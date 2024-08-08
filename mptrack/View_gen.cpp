@@ -452,6 +452,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pPlugin) ? TRUE : FALSE);
+		GetDlgItem(IDC_DELPLUGIN)->EnableWindow((plugin.IsValidPlugin() || !plugin.Info.szLibraryName.empty() || !plugin.Info.szName.empty()) ? TRUE : FALSE);
 		UpdateDryWetDisplay();
 
 		if(pPlugin && pPlugin->IsInstrument())
