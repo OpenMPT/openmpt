@@ -1651,8 +1651,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				order[from] = pat;
 			}
 			Patterns[pat].WriteEffect(EffectWriter(CMD_POSITIONJUMP, mpt::saturate_cast<ModCommand::PARAM>(to)).Row(Patterns[pat].GetNumRows() - 1).RetryPreviousRow());
-			if(pat >= numPatterns)
-				numPatterns = pat + 1;
+			if(pat >= basePattern && (pat - basePattern) >= numPatterns)
+				numPatterns = pat - basePattern + 1;
 		}
 
 		if(numSongs > 1)
@@ -1665,8 +1665,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					Patterns[firstPat].WriteEffect(EffectWriter(CMD_CHANNELVOLUME, static_cast<ModCommand::PARAM>(ChnSettings[chn].nVolume)).Channel(chn).RetryNextRow());
 					Patterns[firstPat].WriteEffect(EffectWriter(CMD_PANNING8, mpt::saturate_cast<ModCommand::PARAM>(ChnSettings[chn].nPan)).Channel(chn).RetryNextRow());
 				}
-				if(firstPat >= numPatterns)
-					numPatterns = firstPat + 1;
+				if(firstPat >= basePattern && (firstPat - basePattern) >= numPatterns)
+					numPatterns = firstPat - basePattern + 1;
 			}
 		}
 
