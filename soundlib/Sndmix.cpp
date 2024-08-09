@@ -1643,7 +1643,7 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 
 	if(chn.dwFlags[CHN_VIBRATO])
 	{
-		const bool advancePosition = !m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && !(m_SongFlags[SONG_ITOLDEFFECTS]));
+		const bool advancePosition = !m_SongFlags[SONG_FIRSTTICK] || ((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MED)) && !(m_SongFlags[SONG_ITOLDEFFECTS]));
 
 		if(GetType() == MOD_TYPE_669)
 		{

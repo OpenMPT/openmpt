@@ -411,7 +411,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	switch(command)
 	{
 	case 0x04:  // Vibrato (twice as deep as in ProTracker)
-		m.SetEffectCommand(CMD_VIBRATO, (std::min<uint8>(param >> 3, 0x0F) << 4) | std::min<uint8>((param & 0x0F) * 2, 0x0F));
+		m.SetEffectCommand(CMD_VIBRATO, (param & 0xF0) | std::min<uint8>((param & 0x0F) * 2, 0x0F));
 		break;
 	case 0x08:  // Hold and decay
 		break;
@@ -491,7 +491,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 		m.SetEffectCommand(CMD_MODCMDEX, 0x20 | nibbleLo);
 		break;
 	case 0x14:  // Vibrato (ProTracker compatible depth, but faster)
-		m.SetEffectCommand(CMD_VIBRATO, (std::min<uint8>((param >> 4) + 1, 0x0F) << 4) | (param & 0x0F));
+		m.SetEffectCommand(CMD_VIBRATO, param);
 		break;
 	case 0x15:  // Set finetune
 		m.SetEffectCommand(CMD_MODCMDEX, 0x50 | (param & 0x0F));
