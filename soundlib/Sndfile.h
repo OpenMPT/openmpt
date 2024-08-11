@@ -443,9 +443,6 @@ private:
 private:
 	CTuningCollection* m_pTuningsTuneSpecific = nullptr;
 
-private: //Misc private methods.
-	static void SetModSpecsPointer(const CModSpecifications* &pModSpecs, const MODTYPE type);
-
 private: //Misc data
 	const CModSpecifications *m_pModSpecs;
 
