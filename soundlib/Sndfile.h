@@ -376,6 +376,30 @@ public:
 using NoteName = mpt::uchar[4];
 
 
+struct PlaybackTestSettings
+{
+	uint32 mixingFreq = 48000;
+	uint32 outputChannels = 2;
+	uint32 mixerChannels = MAX_CHANNELS;
+	ResamplingMode srcMode = SRCMODE_CUBIC;
+	void Sanitize()
+	{
+		if(mixingFreq < 1000)
+		{
+			mixingFreq = 48000;
+		}
+		if(outputChannels != 1 && outputChannels != 2 && outputChannels != 4)
+		{
+			outputChannels = 2;
+		}
+		if(mixerChannels < 1)
+		{
+			mixerChannels = MAX_CHANNELS;
+		}
+	}
+};
+
+
 class CSoundFile
 {
 	friend class GetLengthMemory;
@@ -1244,7 +1268,7 @@ private:
 public:
 	PLUGINDEX GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
-	PlaybackTest CreatePlaybackTest(uint32 mixingFreq = 0, uint32 outputChannels = 0, uint32 mixerChannels = 0, ResamplingMode srcMode = SRCMODE_CUBIC);
+	PlaybackTest CreatePlaybackTest(PlaybackTestSettings settings);
 };
 
 

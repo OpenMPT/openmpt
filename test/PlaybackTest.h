@@ -18,6 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 struct PlaybackTestData;
+struct PlaybackTestSettings;
 class CSoundFile;
 
 class PlaybackTest
@@ -36,7 +37,11 @@ public:
 	void Serialize(std::ostream &output, const mpt::ustring &filename) const noexcept(false);
 	void ToTSV(std::ostream &output) const noexcept(false);
 
-	std::vector<mpt::ustring> Compare(CSoundFile &sndFile) const;
+	PlaybackTestSettings GetSettings() const noexcept;
+
+	static std::vector<mpt::ustring> Compare(const PlaybackTest &lhs, const PlaybackTest &rhs);
+
+private:
 	std::vector<mpt::ustring> Compare(const PlaybackTest &otherTest) const;
 
 private:

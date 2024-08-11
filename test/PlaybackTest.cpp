@@ -121,6 +121,16 @@ struct PlaybackTestData
 	TestDataHeader header;
 	std::vector<SampleDataHash> sampleDataHashes;
 	std::vector<Row> rows;
+
+	PlaybackTestSettings GetSettings() const
+	{
+		PlaybackTestSettings result;
+		result.mixingFreq = header.mixingFreq;
+		result.outputChannels = header.outputChannels;
+		result.mixerChannels = header.mixerChannels;
+		result.srcMode = Resampling::ToKnownMode(header.srcMode);
+		return result;
+	}
 };
 
 
@@ -469,6 +479,13 @@ void PlaybackTest::ToTSV(std::ostream &output) const noexcept(false)
 }
 
 
+PlaybackTestSettings PlaybackTest::GetSettings() const noexcept
+{
+	return m_testData->GetSettings();
+}
+
+
+
 static bool FuzzyEquals(const double left, const double right, const double epsilon) noexcept
 {
 	return std::abs(left - right) <= std::min(std::abs(left), std::abs(right)) * epsilon;
@@ -484,9 +501,9 @@ static bool FuzzyEquals(const double left, const double right, const double epsi
 	errors.push_back(mpt::ToUnicode(mpt::Charset::UTF8, MPT_AFORMAT("{} differs in test row {} (order {}, row {}, tick {}), channel {}: {} vs {}") \
 		(propName, row, lRow.header.order, lRow.header.row, lTick, chn, left, right)));
 
-std::vector<mpt::ustring> PlaybackTest::Compare(CSoundFile &sndFile) const
+std::vector<mpt::ustring> PlaybackTest::Compare(const PlaybackTest &lhs, const PlaybackTest &rhs)
 {
-	return Compare(sndFile.CreatePlaybackTest(m_testData->header.mixingFreq, m_testData->header.outputChannels, m_testData->header.mixerChannels, Resampling::ToKnownMode(m_testData->header.srcMode)));
+	return lhs.Compare(rhs);
 }
 
 std::vector<mpt::ustring> PlaybackTest::Compare(const PlaybackTest &otherTest) const
@@ -605,26 +622,21 @@ std::vector<mpt::ustring> PlaybackTest::Compare(const PlaybackTest &otherTest) c
 }
 
 
-PlaybackTest CSoundFile::CreatePlaybackTest(uint32 mixingFreq, uint32 outputChannels, uint32 mixerChannels, ResamplingMode srcMode)
+PlaybackTest CSoundFile::CreatePlaybackTest(PlaybackTestSettings settings)
 {
-	PlaybackTestData testData{};
+	settings.Sanitize();
 
-	if(mixingFreq < 1000)
-		mixingFreq = 48000;
-	if(outputChannels != 1 && outputChannels != 2 && outputChannels != 4)
-		outputChannels = 2;
-	if(mixerChannels < 1)
-		mixerChannels = MAX_CHANNELS;
+	PlaybackTestData testData{};
 
 	m_bIsRendering = true;
 	const auto origResamplerSettings = m_Resampler.m_Settings;
-	m_Resampler.m_Settings.SrcMode = srcMode;
+	m_Resampler.m_Settings.SrcMode = settings.srcMode;
 	m_Resampler.m_Settings.emulateAmiga = m_SongFlags[SONG_ISAMIGA] ? Resampling::AmigaFilter::A1200 : Resampling::AmigaFilter::Off;
 	const auto origMixerSettings = m_MixerSettings;
 	MixerSettings testSettings;
-	testSettings.gdwMixingFreq = mixingFreq;
-	testSettings.gnChannels = outputChannels;
-	testSettings.m_nMaxMixChannels = mixerChannels;
+	testSettings.gdwMixingFreq = settings.mixingFreq;
+	testSettings.gnChannels = settings.outputChannels;
+	testSettings.m_nMaxMixChannels = settings.mixerChannels;
 	testSettings.VolumeRampUpMicroseconds = 0;
 	testSettings.VolumeRampDownMicroseconds = 0;
 	SetMixerSettings(testSettings);
@@ -649,7 +661,7 @@ PlaybackTest CSoundFile::CreatePlaybackTest(uint32 mixingFreq, uint32 outputChan
 	header.isAmiga = m_SongFlags[SONG_ISAMIGA] ? 1 : 0;
 	header.positionPrecisionBits = static_cast<uint8>(mpt::bit_width(static_cast<typename std::make_unsigned<SamplePosition::value_t>::type>(SamplePosition{1, 0}.GetRaw())) - 1);
 	header.filterPrecisionBits = MIXING_FILTER_PRECISION;
-	header.srcMode = srcMode;
+	header.srcMode = m_Resampler.m_Settings.SrcMode;
 	header.outputChannels = static_cast<uint8>(m_MixerSettings.gnChannels);
 	header.mixerChannels = static_cast<uint16>(m_MixerSettings.m_nMaxMixChannels);
 	header.synthVolume = static_cast<uint16>(m_nVSTiVolume);

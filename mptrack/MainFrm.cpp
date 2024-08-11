@@ -3265,7 +3265,7 @@ void CMainFrame::OnCreateMixerDump()
 			continue;
 		if(!sndFile->Create(GetFileReader(f)))
 			continue;
-		auto playTest = sndFile->CreatePlaybackTest();
+		auto playTest = sndFile->CreatePlaybackTest(PlaybackTestSettings{});
 		mpt::ofstream outFile(fileName + P_(".testdata.gz"), std::ios::binary | std::ios::trunc);
 		if(outFile)
 			playTest.Serialize(outFile, fileName.GetFilename().ToUnicode() + U_(".testdata"));
@@ -3303,7 +3303,7 @@ void CMainFrame::OnVerifyMixerDump()
 			auto sndFile = std::make_unique<CSoundFile>();
 			sndFile->Create(GetFileReader(modFile));
 
-			const auto result = playTest.Compare(*sndFile);
+			const auto result = PlaybackTest::Compare(playTest, sndFile->CreatePlaybackTest(playTest.GetSettings()));
 			if(!result.empty())
 			{
 				InfoDialog infoDlg{this};
