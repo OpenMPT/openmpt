@@ -2648,11 +2648,11 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 	// Check for volume commands
 	uint8 vol = 0xFF;
 	if(chn.rowCommand.volcmd == VOLCMD_VOLUME)
-		vol = std::min(chn.rowCommand.vol, uint8(64));
+		vol = std::min(chn.rowCommand.vol, uint8(64)) * 2u;
 	else if(chn.rowCommand.command == CMD_VOLUME)
-		vol = std::min(chn.rowCommand.param, uint8(64));
+		vol = std::min(chn.rowCommand.param, uint8(64)) * 2u;
 	else if(chn.rowCommand.command == CMD_VOLUME8)
-		vol = static_cast<uint8>((chn.rowCommand.param + 3u) / 4u);
+		vol = static_cast<uint8>((chn.rowCommand.param + 1u) / 2u);
 
 	const bool hasVolCommand = (vol != 0xFF);
 
@@ -2666,7 +2666,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 			SendMIDINote(nChn, realNote, static_cast<uint16>(chn.nVolume), m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
 		} else if(hasVolCommand)
 		{
-			pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Fine, vol, nChn);
+			pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Fine, vol / 2u, nChn);
 		}
 		return;
 	}
@@ -2680,7 +2680,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		switch(pIns->pluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
-				velocity = chn.nVolume;
+				velocity = hasVolCommand ? vol : chn.nVolume;
 				break;
 			default:
 				break;
@@ -2708,11 +2708,11 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		switch(pIns->pluginVolumeHandling)
 		{
 			case PLUGIN_VOLUMEHANDLING_DRYWET:
-				if(hasVolCommand) pPlugin->SetDryRatio(1.0f - (2 * vol) / 127.0f);
+				if(hasVolCommand) pPlugin->SetDryRatio(1.0f - vol / 127.0f);
 				else pPlugin->SetDryRatio(1.0f - static_cast<float>(2 * defaultVolume) / 127.0f);
 				break;
 			case PLUGIN_VOLUMEHANDLING_MIDI:
-				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min(uint8(127), static_cast<uint8>(2 * vol)), nChn);
+				if(hasVolCommand) pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, std::min(uint8(127), vol), nChn);
 				else pPlugin->MidiCC(MIDIEvents::MIDICC_Volume_Coarse, static_cast<uint8>(std::min(uint32(127), static_cast<uint32>(2 * defaultVolume))), nChn);
 				break;
 			default:
