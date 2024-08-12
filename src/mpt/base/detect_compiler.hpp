@@ -204,6 +204,16 @@
 
 
 
+// detect compiler quirks
+
+#if MPT_COMPILER_CLANG
+#if defined(__APPLE__)
+#define MPT_COMPILER_QUIRK_APPLE_CLANG
+#endif
+#endif
+
+
+
 // detect compiler setting quirks
 
 #if MPT_COMPILER_GCC
