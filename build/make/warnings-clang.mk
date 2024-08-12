@@ -2,8 +2,13 @@
 CXXFLAGS_WARNINGS += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-conversion -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-conversion -Wmissing-prototypes -Wshift-count-negative -Wshift-count-overflow -Wshift-op-parentheses -Wshift-overflow -Wshift-sign-overflow -Wundef
 
-CXXFLAGS_WARNINGS += -Wdeprecated -Wexit-time-destructors -Wextra-semi -Wframe-larger-than=16000 -Wglobal-constructors -Wimplicit-fallthrough -Wmissing-declarations -Wnon-virtual-dtor -Wreserved-id-macro
-CFLAGS_WARNINGS   +=                                                   -Wframe-larger-than=4000
+CXXFLAGS_WARNINGS += -Wdeprecated -Wexit-time-destructors -Wextra-semi -Wglobal-constructors -Wimplicit-fallthrough -Wmissing-declarations -Wnon-virtual-dtor -Wreserved-id-macro
+CFLAGS_WARNINGS   += 
+
+ifneq ($(ANCIENT),1)
+CXXFLAGS_WARNINGS += -Wframe-larger-than=16000
+CFLAGS_WARNINGS   += -Wframe-larger-than=4000
+endif
 
 #CXXFLAGS_WARNINGS += -Wfloat-equal
 #CXXFLAGS_WARNINGS += -Wdocumentation
@@ -28,5 +33,11 @@ CFLAGS_SILENT += -Wno-unused-but-set-variable
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
 CFLAGS_SILENT += -Wno-unused-variable
+
+ifneq ($(ANCIENT),1)
+CFLAGS_SILENT += -Wno-unused-but-set-variable
+endif
+
+
 
 FASTMATH_STYLE=clang
