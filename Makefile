@@ -66,6 +66,7 @@
 #  ONLY_TEST=0         Only build the test suite.
 #  STRICT=0            Treat warnings as errors.
 #  MODERN=0            Pass more modern compiler options.
+#  ANCIENT=0           Pass compiler options compatible with older versions.
 #  NATIVE=0            Optimize for system CPU.
 #  STDCXX=c++17        C++ standard version (default depends on compiler)
 #  STDC=c17            C standard version (default depends on compiler)
