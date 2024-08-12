@@ -26,17 +26,18 @@ CFLAGS_SILENT += -Wno-cast-align
 CFLAGS_SILENT += -Wno-cast-qual
 CFLAGS_SILENT += -Wno-double-promotion
 CFLAGS_SILENT += -Wno-float-conversion
+ifneq ($(ANCIENT),1)
 CFLAGS_SILENT += -Wno-frame-larger-than
+endif
 CFLAGS_SILENT += -Wno-missing-prototypes
 CFLAGS_SILENT += -Wno-sign-compare
+ifneq ($(ANCIENT),1)
 CFLAGS_SILENT += -Wno-unused-but-set-variable
+endif
 CFLAGS_SILENT += -Wno-unused-function
 CFLAGS_SILENT += -Wno-unused-parameter
 CFLAGS_SILENT += -Wno-unused-variable
 
-ifneq ($(ANCIENT),1)
-CFLAGS_SILENT += -Wno-unused-but-set-variable
-endif
 
 
 
