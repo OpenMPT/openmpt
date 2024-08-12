@@ -475,6 +475,7 @@ protected:
 	afx_msg void OnAddChannelAfter() { AddChannel(m_MenuCursor.GetChannel(), true); };
 	afx_msg void OnDuplicateChannel();
 	afx_msg void OnResetChannelColors();
+	afx_msg void OnChannelSettings();
 	afx_msg void OnTransposeChannel();
 	afx_msg void OnRemoveChannel();
 	afx_msg void OnRemoveChannelDialog();
