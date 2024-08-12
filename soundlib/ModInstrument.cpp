@@ -41,7 +41,7 @@ void InstrumentEnvelope::Convert(MODTYPE fromType, MODTYPE toType)
 			// So we have to disable the sustain loop if it was behind the normal loop.
 			dwFlags.reset(ENV_SUSTAIN);
 		}
-		if(!dwFlags.test_all(ENV_LOOP | ENV_SUSTAIN))
+		if(!dwFlags[ENV_LOOP | ENV_SUSTAIN])
 		{
 			// XM has no automatic fade-out behaviour at the end of the envelope.
 			dwFlags.set(ENV_SUSTAIN);
