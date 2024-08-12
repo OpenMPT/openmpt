@@ -2680,7 +2680,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		switch(pIns->pluginVelocityHandling)
 		{
 			case PLUGIN_VELOCITYHANDLING_CHANNEL:
-				velocity = hasVolCommand ? vol : chn.nVolume;
+				velocity = hasVolCommand ? vol * 2 : chn.nVolume;
 				break;
 			default:
 				break;
