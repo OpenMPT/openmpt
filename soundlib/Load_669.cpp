@@ -215,6 +215,7 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 note = noteInstr >> 2;
 				uint8 instr = ((noteInstr & 0x03) << 4) | (instrVol >> 4);
 				uint8 vol = instrVol & 0x0F;
+				uint8 command = effect[chn] >> 4;
 				if(noteInstr < 0xFE)
 				{
 					m->note = note + 36 + NOTE_MIN;
@@ -235,6 +236,8 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					// A param value of 0 resets the effect.
 					effect[chn] = 0xFF;
+					if(command < 3)
+						m->SetEffectCommand(effTrans[command], 0);
 				}
 				if(effect[chn] == 0xFF)
 				{
@@ -244,7 +247,6 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				m->param = effect[chn] & 0x0F;
 
 				// Weird stuff happening in corehop.669 with effects > 8... they seem to do the same thing as if the high bit wasn't set, but the sample also behaves strangely.
-				uint8 command = effect[chn] >> 4;
 				if(command < static_cast<uint8>(std::size(effTrans)))
 				{
 					m->command = effTrans[command];
