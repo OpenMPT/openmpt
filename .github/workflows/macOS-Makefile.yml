@@ -57,6 +57,10 @@ jobs:
           - { host: macos-12, compiler: '14.2', arch: i386  , target: '10.13', deps: local, check: false }
           - { host: macos-12, compiler: '14.2', arch: x64_64, target: '10.13', deps: small, check: true  }
           - { host: macos-12, compiler: '14.2', arch: i386  , target: '10.13', deps: small, check: false }
+          - { host: macos-12, compiler: '13.2', arch: x64_64, target: '10.9' , deps: local, check: true  }
+          - { host: macos-12, compiler: '13.2', arch: i386  , target: '10.9' , deps: local, check: false }
+          - { host: macos-12, compiler: '13.2', arch: x64_64, target: '10.9' , deps: small, check: true  }
+          - { host: macos-12, compiler: '13.2', arch: i386  , target: '10.9' , deps: small, check: false }
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.target}}-${{matrix.deps}}
       cancel-in-progress: true
