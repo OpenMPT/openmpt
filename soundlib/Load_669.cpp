@@ -247,7 +247,15 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 command = effect[chn] >> 4;
 				if(command < static_cast<uint8>(CountOf(effTrans)))
 				{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+// false-positive
+#pragma warning(disable:6385)  // Reading invalid data from 'effTrans'.
+#endif
 					m->command = effTrans[command];
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 				} else
 				{
 					m->command = CMD_NONE;
