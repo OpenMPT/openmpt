@@ -249,7 +249,15 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				// Weird stuff happening in corehop.669 with effects > 8... they seem to do the same thing as if the high bit wasn't set, but the sample also behaves strangely.
 				if(command < static_cast<uint8>(std::size(effTrans)))
 				{
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+// false-positive
+#pragma warning(disable:6385)  // Reading invalid data from 'effTrans'.
+#endif
 					m->command = effTrans[command];
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 				} else
 				{
 					m->command = CMD_NONE;
