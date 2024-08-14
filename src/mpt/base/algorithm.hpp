@@ -59,16 +59,16 @@ template <typename Container, typename Ret, typename... Args>
 struct has_find<Container, Ret(Args...)> {
 private:
 	template <typename T>
-  static constexpr inline auto check(T *) -> typename std::is_same<decltype(std::declval<T>().find(std::declval<Args>()...)), Ret>::type {
+	static constexpr inline auto check(T *) -> typename std::is_same<decltype(std::declval<T>().find(std::declval<Args>()...)), Ret>::type {
 		return {};
 	}
-  template <typename T>
+	template <typename T>
 	static constexpr inline std::false_type check(...) {
 		return {};
 	}
 public:
-  typedef decltype(check<Container>(nullptr)) type;
-  static constexpr inline bool value = type::value;
+	typedef decltype(check<Container>(nullptr)) type;
+	static constexpr inline bool value = type::value;
 };
 
 template <typename Tcontainer, typename Tval>
