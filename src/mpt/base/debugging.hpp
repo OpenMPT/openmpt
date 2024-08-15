@@ -68,7 +68,7 @@ MPT_FORCEINLINE void breakpoint() noexcept {
 #elif MPT_COMPILER_CLANG
 	__builtin_debugtrap();
 #elif MPT_COMPILER_GCC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
-	__asm__ __volatile__ ("int 3");
+	__asm__ __volatile__("int 3");
 #else
 	DebugBreak();
 #endif
@@ -186,7 +186,7 @@ MPT_FORCEINLINE void breakpoint() noexcept {
 #if MPT_COMPILER_CLANG
 	__builtin_debugtrap();
 #elif MPT_COMPILER_GCC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
-	__asm__ __volatile__ ("int 3");
+	__asm__ __volatile__("int 3");
 #else
 	kill(getpid(), SIGTRAP);
 #endif
@@ -204,7 +204,7 @@ MPT_FORCEINLINE void breakpoint() noexcept {
 #elif MPT_COMPILER_CLANG
 	__builtin_debugtrap();
 #elif MPT_COMPILER_GCC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
-	__asm__ __volatile__ ("int 3");
+	__asm__ __volatile__("int 3");
 #endif
 }
 
