@@ -326,6 +326,8 @@
 
 #endif
 
+#define MPT_CONFIGURATION_IO_READ_FILEDATA_NO_64BIT
+
 
 
 // platform configuration
