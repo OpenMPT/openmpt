@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "PlaybackTest.h"
+#include "../common/FileReader.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/SampleIO.h"
 #include "../soundlib/Sndfile.h"
