@@ -10,11 +10,9 @@
 
 #include "stdafx.h"
 #include "PlaybackTest.h"
-#include "../common/GzipWriter.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/SampleIO.h"
 #include "../soundlib/Sndfile.h"
-#include "../unarchiver/ungzip.h"
 
 #include "mpt/base/bit.hpp"
 #include "mpt/binary/hex.hpp"
@@ -331,13 +329,6 @@ PlaybackTest& PlaybackTest::operator=(PlaybackTest &&other) noexcept
 
 void PlaybackTest::Deserialize(FileReader file) noexcept(false)
 {
-	CGzipArchive archive{file};
-	if(archive.IsArchive())
-	{
-		if(!archive.ExtractFile(0))
-			throw std::runtime_error{"Cannot extract test data file!"};
-		file = archive.GetOutputFile();
-	}
 
 	file.Rewind();
 
@@ -377,26 +368,17 @@ void PlaybackTest::Deserialize(FileReader file) noexcept(false)
 }
 
 
-void PlaybackTest::Serialize(std::ostream &output, const mpt::ustring &filename) const noexcept(false)
+void PlaybackTest::Serialize(std::ostream &output) const noexcept(false)
 {
-	std::ostringstream outStream;
-	mpt::IO::Write(outStream, m_testData->header);
-	mpt::IO::Write(outStream, m_testData->sampleDataHashes);
+	mpt::IO::Write(output, m_testData->header);
+	mpt::IO::Write(output, m_testData->sampleDataHashes);
 	for(const auto &row : m_testData->rows)
 	{
-		mpt::IO::Write(outStream, row.header);
-		mpt::IO::Write(outStream, row.channels);
-		mpt::IO::WriteVarInt(outStream, row.oplRegisters.size());
-		mpt::IO::Write(outStream, row.oplRegisters);
+		mpt::IO::Write(output, row.header);
+		mpt::IO::Write(output, row.channels);
+		mpt::IO::WriteVarInt(output, row.oplRegisters.size());
+		mpt::IO::Write(output, row.oplRegisters);
 	}
-
-#ifdef MPT_WITH_ZLIB
-	std::string outData = std::move(outStream).str();
-	WriteGzip(output, outData, filename);
-#else
-	// miniz doesn't have gzip convenience functions
-	output << std::move(outStream).str();
-#endif
 }
 
 

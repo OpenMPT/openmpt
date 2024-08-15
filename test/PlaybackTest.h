@@ -34,7 +34,7 @@ public:
 	PlaybackTest& operator=(const PlaybackTest &) = delete;
 
 	void Deserialize(FileReader file) noexcept(false);
-	void Serialize(std::ostream &output, const mpt::ustring &filename) const noexcept(false);
+	void Serialize(std::ostream &output) const noexcept(false);
 	void ToTSV(std::ostream &output) const noexcept(false);
 
 	PlaybackTestSettings GetSettings() const noexcept;

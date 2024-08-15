@@ -56,6 +56,11 @@
 #include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 
+#ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
+#include "../unarchiver/ungzip.h"
+#include "../common/GzipWriter.h"
+#endif
+
 #include <HtmlHelp.h>
 #include <Dbt.h>  // device change messages
 
@@ -66,10 +71,6 @@ static constexpr uint32 TIMERID_GUI = 1;
 static constexpr uint32 TIMERID_NOTIFY = 2;
 
 static constexpr uint32 MPTTIMER_PERIOD = 100;
-
-#if defined(MPT_BUILD_DEBUG)
-#define MPT_ENABLE_PLAYBACK_TEST_MENU
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CMainFrame
@@ -3268,7 +3269,17 @@ void CMainFrame::OnCreateMixerDump()
 		auto playTest = sndFile->CreatePlaybackTest(PlaybackTestSettings{});
 		mpt::ofstream outFile(fileName + P_(".testdata.gz"), std::ios::binary | std::ios::trunc);
 		if(outFile)
-			playTest.Serialize(outFile, fileName.GetFilename().ToUnicode() + U_(".testdata"));
+		{
+			std::ostringstream outStream;
+			playTest.Serialize(outStream);
+			#ifdef MPT_WITH_ZLIB
+				std::string outData = std::move(outStream).str();
+				WriteGzip(outFile, outData, fileName.GetFilename().ToUnicode() + U_(".testdata"));
+			#else
+				// miniz doesn't have gzip convenience functions
+				outFile << std::move(outStream).str();
+			#endif
+		}
 	}
 }
 
@@ -3299,7 +3310,16 @@ void CMainFrame::OnVerifyMixerDump()
 			if(!modFile.IsValid())
 				throw std::runtime_error{"Cannot open module data file: " + modFileName.ToUTF8()};
 
-			PlaybackTest playTest{GetFileReader(testFile)};
+			FileReader testFileReader = GetFileReader(testFile);
+			CGzipArchive archive{testFileReader};
+			if(archive.IsArchive())
+			{
+				if(!archive.ExtractFile(0))
+					throw std::runtime_error{"Cannot extract test data file!"};
+				testFileReader = archive.GetOutputFile();
+			}
+
+			PlaybackTest playTest{testFileReader};
 			auto sndFile = std::make_unique<CSoundFile>();
 			sndFile->Create(GetFileReader(modFile));
 
