@@ -345,6 +345,9 @@
     <ClInclude Include="..\..\src\mpt\base\constexpr_throw.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\debugging.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\detect.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

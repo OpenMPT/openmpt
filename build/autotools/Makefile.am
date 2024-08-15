@@ -135,6 +135,7 @@ MPT_FILES_SRC_MPT += src/mpt/base/bit.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/check_platform.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/compiletime_warning.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/constexpr_throw.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/debugging.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/detect.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/detect_arch.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/detect_compiler.hpp

@@ -551,6 +551,7 @@
 		C950084F5BDDD241C4B6768F /* Load_sfx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_sfx.cpp; path = ../../soundlib/Load_sfx.cpp; sourceTree = "<group>"; };
 		C9545B192355720BEA9C6959 /* arithmetic_shift.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = arithmetic_shift.hpp; path = ../../src/mpt/base/arithmetic_shift.hpp; sourceTree = "<group>"; };
 		C9DD180C21428AFED350A64C /* mptPathString.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptPathString.h; path = ../../common/mptPathString.h; sourceTree = "<group>"; };
+		C9E029A3906E2115FE7047E3 /* debugging.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = debugging.hpp; path = ../../src/mpt/base/debugging.hpp; sourceTree = "<group>"; };
 		CA2995890E783AFB509F73C9 /* array.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = array.hpp; path = ../../src/mpt/base/array.hpp; sourceTree = "<group>"; };
 		CA67A8613B8A4953F150F6A1 /* S3MTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = S3MTools.h; path = ../../soundlib/S3MTools.h; sourceTree = "<group>"; };
 		CB4660EB0F95065D51BC3F2B /* pattern.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = pattern.cpp; path = ../../soundlib/pattern.cpp; sourceTree = "<group>"; };
@@ -1153,6 +1154,7 @@
 				1AA25C6F0B99CA61779D4AAF /* check_platform.hpp */,
 				86260AE5E2AD0F576B4FC925 /* compiletime_warning.hpp */,
 				021DA33D0EA855AF898D217D /* constexpr_throw.hpp */,
+				C9E029A3906E2115FE7047E3 /* debugging.hpp */,
 				C3FAC67D5688906FBF6134BD /* detect.hpp */,
 				1C2F81B7DEEFE2293C24BFF7 /* detect_arch.hpp */,
 				321030713E9AE2E3B97FAEB1 /* detect_compiler.hpp */,
