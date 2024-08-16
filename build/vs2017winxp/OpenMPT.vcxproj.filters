@@ -1044,6 +1044,9 @@
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_wrapping_divide.hpp">
       <Filter>src\mpt\base\tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\base\type_traits.hpp">
+      <Filter>src\mpt\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\utility.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>

@@ -1387,6 +1387,7 @@
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_saturate_cast.hpp" />
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_saturate_round.hpp" />
     <ClInclude Include="..\..\src\mpt\base\tests\tests_base_wrapping_divide.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\type_traits.hpp" />
     <ClInclude Include="..\..\src\mpt\base\utility.hpp" />
     <ClInclude Include="..\..\src\mpt\base\version.hpp" />
     <ClInclude Include="..\..\src\mpt\base\wrapping_divide.hpp" />

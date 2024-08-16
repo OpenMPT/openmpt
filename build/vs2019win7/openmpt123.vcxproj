@@ -776,6 +776,7 @@
     <ClInclude Include="..\..\src\mpt\base\size.hpp" />
     <ClInclude Include="..\..\src\mpt\base\source_location.hpp" />
     <ClInclude Include="..\..\src\mpt\base\span.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\type_traits.hpp" />
     <ClInclude Include="..\..\src\mpt\base\utility.hpp" />
     <ClInclude Include="..\..\src\mpt\base\version.hpp" />
     <ClInclude Include="..\..\src\mpt\base\wrapping_divide.hpp" />

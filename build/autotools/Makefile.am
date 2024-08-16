@@ -160,6 +160,7 @@ MPT_FILES_SRC_MPT += src/mpt/base/semantic_version.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/size.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/source_location.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/span.hpp
+MPT_FILES_SRC_MPT += src/mpt/base/type_traits.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/utility.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/version.hpp
 MPT_FILES_SRC_MPT += src/mpt/base/wrapping_divide.hpp

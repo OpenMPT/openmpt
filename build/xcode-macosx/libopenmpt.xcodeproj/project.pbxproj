@@ -619,6 +619,7 @@
 		F48DAABB97F4D86DAF2A90FB /* filecursor_traits_memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = filecursor_traits_memory.hpp; path = ../../src/mpt/io_read/filecursor_traits_memory.hpp; sourceTree = "<group>"; };
 		F5D2F247BC60E9B92A631087 /* libopenmpt.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = libopenmpt.hpp; path = ../../libopenmpt/libopenmpt.hpp; sourceTree = "<group>"; };
 		F5D60F958863D987F13C7DD5 /* Load_dsm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_dsm.cpp; path = ../../soundlib/Load_dsm.cpp; sourceTree = "<group>"; };
+		F5DB217BB89B81ED15D05FBB /* type_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = type_traits.hpp; path = ../../src/mpt/base/type_traits.hpp; sourceTree = "<group>"; };
 		F61229996734CA8B1CFB77D9 /* guid.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = guid.hpp; path = ../../src/mpt/uuid/guid.hpp; sourceTree = "<group>"; };
 		F6F37E8F68161F811DDCCCCF /* span.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = span.hpp; path = ../../src/mpt/base/span.hpp; sourceTree = "<group>"; };
 		F78A378464B245F6664535C4 /* mptBaseTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptBaseTypes.h; path = ../../common/mptBaseTypes.h; sourceTree = "<group>"; };
@@ -1180,6 +1181,7 @@
 				A105879DAD903A0F287505DD /* source_location.hpp */,
 				F6F37E8F68161F811DDCCCCF /* span.hpp */,
 				8BDA4A4F76C67041BEAC388F /* tests */,
+				F5DB217BB89B81ED15D05FBB /* type_traits.hpp */,
 				5609DBF3C331EA65C4C4DA33 /* utility.hpp */,
 				AB10601718386E8919CB5E57 /* version.hpp */,
 				2C28EA4338B39CB5B3986883 /* wrapping_divide.hpp */,
