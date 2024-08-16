@@ -181,6 +181,9 @@
     <Filter Include="src\openmpt\random">
       <UniqueIdentifier>{AF3B4D62-9B1F-0EB8-0480-080BF082F839}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\soundfile_data">
+      <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\versionNumber.h">
@@ -743,6 +746,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp">
       <Filter>src\openmpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
+      <Filter>src\openmpt\soundfile_data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

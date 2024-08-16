@@ -24,6 +24,7 @@
 #include "../common/version.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/MixerLoops.h"
+#include "../soundlib/Tagging.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "mpt/audio/span.hpp"
 #include "mpt/io/io.hpp"

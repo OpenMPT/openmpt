@@ -886,6 +886,7 @@
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />

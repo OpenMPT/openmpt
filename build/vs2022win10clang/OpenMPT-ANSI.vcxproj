@@ -1983,6 +1983,7 @@
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
     <ClInclude Include="..\..\test\PlaybackTest.h" />
     <ClInclude Include="..\..\test\TestTools.h" />
     <ClInclude Include="..\..\test\TestToolsLib.h" />

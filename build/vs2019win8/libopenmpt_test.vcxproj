@@ -1307,6 +1307,7 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
     <ClInclude Include="..\..\test\PlaybackTest.h" />
     <ClInclude Include="..\..\test\TestTools.h" />
     <ClInclude Include="..\..\test\TestToolsLib.h" />

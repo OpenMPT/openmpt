@@ -1513,6 +1513,7 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />

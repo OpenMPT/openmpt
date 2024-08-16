@@ -317,6 +317,7 @@ MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleConvertFixedPoint.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleDecode.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleEncode.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/SampleFormat.hpp
+MPT_FILES_SRC_OPENMPT += src/openmpt/soundfile_data/tags.hpp
 MPT_FILES_COMMON = 
 MPT_FILES_COMMON += common/BuildSettings.h
 MPT_FILES_COMMON += common/BuildSettingsCompiler.h

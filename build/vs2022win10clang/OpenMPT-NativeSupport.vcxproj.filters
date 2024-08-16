@@ -184,6 +184,9 @@
     <Filter Include="src\openmpt\sounddevice">
       <UniqueIdentifier>{670F92DE-D346-DA75-DC50-3E994807016F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\soundfile_data">
+      <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h">
@@ -932,6 +935,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp">
       <Filter>src\openmpt\sounddevice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
+      <Filter>src\openmpt\soundfile_data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
