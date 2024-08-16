@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: BSL-1.0 OR BSD-3-Clause */
 
-#ifndef MPT_BASE_FLOATINGPOINT_HPP
-#define MPT_BASE_FLOATINGPOINT_HPP
+#ifndef MPT_BASE_FLOAT_HPP
+#define MPT_BASE_FLOAT_HPP
 
 
 
@@ -88,4 +88,4 @@ constexpr nativefloat operator""_nf(long double lit) noexcept {
 
 
 
-#endif // MPT_BASE_FLOATINGPOINT_HPP
+#endif // MPT_BASE_FLOAT_HPP
