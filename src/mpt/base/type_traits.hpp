@@ -21,7 +21,7 @@ inline namespace MPT_INLINE_NS {
 
 using std::type_identity;
 
-#else  // ! C++20
+#else // ! C++20
 
 template <typename T>
 struct type_identity {
