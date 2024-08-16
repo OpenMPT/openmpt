@@ -6,8 +6,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/float.hpp"
 #include "mpt/base/integer.hpp"
-#include "mpt/base/floatingpoint.hpp"
 
 
 

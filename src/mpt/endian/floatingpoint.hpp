@@ -6,7 +6,7 @@
 
 
 #include "mpt/base/bit.hpp"
-#include "mpt/base/floatingpoint.hpp"
+#include "mpt/base/float.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"

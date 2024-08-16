@@ -1388,7 +1388,7 @@
     <ClInclude Include="..\..\src\mpt\base\detect_libcxx.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect_os.hpp" />
     <ClInclude Include="..\..\src\mpt\base\detect_quirks.hpp" />
-    <ClInclude Include="..\..\src\mpt\base\floatingpoint.hpp" />
+    <ClInclude Include="..\..\src\mpt\base\float.hpp" />
     <ClInclude Include="..\..\src\mpt\base\integer.hpp" />
     <ClInclude Include="..\..\src\mpt\base\macros.hpp" />
     <ClInclude Include="..\..\src\mpt\base\math.hpp" />

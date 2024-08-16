@@ -6,7 +6,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mpt/base/floatingpoint.hpp"
+#include "mpt/base/float.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
 #include "openmpt/base/Endian.hpp"

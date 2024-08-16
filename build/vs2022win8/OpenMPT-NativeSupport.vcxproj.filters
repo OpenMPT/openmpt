@@ -411,7 +411,7 @@
     <ClInclude Include="..\..\src\mpt\base\detect_quirks.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\mpt\base\floatingpoint.hpp">
+    <ClInclude Include="..\..\src\mpt\base\float.hpp">
       <Filter>src\mpt\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\base\integer.hpp">
