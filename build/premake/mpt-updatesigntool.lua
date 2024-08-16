@@ -28,6 +28,8 @@
    "../../installer/updatesigntool/*.h",
   }
 	excludes {
++		"../../src/openmpt/soundbase/**.cpp",
++		"../../src/openmpt/soundbase/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
 	}
