@@ -175,9 +175,9 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
 			if(wavFile.GetBitsPerSample() <= 32)
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			else
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, float64>, SC::DecodeFloat64<littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, somefloat64>, SC::DecodeFloat64<littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 		} else
 		{
 			if(wavFile.GetBitsPerSample() <= 8)

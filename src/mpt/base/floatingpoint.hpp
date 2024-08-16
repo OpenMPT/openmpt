@@ -45,17 +45,17 @@ constexpr long double operator""_fe(long double lit) noexcept {
 // fp quad
 // n/a
 
-using float32 = std::conditional<sizeof(float) == 4, float, std::conditional<sizeof(double) == 4, double, std::conditional<sizeof(long double) == 4, long double, float>::type>::type>::type;
+using somefloat32 = std::conditional<sizeof(float) == 4, float, std::conditional<sizeof(double) == 4, double, std::conditional<sizeof(long double) == 4, long double, float>::type>::type>::type;
 namespace float_literals {
-constexpr float32 operator""_f32(long double lit) noexcept {
-	return static_cast<float32>(lit);
+constexpr somefloat32 operator""_sf32(long double lit) noexcept {
+	return static_cast<somefloat32>(lit);
 }
 } // namespace float_literals
 
-using float64 = std::conditional<sizeof(float) == 8, float, std::conditional<sizeof(double) == 8, double, std::conditional<sizeof(long double) == 8, long double, double>::type>::type>::type;
+using somefloat64 = std::conditional<sizeof(float) == 8, float, std::conditional<sizeof(double) == 8, double, std::conditional<sizeof(long double) == 8, long double, double>::type>::type>::type;
 namespace float_literals {
-constexpr float64 operator""_f64(long double lit) noexcept {
-	return static_cast<float64>(lit);
+constexpr somefloat64 operator""_sf64(long double lit) noexcept {
+	return static_cast<somefloat64>(lit);
 }
 } // namespace float_literals
 
@@ -75,7 +75,7 @@ struct float_traits {
 
 // prefer smaller floats, but try to use IEEE754 floats
 using nativefloat =
-	std::conditional<mpt::float_traits<float32>::is_preferred, float32, std::conditional<mpt::float_traits<float64>::is_preferred, float64, std::conditional<std::numeric_limits<float>::is_iec559, float, std::conditional<std::numeric_limits<double>::is_iec559, double, std::conditional<std::numeric_limits<long double>::is_iec559, long double, float>::type>::type>::type>::type>::type;
+	std::conditional<mpt::float_traits<somefloat32>::is_preferred, somefloat32, std::conditional<mpt::float_traits<somefloat64>::is_preferred, somefloat64, std::conditional<std::numeric_limits<float>::is_iec559, float, std::conditional<std::numeric_limits<double>::is_iec559, double, std::conditional<std::numeric_limits<long double>::is_iec559, long double, float>::type>::type>::type>::type>::type;
 namespace float_literals {
 constexpr nativefloat operator""_nf(long double lit) noexcept {
 	return static_cast<nativefloat>(lit);

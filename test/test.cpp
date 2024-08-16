@@ -4618,8 +4618,8 @@ static MPT_NOINLINE void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
 		sample.pData.pSample = sampleBuf.data();
-		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(sample, source32.data(), 4*65536);
-		CopySample<SC::ConversionChain<SC::Convert<int16, float32>, SC::DecodeFloat32<bigEndian32> > >(truncated16.data(), 65536, 1, source32.data(), 65536 * 4, 1);
+		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(sample, source32.data(), 4*65536);
+		CopySample<SC::ConversionChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(truncated16.data(), 65536, 1, source32.data(), 65536 * 4, 1);
 
 		for(std::size_t i = 0; i < 65536; i++)
 		{

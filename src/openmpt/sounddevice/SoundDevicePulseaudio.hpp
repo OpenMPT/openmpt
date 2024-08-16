@@ -64,7 +64,7 @@ public:
 private:
 	pa_simple *m_PA_SimpleOutput;
 	SoundDevice::BufferAttributes m_EffectiveBufferAttributes;
-	std::vector<float32> m_OutputBuffer;
+	std::vector<somefloat32> m_OutputBuffer;
 	std::atomic<uint32> m_StatisticLastLatencyFrames;
 };
 

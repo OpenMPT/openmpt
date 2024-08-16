@@ -375,8 +375,8 @@ void Pulseaudio::InternalFillAudioBuffer()
 	CallbackLockedAudioReadPrepare(m_OutputBuffer.size() / m_Settings.Channels, latencyFrames);
 	CallbackLockedAudioProcess(m_OutputBuffer.data(), nullptr, m_OutputBuffer.size() / m_Settings.Channels);
 	error = 0;
-	static_assert(sizeof(float32) == 4);
-	if(pa_simple_write(m_PA_SimpleOutput, m_OutputBuffer.data(), m_OutputBuffer.size() * sizeof(float32), &error) < 0)
+	static_assert(sizeof(somefloat32) == 4);
+	if(pa_simple_write(m_PA_SimpleOutput, m_OutputBuffer.data(), m_OutputBuffer.size() * sizeof(somefloat32), &error) < 0)
 	{
 		SendDeviceMessage(LogError, MPT_UFORMAT_MESSAGE("pa_simple_write failed: {}")(PulseErrorString(error)));
 		needsClose = true;
