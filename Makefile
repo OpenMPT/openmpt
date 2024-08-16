@@ -895,7 +895,6 @@ CPPFLAGS += -DLIBOPENMPT_BUILD
 
 COMMON_CXX_SOURCES += \
  $(sort $(wildcard common/*.cpp)) \
- $(sort $(wildcard src/mpt/src/*.cpp)) \
  
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
