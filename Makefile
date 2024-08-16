@@ -1176,6 +1176,7 @@ COMMON_CXX_SOURCES += \
  
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
+ $(sort $(wildcard src/openmpt/fileformat_base/*.cpp)) \
  $(sort $(wildcard src/openmpt/soundbase/*.cpp)) \
  $(sort $(wildcard soundlib/*.cpp)) \
  $(sort $(wildcard soundlib/plugins/*.cpp)) \
@@ -1784,6 +1785,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	#svn export ./src/mpt/uuid_namespace bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid_namespace
 	svn export ./src/openmpt/all        bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/all
 	svn export ./src/openmpt/base       bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/base
+	svn export ./src/openmpt/fileformat_base bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/fileformat_base
 	svn export ./src/openmpt/logging    bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/logging
 	svn export ./src/openmpt/random     bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/random
 	svn export ./src/openmpt/soundbase  bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/soundbase
@@ -1882,6 +1884,7 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	#svn export ./src/mpt/uuid_namespace bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/uuid_namespace --native-eol CRLF
 	svn export ./src/openmpt/all        bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/all       --native-eol CRLF
 	svn export ./src/openmpt/base       bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/base      --native-eol CRLF
+	svn export ./src/openmpt/fileformat_base bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/fileformat_base --native-eol CRLF
 	svn export ./src/openmpt/logging    bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/logging   --native-eol CRLF
 	svn export ./src/openmpt/random     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/random    --native-eol CRLF
 	svn export ./src/openmpt/soundbase  bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/openmpt/soundbase --native-eol CRLF

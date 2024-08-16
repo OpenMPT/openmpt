@@ -299,6 +299,7 @@ MPT_FILES_SRC_OPENMPT += src/openmpt/base/Endian.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/base/FlagSet.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/base/Int24.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/base/Types.hpp
+MPT_FILES_SRC_OPENMPT += src/openmpt/fileformat_base/magic.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/logging/Logger.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/random/ModPlug.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/soundbase/Copy.hpp

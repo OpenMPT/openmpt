@@ -104,6 +104,7 @@ svn export ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
 mkdir -p bin/dist-autotools/src/openmpt
 svn export ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
 svn export ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
+svn export ./src/openmpt/fileformat_base bin/dist-autotools/src/openmpt/fileformat_base
 svn export ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 svn export ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
 svn export ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
@@ -176,6 +177,7 @@ cp -r ./src/mpt/uuid           bin/dist-autotools/src/mpt/uuid
 mkdir -p bin/dist-autotools/src/openmpt
 cp -r ./src/openmpt/all        bin/dist-autotools/src/openmpt/all
 cp -r ./src/openmpt/base       bin/dist-autotools/src/openmpt/base
+cp -r ./src/openmpt/fileformat_base bin/dist-autotools/src/openmpt/fileformat_base
 cp -r ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 cp -r ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
 cp -r ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
