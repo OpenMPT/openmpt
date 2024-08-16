@@ -28,7 +28,7 @@ inline namespace MPT_INLINE_NS {
 
 // 1.0f --> 0x3f800000u
 MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f) {
-	if constexpr (mpt::float_traits<float32>::is_ieee754_binary32ne) {
+	if constexpr (mpt::float_traits<float32>::is_float32 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian) {
 		return mpt::bit_cast<uint32>(f);
 	} else {
 		int e = 0;
@@ -56,7 +56,7 @@ MPT_FORCEINLINE uint32 EncodeIEEE754binary32(float32 f) {
 }
 
 MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f) {
-	if constexpr (mpt::float_traits<float64>::is_ieee754_binary64ne) {
+	if constexpr (mpt::float_traits<float64>::is_float64 && mpt::float_traits<float64>::is_ieee754_binary && mpt::float_traits<float64>::is_native_endian) {
 		return mpt::bit_cast<uint64>(f);
 	} else {
 		int e = 0;
@@ -85,7 +85,7 @@ MPT_FORCEINLINE uint64 EncodeIEEE754binary64(float64 f) {
 
 // 0x3f800000u --> 1.0f
 MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i) {
-	if constexpr (mpt::float_traits<float32>::is_ieee754_binary32ne) {
+	if constexpr (mpt::float_traits<float32>::is_float32 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian) {
 		return mpt::bit_cast<float32>(i);
 	} else {
 		uint32 mant = (i & 0x007fffffu) >> 0;
@@ -107,7 +107,7 @@ MPT_FORCEINLINE float32 DecodeIEEE754binary32(uint32 i) {
 }
 
 MPT_FORCEINLINE float64 DecodeIEEE754binary64(uint64 i) {
-	if constexpr (mpt::float_traits<float64>::is_ieee754_binary64ne) {
+	if constexpr (mpt::float_traits<float64>::is_float64 && mpt::float_traits<float64>::is_ieee754_binary && mpt::float_traits<float64>::is_native_endian) {
 		return mpt::bit_cast<float64>(i);
 	} else {
 		uint64 mant = (i & 0x000fffffffffffffull) >> 0;
@@ -412,10 +412,10 @@ struct IEEE754binary_types<true, mpt::endian::big> {
 	using IEEE754binary64BE = IEEE754binary64Native<>;
 };
 
-using IEEE754binary32LE = IEEE754binary_types<mpt::float_traits<float32>::is_ieee754_binary32ne, mpt::endian::native>::IEEE754binary32LE;
-using IEEE754binary32BE = IEEE754binary_types<mpt::float_traits<float32>::is_ieee754_binary32ne, mpt::endian::native>::IEEE754binary32BE;
-using IEEE754binary64LE = IEEE754binary_types<mpt::float_traits<float64>::is_ieee754_binary64ne, mpt::endian::native>::IEEE754binary64LE;
-using IEEE754binary64BE = IEEE754binary_types<mpt::float_traits<float64>::is_ieee754_binary64ne, mpt::endian::native>::IEEE754binary64BE;
+using IEEE754binary32LE = IEEE754binary_types<mpt::float_traits<float32>::is_float32 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian, mpt::endian::native>::IEEE754binary32LE;
+using IEEE754binary32BE = IEEE754binary_types<mpt::float_traits<float32>::is_float32 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian, mpt::endian::native>::IEEE754binary32BE;
+using IEEE754binary64LE = IEEE754binary_types<mpt::float_traits<float32>::is_float64 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian, mpt::endian::native>::IEEE754binary64LE;
+using IEEE754binary64BE = IEEE754binary_types<mpt::float_traits<float32>::is_float64 && mpt::float_traits<float32>::is_ieee754_binary && mpt::float_traits<float32>::is_native_endian, mpt::endian::native>::IEEE754binary64BE;
 
 static_assert(sizeof(IEEE754binary32LE) == 4);
 static_assert(sizeof(IEEE754binary32BE) == 4);

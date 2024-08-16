@@ -64,14 +64,12 @@ struct float_traits {
 	static constexpr bool is_float = !std::numeric_limits<T>::is_integer;
 	static constexpr bool is_hard = is_float && !MPT_COMPILER_QUIRK_FLOAT_EMULATED;
 	static constexpr bool is_soft = is_float && MPT_COMPILER_QUIRK_FLOAT_EMULATED;
+	static constexpr bool is_float16 = is_float && (sizeof(T) == 2);
 	static constexpr bool is_float32 = is_float && (sizeof(T) == 4);
 	static constexpr bool is_float64 = is_float && (sizeof(T) == 8);
+	static constexpr bool is_float128 = is_float && (sizeof(T) == 16);
 	static constexpr bool is_native_endian = is_float && !MPT_COMPILER_QUIRK_FLOAT_NOTNATIVEENDIAN;
 	static constexpr bool is_ieee754_binary = is_float && std::numeric_limits<T>::is_iec559 && !MPT_COMPILER_QUIRK_FLOAT_NOTIEEE754;
-	static constexpr bool is_ieee754_binary32 = is_float && is_ieee754_binary && is_float32;
-	static constexpr bool is_ieee754_binary64 = is_float && is_ieee754_binary && is_float64;
-	static constexpr bool is_ieee754_binary32ne = is_float && is_ieee754_binary && is_float32 && is_native_endian;
-	static constexpr bool is_ieee754_binary64ne = is_float && is_ieee754_binary && is_float64 && is_native_endian;
 	static constexpr bool is_preferred = is_float && ((is_float32 && MPT_COMPILER_QUIRK_FLOAT_PREFER32) || (is_float64 && MPT_COMPILER_QUIRK_FLOAT_PREFER64));
 };
 
