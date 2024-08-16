@@ -31,7 +31,6 @@ struct FileTags
 	mpt::ustring url;
 
 	mpt::ustring genre;
-
 };
 
 
