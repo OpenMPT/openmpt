@@ -1228,21 +1228,6 @@
     <ClInclude Include="..\..\src\openmpt\fileformat_base\magic.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\Copy.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\CopyMix.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\Dither.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherModPlug.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherNone.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherSimple.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\MixSample.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\MixSampleConvert.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClip.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClipFixedPoint.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvert.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvertFixedPoint.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
   </ItemGroup>
   <ItemGroup>

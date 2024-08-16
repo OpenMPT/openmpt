@@ -178,9 +178,6 @@
     <Filter Include="src\openmpt\random">
       <UniqueIdentifier>{AF3B4D62-9B1F-0EB8-0480-080BF082F839}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\openmpt\soundbase">
-      <UniqueIdentifier>{523C5D0D-BEA8-1808-879C-B065F3C73A70}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\openmpt\soundfile_data">
       <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
     </Filter>
@@ -833,51 +830,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp">
       <Filter>src\openmpt\random</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\Copy.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\CopyMix.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\Dither.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherModPlug.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherNone.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\DitherSimple.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\MixSample.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\MixSampleConvert.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClip.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleClipFixedPoint.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvert.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleConvertFixedPoint.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleDecode.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp">
-      <Filter>src\openmpt\soundbase</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
       <Filter>src\openmpt\soundfile_data</Filter>
