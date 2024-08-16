@@ -79,8 +79,12 @@
    "../../common/versionNumber.h",
   }
 	excludes {
+		"../../src/openmpt/fileformat_base/**.cpp",
+		"../../src/openmpt/fileformat_base/**.hpp",
 		"../../src/openmpt/soundbase/**.cpp",
 		"../../src/openmpt/soundbase/**.hpp",
+		"../../src/openmpt/soundfile_data/**.cpp",
+		"../../src/openmpt/soundfile_data/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
 	}
