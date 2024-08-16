@@ -175,17 +175,11 @@
     <Filter Include="src\openmpt\base">
       <UniqueIdentifier>{C98E1EFB-B587-3D4D-DEB9-22D2CA111D59}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\openmpt\fileformat_base">
-      <UniqueIdentifier>{116B1150-7D78-3F36-065F-3B21726B0BED}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\openmpt\logging">
       <UniqueIdentifier>{755E42FE-E1BF-1F0C-6A2D-66BED68D56CB}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\openmpt\random">
       <UniqueIdentifier>{AF3B4D62-9B1F-0EB8-0480-080BF082F839}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\openmpt\soundfile_data">
-      <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -828,17 +822,11 @@
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\fileformat_base\magic.hpp">
-      <Filter>src\openmpt\fileformat_base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
       <Filter>src\openmpt\logging</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp">
       <Filter>src\openmpt\random</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
-      <Filter>src\openmpt\soundfile_data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
