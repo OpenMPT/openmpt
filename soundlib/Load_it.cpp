@@ -2033,8 +2033,8 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 			}
 
 			const uint32 extraDataSize =
-				4 + sizeof(float32) + // 4 for ID and size of dryRatio
-				4 + sizeof(int32);    // Default Program
+				4 + sizeof(IEEE754binary32LE) + // 4 for ID and size of dryRatio
+				4 + sizeof(int32);              // Default Program
 			// For each extra entity, add 4 for ID, plus 4 for size of entity, plus size of entity
 
 			chunkSize += extraDataSize + 4; // +4 is for size field itself
