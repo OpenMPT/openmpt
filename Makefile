@@ -1084,10 +1084,15 @@ CPPFLAGS += -DLIBOPENMPT_BUILD
 
 
 COMMON_CXX_SOURCES += \
+ $(sort $(wildcard src/openmpt/all/*.cpp)) \
+ $(sort $(wildcard src/openmpt/base/*.cpp)) \
+ $(sort $(wildcard src/openmpt/logging/*.cpp)) \
+ $(sort $(wildcard src/openmpt/random/*.cpp)) \
  $(sort $(wildcard common/*.cpp)) \
  
 SOUNDLIB_CXX_SOURCES += \
  $(COMMON_CXX_SOURCES) \
+ $(sort $(wildcard src/openmpt/soundbase/*.cpp)) \
  $(sort $(wildcard soundlib/*.cpp)) \
  $(sort $(wildcard soundlib/plugins/*.cpp)) \
  $(sort $(wildcard soundlib/plugins/dmo/*.cpp)) \
