@@ -22,6 +22,9 @@ jobs:
     runs-on: ${{matrix.host}}
     steps:
     - uses: actions/checkout@v4
+    - name: fixup GitHub Homebrew swiftlint breakage
+      if: ${{ matrix.host == 'macos-12' }}
+      run: brew pin swiftlint
     - name: fixup GitHub Homebrew xcbeautify breakage
       if: ${{ matrix.host == 'macos-12' }}
       run: brew pin xcbeautify
