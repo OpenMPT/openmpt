@@ -6,9 +6,9 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mpt/string/types.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io_virtual_wrapper.hpp"
+#include "mpt/string/types.hpp"
 
 #include "openmpt/base/Types.hpp"
 #include "openmpt/soundfile_data/tags.hpp"

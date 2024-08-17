@@ -10,11 +10,11 @@
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/span.hpp"
 #include "mpt/base/utility.hpp"
-#include "mpt/string/types.hpp"
-#include "mpt/string_transcode/transcode.hpp"
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_virtual_wrapper.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
 #include "openmpt/base/Types.hpp"
 #include "openmpt/soundfile_data/tags.hpp"
