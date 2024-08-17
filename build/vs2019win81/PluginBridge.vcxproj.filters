@@ -720,6 +720,9 @@
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp">
       <Filter>src\openmpt\all</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\all\PlatformFixes.hpp">
+      <Filter>src\openmpt\all</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\base\Endian.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>

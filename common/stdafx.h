@@ -14,6 +14,7 @@
 
 // has to be first
 #include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
 
 #if defined(MODPLUG_TRACKER)
