@@ -60,12 +60,12 @@ OPENMPT_NAMESPACE_END
 
 
 
-// immediate quirk fixups
-
-#if defined(MPT_LIBC_QUIRK_REQUIRES_SYS_TYPES_H)
-#include <sys/types.h>
 #endif
 
 
 
+// immediate quirk fixups
+
+#if defined(MPT_LIBC_QUIRK_REQUIRES_SYS_TYPES_H)
+#include <sys/types.h>
 #endif
