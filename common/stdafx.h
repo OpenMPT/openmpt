@@ -16,11 +16,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 
-#if defined(__MINGW32__) && !defined(__MINGW64__)
-#include <sys/types.h>
-#endif
-
-
 #if defined(MODPLUG_TRACKER)
 
 #if defined(MPT_WITH_MFC)

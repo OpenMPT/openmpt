@@ -235,6 +235,16 @@
 
 
 
+#if MPT_LIBC_MINGW
+// MinGW32 runtime headers require __off64_t when including some C and/or C++ stdlib headers.
+// This is declared in <sys/types.h>, which howeger is not included in some header chains.
+#if (defined(__MINGW32__) && !defined(__MINGW64__))
+#define MPT_LIBC_QUIRK_REQUIRES_SYS_TYPES_H
+#endif
+#endif
+
+
+
 #if MPT_LIBC_DJGPP
 #define MPT_LIBC_QUIRK_NO_FENV
 #endif
