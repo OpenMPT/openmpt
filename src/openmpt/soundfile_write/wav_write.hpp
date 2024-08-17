@@ -56,7 +56,7 @@ protected:
 public:
 	// Finalize the file by closing the last open chunk and updating the file header. Returns total size of file.
 	mpt::IO::Offset Finalize();
-	
+
 	~WAVWriter();
 };
 

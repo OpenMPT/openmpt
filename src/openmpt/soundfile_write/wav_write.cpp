@@ -100,21 +100,21 @@ void WAVWriter::WriteFormat(uint32 sampleRate, uint16 bitDepth, uint16 numChanne
 		extFormat.validBitsPerSample = bitDepth;
 		switch(numChannels)
 		{
-		case 1:
-			extFormat.channelMask = 0x0004;	// FRONT_CENTER
-			break;
-		case 2:
-			extFormat.channelMask = 0x0003;	// FRONT_LEFT | FRONT_RIGHT
-			break;
-		case 3:
-			extFormat.channelMask = 0x0103;	// FRONT_LEFT | FRONT_RIGHT | BACK_CENTER
-			break;
-		case 4:
-			extFormat.channelMask = 0x0033;	// FRONT_LEFT | FRONT_RIGHT | BACK_LEFT | BACK_RIGHT
-			break;
-		default:
-			extFormat.channelMask = 0;
-			break;
+			case 1:
+				extFormat.channelMask = 0x0004;  // FRONT_CENTER
+				break;
+			case 2:
+				extFormat.channelMask = 0x0003;  // FRONT_LEFT | FRONT_RIGHT
+				break;
+			case 3:
+				extFormat.channelMask = 0x0103;  // FRONT_LEFT | FRONT_RIGHT | BACK_CENTER
+				break;
+			case 4:
+				extFormat.channelMask = 0x0033;  // FRONT_LEFT | FRONT_RIGHT | BACK_LEFT | BACK_RIGHT
+				break;
+			default:
+				extFormat.channelMask = 0;
+				break;
 		}
 		extFormat.subFormat = mpt::UUID(static_cast<uint16>(encoding), 0x0000, 0x0010, 0x800000AA00389B71ull);
 		mpt::IO::Write(s, extFormat);
@@ -131,7 +131,7 @@ void WAVWriter::WriteMetatags(const FileTags &tags)
 	mpt::IO::Write(s, mpt::as_le(uint16(0)));      // dialect      (unset)
 
 	StartChunk(RIFFChunk::idLIST);
-	const char info[] = { 'I', 'N', 'F', 'O' };
+	const char info[] = {'I', 'N', 'F', 'O'};
 	mpt::IO::Write(s, info);
 
 	WriteTag(RIFFChunk::idINAM, tags.title);
