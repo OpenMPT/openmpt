@@ -978,6 +978,8 @@
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleEncode.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\SampleFormat.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\wav.hpp" />
+    <ClInclude Include="..\..\src\openmpt\soundfile_write\wav_write.hpp" />
     <ClInclude Include="..\..\test\PlaybackTest.h" />
     <ClInclude Include="..\..\test\TestTools.h" />
     <ClInclude Include="..\..\test\TestToolsLib.h" />
@@ -1134,6 +1136,7 @@
     <ClCompile Include="..\..\soundlib\plugins\dmo\WavesReverb.cpp" />
     <ClCompile Include="..\..\soundlib\tuning.cpp" />
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp" />
+    <ClCompile Include="..\..\src\openmpt\soundfile_write\wav_write.cpp" />
     <ClCompile Include="..\..\test\PlaybackTest.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_base.cpp" />

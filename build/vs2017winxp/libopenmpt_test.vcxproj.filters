@@ -172,6 +172,9 @@
     <Filter Include="src\openmpt\soundfile_data">
       <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\soundfile_write">
+      <UniqueIdentifier>{21750652-8D82-3438-1669-3023827500EF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
@@ -1104,6 +1107,12 @@
     <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
       <Filter>src\openmpt\soundfile_data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\wav.hpp">
+      <Filter>src\openmpt\soundfile_data</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\soundfile_write\wav_write.hpp">
+      <Filter>src\openmpt\soundfile_write</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test\PlaybackTest.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -1567,6 +1576,9 @@
     </ClCompile>
     <ClCompile Include="..\..\soundlib\tuningCollection.cpp">
       <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\soundfile_write\wav_write.cpp">
+      <Filter>src\openmpt\soundfile_write</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\PlaybackTest.cpp">
       <Filter>test</Filter>

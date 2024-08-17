@@ -109,6 +109,7 @@ svn export ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 svn export ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
 svn export ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
 svn export ./src/openmpt/soundfile_data  bin/dist-autotools/src/openmpt/soundfile_data
+svn export ./src/openmpt/soundfile_write bin/dist-autotools/src/openmpt/soundfile_write
 svn export ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp
@@ -183,6 +184,7 @@ cp -r ./src/openmpt/logging    bin/dist-autotools/src/openmpt/logging
 cp -r ./src/openmpt/random     bin/dist-autotools/src/openmpt/random
 cp -r ./src/openmpt/soundbase  bin/dist-autotools/src/openmpt/soundbase
 cp -r ./src/openmpt/soundfile_data  bin/dist-autotools/src/openmpt/soundfile_data
+cp -r ./src/openmpt/soundfile_write bin/dist-autotools/src/openmpt/soundfile_write
 cp -r ./test            bin/dist-autotools/test
 rm bin/dist-autotools/test/mpt_tests_crypto.cpp
 rm bin/dist-autotools/test/mpt_tests_uuid_namespace.cpp

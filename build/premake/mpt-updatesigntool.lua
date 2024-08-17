@@ -30,6 +30,8 @@
 		"../../src/openmpt/soundbase/**.hpp",
 		"../../src/openmpt/soundfile_data/**.cpp",
 		"../../src/openmpt/soundfile_data/**.hpp",
+		"../../src/openmpt/soundfile_write/**.cpp",
+		"../../src/openmpt/soundfile_write/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
 	}

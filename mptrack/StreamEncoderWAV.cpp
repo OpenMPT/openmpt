@@ -16,10 +16,10 @@
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/soundfile_data/wav.hpp"
+#include "openmpt/soundfile_write/wav_write.hpp"
 
-#include "../soundlib/Sndfile.h"
-#include "../soundlib/WAVTools.h"
 
 
 OPENMPT_NAMESPACE_BEGIN

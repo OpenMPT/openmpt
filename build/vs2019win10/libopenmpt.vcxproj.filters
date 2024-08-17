@@ -1086,6 +1086,9 @@
     <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
       <Filter>src\openmpt\soundfile_data</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\soundfile_data\wav.hpp">
+      <Filter>src\openmpt\soundfile_data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
