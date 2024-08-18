@@ -904,6 +904,7 @@
 /soundlib/plugins/dmo/*.o
 /src/openmpt/sounddevice/*.d
 /src/openmpt/sounddevice/*.o
+/src/openmpt/soundfile_write/*.d
 /test/*.d
 /test/*.o
 /test/test.saved.mptm
