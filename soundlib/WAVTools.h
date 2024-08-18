@@ -158,7 +158,7 @@ MPT_BINARY_STRUCT(WAVExtraChunk, 16)
 // Set up sample information
 inline WAVCuePoint ConvertToWAVCuePoint(uint32 id_, SmpLength offset_)
 {
-	WAVCuePoint result;
+	WAVCuePoint result{};
 	result.id = id_;
 	result.position = offset_;
 	result.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
