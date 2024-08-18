@@ -39,8 +39,8 @@ MPT_TEST_GROUP_INLINE("mpt/random")
 {
 	mpt::sane_random_device rd;
 	mpt::good_engine prng = mpt::make_prng<mpt::good_engine>(rd);
-	mpt::any_engine_wrapper<mpt::good_prng, uint64> prng64{prng};
-	mpt::any_engine_wrapper<mpt::good_prng, uint8> prng8{prng};
+	mpt::any_engine_wrapper<mpt::good_engine, uint64> prng64{prng};
+	mpt::any_engine_wrapper<mpt::good_engine, uint8> prng8{prng};
 
 	bool failed = false;
 
