@@ -70,7 +70,6 @@ MPT_TEST_GROUP_INLINE("mpt/random")
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng, -1.0, 0.0), -1.0, 0.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng, 1.0, 2.0), 1.0, 2.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng, 1.0, 3.0), 1.0, 3.0);
-
 	}
 
 	for (std::size_t i = 0; i < 10000; ++i) {
@@ -99,7 +98,6 @@ MPT_TEST_GROUP_INLINE("mpt/random")
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng64, -1.0, 0.0), -1.0, 0.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng64, 1.0, 2.0), 1.0, 2.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng64, 1.0, 3.0), 1.0, 3.0);
-
 	}
 
 	for (std::size_t i = 0; i < 10000; ++i) {
@@ -128,11 +126,9 @@ MPT_TEST_GROUP_INLINE("mpt/random")
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng8, -1.0, 0.0), -1.0, 0.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng8, 1.0, 2.0), 1.0, 2.0);
 		failed = failed || !mpt::is_in_range(mpt::random<double>(prng8, 1.0, 3.0), 1.0, 3.0);
-
 	}
 
 	MPT_TEST_EXPECT_EXPR(!failed);
-
 }
 
 } // namespace random
