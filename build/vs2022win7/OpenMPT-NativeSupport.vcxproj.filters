@@ -181,9 +181,6 @@
     <Filter Include="src\openmpt\base">
       <UniqueIdentifier>{C98E1EFB-B587-3D4D-DEB9-22D2CA111D59}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\openmpt\fileformat_base">
-      <UniqueIdentifier>{116B1150-7D78-3F36-065F-3B21726B0BED}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\openmpt\logging">
       <UniqueIdentifier>{755E42FE-E1BF-1F0C-6A2D-66BED68D56CB}</UniqueIdentifier>
     </Filter>
@@ -195,12 +192,6 @@
     </Filter>
     <Filter Include="src\openmpt\sounddevice">
       <UniqueIdentifier>{670F92DE-D346-DA75-DC50-3E994807016F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\openmpt\soundfile_data">
-      <UniqueIdentifier>{101B62C4-FC2A-0E95-65E4-72B35113FD2D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\openmpt\soundfile_write">
-      <UniqueIdentifier>{21750652-8D82-3438-1669-3023827500EF}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -891,9 +882,6 @@
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp">
       <Filter>src\openmpt\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\fileformat_base\magic.hpp">
-      <Filter>src\openmpt\fileformat_base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp">
       <Filter>src\openmpt\logging</Filter>
     </ClInclude>
@@ -983,15 +971,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp">
       <Filter>src\openmpt\sounddevice</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp">
-      <Filter>src\openmpt\soundfile_data</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundfile_data\wav.hpp">
-      <Filter>src\openmpt\soundfile_data</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\openmpt\soundfile_write\wav_write.hpp">
-      <Filter>src\openmpt\soundfile_write</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1084,9 +1063,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp">
       <Filter>src\openmpt\sounddevice</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\openmpt\soundfile_write\wav_write.cpp">
-      <Filter>src\openmpt\soundfile_write</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

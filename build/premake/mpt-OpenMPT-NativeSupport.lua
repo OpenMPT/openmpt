@@ -35,6 +35,12 @@
   }
   excludes {
    "../../mptrack/wine/WineWrapper.cpp",
+		"../../src/openmpt/fileformat_base/**.cpp",
+		"../../src/openmpt/fileformat_base/**.hpp",
+		"../../src/openmpt/soundfile_data/**.cpp",
+		"../../src/openmpt/soundfile_data/**.hpp",
+		"../../src/openmpt/soundfile_write/**.cpp",
+		"../../src/openmpt/soundfile_write/**.hpp",
   }
   defines { "MODPLUG_TRACKER", "MPT_BUILD_WINESUPPORT" }
 	if _OPTIONS["charset"] ~= "Unicode" then

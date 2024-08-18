@@ -1545,7 +1545,6 @@
     <ClInclude Include="..\..\src\openmpt\base\FlagSet.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Int24.hpp" />
     <ClInclude Include="..\..\src\openmpt\base\Types.hpp" />
-    <ClInclude Include="..\..\src\openmpt\fileformat_base\magic.hpp" />
     <ClInclude Include="..\..\src\openmpt\logging\Logger.hpp" />
     <ClInclude Include="..\..\src\openmpt\random\ModPlug.hpp" />
     <ClInclude Include="..\..\src\openmpt\soundbase\Copy.hpp" />
@@ -1576,9 +1575,6 @@
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.hpp" />
     <ClInclude Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundfile_data\tags.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundfile_data\wav.hpp" />
-    <ClInclude Include="..\..\src\openmpt\soundfile_write\wav_write.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
@@ -1611,7 +1607,6 @@
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceRtAudio.cpp" />
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceUtilities.cpp" />
     <ClCompile Include="..\..\src\openmpt\sounddevice\SoundDeviceWaveout.cpp" />
-    <ClCompile Include="..\..\src\openmpt\soundfile_write\wav_write.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\portaudio.vcxproj">
