@@ -152,11 +152,6 @@ namespace IPCWindow
 		return ::SendMessage(ipcWnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&copyData));
 	}
 
-	HWND FindIPCWindow()
-	{
-		return ::FindWindow(ClassName, nullptr);
-	}
-
 	struct EnumWindowState
 	{
 		uintptr_t lastActive = 0;
@@ -226,8 +221,6 @@ namespace IPCWindow
 		}
 		return state.result;
 	}
-
-
 
 	bool SendToIPC(const std::vector<mpt::PathString> &filenames, bool autoplay)
 	{
