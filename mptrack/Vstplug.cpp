@@ -317,7 +317,8 @@ void CVstPlugin::GetPluginMetadata(bool maskCrashes, LoadResult &loadResult, VST
 	vendor.back() = '\0';
 	plugin.vendor = mpt::ToCString(mpt::Charset::Locale, vendor.data());
 
-	if(CVstPlugin::IsInstrument(*loadResult.effect))
+	plugin.isInstrument = CVstPlugin::IsInstrument(*loadResult.effect);
+	if(plugin.isInstrument)
 		plugin.category = PluginCategory::Synth;
 	else
 		plugin.category = static_cast<PluginCategory>(DispatchSEH(maskCrashes, *loadResult.effect, Vst::effGetPlugCategory, 0, 0, nullptr, 0.0f, exception));
