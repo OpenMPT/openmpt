@@ -3129,7 +3129,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 		for(size_t i = 0; i < NOTE_MAX; i++)
 		{
-			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? 99 : 1);
+			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? (ins * 1111) : 1);
 			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], (i == NOTE_MIDDLEC - 1) ? (i + 13) : (i + 1));
 		}
 
