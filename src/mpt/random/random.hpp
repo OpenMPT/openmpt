@@ -104,13 +104,13 @@ inline T random(Trng & rng, T min, T max) {
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4018) // '<': signed/unsigned mismatch
-#endif // MPT_COMPILER_MSVC
+#endif                          // MPT_COMPILER_MSVC
 	static_assert(std::numeric_limits<T>::is_integer);
-	if constexpr(std::is_same<T, uint8>::value) {
+	if constexpr (std::is_same<T, uint8>::value) {
 		using dis_type = std::uniform_int_distribution<unsigned int>;
 		dis_type dis(min, max);
 		return static_cast<T>(dis(rng));
-	} else if constexpr(std::is_same<T, int8>::value) {
+	} else if constexpr (std::is_same<T, int8>::value) {
 		using dis_type = std::uniform_int_distribution<int>;
 		dis_type dis(min, max);
 		return static_cast<T>(dis(rng));
