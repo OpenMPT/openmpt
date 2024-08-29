@@ -44,6 +44,11 @@ static const char * const license =
 #include "mpt/base/check_platform.hpp"
 #include "mpt/base/detect.hpp"
 
+#include "mpt/random/crand.hpp"
+#include "mpt/random/default_engines.hpp"
+#include "mpt/random/device.hpp"
+#include "mpt/random/engine.hpp"
+
 #include <algorithm>
 #include <deque>
 #include <fstream>
@@ -54,7 +59,6 @@ static const char * const license =
 #include <map>
 #include <memory>
 #include <optional>
-#include <random>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -67,7 +71,6 @@ static const char * const license =
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 
 #if MPT_OS_DJGPP
 #include <conio.h>
@@ -1635,15 +1638,15 @@ static void render_file( commandlineflags & flags, const mpt::native_path & file
 }
 
 
-static mpt::native_path get_random_filename( std::set<mpt::native_path> & filenames, std::default_random_engine & prng ) {
-	std::size_t index = std::uniform_int_distribution<std::size_t>( 0, filenames.size() - 1 )( prng );
+static mpt::native_path get_random_filename( std::set<mpt::native_path> & filenames, mpt::good_engine & prng ) {
+	std::size_t index = mpt::random<std::size_t>( prng, 0, filenames.size() - 1 );
 	std::set<mpt::native_path>::iterator it = filenames.begin();
 	std::advance( it, index );
 	return *it;
 }
 
 
-static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream, std::default_random_engine & prng ) {
+static void render_files( commandlineflags & flags, textout & log, write_buffers_interface & audio_stream, mpt::good_engine & prng ) {
 	if ( flags.randomize ) {
 		std::shuffle( flags.filenames.begin(), flags.filenames.end(), prng );
 	}
@@ -2359,16 +2362,9 @@ static int main( int argc, char * argv [] ) {
 
 		log.writeout();
 
-		std::default_random_engine prng;
-		try {
-			std::random_device rd;
-			std::seed_seq seq{ rd(), static_cast<unsigned int>( std::time( NULL ) ) };
-			prng = std::default_random_engine{ seq };
-		} catch ( const std::exception & ) {
-			std::seed_seq seq{ static_cast<unsigned int>( std::time( NULL ) ) };
-			prng = std::default_random_engine{ seq };
-		}
-		std::srand( std::uniform_int_distribution<unsigned int>()( prng ) );
+		mpt::sane_random_device rd;
+		mpt::good_engine prng = mpt::make_prng<mpt::good_engine>( rd );
+		mpt::crand::reseed( prng );
 
 		switch ( flags.mode ) {
 			case Mode::Probe: {

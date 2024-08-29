@@ -37,6 +37,9 @@
     <Filter Include="src\mpt\path">
       <UniqueIdentifier>{4984D703-35E7-66A8-DE6C-9F5ECAAE322B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\random">
+      <UniqueIdentifier>{3DBF705C-298D-6462-1221-D588FE8D40C7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\string">
       <UniqueIdentifier>{13002060-FFCD-1366-E861-848CD4CEEFCA}</UniqueIdentifier>
     </Filter>
@@ -305,6 +308,30 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\path\path.hpp">
       <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\any_engine.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\crand.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\default_engines.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\device.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\engine.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\engine_lcg.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\random.hpp">
+      <Filter>src\mpt\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\random\seed.hpp">
+      <Filter>src\mpt\random</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string\buffer.hpp">
       <Filter>src\mpt\string</Filter>
