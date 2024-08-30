@@ -1,0 +1,64 @@
+name: RHEL Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.31 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: 'almalinux:8' , deps: sys   }
+          - { version: 'almalinux:8' , deps: local }
+          - { version: 'almalinux:8' , deps: small }
+          - { version: 'almalinux:9' , deps: sys   }
+          - { version: 'almalinux:9' , deps: local }
+          - { version: 'almalinux:9' , deps: small }
+          - { version: 'rockylinux:8', deps: sys   }
+          - { version: 'rockylinux:8', deps: local }
+          - { version: 'rockylinux:8', deps: small }
+          - { version: 'rockylinux:9', deps: sys   }
+          - { version: 'rockylinux:9', deps: local }
+          - { version: 'rockylinux:9', deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    container:
+      image: ${{matrix.version}}
+
+    steps:
+    - name: Update system
+      run: dnf -y upgrade --refresh
+    - name: Setup repositories
+      if: ${{ matrix.version == 'almalinux:8' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled powertools && dnf -y install almalinux-release-devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Setup repositories
+      if: ${{ matrix.version == 'almalinux:9' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y install almalinux-release-devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Setup repositories
+      if: ${{ matrix.version == 'rockylinux:8' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled powertools && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Setup repositories
+      if: ${{ matrix.version == 'rockylinux:9' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Install dependencies
+      run: dnf -y install subversion perl-XML-XPath git gawk zip unzip xz make binutils gcc gcc-c++ clang pkgconf help2man doxygen autoconf autoconf-archive automake libtool zlib-devel mpg123-devel libogg-devel libvorbis-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
+    - name: Enable EPEL
+      run: dnf -y install epel-release
+    - name: Install EPEL dependencies
+      run: dnf -y install ccache portaudio-devel
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: fix git
+      # https://github.com/actions/runner/issues/2033
+      run: chown -R $(id -u):$(id -g) $(pwd)
+    - name: Build
+      run: make -j$(nproc) VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: Test
+      run: make -j$(nproc) VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
