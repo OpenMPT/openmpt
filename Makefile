@@ -1186,7 +1186,6 @@ LIBOPENMPT_CXX_SOURCES += \
  $(sort $(wildcard libopenmpt/*.cpp)) \
  
 include/miniz/miniz$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
-include/miniz/miniz.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(LOCAL_ZLIB),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_ZLIB_SOURCES)
@@ -1204,7 +1203,6 @@ endif
 endif
 
 include/minimp3/minimp3$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
-include/minimp3/minimp3.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(LOCAL_MPG123),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_MPG123_SOURCES)
 LIBOPENMPTTEST_C_SOURCES += $(LOCAL_MPG123_SOURCES)
@@ -1223,7 +1221,6 @@ endif
 endif
 
 include/stb_vorbis/stb_vorbis$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
-include/stb_vorbis/stb_vorbis.test$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT)
 ifeq ($(LOCAL_VORBIS),1)
 ifeq ($(LOCAL_OGG),1)
 LIBOPENMPT_C_SOURCES += $(LOCAL_OGG_SOURCES)
