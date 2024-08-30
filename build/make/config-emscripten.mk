@@ -1,6 +1,6 @@
 
-CC  = emcc -c
-CXX = em++ -c
+CC  = emcc
+CXX = em++
 LD  = em++
 AR  = emar
 LINK.cc = em++ $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
