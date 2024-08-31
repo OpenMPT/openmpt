@@ -478,6 +478,9 @@ void PluginBridge::DispatchToPlugin(DispatchMsg &msg)
 		// [value]: 0 means "turn off", 1 means "turn on"
 		::SetThreadPriority(m_audioThread, msg.value ? THREAD_PRIORITY_ABOVE_NORMAL : THREAD_PRIORITY_NORMAL);
 		m_sharedMem->tailSize = static_cast<int32>(Dispatch(effGetTailSize, 0, 0, nullptr, 0.0f));
+		// Plugin should tell us if number of channels changes through audioMasterIOChanged, but Surge XT via vst3ishell has been observed not to do that.
+		if(msg.value)
+			DispatchToHost(audioMasterVendorSpecific, kVendorOpenMPT, kUpdateProcessingBuffer, nullptr, 0.0f);
 		break;
 
 	case effEditGetRect:
