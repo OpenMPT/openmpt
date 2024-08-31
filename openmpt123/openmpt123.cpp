@@ -48,6 +48,7 @@ static const char * const license =
 #include "mpt/random/default_engines.hpp"
 #include "mpt/random/device.hpp"
 #include "mpt/random/engine.hpp"
+#include "mpt/random/seed.hpp"
 
 #include <algorithm>
 #include <deque>

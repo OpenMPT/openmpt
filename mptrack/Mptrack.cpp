@@ -42,6 +42,7 @@
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
 #include "mpt/io_file/outputfile.hpp"
+#include "mpt/random/seed.hpp"
 #include "mpt/string/utility.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 

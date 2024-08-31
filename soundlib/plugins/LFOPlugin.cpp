@@ -18,6 +18,7 @@
 #include "../../mptrack/plugins/LFOPluginEditor.h"
 #endif // MODPLUG_TRACKER
 #include "mpt/base/numbers.hpp"
+#include "mpt/random/seed.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
 

@@ -25,6 +25,7 @@
 #include "../soundlib/AudioCriticalSection.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/random/seed.hpp"
 
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/Mainfrm.h"

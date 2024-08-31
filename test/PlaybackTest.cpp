@@ -20,6 +20,8 @@
 #include "mpt/crc/crc.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/random/seed.hpp"
+
 #include "openmpt/base/Endian.hpp"
 
 #include <sstream>

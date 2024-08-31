@@ -13,6 +13,7 @@
 #include "mpt/random/default_engines.hpp"
 #include "mpt/random/device.hpp"
 #include "mpt/random/random.hpp"
+#include "mpt/random/seed.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 

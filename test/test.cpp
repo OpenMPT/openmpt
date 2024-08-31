@@ -36,6 +36,7 @@
 #include "mpt/osinfo/dos_memory.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/parse/split.hpp"
+#include "mpt/random/seed.hpp"
 #include "mpt/test/test.hpp"
 #include "mpt/test/test_macros.hpp"
 #include "mpt/uuid/uuid.hpp"
