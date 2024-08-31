@@ -64,7 +64,7 @@ struct engine_traits<std::mt19937_64> {
 
 template <>
 struct engine_seed_traits<std::ranlux24_base> {
-	static inline constexpr std::size_t seed_bits	= std::ranlux24_base::word_size;
+	static inline constexpr std::size_t seed_bits = std::ranlux24_base::word_size;
 };
 
 template <>
