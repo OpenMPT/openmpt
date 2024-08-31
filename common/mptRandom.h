@@ -411,7 +411,7 @@ template <> struct engine_traits<std::mt19937> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		std::unique_ptr<mpt::seed_seq_values<seed_bits / sizeof(unsigned int)>> values = mpt::make_unique<mpt::seed_seq_values<seed_bits / sizeof(unsigned int)>>(rd);
+		std::unique_ptr<mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)>> values = mpt::make_unique<mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)>>(rd);
 		std::seed_seq seed(values->begin(), values->end());
 		return rng_type(seed);
 	}
@@ -424,7 +424,7 @@ template <> struct engine_traits<std::mt19937_64> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		std::unique_ptr<mpt::seed_seq_values<seed_bits / sizeof(unsigned int)>> values = mpt::make_unique<mpt::seed_seq_values<seed_bits / sizeof(unsigned int)>>(rd);
+		std::unique_ptr<mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)>> values = mpt::make_unique<mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)>>(rd);
 		std::seed_seq seed(values->begin(), values->end());
 		return rng_type(seed);
 	}
@@ -437,7 +437,7 @@ template <> struct engine_traits<std::ranlux24_base> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
+		mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)> values(rd);
 		std::seed_seq seed(values.begin(), values.end());
 		return rng_type(seed);
 	}
@@ -450,7 +450,7 @@ template <> struct engine_traits<std::ranlux48_base> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return rng_type::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
+		mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)> values(rd);
 		std::seed_seq seed(values.begin(), values.end());
 		return rng_type(seed);
 	}
@@ -463,7 +463,7 @@ template <> struct engine_traits<std::ranlux24> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux24_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
+		mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)> values(rd);
 		std::seed_seq seed(values.begin(), values.end());
 		return rng_type(seed);
 	}
@@ -476,7 +476,7 @@ template <> struct engine_traits<std::ranlux48> {
 	static MPT_CONSTEXPR11_FUN int result_bits() { return std::ranlux48_base::word_size; }
 	template<typename Trd> static inline rng_type make(Trd & rd)
 	{
-		mpt::seed_seq_values<seed_bits / sizeof(unsigned int)> values(rd);
+		mpt::seed_seq_values<(seed_bits + ((sizeof(unsigned int) * 8) - 1)) / (sizeof(unsigned int) * 8)> values(rd);
 		std::seed_seq seed(values.begin(), values.end());
 		return rng_type(seed);
 	}
