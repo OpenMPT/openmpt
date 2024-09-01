@@ -42,10 +42,10 @@ private:
 		state_type result = 0;
 		std::array<unsigned int, mpt::align_up<std::size_t>(seed_bits, sizeof(unsigned int) * 8) / (sizeof(unsigned int) * 8)> seeds = {};
 		seed.generate(seeds.begin(), seeds.end());
-		for (std::size_t i = 0; i < mpt::align_up<std::size_t>(seed_bits, sizeof(unsigned int) * 8) / (sizeof(unsigned int) * 8); ++i) {
+		for (const auto & seed_value : seeds) {
 			result <<= 16;
 			result <<= 16;
-			result |= static_cast<state_type>(seeds[i]);
+			result |= static_cast<state_type>(seed_value);
 		}
 		return result;
 	}
