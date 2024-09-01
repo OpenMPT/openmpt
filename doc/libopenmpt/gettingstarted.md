@@ -155,15 +155,10 @@ How to compile
             make CONFIG=djgpp
 
         `openmpt123` can use liballegro 4.2 for sound output on DJGPP/DOS.
-        liballegro can either be installed system-wide in the DJGPP environment
-        or downloaded into the `libopenmpt` source tree.
-
-            make CONFIG=djgpp USE_ALLEGRO42=1    # use installed liballegro
-
-        or
+        liballegro needs to be downloaded into the `libopenmpt` source tree.
 
             ./build/download_externals.sh    # download liballegro source
-            make CONFIG=djgpp USE_ALLEGRO42=1 BUNDLED_ALLEGRO42=1
+            make CONFIG=djgpp USE_ALLEGRO42=1
 
      -  American Fuzzy Lop:
 
