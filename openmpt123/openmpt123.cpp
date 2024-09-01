@@ -37,7 +37,11 @@ static const char * const license =
 
 #include "openmpt123_config.hpp"
 
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#include "mpt/base/detect_compiler.hpp"
+#include "mpt/base/detect_os.hpp"
+#include "mpt/base/detect_quirks.hpp"
+
+#if defined(MPT_LIBC_QUIRK_REQUIRES_SYS_TYPES_H)
 #include <sys/types.h>
 #endif
 
@@ -90,7 +94,7 @@ static const char * const license =
 #include <fcntl.h>
 #include <io.h>
 #include <stdio.h>
-#if defined(__MINGW32__) && !defined(__MINGW64__)
+#if MPT_LIBC_MINGW
 #include <string.h>
 #endif
 #include <sys/stat.h>
