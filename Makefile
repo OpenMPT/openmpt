@@ -1064,6 +1064,7 @@ else
 #CPPCHECK_FLAGS += --std=c++20
 CPPCHECK_FLAGS += --std=c++17
 endif
+CPPCHECK_FLAGS += --library=build/cppcheck/glibc-workarounds.cfg
 CPPCHECK_FLAGS += --quiet
 CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]'
 CPPCHECK_FLAGS += --check-level=exhaustive
