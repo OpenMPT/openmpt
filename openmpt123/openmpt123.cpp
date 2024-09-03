@@ -69,9 +69,7 @@ static const char * const license =
 #include <cstring>
 #include <ctime>
 
-#if defined(CPPCHECK)
-// cppcheck 2.15.0 gets confused by linux/glibc headers
-#elif MPT_OS_DJGPP
+#if MPT_OS_DJGPP
 #include <conio.h>
 #include <crt0.h>
 #include <dpmi.h>

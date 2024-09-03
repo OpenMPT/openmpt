@@ -976,6 +976,7 @@ endif
 
 CPPCHECK_FLAGS += -j $(NUMTHREADS)
 CPPCHECK_FLAGS += --std=c11 --std=c++17
+CPPCHECK_FLAGS += --library=build/cppcheck/glibc-workarounds.cfg
 CPPCHECK_FLAGS += --quiet
 CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: warning: {severity}: {message} [{id}]'
 CPPCHECK_FLAGS += --check-level=exhaustive
