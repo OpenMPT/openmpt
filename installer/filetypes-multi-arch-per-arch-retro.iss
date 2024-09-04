@@ -61,6 +61,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAsso
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".etx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".far"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".fmt"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".fst"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ftm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gdm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".gmc"; ValueData: {#OpenMPTFile}; Components: {#Component}
