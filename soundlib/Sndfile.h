@@ -1015,7 +1015,8 @@ public:
 	// Channel Effects
 	void KeyOff(ModChannel &chn) const;
 	// Global Effects
-	void SetTempo(TEMPO param, bool setAsNonModcommand = false);
+	void SetTempo(TEMPO param, bool setAsNonModcommand = false) { SetTempo(m_PlayState, param, setAsNonModcommand); }
+	void SetTempo(PlayState &playState, TEMPO param, bool setAsNonModcommand = false) const;
 	void SetSpeed(PlayState &playState, uint32 param) const;
 	static TEMPO ConvertST2Tempo(uint8 tempo);
 
