@@ -131,8 +131,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					// Default volume only works on raw Paula channels
 					if(pairedChn[chn] && sample.nVolume < 256)
 					{
-						m.volcmd = VOLCMD_VOLUME;
-						m.vol = 64;
+						m.SetVolumeCommand(VOLCMD_VOLUME, 64);
 					}
 					// If channel and sample type don't match, stop this channel (add 100 to the instrument number to make it understandable what happened during import)
 					if((sample.cues[0] == 1 && pairedChn[chn] != 0) || (sample.cues[0] == 0 && pairedChn[chn] == 0))
@@ -150,105 +149,72 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 			case 1:  // 1 Portamento Down (Period)
 				if(param)
 				{
-					m.command = CMD_PORTAMENTOUP;
-					m.param = param;
+					m.SetEffectCommand(CMD_PORTAMENTOUP, param);
 				}
 				break;
 			case 2:  // 2 Portamento Up (Period)
 				if(param)
-				{
-					m.command = CMD_PORTAMENTODOWN;
-					m.param = param;
-				}
+					m.SetEffectCommand(CMD_PORTAMENTODOWN, param);
 				break;
 
 			case 10:  // A Arpeggio 1 (down, orig, up)
 				if(param)
-				{
-					m.command = CMD_ARPEGGIO;
-					m.param = (param & 0x0F) | (InvertArpeggioParam(param >> 4) << 4);
-				}
+					m.SetEffectCommand(CMD_ARPEGGIO, (param & 0x0F) | (InvertArpeggioParam(param >> 4) << 4));
 				break;
 
 			case 11:  // B Arpeggio 2 (orig, up, orig, down)
 				if(param)
-				{
-					m.command = CMD_ARPEGGIO;
-					m.param = (param & 0xF0) | InvertArpeggioParam(param & 0x0F);
-				}
+					m.SetEffectCommand(CMD_ARPEGGIO, (param & 0xF0) | InvertArpeggioParam(param & 0x0F));
 				break;
 		
 			// This one is close enough to "standard" arpeggio -- I think!
 			case 12:  // C Arpeggio 3 (up, up, orig)
 				if(param)
-				{
-					m.command = CMD_ARPEGGIO;
-					m.param = param;
-				}
+					m.SetEffectCommand(CMD_ARPEGGIO, param);
 				break;
 
 			case 13:  // D Slide Down (Notes)
 				if(param)
-				{
-					m.command = CMD_NOTESLIDEDOWN;
-					m.param = 0x10 | std::min(uint8(0x0F), param);
-				}
+					m.SetEffectCommand(CMD_NOTESLIDEDOWN, 0x10 | std::min(uint8(0x0F), param));
 				break;
 			case 30:  // U Slide Up (Notes)
 				if(param)
-				{
-					m.command = CMD_NOTESLIDEUP;
-					m.param = 0x10 | std::min(uint8(0x0F), param);
-				}
+					m.SetEffectCommand(CMD_NOTESLIDEUP, 0x10 | std::min(uint8(0x0F), param));
 				break;
 			// Fine Slides are only implemented for libopenmpt. For OpenMPT,
 			// sliding every 5 (non-note) ticks kind of works (at least at
 			// speed 6), but implementing separate (format-agnostic) fine slide commands would of course be better.
 			case 21:  // L Slide Down Once (Notes)
 				if(param)
-				{
-					m.command = CMD_NOTESLIDEDOWN;
-					m.param = 0x50 | std::min(uint8(0x0F), param);
-				}
+					m.SetEffectCommand(CMD_NOTESLIDEDOWN, 0x50 | std::min(uint8(0x0F), param));
 				break;
 			case 17:  // H Slide Up Once (Notes)
 				if(param)
-				{
-					m.command = CMD_NOTESLIDEUP;
-					m.param = 0x50 | std::min(uint8(0x0F), param);
-				}
+					m.SetEffectCommand(CMD_NOTESLIDEUP, 0x50 | std::min(uint8(0x0F), param));
 				break;
 
 			case 15:  // F Set Filter <>00:ON
-				m.command = CMD_MODCMDEX;
-				m.param = !!param;
+				m.SetEffectCommand(CMD_MODCMDEX, !!param);
 				break;
 
 			case 25:  // P Pos Jump
-				m.command = CMD_POSITIONJUMP;
-				m.param = param;
+				m.SetEffectCommand(CMD_POSITIONJUMP, param);
 				break;
 
 			case 27:  // R Release sample (apparently not listed in the help!)
-				m.Clear();
 				m.note = NOTE_KEYOFF;
+				m.instr = 0;
 				break;
 
 			case 28:  // S Speed
 				if(param < 0x20)
-				{
-					m.command = CMD_SPEED;
-					m.param = param;
-				}
+					m.SetEffectCommand(CMD_SPEED, param);
 				break;
 
 			case 31:  // V Volume
 				// Volume on mixed channels is permanent, on hardware channels it behaves like in regular MODs
 				if(param & 0x0F)
-				{
-					m.command = pairedChn[chn] ? CMD_CHANNELVOLSLIDE : CMD_VOLUMESLIDE;
-					m.param = param & 0x0F;
-				}
+					m.SetEffectCommand(pairedChn[chn] ? CMD_CHANNELVOLSLIDE : CMD_VOLUMESLIDE, param & 0x0F);
 
 				switch(param >> 4)
 				{
@@ -260,13 +226,11 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 				case 0: case 1: case 2: case 3:
 					if(pairedChn[chn])
 					{
-						m.command = CMD_CHANNELVOLUME;
-						m.param = param;
+						m.SetEffectCommand(CMD_CHANNELVOLUME, param);
 					} else
 					{
-						m.volcmd = VOLCMD_VOLUME;
-						m.vol = param;
-						m.command = CMD_NONE;
+						m.SetVolumeCommand(VOLCMD_VOLUME, param);
+						m.SetEffectCommand(oldCmd, oldParam);
 					}
 					break;
 				case 5:  // Normal slide up
@@ -280,7 +244,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					break;
 				default:
 					// Junk.
-					m.command = CMD_NONE;
+					m.SetEffectCommand(oldCmd, oldParam);
 					break;
 				}
 
@@ -293,7 +257,14 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					{
 						other.SetVolumeCommand(volCmd);
 					}
-					other.SetEffectCommand(m);
+					if(ModCommand::GetEffectWeight(other.command) < ModCommand::GetEffectWeight(m.command))
+					{
+						other.SetEffectCommand(m);
+					} else if(row < rows - 1)
+					{
+						// Retry on next row
+						sndFile.Patterns[pat].GetpModCommand(row + 1, chn + pairedChn[chn])->SetEffectCommand(m);
+					}
 				}
 				break;
 
