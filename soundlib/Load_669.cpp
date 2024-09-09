@@ -147,9 +147,10 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 	//m_SongFlags.set(SONG_LINEARSLIDES);
 #endif // MODPLUG_TRACKER
 
+	const bool isExtended = !memcmp(fileHeader.magic, "JN", 2);
 	m_modFormat.formatName = UL_("Composer 669");
 	m_modFormat.type = UL_("669");
-	m_modFormat.madeWithTracker = !memcmp(fileHeader.magic, "if", 2) ? UL_("Composer 669") : UL_("UNIS 669");
+	m_modFormat.madeWithTracker = isExtended ? UL_("UNIS 669") : UL_("Composer 669");
 	m_modFormat.charset = mpt::Charset::CP437;
 
 	m_nSamples = fileHeader.samples;
@@ -215,7 +216,6 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 note = noteInstr >> 2;
 				uint8 instr = ((noteInstr & 0x03) << 4) | (instrVol >> 4);
 				uint8 vol = instrVol & 0x0F;
-				uint8 command = effect[chn] >> 4;
 				if(noteInstr < 0xFE)
 				{
 					m->note = note + 36 + NOTE_MIN;
@@ -229,40 +229,25 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				}
 
 				if(effParam != 0xFF)
-				{
 					effect[chn] = effParam;
-				}
-				if((effParam & 0x0F) == 0 && effParam != 0x30)
-				{
-					// A param value of 0 resets the effect.
-					effect[chn] = 0xFF;
-					if(command < 3)
-						m->SetEffectCommand(effTrans[command], 0);
-				}
 				if(effect[chn] == 0xFF)
-				{
 					continue;
-				}
 
-				m->param = effect[chn] & 0x0F;
+				uint8 command = effect[chn] >> 4;
 
 				// Weird stuff happening in corehop.669 with effects > 8... they seem to do the same thing as if the high bit wasn't set, but the sample also behaves strangely.
-				if(command < static_cast<uint8>(std::size(effTrans)))
+				if(command < mpt::array_size<decltype(effTrans)>::size)
 				{
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-// false-positive
-#pragma warning(disable:6385)  // Reading invalid data from 'effTrans'.
-#endif
-					m->command = effTrans[command];
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+					m->SetEffectCommand(effTrans[command], effect[chn] & 0x0F);
 				} else
 				{
 					m->command = CMD_NONE;
 					continue;
 				}
+
+				// Currently not implemented as auto-slides
+				if(m->command != CMD_PANNINGSLIDE)
+					effect[chn] = 0xFF;
 
 				// Fix some commands
 				switch(command)
@@ -276,7 +261,6 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 #else
 					m->param |= 0x20;
 #endif
-					effect[chn] = 0xFF;
 					break;
 
 				case 4:
@@ -290,7 +274,6 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 				case 5:
 					// F - set tempo
 					// TODO: param 0 is a "super fast tempo" in Unis 669 mode (?)
-					effect[chn] = 0xFF;
 					break;
 
 				case 6:
@@ -309,6 +292,11 @@ bool CSoundFile::Read669(FileReader &file, ModLoadingFlags loadFlags)
 						m->command = CMD_NONE;
 					}
 					break;
+
+				case 7:
+					// H- slot retrig ("This command rapidly fires 4 slots. The command parameter specifies the speed at which to do it. The speed difference across the values is exponential.")
+					if(!m->IsNote() || !isExtended)
+						m->command = CMD_NONE;
 				}
 			}
 		}
