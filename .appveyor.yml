@@ -35,10 +35,10 @@ environment:
       MPT_APPVEYOR_TARGET: win10
       MPT_APPVEYOR_ARCH: amd64
       MPT_APPVEYOR_ARCH_CONFIG: x64
-    - job_name: VS2022 Win10 arm
+    - job_name: VS2022 Win8 arm
       job_group: Builds
       MPT_APPVEYOR_VS: vs2022
-      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_TARGET: win8
       MPT_APPVEYOR_ARCH: arm
       MPT_APPVEYOR_ARCH_CONFIG: ARM
     - job_name: VS2022 Win10 arm64
