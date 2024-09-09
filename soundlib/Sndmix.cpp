@@ -2484,15 +2484,10 @@ bool CSoundFile::ReadNote()
 			{
 				int32 pan = (m_MixerSettings.gnChannels >= 2) ? Clamp(chn.nRealPan, 0, 256) : 128;
 
-				int32 realvol;
-				if(m_PlayConfig.getUseGlobalPreAmp())
-				{
-					realvol = (chn.nRealVolume * kChnMasterVol) / 128;
-				} else
-				{
-					// Extra attenuation required here if we're bypassing pre-amp.
-					realvol = (chn.nRealVolume * kChnMasterVol) / 256;
-				}
+				int32 realvol = (chn.nRealVolume * kChnMasterVol) / 128;
+				// Extra attenuation required here if we're bypassing pre-amp.
+				if(!m_PlayConfig.getUseGlobalPreAmp())
+					realvol /= 2;
 
 				const PanningMode panningMode = m_PlayConfig.getPanningMode();
 				if(panningMode == PanningMode::SoftPanning || (panningMode == PanningMode::Undetermined && (m_MixerSettings.MixerFlags & SNDMIX_SOFTPANNING)))
@@ -2513,10 +2508,19 @@ bool CSoundFile::ReadNote()
 					// you can never truly achieve 100% right panning in FT2, only 100% left.
 					// Test case: FT2PanLaw.xm
 					LimitMax(pan, 255);
-					const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
-					const int panR = XMPanningTable[pan];
-					chn.newLeftVol = (realvol * panL) / 65536;
-					chn.newRightVol = (realvol * panR) / 65536;
+
+					// PolyTracker also uses square root panning, but there's a bug where the leftmost and rightmost pan positions play the sample centered, without any attenuation.
+					if(GetType() == MOD_TYPE_PTM && (pan == 0 || pan == 255))
+					{
+						chn.newLeftVol = realvol;
+						chn.newRightVol = realvol;
+					} else
+					{
+						const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
+						const int panR = XMPanningTable[pan];
+						chn.newLeftVol = (realvol * panL) / 65536;
+						chn.newRightVol = (realvol * panR) / 65536;
+					}
 				} else
 				{
 					chn.newLeftVol = (realvol * (256 - pan)) / 256;
