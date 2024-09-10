@@ -764,6 +764,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 					if(tempo >= GetMinimumTempoParam(GetType()))
 					{
+						playState.m_flags.set(SONG_FIRSTTICK, !m_playBehaviour[kMODTempoOnSecondTick]);
 						SetTempo(playState, tempo, false);
 					} else
 					{
