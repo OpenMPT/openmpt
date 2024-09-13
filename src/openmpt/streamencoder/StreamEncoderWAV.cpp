@@ -63,7 +63,6 @@ public:
 		}
 
 		fileWAV->StartChunk(RIFFChunk::iddata);
-
 	}
 	SampleFormat GetSampleFormat() const override
 	{
@@ -115,8 +114,8 @@ public:
 				cuePoint.id = index++;
 				cuePoint.position = static_cast<uint32>(cue);
 				cuePoint.riffChunkID = static_cast<uint32>(RIFFChunk::iddata);
-				cuePoint.chunkStart = 0;	// we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
-				cuePoint.blockStart = 0;	// ditto
+				cuePoint.chunkStart = 0;  // we use no Wave List Chunk (wavl) as we have only one data block, so this should be 0.
+				cuePoint.blockStart = 0;  // ditto
 				cuePoint.offset = cuePoint.position;
 				mpt::IO::Write(f, cuePoint);
 			}
@@ -146,16 +145,16 @@ WAVEncoder::WAVEncoder()
 	traits.maxChannels = 4;
 	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
-	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::little });
-	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::little });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::endian::little });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::endian::little });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::little });
-	traits.formats.push_back({ Encoder::Format::Encoding::Unsigned, 8, mpt::endian::little });
+	traits.formats.push_back({Encoder::Format::Encoding::Float, 64, mpt::endian::little});
+	traits.formats.push_back({Encoder::Format::Encoding::Float, 32, mpt::endian::little});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 32, mpt::endian::little});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 24, mpt::endian::little});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 16, mpt::endian::little});
+	traits.formats.push_back({Encoder::Format::Encoding::Unsigned, 8, mpt::endian::little});
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeLossless;
-	traits.defaultFormat = { Encoder::Format::Encoding::Float, 32, mpt::endian::little };
+	traits.defaultFormat = {Encoder::Format::Encoding::Float, 32, mpt::endian::little};
 	SetTraits(traits);
 }
 

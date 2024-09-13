@@ -60,7 +60,7 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 	std::size_t written = 0;
 	MPT_MAYBE_CONSTANT_IF(endian == mpt::get_endian() && format.encoding != Encoder::Format::Encoding::Alaw && format.encoding != Encoder::Format::Encoding::ulaw)
 	{
-		if(!mpt::IO::WriteRaw(f, reinterpret_cast<const std::byte*>(interleaved), frameCount * channels * format.GetSampleFormat().GetSampleSize()))
+		if(!mpt::IO::WriteRaw(f, reinterpret_cast<const std::byte *>(interleaved), frameCount * channels * format.GetSampleFormat().GetSampleSize()))
 		{
 			success = false;
 		}

@@ -43,7 +43,6 @@ public:
 public:
 
 	MP3Encoder(MP3EncoderType type);
-
 };
 
 

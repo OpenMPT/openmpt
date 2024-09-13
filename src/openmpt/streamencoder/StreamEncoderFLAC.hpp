@@ -18,7 +18,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-	
+
 class FLACEncoder : public EncoderFactoryBase
 {
 
@@ -30,7 +30,6 @@ public:
 public:
 
 	FLACEncoder();
-
 };
 
 

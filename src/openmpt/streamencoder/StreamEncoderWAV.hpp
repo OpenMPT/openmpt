@@ -18,7 +18,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-	
+
 class WavStreamWriter;
 
 
@@ -35,7 +35,6 @@ public:
 public:
 
 	WAVEncoder();
-
 };
 
 

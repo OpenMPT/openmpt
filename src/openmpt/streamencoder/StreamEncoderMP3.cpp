@@ -43,7 +43,7 @@
 #else
 #include <lame/lame.h>
 #endif
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 
 
 
@@ -56,9 +56,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct ID3v2Header
 {
-	uint8    signature[3];
-	uint8    version[2];
-	uint8be  flags;
+	uint8 signature[3];
+	uint8 version[2];
+	uint8be flags;
 	uint32be size;
 };
 
@@ -66,7 +66,7 @@ MPT_BINARY_STRUCT(ID3v2Header, 10)
 
 struct ID3v2Frame
 {
-	char     frameid[4];
+	char frameid[4];
 	uint32be size;
 	uint16be flags;
 };
@@ -79,7 +79,7 @@ MPT_BINARY_STRUCT(ID3v2Frame, 10)
 // $01 = UTF-16 with BOM. Terminated with $00 00.
 // $02 = UTF-16BE without BOM. Terminated with $00 00.
 // $03 = UTF-8. Terminated with $00.
-#define ID3v2_CHARSET '\3'
+#define ID3v2_CHARSET    '\3'
 #define ID3v2_TEXTENDING '\0'
 
 struct ReplayGain
@@ -170,7 +170,7 @@ uint32 ID3V2Tagger::GetMaxSynchsafeInt() const
 void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGain replayGain)
 {
 	if(!s) return;
-	
+
 	ID3v2Header tHeader;
 	mpt::IO::Offset fOffset = mpt::IO::TellWrite(s);
 	uint32 paddingSize = 0;
@@ -179,10 +179,10 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 
 	// Correct header will be written later (tag size missing)
 	memcpy(tHeader.signature, "ID3", 3);
-	tHeader.version[0] = 0x04; // Version 2.4.0
-	tHeader.version[1] = 0x00; // Ditto
-	tHeader.flags = 0; // No flags
-	tHeader.size  = 0; // will be filled later
+	tHeader.version[0] = 0x04;  // Version 2.4.0
+	tHeader.version[1] = 0x00;  // Ditto
+	tHeader.flags = 0;          // No flags
+	tHeader.size = 0;           // will be filled later
 	mpt::IO::Write(s, tHeader);
 	totalID3v2Size += sizeof(tHeader);
 
@@ -228,17 +228,16 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	mpt::IO::SeekAbsolute(s, fOffset);
 	mpt::IO::Write(s, tHeader);
 	mpt::IO::SeekRelative(s, totalID3v2Size - sizeof(tHeader));
-
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackGainFrameSize()
 {
-	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_GAIN") + 1 + std::strlen("-123.45 dB") + 1); // should be enough
+	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_GAIN") + 1 + std::strlen("-123.45 dB") + 1);  // should be enough
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainTxxxTrackPeakFrameSize()
 {
-	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_PEAK") + 1 + std::strlen("2147483648.123456") + 1); // unrealistic worst case
+	return mpt::saturate_cast<uint32>(sizeof(ID3v2Frame) + 1 + std::strlen("REPLAYGAIN_TRACK_PEAK") + 1 + std::strlen("2147483648.123456") + 1);  // unrealistic worst case
 }
 
 uint32 ID3V2Tagger::GetMaxReplayGainFramesSizes()
@@ -260,7 +259,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		std::string content;
 
-		content += std::string(1, 0x00); // ISO-8859-1
+		content += std::string(1, 0x00);  // ISO-8859-1
 		content += std::string("REPLAYGAIN_TRACK_GAIN");
 		content += std::string(1, '\0');
 
@@ -284,11 +283,10 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			std::memset(&frame, 0, sizeof(ID3v2Frame));
 			std::memcpy(&frame.frameid, "TXXX", 4);
 			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
-			frame.flags = 0x4000; // discard if audio data changed
+			frame.flags = 0x4000;  // discard if audio data changed
 			mpt::IO::Write(s, frame);
 			mpt::IO::Write(s, mpt::as_span(content));
 		}
-
 	}
 
 
@@ -297,7 +295,7 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		std::string content;
 
-		content += std::string(1, 0x00); // ISO-8859-1
+		content += std::string(1, 0x00);  // ISO-8859-1
 		content += std::string("REPLAYGAIN_TRACK_PEAK");
 		content += std::string(1, '\0');
 
@@ -316,13 +314,11 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			std::memset(&frame, 0, sizeof(ID3v2Frame));
 			std::memcpy(&frame.frameid, "TXXX", 4);
 			frame.size = intToSynchsafe(static_cast<uint32>(content.size()));
-			frame.flags = 0x4000; // discard if audio data changed
+			frame.flags = 0x4000;  // discard if audio data changed
 			mpt::IO::Write(s, frame);
 			mpt::IO::Write(s, mpt::as_span(content));
 		}
-
 	}
-
 }
 
 // Write a ID3v2 frame
@@ -348,9 +344,9 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 	{
 		ID3v2Frame tFrame;
 		std::memset(&tFrame, 0, sizeof(ID3v2Frame));
-		std::memcpy(&tFrame.frameid, cFrameID, 4); // ID
-		tFrame.size = intToSynchsafe(static_cast<uint32>(sFramecontent.size())); // Text size
-		tFrame.flags = 0x0000; // No flags
+		std::memcpy(&tFrame.frameid, cFrameID, 4);                                // ID
+		tFrame.size = intToSynchsafe(static_cast<uint32>(sFramecontent.size()));  // Text size
+		tFrame.flags = 0x0000;                                                    // No flags
 		mpt::IO::Write(s, tFrame);
 		mpt::IO::Write(s, mpt::as_span(sFramecontent));
 
@@ -390,15 +386,9 @@ static Encoder::Traits BuildTraits(bool compatible)
 	id3tag_genre_list(&GenreEnumCallback, &traits);
 	traits.modesWithFixedGenres = (compatible ? Encoder::ModeCBR : Encoder::ModeInvalid);
 	traits.maxChannels = 2;
-	traits.samplerates = (compatible
-		? mpt::make_vector(mpeg1layer3_samplerates)
-		: mpt::make_vector(layer3_samplerates)
-		);
+	traits.samplerates = (compatible ? mpt::make_vector(mpeg1layer3_samplerates) : mpt::make_vector(layer3_samplerates));
 	traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
-	traits.bitrates = (compatible
-		? mpt::make_vector(mpeg1layer3_bitrates)
-		: mpt::make_vector(layer3_bitrates)
-		);
+	traits.bitrates = (compatible ? mpt::make_vector(mpeg1layer3_bitrates) : mpt::make_vector(layer3_bitrates));
 	traits.defaultSamplerate = 44100;
 	traits.defaultChannels = 2;
 	traits.defaultMode = (compatible ? Encoder::ModeCBR : Encoder::ModeQuality);
@@ -528,30 +518,29 @@ public:
 			lame_set_VBR(gfp, vbr_default);
 
 			lame_set_bWriteVbrTag(gfp, 1);
-
 		}
 
-		lame_set_decode_on_the_fly(gfp, settings.Details.MP3LameCalculatePeakSample ? 1 : 0); // see LAME docs for why
+		lame_set_decode_on_the_fly(gfp, settings.Details.MP3LameCalculatePeakSample ? 1 : 0);  // see LAME docs for why
 		lame_set_findReplayGain(gfp, settings.Details.MP3LameCalculateReplayGain ? 1 : 0);
 
 		switch(id3type)
 		{
-		case ID3None:
-			lame_set_write_id3tag_automatic(gfp, 0);
-			break;
-		case ID3v1:
-			id3tag_init(gfp);
-			id3tag_v1_only(gfp);
-			break;
-		case ID3v2Lame:
-			id3tag_init(gfp);
-			id3tag_add_v2(gfp);
-			id3tag_v2_only(gfp);
-			id3tag_set_pad(gfp, settings.Details.MP3ID3v2MinPadding);
-			break;
-		case ID3v2OpenMPT:
-			lame_set_write_id3tag_automatic(gfp, 0);
-			break;
+			case ID3None:
+				lame_set_write_id3tag_automatic(gfp, 0);
+				break;
+			case ID3v1:
+				id3tag_init(gfp);
+				id3tag_v1_only(gfp);
+				break;
+			case ID3v2Lame:
+				id3tag_init(gfp);
+				id3tag_add_v2(gfp);
+				id3tag_v2_only(gfp);
+				id3tag_set_pad(gfp, settings.Details.MP3ID3v2MinPadding);
+				break;
+			case ID3v2OpenMPT:
+				lame_set_write_id3tag_automatic(gfp, 0);
+				break;
 		}
 
 		Mode = settings.Mode;
@@ -561,13 +550,13 @@ public:
 			if(id3type == ID3v2Lame || id3type == ID3v1)
 			{
 				// Lame API expects Latin1, which is sad, but we cannot change that.
-				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.title   ).c_str());
-				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.artist  ).c_str());
-				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.album   ).c_str());
-				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.year    ).c_str());
+				if(!tags.title.empty()) id3tag_set_title(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.title).c_str());
+				if(!tags.artist.empty()) id3tag_set_artist(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.artist).c_str());
+				if(!tags.album.empty()) id3tag_set_album(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.album).c_str());
+				if(!tags.year.empty()) id3tag_set_year(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.year).c_str());
 				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.comments).c_str());
-				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.trackno ).c_str());
-				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.genre   ).c_str());
+				if(!tags.trackno.empty()) id3tag_set_track(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.trackno).c_str());
+				if(!tags.genre.empty()) id3tag_set_genre(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.genre).c_str());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
@@ -583,7 +572,6 @@ public:
 				id3v2Size = id3end - id3beg;
 			}
 		}
-
 	}
 	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
@@ -596,15 +584,15 @@ public:
 		while(count > 0)
 		{
 			int count_chunk = std::clamp(mpt::saturate_cast<int>(count), int(0), count_max);
-			buf.resize(count_chunk + (count_chunk+3)/4 + 7200);
+			buf.resize(count_chunk + (count_chunk + 3) / 4 + 7200);
 			int result = 0;
 			if(lame_get_num_channels(gfp) == 1)
 			{
 				// lame always assumes stereo input with interleaved interface, so use non-interleaved for mono
-				result = lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
+				result = lame_encode_buffer_ieee_float(gfp, interleaved, nullptr, count_chunk, mpt::byte_cast<unsigned char *>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			} else
 			{
-				result = lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size()));
+				result = lame_encode_buffer_interleaved_ieee_float(gfp, interleaved, count_chunk, mpt::byte_cast<unsigned char *>(buf.data()), mpt::saturate_cast<int>(buf.size()));
 			}
 			buf.resize((result >= 0) ? result : 0);
 			if(result == -2)
@@ -623,7 +611,7 @@ public:
 			gfp_inited = true;
 		}
 		buf.resize(7200);
-		buf.resize(lame_encode_flush(gfp, mpt::byte_cast<unsigned char*>(buf.data()), mpt::saturate_cast<int>(buf.size())));
+		buf.resize(lame_encode_flush(gfp, mpt::byte_cast<unsigned char *>(buf.data()), mpt::saturate_cast<int>(buf.size())));
 		WriteBuffer();
 		ReplayGain replayGain;
 		if(settings.Details.MP3LameCalculatePeakSample)
@@ -637,12 +625,12 @@ public:
 			replayGain.TrackGaindBValid = true;
 		}
 		if(id3type == ID3v2OpenMPT && (settings.Details.MP3LameCalculatePeakSample || settings.Details.MP3LameCalculateReplayGain))
-		{ // update ID3v2 tag with replay gain information
+		{  // update ID3v2 tag with replay gain information
 			replayGain.Tag = ReplayGain::TagWrite;
 			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
 			mpt::IO::SeekAbsolute(f, fStart);
 			std::string tagdata(static_cast<std::size_t>(id3v2Size), '\0');
-			mpt::IO::Write(f, mpt::as_span(tagdata.data(), mpt::saturate_cast<std::size_t>(id3v2Size))); // clear out the old tag
+			mpt::IO::Write(f, mpt::as_span(tagdata.data(), mpt::saturate_cast<std::size_t>(id3v2Size)));  // clear out the old tag
 			mpt::IO::SeekAbsolute(f, fStart);
 			ID3V2Tagger tagger(settings.Details);
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
@@ -660,7 +648,7 @@ public:
 			mpt::IO::Offset endPos = mpt::IO::TellWrite(f);
 			mpt::IO::SeekAbsolute(f, fStart + id3v2Size);
 			buf.resize(lame_get_lametag_frame(gfp, nullptr, 0));
-			buf.resize(lame_get_lametag_frame(gfp, mpt::byte_cast<unsigned char*>(buf.data()), buf.size()));
+			buf.resize(lame_get_lametag_frame(gfp, mpt::byte_cast<unsigned char *>(buf.data()), buf.size()));
 			WriteBuffer();
 			mpt::IO::SeekAbsolute(f, endPos);
 		}
@@ -677,7 +665,7 @@ public:
 	}
 };
 
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 
 
 
@@ -697,7 +685,7 @@ MP3Encoder::MP3Encoder(MP3EncoderType type)
 		SetTraits(BuildTraits(true));
 		return;
 	}
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 }
 
 
@@ -707,7 +695,7 @@ bool MP3Encoder::IsAvailable() const
 #ifdef MPT_WITH_LAME
 		|| (m_Type == MP3EncoderLame)
 		|| (m_Type == MP3EncoderLameCompatible)
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 		;
 }
 
@@ -723,12 +711,12 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 	{
 		result = std::make_unique<MP3LameStreamWriter>(file, (m_Type == MP3EncoderLameCompatible), settings, tags);
 		MPT_UNUSED(prng);
-#else // !MPT_WITH_LAME
+#else   // !MPT_WITH_LAME
 		MPT_UNUSED(file);
 		MPT_UNUSED(settings);
 		MPT_UNUSED(tags);
 		MPT_UNUSED(prng);
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 	}
 	return result;
 }
@@ -739,7 +727,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 #ifdef MPT_WITH_LAME
 	if(m_Type == MP3EncoderLame)
 	{
-		static constexpr int q_table[11] = { 240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50 }; // http://wiki.hydrogenaud.io/index.php?title=LAME
+		static constexpr int q_table[11] = {240, 220, 190, 170, 160, 130, 120, 100, 80, 70, 50};  // http://wiki.hydrogenaud.io/index.php?title=LAME
 		int q = mpt::saturate_round<int>((1.0f - quality) * 10.0f);
 		if(q < 0) q = 0;
 		if(q >= 10)
@@ -750,7 +738,7 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 			return MPT_UFORMAT_MESSAGE("VBR -V{} (~{} kbit)")(q, q_table[q]);
 		}
 	}
-#endif // MPT_WITH_LAME
+#endif  // MPT_WITH_LAME
 	return EncoderFactoryBase::DescribeQuality(quality);
 }
 

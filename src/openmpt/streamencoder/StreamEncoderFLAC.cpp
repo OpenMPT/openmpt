@@ -36,7 +36,7 @@
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
 #include <FLAC/stream_encoder.h>
-#endif // MPT_WITH_FLAC
+#endif  // MPT_WITH_FLAC
 
 
 
@@ -122,26 +122,25 @@ public:
 
 		int compressionLevel = settings.Details.FLACCompressionLevel;
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
-		
+
 		if(settings.Tags)
 		{
 			flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
-			AddCommentField("ENCODER",     tags.encoder);
+			AddCommentField("ENCODER", tags.encoder);
 			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
-			AddCommentField("TITLE",       tags.title          );
-			AddCommentField("ARTIST",      tags.artist         );
-			AddCommentField("ALBUM",       tags.album          );
-			AddCommentField("DATE",        tags.year           );
-			AddCommentField("COMMENT",     tags.comments       );
-			AddCommentField("GENRE",       tags.genre          );
-			AddCommentField("CONTACT",     tags.url            );
-			AddCommentField("BPM",         tags.bpm            ); // non-standard
-			AddCommentField("TRACKNUMBER", tags.trackno        );
+			AddCommentField("TITLE", tags.title);
+			AddCommentField("ARTIST", tags.artist);
+			AddCommentField("ALBUM", tags.album);
+			AddCommentField("DATE", tags.year);
+			AddCommentField("COMMENT", tags.comments);
+			AddCommentField("GENRE", tags.genre);
+			AddCommentField("CONTACT", tags.url);
+			AddCommentField("BPM", tags.bpm);  // non-standard
+			AddCommentField("TRACKNUMBER", tags.trackno);
 			FLAC__stream_encoder_set_metadata(encoder, flac_metadata, 1);
 		}
 
 		FLAC__stream_encoder_init_stream(encoder, FLACWriteCallback, FLACSeekCallback, FLACTellCallback, nullptr, this);
-
 	}
 	SampleFormat GetSampleFormat() const override
 	{
@@ -200,7 +199,7 @@ public:
 	}
 };
 
-#endif // MPT_WITH_FLAC
+#endif  // MPT_WITH_FLAC
 
 
 
@@ -216,17 +215,17 @@ FLACEncoder::FLACEncoder()
 	traits.maxChannels = 4;
 	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
-#if (FLAC_API_VERSION_CURRENT >= 12)
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::get_endian() });
+#if(FLAC_API_VERSION_CURRENT >= 12)
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 32, mpt::get_endian()});
 #endif
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::get_endian() });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::get_endian() });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::get_endian() });
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 24, mpt::get_endian()});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 16, mpt::get_endian()});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 8, mpt::get_endian()});
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeLossless;
-	traits.defaultFormat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
-#endif // MPT_WITH_FLAC
+	traits.defaultFormat = {Encoder::Format::Encoding::Integer, 24, mpt::get_endian()};
+#endif  // MPT_WITH_FLAC
 	SetTraits(traits);
 }
 
@@ -235,9 +234,9 @@ bool FLACEncoder::IsAvailable() const
 {
 #if defined(MPT_WITH_FLAC)
 	return true;
-#else // !MPT_WITH_FLAC
+#else   // !MPT_WITH_FLAC
 	return false;
-#endif // MPT_WITH_FLAC
+#endif  // MPT_WITH_FLAC
 }
 
 
@@ -251,12 +250,12 @@ std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::os
 #ifdef MPT_WITH_FLAC
 	result = std::make_unique<FLACStreamWriter>(*this, file, settings, tags);
 	MPT_UNUSED(prng);
-#else // !MPT_WITH_FLAC
+#else   // !MPT_WITH_FLAC
 	MPT_UNUSED(file);
 	MPT_UNUSED(settings);
 	MPT_UNUSED(tags);
 	MPT_UNUSED(prng);
-#endif // MPT_WITH_FLAC
+#endif  // MPT_WITH_FLAC
 	return result;
 }
 

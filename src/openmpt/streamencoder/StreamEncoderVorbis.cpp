@@ -70,13 +70,13 @@ static Encoder::Traits VorbisBuildTraits()
 class VorbisStreamWriter : public StreamWriterBase
 {
 private:
-  ogg_stream_state os;
-  ogg_page         og;
-  ogg_packet       op;
-  vorbis_info      vi;
-  vorbis_comment   vc;
-  vorbis_dsp_state vd;
-  vorbis_block     vb;
+	ogg_stream_state os;
+	ogg_page og;
+	ogg_packet op;
+	vorbis_info vi;
+	vorbis_comment vc;
+	vorbis_dsp_state vd;
+	vorbis_block vb;
 	int vorbis_channels;
 private:
 	void WritePage()
@@ -120,17 +120,17 @@ public:
 
 		if(settings.Tags)
 		{
-			AddCommentField("ENCODER",     tags.encoder);
+			AddCommentField("ENCODER", tags.encoder);
 			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
-			AddCommentField("TITLE",       tags.title          );
-			AddCommentField("ARTIST",      tags.artist         );
-			AddCommentField("ALBUM",       tags.album          );
-			AddCommentField("DATE",        tags.year           );
-			AddCommentField("COMMENT",     tags.comments       );
-			AddCommentField("GENRE",       tags.genre          );
-			AddCommentField("CONTACT",     tags.url            );
-			AddCommentField("BPM",         tags.bpm            ); // non-standard
-			AddCommentField("TRACKNUMBER", tags.trackno        );
+			AddCommentField("TITLE", tags.title);
+			AddCommentField("ARTIST", tags.artist);
+			AddCommentField("ALBUM", tags.album);
+			AddCommentField("DATE", tags.year);
+			AddCommentField("COMMENT", tags.comments);
+			AddCommentField("GENRE", tags.genre);
+			AddCommentField("CONTACT", tags.url);
+			AddCommentField("BPM", tags.bpm);  // non-standard
+			AddCommentField("TRACKNUMBER", tags.trackno);
 		}
 
 		ogg_packet header;
@@ -148,7 +148,6 @@ public:
 		{
 			WritePage();
 		}
-
 	}
 	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
@@ -162,7 +161,7 @@ public:
 			{
 				for(int channel = 0; channel < vorbis_channels; ++channel)
 				{
-					buffer[channel][frame] = interleaved[frame*vorbis_channels+channel];
+					buffer[channel][frame] = interleaved[frame * vorbis_channels + channel];
 				}
 			}
 			vorbis_analysis_wrote(&vd, countChunk);
@@ -179,7 +178,7 @@ public:
 					}
 				}
 			}
-    }
+		}
 	}
 	void WriteFinalize() override
 	{
@@ -212,7 +211,7 @@ public:
 	}
 };
 
-#endif // MPT_WITH_OGG && MPT_WITH_VORBIS && MPT_WITH_VORBISENC
+#endif  // MPT_WITH_OGG && MPT_WITH_VORBIS && MPT_WITH_VORBISENC
 
 
 
@@ -266,7 +265,7 @@ bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate
 
 mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
-	static constexpr int q_table[11] = { 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500 }; // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
+	static constexpr int q_table[11] = {64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500};  // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
 	int q = Clamp(mpt::saturate_round<int>(quality * 10.0f), 0, 10);
 	return MPT_UFORMAT("Q{} (~{} kbit)")(mpt::ufmt::fix(quality * 10.0f, 1), q_table[q]);
 }

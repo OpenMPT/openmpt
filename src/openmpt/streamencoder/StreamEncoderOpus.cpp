@@ -71,7 +71,7 @@ private:
 	OpusEncCallbacks ope_callbacks;
 	OggOpusComments *ope_comments;
 	OggOpusEnc *ope_encoder;
-	std::vector<std::pair<std::string, std::string> > opus_comments;
+	std::vector<std::pair<std::string, std::string>> opus_comments;
 private:
 	static int CallbackWrite(void *user_data, const unsigned char *ptr, opus_int32 len)
 	{
@@ -91,7 +91,7 @@ private:
 		{
 			return 1;
 		}
-		const std::byte *pb = mpt::byte_cast<const std::byte*>(ptr);
+		const std::byte *pb = mpt::byte_cast<const std::byte *>(ptr);
 		buf.assign(pb, pb + len);
 		WriteBuffer();
 		return 0;
@@ -121,17 +121,17 @@ public:
 
 		if(settings.Tags)
 		{
-			AddCommentField("ENCODER",     tags.encoder);
+			AddCommentField("ENCODER", tags.encoder);
 			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
-			AddCommentField("TITLE",       tags.title          );
-			AddCommentField("ARTIST",      tags.artist         );
-			AddCommentField("ALBUM",       tags.album          );
-			AddCommentField("DATE",        tags.year           );
-			AddCommentField("COMMENT",     tags.comments       );
-			AddCommentField("GENRE",       tags.genre          );
-			AddCommentField("CONTACT",     tags.url            );
-			AddCommentField("BPM",         tags.bpm            ); // non-standard
-			AddCommentField("TRACKNUMBER", tags.trackno        );
+			AddCommentField("TITLE", tags.title);
+			AddCommentField("ARTIST", tags.artist);
+			AddCommentField("ALBUM", tags.album);
+			AddCommentField("DATE", tags.year);
+			AddCommentField("COMMENT", tags.comments);
+			AddCommentField("GENRE", tags.genre);
+			AddCommentField("CONTACT", tags.url);
+			AddCommentField("BPM", tags.bpm);  // non-standard
+			AddCommentField("TRACKNUMBER", tags.trackno);
 		}
 
 		int ope_error = 0;
@@ -139,14 +139,14 @@ public:
 		ope_comments = ope_comments_create();
 		if(settings.Tags && ope_comments)
 		{
-			for(const auto & comment : opus_comments)
+			for(const auto &comment : opus_comments)
 			{
 				ope_comments_add(ope_comments, comment.first.c_str(), comment.second.c_str());
 			}
 		}
 
 		ope_encoder = ope_encoder_create_callbacks(&ope_callbacks, this, ope_comments, settings.Samplerate, settings.Channels, settings.Channels > 2 ? 1 : 0, &ope_error);
-		
+
 		opus_int32 ctl_serial = mpt::random<uint32>(prng);
 		ope_encoder_ctl(ope_encoder, OPE_SET_SERIALNO(ctl_serial));
 
@@ -172,7 +172,6 @@ public:
 		}
 
 		ope_encoder_flush_header(ope_encoder);
-		
 	}
 	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
@@ -196,7 +195,7 @@ public:
 	}
 };
 
-#endif // MPT_WITH_OGG
+#endif  // MPT_WITH_OGG
 
 
 

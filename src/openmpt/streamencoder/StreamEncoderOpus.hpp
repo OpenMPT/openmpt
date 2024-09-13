@@ -30,7 +30,6 @@ public:
 public:
 
 	OggOpusEncoder();
-
 };
 
 

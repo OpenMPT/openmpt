@@ -47,13 +47,13 @@ private:
 	Encoder::Settings settings;
 
 private:
-	static std::string TagToAnnotation(const std::string & field, const mpt::ustring & tag)
+	static std::string TagToAnnotation(const std::string &field, const mpt::ustring &tag)
 	{
 		if(tag.empty())
 		{
 			return std::string();
 		}
-		return MPT_AFORMAT_MESSAGE("{}={}\n")(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::replace(tag, MPT_USTRING("="), MPT_UTF8_STRING("\xEF\xBF\xBD")))); // U+FFFD
+		return MPT_AFORMAT_MESSAGE("{}={}\n")(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::replace(tag, MPT_USTRING("="), MPT_UTF8_STRING("\xEF\xBF\xBD"))));  // U+FFFD
 	}
 
 public:
@@ -97,22 +97,22 @@ public:
 		{
 			switch(settings.Format.bits)
 			{
-			case 32: encoding = 6; break;
-			case 64: encoding = 7; break;
+				case 32: encoding = 6; break;
+				case 64: encoding = 7; break;
 			}
 		} else if(settings.Format.encoding == Encoder::Format::Encoding::Integer)
 		{
 			switch(settings.Format.bits)
 			{
-			case  8: encoding = 2; break;
-			case 16: encoding = 3; break;
-			case 24: encoding = 4; break;
-			case 32: encoding = 5; break;
+				case 8: encoding = 2; break;
+				case 16: encoding = 3; break;
+				case 24: encoding = 4; break;
+				case 32: encoding = 5; break;
 			}
 		} else if(settings.Format.encoding == Encoder::Format::Encoding::Alaw)
 		{
 			encoding = 27;
-		} else if (settings.Format.encoding == Encoder::Format::Encoding::ulaw)
+		} else if(settings.Format.encoding == Encoder::Format::Encoding::ulaw)
 		{
 			encoding = 1;
 		}
@@ -128,7 +128,6 @@ public:
 		{
 			mpt::IO::WriteIntBE<uint8>(f, '\0');
 		}
-
 	}
 
 	SampleFormat GetSampleFormat() const override
@@ -193,18 +192,18 @@ AUEncoder::AUEncoder()
 	traits.maxChannels = 4;
 	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
-	traits.formats.push_back({ Encoder::Format::Encoding::Float, 64, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Float, 32, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::Alaw, 16, mpt::endian::big });
-	traits.formats.push_back({ Encoder::Format::Encoding::ulaw, 16, mpt::endian::big });
+	traits.formats.push_back({Encoder::Format::Encoding::Float, 64, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Float, 32, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 32, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 24, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 16, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Integer, 8, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::Alaw, 16, mpt::endian::big});
+	traits.formats.push_back({Encoder::Format::Encoding::ulaw, 16, mpt::endian::big});
 	traits.defaultSamplerate = 48000;
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeLossless;
-	traits.defaultFormat = { Encoder::Format::Encoding::Float, 32, mpt::endian::big };
+	traits.defaultFormat = {Encoder::Format::Encoding::Float, 32, mpt::endian::big};
 	SetTraits(traits);
 }
 
