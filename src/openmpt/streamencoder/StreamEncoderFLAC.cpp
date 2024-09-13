@@ -1,27 +1,49 @@
-/*
- * StreamEncoder.cpp
- * -----------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderFLAC.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/streamencoder/StreamEncoderFLAC.hpp"
 
+#include "mpt/base/bit.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/pointer.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/span.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
+
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
+
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <cassert>
+#include <cstddef>
+
+#ifdef MPT_WITH_FLAC
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
 #include <FLAC/stream_encoder.h>
+#endif // MPT_WITH_FLAC
+
 
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+#ifdef MPT_WITH_FLAC
 
 class FLACStreamWriter : public StreamWriterBase
 {
@@ -46,23 +68,23 @@ private:
 	}
 	FLAC__StreamEncoderWriteStatus WriteCallback(const FLAC__StreamEncoder *flacenc, const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame)
 	{
-		MPT_UNREFERENCED_PARAMETER(flacenc);
-		MPT_UNREFERENCED_PARAMETER(samples);
-		MPT_UNREFERENCED_PARAMETER(current_frame);
+		MPT_UNUSED(flacenc);
+		MPT_UNUSED(samples);
+		MPT_UNUSED(current_frame);
 		mpt::IO::WriteRaw(f, mpt::as_span(buffer, bytes));
 		if(!f) return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 	}
 	FLAC__StreamEncoderSeekStatus SeekCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 absolute_byte_offset)
 	{
-		MPT_UNREFERENCED_PARAMETER(flacenc);
+		MPT_UNUSED(flacenc);
 		mpt::IO::SeekAbsolute(f, absolute_byte_offset);
 		if(!f) return FLAC__STREAM_ENCODER_SEEK_STATUS_ERROR;
 		return FLAC__STREAM_ENCODER_SEEK_STATUS_OK;
 	}
 	FLAC__StreamEncoderTellStatus TellCallback(const FLAC__StreamEncoder *flacenc, FLAC__uint64 *absolute_byte_offset)
 	{
-		MPT_UNREFERENCED_PARAMETER(flacenc);
+		MPT_UNUSED(flacenc);
 		if(absolute_byte_offset)
 		{
 			*absolute_byte_offset = mpt::IO::TellWrite(f);
@@ -76,7 +98,7 @@ private:
 		if(!field.empty() && !data.empty())
 		{
 			FLAC__StreamMetadata_VorbisComment_Entry entry;
-			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::ToCharset(mpt::Charset::UTF8, data).c_str());
+			FLAC__metadata_object_vorbiscomment_entry_from_name_value_pair(&entry, field.c_str(), mpt::transcode<std::string>(mpt::common_encoding::utf8, data).c_str());
 			FLAC__metadata_object_vorbiscomment_append_comment(flac_metadata[0], entry, false);
 		}
 	}
@@ -89,8 +111,8 @@ public:
 		flac_metadata[0] = nullptr;
 		encoder = nullptr;
 
-		MPT_ASSERT(settings.Samplerate > 0);
-		MPT_ASSERT(settings.Channels > 0);
+		assert(settings.Samplerate > 0);
+		assert(settings.Channels > 0);
 
 		encoder = FLAC__stream_encoder_new();
 
@@ -105,7 +127,7 @@ public:
 		{
 			flac_metadata[0] = FLAC__metadata_object_new(FLAC__METADATA_TYPE_VORBIS_COMMENT);
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
+			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
@@ -128,7 +150,7 @@ public:
 	template <typename Tsample>
 	void WriteInterleavedInt(std::size_t frameCount, const Tsample *p)
 	{
-		MPT_ASSERT(settings.Format.GetSampleFormat() == SampleFormatTraits<Tsample>::sampleFormat());
+		assert(settings.Format.GetSampleFormat() == SampleFormatTraits<Tsample>::sampleFormat());
 		sampleBuf.resize(frameCount * settings.Channels);
 		for(std::size_t frame = 0; frame < frameCount; ++frame)
 		{
@@ -178,20 +200,25 @@ public:
 	}
 };
 
+#endif // MPT_WITH_FLAC
+
 
 
 FLACEncoder::FLACEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = P_("flac");
-	traits.fileShortDescription = U_("FLAC");
-	traits.fileDescription = U_("Free Lossless Audio Codec");
-	traits.encoderSettingsName = U_("FLAC");
+#if defined(MPT_WITH_FLAC)
+	traits.fileExtension = MPT_NATIVE_PATH("flac");
+	traits.fileShortDescription = MPT_USTRING("FLAC");
+	traits.fileDescription = MPT_USTRING("Free Lossless Audio Codec");
+	traits.encoderSettingsName = MPT_USTRING("FLAC");
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = {};
 	traits.modes = Encoder::ModeLossless;
+#if (FLAC_API_VERSION_CURRENT >= 12)
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 32, mpt::get_endian() });
+#endif
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 24, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 16, mpt::get_endian() });
 	traits.formats.push_back({ Encoder::Format::Encoding::Integer, 8, mpt::get_endian() });
@@ -199,23 +226,38 @@ FLACEncoder::FLACEncoder()
 	traits.defaultChannels = 2;
 	traits.defaultMode = Encoder::ModeLossless;
 	traits.defaultFormat = { Encoder::Format::Encoding::Integer, 24, mpt::get_endian() };
+#endif // MPT_WITH_FLAC
 	SetTraits(traits);
 }
 
 
 bool FLACEncoder::IsAvailable() const
 {
+#if defined(MPT_WITH_FLAC)
 	return true;
+#else // !MPT_WITH_FLAC
+	return false;
+#endif // MPT_WITH_FLAC
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> FLACEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
-	return std::make_unique<FLACStreamWriter>(*this, file, settings, tags);
+	std::unique_ptr<IAudioStreamEncoder> result = nullptr;
+#ifdef MPT_WITH_FLAC
+	result = std::make_unique<FLACStreamWriter>(*this, file, settings, tags);
+	MPT_UNUSED(prng);
+#else // !MPT_WITH_FLAC
+	MPT_UNUSED(file);
+	MPT_UNUSED(settings);
+	MPT_UNUSED(tags);
+	MPT_UNUSED(prng);
+#endif // MPT_WITH_FLAC
+	return result;
 }
 
 

@@ -1,25 +1,38 @@
-/*
- * StreamEncoderAU.cpp
- * -------------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderAU.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
+#include "openmpt/streamencoder/StreamEncoderAU.hpp"
+
+#include "mpt/base/bit.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/numeric.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/format/message_macros.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
+#include "mpt/string_transcode/macros.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
 
-#include "../common/mptFileIO.h"
+#include <memory>
+#include <ostream>
+#include <string>
+
+#include <cassert>
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -40,7 +53,7 @@ private:
 		{
 			return std::string();
 		}
-		return MPT_AFORMAT("{}={}\n")(field, mpt::ToCharset(mpt::Charset::UTF8, mpt::replace(tag, U_("="), MPT_UTF8("\xEF\xBF\xBD")))); // U+FFFD
+		return MPT_AFORMAT_MESSAGE("{}={}\n")(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::replace(tag, MPT_USTRING("="), MPT_UTF8_STRING("\xEF\xBF\xBD")))); // U+FFFD
 	}
 
 public:
@@ -50,8 +63,8 @@ public:
 		, settings(settings_)
 	{
 
-		MPT_ASSERT(settings.Samplerate > 0);
-		MPT_ASSERT(settings.Channels > 0);
+		assert(settings.Samplerate > 0);
+		assert(settings.Channels > 0);
 
 		std::string annotation;
 		std::size_t annotationSize = 0;
@@ -73,8 +86,8 @@ public:
 			}
 			annotationTotalSize = mpt::align_up<std::size_t>(annotationTotalSize, 8u);
 		}
-		MPT_ASSERT(annotationTotalSize >= annotationSize);
-		MPT_ASSERT(annotationTotalSize % 8 == 0);
+		assert(annotationTotalSize >= annotationSize);
+		assert(annotationTotalSize % 8 == 0);
 
 		mpt::IO::WriteText(f, ".snd");
 		mpt::IO::WriteIntBE<uint32>(f, mpt::saturate_cast<uint32>(24u + annotationTotalSize));
@@ -154,7 +167,7 @@ public:
 
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
-		MPT_UNREFERENCED_PARAMETER(cues);
+		MPT_UNUSED(cues);
 	}
 	void WriteFinalize() override
 	{
@@ -171,10 +184,10 @@ public:
 AUEncoder::AUEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = P_("au");
-	traits.fileShortDescription = U_("AU");
-	traits.fileDescription = U_("NeXT/Sun Audio");
-	traits.encoderSettingsName = U_("AU");
+	traits.fileExtension = MPT_NATIVE_PATH("au");
+	traits.fileShortDescription = MPT_USTRING("AU");
+	traits.fileDescription = MPT_USTRING("NeXT/Sun Audio");
+	traits.encoderSettingsName = MPT_USTRING("AU");
 	traits.canTags = true;
 	traits.canCues = false;
 	traits.maxChannels = 4;
@@ -202,12 +215,13 @@ bool AUEncoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> AUEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> AUEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
+	MPT_UNUSED(prng);
 	return std::make_unique<AUStreamWriter>(*this, file, settings, tags);
 }
 

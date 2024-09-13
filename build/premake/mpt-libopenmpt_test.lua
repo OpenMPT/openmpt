@@ -84,6 +84,8 @@
 		"../../test/mpt_tests_uuid_namespace.cpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
+		"../../src/openmpt/streamencoder/**.cpp",
+		"../../src/openmpt/streamencoder/**.hpp",
 	}
 
 	if _OPTIONS["charset"] ~= "Unicode" then

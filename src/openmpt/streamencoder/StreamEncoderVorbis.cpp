@@ -1,19 +1,31 @@
-/*
- * StreamEncoder.cpp
- * -----------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderVorbis.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/streamencoder/StreamEncoderVorbis.hpp"
+
+#include "mpt/base/alloc.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/random/random.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
+
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
+
+#include <memory>
+#include <ostream>
+
+#include <cstddef>
+#include <cstring>
 
 #ifdef MPT_WITH_OGG
 #include <ogg/ogg.h>
@@ -35,10 +47,10 @@ static Encoder::Traits VorbisBuildTraits()
 {
 	Encoder::Traits traits;
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-	traits.fileExtension = P_("ogg");
-	traits.fileShortDescription = U_("Vorbis");
-	traits.fileDescription = U_("Ogg Vorbis");
-	traits.encoderSettingsName = U_("Vorbis");
+	traits.fileExtension = MPT_NATIVE_PATH("ogg");
+	traits.fileShortDescription = MPT_USTRING("Vorbis");
+	traits.fileDescription = MPT_USTRING("Ogg Vorbis");
+	traits.encoderSettingsName = MPT_USTRING("Vorbis");
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = mpt::make_vector(vorbis_samplerates);
@@ -80,11 +92,11 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			vorbis_comment_add_tag(&vc, field.c_str(), mpt::ToCharset(mpt::Charset::UTF8, data).c_str());
+			vorbis_comment_add_tag(&vc, field.c_str(), mpt::transcode<std::string>(mpt::common_encoding::utf8, data).c_str());
 		}
 	}
 public:
-	VorbisStreamWriter(std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags)
+	VorbisStreamWriter(std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng)
 		: StreamWriterBase(stream)
 	{
 		vorbis_channels = 0;
@@ -104,12 +116,12 @@ public:
 
 		vorbis_analysis_init(&vd, &vi);
 		vorbis_block_init(&vd, &vb);
-		ogg_stream_init(&os, mpt::random<uint32>(theApp.PRNG()));
+		ogg_stream_init(&os, mpt::random<uint32>(prng));
 
 		if(settings.Tags)
 		{
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
+			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
@@ -138,9 +150,9 @@ public:
 		}
 
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
-		size_t countTotal = count;
+		std::size_t countTotal = count;
 		while(countTotal > 0)
 		{
 			int countChunk = mpt::saturate_cast<int>(countTotal);
@@ -220,14 +232,16 @@ bool VorbisEncoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> VorbisEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 #if defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISENC)
-	return std::make_unique<VorbisStreamWriter>(file, settings, tags);
+	MPT_UNUSED(prng);
+	return std::make_unique<VorbisStreamWriter>(file, settings, tags, prng);
 #else
-	MPT_UNREFERENCED_PARAMETER(file);
-	MPT_UNREFERENCED_PARAMETER(settings);
-	MPT_UNREFERENCED_PARAMETER(tags);
+	MPT_UNUSED(file);
+	MPT_UNUSED(settings);
+	MPT_UNUSED(tags);
+	MPT_UNUSED(prng);
 	return nullptr;
 #endif
 }
@@ -242,9 +256,9 @@ bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate
 	vorbis_info_clear(&vi);
 	return result;
 #else
-	MPT_UNREFERENCED_PARAMETER(samplerate);
-	MPT_UNREFERENCED_PARAMETER(channels);
-	MPT_UNREFERENCED_PARAMETER(bitrate);
+	MPT_UNUSED(samplerate);
+	MPT_UNUSED(channels);
+	MPT_UNUSED(bitrate);
 	return false;
 #endif
 }

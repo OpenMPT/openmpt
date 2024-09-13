@@ -1,24 +1,29 @@
-/*
- * StreamEncoder.h
- * ---------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
+
 
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/base/bit.hpp"
+#include "mpt/io/base.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/string/types.hpp"
+
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
 #include "openmpt/soundbase/SampleFormat.hpp"
 #include "openmpt/soundfile_data/tags.hpp"
 
 #include <iosfwd>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -172,7 +177,7 @@ namespace Encoder
 	struct Traits
 	{
 		
-		mpt::PathString fileExtension;
+		mpt::native_path fileExtension;
 		mpt::ustring fileShortDescription;
 		mpt::ustring encoderSettingsName;
 
@@ -311,7 +316,7 @@ protected:
 	virtual ~EncoderFactoryBase() = default;
 	void SetTraits(const Encoder::Traits &traits);
 public:
-	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const = 0;
+	virtual std::unique_ptr<IAudioStreamEncoder> ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const = 0;
 	const Encoder::Traits &GetTraits() const
 	{
 		return m_Traits;

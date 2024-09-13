@@ -14,7 +14,7 @@
 
 #include "ProgressDialog.h"
 #include "Settings.h"
-#include "StreamEncoder.h"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
 #include "StreamEncoderSettings.h"
 #include "../soundlib/Snd_defs.h"
 

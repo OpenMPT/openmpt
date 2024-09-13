@@ -33,6 +33,8 @@
 		"../../src/openmpt/soundfile_write/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
+		"../../src/openmpt/streamencoder/**.cpp",
+		"../../src/openmpt/streamencoder/**.hpp",
 	}
   files {
    "../../pluginBridge/PluginBridge.rc",
@@ -91,6 +93,8 @@
 		"../../src/openmpt/soundfile_write/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
+		"../../src/openmpt/streamencoder/**.cpp",
+		"../../src/openmpt/streamencoder/**.hpp",
 	}
   files {
    "../../pluginBridge/PluginBridge.rc",

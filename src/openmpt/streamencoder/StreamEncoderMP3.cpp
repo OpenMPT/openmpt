@@ -1,24 +1,41 @@
-/*
- * StreamEncoder.cpp
- * -----------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderMP3.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/streamencoder/StreamEncoderMP3.hpp"
 
-#include "../soundlib/Sndfile.h"
+#include "mpt/base/alloc.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/memory.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/span.hpp"
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
-#include "../common/misc_util.h"
-#include "../common/mptStringBuffer.h"
+#include "openmpt/base/Endian.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
+
+#include <memory>
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef MPT_WITH_LAME
 #if defined(MPT_BUILD_MSVC)
@@ -169,17 +186,17 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 	mpt::IO::Write(s, tHeader);
 	totalID3v2Size += sizeof(tHeader);
 
-	WriteID3v2Frame("TIT2", mpt::ToCharset(mpt::Charset::UTF8, tags.title), s);
-	WriteID3v2Frame("TPE1", mpt::ToCharset(mpt::Charset::UTF8, tags.artist), s);
-	WriteID3v2Frame("TCOM", mpt::ToCharset(mpt::Charset::UTF8, tags.artist), s);
-	WriteID3v2Frame("TALB", mpt::ToCharset(mpt::Charset::UTF8, tags.album), s);
-	WriteID3v2Frame("TCON", mpt::ToCharset(mpt::Charset::UTF8, tags.genre), s);
-	//WriteID3v2Frame("TYER", mpt::ToCharset(mpt::Charset::UTF8, tags.year), s);		// Deprecated
-	WriteID3v2Frame("TDRC", mpt::ToCharset(mpt::Charset::UTF8, tags.year), s);
-	WriteID3v2Frame("TBPM", mpt::ToCharset(mpt::Charset::UTF8, tags.bpm), s);
-	WriteID3v2Frame("WXXX", mpt::ToCharset(mpt::Charset::UTF8, tags.url), s);
-	WriteID3v2Frame("TENC", mpt::ToCharset(mpt::Charset::UTF8, tags.encoder), s);
-	WriteID3v2Frame("COMM", mpt::ToCharset(mpt::Charset::UTF8, tags.comments), s);
+	WriteID3v2Frame("TIT2", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.title), s);
+	WriteID3v2Frame("TPE1", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.artist), s);
+	WriteID3v2Frame("TCOM", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.artist), s);
+	WriteID3v2Frame("TALB", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.album), s);
+	WriteID3v2Frame("TCON", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.genre), s);
+	//WriteID3v2Frame("TYER", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.year), s);		// Deprecated
+	WriteID3v2Frame("TDRC", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.year), s);
+	WriteID3v2Frame("TBPM", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.bpm), s);
+	WriteID3v2Frame("WXXX", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.url), s);
+	WriteID3v2Frame("TENC", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.encoder), s);
+	WriteID3v2Frame("COMM", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.comments), s);
 	if(replayGain.Tag == ReplayGain::TagReserve)
 	{
 		paddingSize += GetMaxReplayGainFramesSizes();
@@ -200,7 +217,7 @@ void ID3V2Tagger::WriteID3v2Tags(std::ostream &s, const FileTags &tags, ReplayGa
 		totalID3v2Size = mpt::align_up<uint32>(totalID3v2Size, settings.MP3ID3v2PaddingAlignHint);
 		paddingSize = totalID3v2Size - totalID3v2SizeWithoutPadding;
 	}
-	for(size_t i = 0; i < paddingSize; i++)
+	for(std::size_t i = 0; i < paddingSize; i++)
 	{
 		uint8 c = 0;
 		mpt::IO::Write(s, c);
@@ -253,9 +270,9 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 			content += "-";
 			gainTimes100 = std::abs(gainTimes100);
 		}
-		content += mpt::afmt::dec(gainTimes100 / 100);
+		content += mpt::format<std::string>::dec(gainTimes100 / 100);
 		content += ".";
-		content += mpt::afmt::dec0<2>(gainTimes100 % 100);
+		content += mpt::format<std::string>::dec0<2>(gainTimes100 % 100);
 		content += " ";
 		content += "dB";
 
@@ -286,9 +303,9 @@ void ID3V2Tagger::WriteID3v2ReplayGainFrames(ReplayGain replayGain, std::ostream
 
 		int32 peakTimes1000000 = mpt::saturate_round<int32>(std::fabs(replayGain.TrackPeak) * 1000000.0f);
 		std::string number;
-		number += mpt::afmt::dec(peakTimes1000000 / 1000000);
+		number += mpt::format<std::string>::dec(peakTimes1000000 / 1000000);
 		number += ".";
-		number += mpt::afmt::dec0<6>(peakTimes1000000 % 1000000);
+		number += mpt::format<std::string>::dec0<6>(peakTimes1000000 % 1000000);
 		content += number;
 
 		content += std::string(1, '\0');
@@ -313,13 +330,13 @@ void ID3V2Tagger::WriteID3v2Frame(const char cFrameID[4], std::string sFramecont
 {
 	if(!cFrameID[0] || sFramecontent.empty() || !s) return;
 
-	if(!memcmp(cFrameID, "COMM", 4))
+	if(!std::memcmp(cFrameID, "COMM", 4))
 	{
 		// English language for comments - no description following (hence the text ending nullchar(s))
 		// For language IDs, see https://en.wikipedia.org/wiki/ISO-639-2
 		sFramecontent = "eng" + (ID3v2_TEXTENDING + sFramecontent);
 	}
-	if(!memcmp(cFrameID, "WXXX", 4))
+	if(!std::memcmp(cFrameID, "WXXX", 4))
 	{
 		// User-defined URL field (we have no description for the URL, so we leave it out)
 		sFramecontent = ID3v2_TEXTENDING + sFramecontent;
@@ -352,11 +369,11 @@ using lame_t = lame_global_flags *;
 
 static void GenreEnumCallback(int num, const char *name, void *cookie)
 {
-	MPT_UNREFERENCED_PARAMETER(num);
+	MPT_UNUSED(num);
 	Encoder::Traits &traits = *mpt::void_ptr<Encoder::Traits>(cookie);
 	if(name)
 	{
-		traits.genres.push_back(mpt::ToUnicode(mpt::Charset::ISO8859_1, name));
+		traits.genres.push_back(mpt::transcode<mpt::ustring>(mpt::common_encoding::iso8859_1, name));
 	}
 }
 
@@ -364,10 +381,10 @@ static void GenreEnumCallback(int num, const char *name, void *cookie)
 static Encoder::Traits BuildTraits(bool compatible)
 {
 	Encoder::Traits traits;
-	traits.fileExtension = P_("mp3");
-	traits.fileShortDescription = (compatible ? U_("Compatible MP3") : U_("MP3"));
-	traits.encoderSettingsName = (compatible ? U_("MP3LameCompatible") : U_("MP3Lame"));
-	traits.fileDescription = (compatible ? U_("MPEG-1 Layer 3") : U_("MPEG-1/2 Layer 3"));
+	traits.fileExtension = MPT_NATIVE_PATH("mp3");
+	traits.fileShortDescription = (compatible ? MPT_USTRING("Compatible MP3") : MPT_USTRING("MP3"));
+	traits.encoderSettingsName = (compatible ? MPT_USTRING("MP3LameCompatible") : MPT_USTRING("MP3Lame"));
+	traits.fileDescription = (compatible ? MPT_USTRING("MPEG-1 Layer 3") : MPT_USTRING("MPEG-1/2 Layer 3"));
 	traits.canTags = true;
 	traits.genres.clear();
 	id3tag_genre_list(&GenreEnumCallback, &traits);
@@ -544,13 +561,13 @@ public:
 			if(id3type == ID3v2Lame || id3type == ID3v1)
 			{
 				// Lame API expects Latin1, which is sad, but we cannot change that.
-				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.title   ).c_str());
-				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.artist  ).c_str());
-				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.album   ).c_str());
-				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.year    ).c_str());
-				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.comments).c_str());
-				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.trackno ).c_str());
-				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::ToCharset(mpt::Charset::ISO8859_1, tags.genre   ).c_str());
+				if(!tags.title.empty())    id3tag_set_title(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.title   ).c_str());
+				if(!tags.artist.empty())   id3tag_set_artist( gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.artist  ).c_str());
+				if(!tags.album.empty())    id3tag_set_album(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.album   ).c_str());
+				if(!tags.year.empty())     id3tag_set_year(   gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.year    ).c_str());
+				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.comments).c_str());
+				if(!tags.trackno.empty())  id3tag_set_track(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.trackno ).c_str());
+				if(!tags.genre.empty())    id3tag_set_genre(  gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.genre   ).c_str());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
@@ -568,7 +585,7 @@ public:
 		}
 
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
 		if(!gfp_inited)
 		{
@@ -592,10 +609,10 @@ public:
 			buf.resize((result >= 0) ? result : 0);
 			if(result == -2)
 			{
-				throw std::bad_alloc();
+				mpt::throw_out_of_memory();
 			}
 			WriteBuffer();
-			count -= static_cast<size_t>(count_chunk);
+			count -= static_cast<std::size_t>(count_chunk);
 		}
 	}
 	void WriteFinalize() override
@@ -695,7 +712,7 @@ bool MP3Encoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	std::unique_ptr<IAudioStreamEncoder> result = nullptr;
 	if(false)
@@ -705,6 +722,12 @@ std::unique_ptr<IAudioStreamEncoder> MP3Encoder::ConstructStreamEncoder(std::ost
 	} else if(m_Type == MP3EncoderLame || m_Type == MP3EncoderLameCompatible)
 	{
 		result = std::make_unique<MP3LameStreamWriter>(file, (m_Type == MP3EncoderLameCompatible), settings, tags);
+		MPT_UNUSED(prng);
+#else // !MPT_WITH_LAME
+		MPT_UNUSED(file);
+		MPT_UNUSED(settings);
+		MPT_UNUSED(tags);
+		MPT_UNUSED(prng);
 #endif // MPT_WITH_LAME
 	}
 	return result;
@@ -721,10 +744,10 @@ mpt::ustring MP3Encoder::DescribeQuality(float quality) const
 		if(q < 0) q = 0;
 		if(q >= 10)
 		{
-			return MPT_UFORMAT("VBR -V{} (~{} kbit)")(U_("9.999"), q_table[q]);
+			return MPT_UFORMAT_MESSAGE("VBR -V{} (~{} kbit)")(MPT_USTRING("9.999"), q_table[q]);
 		} else
 		{
-			return MPT_UFORMAT("VBR -V{} (~{} kbit)")(q, q_table[q]);
+			return MPT_UFORMAT_MESSAGE("VBR -V{} (~{} kbit)")(q, q_table[q]);
 		}
 	}
 #endif // MPT_WITH_LAME

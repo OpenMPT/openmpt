@@ -997,7 +997,8 @@ void CDoWaveConvert::Run()
 	// Tags must be known at the stream start,
 	// so that the encoder class could write them before audio data if mandated by the format,
 	// otherwise they should just be cached by the encoder.
-	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream, encSettings, m_Settings.Tags);
+	mpt::any_engine_wrapper<mpt::thread_safe_prng<mpt::default_prng>, uint64> prng{theApp.PRNG()};
+	std::unique_ptr<IAudioStreamEncoder> fileEnc = m_Settings.GetEncoderFactory()->ConstructStreamEncoder(fileStream, encSettings, m_Settings.Tags, prng);
 
 	std::variant<
 		std::unique_ptr<std::array<double, MIXBUFFERSIZE * 4>>,

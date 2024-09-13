@@ -1,22 +1,31 @@
-/*
- * StreamEncoderRAW.cpp
- * --------------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderRAW.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
-#include "Mptrack.h"
+#include "openmpt/streamencoder/StreamEncoderRAW.hpp"
 
-#include "../common/mptFileIO.h"
-#include "../soundlib/Sndfile.h"
+#include "mpt/base/bit.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/string/types.hpp"
+
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
+
+#include <memory>
+#include <ostream>
+
+#include <cassert>
+#include <cstddef>
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,9 +44,9 @@ public:
 		, f(file)
 		, settings(settings_)
 	{
-		MPT_ASSERT(settings.Samplerate > 0);
-		MPT_ASSERT(settings.Channels > 0);
-		MPT_UNREFERENCED_PARAMETER(tags);
+		assert(settings.Samplerate > 0);
+		assert(settings.Channels > 0);
+		MPT_UNUSED(tags);
 	}
 	SampleFormat GetSampleFormat() const override
 	{
@@ -115,7 +124,7 @@ public:
 	}
 	void WriteCues(const std::vector<uint64> &cues) override
 	{
-		MPT_UNREFERENCED_PARAMETER(cues);
+		MPT_UNUSED(cues);
 	}
 	void WriteFinalize() override
 	{
@@ -132,10 +141,10 @@ public:
 RAWEncoder::RAWEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = P_("raw");
-	traits.fileShortDescription = U_("Raw PCM");
-	traits.fileDescription = U_("Headerless raw little-endian PCM");
-	traits.encoderSettingsName = U_("RAW");
+	traits.fileExtension = MPT_NATIVE_PATH("raw");
+	traits.fileShortDescription = MPT_USTRING("Raw PCM");
+	traits.fileDescription = MPT_USTRING("Headerless raw little-endian PCM");
+	traits.encoderSettingsName = MPT_USTRING("RAW");
 	traits.canTags = false;
 	traits.canCues = false;
 	traits.maxChannels = 4;
@@ -169,12 +178,13 @@ bool RAWEncoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> RAWEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
+	MPT_UNUSED(prng);
 	return std::make_unique<RawStreamWriter>(*this, file, settings, tags);
 }
 

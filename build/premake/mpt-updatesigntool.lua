@@ -34,6 +34,8 @@
 		"../../src/openmpt/soundfile_write/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",
 		"../../src/openmpt/sounddevice/**.hpp",
+		"../../src/openmpt/streamencoder/**.cpp",
+		"../../src/openmpt/streamencoder/**.hpp",
 	}
   defines { "MODPLUG_TRACKER", "MPT_BUILD_UPDATESIGNTOOL" }
 	if _OPTIONS["charset"] ~= "Unicode" then

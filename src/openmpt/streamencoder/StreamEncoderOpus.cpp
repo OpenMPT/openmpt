@@ -1,23 +1,35 @@
-/*
- * StreamEncoderOpus.cpp
- * ---------------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderOpus.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
-#include <sstream>
+#include "openmpt/streamencoder/StreamEncoderOpus.hpp"
 
-#include "Mptrack.h"
+#include "mpt/base/alloc.hpp"
+#include "mpt/base/memory.hpp"
+#include "mpt/base/saturate_cast.hpp"
+#include "mpt/io/io.hpp"
+#include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/random/random.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
+
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundfile_data/tags.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
 
 #include <deque>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <cstddef>
 
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
 #include <opusenc.h>
@@ -32,10 +44,10 @@ static Encoder::Traits BuildTraits()
 {
 	Encoder::Traits traits;
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-	traits.fileExtension = P_("opus");
-	traits.fileShortDescription = U_("Opus");
-	traits.fileDescription = U_("Ogg Opus");
-	traits.encoderSettingsName = U_("Opus");
+	traits.fileExtension = MPT_NATIVE_PATH("opus");
+	traits.fileShortDescription = MPT_USTRING("Opus");
+	traits.fileDescription = MPT_USTRING("Ogg Opus");
+	traits.encoderSettingsName = MPT_USTRING("Opus");
 	traits.canTags = true;
 	traits.maxChannels = 4;
 	traits.samplerates = mpt::make_vector(opus_all_samplerates);
@@ -93,11 +105,11 @@ private:
 	{
 		if(!field.empty() && !data.empty())
 		{
-			opus_comments.push_back(std::make_pair(field, mpt::ToCharset(mpt::Charset::UTF8, data)));
+			opus_comments.push_back(std::make_pair(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, data)));
 		}
 	}
 public:
-	OpusStreamWriter(std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags)
+	OpusStreamWriter(std::ostream &stream, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng)
 		: StreamWriterBase(stream)
 	{
 		ope_callbacks.write = &CallbackWrite;
@@ -110,7 +122,7 @@ public:
 		if(settings.Tags)
 		{
 			AddCommentField("ENCODER",     tags.encoder);
-			AddCommentField("SOURCEMEDIA", U_("tracked music file"));
+			AddCommentField("SOURCEMEDIA", MPT_USTRING("tracked music file"));
 			AddCommentField("TITLE",       tags.title          );
 			AddCommentField("ARTIST",      tags.artist         );
 			AddCommentField("ALBUM",       tags.album          );
@@ -135,7 +147,7 @@ public:
 
 		ope_encoder = ope_encoder_create_callbacks(&ope_callbacks, this, ope_comments, settings.Samplerate, settings.Channels, settings.Channels > 2 ? 1 : 0, &ope_error);
 		
-		opus_int32 ctl_serial = mpt::random<uint32>(theApp.PRNG());
+		opus_int32 ctl_serial = mpt::random<uint32>(prng);
 		ope_encoder_ctl(ope_encoder, OPE_SET_SERIALNO(ctl_serial));
 
 		opus_int32 ctl_bitrate = opus_bitrate;
@@ -162,12 +174,12 @@ public:
 		ope_encoder_flush_header(ope_encoder);
 		
 	}
-	void WriteInterleaved(size_t count, const float *interleaved) override
+	void WriteInterleaved(std::size_t count, const float *interleaved) override
 	{
 		while(count > 0)
 		{
 			ope_encoder_write_float(ope_encoder, interleaved, mpt::saturate_cast<int>(count));
-			count -= static_cast<size_t>(mpt::saturate_cast<int>(count));
+			count -= static_cast<std::size_t>(mpt::saturate_cast<int>(count));
 		}
 	}
 	void WriteFinalize() override
@@ -204,15 +216,19 @@ bool OggOpusEncoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> OggOpusEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
-	return std::make_unique<OpusStreamWriter>(file, settings, tags);
+	return std::make_unique<OpusStreamWriter>(file, settings, tags, prng);
 #else
+	MPT_UNUSED(file);
+	MPT_UNUSED(settings);
+	MPT_UNUSED(tags);
+	MPT_UNUSED(prng);
 	return nullptr;
 #endif
 }

@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "StreamEncoder.h"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
 #include "Settings.h"
 
 

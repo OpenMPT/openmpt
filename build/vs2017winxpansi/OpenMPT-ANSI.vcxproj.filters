@@ -220,6 +220,9 @@
     <Filter Include="src\openmpt\soundfile_write">
       <UniqueIdentifier>{21750652-8D82-3438-1669-3023827500EF}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\openmpt\streamencoder">
+      <UniqueIdentifier>{BA0C6BE9-26CF-9E73-6F7F-2D00DB807751}</UniqueIdentifier>
+    </Filter>
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
@@ -561,31 +564,7 @@
     <ClInclude Include="..\..\mptrack\Settings.h">
       <Filter>mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoder.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderAU.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderFLAC.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderMP3.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderOpus.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderRAW.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\mptrack\StreamEncoderSettings.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderVorbis.h">
-      <Filter>mptrack</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\mptrack\StreamEncoderWAV.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\TempoSwingDialog.h">
@@ -1557,6 +1536,30 @@
     <ClInclude Include="..\..\src\openmpt\soundfile_write\wav_write.hpp">
       <Filter>src\openmpt\soundfile_write</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoder.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderAU.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderFLAC.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderMP3.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderOpus.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderRAW.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderVorbis.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.hpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\test\PlaybackTest.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -1889,31 +1892,7 @@
     <ClCompile Include="..\..\mptrack\Settings.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoder.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderAU.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderFLAC.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderMP3.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderOpus.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderRAW.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderSettings.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderVorbis.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\StreamEncoderWAV.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp">
@@ -2413,6 +2392,30 @@
     </ClCompile>
     <ClCompile Include="..\..\src\openmpt\soundfile_write\wav_write.cpp">
       <Filter>src\openmpt\soundfile_write</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoder.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderAU.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderFLAC.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderMP3.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderOpus.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderRAW.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderVorbis.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.cpp">
+      <Filter>src\openmpt\streamencoder</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\PlaybackTest.cpp">
       <Filter>test</Filter>

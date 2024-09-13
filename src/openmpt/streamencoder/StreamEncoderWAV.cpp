@@ -1,24 +1,31 @@
-/*
- * StreamEncoder.cpp
- * -----------------
- * Purpose: Exporting streamed music files.
- * Notes  : none
- * Authors: Joern Heusipp
- *          OpenMPT Devs
- * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
- */
+/* SPDX-License-Identifier: BSD-3-Clause */
+/* SPDX-FileCopyrightText: OpenMPT Project Developers and Contributors */
 
-#include "stdafx.h"
 
-#include "StreamEncoder.h"
-#include "StreamEncoderWAV.h"
+#include "openmpt/all/BuildSettings.hpp"
+#include "openmpt/all/PlatformFixes.hpp"
 
+#include "openmpt/streamencoder/StreamEncoderWAV.hpp"
+
+#include "mpt/base/bit.hpp"
+#include "mpt/base/macros.hpp"
+#include "mpt/base/saturate_cast.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/path/native_path.hpp"
+#include "mpt/random/any_engine.hpp"
+#include "mpt/string/types.hpp"
 
+#include "openmpt/base/Endian.hpp"
+#include "openmpt/base/Int24.hpp"
+#include "openmpt/base/Types.hpp"
+#include "openmpt/soundbase/SampleFormat.hpp"
 #include "openmpt/soundfile_data/tags.hpp"
 #include "openmpt/soundfile_data/wav.hpp"
 #include "openmpt/soundfile_write/wav_write.hpp"
+#include "openmpt/streamencoder/StreamEncoder.hpp"
+
+#include <cassert>
 
 
 
@@ -44,8 +51,8 @@ public:
 		, settings(settings_)
 	{
 
-		MPT_ASSERT(settings.Samplerate > 0);
-		MPT_ASSERT(settings.Channels > 0);
+		assert(settings.Samplerate > 0);
+		assert(settings.Channels > 0);
 
 		fileWAV = std::make_unique<WAVWriter>(ff);
 		fileWAV->WriteFormat(settings.Samplerate, settings.Format.GetSampleFormat().GetBitsPerSample(), settings.Channels, settings.Format.GetSampleFormat().IsFloat() ? WAVFormatChunk::fmtFloat : WAVFormatChunk::fmtPCM);
@@ -130,10 +137,10 @@ public:
 WAVEncoder::WAVEncoder()
 {
 	Encoder::Traits traits;
-	traits.fileExtension = P_("wav");
-	traits.fileShortDescription = U_("Wave");
-	traits.fileDescription = U_("Microsoft RIFF Wave");
-	traits.encoderSettingsName = U_("Wave");
+	traits.fileExtension = MPT_NATIVE_PATH("wav");
+	traits.fileShortDescription = MPT_USTRING("Wave");
+	traits.fileDescription = MPT_USTRING("Microsoft RIFF Wave");
+	traits.encoderSettingsName = MPT_USTRING("Wave");
 	traits.canTags = true;
 	traits.canCues = true;
 	traits.maxChannels = 4;
@@ -159,12 +166,13 @@ bool WAVEncoder::IsAvailable() const
 }
 
 
-std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags) const
+std::unique_ptr<IAudioStreamEncoder> WAVEncoder::ConstructStreamEncoder(std::ostream &file, const Encoder::Settings &settings, const FileTags &tags, mpt::any_engine<uint64> &prng) const
 {
 	if(!IsAvailable())
 	{
 		return nullptr;
 	}
+	MPT_UNUSED(prng);
 	return std::make_unique<WavStreamWriter>(*this, file, settings, tags);
 }
 
