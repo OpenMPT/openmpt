@@ -44,17 +44,8 @@
 /build/vs2017winxp/Release
 /build/vs2017winxpansi/*.user
 /build/vs2017winxpansi/.vs
-/build/vs2019win10/*.user
-/build/vs2019win10/.vs
-/build/vs2019win10uwp/.vs
-/build/vs2019win10uwp/Generated Files
-/build/vs2019win10uwp/ext/Generated Files
 /build/vs2019win7/*.user
 /build/vs2019win7/.vs
-/build/vs2019win8/*.user
-/build/vs2019win8/.vs
-/build/vs2019win81/*.user
-/build/vs2019win81/.vs
 /build/vs2022win10/*.user
 /build/vs2022win10/.vs
 /build/vs2022win10/ext/*.user
