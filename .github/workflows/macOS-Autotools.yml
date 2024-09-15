@@ -11,6 +11,7 @@ jobs:
       matrix:
         include:
           - { host: macos-14, compiler: '16.1' }
+          - { host: macos-14, compiler: '16_Release_Candidate' }
           - { host: macos-14, compiler: '15.4' }
           - { host: macos-14, compiler: '15.3' }
           - { host: macos-13, compiler: '15.2' }
