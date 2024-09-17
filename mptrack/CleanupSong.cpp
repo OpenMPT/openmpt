@@ -168,15 +168,15 @@ void CModCleanupDlg::OnOK()
 		if(m_CheckBoxes[kRearrangeSamples]) modified |= RearrangeSamples();
 	}
 
-	// Plugins
-	if(m_CheckBoxes[kRemoveAllPlugins]) modified |= RemoveAllPlugins();
-	if(m_CheckBoxes[kCleanupPlugins]) modified |= RemoveUnusedPlugins();
-
 	// Create samplepack
 	if(m_CheckBoxes[kResetVariables]) modified |= ResetVariables();
 
 	// Remove unused channels
 	if(m_CheckBoxes[kCleanupChannels]) modified |= RemoveUnusedChannels();
+
+	// Plugins (done last because they can be referenced by both instruments and channels)
+	if(m_CheckBoxes[kRemoveAllPlugins]) modified |= RemoveAllPlugins();
+	if(m_CheckBoxes[kCleanupPlugins]) modified |= RemoveUnusedPlugins();
 
 	if(modified) modDoc.SetModified();
 	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
