@@ -662,7 +662,7 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 
 		m_cmbKeyChoice.ResetContent();
 		int numChoices = m_localCmdSet->GetKeyListSize(cmd);
-		if((cmd < kcNumCommands) && (numChoices > 0))
+		if(cmd >= kcFirst && cmd < kcNumCommands && numChoices > 0)
 		{
 			for(int i = 0; i < numChoices; i++)
 			{

@@ -563,6 +563,7 @@ static constexpr struct
 } CommandDefinitions[] =
 // clang-format off
 {
+	{KeyCommand::Dummy, kcNull, _T("")},
 	{1001, kcPatternRecord, _T("Enable Recording")},
 	{1002, kcPatternPlayRow, _T("Play Row")},
 	{1003, kcCursorCopy, _T("Quick Copy")},
@@ -1428,7 +1429,7 @@ void CCommandSet::SetupCommands()
 
 #ifdef MPT_BUILD_DEBUG
 	// Ensure that every visible command has a unique ID
-	for(size_t i = 0; i < kcNumCommands; i++)
+	for(size_t i = kcFirst; i < kcNumCommands; i++)
 	{
 		if(m_commands[i].ID() != 0 || !m_commands[i].IsHidden())
 		{
@@ -1499,7 +1500,7 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 	{
 		// In the first pass, only look for conflicts in the same context, since
 		// such conflicts are errors. Cross-context conflicts only emit warnings.
-		for(int curCmd = 0; curCmd < kcNumCommands; curCmd++)
+		for(int curCmd = kcFirst; curCmd < kcNumCommands; curCmd++)
 		{
 			if(m_commands[curCmd].IsDummy())
 				continue;
@@ -2012,7 +2013,7 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		{
 			//propagate to InstrumentView
 			const auto newCmd = translatedCmds[std::distance(std::begin(propagateCmds), propCmd)];
-			if(0 <= inCmd && inCmd < kcNumCommands)
+			if(kcFirst <= inCmd && inCmd < kcNumCommands)
 			{
 				m_commands[newCmd].kcList.reserve(m_commands[inCmd].kcList.size());
 				for(auto kc : m_commands[inCmd].kcList)
@@ -2062,7 +2063,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 	const bool allowDupes = TrackerSettings::Instance().MiscAllowMultipleCommandsPerKey;
 
 	// Copy commandlist content into map:
-	for(UINT cmd = 0; cmd < kcNumCommands; cmd++)
+	for(UINT cmd = kcFirst; cmd < kcNumCommands; cmd++)
 	{
 		if(m_commands[cmd].IsDummy())
 			continue;
@@ -2268,7 +2269,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		}
 
 		// Error checking
-		if(cmd < 0 || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
+		if(cmd < kcFirst || cmd >= kcNumCommands || kc.Context() >= kCtxMaxInputContexts || tokens.size() < 4)
 		{
 			errorCount++;
 			if (errorCount < 10)
@@ -2347,6 +2348,7 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
+	CommandID lastAdded = kcNull;
 	for(const auto &kb : DefaultKeybindings)
 	{
 		if(onlyCommandsAfterVersion != Version{})
@@ -2357,7 +2359,7 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 			// Do not map shortcuts that already have custom keys assigned.
 			// In particular with default note keys, this can create awkward keymaps when loading
 			// e.g. an IT-style keymap and it contains two keys mapped to the same notes.
-			if(GetKeyListSize(kb.cmd) != 0)
+			if(kb.cmd != lastAdded && GetKeyListSize(kb.cmd) != 0)
 				continue;
 		}
 
@@ -2394,13 +2396,14 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 
 		m_commands[kb.cmd].kcList.push_back(kc);
 		EnforceAll(kc, kb.cmd, true);
+		lastAdded = kb.cmd;
 	}
 }
 
 
 CommandID CCommandSet::FindCmd(uint32 uid) const
 {
-	for(int i = 0; i < kcNumCommands; i++)
+	for(int i = kcFirst; i < kcNumCommands; i++)
 	{
 		if(m_commands[i].ID() == uid)
 			return static_cast<CommandID>(i);

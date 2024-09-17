@@ -67,7 +67,7 @@ enum CommandID
 {
 	kcCommandSetNumNotes = 59,  // kcVPEndNotes - kcVPStartNotes
 
-	kcNull = -1,
+	kcNull = 0,  // Must be same as unhandled SendMessage result
 	kcFirst,
 
 	//Global
