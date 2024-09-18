@@ -33,7 +33,7 @@ jobs:
       run: brew pin xcbeautify
     - name: fixup GitHub Homebrew go breakage
       if: ${{ matrix.host == 'macos-12' }}
-      run: brew unlink go@1.21 && brew unlink go && brew link --overwrite go
+      run: brew unlink go@1.21
     - name: fixup GitHub Homebrew node breakage
       if: ${{ matrix.host == 'macos-12' }}
       run: brew unlink node@18 && brew unlink node && brew link --overwrite node
