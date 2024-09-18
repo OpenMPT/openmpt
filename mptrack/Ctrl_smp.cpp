@@ -35,16 +35,13 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/SampleCopy.h"
 #include "../tracklib/SampleEdit.h"
+#include "../tracklib/TimeStretchPitchShift.h"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/utility.hpp"
 #include "openmpt/soundbase/Copy.hpp"
-
-#include <soundtouch/include/SoundTouch.h>
-#include <soundtouch/source/SoundTouchDLL/SoundTouchDLL.h>
-#include <smbPitchShift/smbPitchShift.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -89,7 +86,7 @@ BEGIN_MESSAGE_MAP(CCtrlSamples, CModControlDlg)
 	ON_COMMAND(ID_NEXTINSTRUMENT,		&CCtrlSamples::OnNextInstrument)
 	ON_COMMAND(IDC_BUTTON1,				&CCtrlSamples::OnPitchShiftTimeStretch)
 	ON_COMMAND(IDC_BUTTON2,				&CCtrlSamples::OnEstimateSampleSize)
-	ON_COMMAND(IDC_CHECK3,				&CCtrlSamples::OnEnableStretchToSize)
+	ON_COMMAND(IDC_CHECK3,				&CCtrlSamples::OnToggleTimestretchQuality)
 	ON_COMMAND(IDC_SAMPLE_INITOPL,		&CCtrlSamples::OnInitOPLInstrument)
 	
 	ON_EN_CHANGE(IDC_SAMPLE_NAME,		&CCtrlSamples::OnNameChanged)
@@ -159,9 +156,11 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN11, m_SpinVibSweep);
 	DDX_Control(pDX, IDC_SPIN12, m_SpinVibDepth);
 	DDX_Control(pDX, IDC_SPIN13, m_SpinVibRate);
+	DDX_Control(pDX, IDC_SPIN16, m_SpinTimeStretchRatio);
 	DDX_Control(pDX, IDC_COMBO1, m_ComboLoopType);
 	DDX_Control(pDX, IDC_COMBO2, m_ComboSustainType);
 	DDX_Control(pDX, IDC_COMBO3, m_ComboAutoVib);
+	DDX_Control(pDX, IDC_COMBO5, m_ComboGrainSize);
 	DDX_Control(pDX, IDC_EDIT1, m_EditLoopStart);
 	DDX_Control(pDX, IDC_EDIT2, m_EditLoopEnd);
 	DDX_Control(pDX, IDC_EDIT3, m_EditSustainStart);
@@ -174,13 +173,6 @@ void CCtrlSamples::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT15, m_EditVibDepth);
 	DDX_Control(pDX, IDC_EDIT16, m_EditVibRate);
 	DDX_Control(pDX, IDC_COMBO4, m_ComboPitch);
-	DDX_Control(pDX, IDC_COMBO5, m_ComboQuality);
-	DDX_Control(pDX, IDC_COMBO6, m_ComboFFT);
-	DDX_Control(pDX, IDC_SPIN10, m_SpinSequenceMs);
-	DDX_Control(pDX, IDC_SPIN14, m_SpinSeekWindowMs);
-	DDX_Control(pDX, IDC_SPIN15, m_SpinOverlap);
-	DDX_Control(pDX, IDC_SPIN16, m_SpinStretchAmount);
-	DDX_Text(pDX, IDC_EDIT6, m_dTimeStretchRatio);
 	//}}AFX_DATA_MAP
 }
 
@@ -279,11 +271,6 @@ BOOL CCtrlSamples::OnInitDialog()
 	}
 	m_CbnBaseNote.SetRedraw(TRUE);
 
-	m_ComboFFT.ShowWindow(SW_SHOW);
-	m_ComboPitch.ShowWindow(SW_SHOW);
-	m_ComboQuality.ShowWindow(SW_SHOW);
-	m_ComboFFT.ShowWindow(SW_SHOW);
-
 	// Pitch selection
 	// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
 	m_ComboPitch.InitStorage(25, 4);
@@ -292,7 +279,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	{
 		mpt::tstring str;
 		if(i == 0)
-			str = _T("none");
+			str = _T("unchanged");
 		else if(i < 0)
 			str = mpt::tfmt::dec(i);
 		else
@@ -300,41 +287,14 @@ BOOL CCtrlSamples::OnInitDialog()
 		m_ComboPitch.SetItemData(m_ComboPitch.AddString(str.c_str()), i + 12);
 	}
 	m_ComboPitch.SetRedraw(TRUE);
-	// Set "none" as default pitch
+	// Set "unchanged" as default pitch
 	m_ComboPitch.SetCurSel(12);
-
-	// Quality selection
-	// Allow quality from 4 to 128
-	m_ComboQuality.InitStorage(128 - 4, 4);
-	m_ComboQuality.SetRedraw(FALSE);
-	for(int i = 4; i <= 128; i++)
-	{
-		m_ComboQuality.SetItemData(m_ComboQuality.AddString(mpt::tfmt::dec(i).c_str()), i - 4);
-	}
-	m_ComboQuality.SetRedraw(TRUE);
-	// Set 32 as default quality
-	m_ComboQuality.SetCurSel(32 - 4);
-
-	// FFT size selection
-	// Deduce exponent from equation : MAX_FRAME_LENGTH = 2^exponent
-	constexpr int exponent = mpt::bit_width(uint32(MAX_FRAME_LENGTH)) - 1;
-	// Allow FFT size from 2^8 (256) to 2^exponent (MAX_FRAME_LENGTH)
-	m_ComboFFT.InitStorage(exponent - 8, 4);
-	m_ComboFFT.SetRedraw(FALSE);
-	for(int i = 8 ; i <= exponent ; i++)
-	{
-		m_ComboFFT.SetItemData(m_ComboFFT.AddString(mpt::tfmt::dec(1 << i).c_str()), i - 8);
-	}
-	m_ComboFFT.SetRedraw(TRUE);
-	// Set 4096 as default FFT size
-	m_ComboFFT.SetCurSel(4);
-
-	// Stretch to size check box
-	OnEnableStretchToSize();
-	m_SpinSequenceMs.SetRange32(0, 9999);
-	m_SpinSeekWindowMs.SetRange32(0, 9999);
-	m_SpinOverlap.SetRange32(0, 9999);
-	m_SpinStretchAmount.SetRange32(50, 200);
+	m_ComboGrainSize.SetCurSel(3);
+	OnToggleTimestretchQuality();
+	m_EditTimeStretchRatio.SubclassDlgItem(IDC_EDIT6, this);
+	m_EditTimeStretchRatio.AllowNegative(false);
+	m_EditTimeStretchRatio.SetDecimalValue(100.0);
+	m_SpinTimeStretchRatio.SetRange32(1, 100000);
 
 	SetRedraw(TRUE);
 	return TRUE;
@@ -1911,48 +1871,11 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 }
 
 
-void CCtrlSamples::ReadTimeStretchParameters()
-{
-	m_nSequenceMs = GetDlgItemInt(IDC_EDIT10);
-	m_nSeekWindowMs = GetDlgItemInt(IDC_EDIT11);
-	m_nOverlapMs = GetDlgItemInt(IDC_EDIT12);
-}
-
-
-void CCtrlSamples::UpdateTimeStretchParameters()
-{
-	GetDlgItem(IDC_EDIT10)->SetWindowText(((m_nSequenceMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nSequenceMs)).c_str());
-	GetDlgItem(IDC_EDIT11)->SetWindowText(((m_nSeekWindowMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nSeekWindowMs)).c_str());
-	GetDlgItem(IDC_EDIT12)->SetWindowText(((m_nOverlapMs <= 0) ? _T("auto") : MPT_TFORMAT("{}ms")(m_nOverlapMs)).c_str());
-}
-
-void CCtrlSamples::OnEnableStretchToSize()
+void CCtrlSamples::OnToggleTimestretchQuality()
 {
 	// Enable time-stretching / disable unused pitch-shifting UI elements
-	bool timeStretch = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
-	if(!timeStretch) ReadTimeStretchParameters();
-	((CComboBox *)GetDlgItem(IDC_COMBO4))->EnableWindow(timeStretch ? FALSE : TRUE);
-	((CEdit *)GetDlgItem(IDC_EDIT6))->EnableWindow(timeStretch ? TRUE : FALSE);
-	((CButton *)GetDlgItem(IDC_BUTTON2))->EnableWindow(timeStretch ? TRUE : FALSE);
-
-	GetDlgItem(IDC_TEXT_PITCH)->SetWindowText(timeStretch ? _T("Sequence") : _T("Pitch"));
-	GetDlgItem(IDC_TEXT_QUALITY)->SetWindowText(timeStretch ? _T("Seek Window") : _T("Quality"));
-	GetDlgItem(IDC_TEXT_FFT)->SetWindowText(timeStretch ? _T("Overlap") : _T("FFT Size"));
-
-	GetDlgItem(IDC_EDIT10)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_EDIT11)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_EDIT12)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_SPIN10)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_SPIN14)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_SPIN15)->ShowWindow(timeStretch ? SW_SHOW : SW_HIDE);
-	
-	GetDlgItem(IDC_COMBO4)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_COMBO5)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-	GetDlgItem(IDC_COMBO6)->ShowWindow(timeStretch ? SW_HIDE : SW_SHOW);
-
-	SetDlgItemText(IDC_BUTTON1, timeStretch ? _T("Time Stretch") : _T("Pitch Shift"));
-	if(timeStretch)
-		UpdateTimeStretchParameters();
+	BOOL isLoFi = (IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED) ? TRUE : FALSE;
+	m_ComboGrainSize.EnableWindow(isLoFi ? TRUE : FALSE);
 }
 
 void CCtrlSamples::OnEstimateSampleSize()
@@ -1960,494 +1883,139 @@ void CCtrlSamples::OnEstimateSampleSize()
 	if(!m_sndFile.GetSample(m_nSample).HasSampleData())
 		return;
 
-	//Ensure m_dTimeStretchRatio is up-to-date with textbox content
-	UpdateData(TRUE);
+	double ratio = 100.0;
+	m_EditTimeStretchRatio.GetDecimalValue(ratio);
+	CPSRatioCalc dlg{m_sndFile, m_nSample, ratio, this};
+	if (dlg.DoModal() != IDOK)
+		return;
 
-	//Open dialog
-	CPSRatioCalc dlg(m_sndFile, m_nSample, m_dTimeStretchRatio, this);
-	if (dlg.DoModal() != IDOK) return;
-
-	//Update ratio value&textbox
-	m_dTimeStretchRatio = dlg.m_dRatio;
-	UpdateData(FALSE);
+	m_EditTimeStretchRatio.SetDecimalValue(dlg.m_ratio);
 }
 
-
-enum TimeStretchPitchShiftResult
-{
-	kUnknown,
-	kOK,
-	kAbort,
-	kInvalidRatio,
-	kStretchTooShort,
-	kStretchTooLong,
-	kOutOfMemory,
-	kSampleTooShort,
-	kStretchInvalidSampleRate,
-};
 
 class DoPitchShiftTimeStretch : public CProgressDialog
 {
 public:
-	CCtrlSamples &m_parent;
-	CModDoc &m_modDoc;
-	const float m_ratio;
-	TimeStretchPitchShiftResult m_result = kUnknown;
-	uint32 m_updateInterval;
-	const SAMPLEINDEX m_sample;
-	const bool m_pitchShift;
-
-	DoPitchShiftTimeStretch(CCtrlSamples &parent, CModDoc &modDoc, SAMPLEINDEX sample, float ratio, bool pitchShift)
-		: CProgressDialog(&parent)
-		, m_parent(parent)
-		, m_modDoc(modDoc)
-		, m_ratio(ratio)
-		, m_sample(sample)
-		, m_pitchShift(pitchShift)
+	DoPitchShiftTimeStretch(CCtrlSamples &parent, CModDoc &modDoc, SAMPLEINDEX sample, SmpLength start, SmpLength end, float pitch, float stretchRatio, int grainSize, bool loFi)
+		: CProgressDialog{&parent}
+		, m_updateInterval{std::max(uint32(15), TrackerSettings::Instance().GUIUpdateInterval.Get())}
 	{
-		m_updateInterval = TrackerSettings::Instance().GUIUpdateInterval;
-		if(m_updateInterval < 15) m_updateInterval = 15;
+		const auto updateFunc = std::bind(&DoPitchShiftTimeStretch::UpdateProgress, this, std::placeholders::_1, std::placeholders::_2);
+		const auto prepareUndo = [&parent]()
+		{
+			return parent.PrepareUndo("Pitch Shift / Time Stretch", sundo_replace);
+		};
+
+		CSoundFile &sndFile = modDoc.GetSoundFile();
+		if(loFi)
+			m_instance = std::make_unique<TimeStretchPitchShift::LoFi>(updateFunc, prepareUndo, sndFile, sample, pitch, stretchRatio, start, end, grainSize);
+		else
+			m_instance = std::make_unique<TimeStretchPitchShift::Signalsmith>(updateFunc, prepareUndo, sndFile, sample, pitch, stretchRatio, start, end);
 	}
 
+	SmpLength NewSelectionEnd() const { return m_instance->NewSelectionEnd(); }
+
+private:
 	void Run() override
 	{
-		SetTitle(m_pitchShift ? _T("Pitch Shift") : _T("Time Stretch"));
+		SetTitle(_T("Pitch Shift / Time Stretch"));
 		SetRange(0, 100);
-		if(m_pitchShift)
-			m_result = PitchShift();
-		else
-			m_result = TimeStretch();
-		EndDialog((m_result == kOK) ? IDOK : IDCANCEL);
-	}
 
-	TimeStretchPitchShiftResult TimeStretch()
-	{
-		ModSample &sample = m_modDoc.GetSoundFile().GetSample(m_sample);
-		const uint32 sampleRate = sample.GetSampleRate(m_modDoc.GetModType());
-
-		if(!sample.HasSampleData()) return kAbort;
-
-		if(m_ratio == 1.0) return kAbort;
-		if(m_ratio < 0.5f) return kStretchTooShort;
-		if(m_ratio > 2.0f) return kStretchTooLong;
-		if(sampleRate > 192000) return kStretchInvalidSampleRate;
-
-		HANDLE handleSt = soundtouch_createInstance();
-		if(handleSt == NULL)
-		{
-			mpt::throw_out_of_memory();
-		}
-
-		const uint8 smpSize = sample.GetElementarySampleSize();
-		const uint8 numChannels = sample.GetNumChannels();
-
-		// Initialize soundtouch object.
-		soundtouch_setSampleRate(handleSt, sampleRate);
-		soundtouch_setChannels(handleSt, numChannels);
-
-		// Given ratio is time stretch ratio, and must be converted to
-		// tempo change ratio: for example time stretch ratio 2 means
-		// tempo change ratio 0.5.
-		soundtouch_setTempoChange(handleSt, (1.0f / m_ratio - 1.0f) * 100.0f);
-
-		// Read settings from GUI.
-		m_parent.ReadTimeStretchParameters();
-
-		// Set settings to soundtouch. Zero value means 'use default', and
-		// setting value is read back after setting because not all settings are accepted.
-		soundtouch_setSetting(handleSt, SETTING_SEQUENCE_MS, m_parent.m_nSequenceMs);
-		m_parent.m_nSequenceMs = soundtouch_getSetting(handleSt, SETTING_SEQUENCE_MS);
-
-		soundtouch_setSetting(handleSt, SETTING_SEEKWINDOW_MS, m_parent.m_nSeekWindowMs);
-		m_parent.m_nSeekWindowMs = soundtouch_getSetting(handleSt, SETTING_SEEKWINDOW_MS);
-
-		soundtouch_setSetting(handleSt, SETTING_OVERLAP_MS, m_parent.m_nOverlapMs);
-		m_parent.m_nOverlapMs = soundtouch_getSetting(handleSt, SETTING_OVERLAP_MS);
-
-		// Update GUI with the actual SoundTouch parameters in effect.
-		m_parent.UpdateTimeStretchParameters();
-
-		const SmpLength inBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_INPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
-		const SmpLength outBatchSize = soundtouch_getSetting(handleSt, SETTING_NOMINAL_OUTPUT_SEQUENCE) + 1; // approximate value, add 1 to play safe
-
-		const auto selection = m_parent.GetSelectionPoints();
-		const SmpLength selLength = selection.selectionActive ? selection.nEnd - selection.nStart : sample.nLength;
-		const SmpLength remainLength = sample.nLength - selLength;
-
-		if(selLength < inBatchSize)
-		{
-			soundtouch_destroyInstance(handleSt);
-			return kSampleTooShort;
-		}
-
-		if(static_cast<SmpLength>(std::ceil(static_cast<double>(m_ratio) * selLength)) < outBatchSize)
-		{
-			soundtouch_destroyInstance(handleSt);
-			return kSampleTooShort;
-		}
-
-		const SmpLength stretchLength = mpt::saturate_round<SmpLength>(m_ratio * selLength);
-		const SmpLength stretchEnd = selection.nStart + stretchLength;
-		const SmpLength newSampleLength = remainLength + stretchLength;
-		void *pNewSample = nullptr;
-		if(newSampleLength <= MAX_SAMPLE_LENGTH)
-		{
-			pNewSample = ModSample::AllocateSample(newSampleLength, sample.GetBytesPerSample());
-		}
-		if(pNewSample == nullptr)
-		{
-			soundtouch_destroyInstance(handleSt);
-			return kOutOfMemory;
-		}
-
-		// Show wait mouse cursor
 		BeginWaitCursor();
-
-		memcpy(pNewSample, sample.sampleb(), selection.nStart * sample.GetBytesPerSample());
-		memcpy(static_cast<std::byte *>(pNewSample) + stretchEnd * sample.GetBytesPerSample(), sample.sampleb() + selection.nEnd * sample.GetBytesPerSample(), (sample.nLength - selection.nEnd) * sample.GetBytesPerSample());
-
-		constexpr SmpLength MaxInputChunkSize = 1024;
-
-		std::vector<float> buffer(MaxInputChunkSize * numChannels);
-
-		SmpLength inPos = selection.nStart;
-		SmpLength outPos = selection.nStart; // Keeps count of the sample length received from stretching process.
-
-		DWORD timeLast = 0;
-
-		// Process sample in steps.
-		while(inPos < selection.nEnd)
-		{
-			// Current chunk size limit test
-			const SmpLength inChunkSize = std::min(MaxInputChunkSize, sample.nLength - inPos);
-
-			DWORD timeNow = timeGetTime();
-			if(timeNow - timeLast >= m_updateInterval)
-			{
-				// Show progress bar using process button painting & text label
-				TCHAR progress[32];
-				uint32 percent = static_cast<uint32>(100 * (inPos + inChunkSize) / sample.nLength);
-				wsprintf(progress, _T("Time Stretch... %u%%"), percent);
-				SetText(progress);
-				SetProgress(percent);
-				ProcessMessages();
-				if(m_abort)
-					break;
-
-				timeLast = timeNow;
-			}
-
-			// Send sampledata for processing.
-			switch(smpSize)
-			{
-			case 1:
-				CopyAudioChannelsInterleaved(buffer.data(), sample.sample8() + inPos * numChannels, numChannels, inChunkSize);
-				break;
-			case 2:
-				CopyAudioChannelsInterleaved(buffer.data(), sample.sample16() + inPos * numChannels, numChannels, inChunkSize);
-				break;
-			}
-			soundtouch_putSamples(handleSt, buffer.data(), inChunkSize);
-
-			// Receive some processed samples (it's not guaranteed that there is any available).
-			{
-				SmpLength outChunkSize = std::min(static_cast<SmpLength>(soundtouch_numSamples(handleSt)), stretchLength - outPos);
-				if(outChunkSize > 0)
-				{
-					buffer.resize(outChunkSize * numChannels);
-					soundtouch_receiveSamples(handleSt, buffer.data(), outChunkSize);
-					switch(smpSize)
-					{
-					case 1:
-						CopyAudioChannelsInterleaved(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
-						break;
-					case 2:
-						CopyAudioChannelsInterleaved(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
-						break;
-					}
-					outPos += outChunkSize;
-				}
-			}
-
-			// Next buffer chunk
-			inPos += inChunkSize;
-		}
-
-		if(!m_abort)
-		{
-			// The input sample should now be processed. Receive remaining samples.
-			soundtouch_flush(handleSt);
-			SmpLength outChunkSize = std::min(static_cast<SmpLength>(soundtouch_numSamples(handleSt)), stretchLength - (outPos - selection.nStart));
-			if(outChunkSize > 0)
-			{
-				buffer.resize(outChunkSize * numChannels);
-				soundtouch_receiveSamples(handleSt, buffer.data(), outChunkSize);
-				switch(smpSize)
-				{
-				case 1:
-					CopyAudioChannelsInterleaved(static_cast<int8 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
-					break;
-				case 2:
-					CopyAudioChannelsInterleaved(static_cast<int16 *>(pNewSample) + numChannels * outPos, buffer.data(), numChannels, outChunkSize);
-					break;
-				}
-				outPos += outChunkSize;
-			}
-
-			soundtouch_clear(handleSt);
-			MPT_ASSERT(soundtouch_isEmpty(handleSt) != 0);
-
-			CSoundFile &sndFile = m_modDoc.GetSoundFile();
-			m_parent.PrepareUndo("Time Stretch", sundo_replace);
-			// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
-			sample.ReplaceWaveform(pNewSample, std::min(outPos + remainLength, newSampleLength), sndFile);
-			// Update loops and wrap-around buffer
-			sample.SetLoop(
-				mpt::saturate_round<SmpLength>(sample.nLoopStart * m_ratio),
-				mpt::saturate_round<SmpLength>(sample.nLoopEnd * m_ratio),
-				sample.uFlags[CHN_LOOP],
-				sample.uFlags[CHN_PINGPONGLOOP],
-				sndFile);
-			sample.SetSustainLoop(
-				mpt::saturate_round<SmpLength>(sample.nSustainStart * m_ratio),
-				mpt::saturate_round<SmpLength>(sample.nSustainEnd * m_ratio),
-				sample.uFlags[CHN_SUSTAINLOOP],
-				sample.uFlags[CHN_PINGPONGSUSTAIN],
-				sndFile);
-		} else
-		{
-			ModSample::FreeSample(pNewSample);
-		}
-
-		soundtouch_destroyInstance(handleSt);
-
-		// Restore mouse cursor
+		m_result = m_instance->Process();
 		EndWaitCursor();
 
-		if(selection.selectionActive)
-			m_parent.SetSelectionPoints(selection.nStart, selection.nStart + stretchLength);
-
-		return m_abort ? kAbort : kOK;
+		EndDialog((m_result == TimeStretchPitchShift::Result::OK) ? IDOK : IDCANCEL);
 	}
 
-	TimeStretchPitchShiftResult PitchShift()
+	bool UpdateProgress(SmpLength current, SmpLength maximum)
 	{
-		static constexpr SmpLength MAX_BUFFER_LENGTH = 8192;
-		ModSample &sample = m_modDoc.GetSoundFile().GetSample(m_sample);
+		uint32 timeNow = timeGetTime();
+		if(timeNow - m_lastUpdate < m_updateInterval)
+			return m_abort;
 
-		if(!sample.HasSampleData() || m_ratio < 0.5f || m_ratio > 2.0f)
-		{
-			return kAbort;
-		}
-
-		// Get selected oversampling - quality - (also refered as FFT overlapping) factor
-		CComboBox *combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO5);
-		long ovs = combo->GetCurSel() + 4;
-
-		// Get selected FFT size (power of 2; should not exceed MAX_BUFFER_LENGTH - see smbPitchShift.h)
-		combo = (CComboBox *)m_parent.GetDlgItem(IDC_COMBO6);
-		UINT fft = 1 << (combo->GetCurSel() + 8);
-		while(fft > MAX_BUFFER_LENGTH) fft >>= 1;
-
-		// Show wait mouse cursor
-		BeginWaitCursor();
-
-		// Get original sample rate
-		const float sampleRate = static_cast<float>(sample.GetSampleRate(m_modDoc.GetModType()));
-
-		// Allocate working buffer
-		const size_t bufferSize = MAX_BUFFER_LENGTH + fft;
-		std::vector<float> buffer;
-		try
-		{
-			buffer.resize(bufferSize);
-		} catch(mpt::out_of_memory e)
-		{
-			mpt::delete_out_of_memory(e);
-			return kOutOfMemory;
-		}
-
-		const auto smpSize = sample.GetElementarySampleSize();
-		const auto numChans = sample.GetNumChannels();
-		const auto bps = sample.GetBytesPerSample();
-		int8 *pNewSample = static_cast<int8 *>(ModSample::AllocateSample(sample.nLength, bps));
-		if(pNewSample == nullptr)
-			return kOutOfMemory;
-
-		DWORD timeLast = 0;
-
-		const auto selection = m_parent.GetSelectionPoints();
-
-		// Process each channel separately
-		for(uint8 chn = 0; chn < numChans; chn++)
-		{
-			// Process sample buffer using MAX_BUFFER_LENGTH (max) sized chunk steps (in order to allow
-			// the processing of BIG samples...)
-			for(SmpLength pos = selection.nStart; pos < selection.nEnd;)
-			{
-				DWORD timeNow = timeGetTime();
-				if(timeNow - timeLast >= m_updateInterval)
-				{
-					TCHAR progress[32];
-					uint32 percent = static_cast<uint32>(chn * 50.0 + (100.0 / numChans) * (pos - selection.nStart) / (selection.nEnd - selection.nStart));
-					wsprintf(progress, _T("Pitch Shift... %u%%"), percent);
-					SetText(progress);
-					SetProgress(percent);
-					ProcessMessages();
-					if(m_abort)
-						break;
-
-					timeLast = timeNow;
-				}
-
-				// TRICK : output buffer offset management
-				// as the pitch-shifter adds  some blank signal in head of output  buffer (matching FFT
-				// length - in short it needs a certain amount of data before being able to output some
-				// meaningful  processed samples) , in order  to avoid this behaviour , we will ignore
-				// the  first FFT_length  samples and process  the same  amount of extra  blank samples
-				// (all 0.0f) at the end of the buffer (those extra samples will benefit from  internal
-				// FFT data  computed during the previous  steps resulting in a  correct and consistent
-				// signal output).
-				const SmpLength processLen = (pos + MAX_BUFFER_LENGTH <= selection.nEnd) ? MAX_BUFFER_LENGTH : (selection.nEnd - pos);
-				const bool bufStart = (pos == selection.nStart);
-				const bool bufEnd = (pos + processLen >= selection.nEnd);
-				const SmpLength startOffset = (bufStart ? fft : 0);
-				const SmpLength innerOffset = (bufStart ? 0 : fft);
-				const SmpLength finalOffset = (bufEnd ? fft : 0);
-
-				// Re-initialize pitch-shifter with blank FFT before processing 1st chunk of current channel
-				if(bufStart)
-				{
-					std::fill(buffer.begin(), buffer.begin() + fft, 0.0f);
-					smbPitchShift(m_ratio, fft, fft, ovs, sampleRate, buffer.data(), buffer.data());
-				}
-
-				// Convert current channel's data chunk to float
-				SmpLength offset = pos * numChans + chn;
-				switch(smpSize)
-				{
-				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<float, int8>, SC::DecodeIdentity<int8>>>(buffer.data(), processLen, 1, sample.sample8() + offset, sizeof(int8) * processLen * numChans, numChans);
-					break;
-				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<float, int16>, SC::DecodeIdentity<int16>>>(buffer.data(), processLen, 1, sample.sample16() + offset, sizeof(int16) * processLen * numChans, numChans);
-					break;
-				}
-
-				// Fills extra blank samples (read TRICK description comment above)
-				if(bufEnd)
-					std::fill(buffer.begin() + processLen, buffer.begin() + processLen + finalOffset, 0.0f);
-
-				// Apply pitch shifting
-				smbPitchShift(m_ratio, static_cast<long>(processLen + finalOffset), fft, ovs, sampleRate, buffer.data(), buffer.data());
-
-				// Restore pitched-shifted float sample into original sample buffer
-				void *ptr = pNewSample + (pos - innerOffset) * smpSize * numChans + chn * smpSize;
-				const SmpLength copyLength = processLen + finalOffset - startOffset + 1;
-
-				switch(smpSize)
-				{
-				case 1:
-					CopySample<SC::ConversionChain<SC::Convert<int8, float>, SC::DecodeIdentity<float>>>(static_cast<int8 *>(ptr), copyLength, numChans, buffer.data() + startOffset, sizeof(float) * bufferSize, 1);
-					break;
-				case 2:
-					CopySample<SC::ConversionChain<SC::Convert<int16, float>, SC::DecodeIdentity<float>>>(static_cast<int16 *>(ptr), copyLength, numChans, buffer.data() + startOffset, sizeof(float) * bufferSize, 1);
-					break;
-				}
-
-				// Next buffer chunk
-				pos += processLen;
-			}
-		}
-
-		if(!m_abort)
-		{
-			m_parent.PrepareUndo("Pitch Shift", sundo_replace);
-			memcpy(pNewSample, sample.sampleb(), selection.nStart * bps);
-			memcpy(pNewSample + selection.nEnd * bps, sample.sampleb() + selection.nEnd * bps, (sample.nLength - selection.nEnd) * bps);
-			sample.ReplaceWaveform(pNewSample, sample.nLength, m_modDoc.GetSoundFile());
-		} else
-		{
-			ModSample::FreeSample(pNewSample);
-		}
-
-		// Restore mouse cursor
-		EndWaitCursor();
-
-		return m_abort ? kAbort : kOK;
+		m_lastUpdate = timeNow;
+		TCHAR progress[48];
+		uint32 percent = Util::muldivr(current, 100, maximum);
+		wsprintf(progress, _T("Pitch Shift / Time Stretch... %u%%"), percent);
+		SetText(progress);
+		SetProgress(percent);
+		ProcessMessages();
+		return m_abort;
 	}
+
+private:
+	std::unique_ptr<TimeStretchPitchShift::Base> m_instance;
+	const uint32 m_updateInterval;
+	uint32 m_lastUpdate = 0;
+public:
+	TimeStretchPitchShift::Result m_result = TimeStretchPitchShift::Result::Abort;
 };
 
 
 void CCtrlSamples::OnPitchShiftTimeStretch()
 {
-	TimeStretchPitchShiftResult errorcode = kAbort;
+	auto errorCode = TimeStretchPitchShift::Result::Abort;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	if(!sample.HasSampleData()) goto error;
+	if(!sample.HasSampleData())
+		return;
+	
+	CString text;
+	GetDlgItem(IDC_COMBO4)->GetWindowText(text);
+	const float semitones = mpt::parse<float>(text);
+	const float pitch = std::pow(2.0f, semitones / 12.0f);
 
-	if(IsDlgButtonChecked(IDC_CHECK3))
+	double ratio = 100.0;
+	m_EditTimeStretchRatio.GetDecimalValue(ratio);
+
+	const auto grainSize = static_cast<int>(GetDlgItemInt(IDC_COMBO5));
+
+	if(pitch != 1.0f || ratio != 100.0)
 	{
-		// Time stretching
-		UpdateData(TRUE); //Ensure m_dTimeStretchRatio is up-to-date with textbox content
-		DoPitchShiftTimeStretch timeStretch(*this, m_modDoc, m_nSample, static_cast<float>(m_dTimeStretchRatio / 100.0), false);
+		auto selection = GetSelectionPoints();
+		DoPitchShiftTimeStretch timeStretch(*this, m_modDoc, m_nSample, selection.nStart, selection.nEnd, pitch, static_cast<float>(ratio / 100.0), grainSize, IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
 		timeStretch.DoModal();
-		errorcode = timeStretch.m_result;
-	} else
-	{
-		// Pitch shifting
-		// Get selected pitch modifier [-12,+12]
-		CString text;
-		static_cast<CComboBox *>(GetDlgItem(IDC_COMBO4))->GetWindowText(text);
-		float pm = mpt::parse<float>(text);
-		if(pm == 0.0f) goto error;
+		errorCode = timeStretch.m_result;
+		if(selection.selectionActive)
+			SetSelectionPoints(selection.nStart, timeStretch.NewSelectionEnd());
 
-		// Compute pitch ratio in range [0.5f ; 2.0f] (1.0f means output == input)
-		// * pitch up -> 1.0f + n / 12.0f -> (12.0f + n) / 12.0f , considering n : pitch modifier > 0
-		// * pitch dn -> 1.0f - n / 24.0f -> (24.0f - n) / 24.0f , considering n : pitch modifier > 0
-		float pitch = pm < 0 ? ((24.0f + pm) / 24.0f) : ((12.0f + pm) / 12.0f);
-
-		// Apply pitch modifier
-		DoPitchShiftTimeStretch pitchShift(*this, m_modDoc, m_nSample, pitch, true);
-		pitchShift.DoModal();
-		errorcode = pitchShift.m_result;
 	}
 
-	if(errorcode == kOK)
+	if(errorCode == TimeStretchPitchShift::Result::OK)
 	{
 		// Update sample view
 		SetModified(SampleHint().Info().Data(), true, true);
+		SwitchToView();
 		return;
 	}
 
 	// Error management
-error:
-
-	if(errorcode != kAbort)
+	if(errorCode != TimeStretchPitchShift::Result::Abort)
 	{
 		CString str;
-		switch(errorcode)
+		switch(errorCode)
 		{
-		case kInvalidRatio:
-			str = _T("Invalid stretch ratio!");
+		case TimeStretchPitchShift::Result::OK:
+		case TimeStretchPitchShift::Result::Abort:
 			break;
-		case kStretchTooShort:
-		case kStretchTooLong:
-			str = MPT_CFORMAT("Stretch ratio is too {}. Must be between 50% and 200%.")((errorcode == kStretchTooShort) ? CString(_T("low")) : CString(_T("high")));
+		case TimeStretchPitchShift::Result::StretchTooShort:
+			str = _T("Stretch ratio is too low, not leaving any sample data.");
 			break;
-		case kOutOfMemory:
-			str = _T("Out of memory.");
+		case TimeStretchPitchShift::Result::StretchTooLong:
+			str = _T("Stretch ratio is too high, exceeding maximum sample length.");
 			break;
-		case kSampleTooShort:
+		case TimeStretchPitchShift::Result::InvalidGrainSize:
+			str = _T("Grain size too small.");
+			break;
+		case TimeStretchPitchShift::Result::SampleTooShort:
 			str = _T("Sample too short.");
 			break;
-		case kStretchInvalidSampleRate:
-			str = _T("Sample rate must be 192,000 Hz or lower.");
-			break;
-		default:
-			str = _T("Unknown Error.");
+		case TimeStretchPitchShift::Result::OutOfMemory:
+			str = _T("Out of memory.");
 			break;
 		}
 		Reporting::Error(str);
+		SwitchToView();
 	}
 }
 
@@ -3166,12 +2734,8 @@ NoSample:
 		SetFinetune(pos);
 		m_SpinFineTune.SetPos(0);
 	}
-	if(scrollBar->m_hWnd == m_SpinSequenceMs.m_hWnd || scrollBar->m_hWnd == m_SpinSeekWindowMs.m_hWnd || scrollBar->m_hWnd == m_SpinOverlap.m_hWnd)
-	{
-		ReadTimeStretchParameters();
-		UpdateTimeStretchParameters();
-	}
-	if(nCode == SB_ENDSCROLL) SwitchToView();
+	if(nCode == SB_ENDSCROLL)
+		SwitchToView();
 	if(redraw)
 	{
 		SetModified(SampleHint().Info().Data(), false, false);

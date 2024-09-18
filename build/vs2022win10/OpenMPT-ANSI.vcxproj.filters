@@ -1623,6 +1623,9 @@
     <ClInclude Include="..\..\tracklib\SampleEdit.h">
       <Filter>tracklib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\tracklib\TimeStretchPitchShift.h">
+      <Filter>tracklib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\unarchiver\archive.h">
       <Filter>unarchiver</Filter>
     </ClInclude>
@@ -2508,6 +2511,9 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\tracklib\SampleEdit.cpp">
+      <Filter>tracklib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\tracklib\TimeStretchPitchShift.cpp">
       <Filter>tracklib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\unarchiver\unancient.cpp">

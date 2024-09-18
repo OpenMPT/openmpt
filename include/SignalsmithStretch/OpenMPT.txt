@@ -1,0 +1,3 @@
+Signalsmith Stretch: C++ pitch/time library, commit a9d78f033150e9e2421decdf1c83011a316fcfb1 (2024-02-19)
+https://github.com/Signalsmith-Audio/signalsmith-stretch
+No local changes have been made.

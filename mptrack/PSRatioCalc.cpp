@@ -1,7 +1,7 @@
 /*
  * PSRatioCalc.cpp
  * ---------------
- * Purpose: Dialog for calculating sample pitch shift ratios in the sample editor.
+ * Purpose: Dialog for calculating sample time stretch ratios in the sample editor.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -10,8 +10,6 @@
 
 #include "stdafx.h"
 #include "PSRatioCalc.h"
-#include "Mptrack.h"
-#include "Reporting.h"
 #include "resource.h"
 #include "../soundlib/Sndfile.h"
 
@@ -19,131 +17,138 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-// CPSRatioCalc dialog
-
-IMPLEMENT_DYNAMIC(CPSRatioCalc, CDialog)
-CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd* pParent /*=NULL*/)
-	: CDialog(IDD_PITCHSHIFT, pParent)
-	, m_dRatio(ratio)
-	, sndFile(sndFile)
-	, sampleIndex(sample)
+CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *parent)
+	: CDialog{IDD_PITCHSHIFT, parent}
+	, m_ratio{ratio}
+	, m_sndFile{sndFile}
+	, m_sampleIndex{sample}
+	, m_speed{sndFile.m_PlayState.m_nMusicSpeed}
+	, m_tempo{sndFile.m_PlayState.m_nMusicTempo}
 {
-	// Calculate/verify samplerate at C5.
-	const ModSample &smp = sndFile.GetSample(sampleIndex);
-	uint32 sampleRate = smp.GetSampleRate(sndFile.GetType());
+	const ModSample &smp = m_sndFile.GetSample(m_sampleIndex);
+	uint32 sampleRate = smp.GetSampleRate(m_sndFile.GetType());
 	if(sampleRate <= 0)
 		sampleRate = 8363;
 
-	m_nSpeed = sndFile.m_PlayState.m_nMusicSpeed;
-	m_nTempo = sndFile.m_PlayState.m_nMusicTempo;
-
 	// Sample rate will not change. We can calculate original duration once and disgard sampleRate.
-	m_lMsOrig = static_cast<ULONGLONG>(1000.0 * ((double)smp.nLength / sampleRate));
-	CalcSamples();
-	CalcMs();
-	CalcRows();
-}
-
-
-void CPSRatioCalc::DoDataExchange(CDataExchange* pDX)
-{
-	CWnd* hasFocus = GetFocus();
-
-	CDialog::DoDataExchange(pDX);
-	SmpLength origLength = sndFile.GetSample(sampleIndex).nLength;
-	DDX_Text(pDX, IDC_SAMPLE_LENGTH_ORIGINAL, origLength);
-	DDX_Text(pDX, IDC_SAMPLE_LENGTH_NEW, m_lSamplesNew);
-	DDX_Text(pDX, IDC_MS_LENGTH_ORIGINAL2, m_lMsOrig);
-	DDX_Text(pDX, IDC_MS_LENGTH_NEW, m_lMsNew);
-	DDX_Text(pDX, IDC_SPEED, m_nSpeed);
-	DDX_Text(pDX, IDC_ROW_LENGTH_ORIGINAL, m_dRowsOrig);
-
-	//These 2 CEdits must only be updated if they don't have focus (to preserve trailing . and 0s etc..)
-	if (pDX->m_bSaveAndValidate || hasFocus != GetDlgItem(IDC_ROW_LENGTH_NEW2))
-		DDX_Text(pDX, IDC_ROW_LENGTH_NEW2, m_dRowsNew);
-	if (pDX->m_bSaveAndValidate || hasFocus != GetDlgItem(IDC_PSRATIO))
-		DDX_Text(pDX, IDC_PSRATIO, m_dRatio);
+	m_durationOrig = 1000.0 * static_cast<double>(smp.nLength) / sampleRate;
 }
 
 
 BEGIN_MESSAGE_MAP(CPSRatioCalc, CDialog)
-	ON_EN_UPDATE(IDC_SAMPLE_LENGTH_NEW, &CPSRatioCalc::OnEnChangeSamples)
-	ON_EN_UPDATE(IDC_MS_LENGTH_NEW, &CPSRatioCalc::OnEnChangeMs)
-	ON_EN_UPDATE(IDC_SPEED, &CPSRatioCalc::OnEnChangeSpeed)
-	ON_EN_UPDATE(IDC_TEMPO, &CPSRatioCalc::OnEnChangeSpeed)
-	ON_EN_UPDATE(IDC_ROW_LENGTH_NEW2, &CPSRatioCalc::OnEnChangeRows)
-	ON_EN_UPDATE(IDC_PSRATIO, &CPSRatioCalc::OnEnChangeratio)
-	ON_BN_CLICKED(IDOK, &CPSRatioCalc::OnBnClickedOk)
+	ON_EN_UPDATE(IDC_SAMPLE_LENGTH_NEW, &CPSRatioCalc::OnChangeSampleLength)
+	ON_EN_UPDATE(IDC_MS_LENGTH_NEW,     &CPSRatioCalc::OnChangeDuration)
+	ON_EN_UPDATE(IDC_SPEED,             &CPSRatioCalc::OnChangeSpeed)
+	ON_EN_UPDATE(IDC_TEMPO,             &CPSRatioCalc::OnChangeSpeed)
+	ON_EN_UPDATE(IDC_ROW_LENGTH_NEW2,   &CPSRatioCalc::OnChangeRows)
+	ON_EN_UPDATE(IDC_PSRATIO,           &CPSRatioCalc::OnChangeRatio)
 END_MESSAGE_MAP()
 
 
 BOOL CPSRatioCalc::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	m_EditTempo.SubclassDlgItem(IDC_TEMPO, this);
-	m_EditTempo.AllowNegative(false);
-	m_EditTempo.SetTempoValue(m_nTempo);
+
+	LockControls();
+
+	const std::pair<CNumberEdit &, int> NumberControls[] =
+	{
+		{m_EditTempo,        IDC_TEMPO},
+		{m_EditRatio,        IDC_PSRATIO},
+		{m_EditRowsOrig,     IDC_ROW_LENGTH_ORIGINAL},
+		{m_EditRowsNew,      IDC_ROW_LENGTH_NEW2},
+		{m_EditDurationOrig, IDC_MS_LENGTH_ORIGINAL2},
+		{m_EditDurationNew,  IDC_MS_LENGTH_NEW},
+	};
+	for(auto [editCtrl, dlgID] : NumberControls)
+	{
+		editCtrl.SubclassDlgItem(dlgID, this);
+		editCtrl.AllowNegative(false);
+	}
+
+	SetDlgItemInt(IDC_SAMPLE_LENGTH_ORIGINAL, m_sndFile.GetSample(m_sampleIndex).nLength, FALSE);
+	SetDlgItemInt(IDC_SAMPLE_LENGTH_NEW, m_sampleLengthNew, FALSE);
+	SetDlgItemInt(IDC_SPEED, m_speed, FALSE);
+	m_EditTempo.SetTempoValue(m_tempo);
+	m_EditRatio.SetDecimalValue(m_ratio);
+	m_EditDurationOrig.SetDecimalValue(m_durationOrig);
+	CalcSamples();
+	CalcMs();
+	CalcRows();
+
+	UnlockControls();
+
 	return TRUE;
 }
 
-// CPSRatioCalc message handlers
-void CPSRatioCalc::OnEnChangeSamples()
+void CPSRatioCalc::OnChangeSampleLength()
 {
-	UpdateData();
-	if (m_lSamplesNew && sndFile.GetSample(sampleIndex).nLength)
+	if(IsLocked())
+		return;
+	m_sampleLengthNew = GetDlgItemInt(IDC_SAMPLE_LENGTH_NEW, nullptr, FALSE);
+	if(m_sampleLengthNew && m_sndFile.GetSample(m_sampleIndex).nLength)
 	{
-		m_dRatio = (double)m_lSamplesNew / (double)sndFile.GetSample(sampleIndex).nLength * 100;
+		LockControls();
+		m_ratio = static_cast<double>(m_sampleLengthNew) * 100.0 / static_cast<double>(m_sndFile.GetSample(m_sampleIndex).nLength);
 		CalcMs();
 		CalcRows();
-		UpdateData(FALSE);
+		m_EditRatio.SetDecimalValue(m_ratio);
+		UnlockControls();
 	}
 }
 
-void CPSRatioCalc::OnEnChangeMs()
+void CPSRatioCalc::OnChangeDuration()
 {
-	UpdateData();
-	if (m_lMsOrig && m_lMsNew)
+	if(IsLocked())
+		return;
+	if(m_durationOrig > 0.0 && m_EditDurationNew.GetDecimalValue(m_durationNew))
 	{
-		m_dRatio = (double)m_lMsNew / (double)m_lMsOrig * 100;
+		LockControls();
+		m_ratio = m_durationNew * 100.0 / m_durationOrig;
 		CalcSamples();
 		CalcRows();
-		UpdateData(FALSE);
+		m_EditRatio.SetDecimalValue(m_ratio);
+		UnlockControls();
 	}
-	
 }
 
-void CPSRatioCalc::OnEnChangeRows()
+void CPSRatioCalc::OnChangeRows()
 {
-	UpdateData();
-	if (m_dRowsOrig && m_dRowsNew)
+	if(IsLocked())
+		return;
+	if(m_rowsOrig && m_EditRowsNew.GetDecimalValue(m_rowsNew))
 	{
-		m_dRatio = m_dRowsNew / m_dRowsOrig * 100.0;
+		LockControls();
+		m_ratio = m_rowsNew * 100.0 / m_rowsOrig;
 		CalcSamples();
-		CalcMs();	
-		UpdateData(FALSE);
+		CalcMs();
+		m_EditRatio.SetDecimalValue(m_ratio);
+		UnlockControls();
 	}
-
 }
 
-void CPSRatioCalc::OnEnChangeSpeed()
+void CPSRatioCalc::OnChangeSpeed()
 {
-	UpdateData();
-	m_nTempo = m_EditTempo.GetTempoValue();
-	if (m_nTempo < TEMPO(1, 0)) m_nTempo = TEMPO(1, 0);
-	if (m_nSpeed < 1) m_nSpeed = 1;
+	if(IsLocked())
+		return;
+	LockControls();
+	m_tempo = std::max(TEMPO(1, 0), m_EditTempo.GetTempoValue());
+	m_speed = std::max(uint32(1), GetDlgItemInt(IDC_SPEED, nullptr, FALSE));
 	CalcRows();
-	UpdateData(FALSE);
+	UnlockControls();
 }
 
-void CPSRatioCalc::OnEnChangeratio()
+void CPSRatioCalc::OnChangeRatio()
 {
-	UpdateData();
-	if (m_dRatio)
+	if(IsLocked())
+		return;
+	if(m_EditRatio.GetDecimalValue(m_ratio))
 	{
+		LockControls();
 		CalcSamples();
 		CalcMs();
 		CalcRows();
-		UpdateData(FALSE);
+		UnlockControls();
 	}
 }
 
@@ -151,35 +156,22 @@ void CPSRatioCalc::OnEnChangeratio()
 
 void CPSRatioCalc::CalcSamples()
 {
-	m_lSamplesNew = static_cast<ULONGLONG>(sndFile.GetSample(sampleIndex).nLength * (m_dRatio / 100.0));
-	return;
+	m_sampleLengthNew = mpt::saturate_round<SmpLength>(m_sndFile.GetSample(m_sampleIndex).nLength * m_ratio / 100.0);
+	SetDlgItemInt(IDC_SAMPLE_LENGTH_NEW, m_sampleLengthNew, FALSE);
 }
 
 void CPSRatioCalc::CalcMs()
 {
-	m_lMsNew = static_cast<ULONGLONG>(m_lMsOrig * (m_dRatio / 100.0));
-	return;
+	m_durationNew = m_durationOrig * m_ratio / 100.0;
+	m_EditDurationNew.SetDecimalValue(m_durationNew);
 }
 
 void CPSRatioCalc::CalcRows()
 {
-	double rowTime = sndFile.GetRowDuration(m_nTempo, m_nSpeed);
-
-	m_dRowsOrig = (double)m_lMsOrig / rowTime;
-	m_dRowsNew = m_dRowsOrig * (m_dRatio / 100);
-
-	return;
+	m_rowsOrig = m_durationOrig / m_sndFile.GetRowDuration(m_tempo, m_speed);
+	m_rowsNew = m_rowsOrig * m_ratio / 100.0;
+	m_EditRowsOrig.SetDecimalValue(m_rowsOrig);
+	m_EditRowsNew.SetDecimalValue(m_rowsNew);
 }
-
-void CPSRatioCalc::OnBnClickedOk()
-{
-	if (m_dRatio<50.0 || m_dRatio>200.0)
-	{
-		Reporting::Error("Error: ratio must be between 50% and 200%.");
-		return;
-	}
-	OnOK();
-}
-
 
 OPENMPT_NAMESPACE_END

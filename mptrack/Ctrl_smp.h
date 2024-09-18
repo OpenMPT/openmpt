@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "CDecimalSupport.h"
 #include "Globals.h"
 #include "Undo.h"
 #include "UpdateHints.h"
@@ -45,22 +46,18 @@ protected:
 	CEdit m_EditLoopStart, m_EditLoopEnd, m_EditSustainStart, m_EditSustainEnd;
 	CEdit m_EditVibSweep, m_EditVibDepth, m_EditVibRate;
 	CEdit m_EditVolume, m_EditGlobalVol, m_EditPanning;
+	CNumberEdit m_EditTimeStretchRatio;
 	CSpinButtonCtrl m_SpinVolume, m_SpinGlobalVol, m_SpinPanning, m_SpinVibSweep, m_SpinVibDepth, m_SpinVibRate;
 	CSpinButtonCtrl m_SpinLoopStart, m_SpinLoopEnd, m_SpinSustainStart, m_SpinSustainEnd;
-	CSpinButtonCtrl m_SpinFineTune, m_SpinSample;
-	CSpinButtonCtrl m_SpinSequenceMs, m_SpinSeekWindowMs, m_SpinOverlap, m_SpinStretchAmount;
-	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote;
+	CSpinButtonCtrl m_SpinFineTune, m_SpinSample, m_SpinTimeStretchRatio;
+	CComboBox m_ComboAutoVib, m_ComboLoopType, m_ComboSustainType, m_ComboZoom, m_CbnBaseNote, m_ComboGrainSize;
 	CButton m_CheckPanning;
-	double m_dTimeStretchRatio = 100;
-	uint32 m_nSequenceMs = 0;
-	uint32 m_nSeekWindowMs = 0;
-	uint32 m_nOverlapMs = 0;
 	SAMPLEINDEX m_nSample = 1;
 	INSTRUMENTINDEX m_editInstrumentName = INSTRUMENTINDEX_INVALID;
 	bool m_rememberRawFormat = false;
 	bool m_startedEdit = false;
 
-	CComboBox m_ComboPitch, m_ComboQuality, m_ComboFFT;
+	CComboBox m_ComboPitch;
 
 public:
 	CCtrlSamples(CModControlView &parent, CModDoc &document);
@@ -78,9 +75,6 @@ protected:
 
 	void Normalize(bool allSamples);
 	void RemoveDCOffset(bool allSamples);
-
-	void UpdateTimeStretchParameters();
-	void ReadTimeStretchParameters();
 
 	void ApplyAmplify(const double amp, const double fadeInStart, const double fadeOutEnd, const bool fadeIn, const bool fadeOut, const Fade::Law fadeLaw);
 	void ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection = false, bool updatePatternCommands = false);
@@ -157,7 +151,7 @@ protected:
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 
 	afx_msg void OnPitchShiftTimeStretch();
-	afx_msg void OnEnableStretchToSize();
+	afx_msg void OnToggleTimestretchQuality();
 	afx_msg void OnEstimateSampleSize();
 
 	afx_msg void OnInitOPLInstrument();

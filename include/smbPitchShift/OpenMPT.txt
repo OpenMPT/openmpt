@@ -1,2 +1,0 @@
-smbPitchShift from http://blogs.zynaptiq.com/bernsee/download/.
-Modifications are marked with "// OpenMPT".

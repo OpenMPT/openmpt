@@ -92,7 +92,6 @@ def copy_binaries(from_path, to_path):
 	copy_file(from_path, to_path, "OpenMPT.exe")
 	copy_file(from_path, to_path, "openmpt-lame.dll")
 	copy_file(from_path, to_path, "openmpt-mpg123.dll")
-	copy_file(from_path, to_path, "openmpt-soundtouch.dll")
 	copy_file(from_path, to_path, "openmpt-wine-support.zip")
 
 def copy_pluginbridge(from_path, arch, to_path):
@@ -104,7 +103,6 @@ def copy_symbols(from_path, to_path):
 	copy_file(from_path, to_path, "OpenMPT.pdb")
 	copy_file(from_path, to_path, "openmpt-lame.pdb")
 	copy_file(from_path, to_path, "openmpt-mpg123.pdb")
-	copy_file(from_path, to_path, "openmpt-soundtouch.pdb")
 
 def copy_symbols_pluginbridge(from_path, to_path, arch):
 	copy_file(from_path, to_path, "PluginBridge-" + arch + ".pdb")

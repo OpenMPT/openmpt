@@ -1,7 +1,7 @@
 /*
  * PSRatioCalc.h
  * -------------
- * Purpose: Dialog for calculating sample pitch shift ratios in the sample editor.
+ * Purpose: Dialog for calculating time stretch shift ratios in the sample editor.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -20,39 +20,44 @@ class CSoundFile;
 
 class CPSRatioCalc : public CDialog
 {
-	DECLARE_DYNAMIC(CPSRatioCalc)
-
 public:
-	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *pParent = nullptr);
-	double m_dRatio;
+	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *parent = nullptr);
+
+	double m_ratio = 100.0;
 
 protected:
-	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	BOOL OnInitDialog() override;
-
-	CNumberEdit m_EditTempo;
-	const CSoundFile &sndFile;
-	SAMPLEINDEX sampleIndex;
-
-	ULONGLONG m_lSamplesNew;
-	ULONGLONG m_lMsNew, m_lMsOrig;
-	double m_dRowsOrig, m_dRowsNew;
-	uint32 m_nSpeed;
-	TEMPO m_nTempo;
-
-	afx_msg void OnEnChangeSamples();
-	afx_msg void OnEnChangeMs();
-	afx_msg void OnEnChangeSpeed();
-	afx_msg void OnEnChangeRows();
-	afx_msg void OnEnChangeratio();
 
 	void CalcSamples();
 	void CalcMs();
 	void CalcRows();
 
+	void LockControls() { m_lockCount++; }
+	void UnlockControls() { m_lockCount--; }
+	bool IsLocked() const { return m_lockCount != 0; }
+
+	afx_msg void OnChangeSampleLength();
+	afx_msg void OnChangeDuration();
+	afx_msg void OnChangeSpeed();
+	afx_msg void OnChangeRows();
+	afx_msg void OnChangeRatio();
+
+	CNumberEdit m_EditTempo;
+	CNumberEdit m_EditRatio;
+	CNumberEdit m_EditDurationOrig, m_EditDurationNew;
+	CNumberEdit m_EditRowsOrig, m_EditRowsNew;
+
+	const CSoundFile &m_sndFile;
+	SAMPLEINDEX m_sampleIndex = 0;
+
+	double m_durationOrig = 0, m_durationNew = 0;
+	double m_rowsOrig = 0, m_rowsNew = 0;
+	SmpLength m_sampleLengthNew = 0;
+	uint32 m_speed = 0;
+	TEMPO m_tempo;
+	int m_lockCount = 0;
+
 	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnBnClickedOk();
 };
 
 OPENMPT_NAMESPACE_END

@@ -37,7 +37,7 @@ void CNumberEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	BOOL bHandled = false;
 	CDecimalSupport<CNumberEdit>::OnChar(0, nChar, 0, bHandled);
-	if(!bHandled) CEdit::OnChar(nChar , nRepCnt,  nFlags);
+	if(!bHandled) CEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
 
