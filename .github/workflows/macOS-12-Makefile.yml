@@ -19,6 +19,8 @@ jobs:
       run: brew pin swiftlint
     - name: fixup GitHub Homebrew xcbeautify breakage
       run: brew pin xcbeautify
+    - name: fixup GitHub Homebrew go breakage
+      run: brew unlink go@1.21
     - name: fixup GitHub Homebrew node breakage
       run: brew unlink node@18 && brew unlink node && brew link --overwrite node
     - name: fixup GitHub Homebrew python breakage
