@@ -46,36 +46,36 @@ mkdir XMPlay-legacy
 mkdir Winamp-legacy
 rmdir /s /q Licenses
 mkdir Licenses
-copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt               .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
-copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                    .\Licenses\License.mpt.BSL-1.0.txt || goto error
-rem copy /y ..\..\include\ancient\LICENSE                        .\Licenses\License.ancient.txt || goto error
-rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp             .\Licenses\License.ancient.bzip2.txt || goto error
-rem copy /y ..\..\include\cryptopp\License.txt                   .\Licenses\License.CryptoPP.txt || goto error
-copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
-rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
-rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-rem copy /y ..\..\include\minimp3\LICENSE                        .\Licenses\License.minimp3.txt || goto error
-rem copy /y ..\..\include\miniz\miniz.c                          .\Licenses\License.miniz.txt || goto error
-copy /y ..\..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
-copy /y ..\..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
-rem copy /y ..\..\include\nlohmann-json\LICENSE.MIT               .\Licenses\License.nlohmann-json.txt || goto error
-copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
-rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
-rem copy /y ..\..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error
-rem copy /y ..\..\include\opusenc\AUTHORS                        .\Licenses\License.Opusenc.Authors.txt || goto error
-rem copy /y ..\..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
-copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
-copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
-copy /y ..\..\include\pugixml\LICENSE.md                     .\Licenses\License.PugiXML.txt || goto error
-rem copy /y ..\..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
-rem copy /y ..\..\include\rtmidi\LICENSE                         .\Licenses\License.RtMidi.txt || goto error
+copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt                          .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
+copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                               .\Licenses\License.mpt.BSL-1.0.txt || goto error
+rem copy /y ..\..\include\ancient\LICENSE                                   .\Licenses\License.ancient.txt || goto error
+rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp                        .\Licenses\License.ancient.bzip2.txt || goto error
+rem copy /y ..\..\include\cryptopp\License.txt                              .\Licenses\License.CryptoPP.txt || goto error
+copy /y ..\..\include\flac\COPYING.Xiph                                 .\Licenses\License.FLAC.txt || goto error
+rem copy /y ..\..\include\lame\COPYING                                      .\Licenses\License.lame.txt || goto error
+rem copy /y ..\..\include\lhasa\COPYING                                     .\Licenses\License.lhasa.txt || goto error
+rem copy /y ..\..\include\minimp3\LICENSE                                   .\Licenses\License.minimp3.txt || goto error
+rem copy /y ..\..\include\miniz\miniz.c                                     .\Licenses\License.miniz.txt || goto error
+copy /y ..\..\include\mpg123\COPYING                                    .\Licenses\License.mpg123.txt || goto error
+copy /y ..\..\include\mpg123\AUTHORS                                    .\Licenses\License.mpg123.Authors.txt || goto error
+rem copy /y ..\..\include\nlohmann-json\LICENSE.MIT                         .\Licenses\License.nlohmann-json.txt || goto error
+copy /y ..\..\include\ogg\COPYING                                       .\Licenses\License.ogg.txt || goto error
+rem copy /y ..\..\include\opus\COPYING                                      .\Licenses\License.Opus.txt || goto error
+rem copy /y ..\..\include\opusenc\COPYING                                   .\Licenses\License.Opusenc.txt || goto error
+rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Licenses\License.Opusenc.Authors.txt || goto error
+rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
+copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
+copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
+rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
+rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
+rem copy /y ..\..\include\rtmidi\LICENSE                                    .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\SignalsmithStretch\SignalsmithStretch\LICENSE.txt .\Licenses\License.SignalsmithStretch.txt || goto error
-rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
-rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
-copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
-rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
+rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Licenses\License.stb_vorbis.txt || goto error
+rem copy /y ..\..\include\unrar\license.txt                                 .\Licenses\License.UnRAR.txt || goto error
+copy /y ..\..\include\vorbis\COPYING                                    .\Licenses\License.Vorbis.txt || goto error
+copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
+rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt           .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
@@ -167,35 +167,35 @@ mkdir bin\amd64-legacy
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
-copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt               .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
-copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                    .\Licenses\License.mpt.BSL-1.0.txt || goto error
-rem copy /y ..\..\include\ancient\LICENSE                        .\Licenses\License.ancient.txt || goto error
-rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp             .\Licenses\License.ancient.bzip2.txt || goto error
-rem copy /y ..\..\include\flac\COPYING.Xiph                      .\Licenses\License.FLAC.txt || goto error
-rem copy /y ..\..\include\lame\COPYING                           .\Licenses\License.lame.txt || goto error
-rem copy /y ..\..\include\lhasa\COPYING                          .\Licenses\License.lhasa.txt || goto error
-rem copy /y ..\..\include\minimp3\LICENSE                        .\Licenses\License.minimp3.txt || goto error
-rem copy /y ..\..\include\miniz\LICENSE                          .\Licenses\License.miniz.txt || goto error
-copy /y ..\..\include\mpg123\COPYING                         .\Licenses\License.mpg123.txt || goto error
-copy /y ..\..\include\mpg123\AUTHORS                         .\Licenses\License.mpg123.Authors.txt || goto error
-rem copy /y ..\..\include\nlohmann-json\LICENSE.MIT              .\Licenses\License.nlohmann-json.txt || goto error
-copy /y ..\..\include\ogg\COPYING                            .\Licenses\License.ogg.txt || goto error
-rem copy /y ..\..\include\opus\COPYING                           .\Licenses\License.Opus.txt || goto error
-rem copy /y ..\..\include\opusenc\COPYING                        .\Licenses\License.Opusenc.txt || goto error
-rem copy /y ..\..\include\opusenc\AUTHORS                        .\Licenses\License.Opusenc.Authors.txt || goto error
-rem copy /y ..\..\include\opusfile\COPYING                       .\Licenses\License.Opusfile.txt || goto error
-rem copy /y ..\..\include\portaudio\LICENSE.txt                  .\Licenses\License.PortAudio.txt || goto error
-rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING         .\Licenses\License.portaudiocpp.txt || goto error
-rem copy /y ..\..\include\pugixml\LICENSE.md                     .\Licenses\License.PugiXML.txt || goto error
-rem copy /y ..\..\include\r8brain\LICENSE                        .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\rtaudio\README.md                      .\Licenses\License.RtAudio.txt || goto error
-rem copy /y ..\..\include\rtmidi\LICENSE                         .\Licenses\License.RtMidi.txt || goto error
+copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt                          .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
+copy /y ..\..\src\mpt\LICENSE.BSL-1.0.txt                               .\Licenses\License.mpt.BSL-1.0.txt || goto error
+rem copy /y ..\..\include\ancient\LICENSE                                   .\Licenses\License.ancient.txt || goto error
+rem copy /y ..\..\include\ancient\src\BZIP2Table.hpp                        .\Licenses\License.ancient.bzip2.txt || goto error
+rem copy /y ..\..\include\flac\COPYING.Xiph                                 .\Licenses\License.FLAC.txt || goto error
+rem copy /y ..\..\include\lame\COPYING                                      .\Licenses\License.lame.txt || goto error
+rem copy /y ..\..\include\lhasa\COPYING                                     .\Licenses\License.lhasa.txt || goto error
+rem copy /y ..\..\include\minimp3\LICENSE                                   .\Licenses\License.minimp3.txt || goto error
+rem copy /y ..\..\include\miniz\LICENSE                                     .\Licenses\License.miniz.txt || goto error
+copy /y ..\..\include\mpg123\COPYING                                    .\Licenses\License.mpg123.txt || goto error
+copy /y ..\..\include\mpg123\AUTHORS                                    .\Licenses\License.mpg123.Authors.txt || goto error
+rem copy /y ..\..\include\nlohmann-json\LICENSE.MIT                         .\Licenses\License.nlohmann-json.txt || goto error
+copy /y ..\..\include\ogg\COPYING                                       .\Licenses\License.ogg.txt || goto error
+rem copy /y ..\..\include\opus\COPYING                                      .\Licenses\License.Opus.txt || goto error
+rem copy /y ..\..\include\opusenc\COPYING                                   .\Licenses\License.Opusenc.txt || goto error
+rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Licenses\License.Opusenc.Authors.txt || goto error
+rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
+rem copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
+rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+rem copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
+rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
+rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
+rem copy /y ..\..\include\rtmidi\LICENSE                                    .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\SignalsmithStretch\SignalsmithStretch\LICENSE.txt .\Licenses\License.SignalsmithStretch.txt || goto error
-rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                .\Licenses\License.stb_vorbis.txt || goto error
-rem copy /y ..\..\include\unrar\license.txt                      .\Licenses\License.UnRAR.txt || goto error
-copy /y ..\..\include\vorbis\COPYING                         .\Licenses\License.Vorbis.txt || goto error
-copy /y ..\..\include\zlib\README                            .\Licenses\License.zlib.txt || goto error
-rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt .\Licenses\License.minizip.txt || goto error
+rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Licenses\License.stb_vorbis.txt || goto error
+rem copy /y ..\..\include\unrar\license.txt                                 .\Licenses\License.UnRAR.txt || goto error
+copy /y ..\..\include\vorbis\COPYING                                    .\Licenses\License.Vorbis.txt || goto error
+copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
+rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt           .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\changelog.md || goto error
 copy /y ..\..\libopenmpt\libopenmpt.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
