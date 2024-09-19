@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.45-pre
 
+ *  Fixed inconsistency in length calculation and actual playback length with
+    tempo commands below 32 BPM in various formats (MDL among others).
+
  *  mpg123: Update to v1.32.7 (2024-08-07).
 
 ### libopenmpt 0.4.44 (2024-07-21)
