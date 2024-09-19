@@ -196,6 +196,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, accidentalFlats(conf, U_("Display"), U_("AccidentalFlats"), false)
 	, rememberSongWindows(conf, U_("Display"), U_("RememberSongWindows"), true)
 	, showDirsInSampleBrowser(conf, U_("Display"), U_("ShowDirsInSampleBrowser"), false)
+	, useOldStyleFolderBrowser(conf, U_("Display"), U_("UseOldStyleFolderBrowser"), false)
 	, defaultRainbowChannelColors(conf, U_("Display"), U_("DefaultChannelColors"), DefaultChannelColors::Random)
 	, commentsFont(conf, U_("Display"), U_("Comments Font"), FontSetting(U_("Courier New"), 120))
 	// Misc

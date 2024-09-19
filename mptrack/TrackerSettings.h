@@ -693,6 +693,7 @@ public:
 	CachedSetting<bool> accidentalFlats;
 	Setting<bool> rememberSongWindows;
 	Setting<bool> showDirsInSampleBrowser;
+	Setting<bool> useOldStyleFolderBrowser;
 	Setting<DefaultChannelColors> defaultRainbowChannelColors;
 
 	Setting<FontSetting> commentsFont;
