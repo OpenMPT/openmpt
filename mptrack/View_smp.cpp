@@ -3656,13 +3656,6 @@ BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 			const auto event = ih->Translate(*pMsg);
 			if (ih->KeyEvent(kCtxViewSamples, event) != kcNull)
 				return true; // Mapped to a command, no need to pass message on.
-
-			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
-			{
-				int x = Util::ScalePixels(32, m_hWnd);
-				OnRButtonDown(0, CPoint(x, x));
-			}
 		}
 
 	}
@@ -3679,6 +3672,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
+		case kcContextMenu: OnRButtonDown(0, CPoint(0, TimelineHeight(m_hWnd))); return wParam;
+
 		case kcSampleTrim:			TrimSample(false); return wParam;
 		case kcSampleTrimToLoopEnd:	TrimSample(true); return wParam;
 		case kcSampleZoomUp:		OnZoomUp(); return wParam;

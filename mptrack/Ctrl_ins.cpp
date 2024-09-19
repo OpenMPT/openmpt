@@ -71,55 +71,42 @@ END_MESSAGE_MAP()
 
 BOOL CNoteMapWnd::PreTranslateMessage(MSG *pMsg)
 {
-	if(!pMsg)
-		return TRUE;
-	uint32 wParam = static_cast<uint32>(pMsg->wParam);
-
+	//We handle keypresses before Windows has a chance to handle them (for alt etc..)
+	if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
+		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
-		//We handle keypresses before Windows has a chance to handle them (for alt etc..)
-		if ((pMsg->message == WM_SYSKEYUP)   || (pMsg->message == WM_KEYUP) ||
-			(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
-		{
-			CInputHandler *ih = CMainFrame::GetInputHandler();
-			const auto event = ih->Translate(*pMsg);
+		CInputHandler *ih = CMainFrame::GetInputHandler();
+		const auto event = ih->Translate(*pMsg);
 
-			if (ih->KeyEvent(kCtxInsNoteMap, event) != kcNull)
-				return true; // Mapped to a command, no need to pass message on.
+		if (ih->KeyEvent(kCtxInsNoteMap, event, this) != kcNull)
+			return TRUE; // Mapped to a command, no need to pass message on.
 
-			// a bit of a hack...
-			if (ih->KeyEvent(kCtxCtrlInstruments, event) != kcNull)
-				return true; // Mapped to a command, no need to pass message on.
-		}
+		// a bit of a hack...
+		if (ih->KeyEvent(kCtxCtrlInstruments, event, this) != kcNull)
+			return TRUE; // Mapped to a command, no need to pass message on.
+
+		// For context menu shortcut
+		if(ih->KeyEvent(kCtxAllContexts, event, this) != kcNull)
+			return TRUE;  // Mapped to a command, no need to pass message on.
 	}
 
 	//The key was not handled by a command, but it might still be useful
-	if (pMsg->message == WM_CHAR) //key is a character
+	uint32 wParam = static_cast<uint32>(pMsg->wParam);
+	if(pMsg->message == WM_CHAR && CInputHandler::GetKeyEventType(*pMsg) == kKeyEventDown)  // Key is a character
 	{
-		if(CInputHandler::GetKeyEventType(*pMsg) == kKeyEventDown)
-			if(HandleChar(wParam))
-				return true;
-	}
-	else if (pMsg->message == WM_KEYDOWN) //key is not a character
+		if(HandleChar(wParam))
+			return TRUE;
+	} else if(pMsg->message == WM_KEYDOWN)  // Key is not a character
 	{
 		if(HandleNav(wParam))
-			return true;
-
-		// Handle Application (menu) key
-		if(wParam == VK_APPS)
-		{
-			CRect clientRect;
-			GetClientRect(clientRect);
-			clientRect.bottom = clientRect.top + mpt::align_up(clientRect.Height(), m_cyFont);
-			OnRButtonDown(0, clientRect.CenterPoint());
-		}
-	}
-	else if (pMsg->message == WM_KEYUP) //stop notes on key release
+			return TRUE;
+	} else if(pMsg->message == WM_KEYUP)  // Stop notes on key release
 	{
-		if (((pMsg->wParam >= '0') && (pMsg->wParam <= '9')) || (pMsg->wParam == ' ') ||
+		if(((pMsg->wParam >= '0') && (pMsg->wParam <= '9')) || (pMsg->wParam == ' ') ||
 			((pMsg->wParam >= VK_NUMPAD0) && (pMsg->wParam <= VK_NUMPAD9)))
 		{
 			StopNote();
-			return true;
+			return TRUE;
 		}
 	}
 
@@ -272,7 +259,6 @@ void CNoteMapWnd::OnSetFocus(CWnd *pOldWnd)
 {
 	CStatic::OnSetFocus(pOldWnd);
 	Invalidate(FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = this;
 	m_undo = true;
 }
 
@@ -281,7 +267,6 @@ void CNoteMapWnd::OnKillFocus(CWnd *pNewWnd)
 {
 	CStatic::OnKillFocus(pNewWnd);
 	Invalidate(FALSE);
-	CMainFrame::GetMainFrame()->m_pNoteMapHasFocus = nullptr;
 }
 
 
@@ -615,6 +600,14 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
+	case kcContextMenu:
+		{
+			CRect clientRect;
+			GetClientRect(clientRect);
+			clientRect.bottom = clientRect.top + mpt::align_up(clientRect.Height(), m_cyFont);
+			OnRButtonDown(0, clientRect.CenterPoint());
+		}
+		return wParam;
 	case kcInsNoteMapTransposeDown:		MapTranspose(-1); return wParam;
 	case kcInsNoteMapTransposeUp:		MapTranspose(1); return wParam;
 	case kcInsNoteMapTransposeOctDown:	MapTranspose(-12); return wParam;

@@ -173,8 +173,6 @@ public:
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	void UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify);
-	HWND GetModTreeHWND(); //rewbs.customKeys
-	LRESULT SendMessageToModTree(UINT cmdID, WPARAM wParam, LPARAM lParam);
 	bool SetTreeSoundfile(FileReader &file);
 
 	void StartTreeFilter(CModTree &source);

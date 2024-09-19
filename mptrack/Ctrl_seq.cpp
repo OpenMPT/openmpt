@@ -446,17 +446,29 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 		CInputHandler *ih = CMainFrame::GetInputHandler();
 		const auto event = ih->Translate(*pMsg);
 
-		if(ih->KeyEvent(kCtxCtrlOrderlist, event) != kcNull)
+		if(ih->KeyEvent(kCtxCtrlOrderlist, event, this) != kcNull)
 			return TRUE;  // Mapped to a command, no need to pass message on.
 
 		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
 		//      command propagation to kCtxCtrlOrderlist context.
 
-		if(ih->KeyEvent(kCtxViewPatternsNote, event) != kcNull)
+		if(ih->KeyEvent(kCtxViewPatternsNote, event, this) != kcNull)
 			return TRUE;  // Mapped to a command, no need to pass message on.
 
-		// Handle Application (menu) key
-		if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
+		if(ih->KeyEvent(kCtxAllContexts, event, this) != kcNull)
+			return TRUE;  // Mapped to a command, no need to pass message on.
+	}
+
+	return CWnd::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
+{
+	const bool isPlaying = IsPlaying();
+	switch(wParam)
+	{
+	case kcContextMenu:
 		{
 			const auto selection = GetCurSel();
 			auto pt = (GetRectFromOrder(selection.firstOrd) | GetRectFromOrder(selection.lastOrd)).CenterPoint();
@@ -466,17 +478,8 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 				pt = clientRect.CenterPoint();
 			OnRButtonDown(0, pt);
 		}
-	}
+		return wParam;
 
-	return CWnd::PreTranslateMessage(pMsg);
-}
-
-
-LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
-{
-	bool isPlaying = IsPlaying();
-	switch(wParam)
-	{
 	case kcEditCopy:
 		OnEditCopy(); return wParam;
 	case kcEditCut:
@@ -888,7 +891,6 @@ void COrderList::OnSetFocus(CWnd *pWnd)
 	CWnd::OnSetFocus(pWnd);
 	InvalidateSelection();
 	UpdateInfoText();
-	CMainFrame::GetMainFrame()->m_pOrderlistHasFocus = this;
 }
 
 
@@ -896,7 +898,6 @@ void COrderList::OnKillFocus(CWnd *pWnd)
 {
 	CWnd::OnKillFocus(pWnd);
 	InvalidateSelection();
-	CMainFrame::GetMainFrame()->m_pOrderlistHasFocus = nullptr;
 }
 
 

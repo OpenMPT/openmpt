@@ -276,17 +276,6 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 	{
 		switch(pMsg->wParam)
 		{
-		case VK_APPS:
-			// Handle Application (menu) key
-			if(HTREEITEM item = GetSelectedItem())
-			{
-				CRect rect;
-				GetItemRect(item, &rect, FALSE);
-				ClientToScreen(rect);
-				OnItemRightClick(item, rect.TopLeft() + CPoint{rect.Height() / 2, rect.Height() / 2});
-			}
-			return TRUE;
-
 		case VK_ESCAPE:
 			GetParent()->PostMessage(WM_COMMAND, ID_CLOSE_LIBRARY_FILTER);
 			break;
@@ -315,7 +304,12 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 		(pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
-		if(ih->KeyEvent(kCtxViewTree, ih->Translate(*pMsg)) != kcNull)
+		const auto event = ih->Translate(*pMsg);
+		if(ih->KeyEvent(kCtxViewTree, event, this) != kcNull)
+			return TRUE;  // Mapped to a command, no need to pass message on.
+
+		// For context menu shortcut
+		if(ih->KeyEvent(kCtxAllContexts, event, this) != kcNull)
 			return TRUE;  // Mapped to a command, no need to pass message on.
 	}
 	return CTreeCtrl::PreTranslateMessage(pMsg);
@@ -525,31 +519,31 @@ void CModTree::RefreshMidiLibrary()
 	HTREEITEM parent = GetChildItem(m_hMidiLib);
 	for(UINT iMidi = 0; iMidi < 128; iMidi++)
 	{
-		DWORD dwImage = IMAGE_INSTRMUTE;
+		int image = IMAGE_INSTRMUTE;
 		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
 		if(!midiLib[iMidi].empty())
 		{
 			s += _T(": ") + midiLib[iMidi].GetFilename().ToCString();
-			dwImage = IMAGE_INSTRUMENTS;
+			image = IMAGE_INSTRUMENTS;
 		}
 		if(!m_tiMidi[iMidi])
 		{
 			m_tiMidi[iMidi] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
+							s, image, image, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiMidi[iMidi];
 			tvi.pszText = stmp.GetBuffer(s.GetLength() + 1);
 			tvi.cchTextMax = stmp.GetAllocLength();
-			tvi.iImage = tvi.iSelectedImage = dwImage;
+			tvi.iImage = tvi.iSelectedImage = image;
 			GetItem(&tvi);
 			s.ReleaseBuffer();
-			if(s != stmp || tvi.iImage != (int)dwImage)
+			if(s != stmp || tvi.iImage != image)
 			{
 				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-					s, dwImage, dwImage, 0, 0, param);
+					s, image, image, 0, 0, param);
 			}
 		}
 		if((iMidi % 8u) == 7u)
@@ -4191,6 +4185,17 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 
 	switch(wParam)
 	{
+	case kcContextMenu:
+		if(HTREEITEM item = GetSelectedItem())
+		{
+			CRect rect;
+			GetItemRect(item, &rect, FALSE);
+			ClientToScreen(rect);
+			OnItemRightClick(item, rect.TopLeft() + CPoint{ rect.Height() / 2, rect.Height() / 2 });
+			return wParam;
+		}
+		break;
+
 	case kcTreeViewStopPreview:
 		note = NOTE_NOTECUT;
 		break;

@@ -2260,18 +2260,6 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 			const auto event = ih->Translate(*pMsg);
 			if(ih->KeyEvent(kCtxViewInstruments, event) != kcNull)
 				return TRUE;  // Mapped to a command, no need to pass message on.
-
-			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
-			{
-				CPoint pt(0, 0);
-				if(m_nDragItem > 0)
-				{
-					uint32 point = DragItemToEnvPoint();
-					pt.SetPoint(PointToScreen(point), ValueToScreen(EnvGetValue(point)));
-				}
-				OnRButtonDown(0, pt);
-			}
 		}
 	}
 
@@ -2288,6 +2276,17 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 
 	switch(wParam)
 	{
+		case kcContextMenu:
+			{
+				CPoint pt(0, 0);
+				if(m_nDragItem > 0)
+				{
+					uint32 point = DragItemToEnvPoint();
+					pt.SetPoint(PointToScreen(point), ValueToScreen(EnvGetValue(point)));
+				}
+				OnRButtonDown(0, pt);
+			}
+			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;
 		case kcNextInstrument:	OnNextInstrument(); return wParam;
 		case kcEditCopy:		OnEditCopy(); return wParam;

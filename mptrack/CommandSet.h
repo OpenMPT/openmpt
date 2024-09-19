@@ -161,7 +161,8 @@ enum CommandID
 	kcEndView = kcHelp,
 
 	kcStartMisc,
-	kcPrevInstrument = kcStartMisc,
+	kcContextMenu = kcStartMisc,
+	kcPrevInstrument,
 	kcNextInstrument,
 	kcPrevOctave,
 	kcNextOctave,

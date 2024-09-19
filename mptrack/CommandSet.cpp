@@ -89,6 +89,8 @@ constexpr struct
 	{kcViewMIDImapping,                        VK_F3,              ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
 	{kcSwitchToInstrLibrary,                   'I',                ModAlt,             kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
 	{kcHelp,                                   VK_F1,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcContextMenu,                            VK_APPS,            ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.32.00.25")},
+	{kcContextMenu,                            VK_F10,             ModShift,           kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.32.00.25")},
 	{kcPrevInstrument,                         VK_DIVIDE,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
 	{kcPrevInstrument,                         VK_UP,              ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
 	{kcNextInstrument,                         VK_MULTIPLY,        ModCtrl,            kKeyEventDown | kKeyEventRepeat, kCtxAllContexts,         MPT_V("1.31")},
@@ -1390,6 +1392,7 @@ static constexpr struct
 	{2098, kcGotoVolumeColumn, _T("Go to volume effect column")},
 	{2099, kcGotoCommandColumn, _T("Go to effect command column")},
 	{2100, kcGotoParamColumn, _T("Go to effect parameter column")},
+	{2101, kcContextMenu, _T("Open Context Menu")},
 };
 // clang-format on
 
@@ -2387,10 +2390,10 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 
 		if(auto conflictCmd = IsConflicting(kc, kb.cmd, false); conflictCmd.first != kcNull)
 		{
-			// Allow cross-context conflicts in case the newly added shortcut is in a more specific context
+			// Allow cross-context conflicts in case the newly added shortcut is in a more generic context
 			// - unless the conflicting shortcut is the reserved dummy shortcut (which was used to prevent
 			// default shortcuts from being added back before default key binding versioning was added).
-			if(conflictCmd.first == kcDummyShortcut || !m_isParentContext[conflictCmd.second.Context()][kb.ctx])
+			if(conflictCmd.first == kcDummyShortcut || !m_isParentContext[kb.ctx][conflictCmd.second.Context()])
 				continue;
 		}
 

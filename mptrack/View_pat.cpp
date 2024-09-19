@@ -710,12 +710,6 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				}
 			}
 			//end HACK.
-
-			// Handle Application (menu) key
-			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)
-			{
-				OnRButtonDown(0, GetPointFromPosition(m_Cursor));
-			}
 		} else if(pMsg->message == WM_MBUTTONDOWN)
 		{
 			// Open quick channel properties dialog if we're middle-clicking a channel header.
@@ -4334,6 +4328,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
+		case kcContextMenu: OnRButtonDown(0, GetPointFromPosition(m_Cursor)); return wParam;
+
 		case kcPrevInstrument:        OnPrevInstrument(); return wParam;
 		case kcNextInstrument:        OnNextInstrument(); return wParam;
 		case kcPrevOrder:             GotoPreviousOrder(); return wParam;

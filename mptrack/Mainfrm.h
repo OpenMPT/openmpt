@@ -208,8 +208,6 @@ protected:
 	CAutoSaver m_AutoSaver;
 
 public:
-	CWnd *m_pNoteMapHasFocus = nullptr;
-	CWnd *m_pOrderlistHasFocus = nullptr;
 	bool m_bModTreeHasFocus = false;
 
 public:

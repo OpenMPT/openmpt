@@ -1900,11 +1900,8 @@ public:
 		: CProgressDialog{&parent}
 		, m_updateInterval{std::max(uint32(15), TrackerSettings::Instance().GUIUpdateInterval.Get())}
 	{
-		const auto updateFunc = std::bind(&DoPitchShiftTimeStretch::UpdateProgress, this, std::placeholders::_1, std::placeholders::_2);
-		const auto prepareUndo = [&parent]()
-		{
-			return parent.PrepareUndo("Pitch Shift / Time Stretch", sundo_replace);
-		};
+		const auto updateFunc = [this](SmpLength current, SmpLength maximum) { return UpdateProgress(current, maximum); };
+		const auto prepareUndo = [&parent]() { return parent.PrepareUndo("Pitch Shift / Time Stretch", sundo_replace); };
 
 		CSoundFile &sndFile = modDoc.GetSoundFile();
 		if(loFi)

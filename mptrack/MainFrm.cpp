@@ -2520,7 +2520,6 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPrevDocument:	MDIPrev(); break;
 		case kcFileCloseAll:	theApp.OnFileCloseAll(); break;
 
-
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
 		case kcFileSaveAs:
@@ -2581,17 +2580,8 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				m_wndTree.SetFocus();
 			break;
 
-		//if handled neither by MainFrame nor by ModDoc...
 		default:
-			//If the treeview has focus, post command to the tree view
-			if (m_bModTreeHasFocus)
-				return m_wndTree.SendMessageToModTree(WM_MOD_KEYCOMMAND, wParam, lParam);
-			if (m_pNoteMapHasFocus)
-				return m_pNoteMapHasFocus->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
-			if (m_pOrderlistHasFocus)
-				return m_pOrderlistHasFocus->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
-
-			//Else send it to the active view
+			// If handled neither by MainFrame nor by ModDoc, send it to the active view
 			CMDIChildWnd *pMDIActive = MDIGetActive();
 			CWnd *wnd = nullptr;
 			if(pMDIActive)
