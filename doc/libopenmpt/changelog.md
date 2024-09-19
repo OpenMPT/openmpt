@@ -7,7 +7,26 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.10-pre
 
+ *  [**Change**] FST was added to the list of supported file extension.
+    AMP uses this extension for multichannel MODs.
+
  *  [**Bug**] The Android NDK build system did not enable C++20 when available.
+
+ *  Fixed inconsistency in length calculation and actual playback length with
+    tempo commands below 32 BPM in various formats (MDL, MED among others).
+ *  MED: Command 09 (set speed) was limited to 20 ticks per row instead of 32
+    ticks per row.
+ *  MED: Allow tempo parameters < 32 BPM.
+ *  MED: Disallow free panning if hardware mixing is enabled.
+ *  For MOD-style vibrato, a speed parameter of 0 was not treated as effect
+    memory. Vibrato speed is now correct for both vibrato commands.
+ *  MED: Fix pattern index exhaustion in modules with multiple subsongs.
+ *  OKT: Don't drop global commands when setting paired channel volume, and try
+    to write channel volume on the next row in this situation. 
+ *  PTM: Use square root pan law, like in XM files.
+ *  SFX: Ignore unused data at end of oneshot samples which sometimes caused
+    clicky noises.
+ *  SFX: More accurate implementation of arpeggio effect.
 
  *  mpg123: Update to v1.32.7 (2024-08-07).
  *  minimp3: Update to fork
