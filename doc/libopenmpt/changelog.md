@@ -262,7 +262,8 @@ is just a high-level summary.
  *  [**New**] Can now read a variant of the DSMI AMF format called DMF, as found
     in various DOS games distributed by Webfoot (Tronic, H2O, PowBall, etc.).
  *  [**New**] `DSM` files from Dynamic Studio are now supported.
- *  [**New**] `XMF` files from the DOS game Imperium Galactica are now supported.
+ *  [**New**] `XMF` files from the DOS game Imperium Galactica are now
+    supported.
  *  [**New**] Can now read the hacked MOD format (`DMF`) from the game
     "Apocalypse Abyss".
  *  [**New**] libopenmpt: New APIs for getting the current tempo as a floating
@@ -395,7 +396,8 @@ is just a high-level summary.
     as IMF/ PTM note slides. Tone portamento is now synchronized correctly when
     seeking in DBM, 669 and MED with fast slides (first tick of portamento was
     previously not executed).
- *  The filter cutoff frequency is no longer rounded to integer frequency values.
+ *  The filter cutoff frequency is no longer rounded to integer frequency
+    values.
  *  MED: Tempos higher than 255 BPM can now be imported in pattern data.
  *  MED: MMD1 files with more than 16 channels are now supported.
  *  ULT: Import 8-bit volume commands with full precision.
@@ -404,7 +406,8 @@ is just a high-level summary.
  *  S3M: Better approximation of old "stereo control" SAx command used in
     Purple Motion's PANIC.S3M.
  *  S3M: In ScreamTracker 3.03 and later, OPL notes with tone portamento next to
-    them are delayed until the next row and then the new pitch is used instantly.
+    them are delayed until the next row and then the new pitch is used
+    instantly.
  *  MO3: Envelope sustain was not imported correctly if the source file was an
     XM.
  *  MOD: Lone instrument number with retrigger effect swap sample immediately.
