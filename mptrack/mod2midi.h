@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #ifndef NO_PLUGINS
+#include "DialogBase.h"
 #include "ProgressDialog.h"
 #include "../soundlib/Snd_defs.h"
 
@@ -31,7 +32,7 @@ namespace MidiExport
 }
 
 
-class CModToMidi: public CDialog
+class CModToMidi : public DialogBase
 {
 protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;

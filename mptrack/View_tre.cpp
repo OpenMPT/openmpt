@@ -316,7 +316,7 @@ BOOL CModTree::PreTranslateMessage(MSG *pMsg)
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
 		if(ih->KeyEvent(kCtxViewTree, ih->Translate(*pMsg)) != kcNull)
-			return true;  // Mapped to a command, no need to pass message on.
+			return TRUE;  // Mapped to a command, no need to pass message on.
 	}
 	return CTreeCtrl::PreTranslateMessage(pMsg);
 }

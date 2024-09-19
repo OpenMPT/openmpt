@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "PatternFindReplaceDlg.h"
+#include "DialogBase.h"
 #include "Mptrack.h"
 #include "PatternFindReplace.h"
 #include "View_pat.h"
@@ -21,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 // CFindRangeDlg: Find a range of values.
 
-class CFindRangeDlg : public CDialog
+class CFindRangeDlg : public DialogBase
 {
 public:
 	enum DisplayMode
@@ -37,7 +38,7 @@ protected:
 	DisplayMode m_displayMode;
 
 public:
-	CFindRangeDlg(CWnd *parent, int minVal, int minDefault, int maxVal, int maxDefault, DisplayMode displayMode) : CDialog(IDD_FIND_RANGE, parent)
+	CFindRangeDlg(CWnd *parent, int minVal, int minDefault, int maxVal, int maxDefault, DisplayMode displayMode) : DialogBase(IDD_FIND_RANGE, parent)
 		, m_minVal(minVal)
 		, m_minDefault(minDefault)
 		, m_maxVal(maxVal)
@@ -51,14 +52,14 @@ public:
 protected:
 	void DoDataExchange(CDataExchange* pDX) override
 	{
-		CDialog::DoDataExchange(pDX);
+		DialogBase::DoDataExchange(pDX);
 		DDX_Control(pDX, IDC_COMBO1, m_cbnMin);
 		DDX_Control(pDX, IDC_COMBO2, m_cbnMax);
 	}
 
 	BOOL OnInitDialog() override
 	{
-		CDialog::OnInitDialog();
+		DialogBase::OnInitDialog();
 
 		if(m_displayMode == kNotes)
 		{
@@ -96,7 +97,7 @@ protected:
 
 	void OnOK() override
 	{
-		CDialog::OnOK();
+		DialogBase::OnOK();
 		m_minVal = static_cast<int>(m_cbnMin.GetItemData(m_cbnMin.GetCurSel()));
 		m_maxVal = static_cast<int>(m_cbnMax.GetItemData(m_cbnMax.GetCurSel()));
 		if(m_maxVal < m_minVal)
@@ -130,7 +131,7 @@ END_MESSAGE_MAP()
 
 void CFindReplaceTab::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_cbnNote);
 	DDX_Control(pDX, IDC_COMBO2, m_cbnInstr);
 	DDX_Control(pDX, IDC_COMBO3, m_cbnVolCmd);

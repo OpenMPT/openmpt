@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "DialogBase.h"
 #include "EffectInfo.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -21,10 +22,8 @@ class CModDoc;
 class CSoundFile;
 
 // EffectVis dialog
-class CEffectVis : public CDialog
+class CEffectVis : public DialogBase
 {
-	DECLARE_DYNAMIC(CEffectVis)
-
 public:
 	enum class Action
 	{

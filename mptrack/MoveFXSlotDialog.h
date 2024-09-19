@@ -11,11 +11,12 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 #include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CMoveFXSlotDialog : public CDialog
+class CMoveFXSlotDialog : public DialogBase
 {
 protected:
 	const std::vector<PLUGINDEX> &m_EmptySlots;

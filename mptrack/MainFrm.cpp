@@ -508,64 +508,10 @@ void CMainFrame::OnActivateApp(BOOL active, DWORD threadID)
 
 LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
 {
+	if(code == HC_ACTION)
+		m_InputHandler->HandleModifierChanges(wParam, lParam);
 
-	static bool s_KeyboardHookReentryFlag = false; // work-around for https://bugs.openmpt.org/view.php?id=713
-
-	if(mpt::OS::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
-	{
-		// TODO: Properly fix this in same way or another.
-		if(code < 0)
-		{
-			return CallNextHookEx(ghKbdHook, code, wParam, lParam); // required by spec
-		}
-		if(theApp.InGuiThread())
-		{
-			if(s_KeyboardHookReentryFlag)
-			{
-				// Exit early without calling our hook when re-entering.
-				// We still need to call other hooks though.
-				return CallNextHookEx(ghKbdHook, code, wParam, lParam); // required by spec
-			}
-			s_KeyboardHookReentryFlag = true;
-		}
-	}
-
-	bool skipFurtherProcessing = false;
-
-	if(code >= 0)
-	{
-		// Check if textbox has focus
-		const bool handledByTextBox = m_InputHandler->IsKeyPressHandledByTextBox(static_cast<DWORD>(wParam), ::GetFocus());
-		if(!handledByTextBox && m_InputHandler->GeneralKeyEvent(kCtxAllContexts, code, wParam, lParam) != kcNull)
-		{
-			if(wParam != VK_ESCAPE)
-			{
-				// We've handled the keypress. No need to take it further.
-				// Unless it was esc, in which case we need it to close Windows
-				// (there might be other special cases, we'll see.. )
-				skipFurtherProcessing = true;
-			}
-		}
-	}
-
-	LRESULT result = 0;
-	if(skipFurtherProcessing)
-	{
-		result = -1;
-	} else
-	{
-		result = CallNextHookEx(ghKbdHook, code, wParam, lParam);
-	}
-
-	if(mpt::OS::Windows::IsWine()) // work-around for https://bugs.openmpt.org/view.php?id=713
-	{
-		if(theApp.InGuiThread())
-		{
-			s_KeyboardHookReentryFlag = false;
-		}
-	}
-
-	return result;
+	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
 }
 
 
@@ -642,6 +588,16 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
+
+	// We handle keypresses before Windows has a chance to handle them (for alt etc..)
+	if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP || pMsg->message == WM_SYSKEYDOWN)
+	{
+		CInputHandler *ih = CMainFrame::GetInputHandler();
+		const auto event = ih->Translate(*pMsg);
+		if(ih->KeyEvent(kCtxAllContexts, event) != kcNull)
+			return TRUE;  // Mapped to a command, no need to pass message on.
+	}
+
 	return CMDIFrameWnd::PreTranslateMessage(pMsg);
 }
 
@@ -2609,16 +2565,16 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewToggle:
 			{
 				CModDoc *modDoc = GetActiveDoc();
-				if (modDoc)
+				if(modDoc)
 					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
-				else if(wParam == kcPlayPauseSong || wParam == kcPlayStopSong|| wParam == kcStopSong)
+				else if(wParam == kcPlayPauseSong || wParam == kcPlayStopSong || wParam == kcStopSong)
 					StopPreview();
 				break;
 			}
 
 		case kcSwitchToInstrLibrary:
 			if(!m_wndTree.IsVisible())
-				break;
+				return kcNull;
 			if(m_bModTreeHasFocus)
 				SwitchToActiveView();
 			else

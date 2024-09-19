@@ -27,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
-BEGIN_MESSAGE_MAP(CAmpDlg, CDialog)
+BEGIN_MESSAGE_MAP(CAmpDlg, DialogBase)
 	ON_WM_DESTROY()
 	ON_EN_CHANGE(IDC_EDIT2, &CAmpDlg::EnableFadeIn)
 	ON_EN_CHANGE(IDC_EDIT3, &CAmpDlg::EnableFadeOut)
@@ -35,14 +35,14 @@ END_MESSAGE_MAP()
 
 void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAmpDlg)
 	DDX_Control(pDX, IDC_COMBO1, m_fadeBox);
 	//}}AFX_DATA_MAP
 }
 
 CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 factorMax)
-	: CDialog(IDD_SAMPLE_AMPLIFY, parent)
+	: DialogBase(IDD_SAMPLE_AMPLIFY, parent)
 	, m_settings(settings)
 	, m_nFactorMin(factorMin)
 	, m_nFactorMax(factorMax)
@@ -50,7 +50,7 @@ CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 fac
 
 BOOL CAmpDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
 	spin->SetRange32(m_nFactorMin, m_nFactorMax);
 	spin->SetPos32(m_settings.factor);
@@ -158,7 +158,7 @@ void CAmpDlg::OnOK()
 	m_settings.fadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	m_settings.fadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
 	m_settings.fadeLaw = static_cast<Fade::Law>(m_fadeBox.GetItemData(m_fadeBox.GetCurSel()));
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -168,7 +168,7 @@ void CAmpDlg::OnOK()
 SampleIO CRawSampleDlg::m_format(SampleIO::_8bit, SampleIO::mono, SampleIO::littleEndian, SampleIO::signedPCM);
 SmpLength CRawSampleDlg::m_offset = 0;
 
-BEGIN_MESSAGE_MAP(CRawSampleDlg, CDialog)
+BEGIN_MESSAGE_MAP(CRawSampleDlg, DialogBase)
 	ON_COMMAND_RANGE(IDC_RADIO1, IDC_RADIO4, &CRawSampleDlg::OnBitDepthChanged)
 	ON_COMMAND_RANGE(IDC_RADIO7, IDC_RADIO10, &CRawSampleDlg::OnEncodingChanged)
 	ON_COMMAND(IDC_BUTTON1, &CRawSampleDlg::OnAutodetectFormat)
@@ -177,7 +177,7 @@ END_MESSAGE_MAP()
 
 void CRawSampleDlg::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CRawSampleDlg)
 	DDX_Control(pDX, IDC_SPIN1, m_SpinOffset);
 	//}}AFX_DATA_MAP
@@ -186,7 +186,7 @@ void CRawSampleDlg::DoDataExchange(CDataExchange *pDX)
 
 BOOL CRawSampleDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	if(const auto filename = m_file.GetOptionalFileName(); filename)
 	{
 		CString title;
@@ -232,7 +232,7 @@ void CRawSampleDlg::OnOK()
 		m_format |= SampleIO::bigEndian;
 	m_rememberFormat = IsDlgButtonChecked(IDC_CHK_REMEMBERSETTINGS) != BST_UNCHECKED;
 	m_offset = GetDlgItemInt(IDC_EDIT1, nullptr, FALSE);
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -428,7 +428,7 @@ void CRawSampleDlg::OnAutodetectFormat()
 /////////////////////////////////////////////////////////////////////////
 // Add silence / resize sample dialog
 
-BEGIN_MESSAGE_MAP(AddSilenceDlg, CDialog)
+BEGIN_MESSAGE_MAP(AddSilenceDlg, DialogBase)
 	ON_CBN_SELCHANGE(IDC_COMBO1,           &AddSilenceDlg::OnUnitChanged)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_BEGIN, &AddSilenceDlg::OnEditModeChanged)
 	ON_COMMAND(IDC_RADIO_ADDSILENCE_END,   &AddSilenceDlg::OnEditModeChanged)
@@ -440,7 +440,7 @@ SmpLength AddSilenceDlg::m_addSamples = 32;
 SmpLength AddSilenceDlg::m_createSamples = 64;
 
 AddSilenceDlg::AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL)
-	: CDialog(IDD_ADDSILENCE, parent)
+	: DialogBase(IDD_ADDSILENCE, parent)
 	, m_numSamples(m_addSamples)
 	, m_sampleRate(sampleRate)
 	, m_allowOPL(allowOPL)
@@ -459,7 +459,7 @@ AddSilenceDlg::AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRa
 
 BOOL AddSilenceDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN_ADDSILENCE);
 	if(spin)
@@ -517,7 +517,7 @@ void AddSilenceDlg::OnOK()
 	default:
 		break;
 	}
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -577,7 +577,7 @@ AddSilenceDlg::AddSilenceOptions AddSilenceDlg::GetEditMode() const
 
 void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleGridDlg)
 	DDX_Control(pDX, IDC_EDIT1,			m_EditSegments);
 	DDX_Control(pDX, IDC_SPIN1,			m_SpinSegments);
@@ -587,7 +587,7 @@ void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CSampleGridDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	m_SpinSegments.SetRange32(0, m_nMaxSegments);
 	m_SpinSegments.SetPos(m_nSegments);
 	SetDlgItemInt(IDC_EDIT1, m_nSegments, FALSE);
@@ -599,7 +599,7 @@ BOOL CSampleGridDlg::OnInitDialog()
 void CSampleGridDlg::OnOK()
 {
 	m_nSegments = GetDlgItemInt(IDC_EDIT1, NULL, FALSE);
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -611,7 +611,7 @@ uint32 CSampleXFadeDlg::m_fadeLaw = 50000;
 bool CSampleXFadeDlg::m_afterloopFade = true;
 bool CSampleXFadeDlg::m_useSustainLoop = false;
 
-BEGIN_MESSAGE_MAP(CSampleXFadeDlg, CDialog)
+BEGIN_MESSAGE_MAP(CSampleXFadeDlg, DialogBase)
 	ON_WM_HSCROLL()
 	ON_COMMAND(IDC_RADIO1,	&CSampleXFadeDlg::OnLoopTypeChanged)
 	ON_COMMAND(IDC_RADIO2,	&CSampleXFadeDlg::OnLoopTypeChanged)
@@ -622,7 +622,7 @@ END_MESSAGE_MAP()
 
 void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleGridDlg)
 	DDX_Control(pDX, IDC_EDIT1,			m_EditSamples);
 	DDX_Control(pDX, IDC_SPIN1,			m_SpinSamples);
@@ -636,7 +636,7 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CSampleXFadeDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	const bool hasNormal = (m_sample.uFlags[CHN_LOOP] || !m_sample.uFlags[CHN_SUSTAINLOOP]) && m_sample.nLoopStart > 0;
 	const bool hasSustain = m_sample.uFlags[CHN_SUSTAINLOOP] && m_sample.nSustainStart > 0;
 	const bool hasBothLoops = hasNormal && hasSustain;
@@ -662,7 +662,7 @@ void CSampleXFadeDlg::OnOK()
 	m_afterloopFade = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 	m_useSustainLoop = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
 	Limit(m_fadeLength, uint32(0), uint32(100000));
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -757,13 +757,13 @@ CResamplingDlg::ResamplingOption CResamplingDlg::m_lastChoice = CResamplingDlg::
 uint32 CResamplingDlg::m_lastFrequency = 0;
 bool CResamplingDlg::m_updatePatterns = false;
 
-BEGIN_MESSAGE_MAP(CResamplingDlg, CDialog)
+BEGIN_MESSAGE_MAP(CResamplingDlg, DialogBase)
 	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
 END_MESSAGE_MAP()
 
 BOOL CResamplingDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	SetWindowText(m_resampleAll ? _T("Resample All") : _T("Resample"));
 
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1 + m_lastChoice);
@@ -840,7 +840,7 @@ void CResamplingDlg::OnOK()
 
 	m_updatePatterns = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -854,7 +854,7 @@ int CMixSampleDlg::amplifyMix = 50;
 
 void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMixSampleDlg)
 	DDX_Control(pDX, IDC_EDIT_OFFSET,			m_EditOffset);
 	DDX_Control(pDX, IDC_SPIN_OFFSET,			m_SpinOffset);
@@ -865,13 +865,13 @@ void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
 
 
 CMixSampleDlg::CMixSampleDlg(CWnd *parent)
-	: CDialog(IDD_MIXSAMPLES, parent)
+	: DialogBase(IDD_MIXSAMPLES, parent)
 { }
 
 
 BOOL CMixSampleDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	// Offset
 	m_SpinOffset.SetRange32(0, MAX_SAMPLE_LENGTH);
@@ -895,7 +895,7 @@ BOOL CMixSampleDlg::OnInitDialog()
 
 void CMixSampleDlg::OnOK()
 {
-	CDialog::OnOK();
+	DialogBase::OnOK();
 	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, MAX_SAMPLE_LENGTH);
 	amplifyOriginal = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL1), -10000, 10000);
 	amplifyMix = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL2), -10000, 10000);

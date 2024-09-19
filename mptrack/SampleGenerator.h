@@ -14,6 +14,7 @@
 
 #ifdef MPT_DISABLED_CODE
 
+#include "DialogBase.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "Sndfile.h"
@@ -113,7 +114,7 @@ public:
 // Sample Generator Dialog implementation
 
 
-class CSmpGenDialog: public CDialog
+class CSmpGenDialog : public DialogBase
 {
 protected:
 
@@ -143,7 +144,7 @@ public:
 	const mu::string_type GetExpression() { return expression; };
 	bool CanApply() { return apply; };
 	
-	CSmpGenDialog(int freq, int len, smpgen_clip_methods clipping, mu::string_type expr):CDialog(IDD_SAMPLE_GENERATOR, CMainFrame::GetMainFrame())
+	CSmpGenDialog(int freq, int len, smpgen_clip_methods clipping, mu::string_type expr) : DialogBase(IDD_SAMPLE_GENERATOR, CMainFrame::GetMainFrame())
 	{
 		sample_frequency = freq;
 		sample_length = len;
@@ -175,7 +176,7 @@ protected:
 // Sample Generator Preset Dialog implementation
 
 
-class CSmpGenPresetDlg: public CDialog
+class CSmpGenPresetDlg : public DialogBase
 {
 protected:
 	CSmpGenPresets *presets;
@@ -184,7 +185,7 @@ protected:
 	void RefreshList();
 
 public:
-	CSmpGenPresetDlg(CSmpGenPresets *pPresets):CDialog(IDD_SAMPLE_GENERATOR_PRESETS, CMainFrame::GetMainFrame())
+	CSmpGenPresetDlg(CSmpGenPresets *pPresets) : DialogBase(IDD_SAMPLE_GENERATOR_PRESETS, CMainFrame::GetMainFrame())
 	{
 		presets = pPresets;
 		currentItem = 0;

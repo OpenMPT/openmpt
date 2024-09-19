@@ -12,10 +12,11 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class ResizableDialog : public CDialog
+class ResizableDialog : public DialogBase
 {
 private:
 	CPoint m_minSize;

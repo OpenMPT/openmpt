@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 #include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -19,7 +20,7 @@ class CSoundFile;
 
 // CPatternGotoDialog dialog
 
-class CPatternGotoDialog : public CDialog
+class CPatternGotoDialog : public DialogBase
 {
 	CSoundFile &m_SndFile;
 	CSpinButtonCtrl m_SpinRow, m_SpinChannel, m_SpinPattern, m_SpinOrder;

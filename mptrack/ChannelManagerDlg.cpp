@@ -26,7 +26,7 @@ OPENMPT_NAMESPACE_BEGIN
 ///////////////////////////////////////////////////////////
 // CChannelManagerDlg
 
-BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
+BEGIN_MESSAGE_MAP(CChannelManagerDlg, DialogBase)
 	ON_WM_PAINT()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
@@ -149,7 +149,7 @@ CChannelManagerDlg::~CChannelManagerDlg()
 
 BOOL CChannelManagerDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	HWND menu = ::GetDlgItem(m_hWnd, IDC_TAB1);
 
@@ -239,7 +239,7 @@ void CChannelManagerDlg::OnClose()
 	m_bkgnd = nullptr;
 	m_show = false;
 
-	CDialog::OnCancel();
+	DialogBase::OnCancel();
 }
 
 void CChannelManagerDlg::OnSelectAll()
@@ -567,13 +567,13 @@ void CChannelManagerDlg::OnPaint()
 {
 	if(!m_hWnd || !m_show || m_ModDoc == nullptr)
 	{
-		CDialog::OnPaint();
+		DialogBase::OnPaint();
 		ShowWindow(SW_HIDE);
 		return;
 	}
 	if(IsIconic())
 	{
-		CDialog::OnPaint();
+		DialogBase::OnPaint();
 		return;
 	}
 
@@ -1046,13 +1046,13 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 void CChannelManagerDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	OnLButtonDown(nFlags, point);
-	CDialog::OnLButtonDblClk(nFlags, point);
+	DialogBase::OnLButtonDblClk(nFlags, point);
 }
 
 void CChannelManagerDlg::OnRButtonDblClk(UINT nFlags, CPoint point)
 {
 	OnRButtonDown(nFlags, point);
-	CDialog::OnRButtonDblClk(nFlags, point);
+	DialogBase::OnRButtonDblClk(nFlags, point);
 }
 
 

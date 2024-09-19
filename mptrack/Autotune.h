@@ -12,8 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "DialogBase.h"
 #include "../soundlib/Snd_defs.h"
-#include "resource.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -55,7 +55,7 @@ protected:
 };
 
 
-class CAutotuneDlg : public CDialog
+class CAutotuneDlg : public DialogBase
 {
 protected:
 	static int m_pitchReference;	// Pitch reference (440Hz by default)
@@ -64,8 +64,7 @@ protected:
 	CComboBox m_CbnNoteBox;
 
 public:
-	CAutotuneDlg(CWnd *parent) : CDialog(IDD_AUTOTUNE, parent)
-	{ };
+	CAutotuneDlg(CWnd *parent);
 
 	int GetPitchReference() const { return m_pitchReference; }
 	int GetTargetNote() const { return m_targetNote; }

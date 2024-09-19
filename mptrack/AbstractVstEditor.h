@@ -14,16 +14,16 @@
 
 #ifndef NO_PLUGINS
 
-#include <vector>
-#include "../soundlib/Snd_defs.h"
+#include "DialogBase.h"
 #include "Moddoc.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class IMixPlugin;
 struct UpdateHint;
 
-class CAbstractVstEditor: public CDialog
+class CAbstractVstEditor : public DialogBase
 {
 protected:
 	CMenu m_Menu;

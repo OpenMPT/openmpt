@@ -79,7 +79,7 @@ CModCleanupDlg::CleanupOptions const CModCleanupDlg::m_MutuallyExclusive[CModCle
 ///////////////////////////////////////////////////////////////////////
 // CModCleanupDlg
 
-BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
+BEGIN_MESSAGE_MAP(CModCleanupDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModTypeDlg)
 	ON_COMMAND(IDC_BTN_CLEANUP_SONG,			&CModCleanupDlg::OnPresetCleanupSong)
 	ON_COMMAND(IDC_BTN_COMPO_CLEANUP,			&CModCleanupDlg::OnPresetCompoCleanup)
@@ -106,12 +106,12 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, CDialog)
 END_MESSAGE_MAP()
 
 
-CModCleanupDlg::CModCleanupDlg(CModDoc &modParent, CWnd *parent) : CDialog(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
+CModCleanupDlg::CModCleanupDlg(CModDoc &modParent, CWnd *parent) : DialogBase(IDD_CLEANUP_SONG, parent), modDoc(modParent) { }
 
 
 BOOL CModCleanupDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	for(int i = 0; i < kMaxCleanupOptions; i++)
 	{
 		CheckDlgButton(m_CleanupIDtoDlgID[i], (m_CheckBoxes[i]) ? BST_CHECKED : BST_UNCHECKED);
@@ -181,7 +181,7 @@ void CModCleanupDlg::OnOK()
 	if(modified) modDoc.SetModified();
 	modDoc.UpdateAllViews(nullptr, UpdateHint().ModType());
 	logcapturer.ShowLog(true);
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 

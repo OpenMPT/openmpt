@@ -65,7 +65,7 @@ CAbstractVstEditor::WindowSizeAdjuster::~WindowSizeAdjuster()
 
 UINT CAbstractVstEditor::m_clipboardFormat = RegisterClipboardFormat(_T("VST Preset Data"));
 
-BEGIN_MESSAGE_MAP(CAbstractVstEditor, CDialog)
+BEGIN_MESSAGE_MAP(CAbstractVstEditor, DialogBase)
 	ON_WM_CLOSE()
 	ON_WM_INITMENU()
 	ON_WM_MENUSELECT()
@@ -114,14 +114,14 @@ CAbstractVstEditor::~CAbstractVstEditor()
 
 void CAbstractVstEditor::PostNcDestroy()
 {
-	CDialog::PostNcDestroy();
+	DialogBase::PostNcDestroy();
 	delete this;
 }
 
 
 void CAbstractVstEditor::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 {
-	CDialog::OnNcLButtonDblClk(nHitTest, point);
+	DialogBase::OnNcLButtonDblClk(nHitTest, point);
 	// Double click on title bar = reduce plugin window to non-client area
 	if(nHitTest == HTCAPTION)
 	{
@@ -146,7 +146,7 @@ void CAbstractVstEditor::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 
 void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
 {
-	CDialog::OnActivate(nState, pWndOther, bMinimized);
+	DialogBase::OnActivate(nState, pWndOther, bMinimized);
 	if(nState != WA_INACTIVE) CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
 }
 
@@ -445,7 +445,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG *msg)
 	if(msg && HandleKeyMessage(*msg))
 		return TRUE;
 
-	return CDialog::PreTranslateMessage(msg);
+	return DialogBase::PreTranslateMessage(msg);
 }
 
 

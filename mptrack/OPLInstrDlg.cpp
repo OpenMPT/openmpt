@@ -17,7 +17,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-BEGIN_MESSAGE_MAP(OPLInstrDlg, CDialog)
+BEGIN_MESSAGE_MAP(OPLInstrDlg, DialogBase)
 	ON_WM_HSCROLL()
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING, &OPLInstrDlg::OnDragonDropping)
 	ON_COMMAND(IDC_CHECK1, &OPLInstrDlg::ParamsChanged)
@@ -37,7 +37,7 @@ END_MESSAGE_MAP()
 
 void OPLInstrDlg::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHECK1, m_additive);
 	DDX_Control(pDX, IDC_SLIDER1, m_feedback);
 
@@ -80,7 +80,7 @@ OPLInstrDlg::~OPLInstrDlg()
 
 BOOL OPLInstrDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	EnableToolTips();
 	m_feedback.SetRange(0, 7);
 	for(int op = 0; op < 2; op++)
@@ -123,7 +123,7 @@ BOOL OPLInstrDlg::PreTranslateMessage(MSG *pMsg)
 				return TRUE;
 		}
 	}
-	return CDialog::PreTranslateMessage(pMsg);
+	return DialogBase::PreTranslateMessage(pMsg);
 }
 
 

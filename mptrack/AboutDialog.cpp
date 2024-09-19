@@ -247,7 +247,7 @@ void CAboutDlg::OnCancel()
 
 BOOL CAboutDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	mpt::ustring app;
 	app += MPT_UFORMAT("OpenMPT{} ({} ({} bit))")(
@@ -573,13 +573,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TABABOUT, m_Tab);
 	DDX_Control(pDX, IDC_EDITABOUT, m_TabEdit);
 }
 
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+BEGIN_MESSAGE_MAP(CAboutDlg, DialogBase)
 	ON_WM_TIMER()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABABOUT, &CAboutDlg::OnTabChange)
 END_MESSAGE_MAP()

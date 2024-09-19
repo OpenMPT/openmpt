@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Mpdlgs.h"
+#include "DialogBase.h"
 #include "dlg_misc.h"
 #include "ImageLists.h"
 #include "Mainfrm.h"
@@ -1235,13 +1236,13 @@ void COptionsMixer::OnOK()
 
 #ifndef NO_EQ
 
-class CEQSavePresetDlg: public CDialog
+class CEQSavePresetDlg : public DialogBase
 {
 protected:
 	EQPreset &m_EQ;
 
 public:
-	CEQSavePresetDlg(EQPreset &eq, CWnd *parent = nullptr) : CDialog(IDD_SAVEPRESET, parent), m_EQ(eq) { }
+	CEQSavePresetDlg(EQPreset &eq, CWnd *parent = nullptr) : DialogBase(IDD_SAVEPRESET, parent), m_EQ(eq) { }
 	BOOL OnInitDialog();
 	void OnOK();
 };
@@ -1278,7 +1279,7 @@ void CEQSavePresetDlg::OnOK()
 		mpt::String::WriteAutoBuf(m_EQ.szName) = mpt::ToCharset(mpt::Charset::Locale, s);
 		TrackerSettings::Instance().m_EqUserPresets[n] = m_EQ;
 	}
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -1579,7 +1580,7 @@ void COptionsPlayer::UpdateEQ(bool bReset)
 
 void COptionsPlayer::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 {
-	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+	CPropertyPage::OnVScroll(nSBCode, nPos, pScrollBar);
 	for (UINT i=0; i<MAX_EQ_BANDS; i++)
 	{
 		int n = 32 - m_Sliders[i].GetPos();

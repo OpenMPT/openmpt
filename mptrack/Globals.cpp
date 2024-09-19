@@ -18,6 +18,7 @@
 #include "Ctrl_pat.h"
 #include "Ctrl_smp.h"
 #include "ImageLists.h"
+#include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
@@ -42,7 +43,7 @@ static void RestoreLastFocusItem(HWND parent, HWND &lastFocusItem)
 /////////////////////////////////////////////////////////////////////////////
 // CModControlDlg
 
-BEGIN_MESSAGE_MAP(CModControlDlg, CDialog)
+BEGIN_MESSAGE_MAP(CModControlDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
 #if !defined(MPT_BUILD_RETRO)
@@ -68,7 +69,7 @@ CModControlDlg::~CModControlDlg()
 
 BOOL CModControlDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	m_nDPIx = Util::GetDPIx(m_hWnd);
 	m_nDPIy = Util::GetDPIy(m_hWnd);
 	EnableToolTips(TRUE);
@@ -86,7 +87,7 @@ LRESULT CModControlDlg::OnDPIChanged(WPARAM wParam, LPARAM)
 
 void CModControlDlg::OnSize(UINT nType, int cx, int cy)
 {
-	CDialog::OnSize(nType, cx, cy);
+	DialogBase::OnSize(nType, cx, cy);
 	if (((nType == SIZE_RESTORED) || (nType == SIZE_MAXIMIZED)) && (cx > 0) && (cy > 0))
 	{
 		RecalcLayout();
@@ -151,7 +152,7 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 
 INT_PTR CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 {
-	INT_PTR nHit = CDialog::OnToolHitTest(point, pTI);
+	INT_PTR nHit = DialogBase::OnToolHitTest(point, pTI);
 	if ((nHit >= 0) && (pTI))
 	{
 		if ((pTI->lpszText == LPSTR_TEXTCALLBACK) && (pTI->hwnd == m_hWnd))
@@ -658,6 +659,21 @@ void CModScrollView::OnInitialUpdate()
 	CScrollView::OnInitialUpdate();
 	m_nDPIx = Util::GetDPIx(m_hWnd);
 	m_nDPIy = Util::GetDPIy(m_hWnd);
+}
+
+
+BOOL CModScrollView::PreTranslateMessage(MSG *pMsg)
+{
+	// We handle keypresses before Windows has a chance to handle them (for alt etc..)
+	if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP || pMsg->message == WM_SYSKEYDOWN)
+	{
+		CInputHandler *ih = CMainFrame::GetInputHandler();
+		const auto event = ih->Translate(*pMsg);
+		if(ih->KeyEvent(kCtxAllContexts, event) != kcNull)
+			return TRUE;  // Mapped to a command, no need to pass message on.
+	}
+
+	return CScrollView::PreTranslateMessage(pMsg);
 }
 
 

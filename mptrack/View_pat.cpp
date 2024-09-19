@@ -689,7 +689,7 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 			const auto event = ih->Translate(*pMsg);
 			if(ih->KeyEvent(ctx, event) != kcNull)
 			{
-				return true;  // Mapped to a command, no need to pass message on.
+				return TRUE;  // Mapped to a command, no need to pass message on.
 			}
 			//HACK: fold kCtxViewPatternsFX and kCtxViewPatternsFXparam so that all commands of 1 are active in the other
 			else
@@ -697,16 +697,16 @@ BOOL CViewPattern::PreTranslateMessage(MSG *pMsg)
 				if(ctx == kCtxViewPatternsFX)
 				{
 					if(ih->KeyEvent(kCtxViewPatternsFXparam, event) != kcNull)
-						return true;  // Mapped to a command, no need to pass message on.
+						return TRUE;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsFXparam)
 				{
 					if(ih->KeyEvent(kCtxViewPatternsFX, event) != kcNull)
-						return true;  // Mapped to a command, no need to pass message on.
+						return TRUE;  // Mapped to a command, no need to pass message on.
 				} else if(ctx == kCtxViewPatternsIns)
 				{
 					// Do the same with instrument->note column
 					if(ih->KeyEvent(kCtxViewPatternsNote, event) != kcNull)
-						return true;  // Mapped to a command, no need to pass message on.
+						return TRUE;  // Mapped to a command, no need to pass message on.
 				}
 			}
 			//end HACK.

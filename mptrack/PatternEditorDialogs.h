@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "DialogBase.h"
 #include "dlg_misc.h"	// for keyboard control
 #include "ColorPickerButton.h"
 #include "EffectInfo.h"
@@ -26,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 struct SplitKeyboardSettings;
 
-class CPatternPropertiesDlg: public CDialog
+class CPatternPropertiesDlg : public DialogBase
 {
 protected:
 	CModDoc &modDoc;
@@ -35,7 +36,7 @@ protected:
 
 public:
 	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent=NULL)
-		: CDialog(IDD_PATTERN_PROPERTIES, parent)
+		: DialogBase(IDD_PATTERN_PROPERTIES, parent)
 		, modDoc(modParent)
 		, m_nPattern(nPat)
 	{ }
@@ -55,7 +56,7 @@ protected:
 // Command Editing
 
 
-class CEditCommand: public CDialog
+class CEditCommand : public DialogBase
 {
 protected:
 	CComboBox cbnNote, cbnVolCmd, cbnCommand, cbnPlugParam;
@@ -148,7 +149,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-class CSplitKeyboardSettings : public CDialog
+class CSplitKeyboardSettings : public DialogBase
 {
 protected:
 	CComboBox m_CbnSplitInstrument, m_CbnSplitNote, m_CbnOctaveModifier, m_CbnSplitVolume;
@@ -157,7 +158,7 @@ protected:
 public:
 	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : CDialog(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
+	CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : DialogBase(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
@@ -174,7 +175,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Show channel properties from pattern editor
 
-class QuickChannelProperties : public CDialog
+class QuickChannelProperties : public DialogBase
 {
 protected:
 	CModDoc *m_document = nullptr;

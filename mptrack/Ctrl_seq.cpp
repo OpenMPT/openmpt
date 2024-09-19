@@ -447,13 +447,13 @@ BOOL COrderList::PreTranslateMessage(MSG *pMsg)
 		const auto event = ih->Translate(*pMsg);
 
 		if(ih->KeyEvent(kCtxCtrlOrderlist, event) != kcNull)
-			return true;  // Mapped to a command, no need to pass message on.
+			return TRUE;  // Mapped to a command, no need to pass message on.
 
 		//HACK: masquerade as kCtxViewPatternsNote context until we implement appropriate
 		//      command propagation to kCtxCtrlOrderlist context.
 
 		if(ih->KeyEvent(kCtxViewPatternsNote, event) != kcNull)
-			return true;  // Mapped to a command, no need to pass message on.
+			return TRUE;  // Mapped to a command, no need to pass message on.
 
 		// Handle Application (menu) key
 		if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)

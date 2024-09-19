@@ -453,6 +453,9 @@
     <ClInclude Include="..\..\mptrack\DefaultVstEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\DialogBase.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\EffectInfo.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1767,6 +1770,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\DefaultVstEditor.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\DialogBase.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Draw_pat.cpp">

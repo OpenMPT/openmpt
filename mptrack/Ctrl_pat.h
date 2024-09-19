@@ -15,7 +15,6 @@
 
 #include "Globals.h"
 #include "PatternCursor.h"
-#include "resource.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -212,8 +211,8 @@ public:
 
 	void SetCurrentPattern(PATTERNINDEX nPat);
 	BOOL SetCurrentInstrument(UINT nIns);
-	BOOL GetFollowSong() { return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG); }
-	BOOL GetLoopPattern() {return IsDlgButtonChecked(IDC_PATTERN_LOOP);}
+	BOOL GetFollowSong() const;
+	BOOL GetLoopPattern() const;
 	COrderList &GetOrderList() { return m_OrderList; }
 	//{{AFX_VIRTUAL(CCtrlPatterns)
 	Setting<LONG> &GetSplitPosRef() override;

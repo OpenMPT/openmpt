@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CMIDIMappingDialog::CMIDIMappingDialog(CWnd *pParent, CSoundFile &rSndfile)
-	: CDialog(IDD_MIDIPARAMCONTROL, pParent)
+	: DialogBase(IDD_MIDIPARAMCONTROL, pParent)
 	, m_sndFile(rSndfile)
 	, m_rMIDIMapper(m_sndFile.GetMIDIMapper())
 {
@@ -46,7 +46,7 @@ CMIDIMappingDialog::~CMIDIMappingDialog()
 
 void CMIDIMappingDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO_CONTROLLER, m_ControllerCBox);
 	DDX_Control(pDX, IDC_COMBO_PLUGIN, m_PluginCBox);
 	DDX_Control(pDX, IDC_COMBO_PARAM, m_PlugParamCBox);
@@ -57,7 +57,7 @@ void CMIDIMappingDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CMIDIMappingDialog, CDialog)
+BEGIN_MESSAGE_MAP(CMIDIMappingDialog, DialogBase)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CMIDIMappingDialog::OnSelectionChanged)
 	ON_BN_CLICKED(IDC_CHECKACTIVE, &CMIDIMappingDialog::OnBnClickedCheckactive)
 	ON_BN_CLICKED(IDC_CHECKCAPTURE, &CMIDIMappingDialog::OnBnClickedCheckCapture)
@@ -111,7 +111,7 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 BOOL CMIDIMappingDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	// Add events
 	m_EventCBox.SetItemData(m_EventCBox.AddString(_T("Controller Change")), MIDIEvents::evControllerChange);

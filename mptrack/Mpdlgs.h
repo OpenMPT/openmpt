@@ -108,12 +108,11 @@ protected:
 
 	CSliderCtrl m_SliderPreAmp;
 
-	bool m_initialized : 1;
+	bool m_initialized = false;
 
 public:
 	COptionsMixer()
 		: CPropertyPage(IDD_OPTIONS_MIXER)
-		, m_initialized(false)
 	{}
 
 protected:

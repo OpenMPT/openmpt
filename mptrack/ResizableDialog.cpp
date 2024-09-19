@@ -15,12 +15,12 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-BEGIN_MESSAGE_MAP(ResizableDialog, CDialog)
+BEGIN_MESSAGE_MAP(ResizableDialog, DialogBase)
 	ON_WM_GETMINMAXINFO()
 END_MESSAGE_MAP()
 
 ResizableDialog::ResizableDialog(UINT nIDTemplate, CWnd *pParentWnd)
-	: CDialog(nIDTemplate, pParentWnd)
+	: DialogBase(nIDTemplate, pParentWnd)
 { }
 
 
@@ -34,14 +34,14 @@ BOOL ResizableDialog::OnInitDialog()
 	SetIcon(icon, FALSE);
 	SetIcon(icon, TRUE);
 
-	return CDialog::OnInitDialog();
+	return DialogBase::OnInitDialog();
 }
 
 
 void ResizableDialog::OnGetMinMaxInfo(MINMAXINFO *mmi)
 {
 	mmi->ptMinTrackSize = m_minSize;
-	CDialog::OnGetMinMaxInfo(mmi);
+	DialogBase::OnGetMinMaxInfo(mmi);
 }
 
 OPENMPT_NAMESPACE_END

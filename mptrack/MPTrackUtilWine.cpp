@@ -9,6 +9,7 @@
 
 
 #include "stdafx.h"
+#include "DialogBase.h"
 #include "MPTrackUtilWine.h"
 #include "Mptrack.h"
 #include "resource.h"
@@ -27,8 +28,7 @@ namespace Wine
 {
 
 
-class CExecutePosixShellScriptProgressDialog
-	: public CDialog
+class CExecutePosixShellScriptProgressDialog : public DialogBase
 {
 
 protected:
@@ -71,13 +71,13 @@ private:
 };
 
 
-BEGIN_MESSAGE_MAP(CExecutePosixShellScriptProgressDialog, CDialog)
+BEGIN_MESSAGE_MAP(CExecutePosixShellScriptProgressDialog, DialogBase)
 	ON_COMMAND(IDC_BUTTON1,	&CExecutePosixShellScriptProgressDialog::OnButton1)
 END_MESSAGE_MAP()
 
 
 CExecutePosixShellScriptProgressDialog::CExecutePosixShellScriptProgressDialog(mpt::Wine::Context & wine, std::string script, FlagSet<mpt::Wine::ExecFlags> flags, std::map<std::string, std::vector<char> > filetree, std::string title, std::string status, CWnd *parent)
-	: CDialog(IDD_PROGRESS, parent)
+	: DialogBase(IDD_PROGRESS, parent)
 	, wine(wine)
 	, m_Title(title)
 	, m_Status(status)
@@ -133,7 +133,7 @@ std::string CExecutePosixShellScriptProgressDialog::GetExceptionString() const
 
 BOOL CExecutePosixShellScriptProgressDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	SetWindowText(mpt::ToCString(mpt::Charset::UTF8, m_Title));
 	SetDlgItemText(IDCANCEL, _T("Cancel"));
 	SetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE, GetWindowLong(::GetDlgItem(m_hWnd, IDC_PROGRESS1), GWL_STYLE) | PBS_MARQUEE);

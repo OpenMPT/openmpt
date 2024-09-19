@@ -424,7 +424,7 @@ public:
 		if(m_conversionRunning)
 			CProgressDialog::OnCancel();
 		else
-			CDialog::OnCancel();
+			DialogBase::OnCancel();
 	}
 
 	void Run() override {}
@@ -595,7 +595,7 @@ public:
 OPLExportDlg::ExportFormat OPLExportDlg::s_format = OPLExportDlg::ExportFormat::VGZ;
 
 
-BEGIN_MESSAGE_MAP(OPLExportDlg, CDialog)
+BEGIN_MESSAGE_MAP(OPLExportDlg, CProgressDialog)
 	//{{AFX_MSG_MAP(OPLExportDlg)
 	ON_COMMAND(IDC_RADIO1,  &OPLExportDlg::OnFormatChanged)
 	ON_COMMAND(IDC_RADIO2,  &OPLExportDlg::OnFormatChanged)

@@ -54,7 +54,7 @@ static samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer,
 ///////////////////////////////////////////////////
 // CWaveConvert - setup for converting a wave file
 
-BEGIN_MESSAGE_MAP(CWaveConvert, CDialog)
+BEGIN_MESSAGE_MAP(CWaveConvert, DialogBase)
 	ON_COMMAND(IDC_CHECK2,			&CWaveConvert::OnCheckTimeLimit)
 	ON_COMMAND(IDC_CHECK4,			&CWaveConvert::OnCheckChannelMode)
 	ON_COMMAND(IDC_CHECK6,			&CWaveConvert::OnCheckInstrMode)
@@ -74,7 +74,7 @@ END_MESSAGE_MAP()
 
 
 CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories)
-	: CDialog(IDD_WAVECONVERT, parent)
+	: DialogBase(IDD_WAVECONVERT, parent)
 	, m_Settings(theApp.GetSettings(), encFactories)
 	, m_SndFile(sndFile)
 {
@@ -97,7 +97,7 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 
 void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO5,	m_CbnFileType);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSampleRate);
 	DDX_Control(pDX, IDC_COMBO4,	m_CbnChannels);
@@ -122,7 +122,7 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 
 BOOL CWaveConvert::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);	// Normalize
 	CheckDlgButton(IDC_CHECK3, BST_CHECKED);	// Cue points
@@ -785,7 +785,7 @@ void CWaveConvert::OnOK()
 
 	}
 
-	CDialog::OnOK();
+	DialogBase::OnOK();
 
 }
 

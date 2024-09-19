@@ -13,12 +13,13 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "DialogBase.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 
-class CPSRatioCalc : public CDialog
+class CPSRatioCalc : public DialogBase
 {
 public:
 	CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *parent = nullptr);

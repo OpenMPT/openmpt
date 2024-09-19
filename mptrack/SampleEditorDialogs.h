@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "DialogBase.h"
 #include "resource.h"
 #include "../common/FileReaderFwd.h"
 #include "../soundlib/SampleIO.h"
@@ -24,7 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////
 // Sample amplification dialog
 
-class CAmpDlg: public CDialog
+class CAmpDlg : public DialogBase
 {
 public:
 	struct AmpSettings
@@ -63,7 +64,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 // Sample import dialog
 
-class CRawSampleDlg: public CDialog
+class CRawSampleDlg : public DialogBase
 {
 	friend class AutodetectFormatDlg;
 
@@ -87,7 +88,7 @@ public:
 
 public:
 	CRawSampleDlg(FileReader &file, CWnd *parent = nullptr)
-		: CDialog(IDD_LOADRAWSAMPLE, parent)
+		: DialogBase(IDD_LOADRAWSAMPLE, parent)
 		, m_file(file) {}
 
 protected:
@@ -107,7 +108,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Add silence dialog - add silence to a sample
 
-class AddSilenceDlg: public CDialog
+class AddSilenceDlg : public DialogBase
 {
 public:
 	enum AddSilenceOptions
@@ -152,7 +153,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample grid dialog
 
-class CSampleGridDlg: public CDialog
+class CSampleGridDlg : public DialogBase
 {
 public:
 	SmpLength m_nSegments, m_nMaxSegments;
@@ -162,7 +163,7 @@ protected:
 	CSpinButtonCtrl m_SpinSegments;
 
 public:
-	CSampleGridDlg(CWnd *parent, SmpLength nSegments, SmpLength nMaxSegments) : CDialog(IDD_SAMPLE_GRID_SIZE, parent) { m_nSegments = nSegments; m_nMaxSegments = nMaxSegments; };
+	CSampleGridDlg(CWnd *parent, SmpLength nSegments, SmpLength nMaxSegments) : DialogBase(IDD_SAMPLE_GRID_SIZE, parent) { m_nSegments = nSegments; m_nMaxSegments = nMaxSegments; };
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
@@ -174,7 +175,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample cross-fade dialog
 
-class CSampleXFadeDlg: public CDialog
+class CSampleXFadeDlg : public DialogBase
 {
 public:
 	static uint32 m_fadeLength;
@@ -193,7 +194,7 @@ protected:
 
 public:
 	CSampleXFadeDlg(CWnd *parent, ModSample &sample)
-	    : CDialog(IDD_SAMPLE_XFADE, parent)
+	    : DialogBase(IDD_SAMPLE_XFADE, parent)
 	    , m_sample(sample) {}
 
 	SmpLength PercentToSamples(uint32 percent) const { return Util::muldivr_unsigned(percent, m_loopLength, 100000); }
@@ -215,7 +216,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Resampling dialog
 
-class CResamplingDlg: public CDialog
+class CResamplingDlg : public DialogBase
 {
 public:
 	enum ResamplingOption
@@ -234,7 +235,7 @@ protected:
 	static bool m_updatePatterns;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll) : CDialog(IDD_RESAMPLE, parent), m_srcMode(srcMode), m_frequency(frequency), m_resampleAll(resampleAll) { };
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll) : DialogBase(IDD_RESAMPLE, parent), m_srcMode(srcMode), m_frequency(frequency), m_resampleAll(resampleAll) { };
 	uint32 GetFrequency() const { return m_frequency; }
 	ResamplingMode GetFilter() const { return m_srcMode; }
 	static ResamplingOption GetResamplingOption() { return m_lastChoice; }
@@ -253,7 +254,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample mix dialog
 
-class CMixSampleDlg: public CDialog
+class CMixSampleDlg : public DialogBase
 {
 protected:
 	// Dialog controls

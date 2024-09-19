@@ -39,7 +39,7 @@ END_MESSAGE_MAP()
 
 void LFOPluginEditor::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CAbstractVstEditor::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(LFOPluginEditor)
 	DDX_Control(pDX, IDC_COMBO1, m_plugParam);
 	DDX_Control(pDX, IDC_COMBO2, m_outPlug);

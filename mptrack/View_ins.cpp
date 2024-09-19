@@ -2259,7 +2259,7 @@ BOOL CViewInstrument::PreTranslateMessage(MSG *pMsg)
 			CInputHandler *ih = CMainFrame::GetInputHandler();
 			const auto event = ih->Translate(*pMsg);
 			if(ih->KeyEvent(kCtxViewInstruments, event) != kcNull)
-				return true;  // Mapped to a command, no need to pass message on.
+				return TRUE;  // Mapped to a command, no need to pass message on.
 
 			// Handle Application (menu) key
 			if(pMsg->message == WM_KEYDOWN && event.key == VK_APPS)

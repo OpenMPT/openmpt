@@ -18,7 +18,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double ratio, CWnd *parent)
-	: CDialog{IDD_PITCHSHIFT, parent}
+	: DialogBase{IDD_PITCHSHIFT, parent}
 	, m_ratio{ratio}
 	, m_sndFile{sndFile}
 	, m_sampleIndex{sample}
@@ -35,7 +35,7 @@ CPSRatioCalc::CPSRatioCalc(const CSoundFile &sndFile, SAMPLEINDEX sample, double
 }
 
 
-BEGIN_MESSAGE_MAP(CPSRatioCalc, CDialog)
+BEGIN_MESSAGE_MAP(CPSRatioCalc, DialogBase)
 	ON_EN_UPDATE(IDC_SAMPLE_LENGTH_NEW, &CPSRatioCalc::OnChangeSampleLength)
 	ON_EN_UPDATE(IDC_MS_LENGTH_NEW,     &CPSRatioCalc::OnChangeDuration)
 	ON_EN_UPDATE(IDC_SPEED,             &CPSRatioCalc::OnChangeSpeed)
@@ -47,7 +47,7 @@ END_MESSAGE_MAP()
 
 BOOL CPSRatioCalc::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	LockControls();
 

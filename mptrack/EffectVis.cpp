@@ -23,10 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 CEffectVis::Action CEffectVis::m_nAction = CEffectVis::Action::OverwriteFX;
 
-IMPLEMENT_DYNAMIC(CEffectVis, CDialog)
-
-
-BEGIN_MESSAGE_MAP(CEffectVis, CDialog)
+BEGIN_MESSAGE_MAP(CEffectVis, DialogBase)
 	ON_WM_ERASEBKGND()
 	ON_WM_PAINT()
 	ON_WM_SIZE()
@@ -54,7 +51,7 @@ CEffectVis::CEffectVis(CViewPattern *pViewPattern, ROWINDEX startRow, ROWINDEX e
 
 void CEffectVis::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_VISSTATUS, m_edVisStatus);
 	DDX_Control(pDX, IDC_VISACTION, m_cmbActionList);
 }
@@ -647,19 +644,19 @@ void CEffectVis::OnRButtonDown(UINT nFlags, CPoint point)
 		OnMouseMove(nFlags, point);
 	}
 
-	CDialog::OnRButtonDown(nFlags, point);
+	DialogBase::OnRButtonDown(nFlags, point);
 }
 
 void CEffectVis::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	ReleaseCapture();
 	m_dwStatus = 0x00;
-	CDialog::OnRButtonUp(nFlags, point);
+	DialogBase::OnRButtonUp(nFlags, point);
 }
 
 void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 {
-	CDialog::OnMouseMove(nFlags, point);
+	DialogBase::OnMouseMove(nFlags, point);
 
 	ROWINDEX row = ScreenXToRow(point.x);
 
@@ -735,21 +732,21 @@ void CEffectVis::OnLButtonDown(UINT nFlags, CPoint point)
 		OnMouseMove(nFlags, point);
 	}
 
-	CDialog::OnLButtonDown(nFlags, point);
+	DialogBase::OnLButtonDown(nFlags, point);
 }
 
 void CEffectVis::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	ReleaseCapture();
 	m_dwStatus = 0x00;
-	CDialog::OnLButtonUp(nFlags, point);
+	DialogBase::OnLButtonUp(nFlags, point);
 	m_nLastDrawnRow = ROWINDEX_INVALID;
 }
 
 
 BOOL CEffectVis::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	int dpi = Util::GetDPIx(m_hWnd);
 	m_nodeSizeHalf = MulDiv(3, dpi, 96);

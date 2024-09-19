@@ -12,12 +12,14 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-class CSoundFile;
+#include "DialogBase.h"
 #include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CTempoSwingDlg: public CDialog
+class CSoundFile;
+
+class CTempoSwingDlg : public DialogBase
 {
 protected:
 	// Scrollable container for the sliders

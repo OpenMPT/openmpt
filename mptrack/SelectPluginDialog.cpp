@@ -743,7 +743,7 @@ VSTPluginLib *CSelectPluginDlg::ScanPlugins(const mpt::PathString &path, CWnd *p
 	VSTPluginLib *plugLib = nullptr;
 	bool update = false;
 
-	CDialog pluginScanDlg;
+	DialogBase pluginScanDlg;
 	pluginScanDlg.Create(IDD_SCANPLUGINS, parent);
 	pluginScanDlg.CenterWindow(parent);
 	pluginScanDlg.ModifyStyle(0, WS_SYSMENU, WS_SYSMENU);

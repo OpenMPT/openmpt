@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "DialogBase.h"
 #include "ResizableDialog.h"
 #include "resource.h"
 #include "../soundlib/Sndfile.h"
@@ -23,7 +24,7 @@ class Version;
 class CModDoc;
 class CDLSBank;
 
-class CModTypeDlg: public CDialog
+class CModTypeDlg : public DialogBase
 {
 protected:
 	CComboBox m_TypeBox, m_ChannelsBox, m_TempoModeBox, m_PlugMixBox;
@@ -39,7 +40,7 @@ public:
 	bool initialized = false;
 
 public:
-	CModTypeDlg(CSoundFile &sf, CWnd *parent) : CDialog(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { }
+	CModTypeDlg(CSoundFile &sf, CWnd *parent) : DialogBase(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { }
 	bool VerifyData();
 	void UpdateDialog();
 	void OnPTModeChanged();
@@ -94,7 +95,7 @@ protected:
 };
 
 
-class CRemoveChannelsDlg: public CDialog
+class CRemoveChannelsDlg : public DialogBase
 {
 public:
 	CSoundFile &sndFile;
@@ -105,7 +106,7 @@ public:
 
 public:
 	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX toRemove, bool showCancel = true, CWnd *parent = nullptr)
-	    : CDialog{IDD_REMOVECHANNELS, parent}
+	    : DialogBase{IDD_REMOVECHANNELS, parent}
 	    , sndFile{sf}
 	    , m_bKeepMask(sf.GetNumChannels(), true)
 	    , m_nRemove{toRemove}
@@ -206,7 +207,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample Map
 
-class CSampleMapDlg: public CDialog
+class CSampleMapDlg : public DialogBase
 {
 protected:
 	enum MouseAction
@@ -226,7 +227,7 @@ protected:
 	MouseAction mouseAction;
 
 public:
-	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : CDialog(IDD_EDITSAMPLEMAP, parent), sndFile(sf), mouseAction(mouseUnknown)
+	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : DialogBase(IDD_EDITSAMPLEMAP, parent), sndFile(sf), mouseAction(mouseUnknown)
 		{ m_nInstrument = nInstr; }
 
 protected:
@@ -264,7 +265,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Generic input dialog
 
-class CInputDlg: public CDialog
+class CInputDlg : public DialogBase
 {
 protected:
 	CNumberEdit m_edit;
@@ -281,24 +282,24 @@ public:
 
 public:
 	// Initialize text input box
-	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : DialogBase(IDD_INPUT, parent)
 		, m_description(desc)
 		, m_maxLength(maxLength)
 		, resultAsString(defaultString)
 	{ }
 	// Initialize numeric input box (float)
-	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : DialogBase(IDD_INPUT, parent)
 		, m_description(desc)
 		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
 		, resultAsDouble(defaultNumber)
 	{ }
-	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : DialogBase(IDD_INPUT, parent)
 		, m_description(desc)
 		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
 		, resultAsDouble(defaultNumber)
 	{ }
 	// Initialize numeric input box (int)
-	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CDialog(IDD_INPUT, parent)
+	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : DialogBase(IDD_INPUT, parent)
 		, m_description(desc)
 		, m_minValueInt(minVal), m_maxValueInt(maxVal)
 		, resultAsInt(defaultNumber)

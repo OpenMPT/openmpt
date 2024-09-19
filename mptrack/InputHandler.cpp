@@ -92,47 +92,30 @@ CommandID CInputHandler::SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 }
 
 
-CommandID CInputHandler::GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam)
+void CInputHandler::HandleModifierChanges(WPARAM wParam, LPARAM lParam)
 {
 	KeyMapRange cmd = { m_keyMap.end(), m_keyMap.end() };
 	KeyEventType keyEventType;
 
-	if(code == HC_ACTION)
-	{
-		//Get the KeyEventType (key up, key down, key repeat)
-		DWORD scancode = static_cast<LONG>(lParam) >> 16;
-		if((scancode & 0xC000) == 0xC000)
-		{
-			keyEventType = kKeyEventUp;
-		} else if((scancode & 0xC000) == 0x0000)
-		{
-			keyEventType = kKeyEventDown;
-		} else
-		{
-			keyEventType = kKeyEventRepeat;
-		}
+	// Get the KeyEventType (key up, key down, key repeat)
+	DWORD scancode = static_cast<LONG>(lParam) >> 16;
+	if((scancode & 0xC000) == 0xC000)
+		keyEventType = kKeyEventUp;
+	else if((scancode & 0xC000) == 0x0000)
+		keyEventType = kKeyEventDown;
+	else
+		keyEventType = kKeyEventRepeat;
 
-		// Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
-		// NB: we want to catch modifiers even when the input handler is locked
-		if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
-		{
-			scancode = (static_cast<LONG>(lParam) >> 16) & 0x1FF;
-			CatchModifierChange(wParam, keyEventType, scancode);
-		}
-
-		if(!InterceptSpecialKeys(static_cast<UINT>(wParam), static_cast<LONG>(lParam), true) && !IsBypassed())
-		{
-			// only execute command when the input handler is not locked
-			// and the input is not a consequence of special key interception.
-			cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, static_cast<UINT>(wParam), keyEventType));
-		}
-	}
-	if(code == HC_MIDI)
+	// Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
+	// NB: we want to catch modifiers even when the input handler is locked
+	if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
 	{
-		cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, static_cast<UINT>(wParam), static_cast<KeyEventType>(lParam)));
+		scancode = (static_cast<LONG>(lParam) >> 16) & 0x1FF;
+		CatchModifierChange(wParam, keyEventType, scancode);
 	}
 
-	return SendCommands(m_pMainFrm, cmd);
+	if(!IsBypassed())
+		InterceptSpecialKeys(static_cast<UINT>(wParam), static_cast<LONG>(lParam), true);
 }
 
 
@@ -266,6 +249,7 @@ bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType
 // Translate MIDI messages to shortcut commands
 CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
 {
+	KeyMapRange cmd = { m_keyMap.end(), m_keyMap.end() };
 	auto byte1 = MIDIEvents::GetDataByte1FromEvent(message), byte2 = MIDIEvents::GetDataByte2FromEvent(message);
 	switch(MIDIEvents::GetTypeFromEvent(message))
 	{
@@ -274,7 +258,8 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 		{
 			// Only capture MIDI CCs for now. Some controllers constantly send some MIDI CCs with value 0
 			// (e.g. the Roland D-50 sends CC123 whenenver all notes have been released), so we will ignore those.
-			return GeneralKeyEvent(context, HC_MIDI, byte1, kKeyEventDown);
+			cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, byte1, kKeyEventDown));
+			return SendCommands(m_pMainFrm, cmd);
 		}
 		break;
 
@@ -284,11 +269,13 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 	case MIDIEvents::evNoteOn:
 		if(byte2 != 0)
 		{
-			return GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, kKeyEventDown);
+			cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, byte1 | 0x80, kKeyEventDown));
+			return SendCommands(m_pMainFrm, cmd);
 		} else
 		{
+			cmd = m_keyMap.equal_range(KeyCombination(context, ModMidi, byte1 | 0x80, kKeyEventUp));
 			// If the key-down triggered a note, we still want that note to be stopped. So we always pretend that no key was assigned to this event
-			GeneralKeyEvent(context, HC_MIDI, byte1 | 0x80, kKeyEventUp);
+			SendCommands(m_pMainFrm, cmd);
 		}
 		break;
 

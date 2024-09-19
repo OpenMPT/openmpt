@@ -16,12 +16,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-// Hook codes
-enum
-{
-	HC_MIDI = 0x8000,
-};
-
 struct CModSpecifications;
 
 class CInputHandler
@@ -49,7 +43,7 @@ public:
 
 public:
 	CInputHandler(CWnd *mainframe);
-	CommandID GeneralKeyEvent(InputTargetContext context, int code, WPARAM wParam, LPARAM lParam);
+	void HandleModifierChanges(WPARAM wParam, LPARAM lParam);
 	CommandID KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd = nullptr);
 	static KeyboardEvent Translate(const MSG &msg);
 	static KeyEventType GetKeyEventType(const MSG &msg);

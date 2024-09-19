@@ -12,12 +12,10 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "tuningRatioMapWnd.h"
-#include "tuningcollection.h"
-#include <vector>
-#include <string>
-#include "resource.h"
 #include "CDecimalSupport.h"
+#include "DialogBase.h"
+#include "tuningcollection.h"
+#include "tuningRatioMapWnd.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -189,7 +187,7 @@ public:
 
 // CTuningDialog dialog
 
-class CTuningDialog : public CDialog
+class CTuningDialog : public DialogBase
 {
 	friend class CTuningTreeCtrl;
 
@@ -210,7 +208,7 @@ public:
 	using TUNINGVECTOR = std::vector<CTuningCollection*>;
 
 public:
-	CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf);
+	CTuningDialog(CWnd *pParent, INSTRUMENTINDEX inst, CSoundFile &csf);
 	~CTuningDialog() override;
 
 	BOOL OnInitDialog() override;
@@ -218,9 +216,6 @@ public:
 	void UpdateRatioMapEdits(const Tuning::NOTEINDEXTYPE&);
 
 	bool GetModifiedStatus(const CTuningCollection* const pTc) const;
-
-// Dialog Data
-	enum { IDD = IDD_TUNING };
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support

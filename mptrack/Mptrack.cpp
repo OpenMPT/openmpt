@@ -14,6 +14,7 @@
 #include "AutoSaver.h"
 #include "Childfrm.h"
 #include "CloseMainDialog.h"
+#include "DialogBase.h"
 #include "ExceptionHandler.h"
 #include "FileDialog.h"
 #include "Globals.h"
@@ -1790,7 +1791,7 @@ void CTrackApp::OnAppAbout()
 /////////////////////////////////////////////////////////////////////////////
 // Splash Screen
 
-class CSplashScreen: public CDialog
+class CSplashScreen : public DialogBase
 {
 protected:
 	std::unique_ptr<Gdiplus::Image> m_Image;

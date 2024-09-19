@@ -31,7 +31,7 @@ OPENMPT_NAMESPACE_BEGIN
 // CModTypeDlg
 
 
-BEGIN_MESSAGE_MAP(CModTypeDlg, CDialog)
+BEGIN_MESSAGE_MAP(CModTypeDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModTypeDlg)
 	ON_CBN_SELCHANGE(IDC_COMBO1,			&CModTypeDlg::UpdateDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_TEMPOMODE,	&CModTypeDlg::OnTempoModeChanged)
@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 
 void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CModTypeDlg)
 	DDX_Control(pDX, IDC_COMBO1,		m_TypeBox);
 	DDX_Control(pDX, IDC_COMBO2,		m_ChannelsBox);
@@ -70,7 +70,7 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CModTypeDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	m_nType = sndFile.GetType();
 	m_nChannels = sndFile.GetNumChannels();
 	m_tempoSwing = sndFile.m_tempoSwing;
@@ -444,7 +444,7 @@ void CModTypeDlg::OnOK()
 	}
 
 	DestroyIcon(m_warnIcon);
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
@@ -740,12 +740,12 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 
 void CRemoveChannelsDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_REMCHANSLIST,		m_RemChansList);
 }
 
 
-BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, CDialog)
+BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, DialogBase)
 	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		&CRemoveChannelsDlg::OnChannelChanged)
 END_MESSAGE_MAP()
 
@@ -754,7 +754,7 @@ END_MESSAGE_MAP()
 BOOL CRemoveChannelsDlg::OnInitDialog()
 {
 	CString s;
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	const CHANNELINDEX numChannels = sndFile.GetNumChannels();
 	for(CHANNELINDEX n = 0; n < numChannels; n++)
 	{
@@ -794,9 +794,9 @@ void CRemoveChannelsDlg::OnOK()
 	}
 	if ((static_cast<CHANNELINDEX>(selCount) == m_nRemove && selCount > 0)
 		|| (m_nRemove == 0 && (sndFile.GetNumChannels() >= selCount + sndFile.GetModSpecifications().channelsMin)))
-		CDialog::OnOK();
+		DialogBase::OnOK();
 	else
-		CDialog::OnCancel();
+		DialogBase::OnCancel();
 }
 
 
@@ -1104,7 +1104,7 @@ void CKeyboardControl::OnLButtonUp(UINT, CPoint)
 // Sample Map
 //
 
-BEGIN_MESSAGE_MAP(CSampleMapDlg, CDialog)
+BEGIN_MESSAGE_MAP(CSampleMapDlg, DialogBase)
 	ON_MESSAGE(WM_MOD_KBDNOTIFY,	&CSampleMapDlg::OnKeyboardNotify)
 	ON_WM_HSCROLL()
 	ON_COMMAND(IDC_CHECK1,			&CSampleMapDlg::OnUpdateSamples)
@@ -1113,7 +1113,7 @@ END_MESSAGE_MAP()
 
 void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleMapDlg)
 	DDX_Control(pDX, IDC_KEYBOARD1,		m_Keyboard);
 	DDX_Control(pDX, IDC_COMBO1,		m_CbnSample);
@@ -1124,7 +1124,7 @@ void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CSampleMapDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if(pIns)
 	{
@@ -1144,7 +1144,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 
 void CSampleMapDlg::OnHScroll(UINT nCode, UINT nPos, CScrollBar *pBar)
 {
-	CDialog::OnHScroll(nCode, nPos, pBar);
+	DialogBase::OnHScroll(nCode, nPos, pBar);
 	OnUpdateKeyboard();
 	OnUpdateOctave();
 }
@@ -1297,11 +1297,11 @@ void CSampleMapDlg::OnOK()
 		}
 		if(modified)
 		{
-			CDialog::OnOK();
+			DialogBase::OnOK();
 			return;
 		}
 	}
-	CDialog::OnCancel();
+	DialogBase::OnCancel();
 }
 
 
@@ -1381,7 +1381,7 @@ void CEditHistoryDlg::OnClearHistory()
 
 void CInputDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	if(m_minValueInt == m_maxValueInt && m_minValueDbl == m_maxValueDbl)
 	{
 		// Only need this for freeform text
@@ -1393,7 +1393,7 @@ void CInputDlg::DoDataExchange(CDataExchange* pDX)
 
 BOOL CInputDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	SetDlgItemText(IDC_PROMPT, m_description);
 
 	// Get all current control sizes and positions
@@ -1460,7 +1460,7 @@ BOOL CInputDlg::OnInitDialog()
 
 void CInputDlg::OnOK()
 {
-	CDialog::OnOK();
+	DialogBase::OnOK();
 	GetDlgItemText(IDC_EDIT1, resultAsString);
 	resultAsInt = static_cast<int32>(GetDlgItemInt(IDC_EDIT1));
 	Limit(resultAsInt, m_minValueInt, m_maxValueInt);
@@ -1472,7 +1472,7 @@ void CInputDlg::OnOK()
 ///////////////////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
-class CMsgBoxHidable : public CDialog
+class CMsgBoxHidable : public DialogBase
 {
 public:
 	CMsgBoxHidable(const TCHAR *strMsg, bool checkStatus = true, CWnd* pParent = NULL);
@@ -1526,14 +1526,14 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 
 
 CMsgBoxHidable::CMsgBoxHidable(const  TCHAR *strMsg, bool checkStatus, CWnd* pParent)
-	: CDialog(CMsgBoxHidable::IDD, pParent)
+	: DialogBase(CMsgBoxHidable::IDD, pParent)
 	, m_StrMsg(strMsg)
 	, m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
 {}
 
 BOOL CMsgBoxHidable::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	SetDlgItemText(IDC_MESSAGETEXT, m_StrMsg);
 	SetWindowText(AfxGetAppName());
 	return TRUE;
@@ -1541,7 +1541,7 @@ BOOL CMsgBoxHidable::OnInitDialog()
 
 void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Check(pDX, IDC_DONTSHOWAGAIN, m_nCheckStatus);
 }
 

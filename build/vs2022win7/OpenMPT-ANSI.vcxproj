@@ -855,6 +855,7 @@
     <ClInclude Include="..\..\mptrack\Ctrl_pat.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_smp.h" />
     <ClInclude Include="..\..\mptrack\DefaultVstEditor.h" />
+    <ClInclude Include="..\..\mptrack\DialogBase.h" />
     <ClInclude Include="..\..\mptrack\EffectInfo.h" />
     <ClInclude Include="..\..\mptrack\EffectVis.h" />
     <ClInclude Include="..\..\mptrack\ExceptionHandler.h" />
@@ -1295,6 +1296,7 @@
     <ClCompile Include="..\..\mptrack\Ctrl_seq.cpp" />
     <ClCompile Include="..\..\mptrack\Ctrl_smp.cpp" />
     <ClCompile Include="..\..\mptrack\DefaultVstEditor.cpp" />
+    <ClCompile Include="..\..\mptrack\DialogBase.cpp" />
     <ClCompile Include="..\..\mptrack\Draw_pat.cpp" />
     <ClCompile Include="..\..\mptrack\EffectInfo.cpp" />
     <ClCompile Include="..\..\mptrack\EffectVis.cpp" />

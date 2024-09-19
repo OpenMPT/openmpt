@@ -124,7 +124,7 @@ void getXParam(ModCommand::COMMAND command, PATTERNINDEX nPat, ROWINDEX nRow, CH
 /////////////////////////////////////////////////////////////////////////////////////////////
 // CPatternPropertiesDlg
 
-BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, CDialog)
+BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, DialogBase)
 	ON_COMMAND(IDC_BUTTON_HALF,		&CPatternPropertiesDlg::OnHalfRowNumber)
 	ON_COMMAND(IDC_BUTTON_DOUBLE,	&CPatternPropertiesDlg::OnDoubleRowNumber)
 	ON_COMMAND(IDC_CHECK1,			&CPatternPropertiesDlg::OnOverrideSignature)
@@ -134,7 +134,7 @@ END_MESSAGE_MAP()
 BOOL CPatternPropertiesDlg::OnInitDialog()
 {
 	CComboBox *combo;
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	combo = (CComboBox *)GetDlgItem(IDC_COMBO1);
 	const CSoundFile &sndFile = modDoc.GetSoundFile();
 
@@ -329,14 +329,14 @@ void CPatternPropertiesDlg::OnOK()
 		}
 		modDoc.EndWaitCursor();
 	}
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // CEditCommand
 
-BEGIN_MESSAGE_MAP(CEditCommand, CDialog)
+BEGIN_MESSAGE_MAP(CEditCommand, DialogBase)
 	ON_WM_ACTIVATE()
 	ON_WM_CLOSE()
 
@@ -351,7 +351,7 @@ END_MESSAGE_MAP()
 
 void CEditCommand::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
 	DDX_Control(pDX, IDC_COMBO1,	cbnNote);
 	DDX_Control(pDX, IDC_COMBO2,	cbnInstr);
@@ -367,7 +367,7 @@ void CEditCommand::DoDataExchange(CDataExchange* pDX)
 CEditCommand::CEditCommand(CSoundFile &sndFile)
     : sndFile(sndFile), effectInfo(sndFile)
 {
-	CDialog::Create(IDD_PATTERN_EDITCOMMAND);
+	DialogBase::Create(IDD_PATTERN_EDITCOMMAND);
 }
 
 
@@ -381,7 +381,7 @@ BOOL CEditCommand::PreTranslateMessage(MSG *pMsg)
 			return TRUE;
 		}
 	}
-	return CDialog::PreTranslateMessage(pMsg);
+	return DialogBase::PreTranslateMessage(pMsg);
 }
 
 
@@ -894,7 +894,7 @@ void CEditCommand::OnHScroll(UINT, UINT, CScrollBar *bar)
 
 void CEditCommand::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
 {
-	CDialog::OnActivate(nState, pWndOther, bMinimized);
+	DialogBase::OnActivate(nState, pWndOther, bMinimized);
 	if(nState == WA_INACTIVE)
 		ShowWindow(SW_HIDE);
 }
@@ -1142,14 +1142,14 @@ void CChordEditor::OnNoteChanged(int noteIndex)
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Keyboard Split Settings (pattern editor)
 
-BEGIN_MESSAGE_MAP(CSplitKeyboardSettings, CDialog)
+BEGIN_MESSAGE_MAP(CSplitKeyboardSettings, DialogBase)
 	ON_CBN_SELCHANGE(IDC_COMBO_OCTAVEMODIFIER, &CSplitKeyboardSettings::OnOctaveModifierChanged)
 END_MESSAGE_MAP()
 
 
 void CSplitKeyboardSettings::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSplitKeyboadSettings)
 	DDX_Control(pDX, IDC_COMBO_SPLITINSTRUMENT, m_CbnSplitInstrument);
 	DDX_Control(pDX, IDC_COMBO_SPLITNOTE,       m_CbnSplitNote);
@@ -1164,7 +1164,7 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 	if(sndFile.GetpModDoc() == nullptr)
 		return TRUE;
 
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	CString s;
 
@@ -1237,7 +1237,7 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 
 void CSplitKeyboardSettings::OnOK()
 {
-	CDialog::OnOK();
+	DialogBase::OnOK();
 
 	m_Settings.splitNote = static_cast<ModCommand::NOTE>(m_CbnSplitNote.GetItemData(m_CbnSplitNote.GetCurSel()) - 1);
 	m_Settings.octaveModifier = m_CbnOctaveModifier.GetCurSel() - SplitKeyboardSettings::splitOctaveRange;
@@ -1249,7 +1249,7 @@ void CSplitKeyboardSettings::OnOK()
 
 void CSplitKeyboardSettings::OnCancel()
 {
-	CDialog::OnCancel();
+	DialogBase::OnCancel();
 }
 
 
@@ -1262,7 +1262,7 @@ void CSplitKeyboardSettings::OnOctaveModifierChanged()
 /////////////////////////////////////////////////////////////////////////
 // Show channel properties from pattern editor
 
-BEGIN_MESSAGE_MAP(QuickChannelProperties, CDialog)
+BEGIN_MESSAGE_MAP(QuickChannelProperties, DialogBase)
 	ON_WM_HSCROLL()		// Sliders
 	ON_WM_ACTIVATE()	// Catch Window focus change
 	ON_EN_UPDATE(IDC_EDIT1,	&QuickChannelProperties::OnVolChanged)
@@ -1621,7 +1621,7 @@ BOOL QuickChannelProperties::PreTranslateMessage(MSG *pMsg)
 		}
 	}
 
-	return CDialog::PreTranslateMessage(pMsg);
+	return DialogBase::PreTranslateMessage(pMsg);
 }
 
 

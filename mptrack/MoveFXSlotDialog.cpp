@@ -20,13 +20,13 @@ OPENMPT_NAMESPACE_BEGIN
 
 void CMoveFXSlotDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1, m_CbnEmptySlots);
 }
 
 
 CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const std::vector<PLUGINDEX> &emptySlots, PLUGINDEX defaultIndex, bool clone, bool hasChain) :
-	CDialog(IDD_MOVEFXSLOT, pParent),
+	DialogBase(IDD_MOVEFXSLOT, pParent),
 	m_EmptySlots(emptySlots),
 	m_nDefaultSlot(defaultIndex),
 	moveChain(hasChain)
@@ -47,7 +47,7 @@ CMoveFXSlotDialog::CMoveFXSlotDialog(CWnd *pParent, PLUGINDEX currentSlot, const
 
 BOOL CMoveFXSlotDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	SetDlgItemText(IDC_STATIC1, m_csPrompt);
 	SetDlgItemText(IDC_CHECK1, m_csChain);
 	SetWindowText(m_csTitle);
@@ -85,7 +85,7 @@ void CMoveFXSlotDialog::OnOK()
 {
 	m_nToSlot = m_CbnEmptySlots.GetItemData(m_CbnEmptySlots.GetCurSel());
 	moveChain = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 

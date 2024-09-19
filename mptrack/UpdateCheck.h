@@ -18,7 +18,6 @@
 
 #include <atomic>
 
-#include "resource.h"
 #include "Settings.h"
 
 OPENMPT_NAMESPACE_BEGIN

@@ -32,7 +32,7 @@ END_MESSAGE_MAP()
 
 void MidiInOutEditor::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CAbstractVstEditor::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(MidiInOutEditor)
 	DDX_Control(pDX, IDC_COMBO1,	m_inputCombo);
 	DDX_Control(pDX, IDC_COMBO2,	m_outputCombo);

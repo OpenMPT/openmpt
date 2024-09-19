@@ -580,7 +580,7 @@ namespace MidiExport
 
 bool CModToMidi::s_overlappingInstruments = false;
 
-BEGIN_MESSAGE_MAP(CModToMidi, CDialog)
+BEGIN_MESSAGE_MAP(CModToMidi, DialogBase)
 	ON_CBN_SELCHANGE(IDC_COMBO1,	&CModToMidi::UpdateDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO2,	&CModToMidi::OnChannelChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,	&CModToMidi::OnProgramChanged)
@@ -591,7 +591,7 @@ END_MESSAGE_MAP()
 
 void CModToMidi::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnInstrument);
 	DDX_Control(pDX, IDC_COMBO2,	m_CbnChannel);
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnProgram);
@@ -600,7 +600,7 @@ void CModToMidi::DoDataExchange(CDataExchange *pDX)
 
 
 CModToMidi::CModToMidi(CSoundFile &sndFile, CWnd *pWndParent)
-	: CDialog(IDD_MOD2MIDI, pWndParent)
+	: DialogBase(IDD_MOD2MIDI, pWndParent)
 	, m_sndFile(sndFile)
 	, m_instrMap((sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()) + 1)
 {
@@ -625,7 +625,7 @@ BOOL CModToMidi::OnInitDialog()
 {
 	CString s;
 
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	// Fill instruments box
 	m_SpinInstrument.SetRange(-1, 1);
@@ -772,7 +772,7 @@ void CModToMidi::UpdateDialog()
 
 void CModToMidi::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+	DialogBase::OnVScroll(nSBCode, nPos, pScrollBar);
 	int pos = m_SpinInstrument.GetPos32();
 	if(pos)
 	{
@@ -829,16 +829,16 @@ void CModToMidi::OnOK()
 	{
 		if(m_instrMap[i].channel != MidiNoChannel)
 		{
-			CDialog::OnOK();
+			DialogBase::OnOK();
 			return;
 		}
 	}
 
 	auto choice = Reporting::Confirm(_T("No instruments have been selected for export. Would you still like to export the file?"), true, true);
 	if(choice == cnfYes)
-		CDialog::OnOK();
+		DialogBase::OnOK();
 	else if(choice == cnfNo)
-		CDialog::OnCancel();
+		DialogBase::OnCancel();
 }
 
 

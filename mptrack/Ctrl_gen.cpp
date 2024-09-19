@@ -400,7 +400,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 
 void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 {
-	CDialog::OnVScroll(code, pos, pscroll);
+	CModControlDlg::OnVScroll(code, pos, pscroll);
 
 	if (m_bInitialized)
 	{

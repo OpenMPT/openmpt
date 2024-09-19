@@ -13,12 +13,13 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
+#include "DialogBase.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 struct InstrumentEnvelope;
 
-class CScaleEnvPointsDlg : public CDialog
+class CScaleEnvPointsDlg : public DialogBase
 {
 protected:
 	CNumberEdit m_EditX, m_EditY, m_EditOffset;

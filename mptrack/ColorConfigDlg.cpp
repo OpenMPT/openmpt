@@ -326,7 +326,7 @@ void COptionsColors::OnDrawItem(int nIdCtl, LPDRAWITEMSTRUCT lpdis)
 {
 	if(!lpdis || nIdCtl != IDC_BUTTON4 || !m_pPreviewDib)
 	{
-		CDialog::OnDrawItem(nIdCtl, lpdis);
+		CPropertyPage::OnDrawItem(nIdCtl, lpdis);
 		return;
 	}
 

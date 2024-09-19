@@ -162,7 +162,7 @@ END_MESSAGE_MAP()
 
 void CDefaultVstEditor::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CAbstractVstEditor::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CDefaultVstEditor)
 	DDX_Control(pDX, IDC_SCROLLBAR1,	paramScroller);
 	//}}AFX_DATA_MAP

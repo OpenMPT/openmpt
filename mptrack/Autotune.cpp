@@ -10,10 +10,12 @@
 
 #include "stdafx.h"
 #include "Autotune.h"
-#include <math.h>
+#include "resource.h"
 #include "../common/misc_util.h"
 #include "../soundlib/Sndfile.h"
+
 #include <algorithm>
+#include <cmath>
 #include <execution>
 #include <numeric>
 #if defined(MPT_ENABLE_ARCH_INTRINSICS_SSE2)
@@ -383,16 +385,19 @@ int CAutotuneDlg::m_targetNote = 0;       // Target note (C- = 0, C# = 1, etc...
 
 void CAutotuneDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAutotuneDlg)
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnNoteBox);
 	//}}AFX_DATA_MAP
 }
 
 
+CAutotuneDlg::CAutotuneDlg(CWnd *parent) : DialogBase(IDD_AUTOTUNE, parent) {}
+
+
 BOOL CAutotuneDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	m_CbnNoteBox.ResetContent();
 	for(int note = 0; note < 12; note++)
@@ -420,7 +425,7 @@ void CAutotuneDlg::OnOK()
 		return;
 	}
 
-	CDialog::OnOK();
+	DialogBase::OnOK();
 	m_targetNote = (int)m_CbnNoteBox.GetItemData(m_CbnNoteBox.GetCurSel());
 	m_pitchReference = pitch;
 }

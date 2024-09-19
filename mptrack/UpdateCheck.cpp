@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "UpdateCheck.h"
+#include "DialogBase.h"
 #include "dlg_misc.h"
 #include "HTTP.h"
 #include "Mainfrm.h"
@@ -349,7 +350,7 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 
 
 // Update notification dialog
-class UpdateDialog : public CDialog
+class UpdateDialog : public DialogBase
 {
 protected:
 	const CString m_releaseVersion;
@@ -360,7 +361,7 @@ protected:
 
 public:
 	UpdateDialog(const CString &releaseVersion, const CString &releaseDate, const CString &releaseURL, const CString &buttonText = _T("&Update"))
-		: CDialog(IDD_UPDATE)
+		: DialogBase(IDD_UPDATE)
 		, m_releaseVersion(releaseVersion)
 		, m_releaseDate(releaseDate)
 		, m_releaseURL(releaseURL)
@@ -369,7 +370,7 @@ public:
 
 	BOOL OnInitDialog() override
 	{
-		CDialog::OnInitDialog();
+		DialogBase::OnInitDialog();
 
 		SetDlgItemText(IDOK, m_buttonText);
 
@@ -392,7 +393,7 @@ public:
 	{
 		TrackerSettings::Instance().UpdateIgnoreVersion = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED ? m_releaseVersion : CString();
 		m_boldFont.DeleteObject();
-		CDialog::OnDestroy();
+		DialogBase::OnDestroy();
 	}
 
 	void OnClickURL(NMHDR * /*pNMHDR*/, LRESULT * /*pResult*/)
@@ -403,7 +404,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-BEGIN_MESSAGE_MAP(UpdateDialog, CDialog)
+BEGIN_MESSAGE_MAP(UpdateDialog, DialogBase)
 	ON_NOTIFY(NM_CLICK, IDC_SYSLINK1, &UpdateDialog::OnClickURL)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
@@ -1539,7 +1540,7 @@ CUpdateSetupDlg::CUpdateSetupDlg()
 
 void CUpdateSetupDlg::DoDataExchange(CDataExchange *pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO_UPDATEFREQUENCY, m_CbnUpdateFrequency);
 }
 

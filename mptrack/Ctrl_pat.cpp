@@ -21,6 +21,7 @@
 #include "Mptrack.h"
 #include "PatternEditorDialogs.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "View_pat.h"
 #include "WindowMessages.h"
@@ -547,6 +548,19 @@ BOOL CCtrlPatterns::SetCurrentInstrument(UINT nIns)
 	}
 	return FALSE;
 }
+
+
+BOOL CCtrlPatterns::GetFollowSong() const
+{
+	return IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG);
+}
+
+
+BOOL CCtrlPatterns::GetLoopPattern() const
+{
+	return IsDlgButtonChecked(IDC_PATTERN_LOOP);
+}
+
 
 
 ////////////////////////////////////////////////////////////

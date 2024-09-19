@@ -11,10 +11,11 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CProgressDialog : public CDialog
+class CProgressDialog : public DialogBase
 {
 private:
 	ITaskbarList3 *m_taskBarList = nullptr;

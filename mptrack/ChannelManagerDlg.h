@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 #include "PatternEditorDialogs.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -18,7 +19,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 struct UpdateHint;
 
-class CChannelManagerDlg: public CDialog
+class CChannelManagerDlg : public DialogBase
 {
 	enum Tab
 	{

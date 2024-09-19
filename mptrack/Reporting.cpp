@@ -11,7 +11,6 @@
 #include "stdafx.h"
 #include "Reporting.h"
 #include "../mptrack/Mainfrm.h"
-#include "../mptrack/InputHandler.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -81,7 +80,6 @@ static UINT ShowNotificationImpl(CString text, const CString &caption, UINT flag
 		text.SetAt(uint16_max - 2, _T('.'));
 		text.SetAt(uint16_max - 3, _T('.'));
 	}
-	BypassInputHandler bih;
 	UINT result = ::MessageBox(parent->GetSafeHwnd(), text, caption.IsEmpty() ? CString(MAINFRAME_TITLE) : caption, flags);
 	return result;
 }

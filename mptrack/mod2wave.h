@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "DialogBase.h"
 #include "ProgressDialog.h"
 #include "Settings.h"
 #include "openmpt/streamencoder/StreamEncoder.hpp"
@@ -53,7 +54,7 @@ struct CWaveConvertSettings
 };
 
 
-class CWaveConvert: public CDialog
+class CWaveConvert : public DialogBase
 {
 public:
 	CWaveConvertSettings m_Settings;

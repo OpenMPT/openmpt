@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "DialogBase.h"
 #include "resource.h"
 #include "Settings.h"
 #include "UpdateHints.h"
@@ -35,7 +36,7 @@ public:
 };
 
 
-class CModControlDlg: public CDialog
+class CModControlDlg : public DialogBase
 {
 protected:
 	CModDoc &m_modDoc;
@@ -219,6 +220,7 @@ public:
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
+	BOOL PreTranslateMessage(MSG *pMsg);
 	//}}AFX_VIRTUAL
 
 	CModControlDlg *GetControlDlg() { return static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->GetCurrentControlDlg(); }

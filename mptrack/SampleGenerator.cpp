@@ -230,7 +230,7 @@ void CSampleGenerator::ShowError(mu::Parser::exception_type *e)
 
 #define MAX_SAMPLEGEN_EXPRESSIONS 61
 
-BEGIN_MESSAGE_MAP(CSmpGenDialog, CDialog)
+BEGIN_MESSAGE_MAP(CSmpGenDialog, DialogBase)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE_LENGTH,		&CSmpGenDialog::OnSampleLengthChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE_LENGTH_SEC,	&CSmpGenDialog::OnSampleSecondsChanged)
 	ON_EN_CHANGE(IDC_EDIT_SAMPLE_FREQ,			&CSmpGenDialog::OnSampleFreqChanged)
@@ -311,7 +311,7 @@ const samplegen_expression menu_descriptions[MAX_SAMPLEGEN_EXPRESSIONS] =
 
 BOOL CSmpGenDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	RecalcParameters(false, true);
 	SetDlgItemText(IDC_EDIT_FORMULA, expression.c_str());
 
@@ -339,7 +339,7 @@ BOOL CSmpGenDialog::OnInitDialog()
 
 void CSmpGenDialog::OnOK()
 {
-	CDialog::OnOK();
+	DialogBase::OnOK();
 	apply = true;
 
 	int check = GetCheckedRadioButton(IDC_RADIO_SMPCLIP1, IDC_RADIO_SMPCLIP3);
@@ -356,7 +356,7 @@ void CSmpGenDialog::OnOK()
 
 void CSmpGenDialog::OnCancel()
 {
-	CDialog::OnCancel();
+	DialogBase::OnCancel();
 	apply = false;
 }
 
@@ -620,7 +620,7 @@ void CSmpGenDialog::CreateDefaultPresets()
 // Sample Generator Preset Dialog implementation
 
 
-BEGIN_MESSAGE_MAP(CSmpGenPresetDlg, CDialog)
+BEGIN_MESSAGE_MAP(CSmpGenPresetDlg, DialogBase)
 	ON_COMMAND(IDC_BUTTON_ADD,				&CSmpGenPresetDlg::OnAddPreset)
 	ON_COMMAND(IDC_BUTTON_REMOVE,			&CSmpGenPresetDlg::OnRemovePreset)
 	ON_EN_CHANGE(IDC_EDIT_PRESET_NAME,		&CSmpGenPresetDlg::OnTextChanged)
@@ -631,7 +631,7 @@ END_MESSAGE_MAP()
 
 BOOL CSmpGenPresetDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	RefreshList();
 
@@ -649,7 +649,7 @@ void CSmpGenPresetDlg::OnOK()
 			presets->RemovePreset(i);
 		}
 	}
-	CDialog::OnOK();
+	DialogBase::OnOK();
 }
 
 

@@ -30,7 +30,7 @@ TempoSwing::value_type CTempoSwingDlg::RowCtls::GetValue() const
 }
 
 
-BEGIN_MESSAGE_MAP(CTempoSwingDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTempoSwingDlg, DialogBase)
 	//{{AFX_MSG_MAP(CTempoSwingDlg)
 	ON_WM_VSCROLL()
 	ON_COMMAND(IDC_BUTTON1,	&CTempoSwingDlg::OnReset)
@@ -43,7 +43,7 @@ END_MESSAGE_MAP()
 int CTempoSwingDlg::m_groupSize = 1;
 
 CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing, CSoundFile &sndFile, PATTERNINDEX pattern)
-	: CDialog(IDD_TEMPO_SWING, parent)
+	: DialogBase(IDD_TEMPO_SWING, parent)
 	, m_container(*this)
 	, m_scrollPos(0)
 	, m_tempoSwing(currentTempoSwing)
@@ -57,7 +57,7 @@ CTempoSwingDlg::CTempoSwingDlg(CWnd *parent, const TempoSwing &currentTempoSwing
 
 void CTempoSwingDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHECK1, m_checkGroup);
 	DDX_Control(pDX, IDC_SCROLLBAR1, m_scrollBar);
 	DDX_Control(pDX, IDC_CONTAINER, m_container);
@@ -107,7 +107,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		{ }
 	};
 
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	Measurements m(m_hWnd);
 	CRect windowRect, rect;
 	GetWindowRect(windowRect);
@@ -201,7 +201,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 
 void CTempoSwingDlg::OnOK()
 {
-	CDialog::OnOK();
+	DialogBase::OnOK();
 	// If this is the default setup, just clear the vector.
 	if(m_pattern == PATTERNINDEX_INVALID)
 	{
@@ -222,7 +222,7 @@ void CTempoSwingDlg::OnOK()
 
 void CTempoSwingDlg::OnCancel()
 {
-	CDialog::OnCancel();
+	DialogBase::OnCancel();
 	OnClose();
 }
 
@@ -350,12 +350,12 @@ void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 		m_scrollPos = curpos;
 	}
 
-	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+	DialogBase::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 
 // Scrollable container for the sliders
-BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, CDialog)
+BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, DialogBase)
 	//{{AFX_MSG_MAP(CTempoSwingDlg::SliderContainer)
 	ON_WM_HSCROLL()
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CTempoSwingDlg::SliderContainer::OnToolTipNotify)

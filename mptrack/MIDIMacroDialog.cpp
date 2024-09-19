@@ -22,7 +22,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-BEGIN_MESSAGE_MAP(CMidiMacroSetup, CDialog)
+BEGIN_MESSAGE_MAP(CMidiMacroSetup, DialogBase)
 	ON_COMMAND(IDC_BUTTON1,			&CMidiMacroSetup::OnSetAsDefault)
 	ON_COMMAND(IDC_BUTTON2,			&CMidiMacroSetup::OnResetCfg)
 	ON_COMMAND(IDC_BUTTON3,			&CMidiMacroSetup::OnMacroHelp)
@@ -42,7 +42,7 @@ END_MESSAGE_MAP()
 
 void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	DialogBase::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_COMBO1,	m_CbnSFx);
 	DDX_Control(pDX, IDC_COMBO2,	m_CbnSFxPreset);
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnZxxPreset);
@@ -56,7 +56,7 @@ void CMidiMacroSetup::DoDataExchange(CDataExchange* pDX)
 
 
 CMidiMacroSetup::CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent)
-	: CDialog{IDD_MIDIMACRO, parent}
+	: DialogBase{IDD_MIDIMACRO, parent}
 	, m_SndFile{sndFile}
 	, m_vMidiCfg{sndFile.m_MidiCfg}
 	, m_MidiCfg{*m_vMidiCfg}
@@ -67,7 +67,7 @@ CMidiMacroSetup::CMidiMacroSetup(CSoundFile &sndFile, CWnd *parent)
 BOOL CMidiMacroSetup::OnInitDialog()
 {
 	CString s;
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 	m_EditSFx.SetLimitText(kMacroLength - 1);
 	m_EditZxx.SetLimitText(kMacroLength - 1);
 
