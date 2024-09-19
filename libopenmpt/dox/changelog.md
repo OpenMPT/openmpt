@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.33-pre
 
+ *  Fixed inconsistency in length calculation and actual playback length with
+    tempo commands below 32 BPM in various formats (MDL, MED among others).
+ *  MED: Command 09 (set speed) was limited to 20 ticks per row instead of 32
+    ticks per row.
+ *  MED: Allow tempo parameters < 32 BPM.
+
  *  mpg123: Update to v1.32.7 (2024-08-07).
 
 ### libopenmpt 0.5.32 (2024-07-21)
