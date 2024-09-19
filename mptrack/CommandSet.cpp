@@ -68,6 +68,7 @@ constexpr struct
 	{kcMidiRecord,                             VK_F9,              ModNone,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
 	{kcEditUndo,                               'Z',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
 	{kcEditRedo,                               'Y',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
+	{kcEditRedo,                               'Z',                ModShift | ModCtrl, kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.32.00.25")},
 	{kcEditCut,                                'X',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
 	{kcEditCopy,                               'C',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
 	{kcEditPaste,                              'V',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
