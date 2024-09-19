@@ -44,6 +44,7 @@ public:
 
 	Base(UpdateProgressFunc updateProgress, PrepareUndoFunc prepareUndo,
 		CSoundFile &sndFile, SAMPLEINDEX sample, float pitch, float stretchRatio, SmpLength start, SmpLength end);
+	virtual ~Base();
 
 	virtual Result Process() = 0;
 
