@@ -263,7 +263,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					} else if(row < rows - 1)
 					{
 						// Retry on next row
-						sndFile.Patterns[pat].GetpModCommand(row + 1, chn + pairedChn[chn])->SetEffectCommand(m);
+						sndFile.Patterns[pat].GetpModCommand(row + 1, static_cast<CHANNELINDEX>(chn + pairedChn[chn]))->SetEffectCommand(m);
 					}
 				}
 				break;
