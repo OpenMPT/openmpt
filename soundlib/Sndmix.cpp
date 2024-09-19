@@ -2509,18 +2509,10 @@ bool CSoundFile::ReadNote()
 					// Test case: FT2PanLaw.xm
 					LimitMax(pan, 255);
 
-					// PolyTracker also uses square root panning, but there's a bug where the leftmost and rightmost pan positions play the sample centered, without any attenuation.
-					if(GetType() == MOD_TYPE_PTM && (pan == 0 || pan == 255))
-					{
-						chn.newLeftVol = realvol;
-						chn.newRightVol = realvol;
-					} else
-					{
-						const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
-						const int panR = XMPanningTable[pan];
-						chn.newLeftVol = (realvol * panL) / 65536;
-						chn.newRightVol = (realvol * panR) / 65536;
-					}
+					const int panL = pan > 0 ? XMPanningTable[256 - pan] : 65536;
+					const int panR = XMPanningTable[pan];
+					chn.newLeftVol = (realvol * panL) / 65536;
+					chn.newRightVol = (realvol * panR) / 65536;
 				} else
 				{
 					chn.newLeftVol = (realvol * (256 - pan)) / 256;
