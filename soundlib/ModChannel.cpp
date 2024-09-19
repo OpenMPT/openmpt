@@ -18,6 +18,8 @@ OPENMPT_NAMESPACE_BEGIN
 
 void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELINDEX sourceChannel, ChannelFlags muteFlag)
 {
+	// For "the ultimate beeper.mod"
+	const ModSample *defaultSample = (sndFile.GetType() == MOD_TYPE_MOD && sndFile.GetSample(0).HasSampleData()) ? &sndFile.GetSample(0) : nullptr;
 	if(resetMask & resetSetPosBasic)
 	{
 		// IT compatibility: Initial "last note memory" of channel is C-0 (so a lonely instrument number without note will play that note).
@@ -25,7 +27,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nNote = nNewNote = (sndFile.m_playBehaviour[kITInitialNoteMemory] ? NOTE_MIN : NOTE_NONE);
 		nArpeggioLastNote = lastMidiNoteWithoutArp = NOTE_NONE;
 		nNewIns = nOldIns = 0;
-		pModSample = nullptr;
+		pModSample = defaultSample;
 		pModInstrument = nullptr;
 		nPortamentoDest = 0;
 		nCommand = CMD_NONE;
@@ -35,6 +37,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		dwFlags.set(CHN_KEYOFF | CHN_NOTEFADE);
 		dwOldFlags.reset();
 		autoSlide.Reset();
+		nInsVol = 64;
 		nnaGeneration = 0;
 		//IT compatibility 15. Retrigger
 		if(sndFile.m_playBehaviour[kITRetrigger])
@@ -65,7 +68,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nLoopStart = 0;
 		nLoopEnd = 0;
 		nROfs = nLOfs = 0;
-		pModSample = nullptr;
+		pModSample = defaultSample;
 		pModInstrument = nullptr;
 		nCutOff = 0x7F;
 		nResonance = 0;

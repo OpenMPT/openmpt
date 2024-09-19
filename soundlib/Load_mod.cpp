@@ -829,6 +829,18 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
+	// For "the ultimate beeper.mod"
+	{
+		ModSample &sample = Samples[0];
+		sample.Initialize(MOD_TYPE_MOD);
+		sample.nLength = 2;
+		sample.nLoopStart = 0;
+		sample.nLoopEnd = 2;
+		sample.nVolume = 0;
+		sample.uFlags.set(CHN_LOOP);
+		sample.AllocateSample();
+	}
+
 	// Fix VBlank MODs. Arbitrary threshold: 8 minutes (enough for "frame of mind" by Dascon...).
 	// Basically, this just converts all tempo commands into speed commands
 	// for MODs which are supposed to have VBlank timing (instead of CIA timing).
