@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_COMMAND(ID_EDIT_SPLITKEYBOARDSETTINGS,	&CViewPattern::SetSplitKeyboardSettings)
 	ON_COMMAND(ID_EDIT_UNDO,		&CViewPattern::OnEditUndo)
 	ON_COMMAND(ID_EDIT_REDO,		&CViewPattern::OnEditRedo)
+	ON_COMMAND(ID_CHANNEL_SETTINGS,	&CViewPattern::OnChannelSettings)
 	ON_COMMAND(ID_PATTERN_CHNRESET,	&CViewPattern::OnChannelReset)
 	ON_COMMAND(ID_PATTERN_MUTE,		&CViewPattern::OnMuteFromClick)
 	ON_COMMAND(ID_PATTERN_SOLO,		&CViewPattern::OnSoloFromClick)
@@ -2728,6 +2729,16 @@ void CViewPattern::OnResetChannelColors()
 	{
 		modDoc.GetPatternUndo().RemoveLastUndoStep();
 	}
+}
+
+
+void CViewPattern::OnChannelSettings()
+{
+	CPoint pt = GetPointFromPosition(m_MenuCursor);
+	pt.x += GetChannelWidth() / 2;
+	pt.y = m_szHeader.cy / 2;
+	ClientToScreen(&pt);
+	m_quickChannelProperties.Show(GetDocument(), m_MenuCursor.GetChannel(), pt);
 }
 
 
@@ -6614,6 +6625,8 @@ bool CViewPattern::BuildChannelControlCtxMenu(HMENU hMenu, CInputHandler *ih) co
 	DWORD canAddChannels = (numChannels < specs.channelsMax) ? 0 : MF_GRAYED;
 	DWORD canRemoveChannels = (numChannels > specs.channelsMin) ? 0 : MF_GRAYED;
 
+	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+	AppendMenu(hMenu, MF_STRING, ID_CHANNEL_SETTINGS, ih->GetKeyTextFromCommand(kcChannelSettings, _T("C&hannel Settings")));
 	AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 
 	AppendMenu(hMenu, MF_STRING, ID_PATTERN_TRANSPOSECHANNEL, ih->GetKeyTextFromCommand(kcChannelTranspose, _T("&Transpose Channel")));
