@@ -71,6 +71,8 @@ jobs:
     runs-on: ${{matrix.host}}
     steps:
     - uses: actions/checkout@v4
+    - name: update Homebrew
+      run: brew update
     - name: fixup GitHub Homebrew swiftlint breakage
       if: ${{ matrix.host == 'macos-12' }}
       run: brew pin swiftlint
@@ -79,15 +81,17 @@ jobs:
       run: brew pin xcbeautify
     - name: fixup GitHub Homebrew go breakage
       if: ${{ matrix.host == 'macos-12' }}
-      run: brew unlink go@1.21
+      run: brew unlink go@1.21 && brew unlink go && brew link --overwrite go
     - name: fixup GitHub Homebrew node breakage
       if: ${{ matrix.host == 'macos-12' }}
       run: brew unlink node@18 && brew unlink node && brew link --overwrite node
     - name: fixup GitHub Homebrew python breakage
       if: ${{ matrix.host == 'macos-12' || matrix.host == 'macos-13' }}
       run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
+    - name: upgrade packages
+      run: brew upgrade
     - name: install dependencies
-      run: brew update && brew upgrade && brew install p7zip help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile sdl2
+      run: brew install p7zip help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     - name: selecting Xcode version
       run: sudo xcode-select --switch /Applications/Xcode_${{matrix.compiler}}.app
     - name: setup parallel make
