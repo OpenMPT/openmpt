@@ -3216,16 +3216,18 @@ bool CSoundFile::ProcessEffects()
 			if(m_playBehaviour[kMODVBlankTiming])
 			{
 				// ProTracker MODs with VBlank timing: All Fxx parameters set the tick count.
-				if(m_SongFlags[SONG_FIRSTTICK] && param != 0)
-					SetSpeed(m_PlayState, param);
-			} else
+				if(m_SongFlags[SONG_FIRSTTICK] && param != 0) SetSpeed(m_PlayState, param);
+				break;
+			}
 			{
 				param = CalculateXParam(m_PlayState.m_nPattern, m_PlayState.m_nRow, nChn);
-				if (GetType() & (MOD_TYPE_S3M | MOD_TYPE_IT | MOD_TYPE_MPT))
+				if (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT))
 				{
 					if (param) chn.nOldTempo = static_cast<ModCommand::PARAM>(param); else param = chn.nOldTempo;
 				}
-				SetTempo(TEMPO(param, 0));
+				TEMPO t(param, 0);
+				LimitMax(t, GetModSpecifications().GetTempoMax());
+				SetTempo(t);
 			}
 			break;
 
@@ -5976,24 +5978,17 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 
 	// Anything lower than the minimum tempo is considered to be a tempo slide
 	const TEMPO minTempo = GetMinimumTempoParam(GetType());
-	TEMPO maxTempo = specs.GetTempoMax();
-	// MED files may be imported with #xx parameter extension for tempos above 255, but they may be imported as either MOD or XM.
-	// As regular MOD files cannot contain effect #xx, the tempo parameter cannot exceed 255 anyway, so we simply ignore their max tempo in CModSpecifications here.
-	if(!(GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT)))
-		maxTempo = GetModSpecifications(MOD_TYPE_MPT).GetTempoMax();
-	if(m_playBehaviour[kTempoClamp])
-		maxTempo.Set(255);
 
 	if(setFromUI)
 	{
 		// Set tempo from UI - ignore slide commands and such.
-		m_PlayState.m_nMusicTempo = Clamp(param, specs.GetTempoMin(), maxTempo);
+		m_PlayState.m_nMusicTempo = Clamp(param, specs.GetTempoMin(), specs.GetTempoMax());
 	} else if(param >= minTempo && m_SongFlags[SONG_FIRSTTICK] == !m_playBehaviour[kMODTempoOnSecondTick])
 	{
 		// ProTracker sets the tempo after the first tick.
 		// Note: The case of one tick per row is handled in ProcessRow() instead.
 		// Test case: TempoChange.mod
-		m_PlayState.m_nMusicTempo = std::min(param, maxTempo);
+		m_PlayState.m_nMusicTempo = std::min(param, specs.GetTempoMax());
 	} else if(param < minTempo && !m_SongFlags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
@@ -6003,8 +5998,12 @@ void CSoundFile::SetTempo(TEMPO param, bool setFromUI)
 		else
 			m_PlayState.m_nMusicTempo -= tempDiff;
 
-		TEMPO tempoMin = specs.GetTempoMin();
-		Limit(m_PlayState.m_nMusicTempo, tempoMin, maxTempo);
+		TEMPO tempoMin = specs.GetTempoMin(), tempoMax = specs.GetTempoMax();
+		if(m_playBehaviour[kTempoClamp])	// clamp tempo correctly in compatible mode
+		{
+			tempoMax.Set(255);
+		}
+		Limit(m_PlayState.m_nMusicTempo, tempoMin, tempoMax);
 	}
 }
 
