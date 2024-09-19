@@ -7,6 +7,19 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.19-pre
 
+ *  [**Sec**] Possible out-of-bounds read with malformed IT / MPTM / XM files
+    using the SymMOD Echo plugin when modern tempo mode with an invalid rows per
+    beat setting of 0 was used (r21607).
+
+ *  Fixed inconsistency in length calculation and actual playback length with
+    tempo commands below 32 BPM in various formats (MDL, MED among others).
+ *  MED: Command 09 (set speed) was limited to 20 ticks per row instead of 32
+    ticks per row.
+ *  MED: Allow tempo parameters < 32 BPM.
+ *  SFX: Ignore unused data at end of oneshot samples which sometimes caused
+    clicky noises.
+ *  SFX: More accurate implementation of arpeggio effect.
+
  *  mpg123: Update to v1.32.7 (2024-08-07).
 
 ### libopenmpt 0.6.18 (2024-07-21)
