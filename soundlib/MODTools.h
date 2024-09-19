@@ -89,7 +89,7 @@ inline bool IsMagic(const char *magic1, const char (&magic2)[5]) noexcept
 template<typename T, typename TFileReader>
 inline T ReadAndSwap(TFileReader &file, const bool swapBytes)
 {
-	T value;
+	T value{};
 	if(file.Read(value) && swapBytes)
 	{
 		static_assert(sizeof(value) % 2u == 0);
