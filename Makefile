@@ -1861,8 +1861,8 @@ bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip:
 	svn export ./LICENSE                         bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSE.TXT          --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSD-3-Clause.txt bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPT_BSD3.TXT --native-eol CRLF
 	svn export ./src/mpt/LICENSE.BSL-1.0.txt     bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPT_BSL1.TXT --native-eol CRLF
-	cp include/allegro42/readme.txt              bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT
-	cp include/cwsdpmi/bin/$(FLAVOUR_DIR)cwsdpmi.doc           bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/CWSDPMI.TXT
+	cp include/allegro42/readme.txt              bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/ALLEGRO.TXT --native-eol CRLF
+	cp include/cwsdpmi/bin/$(FLAVOUR_DIR)cwsdpmi.doc           bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/CWSDPMI.TXT --native-eol CRLF
 ifeq ($(ALLOW_LGPL),1)
 	svn export ./include/mpg123/COPYING          bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPG123.TXT   --native-eol CRLF
 	svn export ./include/mpg123/AUTHORS          bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MPG123_A.TXT --native-eol CRLF
