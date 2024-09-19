@@ -175,6 +175,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.madeWithTracker = MPT_UFORMAT("PolyTracker {}.{}")(fileHeader.versionHi.get(), mpt::ufmt::hex0<2>(fileHeader.versionLo.get()));
 	m_modFormat.charset = mpt::Charset::CP437;
 
+	SetMixLevels(MixLevels::CompatibleFT2);
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nChannels = fileHeader.numChannels;
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(fileHeader.numSamples), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
@@ -267,8 +268,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				{
 				case CMD_PANNING8:
 					// Don't be surprised about the strange formula, this is directly translated from original disassembly...
-					m.command = CMD_S3MCMDEX;
-					m.param = 0x80 | ((std::max<uint8>(m.param >> 3, 1u) - 1u) & 0x0F);
+					m.SetEffectCommand(CMD_S3MCMDEX, static_cast<ModCommand::PARAM>(0x80 | ((std::max<uint8>(m.param >> 3, 1u) - 1u) & 0x0F)));
 					break;
 				case CMD_GLOBALVOLUME:
 					m.param = std::min(m.param, uint8(0x40)) * 2u;
@@ -279,8 +279,7 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 			}
 			if(b & 0x80)
 			{
-				m.volcmd = VOLCMD_VOLUME;
-				m.vol = file.ReadUint8();
+				m.SetVolumeCommand(VOLCMD_VOLUME, file.ReadUint8());
 			}
 		}
 	}
