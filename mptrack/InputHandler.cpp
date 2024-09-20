@@ -92,40 +92,14 @@ CommandID CInputHandler::SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 }
 
 
-void CInputHandler::HandleModifierChanges(WPARAM wParam, LPARAM lParam)
-{
-	KeyMapRange cmd = { m_keyMap.end(), m_keyMap.end() };
-	KeyEventType keyEventType;
-
-	// Get the KeyEventType (key up, key down, key repeat)
-	DWORD scancode = static_cast<LONG>(lParam) >> 16;
-	if((scancode & 0xC000) == 0xC000)
-		keyEventType = kKeyEventUp;
-	else if((scancode & 0xC000) == 0x0000)
-		keyEventType = kKeyEventDown;
-	else
-		keyEventType = kKeyEventRepeat;
-
-	// Catch modifier change (ctrl, alt, shift) - Only check on keyDown or keyUp.
-	// NB: we want to catch modifiers even when the input handler is locked
-	if(keyEventType == kKeyEventUp || keyEventType == kKeyEventDown)
-	{
-		scancode = (static_cast<LONG>(lParam) >> 16) & 0x1FF;
-		CatchModifierChange(wParam, keyEventType, scancode);
-	}
-
-	if(!IsBypassed())
-		InterceptSpecialKeys(static_cast<UINT>(wParam), static_cast<LONG>(lParam), true);
-}
-
-
 CommandID CInputHandler::KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd)
 {
 	if(InterceptSpecialKeys(event.key, event.flags, false))
 		return kcDummyShortcut;
 	if(IsKeyPressHandledByTextBox(event.key, ::GetFocus()))
 		return kcNull;
-	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, m_modifierMask, event.key, event.keyEventType));
+
+	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, GetModifierMask(), event.key, event.keyEventType));
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	// By default, send command message to main frame.
@@ -202,50 +176,6 @@ void CInputHandler::SetupSpecialKeyInterception()
 };
 
 
-//Deal with Modifier keypresses. Private surouting used above.
-bool CInputHandler::CatchModifierChange(WPARAM wParam, KeyEventType keyEventType, int scancode)
-{
-	FlagSet<Modifiers> modifierMask = ModNone;
-	// Scancode for right modifier keys should have bit 8 set, but Right Shift is actually 0x36.
-	const bool isRight = ((scancode & 0x100) || scancode == 0x36) && TrackerSettings::Instance().MiscDistinguishModifiers;
-	switch(wParam)
-	{
-		case VK_CONTROL:
-			modifierMask.set(isRight ? ModRCtrl : ModCtrl);
-			break;
-		case VK_SHIFT:
-			modifierMask.set(isRight ? ModRShift : ModShift);
-			break;
-		case VK_MENU:
-			modifierMask.set(isRight ? ModRAlt : ModAlt);
-			break;
-		case VK_LWIN: case VK_RWIN: // Feature: use Windows keys as modifier keys
-			modifierMask.set(ModWin);
-			break;
-	}
-
-	if (modifierMask)	// This keypress just changed the modifier mask
-	{
-		if (keyEventType == kKeyEventDown)
-		{
-			m_modifierMask.set(modifierMask);
-			// Right Alt is registered as Ctrl+Alt.
-			// Left Ctrl + Right Alt seems like a pretty difficult to use key combination anyway, so just ignore Ctrl.
-			if(scancode == 0x138)
-				m_modifierMask.reset(ModCtrl);
-#ifdef _DEBUG
-			LogModifiers();
-#endif
-		} else if (keyEventType == kKeyEventUp)
-			m_modifierMask.reset(modifierMask);
-
-		return true;
-	}
-
-	return false;
-}
-
-
 // Translate MIDI messages to shortcut commands
 CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
 {
@@ -290,19 +220,6 @@ CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 me
 int CInputHandler::GetKeyListSize(CommandID cmd) const
 {
 	return m_activeCommandSet->GetKeyListSize(cmd);
-}
-
-
-//----------------------- Misc
-
-
-void CInputHandler::LogModifiers()
-{
-	MPT_LOG_GLOBAL(LogDebug, "InputHandler", U_("----------------------------------\n"));
-	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModCtrl] ? U_("Ctrl On") : U_("Ctrl --"));
-	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModShift] ? U_("\tShft On") : U_("\tShft --"));
-	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModAlt] ? U_("\tAlt  On") : U_("\tAlt  --"));
-	MPT_LOG_GLOBAL(LogDebug, "InputHandler", m_modifierMask[ModWin] ? U_("\tWin  On\n") : U_("\tWin  --\n"));
 }
 
 
@@ -364,33 +281,32 @@ bool CInputHandler::SelectionPressed() const
 	int nSelectionKeys = m_activeCommandSet->GetKeyListSize(kcSelect);
 	KeyCombination key;
 
+	const auto modifierMask = GetModifierMask();
 	for (int k=0; k<nSelectionKeys; k++)
 	{
 		key = m_activeCommandSet->GetKey(kcSelect, k);
-		if (m_modifierMask & key.Modifier())
-		{
+		if(modifierMask & key.Modifier())
 			return true;
-		}
 	}
 	return false;
 }
 
 
-bool CInputHandler::ShiftPressed() const
+bool CInputHandler::ShiftPressed()
 {
-	return m_modifierMask[ModShift | ModRShift];
+	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 }
 
 
-bool CInputHandler::CtrlPressed() const
+bool CInputHandler::CtrlPressed()
 {
-	return m_modifierMask[ModCtrl | ModRCtrl];
+	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 }
 
 
-bool CInputHandler::AltPressed() const
+bool CInputHandler::AltPressed()
 {
-	return m_modifierMask[ModAlt | ModRAlt];
+	return (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
 }
 
 
@@ -425,15 +341,31 @@ bool CInputHandler::IsBypassed() const
 }
 
 
-FlagSet<Modifiers> CInputHandler::GetModifierMask() const
+FlagSet<Modifiers> CInputHandler::GetModifierMask()
 {
-	return m_modifierMask;
-}
+	BYTE keyStates[256];
+	FlagSet<Modifiers> modifierMask = ModNone;
+	if(!GetKeyboardState(keyStates))
+		return modifierMask;
 
-
-void CInputHandler::SetModifierMask(FlagSet<Modifiers> mask)
-{
-	m_modifierMask = mask;
+	const bool distinguishModifiers = TrackerSettings::Instance().MiscDistinguishModifiers;
+	if(keyStates[VK_LCONTROL] & 0x80)
+		modifierMask.set(ModCtrl);
+	if(keyStates[VK_RCONTROL] & 0x80)
+		modifierMask.set(distinguishModifiers ? ModRCtrl : ModCtrl);
+	if(keyStates[VK_LSHIFT] & 0x80)
+		modifierMask.set(ModShift);
+	if(keyStates[VK_RSHIFT] & 0x80)
+		modifierMask.set(distinguishModifiers ? ModRShift : ModShift);
+	if(keyStates[VK_LMENU] & 0x80)
+		modifierMask.set(ModAlt);
+	if(keyStates[VK_RMENU] & 0x80)
+		modifierMask.set(distinguishModifiers ? ModRAlt : ModAlt);
+	if(keyStates[VK_LWIN] & 0x80)
+		modifierMask.set(ModWin);
+	if(keyStates[VK_RWIN] & 0x80)
+		modifierMask.set(ModWin);
+	return modifierMask;
 }
 
 

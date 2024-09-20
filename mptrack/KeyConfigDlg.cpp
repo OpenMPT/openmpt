@@ -77,7 +77,7 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 	{
 		if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)
 		{
-			SetKey(CMainFrame::GetInputHandler()->GetModifierMask(), static_cast<UINT>(pMsg->wParam));
+			SetKey(CInputHandler::GetModifierMask(), static_cast<UINT>(pMsg->wParam));
 			return -1;  // Keypress handled, don't pass on message.
 		} else if(pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP)
 		{

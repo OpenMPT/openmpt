@@ -1298,7 +1298,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 				// Toggle record state
 				modDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group1);
 				InvalidateChannelsHeaders(sourceChn);
-			} else if(CMainFrame::GetInputHandler()->AltPressed())
+			} else if(CInputHandler::AltPressed())
 			{
 				// Solo / Unsolo
 				OnSoloChannel(sourceChn, sourceChn);

@@ -144,7 +144,7 @@ public:
 
 	// Globals
 	static OptionsPage m_nLastOptionsPage;
-	static HHOOK ghKbdHook, g_focusHook;
+	static HHOOK g_focusHook;
 
 	// GDI
 	static HICON m_hIcon;
@@ -446,9 +446,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnInitMenu(CMenu *pMenu);
 	bool UpdateEffectKeys(const CModDoc *modDoc);
-	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 
 	// Defines maximum number of items in example modules menu.

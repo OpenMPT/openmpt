@@ -3125,7 +3125,7 @@ BOOL CViewSample::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		break;
 	}
 	
-	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed();
+	bool insertNew = CInputHandler::ShiftPressed();
 	if(dropInfo->insertType != DRAGONDROP::InsertType::Unspecified)
 		insertNew = dropInfo->insertType == DRAGONDROP::InsertType::InsertNew;
 

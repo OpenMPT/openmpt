@@ -140,8 +140,6 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
 	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	&CMainFrame::OnUpdateMRUItem)
 	//}}AFX_MSG_MAP
-	ON_WM_INITMENU()
-	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SHOWWINDOW()
 	ON_WM_ACTIVATEAPP()
@@ -149,7 +147,6 @@ END_MESSAGE_MAP()
 
 // Globals
 OptionsPage CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_DEFAULT;
-HHOOK CMainFrame::ghKbdHook = nullptr;
 HHOOK CMainFrame::g_focusHook = nullptr;
 
 // GDI
@@ -234,7 +231,6 @@ void CMainFrame::Initialize()
 	m_nTimer = SetTimer(TIMERID_GUI, MPTTIMER_PERIOD, NULL);
 
 	// Setup Keyboard Hook
-	ghKbdHook = SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 	g_focusHook = SetWindowsHookEx(WH_CBT, FocusChangeProc, AfxGetInstanceHandle(), GetCurrentThreadId());
 
 	// Update the tree
@@ -351,12 +347,6 @@ BOOL CMainFrame::DestroyWindow()
 #pragma warning(pop)
 #endif
 
-	// Uninstall Keyboard Hook
-	if(ghKbdHook)
-	{
-		UnhookWindowsHookEx(ghKbdHook);
-		ghKbdHook = nullptr;
-	}
 	if(g_focusHook)
 	{
 		UnhookWindowsHookEx(g_focusHook);
@@ -466,7 +456,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 #ifdef MPT_BUILD_DEBUG
 			// Debug Hack: Quickly scan a folder containing module files (without running out of window handles ;)
-			if(m_InputHandler->CtrlPressed() && m_InputHandler->AltPressed() && m_InputHandler->ShiftPressed() && mpt::native_fs{}.is_directory(file))
+			if(CInputHandler::GetModifierMask().test_all(ModCtrl | ModShift | ModAlt) && mpt::native_fs{}.is_directory(file))
 			{
 				FolderScanner scanner(file, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 				mpt::PathString scanName;
@@ -500,18 +490,7 @@ void CMainFrame::OnActivateApp(BOOL active, DWORD threadID)
 {
 	if(active)
 		IPCWindow::UpdateLastUsed();
-	else	
-		m_InputHandler->SetModifierMask(ModNone);	// Ensure modifiers are reset when we leave the window (e.g. Alt-Tab)
 	CMDIFrameWnd::OnActivateApp(active, threadID);
-}
-
-
-LRESULT CALLBACK CMainFrame::KeyboardProc(int code, WPARAM wParam, LPARAM lParam)
-{
-	if(code == HC_ACTION)
-		m_InputHandler->HandleModifierChanges(wParam, lParam);
-
-	return CallNextHookEx(ghKbdHook, code, wParam, lParam);
 }
 
 
@@ -2642,14 +2621,6 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-void CMainFrame::OnInitMenu(CMenu* pMenu)
-{
-	m_InputHandler->SetModifierMask(ModNone);
-	CMDIFrameWnd::OnInitMenu(pMenu);
-
-}
-
-
 void CMainFrame::InitRenderer(CSoundFile *pSndFile)
 {
 	CriticalSection cs;
@@ -2675,15 +2646,6 @@ bool CMainFrame::UpdateEffectKeys(const CModDoc *modDoc)
 		return m_InputHandler->SetEffectLetters(modDoc->GetSoundFile().GetModSpecifications());
 	}
 	return false;
-}
-
-
-void CMainFrame::OnKillFocus(CWnd* pNewWnd)
-{
-	CMDIFrameWnd::OnKillFocus(pNewWnd);
-
-	//rewbs: ensure modifiers are reset when we leave the window (e.g. alt-tab)
-	m_InputHandler->SetModifierMask(ModNone);
 }
 
 
@@ -3381,7 +3343,6 @@ HRESULT TfLanguageProfileNotifySink::OnLanguageChanged()
 	if(mainFrm != nullptr)
 	{
 		mainFrm->UpdateEffectKeys(mainFrm->GetActiveDoc());
-		mainFrm->m_InputHandler->SetModifierMask(ModNone);
 	}
 	return ResultFromScode(S_OK);
 }

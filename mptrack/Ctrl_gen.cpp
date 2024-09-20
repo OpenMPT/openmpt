@@ -465,9 +465,9 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 				pos32 *= TEMPO::fractFact;
 				if(m_sndFile.GetModSpecifications().hasFractionalTempo)
 				{
-					if(CMainFrame::GetMainFrame()->GetInputHandler()->CtrlPressed())
+					if(CInputHandler::CtrlPressed())
 						pos32 /= 100;
-					else if(CMainFrame::GetMainFrame()->GetInputHandler()->ShiftPressed())
+					else if(CInputHandler::ShiftPressed())
 						pos32 /= 10;
 				}
 				TEMPO newTempo;

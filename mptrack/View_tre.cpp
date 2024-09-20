@@ -3588,7 +3588,7 @@ void CModTree::OnExecuteItem()
 
 void CModTree::OnDeleteTreeItem()
 {
-	DeleteTreeItem(GetSelectedItem(), CMainFrame::GetInputHandler()->ShiftPressed());
+	DeleteTreeItem(GetSelectedItem(), CInputHandler::ShiftPressed());
 }
 
 

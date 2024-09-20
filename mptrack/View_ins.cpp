@@ -1481,7 +1481,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		if(IsDragItemEnvPoint())
 		{
 			// Ctrl pressed -> move tail of envelope
-			changed = EnvSetValue(m_nDragItem - 1, nTick, nVal, CMainFrame::GetInputHandler()->CtrlPressed());
+			changed = EnvSetValue(m_nDragItem - 1, nTick, nVal, CInputHandler::CtrlPressed());
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1711,7 +1711,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		} else
 		{
 			// Shift-Click: Insert envelope point here
-			if(CMainFrame::GetInputHandler()->ShiftPressed())
+			if(CInputHandler::ShiftPressed())
 			{
 				if(InsertAtPoint(pt) == 0 && oldDragItem != 0)
 				{
@@ -2115,7 +2115,7 @@ BOOL CViewInstrument::OnDragonDrop(BOOL doDrop, const DRAGONDROP *dropInfo)
 		break;
 	}
 	
-	bool insertNew = CMainFrame::GetInputHandler()->ShiftPressed() && sndFile.GetNumInstruments() > 0;
+	bool insertNew = CInputHandler::ShiftPressed() && sndFile.GetNumInstruments() > 0;
 	if(dropInfo->insertType != DRAGONDROP::InsertType::Unspecified)
 		insertNew = dropInfo->insertType == DRAGONDROP::InsertType::InsertNew && sndFile.GetNumInstruments() > 0;
 

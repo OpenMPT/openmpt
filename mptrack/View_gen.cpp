@@ -1,5 +1,5 @@
 /*
- * view_gen.cpp
+ * View_gen.cpp
  * ------------
  * Purpose: General tab, lower panel.
  * Notes  : (currently none)
@@ -1264,8 +1264,8 @@ void CViewGlobals::OnBypassChanged()
 	auto &mixPlugs = pModDoc->GetSoundFile().m_MixPlugins;
 	auto &currentPlug = pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin];
 	bool bypass = IsDlgButtonChecked(IDC_CHECK10) != BST_UNCHECKED;
-	const bool bypassOthers = CMainFrame::GetInputHandler()->ShiftPressed();
-	const bool bypassOnlyMasterPlugs = CMainFrame::GetInputHandler()->CtrlPressed();
+	const bool bypassOthers = CInputHandler::ShiftPressed();
+	const bool bypassOnlyMasterPlugs = CInputHandler::CtrlPressed();
 	if(bypassOthers || bypassOnlyMasterPlugs)
 	{
 		CheckDlgButton(IDC_CHECK10, currentPlug.IsBypassed() ? BST_CHECKED : BST_UNCHECKED);
@@ -1354,7 +1354,7 @@ void CViewGlobals::OnEditPlugin()
 {
 	CModDoc *pModDoc = GetDocument();
 	if ((m_nCurrentPlugin >= MAX_MIXPLUGINS) || (!pModDoc)) return;
-	pModDoc->TogglePluginEditor(m_nCurrentPlugin, CMainFrame::GetInputHandler()->ShiftPressed());
+	pModDoc->TogglePluginEditor(m_nCurrentPlugin, CInputHandler::ShiftPressed());
 	return;
 }
 

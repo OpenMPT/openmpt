@@ -1171,7 +1171,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CCtrlSamples::OnSampleNew()
 {
-	InsertSample(CMainFrame::GetInputHandler()->ShiftPressed());
+	InsertSample(CInputHandler::ShiftPressed());
 	SwitchToView();
 }
 
@@ -1359,7 +1359,7 @@ void CCtrlSamples::OpenSamples(const std::vector<mpt::PathString> &files, FlagSe
 
 void CCtrlSamples::OnSampleSave()
 {
-	SaveSample(CMainFrame::GetInputHandler()->ShiftPressed());
+	SaveSample(CInputHandler::ShiftPressed());
 }
 
 
@@ -1628,7 +1628,7 @@ void CCtrlSamples::Normalize(bool allSamples)
 
 void CCtrlSamples::OnNormalize()
 {
-	Normalize(CMainFrame::GetInputHandler()->ShiftPressed());
+	Normalize(CInputHandler::ShiftPressed());
 }
 
 
@@ -1709,7 +1709,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 
 void CCtrlSamples::OnRemoveDCOffset()
 {
-	RemoveDCOffset(CMainFrame::GetInputHandler()->ShiftPressed());
+	RemoveDCOffset(CInputHandler::ShiftPressed());
 }
 
 
@@ -1785,7 +1785,7 @@ void CCtrlSamples::OnResample()
 		return;
 
 	SAMPLEINDEX first = m_nSample, last = m_nSample;
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(CInputHandler::ShiftPressed())
 	{
 		first = 1;
 		last = m_sndFile.GetNumSamples();
@@ -3032,7 +3032,7 @@ void CCtrlSamples::OnAutotune()
 void CCtrlSamples::OnKeepSampleOnDisk()
 {
 	SAMPLEINDEX first = m_nSample, last = m_nSample;
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(CInputHandler::ShiftPressed())
 	{
 		first = 1;
 		last = m_sndFile.GetNumSamples();

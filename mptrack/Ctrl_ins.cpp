@@ -1953,7 +1953,7 @@ void CCtrlInstruments::OnNextInstrument()
 
 void CCtrlInstruments::OnInstrumentNew()
 {
-	InsertInstrument(m_sndFile.GetNumInstruments() > 0 && CMainFrame::GetInputHandler()->ShiftPressed());
+	InsertInstrument(m_sndFile.GetNumInstruments() > 0 && CInputHandler::ShiftPressed());
 	SwitchToView();
 }
 
@@ -2025,7 +2025,7 @@ void CCtrlInstruments::OnInstrumentOpen()
 
 void CCtrlInstruments::OnInstrumentSave()
 {
-	SaveInstrument(CMainFrame::GetInputHandler()->ShiftPressed());
+	SaveInstrument(CInputHandler::ShiftPressed());
 }
 
 
@@ -2833,7 +2833,7 @@ void CCtrlInstruments::TogglePluginEditor()
 {
 	if(m_nInstrument)
 	{
-		m_modDoc.TogglePluginEditor(m_CbnMixPlug.GetSelection().value_or(PLUGINDEX_INVALID), CMainFrame::GetInputHandler()->ShiftPressed());
+		m_modDoc.TogglePluginEditor(m_CbnMixPlug.GetSelection().value_or(PLUGINDEX_INVALID), CInputHandler::ShiftPressed());
 	}
 }
 
@@ -3020,7 +3020,7 @@ void CCtrlInstruments::OnBnClickedCheckPitchtempolock()
 	if(IsLocked() || !m_nInstrument) return;
 
 	INSTRUMENTINDEX firstIns = m_nInstrument, lastIns = m_nInstrument;
-	if(CMainFrame::GetInputHandler()->ShiftPressed())
+	if(CInputHandler::ShiftPressed())
 	{
 		firstIns = 1;
 		lastIns = m_sndFile.GetNumInstruments();
