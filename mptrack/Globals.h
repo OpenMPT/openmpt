@@ -220,7 +220,7 @@ public:
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
-	BOOL PreTranslateMessage(MSG *pMsg);
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	//}}AFX_VIRTUAL
 
 	CModControlDlg *GetControlDlg() { return static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->GetCurrentControlDlg(); }
