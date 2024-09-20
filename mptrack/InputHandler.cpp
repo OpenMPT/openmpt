@@ -559,20 +559,21 @@ bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 		return false;
 
 	// Alpha-numerics (only shift or no modifier):
-	if(!GetModifierMask().test_any_except(ModShift))
+	const auto modifierMask = GetModifierMask();
+	if(!modifierMask.test_any_except(ModShift))
 	{
 		if((key >= 'A' && key <= 'Z') || (key >= '0' && key <= '9')
 		   || (key >= VK_MULTIPLY && key <= VK_DIVIDE) || key == VK_SPACE || key == VK_CAPITAL
 		   || (key >= VK_OEM_1 && key <= VK_OEM_3) || (key >= VK_OEM_4 && key <= VK_OEM_8))
 			return true;
-		if((key >= VK_NUMPAD0 && key <= VK_NUMPAD9) && GetModifierMask() == ModNone)
+		if((key >= VK_NUMPAD0 && key <= VK_NUMPAD9) && modifierMask == ModNone)
 			return true;
 		if(key == VK_RETURN && (GetWindowLong(hWnd, GWL_STYLE) & ES_MULTILINE))
 			return true;
 	}
 
 	// Navigation (any modifier except Alt without any other modifiers):
-	if(GetModifierMask() != ModAlt)
+	if(modifierMask != ModAlt)
 	{
 		if(key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN
 		   || key == VK_HOME || key == VK_END || key == VK_DELETE || key == VK_INSERT || key == VK_BACK)
@@ -580,7 +581,7 @@ bool CInputHandler::IsKeyPressHandledByTextBox(DWORD key, HWND hWnd) const
 	}
 
 	// Copy paste etc..
-	if(GetModifierMask() == ModCtrl)
+	if(modifierMask == ModCtrl)
 	{
 		if(key == 'Y' || key == 'Z' || key == 'X' ||  key == 'C' || key == 'V' || key == 'A')
 			return true;
