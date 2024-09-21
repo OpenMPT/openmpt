@@ -20,6 +20,8 @@
 #include <FLAC/format.h>
 #include <FLAC/stream_encoder.h>
 
+#include <iostream>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
