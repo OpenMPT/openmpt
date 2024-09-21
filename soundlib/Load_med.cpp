@@ -999,7 +999,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			TranslateMEDSynthScript(synthInstr.volTable, synthInstr.volTableLen, synthInstr.volSpeed, instrExt.hold, instrExt.decay, instr.synth.m_scripts[0], true);
 			TranslateMEDSynthScript(synthInstr.waveTable, synthInstr.waveTableLen, synthInstr.waveSpeed, instrExt.hold, instrExt.decay, instr.synth.m_scripts[1], false);
 
-			file.ReadVector(waveformOffsets, synthInstr.numWaveforms);
+			if(synthInstr.numWaveforms <= 64)
+				file.ReadVector(waveformOffsets, synthInstr.numWaveforms);
 		} else if(isSynth)
 		{
 			instr.AssignSample(0);
