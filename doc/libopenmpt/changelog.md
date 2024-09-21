@@ -7,8 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.10-pre
 
- *  [**Change**] FST was added to the list of supported file extension.
-    AMP uses this extension for multichannel MODs.
+ *  [**Change**] FST was added to the list of supported file extension. AMP uses
+    this extension for multichannel MODs.
 
  *  [**Bug**] The Android NDK build system did not enable C++20 when available.
 
@@ -32,7 +32,7 @@ is just a high-level summary.
  *  minimp3: Update to fork
     <https://github.com/manxorist/minimp3/releases/tag/openmpt-2024-08-15-v4>
     commit 2116754771b79347ad2f39127abace2a093c383e (2024-08-15).
- 
+
 ### libopenmpt 0.7.9 (2024-07-21)
 
  *  [**Sec**] Potential division by 0 when seeking in the module with
