@@ -140,7 +140,7 @@ struct field {
 };
 
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 bool IsConsole( DWORD stdHandle );
 #endif
 bool IsTerminal( int fd );
