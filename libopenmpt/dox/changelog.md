@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.33-pre
+### libopenmpt 0.5.33 (2024-09-22)
 
  *  Fixed inconsistency in length calculation and actual playback length with
     tempo commands below 32 BPM in various formats (MDL, MED among others).
