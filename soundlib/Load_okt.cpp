@@ -30,7 +30,7 @@ struct OktIffChunk
 	};
 
 	uint32be signature;  // IFF chunk name
-	uint32be chunksize;  // chunk size without header
+	uint32be chunkSize;  // Chunk size without header
 };
 
 MPT_BINARY_STRUCT(OktIffChunk, 8)
@@ -38,11 +38,11 @@ MPT_BINARY_STRUCT(OktIffChunk, 8)
 struct OktSample
 {
 	char     name[20];
-	uint32be length;      // length in bytes
+	uint32be length;      // Length in bytes
 	uint16be loopStart;   // *2 for real value
 	uint16be loopLength;  // ditto
-	uint16be volume;      // default volume
-	uint16be type;        // 7-/8-bit sample
+	uint16be volume;      // Default volume
+	uint16be type;        // 7-/8-bit sample (0: 7-bit, only usable on paired channels ["8" in GUI], 1: 8-bit, only usable on unpaired channels ["4" in GUI], 2: 7-bit, usable on all channels ["B" in GUI])
 };
 
 MPT_BINARY_STRUCT(OktSample, 32)
@@ -124,20 +124,26 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 			if(note > 0 && note <= 36)
 			{
 				m.note = note + (NOTE_MIDDLEC - 13);
+				if(pairedChn[chn] && m.note >= NOTE_MIDDLEC + 22)
+					m.note = NOTE_MIDDLEC + 21;
+
 				m.instr = instr + 1;
 				if(m.instr > 0 && m.instr <= sndFile.GetNumSamples())
 				{
-					const auto &sample = sndFile.GetSample(m.instr);
+					auto &sample = sndFile.GetSample(m.instr);
 					// Default volume only works on raw Paula channels
 					if(pairedChn[chn] && sample.nVolume < 256)
-					{
 						m.SetVolumeCommand(VOLCMD_VOLUME, 64);
-					}
+					// Type "B" samples (can play on both paired and unpaired channels) can have loop information,
+					// which can only be used on unpaired channels. The correct fix would be to have a looped and unlooped variant of this sample,
+					// but it is probably quite unlikely that any module relies on this behaviour.
+					// On the other hand, sinfonia.okta has a type "B" sample with loop points set, and it only uses paired channels.
+					if(pairedChn[chn] && sample.uFlags[CHN_SUSTAINLOOP])
+						sample.uFlags.reset(CHN_SUSTAINLOOP);
+					
 					// If channel and sample type don't match, stop this channel (add 100 to the instrument number to make it understandable what happened during import)
 					if((sample.cues[0] == 1 && pairedChn[chn] != 0) || (sample.cues[0] == 0 && pairedChn[chn] == 0))
-					{
 						m.instr += 100;
-					}
 				}
 			}
 
@@ -330,7 +336,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 		if(!file.ReadStruct(iffHead))
 			break;
 
-		FileReader chunk = file.ReadChunk(iffHead.chunksize);
+		FileReader chunk = file.ReadChunk(iffHead.chunkSize);
 		if(!chunk.IsValid())
 			continue;
 
