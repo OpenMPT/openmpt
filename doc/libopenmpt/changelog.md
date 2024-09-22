@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.10-pre
+### libopenmpt 0.7.10 (2024-09-22)
 
  *  [**Change**] FST was added to the list of supported file extension. AMP uses
     this extension for multichannel MODs.
