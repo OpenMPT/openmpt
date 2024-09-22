@@ -152,37 +152,6 @@ struct show_long_version_number_exception : public std::exception {
 
 constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
 
-#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-bool IsConsole( DWORD stdHandle ) {
-	HANDLE hStd = GetStdHandle( stdHandle );
-	if ( ( hStd != NULL ) && ( hStd != INVALID_HANDLE_VALUE ) ) {
-		DWORD mode = 0;
-		if ( GetConsoleMode( hStd, &mode ) != FALSE ) {
-			return true;
-		}
-	}
-	return false;
-}
-#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-
-bool IsTerminal( int fd ) {
-#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-	if ( !_isatty( fd ) ) {
-		return false;
-	}
-	DWORD stdHandle = 0;
-	if ( fd == 0 ) {
-		stdHandle = STD_INPUT_HANDLE;
-	} else if ( fd == 1 ) {
-		stdHandle = STD_OUTPUT_HANDLE;
-	} else if ( fd == 2 ) {
-		stdHandle = STD_ERROR_HANDLE;
-	}
-	return IsConsole( stdHandle );
-#else
-	return isatty( fd ) ? true : false;
-#endif
-}
 
 #if !MPT_OS_WINDOWS
 
