@@ -5805,9 +5805,9 @@ void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 		param = (param - chn.nLoopStart) % (chn.nLoopEnd - chn.nLoopStart) + chn.nLoopStart;
 	}
 
-	if(GetType() == MOD_TYPE_MDL && chn.dwFlags[CHN_16BIT])
+	if((GetType() & (MOD_TYPE_MDL | MOD_TYPE_PTM)) && chn.dwFlags[CHN_16BIT])
 	{
-		// Digitrakker really uses byte offsets, not sample offsets. WTF!
+		// Digitrakker and Polytracker use byte offsets, not sample offsets.
 		param /= 2u;
 	}
 
@@ -5883,7 +5883,10 @@ void CSoundFile::ReverseSampleOffset(ModChannel &chn, ModCommand::PARAM param) c
 		chn.dwFlags.set(CHN_PINGPONGFLAG);
 		chn.dwFlags.reset(CHN_LOOP);
 		chn.nLength = chn.pModSample->nLength;  // If there was a loop, extend sample to whole length.
-		chn.position.Set((chn.nLength - 1) - std::min(SmpLength(param) << 8, chn.nLength - SmpLength(1)), 0);
+		SmpLength offset = param << 8;
+		if(GetType() == MOD_TYPE_PTM && chn.dwFlags[CHN_16BIT])
+			offset /= 2;
+		chn.position.Set((chn.nLength - 1) - std::min(offset, chn.nLength - SmpLength(1)), 0);
 	}
 }
 

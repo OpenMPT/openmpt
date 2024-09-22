@@ -271,6 +271,13 @@ bool CSoundFile::ReadPTM(FileReader &file, ModLoadingFlags loadFlags)
 				case CMD_GLOBALVOLUME:
 					m.param = std::min(m.param, uint8(0x40)) * 2u;
 					break;
+#ifdef MODPLUG_TRACKER
+				case CMD_OFFSET:
+				case CMD_REVERSEOFFSET:
+					if(m.instr && m.instr <= GetNumSamples() && Samples[m.instr].uFlags[CHN_16BIT])
+						m.param /= 2;
+					break;
+#endif  // MODPLUG_TRACKER
 				default:
 					break;
 				}
