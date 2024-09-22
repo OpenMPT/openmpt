@@ -197,7 +197,9 @@ static std::pair<EffectCommand, uint8> TranslateULTCommands(const uint8 e, uint8
 }
 
 
-static uint8 ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
+struct ULTEventResult { uint8 repeat = 0; ModCommand::COMMAND lostCommand = CMD_NONE; ModCommand::PARAM lostParam = 0; };
+
+static ULTEventResult ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 {
 	uint8 repeat = 1;
 	uint8 b = file.ReadUint8();
@@ -222,7 +224,7 @@ static uint8 ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
 		if(offset > 0xFF)
 			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
-		return repeat;
+		return {repeat};
 	} else if(cmd1 == CMD_OFFSET)
 	{
 		uint32 offset = param1 * 4;
@@ -231,7 +233,7 @@ static uint8 ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		{
 			m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
 			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
-			return repeat;
+			return {repeat};
 		}
 	} else if(cmd2 == CMD_OFFSET)
 	{
@@ -241,7 +243,7 @@ static uint8 ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 		{
 			m.SetEffectCommand(CMD_OFFSET, static_cast<ModCommand::PARAM>(offset));
 			m.SetVolumeCommand(VOLCMD_OFFSET, static_cast<ModCommand::VOL>(offset >> 8));
-			return repeat;
+			return {repeat};
 		}
 	} else if(cmd1 == cmd2)
 	{
@@ -257,9 +259,8 @@ static uint8 ReadULTEvent(ModCommand &m, FileReader &file, uint8 version)
 
 	// Combine slide commands, if possible
 	ModCommand::CombineEffects(cmd2, param2, cmd1, param1);
-	m.FillInTwoCommands(cmd1, param1, cmd2, param2);
-
-	return repeat;
+	const auto lostCommand = m.FillInTwoCommands(cmd1, param1, cmd2, param2);
+	return {repeat, lostCommand.first, lostCommand.second};
 }
 
 
@@ -378,7 +379,10 @@ bool CSoundFile::ReadULT(FileReader &file, ModLoadingFlags loadFlags)
 			ROWINDEX row = 0;
 			while(row < 64)
 			{
-				int repeat = ReadULTEvent(evnote, file, fileHeader.version);
+				const ULTEventResult eventResult = ReadULTEvent(evnote, file, fileHeader.version);
+				if(eventResult.lostCommand != CMD_NONE && ModCommand::IsGlobalCommand(eventResult.lostCommand, eventResult.lostParam))
+					Patterns[pat].WriteEffect(EffectWriter(eventResult.lostCommand, eventResult.lostParam).Row(row).RetryNextRow());
+				int repeat = eventResult.repeat;
 				if(repeat + row > 64)
 					repeat = 64 - row;
 				if(repeat == 0)
