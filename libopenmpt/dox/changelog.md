@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.46-pre
+
 ### libopenmpt 0.4.45 (2024-09-22)
 
  *  Fixed inconsistency in length calculation and actual playback length with
