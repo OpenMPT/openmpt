@@ -33,6 +33,52 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.10.00 (22 September 2024, revision 21662)
+-----------------------------------------------
+Tree view
+- [Fix] <js> Remove keyboard focus from tree when it is about to be hidden (http://bugs.openmpt.org/view.php?id=1802).
+
+Pattern tab
+- [Imp] <js> Channel settings can now be opened from channel context menu.
+
+Instrument tab
+- [Imp] <js> SFZ: Reduce memory usage of regions using the offset / end opcodes (e.g. SFZ files generated Sforzando's SF2 conversion process).
+
+Mod Conversion
+- [Imp] <js> Enable sustain loop on last envelope point when converting a volume envelope from XM that has no loops set (http://bugs.openmpt.org/view.php?id=1805).
+
+VST / DMO Plugins
+- [Fix] <js> Effect column Cxx volume command (MOD / XM style) was never sent to plugins. In particular this means that MIDI export did not export such volume commands.
+- [Fix] <js> For plugin IDs with the highest bit set, cache information retrieval was not possible due to incorrect INI key formatting, causing such plugins to be rescanned every time.
+- [Fix] <js> Avoid crash in plugin bridge if plugin changes channel configuration without notifying the host (http://bugs.openmpt.org/view.php?id=1807).
+
+Other formats
+- [New] <js> MID: SF2 sound banks embedded in RMI files are now also recognized.
+- [Imp] <js> PTM: Use square root pan law, like in XM files.
+- [Imp] <js> OKT: Don't drop global commands when setting paired channel volume, and try to write channel volume on the next row in this situation (http://www.un4seen.com/forum/?topic=15448.msg143684#msg143684 
+- [Imp] <js> MED: Allow tempo parameters < 32 BPM.
+- [Fix] <js> MED: Command 09 (set speed) was limited to 20 ticks per row instead of 32 ticks per row (http://www.un4seen.com/forum/?topic=15448.msg143294#msg143294).
+- [Fix] <js> MED: Disallow free panning if hardware mixing is enabled (http://www.un4seen.com/forum/?topic=15448.msg143278#msg143278).
+- [Fix] <js> MED: For MOD-style vibrato, a speed parameter of 0 was not treated as effect memory (http://www.un4seen.com/forum/?topic=15448.msg143464#msg143464).
+- [Fix] <js> MED: Fix pattern index exhaustion in modules with multiple subsongs (http://www.un4seen.com/forum/?topic=15448.msg143464#msg143464).
+- [Fix] <js> MID: Embedded DLS sound banks were not being read.
+- [Fix] <js> SFX: Ignore unused data at end of oneshot samples which sometimes caused clicky noises (http://www.un4seen.com/forum/?topic=15448.msg143414#msg143414).
+
+Module cleanup
+- [Fix] <js> Plugins only referenced by to-be-removed channels were not removed.
+
+Misc
+- [Imp] <js> When using the /shared command line parameter, modules are now opened in the OpenMPT window that was last interacted with, instead of a more or less random one. 
+- [Imp] <js> When appending to an MPTM module, copy over restart position to the newly-created sequence.
+- [Fix] <js> Huge soundfonts failed to load if the hidden setting "Misc.CacheCompleteFileBeforeLoading" was used and the soundfont would not fit in memory.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.32.7)
+
+Installer/release package
+- [Mod] <cs127> Added FST to list of recognized file extensions. AMP uses this extension for multichannel MODs.
+
+
 v1.31.09.00 (21 July 2024, revision 21219)
 ------------------------------------------
 General tab
@@ -56,7 +102,7 @@ IT
 XM
 - [Imp] <js> For files saved with registered MadTracker 2 versions, do not show binary garbage (the user ID) in the "last saved with" information, instead simply show "registered".
 - [Fix] <js> For some truncated files, the used tracker was not identified correctly. 
-- [Fix] <js> oggmod does not support stereo samples but keeps the stereo flag when encoding such samples. Such samples are now imported as mono samples instead of not importing them at all (tx AliceLR).
+- [Fix] <js> oggmod does not support stereo samples but keeps the stereo flag when encoding such samples. They are now imported as mono samples instead of not importing them at all (tx AliceLR).
 
 S3M
 - [Imp] <js> Identify files saved with early Impulse Tracker versions, Sound Club 2, Liquid Tracker, NESMusa, UNMO3, deMODifier, Kosmic To-S3M, and better tell old ModPlug Tracker versions apart.
@@ -200,7 +246,7 @@ Sample tab
 - [Fix] <js> Reset sample reverse flag when loading new samples or converting between formats.
 - [Fix] <js> Avoid accidental single-pixel sample data selections and jumpy selection start / end points with zoomed-out or auto-zoomed samples (quite likely introduced in OpenMPT 1.30.04.00).
 
-Instruments
+Instrument tab
 - [Imp] <js> SFZ: global_label opcode (instrument name) is now read and written.
 - [Imp] <js> SFZ: Sustain point is no longer set on volume envelopes if it's the last point of the envelope and its value is neutral (0).
 - [Fix] <js> SFZ: <, = and various whitespace characters are now omitted when writing name labels, to ensure that the resulting SFZ file can be parsed unambiguously.
@@ -2618,7 +2664,7 @@ Sample tab
 - [Mod] <js> Lifted the sample limit in sample mode from 199 to 255 (http://bugs.openmpt.org/view.php?id=969).
 
 Mod Conversion
-- [Imp] <js> When converting note cuts to XM, rewrite them as a v00 command if the effect column already occupied.
+- [Imp] <js> When converting note cuts to XM, rewrite them as a v00 command if the effect column is already occupied.
 
 VST::Specific Plugin Fixes
 - [Fix] <js> Some resizable GUI plugins (e.g. Roland D-50) were not resized correctly.
