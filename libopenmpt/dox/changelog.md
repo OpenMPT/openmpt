@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.6.19-pre
+### libopenmpt 0.6.19 (2024-09-22)
 
  *  [**Sec**] Possible out-of-bounds read with malformed IT / MPTM / XM files
     using the SymMOD Echo plugin when modern tempo mode with an invalid rows per
