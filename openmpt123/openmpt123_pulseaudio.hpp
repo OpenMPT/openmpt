@@ -44,7 +44,7 @@ struct pulseaudio_exception : public exception {
 			return mpt::ustring();
 		}
 	}
-	pulseaudio_exception( int error ) : exception( error_to_string( error ) ) { }
+	pulseaudio_exception( int error ) : exception( MPT_USTRING("PulseAudio: ") + error_to_string( error ) ) { }
 };
 
 class pulseaudio_stream_raii : public write_buffers_interface {

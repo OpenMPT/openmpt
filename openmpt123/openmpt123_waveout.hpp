@@ -20,7 +20,7 @@
 namespace openmpt123 {
 
 struct waveout_exception : public exception {
-	waveout_exception() : exception( MPT_USTRING("waveout") ) { }
+	waveout_exception() : exception( MPT_USTRING("WaveOut: ") + MPT_USTRING("waveout") ) { }
 };
 
 class waveout_stream_raii : public write_buffers_interface {

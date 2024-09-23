@@ -39,7 +39,7 @@ struct allegro42_exception : public exception {
 		}
 	}
 	allegro42_exception()
-		: exception( error_to_string() )
+		: exception( MPT_USTRING("Allegro-4.2: ") + error_to_string() )
 	{
 	}
 };

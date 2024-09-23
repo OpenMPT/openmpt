@@ -30,7 +30,7 @@ namespace openmpt123 {
 inline constexpr auto portaudio_encoding = mpt::common_encoding::utf8;
 
 struct portaudio_exception : public exception {
-	portaudio_exception( PaError code ) : exception( mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetErrorText( code ) ) ) { }
+	portaudio_exception( PaError code ) : exception( MPT_USTRING("PortAudio: ") + mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetErrorText( code ) ) ) { }
 };
 
 typedef void (*PaUtilLogCallback ) (const char *log);

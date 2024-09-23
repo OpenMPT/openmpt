@@ -46,7 +46,7 @@ private:
 		return s.str();
 	}
 public:
-	sdl2_exception( int code, const char * error ) : exception( text_from_code( code ) + MPT_USTRING(" (") + mpt::transcode<mpt::ustring>( sdl2_encoding, error ? std::string(error) : std::string("NULL") ) + MPT_USTRING(")") ) { }
+	sdl2_exception( int code, const char * error ) : exception( MPT_USTRING("SDL2: ") + text_from_code( code ) + MPT_USTRING(" (") + mpt::transcode<mpt::ustring>( sdl2_encoding, error ? std::string(error) : std::string("NULL") ) + MPT_USTRING(")") ) { }
 };
 
 static void check_sdl2_error( int e ) {

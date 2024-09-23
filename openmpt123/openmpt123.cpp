@@ -2371,30 +2371,6 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		std_err << MPT_USTRING("Error parsing command line.") << lf;
 		std_err.writeout();
 		return 1;
-#ifdef MPT_WITH_ALLEGRO42
-	} catch ( allegro42_exception & e ) {
-		std_err << MPT_USTRING("Allegro-4.2 error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-#endif
-#ifdef MPT_WITH_PULSEAUDIO
-	} catch ( pulseaudio_exception & e ) {
-		std_err << MPT_USTRING("PulseAudio error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-#endif
-#ifdef MPT_WITH_PORTAUDIO
-	} catch ( portaudio_exception & e ) {
-		std_err << MPT_USTRING("PortAudio error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-#endif
-#ifdef MPT_WITH_SDL2
-	} catch ( sdl2_exception & e ) {
-		std_err << MPT_USTRING("SDL2 error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-#endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
 	} catch ( exception & e ) {
