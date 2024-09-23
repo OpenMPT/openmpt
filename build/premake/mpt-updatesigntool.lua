@@ -24,6 +24,8 @@
    "../../installer/updatesigntool/*.h",
   }
 	excludes {
+		"../../src/mpt/main/**.cpp",
+		"../../src/mpt/main/**.hpp",
 		"../../src/openmpt/fileformat_base/**.cpp",
 		"../../src/openmpt/fileformat_base/**.hpp",
 		"../../src/openmpt/soundbase/**.cpp",

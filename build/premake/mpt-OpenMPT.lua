@@ -118,6 +118,10 @@ end
    "../../pluginBridge/BridgeWrapper.cpp",
    "../../pluginBridge/BridgeWrapper.h",
   }
+	excludes {
+		"../../src/mpt/main/**.cpp",
+		"../../src/mpt/main/**.hpp",
+	}
   files {
    "../../mptrack/mptrack.rc",
    "../../mptrack/res/*.*", -- resource data files

@@ -89,6 +89,7 @@ svn export ./src/mpt/io_read                          bin/dist-autotools/src/mpt
 svn export ./src/mpt/io_write                         bin/dist-autotools/src/mpt/io_write
 #svn export ./src/mpt/json                             bin/dist-autotools/src/mpt/json
 #svn export ./src/mpt/library                          bin/dist-autotools/src/mpt/library
+svn export ./src/mpt/main                             bin/dist-autotools/src/mpt/main
 svn export ./src/mpt/mutex                            bin/dist-autotools/src/mpt/mutex
 svn export ./src/mpt/out_of_memory                    bin/dist-autotools/src/mpt/out_of_memory
 svn export ./src/mpt/osinfo                           bin/dist-autotools/src/mpt/osinfo
@@ -164,6 +165,7 @@ cp -r ./src/mpt/io_read                               bin/dist-autotools/src/mpt
 cp -r ./src/mpt/io_write                              bin/dist-autotools/src/mpt/io_write
 #cp -r ./src/mpt/json                                  bin/dist-autotools/src/mpt/json
 #cp -r ./src/mpt/library                               bin/dist-autotools/src/mpt/library
+cp -r ./src/mpt/main                                  bin/dist-autotools/src/mpt/main
 cp -r ./src/mpt/mutex                                 bin/dist-autotools/src/mpt/mutex
 cp -r ./src/mpt/out_of_memory                         bin/dist-autotools/src/mpt/out_of_memory
 cp -r ./src/mpt/osinfo                                bin/dist-autotools/src/mpt/osinfo

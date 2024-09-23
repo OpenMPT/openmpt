@@ -1835,6 +1835,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	svn export ./src/mpt/io_write                 bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write
 	#svn export ./src/mpt/json                     bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json
 	#svn export ./src/mpt/library                  bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/library
+	svn export ./src/mpt/main                     bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/main
 	svn export ./src/mpt/mutex                    bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex
 	svn export ./src/mpt/out_of_memory            bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/out_of_memory
 	svn export ./src/mpt/osinfo                   bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo
@@ -1935,6 +1936,7 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./src/mpt/io_write                 bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/io_write                 --native-eol CRLF
 	#svn export ./src/mpt/json                     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/json                     --native-eol CRLF
 	#svn export ./src/mpt/library                  bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/library                  --native-eol CRLF
+	svn export ./src/mpt/main                     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/main                     --native-eol CRLF
 	svn export ./src/mpt/mutex                    bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/mutex                    --native-eol CRLF
 	svn export ./src/mpt/out_of_memory            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/out_of_memory            --native-eol CRLF
 	svn export ./src/mpt/osinfo                   bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo                   --native-eol CRLF
