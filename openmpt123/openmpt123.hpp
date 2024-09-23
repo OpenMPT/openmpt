@@ -194,7 +194,9 @@ public:
 class textout_dummy : public textout {
 public:
 	textout_dummy() = default;
-	~textout_dummy() override = default;
+	~textout_dummy() override {
+		static_cast<void>( pop() );
+	}
 public:
 	void writeout() override {
 		static_cast<void>( pop() );
@@ -378,7 +380,9 @@ private:
 #endif
 public:
 	textout_wrapper() = default;
-	~textout_wrapper() override = default;
+	~textout_wrapper() override {
+		out.write( pop() );
+	}
 public:
 	void writeout() override {
 		out.write( pop() );
