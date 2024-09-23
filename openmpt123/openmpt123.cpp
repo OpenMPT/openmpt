@@ -45,6 +45,7 @@ static const char * const license =
 #include <sys/types.h>
 #endif
 
+#include "mpt/base/algorithm.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/main/main.hpp"
 
@@ -2078,8 +2079,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 }
 
 enum class FILE_mode {
-	unchanged,
-	utf8,
+	text,
 	binary,
 };
 
@@ -2095,7 +2095,7 @@ public:
 		, old_mode(-1)
 	{
 		switch (new_mode) {
-			case FILE_mode::utf8:
+			case FILE_mode::text:
 				fflush( file );
 				#if defined(UNICODE)
 					old_mode = _setmode( _fileno( file ), _O_U8TEXT );
@@ -2113,11 +2113,12 @@ public:
 					throw exception( MPT_USTRING("failed to set binary mode on file descriptor") );
 				}
 				break;
-			default:
-				// nothing
-				break;
 		}
 	}
+	FILE_mode_guard( const FILE_mode_guard & ) = delete;
+	FILE_mode_guard( FILE_mode_guard && ) = default;
+	FILE_mode_guard & operator=( const FILE_mode_guard & ) = delete;
+	FILE_mode_guard & operator=( FILE_mode_guard && ) = default;
 	~FILE_mode_guard() {
 		if ( old_mode != -1 ) {
 			fflush( file );
@@ -2140,10 +2141,13 @@ public:
 
 class FILE_mode_guard {
 public:
-	FILE_mode_guard( FILE * /* file */, FILE_mode /* new_mode */ )
-	{
+	FILE_mode_guard( FILE * /* file */, FILE_mode /* new_mode */ ) {
 		return;
 	}
+	FILE_mode_guard( const FILE_mode_guard & ) = delete;
+	FILE_mode_guard( FILE_mode_guard && ) = default;
+	FILE_mode_guard & operator=( const FILE_mode_guard & ) = delete;
+	FILE_mode_guard & operator=( FILE_mode_guard && ) = default;
 	~FILE_mode_guard() = default;
 };
 
@@ -2180,30 +2184,13 @@ public:
 
 static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
-	FILE_mode_guard stdin_utf8_guard( stdin, FILE_mode::utf8 );
-	FILE_mode_guard stdout_utf8_guard( stdout, FILE_mode::utf8 );
-	FILE_mode_guard stderr_utf8_guard( stderr, FILE_mode::utf8 );
+	FILE_mode_guard stdin_text_guard( stdin, FILE_mode::text );
+	FILE_mode_guard stdout_text_guard( stdout, FILE_mode::text );
+	FILE_mode_guard stderr_text_guard( stderr, FILE_mode::text );
+
 	textout_dummy dummy_log;
-#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-#if defined(UNICODE)
-	textout_ostream_console std_out( std::wcout, STD_OUTPUT_HANDLE );
-	textout_ostream_console std_err( std::wclog, STD_ERROR_HANDLE );
-#else
-	textout_ostream_console std_out( std::cout, STD_OUTPUT_HANDLE );
-	textout_ostream_console std_err( std::clog, STD_ERROR_HANDLE );
-#endif
-#elif MPT_OS_WINDOWS
-#if defined(UNICODE)
-	textout_wostream std_out( std::wcout );
-	textout_wostream std_err( std::wclog );
-#else
-	textout_ostream std_out( std::cout );
-	textout_ostream std_err( std::clog );
-#endif
-#else
-	textout_ostream std_out( std::cout );
-	textout_ostream std_err( std::clog );
-#endif
+	textout_wrapper<textout_destination::destination_stdout> std_out;
+	textout_wrapper<textout_destination::destination_stderr> std_err;
 
 	commandlineflags flags;
 
@@ -2274,29 +2261,23 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
 	try {
 
-		bool stdin_can_ui = true;
-		for ( const auto & filename : flags.filenames ) {
-			if ( filename == MPT_NATIVE_PATH("-") ) {
-				stdin_can_ui = false;
-				break;
-			}
-		}
+		const FILE_mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? FILE_mode::binary : FILE_mode::text;
+		const FILE_mode stdout_mode = flags.use_stdout ? FILE_mode::binary : FILE_mode::text;
 
-		bool stdout_can_ui = true;
-		if ( flags.use_stdout ) {
-			stdout_can_ui = false;
-		}
+		[[maybe_unused]] const bool stdin_text = ( stdin_mode == FILE_mode::text );
+		[[maybe_unused]] const bool stdin_data = ( stdin_mode == FILE_mode::binary );
+		[[maybe_unused]] const bool stdout_text = ( stdout_mode == FILE_mode::text );
+		[[maybe_unused]] const bool stdout_data = ( stdout_mode == FILE_mode::binary );
 
-		// set stdin binary
-		FILE_mode_guard stdin_guard( stdin, stdin_can_ui ? FILE_mode::unchanged : FILE_mode::binary );
+		// set stdin/stdout to binary for data input/output
+		std::optional<FILE_mode_guard> stdin_guard{ stdin_data ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::binary ) : std::nullopt };
+		std::optional<FILE_mode_guard> stdout_guard{ stdout_data ? std::make_optional<FILE_mode_guard>( stdout, FILE_mode::binary ) : std::nullopt };
 
-		// set stdout binary
-		FILE_mode_guard stdout_guard( stdout, stdout_can_ui ? FILE_mode::unchanged : FILE_mode::binary );
+		// setup terminal
+		std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
-		// setup terminal for ui mode
-		std::optional<terminal_ui_guard> input_guard{ ( stdin_can_ui && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt ) };
-		
-		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
+		// choose text output between quiet/stdout/stderr
+		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : stdout_text ? static_cast<textout&>( std_out ) : static_cast<textout&>( std_err );
 
 		show_banner( log, flags.banner );
 

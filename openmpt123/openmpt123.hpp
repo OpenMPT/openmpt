@@ -174,13 +174,10 @@ inline bool IsTerminal( int fd ) {
 
 
 class textout : public string_concat_stream<mpt::ustring> {
+protected:
+	textout() = default;
 public:
-	textout() {
-		return;
-	}
-	virtual ~textout() {
-		return;
-	}
+	virtual ~textout() = default;
 protected:
 	mpt::ustring pop() {
 		mpt::ustring text = str();
@@ -189,26 +186,44 @@ protected:
 	}
 public:
 	virtual void writeout() = 0;
-	virtual void cursor_up( std::size_t lines ) {
+	virtual void cursor_up( std::size_t lines ) = 0;
+};
+
+
+
+class textout_dummy : public textout {
+public:
+	textout_dummy() = default;
+	~textout_dummy() final = default;
+public:
+	void writeout() final {
+		static_cast<void>( pop() );
+	}
+	void cursor_up( std::size_t lines ) final {
 		static_cast<void>( lines );
 	}
 };
 
-class textout_dummy : public textout {
-public:
-	textout_dummy() {
-		return;
-	}
-	virtual ~textout_dummy() {
-		return;
-	}
-public:
-	void writeout() override {
-		static_cast<void>( pop() );
-	}
+
+
+enum class textout_destination {
+	destination_stdout,
+	destination_stderr,
 };
 
-class textout_ostream : public textout {
+class textout_backend {
+protected:
+	textout_backend() = default;
+public:
+	virtual ~textout_backend() = default;
+public:
+	virtual void write( const mpt::ustring & text ) = 0;
+	virtual void cursor_up(std::size_t lines) = 0;
+};
+
+
+
+class textout_ostream : public textout_backend {
 private:
 	std::ostream & s;
 #if MPT_OS_DJGPP
@@ -226,12 +241,9 @@ public:
 		#endif
 		return;
 	}
-	virtual ~textout_ostream() {
-		writeout_impl();
-	}
-private:
-	void writeout_impl() {
-		mpt::ustring text = pop();
+	~textout_ostream() final = default;
+public:
+	void write( const mpt::ustring & text ) final {
 		if ( text.length() > 0 ) {
 			#if MPT_OS_DJGPP
 				s << mpt::transcode<std::string>( codepage, text );
@@ -243,21 +255,17 @@ private:
 			s.flush();
 		}	
 	}
-public:
-	void writeout() override {
-		writeout_impl();
-	}
-	void cursor_up( std::size_t lines ) override {
+	void cursor_up( std::size_t lines ) final {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
-			*this << MPT_USTRING("\x1b[1A");
+			s << std::string("\x1b[1A");
 		}
 	}
 };
 
 #if MPT_OS_WINDOWS && defined(UNICODE)
 
-class textout_wostream : public textout {
+class textout_wostream : public textout_backend {
 private:
 	std::wostream & s;
 public:
@@ -266,25 +274,18 @@ public:
 	{
 		return;
 	}
-	virtual ~textout_wostream() {
-		writeout_impl();
-	}
-private:
-	void writeout_impl() {
-		mpt::ustring text = pop();
+	~textout_wostream() final = default;
+public:
+	void write( const mpt::ustring & text ) final {
 		if ( text.length() > 0 ) {
 			s << mpt::transcode<std::wstring>( text );
 			s.flush();
 		}	
 	}
-public:
-	void writeout() override {
-		writeout_impl();
-	}
-	void cursor_up( std::size_t lines ) override {
+	void cursor_up( std::size_t lines ) final {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
-			*this << MPT_USTRING("\x1b[1A");
+			s << std::wstring(L"\x1b[1A");
 		}
 	}
 };
@@ -293,7 +294,7 @@ public:
 
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
-class textout_ostream_console : public textout {
+class textout_ostream_console : public textout_backend {
 private:
 #if defined(UNICODE)
 	std::wostream & s;
@@ -314,12 +315,9 @@ public:
 	{
 		return;
 	}
-	virtual ~textout_ostream_console() {
-		writeout_impl();
-	}
-private:
-	void writeout_impl() {
-		mpt::ustring text = pop();
+	~textout_ostream_console() final = default;
+public:
+	void write( const mpt::ustring & text ) final {
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				DWORD chars_written = 0;
@@ -340,11 +338,7 @@ private:
 			}
 		}
 	}
-public:
-	void writeout() override {
-		writeout_impl();
-	}
-	void cursor_up( std::size_t lines ) override {
+	void cursor_up( std::size_t lines ) final {
 		if ( console ) {
 			s.flush();
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -361,6 +355,40 @@ public:
 };
 
 #endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
+
+
+
+template <textout_destination dest>
+class textout_wrapper : public textout {
+private:
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
+#if defined(UNICODE)
+	textout_ostream_console out{ dest == textout_destination::destination_stdout ? std::wcout : std::wclog, dest == textout_destination::destination_stdout ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+#else
+	textout_ostream_console out{ dest == textout_destination::destination_stdout ? std::cout : std::clog, dest == textout_destination::destination_stdout ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+#endif
+#elif MPT_OS_WINDOWS
+#if defined(UNICODE)
+	textout_wostream out{ dest == textout_destination::destination_stdout ? std::wcout : std::wclog };
+#else
+	textout_wostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+#endif
+#else
+	textout_wostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+#endif
+public:
+	textout_wrapper() = default;
+	~textout_wrapper() final = default;
+public:
+	void writeout() final {
+		out.write( pop() );
+	}
+	void cursor_up(std::size_t lines) final {
+		out.cursor_up( lines );
+	}
+};
+
+
 
 inline mpt::ustring append_software_tag( mpt::ustring software ) {
 	mpt::ustring openmpt123 = mpt::ustring()
