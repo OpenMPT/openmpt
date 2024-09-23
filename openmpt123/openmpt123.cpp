@@ -2126,12 +2126,14 @@ public:
 	}
 };
 
-class terminal_input_guard {
+class terminal_ui_guard {
 public:
-	terminal_input_guard( bool /* enable */ ) {
-		return;
-	}
-	~terminal_input_guard() = default;
+	terminal_ui_guard() = default;
+	terminal_ui_guard( const terminal_ui_guard & ) = delete;
+	terminal_ui_guard( terminal_ui_guard && ) = default;
+	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
+	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
+	~terminal_ui_guard() = default;
 };
 
 #else
@@ -2145,28 +2147,28 @@ public:
 	~FILE_mode_guard() = default;
 };
 
-class terminal_input_guard {
+class terminal_ui_guard {
 private:
 	bool changed = false;
 	termios saved_attributes;
 public:
-	terminal_input_guard( bool enable ) {
-		if ( !enable ) {
-			return;
-		}
-		termios tattr;
+	terminal_ui_guard() {
 		if ( !isatty( STDIN_FILENO ) ) {
 			return;
 		}
 		tcgetattr( STDIN_FILENO, &saved_attributes );
-		tcgetattr( STDIN_FILENO, &tattr );
+		termios tattr = saved_attributes;
 		tattr.c_lflag &= ~( ICANON | ECHO );
 		tattr.c_cc[VMIN] = 1;
 		tattr.c_cc[VTIME] = 0;
 		tcsetattr( STDIN_FILENO, TCSAFLUSH, &tattr );
 		changed = true;
 	}
-	~terminal_input_guard() {
+	terminal_ui_guard( const terminal_ui_guard & ) = delete;
+	terminal_ui_guard( terminal_ui_guard && ) = default;
+	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
+	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
+	~terminal_ui_guard() {
 		if ( changed ) {
 			tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
 		}
@@ -2291,8 +2293,8 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		// set stdout binary
 		FILE_mode_guard stdout_guard( stdout, stdout_can_ui ? FILE_mode::unchanged : FILE_mode::binary );
 
-		// setup terminal
-		terminal_input_guard input_guard( stdin_can_ui && ( flags.mode == Mode::UI ) );
+		// setup terminal for ui mode
+		std::optional<terminal_ui_guard> input_guard{ ( stdin_can_ui && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt ) };
 		
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
