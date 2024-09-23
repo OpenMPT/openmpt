@@ -2301,6 +2301,10 @@ static int main( int argc, char * argv [] ) {
 		return 0;
 	} catch ( silent_exit_exception & ) {
 		return 0;
+	} catch ( exception & e ) {
+		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+		std_err.writeout();
+		return 1;
 	} catch ( std::exception & e ) {
 		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
@@ -2468,6 +2472,10 @@ static int main( int argc, char * argv [] ) {
 #endif
 	} catch ( silent_exit_exception & ) {
 		return 0;
+	} catch ( exception & e ) {
+		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+		std_err.writeout();
+		return 1;
 	} catch ( std::exception & e ) {
 		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
