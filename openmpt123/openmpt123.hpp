@@ -371,10 +371,10 @@ private:
 #if defined(UNICODE)
 	textout_wostream out{ dest == textout_destination::destination_stdout ? std::wcout : std::wclog };
 #else
-	textout_wostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+	textout_ostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
 #endif
 #else
-	textout_wostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+	textout_ostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
 #endif
 public:
 	textout_wrapper() = default;
