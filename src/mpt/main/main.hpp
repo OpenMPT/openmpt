@@ -107,7 +107,9 @@ namespace main {
 #endif // MPT_OS_DJGPP
 
 #if !defined(MPT_MAIN_PROLOG)
+/* clang-format off */
 #define MPT_MAIN_PROLOG() do { } while(0)
+/* clang-format on */
 #endif
 
 
