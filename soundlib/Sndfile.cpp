@@ -297,6 +297,7 @@ static constexpr FileFormatLoader ModuleFormatLoaders[] =
 	MPT_DECLARE_FORMAT(STP),
 	MPT_DECLARE_FORMAT(DSym),
 	MPT_DECLARE_FORMAT(STX),
+	MPT_DECLARE_FORMAT(UNIC),  // Magic bytes clash with MOD, must be tried first
 	MPT_DECLARE_FORMAT(MOD),
 	MPT_DECLARE_FORMAT(ICE),
 	MPT_DECLARE_FORMAT(KRIS),

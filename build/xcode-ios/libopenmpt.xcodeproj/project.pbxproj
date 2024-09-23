@@ -75,6 +75,7 @@
 		81C26ED360DF89053CE8E513 /* Load_gmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D668A71B68F6710DD1CF155B /* Load_gmc.cpp */; };
 		8479AC1F9F461AD1A316B25F /* Load_digi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D14936A73E714519400434E7 /* Load_digi.cpp */; };
 		84A9E60B844CC93DBEA17C4B /* MixerLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */; };
+		84F9B8439FC626F5A396BE83 /* Load_unic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9EEAF28B0C1300FD0DA5F0CB /* Load_unic.cpp */; };
 		8676CA3F6593E471419D407F /* Load_gt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10E0ADC7A36E77B90C471C07 /* Load_gt2.cpp */; };
 		8751165421750B86D19AEC94 /* mptStringBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C510221C396A670EB74DF05C /* mptStringBuffer.cpp */; };
 		877C818BA248F03DA61987CB /* Load_puma.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6DB68B53DADE99C5DC718993 /* Load_puma.cpp */; };
@@ -488,6 +489,7 @@
 		9E737DF712CDC2E990B14C37 /* Distortion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Distortion.h; path = ../../soundlib/plugins/dmo/Distortion.h; sourceTree = "<group>"; };
 		9E8AC865F88BDF57BFD2D6A5 /* tests_binary.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_binary.hpp; path = ../../src/mpt/binary/tests/tests_binary.hpp; sourceTree = "<group>"; };
 		9EB0D073130B156590EE9EB3 /* Compressor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Compressor.h; path = ../../soundlib/plugins/dmo/Compressor.h; sourceTree = "<group>"; };
+		9EEAF28B0C1300FD0DA5F0CB /* Load_unic.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_unic.cpp; path = ../../soundlib/Load_unic.cpp; sourceTree = "<group>"; };
 		9F187E69B9E4ED1BBDB584A9 /* outputfile.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = outputfile.hpp; path = ../../src/mpt/io_file/outputfile.hpp; sourceTree = "<group>"; };
 		9F2E1C1AF92F330CC0762A5A /* BuildSettingsCompiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BuildSettingsCompiler.h; path = ../../common/BuildSettingsCompiler.h; sourceTree = "<group>"; };
 		9FCB791A628BD98CBFC0B75A /* dos_memory.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = dos_memory.hpp; path = ../../src/mpt/osinfo/dos_memory.hpp; sourceTree = "<group>"; };
@@ -1352,6 +1354,7 @@
 				7D070D1F43950491B1972B5F /* Load_symmod.cpp */,
 				54393E69E6C7085B4F9FACA9 /* Load_uax.cpp */,
 				7FD19A57125F64497B380897 /* Load_ult.cpp */,
+				9EEAF28B0C1300FD0DA5F0CB /* Load_unic.cpp */,
 				694D3F69FBDB095B64B3ADA9 /* Load_wav.cpp */,
 				2A6435F76EB2DB69B0DA1437 /* Load_xm.cpp */,
 				2EF17543C17F3F352A57E383 /* Load_xmf.cpp */,
@@ -1695,6 +1698,7 @@
 				CF116C1742F9E3C965479257 /* Load_symmod.cpp in Sources */,
 				4174F40120920E33FC9B6A41 /* Load_uax.cpp in Sources */,
 				F4EF37CFD40C5201B015AE0F /* Load_ult.cpp in Sources */,
+				84F9B8439FC626F5A396BE83 /* Load_unic.cpp in Sources */,
 				BD3885019C559F33785EFB41 /* Load_wav.cpp in Sources */,
 				00BB926F99087821C74F78AF /* Load_xm.cpp in Sources */,
 				F57A8B7BD497A5ADB0A101BB /* Load_xmf.cpp in Sources */,

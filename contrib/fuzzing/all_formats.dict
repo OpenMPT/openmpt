@@ -251,6 +251,9 @@ symmod="SymM\x00\x00\x00\x01\xFF\xFF\xFF\xFF\x00\x00\x00"
 
 ult="MAS_UTrack_V004"
 
+#unic="UNIC"
+#unic="\x00\x00\x00\x00"
+
 umx="\xC1\x83\x2A\x9E"
 umx="music"
 umx="sound"

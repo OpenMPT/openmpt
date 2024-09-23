@@ -196,8 +196,9 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_stm.cpp \
 	soundlib/Load_stp.cpp \
 	soundlib/Load_symmod.cpp \
-	soundlib/Load_ult.cpp \
 	soundlib/Load_uax.cpp \
+	soundlib/Load_ult.cpp \
+	soundlib/Load_unic.cpp \
 	soundlib/Load_wav.cpp \
 	soundlib/Load_xm.cpp \
 	soundlib/Load_xmf.cpp \

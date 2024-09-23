@@ -111,6 +111,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("Graoumf Tracker"),                    "gtk" },
 	{ UL_("Graoumf Tracker 1 / 2"),              "gt2" },
 	{ UL_("UltraTracker"),                       "ult" },
+	{ UL_("UNIC Tracker"),                       "unic" },
 	{ UL_("Mod's Grave"),                        "wow" },
 	{ UL_("Astroidea XMF"),                      "xmf" },
 	// converted formats (no MODTYPE)

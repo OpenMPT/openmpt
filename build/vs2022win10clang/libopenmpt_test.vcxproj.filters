@@ -1388,6 +1388,9 @@
     <ClCompile Include="..\..\soundlib\Load_ult.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_unic.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_wav.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

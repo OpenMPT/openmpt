@@ -438,6 +438,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_stp.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_symmod.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_uax.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_ult.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_unic.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_wav.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_xm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_xmf.cpp
