@@ -493,6 +493,8 @@ protected:
 	/// Opens either template or example menu item.
 	void OpenMenuItemFile(const UINT nId, const bool isTemplateFile);
 
+	void ShowToolbarMenu(CPoint screenPt);
+
 public:
 	void UpdateMRUList();
 

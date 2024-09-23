@@ -2870,15 +2870,6 @@ BEGIN
     END
 END
 
-IDR_TOOLBARS MENU
-BEGIN
-    POPUP "&ToolBars"
-    BEGIN
-        MENUITEM "&Main",                       ID_VIEW_TOOLBAR
-        MENUITEM "&Tree",                       IDD_TREEVIEW
-    END
-END
-
 IDR_ENVELOPES MENU
 BEGIN
     POPUP "&Envelope"

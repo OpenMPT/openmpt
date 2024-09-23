@@ -31,7 +31,6 @@
 #define IDD_OPTIONS_EFFECTS             133
 #define IDR_MAINFRAME                   200
 #define IDR_MODULETYPE                  201
-#define IDR_TOOLBARS                    202
 #define ID_PATTERN_CHANNELMANAGER       202
 #define IDR_ENVELOPES                   203
 #define ID_INDICATOR_CPU                203
