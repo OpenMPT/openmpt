@@ -11,6 +11,7 @@
 #include "mpt/base/saturate_cast.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
 #include <type_traits>
 
