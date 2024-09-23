@@ -153,30 +153,6 @@ struct show_long_version_number_exception : public std::exception {
 constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
 
 
-#if !MPT_OS_WINDOWS
-
-static termios saved_attributes;
-
-static void reset_input_mode() {
-	tcsetattr( STDIN_FILENO, TCSANOW, &saved_attributes );
-}
-
-static void set_input_mode() {
-	termios tattr;
-	if ( !isatty( STDIN_FILENO ) ) {
-		return;
-	}
-	tcgetattr( STDIN_FILENO, &saved_attributes );
-	atexit( reset_input_mode );
-	tcgetattr( STDIN_FILENO, &tattr );
-	tattr.c_lflag &= ~( ICANON | ECHO );
-	tattr.c_cc[VMIN] = 1;
-	tattr.c_cc[VTIME] = 0;
-	tcsetattr( STDIN_FILENO, TCSAFLUSH, &tattr );
-}
-
-#endif
-
 class file_audio_stream_raii : public file_audio_stream_base {
 private:
 	std::unique_ptr<file_audio_stream_base> impl;
@@ -2102,31 +2078,48 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 }
 
+enum class FILE_mode {
+	unchanged,
+	utf8,
+	binary,
+};
+
 #if MPT_OS_WINDOWS
 
-class FD_utf8_raii {
+class FILE_mode_guard {
 private:
 	FILE * file;
 	int old_mode;
 public:
-	FD_utf8_raii( FILE * file, bool set_utf8 )
+	FILE_mode_guard( FILE * file, FILE_mode new_mode )
 		: file(file)
 		, old_mode(-1)
 	{
-		if ( set_utf8 ) {
-			fflush( file );
-			#if defined(UNICODE)
-				old_mode = _setmode( _fileno( file ), _O_U8TEXT );
-			#else
-				old_mode = _setmode( _fileno( file ), _O_TEXT );
-			#endif
-			if ( old_mode == -1 ) {
-				throw exception( MPT_USTRING("failed to set TEXT mode on file descriptor") );
-			}
+		switch (new_mode) {
+			case FILE_mode::utf8:
+				fflush( file );
+				#if defined(UNICODE)
+					old_mode = _setmode( _fileno( file ), _O_U8TEXT );
+				#else
+					old_mode = _setmode( _fileno( file ), _O_TEXT );
+				#endif
+				if ( old_mode == -1 ) {
+					throw exception( MPT_USTRING("failed to set TEXT mode on file descriptor") );
+				}
+				break;
+			case FILE_mode::binary:
+				fflush( file );
+				old_mode = _setmode( _fileno( file ), _O_BINARY );
+				if ( old_mode == -1 ) {
+					throw exception( MPT_USTRING("failed to set binary mode on file descriptor") );
+				}
+				break;
+			default:
+				// nothing
+				break;
 		}
 	}
-	~FD_utf8_raii()
-	{
+	~FILE_mode_guard() {
 		if ( old_mode != -1 ) {
 			fflush( file );
 			old_mode = _setmode( _fileno( file ), old_mode );
@@ -2134,28 +2127,50 @@ public:
 	}
 };
 
-class FD_binary_raii {
-private:
-	FILE * file;
-	int old_mode;
+class terminal_input_guard {
 public:
-	FD_binary_raii( FILE * file, bool set_binary )
-		: file(file)
-		, old_mode(-1)
-	{
-		if ( set_binary ) {
-			fflush( file );
-			old_mode = _setmode( _fileno( file ), _O_BINARY );
-			if ( old_mode == -1 ) {
-				throw exception( MPT_USTRING("failed to set binary mode on file descriptor") );
-			}
-		}
+	terminal_input_guard( bool /* enable */ ) {
+		return;
 	}
-	~FD_binary_raii()
+	~terminal_input_guard() = default;
+};
+
+#else
+
+class FILE_mode_guard {
+public:
+	FILE_mode_guard( FILE * /* file */, FILE_mode /* new_mode */ )
 	{
-		if ( old_mode != -1 ) {
-			fflush( file );
-			old_mode = _setmode( _fileno( file ), old_mode );
+		return;
+	}
+	~FILE_mode_guard() = default;
+};
+
+class terminal_input_guard {
+private:
+	bool changed = false;
+	termios saved_attributes;
+public:
+	terminal_input_guard( bool enable ) {
+		if ( !enable ) {
+			return;
+		}
+		termios tattr;
+		if ( !isatty( STDIN_FILENO ) ) {
+			return;
+		}
+		tcgetattr( STDIN_FILENO, &saved_attributes );
+		atexit( reset_input_mode );
+		tcgetattr( STDIN_FILENO, &tattr );
+		tattr.c_lflag &= ~( ICANON | ECHO );
+		tattr.c_cc[VMIN] = 1;
+		tattr.c_cc[VTIME] = 0;
+		tcsetattr( STDIN_FILENO, TCSAFLUSH, &tattr );
+		changed = true;
+	}
+	~terminal_input_guard() {
+		if ( changed ) {
+			tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
 		}
 	}
 };
@@ -2194,11 +2209,9 @@ static int main( int argc, char * argv [] ) {
 		}
 	#endif
 
-#if MPT_OS_WINDOWS
-	FD_utf8_raii stdin_utf8_guard( stdin, true );
-	FD_utf8_raii stdout_utf8_guard( stdout, true );
-	FD_utf8_raii stderr_utf8_guard( stderr, true );
-#endif
+	FILE_mode_guard stdin_utf8_guard( stdin, FILE_mode::utf8 );
+	FILE_mode_guard stdout_utf8_guard( stdout, FILE_mode::utf8 );
+	FILE_mode_guard stderr_utf8_guard( stderr, FILE_mode::utf8 );
 	textout_dummy dummy_log;
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 #if defined(UNICODE)
@@ -2304,23 +2317,13 @@ static int main( int argc, char * argv [] ) {
 		}
 
 		// set stdin binary
-#if MPT_OS_WINDOWS
-		FD_binary_raii stdin_guard( stdin, !stdin_can_ui );
-#endif
+		FILE_mode_guard stdin_guard( stdin, stdin_can_ui ? FILE_mode::unchanged : FILE_mode::binary );
 
 		// set stdout binary
-#if MPT_OS_WINDOWS
-		FD_binary_raii stdout_guard( stdout, !stdout_can_ui );
-#endif
+		FILE_mode_guard stdout_guard( stdout, stdout_can_ui ? FILE_mode::unchanged : FILE_mode::binary );
 
 		// setup terminal
-		#if !MPT_OS_WINDOWS
-			if ( stdin_can_ui ) {
-				if ( flags.mode == Mode::UI ) {
-					set_input_mode();
-				}
-			}
-		#endif
+		terminal_input_guard input_guard( stdin_can_ui && ( flags.mode == Mode::UI ) );
 		
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : static_cast<textout&>( stdout_can_ui ? std_out : std_err );
 
