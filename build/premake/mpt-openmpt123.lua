@@ -32,6 +32,7 @@
    "../../src/mpt/format/*.hpp",
    "../../src/mpt/io/*.hpp",
    "../../src/mpt/io_file/*.hpp",
+   "../../src/mpt/main/*.hpp",
    "../../src/mpt/parse/*.hpp",
    "../../src/mpt/path/*.hpp",
    "../../src/mpt/random/*.hpp",

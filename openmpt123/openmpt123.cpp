@@ -45,8 +45,8 @@ static const char * const license =
 #include <sys/types.h>
 #endif
 
-#include "mpt/base/check_platform.hpp"
 #include "mpt/base/detect.hpp"
+#include "mpt/main/main.hpp"
 
 #include "mpt/random/crand.hpp"
 #include "mpt/random/default_engines.hpp"
@@ -79,7 +79,6 @@ static const char * const license =
 
 #if MPT_OS_DJGPP
 #include <conio.h>
-#include <crt0.h>
 #include <dpmi.h>
 #include <fcntl.h>
 #include <io.h>
@@ -2176,37 +2175,8 @@ public:
 
 #endif
 
-#if MPT_OS_DJGPP
-/* Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=45977> */
-/* clang-format off */
-extern "C" {
-	int _crt0_startup_flags = 0
-		| _CRT0_FLAG_NONMOVE_SBRK          /* force interrupt compatible allocation */
-		| _CRT0_DISABLE_SBRK_ADDRESS_WRAP  /* force NT compatible allocation */
-		| _CRT0_FLAG_LOCK_MEMORY           /* lock all code and data at program startup */
-		| 0;
-}
-/* clang-format on */
-#endif /* MPT_OS_DJGPP */
-#if MPT_OS_WINDOWS && defined(UNICODE)
-static int wmain( int wargc, wchar_t * wargv [] ) {
-#else
-static int main( int argc, char * argv [] ) {
-#endif
-	#if MPT_OS_DJGPP
-		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY;  /* disable automatic locking for all further memory allocations */
-		assert(mpt::platform::libc().is_ok());
-	#endif /* MPT_OS_DJGPP */
-	std::vector<mpt::ustring> args;
-	#if MPT_OS_WINDOWS && defined(UNICODE)
-		for ( int arg = 0; arg < wargc; ++arg ) {
-			args.push_back( mpt::transcode<mpt::ustring>( wargv[arg] ) );
-		}
-	#else
-		for ( int arg = 0; arg < argc; ++arg ) {
-			args.push_back( mpt::transcode<mpt::ustring>( mpt::logical_encoding::locale, argv[arg] ) );
-		}
-	#endif
+
+static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
 	FILE_mode_guard stdin_utf8_guard( stdin, FILE_mode::utf8 );
 	FILE_mode_guard stdout_utf8_guard( stdout, FILE_mode::utf8 );
@@ -2455,17 +2425,5 @@ static int main( int argc, char * argv [] ) {
 
 } // namespace openmpt123
 
-#if MPT_OS_WINDOWS && defined(UNICODE)
-#if defined(__GNUC__) || (defined(__clang__) && !defined(_MSC_VER))
-// mingw64 does only default to special C linkage for "main", but not for "wmain".
-extern "C" int wmain( int wargc, wchar_t * wargv [] );
-extern "C"
-#endif
-int wmain( int wargc, wchar_t * wargv [] ) {
-	return openmpt123::wmain( wargc, wargv );
-}
-#else
-int main( int argc, char * argv [] ) {
-	return openmpt123::main( argc, argv );
-}
-#endif
+
+MPT_MAIN_IMPLEMENT_MAIN(openmpt123)

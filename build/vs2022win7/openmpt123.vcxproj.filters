@@ -37,6 +37,9 @@
     <Filter Include="src\mpt\io_file">
       <UniqueIdentifier>{D34C5655-3FD8-C319-48E9-460EB4F31F1A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\main">
+      <UniqueIdentifier>{C1DDD503-AD40-65A8-56C6-9D5E4208312B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\parse">
       <UniqueIdentifier>{B706C87E-23C7-43B5-EC01-8D3258818891}</UniqueIdentifier>
     </Filter>
@@ -293,6 +296,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_file\outputfile.hpp">
       <Filter>src\mpt\io_file</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\main\main.hpp">
+      <Filter>src\mpt\main</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp">
       <Filter>src\mpt\parse</Filter>
