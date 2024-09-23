@@ -2160,7 +2160,6 @@ public:
 			return;
 		}
 		tcgetattr( STDIN_FILENO, &saved_attributes );
-		atexit( reset_input_mode );
 		tcgetattr( STDIN_FILENO, &tattr );
 		tattr.c_lflag &= ~( ICANON | ECHO );
 		tattr.c_cc[VMIN] = 1;
