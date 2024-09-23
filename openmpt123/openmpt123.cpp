@@ -2264,10 +2264,10 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		const FILE_mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? FILE_mode::binary : FILE_mode::text;
 		const FILE_mode stdout_mode = flags.use_stdout ? FILE_mode::binary : FILE_mode::text;
 
-		[[maybe_unused]] const bool stdin_text = ( stdin_mode == FILE_mode::text );
-		[[maybe_unused]] const bool stdin_data = ( stdin_mode == FILE_mode::binary );
-		[[maybe_unused]] const bool stdout_text = ( stdout_mode == FILE_mode::text );
-		[[maybe_unused]] const bool stdout_data = ( stdout_mode == FILE_mode::binary );
+		const bool stdin_text = ( stdin_mode == FILE_mode::text );
+		const bool stdin_data = ( stdin_mode == FILE_mode::binary );
+		const bool stdout_text = ( stdout_mode == FILE_mode::text );
+		const bool stdout_data = ( stdout_mode == FILE_mode::binary );
 
 		// set stdin/stdout to binary for data input/output
 		std::optional<FILE_mode_guard> stdin_guard{ stdin_data ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::binary ) : std::nullopt };
@@ -2278,6 +2278,11 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
 		// choose text output between quiet/stdout/stderr
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : stdout_text ? static_cast<textout&>( std_out ) : static_cast<textout&>( std_err );
+
+		MPT_UNUSED( stdin_text );
+		MPT_UNUSED( stdin_data );
+		MPT_UNUSED( stdout_text );
+		MPT_UNUSED( stdout_data );
 
 		show_banner( log, flags.banner );
 
