@@ -15,7 +15,6 @@
 #include "CDecimalSupport.h"
 #include "DialogBase.h"
 #include "ResizableDialog.h"
-#include "resource.h"
 #include "../soundlib/Sndfile.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -40,7 +39,7 @@ public:
 	bool initialized = false;
 
 public:
-	CModTypeDlg(CSoundFile &sf, CWnd *parent) : DialogBase(IDD_MODDOC_MODTYPE, parent), sndFile(sf) { }
+	CModTypeDlg(CSoundFile &sf, CWnd *parent);
 	bool VerifyData();
 	void UpdateDialog();
 	void OnPTModeChanged();
@@ -74,12 +73,7 @@ protected:
 	MODTYPE m_modType;
 
 public:
-	CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehaviourSet &playBehaviour, MODTYPE modType)
-	    : ResizableDialog{IDD_LEGACY_PLAYBACK, parent}
-	    , m_playBehaviour{playBehaviour}
-	    , m_modType{modType}
-	{
-	}
+	CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehaviourSet &playBehaviour, MODTYPE modType);
 
 	PlayBehaviourSet GetPlayBehaviour() const { return m_playBehaviour; }
 
@@ -105,14 +99,7 @@ public:
 	bool m_ShowCancel;
 
 public:
-	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX toRemove, bool showCancel = true, CWnd *parent = nullptr)
-	    : DialogBase{IDD_REMOVECHANNELS, parent}
-	    , sndFile{sf}
-	    , m_bKeepMask(sf.GetNumChannels(), true)
-	    , m_nRemove{toRemove}
-	    , m_ShowCancel{showCancel}
-	{
-	}
+	CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX toRemove, bool showCancel = true, CWnd *parent = nullptr);
 
 protected:
 	//{{AFX_VIRTUAL(CRemoveChannelsDlg)
@@ -210,25 +197,25 @@ protected:
 class CSampleMapDlg : public DialogBase
 {
 protected:
-	enum MouseAction
+	enum class MouseAction
 	{
-		mouseUnknown,	// Didn't mouse-down yet
-		mouseSet,		// Set selected sample
-		mouseUnset,		// Unset (revert to original keymap)
-		mouseZero,		// Set to zero
+		Unknown,  // Didn't mouse-down yet
+		Set,      // Set selected sample
+		Unset,    // Unset (revert to original keymap)
+		Zero,     // Set to zero
 	};
 
 	CKeyboardControl m_Keyboard;
 	CComboBox m_CbnSample;
 	CSliderCtrl m_SbOctave;
+
 	CSoundFile &sndFile;
-	INSTRUMENTINDEX m_nInstrument;
+	const INSTRUMENTINDEX m_nInstrument;
 	SAMPLEINDEX KeyboardMap[NOTE_MAX];
-	MouseAction mouseAction;
+	MouseAction mouseAction = MouseAction::Unknown;
 
 public:
-	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent=NULL) : DialogBase(IDD_EDITSAMPLEMAP, parent), sndFile(sf), mouseAction(mouseUnknown)
-		{ m_nInstrument = nInstr; }
+	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent = nullptr);
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
@@ -252,8 +239,7 @@ protected:
 	CModDoc &m_modDoc;
 
 public:
-	CEditHistoryDlg(CWnd *parent, CModDoc &modDoc)
-	    : ResizableDialog(IDD_EDITHISTORY, parent), m_modDoc(modDoc) {}
+	CEditHistoryDlg(CWnd *parent, CModDoc &modDoc);
 
 protected:
 	BOOL OnInitDialog() override;
@@ -270,40 +256,27 @@ class CInputDlg : public DialogBase
 protected:
 	CNumberEdit m_edit;
 	CSpinButtonCtrl m_spin;
-	CString m_description;
-	double m_minValueDbl = 0.0, m_maxValueDbl = 0.0;
-	int32 m_minValueInt = 0, m_maxValueInt = 0;
-	int32 m_maxLength = 0;
+	const CString m_description;
+	const double m_minValueDbl = 0.0, m_maxValueDbl = 0.0;
+	const int32 m_minValueInt = 0, m_maxValueInt = 0;
+	const int32 m_maxLength = 0;
 
 public:
 	int32 resultAsInt = 0;
 	double resultAsDouble = 0.0;
 	CString resultAsString;
 
+protected:
+	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength, double minValDbl, double maxValDbl = 0.0, double defaultDbl = 0.0, int32 minValInt = 0, int32 maxValInt = 0, int32 defaultInt = 0);
+
 public:
 	// Initialize text input box
-	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : DialogBase(IDD_INPUT, parent)
-		, m_description(desc)
-		, m_maxLength(maxLength)
-		, resultAsString(defaultString)
-	{ }
+	CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength = -1) : CInputDlg{parent, desc, defaultString, maxLength, 0.0} { }
 	// Initialize numeric input box (float)
-	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : DialogBase(IDD_INPUT, parent)
-		, m_description(desc)
-		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
-		, resultAsDouble(defaultNumber)
-	{ }
-	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : DialogBase(IDD_INPUT, parent)
-		, m_description(desc)
-		, m_minValueDbl(minVal), m_maxValueDbl(maxVal)
-		, resultAsDouble(defaultNumber)
-	{ }
+	CInputDlg(CWnd *parent, const TCHAR *desc, double minVal, double maxVal, double defaultNumber) : CInputDlg{parent, desc, {}, -1, minVal, maxVal, defaultNumber} { }
+	CInputDlg(CWnd *parent, const TCHAR *desc, float minVal, float maxVal, float defaultNumber) : CInputDlg{parent, desc, {}, -1, minVal, maxVal, defaultNumber } { }
 	// Initialize numeric input box (int)
-	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : DialogBase(IDD_INPUT, parent)
-		, m_description(desc)
-		, m_minValueInt(minVal), m_maxValueInt(maxVal)
-		, resultAsInt(defaultNumber)
-	{ }
+	CInputDlg(CWnd *parent, const TCHAR *desc, int32 minVal, int32 maxVal, int32 defaultNumber) : CInputDlg{parent, desc, {}, -1, 0.0, 0.0, 0.0, minVal, maxVal, defaultNumber } { }
 
 protected:
 	void DoDataExchange(CDataExchange *pDX) override;

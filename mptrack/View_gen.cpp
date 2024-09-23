@@ -22,6 +22,7 @@
 #include "Moddoc.h"
 #include "MoveFXSlotDialog.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "SelectPluginDialog.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
@@ -168,6 +169,9 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON2,	m_BtnEdit);
 	//}}AFX_DATA_MAP
 }
+
+
+CViewGlobals::CViewGlobals() : CFormView{IDD_VIEW_GLOBALS} { }
 
 
 CModDoc* CViewGlobals::GetDocument() const { return static_cast<CModDoc *>(m_pDocument); }

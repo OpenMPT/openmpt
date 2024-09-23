@@ -18,6 +18,7 @@
 #include "Mptrack.h"
 #include "ProgressDialog.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../common/misc_util.h"

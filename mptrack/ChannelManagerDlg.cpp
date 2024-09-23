@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "MPTrackUtil.h"
+#include "resource.h"
 #include "UpdateHints.h"
 #include "../common/mptStringBuffer.h"
 

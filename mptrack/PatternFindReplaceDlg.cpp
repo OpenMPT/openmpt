@@ -14,6 +14,7 @@
 #include "DialogBase.h"
 #include "Mptrack.h"
 #include "PatternFindReplace.h"
+#include "resource.h"
 #include "View_pat.h"
 #include "mpt/parse/parse.hpp"
 
@@ -723,6 +724,13 @@ void CFindReplaceTab::OnInstrChanged()
 }
 
 
+void CFindReplaceTab::OnVolCmdChanged()
+{
+	CheckOnChange(IDC_CHECK3);
+	UpdateVolumeList();
+};
+
+
 void CFindReplaceTab::RelativeOrMultiplyPrompt(CComboBox &comboBox, FindReplace::ReplaceMode &action, int &value, int range, bool isHex)
 {
 	int sel = comboBox.GetCurSel();
@@ -837,6 +845,13 @@ void CFindReplaceTab::OnVolumeChanged()
 }
 
 
+void CFindReplaceTab::OnEffectChanged()
+{
+	CheckOnChange(IDC_CHECK5);
+	UpdateParamList();
+};
+
+
 void CFindReplaceTab::OnParamChanged()
 {
 	CheckOnChange(IDC_CHECK6);
@@ -911,6 +926,21 @@ void CFindReplaceTab::OnPCParamChanged()
 		}
 	}
 }
+
+
+void CFindReplaceTab::OnCheckNote() { CheckReplace(IDC_CHECK1); };
+void CFindReplaceTab::OnCheckInstr() { CheckReplace(IDC_CHECK2); };
+void CFindReplaceTab::OnCheckVolCmd() { CheckReplace(IDC_CHECK3); };
+void CFindReplaceTab::OnCheckVolume() { CheckReplace(IDC_CHECK4); };
+void CFindReplaceTab::OnCheckEffect() { CheckReplace(IDC_CHECK5); };
+void CFindReplaceTab::OnCheckParam() { CheckReplace(IDC_CHECK6); };
+
+
+void CFindReplaceTab::CheckReplace(int nIDButton)
+{
+	if(m_isReplaceTab && IsDlgButtonChecked(nIDButton))
+		CheckDlgButton(IDC_CHECK7, BST_CHECKED);
+};
 
 
 void CFindReplaceTab::OnCheckChannelSearch()

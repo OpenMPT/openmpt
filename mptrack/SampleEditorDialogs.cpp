@@ -162,6 +162,20 @@ void CAmpDlg::OnOK()
 }
 
 
+void CAmpDlg::EnableFadeIn()
+{
+	if(!m_locked)
+		CheckDlgButton(IDC_CHECK1, BST_CHECKED);
+}
+
+
+void CAmpDlg::EnableFadeOut()
+{
+	if(!m_locked)
+		CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+}
+
+
 //////////////////////////////////////////////////////////////
 // Sample import dialog
 
@@ -181,6 +195,13 @@ void CRawSampleDlg::DoDataExchange(CDataExchange *pDX)
 	//{{AFX_DATA_MAP(CRawSampleDlg)
 	DDX_Control(pDX, IDC_SPIN1, m_SpinOffset);
 	//}}AFX_DATA_MAP
+}
+
+
+CRawSampleDlg::CRawSampleDlg(FileReader &file, CWnd *parent)
+	: DialogBase{IDD_LOADRAWSAMPLE, parent}
+	, m_file{file}
+{
 }
 
 
@@ -579,9 +600,17 @@ void CSampleGridDlg::DoDataExchange(CDataExchange* pDX)
 {
 	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CSampleGridDlg)
-	DDX_Control(pDX, IDC_EDIT1,			m_EditSegments);
-	DDX_Control(pDX, IDC_SPIN1,			m_SpinSegments);
+	DDX_Control(pDX, IDC_EDIT1, m_EditSegments);
+	DDX_Control(pDX, IDC_SPIN1, m_SpinSegments);
 	//}}AFX_DATA_MAP
+}
+
+
+CSampleGridDlg::CSampleGridDlg(CWnd* parent, SmpLength nSegments, SmpLength nMaxSegments)
+	: DialogBase{IDD_SAMPLE_GRID_SIZE, parent}
+	, m_nSegments{nSegments}
+	, m_nMaxSegments{nMaxSegments}
+{
 }
 
 
@@ -613,9 +642,9 @@ bool CSampleXFadeDlg::m_useSustainLoop = false;
 
 BEGIN_MESSAGE_MAP(CSampleXFadeDlg, DialogBase)
 	ON_WM_HSCROLL()
-	ON_COMMAND(IDC_RADIO1,	&CSampleXFadeDlg::OnLoopTypeChanged)
-	ON_COMMAND(IDC_RADIO2,	&CSampleXFadeDlg::OnLoopTypeChanged)
-	ON_EN_CHANGE(IDC_EDIT1,	&CSampleXFadeDlg::OnFadeLengthChanged)
+	ON_COMMAND(IDC_RADIO1,  &CSampleXFadeDlg::OnLoopTypeChanged)
+	ON_COMMAND(IDC_RADIO2,  &CSampleXFadeDlg::OnLoopTypeChanged)
+	ON_EN_CHANGE(IDC_EDIT1, &CSampleXFadeDlg::OnFadeLengthChanged)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CSampleXFadeDlg::OnToolTipText)
 END_MESSAGE_MAP()
 
@@ -633,6 +662,12 @@ void CSampleXFadeDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
+
+CSampleXFadeDlg::CSampleXFadeDlg(CWnd *parent, ModSample &sample)
+	: DialogBase{IDD_SAMPLE_XFADE, parent}
+	, m_sample{sample}
+{
+}
 
 BOOL CSampleXFadeDlg::OnInitDialog()
 {
@@ -761,6 +796,16 @@ BEGIN_MESSAGE_MAP(CResamplingDlg, DialogBase)
 	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
 END_MESSAGE_MAP()
 
+
+CResamplingDlg::CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll)
+	: DialogBase{IDD_RESAMPLE, parent}
+	, m_srcMode{srcMode}
+	, m_frequency{frequency}
+	, m_resampleAll{resampleAll}
+{
+}
+
+
 BOOL CResamplingDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
@@ -841,6 +886,12 @@ void CResamplingDlg::OnOK()
 	m_updatePatterns = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
 	DialogBase::OnOK();
+}
+
+
+void CResamplingDlg::OnFocusEdit()
+{
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3);
 }
 
 

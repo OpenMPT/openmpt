@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "resource.h"
+#include "openmpt/all/BuildSettings.hpp"
+
 #include "TrackerSettings.h"
 #include "../sounddsp/EQ.h"
-#include "openmpt/all/BuildSettings.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -111,9 +111,7 @@ protected:
 	bool m_initialized = false;
 
 public:
-	COptionsMixer()
-		: CPropertyPage(IDD_OPTIONS_MIXER)
-	{}
+	COptionsMixer();
 
 protected:
 	void UpdateRamping();
@@ -145,7 +143,7 @@ public:
 	UINT m_nSliderNo;
 	short int m_x, m_y;
 public:
-	CEQSlider() {}
+	CEQSlider() = default;
 	void Init(UINT nID, UINT n, CWnd *parent);
 	BOOL PreTranslateMessage(MSG *pMsg);
 };
@@ -169,11 +167,7 @@ protected:
 #endif // !NO_EQ
 
 public:
-	COptionsPlayer() : CPropertyPage(IDD_OPTIONS_PLAYER)
-#ifndef NO_EQ
-		, m_EQPreset(TrackerSettings::Instance().m_EqSettings)
-#endif
-	{ }
+	COptionsPlayer();
 
 protected:
 	BOOL OnInitDialog() override;
@@ -185,10 +179,10 @@ protected:
 
 #ifndef NO_EQ
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnEqUser1()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[0]); };
-	afx_msg void OnEqUser2()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[1]); };
-	afx_msg void OnEqUser3()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[2]); };
-	afx_msg void OnEqUser4()	{ LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[3]); };
+	afx_msg void OnEqUser1() { LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[0]); };
+	afx_msg void OnEqUser2() { LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[1]); };
+	afx_msg void OnEqUser3() { LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[2]); };
+	afx_msg void OnEqUser4() { LoadEQPreset(TrackerSettings::Instance().m_EqUserPresets[3]); };
 	afx_msg void OnSavePreset();
 	afx_msg void OnSliderMenu(UINT);
 	afx_msg void OnSliderFreq(UINT);
@@ -213,11 +207,7 @@ protected:
 	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize;
 
 public:
-	CMidiSetupDlg(DWORD d, UINT n)
-		: CPropertyPage(IDD_OPTIONS_MIDI)
-		, m_dwMidiSetup(d)
-		, m_nMidiDevice(n)
-		{ }
+	CMidiSetupDlg(DWORD flags, UINT device);
 
 protected:
 	BOOL OnInitDialog() override;

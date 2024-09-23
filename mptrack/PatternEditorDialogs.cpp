@@ -16,6 +16,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TempoSwingDialog.h"
 #include "View_pat.h"
 #include "WindowMessages.h"
@@ -130,6 +131,15 @@ BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, DialogBase)
 	ON_COMMAND(IDC_CHECK1,			&CPatternPropertiesDlg::OnOverrideSignature)
 	ON_COMMAND(IDC_BUTTON1,			&CPatternPropertiesDlg::OnTempoSwing)
 END_MESSAGE_MAP()
+
+
+CPatternPropertiesDlg::CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent)
+	: DialogBase{IDD_PATTERN_PROPERTIES, parent}
+	, modDoc{modParent}
+	, m_nPattern{nPat}
+{
+}
+
 
 BOOL CPatternPropertiesDlg::OnInitDialog()
 {
@@ -1156,6 +1166,14 @@ void CSplitKeyboardSettings::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_COMBO_OCTAVEMODIFIER,  m_CbnOctaveModifier);
 	DDX_Control(pDX, IDC_COMBO_SPLITVOLUME,     m_CbnSplitVolume);
 	//}}AFX_DATA_MAP
+}
+
+
+CSplitKeyboardSettings::CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings)
+	: DialogBase{IDD_KEYBOARD_SPLIT, parent}
+	, sndFile{sf}
+	, m_Settings{settings}
+{
 }
 
 

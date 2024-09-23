@@ -17,6 +17,7 @@
 #include "Mpdlgs.h"
 #include "Mptrack.h"
 #include "PatternClipboard.h"
+#include "resource.h"
 #include "TuningDialog.h"
 #include "UpdateCheck.h"
 #include "../common/ComponentManager.h"

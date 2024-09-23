@@ -14,7 +14,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 #include "ColorPickerButton.h"
 #include "PluginComboBox.h"
-#include "resource.h"
 #include "UpdateHints.h"
 #include "WindowMessages.h"
 #include "../soundlib/plugins/PluginStructs.h"
@@ -56,7 +55,7 @@ protected:
 	enum {AdjustPattern = true, NoPatternAdjust = false};
 
 protected:
-	CViewGlobals() : CFormView(IDD_VIEW_GLOBALS) { }
+	CViewGlobals();
 	DECLARE_SERIAL(CViewGlobals)
 
 public:

@@ -16,6 +16,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TempoSwingDialog.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
@@ -65,6 +66,13 @@ void CModTypeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK_AMIGALIMITS,	m_CheckBoxAmigaLimits);
 
 	//}}AFX_DATA_MAP
+}
+
+
+CModTypeDlg::CModTypeDlg(CSoundFile &sf, CWnd *parent)
+	: DialogBase{IDD_MODDOC_MODTYPE, parent}
+	, sndFile{sf}
+{
 }
 
 
@@ -526,6 +534,14 @@ void CLegacyPlaybackSettingsDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
+CLegacyPlaybackSettingsDlg::CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehaviourSet &playBehaviour, MODTYPE modType)
+	: ResizableDialog{IDD_LEGACY_PLAYBACK, parent}
+	, m_playBehaviour{playBehaviour}
+	, m_modType{modType}
+{
+}
+
+
 BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 {
 	ResizableDialog::OnInitDialog();
@@ -749,6 +765,15 @@ BEGIN_MESSAGE_MAP(CRemoveChannelsDlg, DialogBase)
 	ON_LBN_SELCHANGE(IDC_REMCHANSLIST,		&CRemoveChannelsDlg::OnChannelChanged)
 END_MESSAGE_MAP()
 
+
+CRemoveChannelsDlg::CRemoveChannelsDlg(CSoundFile &sf, CHANNELINDEX toRemove, bool showCancel, CWnd *parent)
+	: DialogBase{IDD_REMOVECHANNELS, parent}
+	, sndFile{sf}
+	, m_bKeepMask(sf.GetNumChannels(), true)
+	, m_nRemove{toRemove}
+	, m_ShowCancel{showCancel}
+{
+}
 
 
 BOOL CRemoveChannelsDlg::OnInitDialog()
@@ -1122,6 +1147,14 @@ void CSampleMapDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
+CSampleMapDlg::CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent)
+	: DialogBase{IDD_EDITSAMPLEMAP, parent}
+	, sndFile{sf}
+	, m_nInstrument{nInstr}
+{
+}
+
+
 BOOL CSampleMapDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
@@ -1243,39 +1276,37 @@ LRESULT CSampleMapDlg::OnKeyboardNotify(WPARAM wParam, LPARAM lParam)
 		{
 			const uint32 note = static_cast<uint32>(baseOctave * 12 + lParam);
 
-			if(mouseAction == mouseUnknown)
+			if(mouseAction == MouseAction::Unknown)
 			{
 				// Mouse down -> decide if we are going to set or remove notes
-				mouseAction = mouseSet;
+				mouseAction = MouseAction::Set;
 				if(KeyboardMap[note] == sample)
 				{
-					mouseAction = (KeyboardMap[note] == pIns->Keyboard[note]) ? mouseZero : mouseUnset;
+					mouseAction = (KeyboardMap[note] == pIns->Keyboard[note]) ? MouseAction::Zero : MouseAction::Unset;
 				}
 			}
 
 			switch(mouseAction)
 			{
-			case mouseUnknown:
-			case mouseSet:
+			case MouseAction::Unknown:
+			case MouseAction::Set:
 				KeyboardMap[note] = sample;
 				break;
-			case mouseUnset:
+			case MouseAction::Unset:
 				KeyboardMap[note] = pIns->Keyboard[note];
 				break;
-			case mouseZero:
+			case MouseAction::Zero:
 				if(KeyboardMap[note] == sample)
-				{
 					KeyboardMap[note] = 0;
-				}
 				break;
 			}
 			OnUpdateKeyboard();
 		}
 	}
+	
 	if(wParam == KBDNOTIFY_LBUTTONUP)
-	{
-		mouseAction = mouseUnknown;
-	}
+		mouseAction = MouseAction::Unknown;
+	
 	SetDlgItemText(IDC_TEXT2, s);
 	return 0;
 }
@@ -1311,6 +1342,13 @@ void CSampleMapDlg::OnOK()
 BEGIN_MESSAGE_MAP(CEditHistoryDlg, ResizableDialog)
 	ON_COMMAND(IDC_BTN_CLEAR,	&CEditHistoryDlg::OnClearHistory)
 END_MESSAGE_MAP()
+
+
+CEditHistoryDlg::CEditHistoryDlg(CWnd *parent, CModDoc &modDoc)
+	: ResizableDialog{IDD_EDITHISTORY, parent}
+	, m_modDoc{modDoc}
+{
+}
 
 
 BOOL CEditHistoryDlg::OnInitDialog()
@@ -1388,6 +1426,21 @@ void CInputDlg::DoDataExchange(CDataExchange* pDX)
 		DDX_Control(pDX, IDC_EDIT1, m_edit);
 	}
 	DDX_Control(pDX, IDC_SPIN1, m_spin);
+}
+
+
+CInputDlg::CInputDlg(CWnd *parent, const TCHAR *desc, const TCHAR *defaultString, int32 maxLength, double minValDbl, double maxValDbl, double defaultDbl, int32 minValInt, int32 maxValInt, int32 defaultInt)
+	: DialogBase{IDD_INPUT, parent}
+	, m_description{desc}
+	, m_minValueDbl{minValDbl}
+	, m_maxValueDbl{maxValDbl}
+	, m_minValueInt{minValInt}
+	, m_maxValueInt{maxValInt}
+	, m_maxLength{maxLength}
+	, resultAsInt{defaultInt}
+	, resultAsDouble{defaultDbl}
+	, resultAsString{defaultString}
+{
 }
 
 

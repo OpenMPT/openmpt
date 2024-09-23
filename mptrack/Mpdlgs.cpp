@@ -17,6 +17,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "Sndfile.h"
 #include "WindowMessages.h"
 #include "../common/Dither.h"
@@ -1025,6 +1026,10 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 }
 
 
+COptionsMixer::COptionsMixer() : CPropertyPage{IDD_OPTIONS_MIXER} {}
+
+
+
 BOOL COptionsMixer::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
@@ -1327,25 +1332,25 @@ BEGIN_MESSAGE_MAP(COptionsPlayer, CPropertyPage)
 #ifndef NO_EQ
 	// EQ
 	ON_WM_VSCROLL()
-	ON_COMMAND(IDC_CHECK3,	&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON1,	&COptionsPlayer::OnEqUser1)
-	ON_COMMAND(IDC_BUTTON2,	&COptionsPlayer::OnEqUser2)
-	ON_COMMAND(IDC_BUTTON3,	&COptionsPlayer::OnEqUser3)
-	ON_COMMAND(IDC_BUTTON4,	&COptionsPlayer::OnEqUser4)
-	ON_COMMAND(IDC_BUTTON5,	&COptionsPlayer::OnSavePreset)
-	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS,	&COptionsPlayer::OnSliderMenu)
-	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS,		&COptionsPlayer::OnSliderFreq)
+	ON_COMMAND(IDC_CHECK3,  &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1, &COptionsPlayer::OnEqUser1)
+	ON_COMMAND(IDC_BUTTON2, &COptionsPlayer::OnEqUser2)
+	ON_COMMAND(IDC_BUTTON3, &COptionsPlayer::OnEqUser3)
+	ON_COMMAND(IDC_BUTTON4, &COptionsPlayer::OnEqUser4)
+	ON_COMMAND(IDC_BUTTON5, &COptionsPlayer::OnSavePreset)
+	ON_COMMAND_RANGE(ID_EQSLIDER_BASE, ID_EQSLIDER_BASE + MAX_EQ_BANDS, &COptionsPlayer::OnSliderMenu)
+	ON_COMMAND_RANGE(ID_EQMENU_BASE, ID_EQMENU_BASE + EQ_MAX_FREQS,     &COptionsPlayer::OnSliderFreq)
 #endif // !NO_EQ
 
 	// DSP
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COMBO2,	&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK1,			&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,			&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,			&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK5,			&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK6,			&COptionsPlayer::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK7,			&COptionsPlayer::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2, &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,       &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,       &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,       &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK5,       &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK6,       &COptionsPlayer::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK7,       &COptionsPlayer::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -1361,6 +1366,14 @@ void COptionsPlayer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER6,		m_SbSurroundDelay);
 	DDX_Control(pDX, IDC_SLIDER4,		m_SbBitCrushBits);
 	//}}AFX_DATA_MAP
+}
+
+
+COptionsPlayer::COptionsPlayer() : CPropertyPage{IDD_OPTIONS_PLAYER}
+#ifndef NO_EQ
+	, m_EQPreset(TrackerSettings::Instance().m_EqSettings)
+#endif
+{
 }
 
 
@@ -1722,6 +1735,14 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
 	DDX_Control(pDX, IDC_COMBO3,	m_Quantize);
 	//}}AFX_DATA_MAP
+}
+
+
+CMidiSetupDlg::CMidiSetupDlg(DWORD flags, UINT device)
+	: CPropertyPage{IDD_OPTIONS_MIDI}
+	, m_dwMidiSetup{flags}
+	, m_nMidiDevice{device}
+{
 }
 
 

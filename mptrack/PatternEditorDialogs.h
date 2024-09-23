@@ -13,13 +13,12 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "DialogBase.h"
-#include "dlg_misc.h"	// for keyboard control
+#include "dlg_misc.h"  // for keyboard control
 #include "ColorPickerButton.h"
 #include "EffectInfo.h"
 #include "PatternCursor.h"
 #include "PluginComboBox.h"
 #include "ResizableDialog.h"
-#include "resource.h"
 #include "TrackerSettings.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,11 +34,7 @@ protected:
 	PATTERNINDEX m_nPattern;
 
 public:
-	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent=NULL)
-		: DialogBase(IDD_PATTERN_PROPERTIES, parent)
-		, modDoc(modParent)
-		, m_nPattern(nPat)
-	{ }
+	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent = nullptr);
 
 protected:
 	BOOL OnInitDialog() override;
@@ -158,7 +153,7 @@ protected:
 public:
 	SplitKeyboardSettings &m_Settings;
 
-	CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings) : DialogBase(IDD_KEYBOARD_SPLIT, parent), sndFile(sf), m_Settings(settings) { }
+	CSplitKeyboardSettings(CWnd *parent, CSoundFile &sf, SplitKeyboardSettings &settings);
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
