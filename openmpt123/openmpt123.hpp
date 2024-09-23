@@ -194,12 +194,12 @@ public:
 class textout_dummy : public textout {
 public:
 	textout_dummy() = default;
-	~textout_dummy() final = default;
+	~textout_dummy() override = default;
 public:
-	void writeout() final {
+	void writeout() override {
 		static_cast<void>( pop() );
 	}
-	void cursor_up( std::size_t lines ) final {
+	void cursor_up( std::size_t lines ) override {
 		static_cast<void>( lines );
 	}
 };
@@ -241,9 +241,9 @@ public:
 		#endif
 		return;
 	}
-	~textout_ostream() final = default;
+	~textout_ostream() override = default;
 public:
-	void write( const mpt::ustring & text ) final {
+	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
 			#if MPT_OS_DJGPP
 				s << mpt::transcode<std::string>( codepage, text );
@@ -255,7 +255,7 @@ public:
 			s.flush();
 		}	
 	}
-	void cursor_up( std::size_t lines ) final {
+	void cursor_up( std::size_t lines ) override {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
 			s << std::string("\x1b[1A");
@@ -274,15 +274,15 @@ public:
 	{
 		return;
 	}
-	~textout_wostream() final = default;
+	~textout_wostream() override = default;
 public:
-	void write( const mpt::ustring & text ) final {
+	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
 			s << mpt::transcode<std::wstring>( text );
 			s.flush();
 		}	
 	}
-	void cursor_up( std::size_t lines ) final {
+	void cursor_up( std::size_t lines ) override {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
 			s << std::wstring(L"\x1b[1A");
@@ -315,9 +315,9 @@ public:
 	{
 		return;
 	}
-	~textout_ostream_console() final = default;
+	~textout_ostream_console() override = default;
 public:
-	void write( const mpt::ustring & text ) final {
+	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				DWORD chars_written = 0;
@@ -338,7 +338,7 @@ public:
 			}
 		}
 	}
-	void cursor_up( std::size_t lines ) final {
+	void cursor_up( std::size_t lines ) override {
 		if ( console ) {
 			s.flush();
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -378,12 +378,12 @@ private:
 #endif
 public:
 	textout_wrapper() = default;
-	~textout_wrapper() final = default;
+	~textout_wrapper() override = default;
 public:
-	void writeout() final {
+	void writeout() override {
 		out.write( pop() );
 	}
-	void cursor_up(std::size_t lines) final {
+	void cursor_up(std::size_t lines) override {
 		out.cursor_up( lines );
 	}
 };
