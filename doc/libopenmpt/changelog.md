@@ -20,7 +20,7 @@ is just a high-level summary.
     ticks per row.
  *  MED: Allow tempo parameters < 32 BPM.
  *  MED: Disallow free panning if hardware mixing is enabled.
- *  For MOD-style vibrato, a speed parameter of 0 was not treated as effect
+ *  MED: For MOD-style vibrato, a speed parameter of 0 was not treated as effect
     memory. Vibrato speed is now correct for both vibrato commands.
  *  MED: Fix pattern index exhaustion in modules with multiple subsongs.
  *  OKT: Don't drop global commands when setting paired channel volume, and try
