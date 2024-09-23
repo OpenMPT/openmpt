@@ -547,24 +547,17 @@ LRESULT CALLBACK CMainFrame::FocusChangeProc(int code, WPARAM wParam, LPARAM lPa
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
+	// Right-click menu to disable/enable tree view and main toolbar when right-clicking on either the menu strip or main toolbar
 	if((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
 	{
-		CWnd* pWnd = CWnd::FromHandlePermanent(pMsg->hwnd);
-		CControlBar* pBar = NULL;
-		HWND hwnd = (pWnd) ? pWnd->m_hWnd : NULL;
-
-		if ((hwnd) && (pMsg->message == WM_RBUTTONDOWN)) pBar = DYNAMIC_DOWNCAST(CControlBar, pWnd);
-		if ((pBar != NULL) || ((pMsg->message == WM_NCRBUTTONDOWN) && (pMsg->wParam == HTMENU)))
+		CControlBar *pBar = nullptr;
+		if(CWnd *pWnd = CWnd::FromHandlePermanent(pMsg->hwnd); pWnd && (pMsg->message == WM_RBUTTONDOWN))
+			pBar = dynamic_cast<CControlBar *>(pWnd);
+		if(pBar != nullptr || (pMsg->message == WM_NCRBUTTONDOWN && pMsg->wParam == HTMENU))
 		{
-			CMenu Menu;
 			CPoint pt;
-
 			GetCursorPos(&pt);
-			if (Menu.LoadMenu(IDR_TOOLBARS))
-			{
-				CMenu* pSubMenu = Menu.GetSubMenu(0);
-				if (pSubMenu!=NULL) pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,pt.x,pt.y,this);
-			}
+			ShowToolbarMenu(pt);
 		}
 	}
 
@@ -2468,13 +2461,19 @@ BOOL CMainFrame::OnInternetLink(UINT nID)
 
 void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 {
-	CMenu Menu;
 	ClientToScreen(&pt);
-	if (Menu.LoadMenu(IDR_TOOLBARS))
-	{
-		CMenu *pSubMenu = Menu.GetSubMenu(0);
-		if (pSubMenu != nullptr) pSubMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, this);
-	}
+	ShowToolbarMenu(pt);
+}
+
+
+void CMainFrame::ShowToolbarMenu(CPoint screenPt)
+{
+	CMenu menu;
+	if(!menu.CreatePopupMenu())
+		return;
+	menu.AppendMenu(MF_STRING, ID_VIEW_TOOLBAR, m_InputHandler->GetMenuText(ID_VIEW_TOOLBAR));
+	menu.AppendMenu(MF_STRING, IDD_TREEVIEW, m_InputHandler->GetMenuText(IDD_TREEVIEW));
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, screenPt.x, screenPt.y, this);
 }
 
 
@@ -2485,19 +2484,23 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewTree: OnBarCheck(IDD_TREEVIEW); break;
 		case kcViewOptions: OnViewOptions(); break;
 		case kcViewMain: OnBarCheck(ID_VIEW_TOOLBAR); break;
-	 	case kcFileImportMidiLib: OnImportMidiLib(); break;
+		case kcFileImportMidiLib: OnImportMidiLib(); break;
 		case kcFileAddSoundBank: OnAddDlsBank(); break;
-		case kcPauseSong:	OnPlayerPause(); break;
-		case kcPrevOctave:	OnPrevOctave(); break;
-		case kcNextOctave:	OnNextOctave(); break;
-		case kcFileNew:		theApp.OnFileNew(); break;
-		case kcFileOpen:	theApp.OnFileOpen(); break;
-		case kcMidiRecord:	OnMidiRecord(); break;
-		case kcHelp: 		OnHelp(); break;
+		case kcPauseSong: OnPlayerPause(); break;
+		case kcPrevOctave: OnPrevOctave(); break;
+		case kcNextOctave: OnNextOctave(); break;
+		case kcFileNew: theApp.OnFileNew(); break;
+		case kcFileOpen: theApp.OnFileOpen(); break;
+		case kcMidiRecord: OnMidiRecord(); break;
+		case kcHelp: OnHelp(); break;
 		case kcViewAddPlugin: OnPluginManager(); break;
-		case kcNextDocument:	MDINext(); break;
-		case kcPrevDocument:	MDIPrev(); break;
-		case kcFileCloseAll:	theApp.OnFileCloseAll(); break;
+		case kcNextDocument: MDINext(); break;
+		case kcPrevDocument: MDIPrev(); break;
+		case kcFileCloseAll:
+			if(GetActiveWindow() != this)
+				return kcNull;
+			theApp.OnFileCloseAll();
+			break;
 
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
