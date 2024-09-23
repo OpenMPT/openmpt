@@ -85,6 +85,7 @@ namespace main {
 
 #if MPT_OS_WINDOWS && (MPT_COMPILER_GCC || MPT_COMPILER_CLANG)
 #if defined(UNICODE)
+// mingw64 does only default to special C linkage for "main", but not for "wmain".
 #define MPT_MAIN_DECL extern "C" int wmain(int argc, wchar_t * argv[]);
 #endif
 #endif
