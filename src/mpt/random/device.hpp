@@ -20,6 +20,7 @@
 #include "mpt/random/random.hpp"
 
 #include <chrono>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <random>
