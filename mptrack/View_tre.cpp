@@ -25,6 +25,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../common/FileReader.h"

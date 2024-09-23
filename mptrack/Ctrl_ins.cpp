@@ -21,6 +21,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "SelectPluginDialog.h"
 #include "TrackerSettings.h"
 #include "TuningDialog.h"

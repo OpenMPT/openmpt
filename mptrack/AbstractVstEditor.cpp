@@ -18,6 +18,7 @@
 #include "Mainfrm.h"
 #include "Mptrack.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "VstPresets.h"
 #include "Vstplug.h"
 #include "../common/FileReader.h"

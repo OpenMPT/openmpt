@@ -16,6 +16,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "view_com.h"
 #include "../soundlib/mod_specifications.h"

@@ -27,6 +27,7 @@
 #include "ModDocTemplate.h"
 #include "Mpdlgs.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "openmpt/streamencoder/StreamEncoderAU.hpp"
 #include "openmpt/streamencoder/StreamEncoderFLAC.hpp"
 #include "openmpt/streamencoder/StreamEncoderMP3.hpp"

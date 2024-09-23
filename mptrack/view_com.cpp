@@ -21,6 +21,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "resource.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
@@ -615,6 +616,11 @@ void CViewComments::OnSize(UINT nType, int cx, int cy)
 		RecalcLayout();
 	}
 }
+
+
+void CViewComments::OnShowSamples() { SwitchToList(IDC_LIST_SAMPLES); }
+void CViewComments::OnShowInstruments() { SwitchToList(IDC_LIST_INSTRUMENTS); }
+void CViewComments::OnShowPatterns() { SwitchToList(IDC_LIST_PATTERNS); }
 
 
 bool CViewComments::SwitchToList(int list)

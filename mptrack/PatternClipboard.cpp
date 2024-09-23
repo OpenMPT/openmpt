@@ -14,6 +14,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Clipboard.h"
+#include "resource.h"
 #include "View_pat.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"

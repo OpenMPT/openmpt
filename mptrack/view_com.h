@@ -54,9 +54,9 @@ protected:
 	// cppcheck-suppress duplInheritedMember
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnShowSamples() { SwitchToList(IDC_LIST_SAMPLES); }
-	afx_msg void OnShowInstruments() { SwitchToList(IDC_LIST_INSTRUMENTS); }
-	afx_msg void OnShowPatterns() { SwitchToList(IDC_LIST_PATTERNS); }
+	afx_msg void OnShowSamples();
+	afx_msg void OnShowInstruments();
+	afx_msg void OnShowPatterns();
 	afx_msg void OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
 	afx_msg void OnBeginLabelEdit(LPNMHDR pnmhdr, LRESULT *pLResult);
 	afx_msg void OnDblClickListItem(NMHDR *, LRESULT *);

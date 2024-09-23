@@ -12,7 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "DialogBase.h"
-#include "resource.h"
 #include "Settings.h"
 #include "UpdateHints.h"
 #include "WindowMessages.h"
@@ -67,16 +66,16 @@ public:
 	void ForgetLastFocusItem() { m_lastFocusItem = nullptr; }
 	void RestoreLastFocusItem();
 
-	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
-	afx_msg void OnEditCopy() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
-	afx_msg void OnEditPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }
-	afx_msg void OnEditMixPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }
-	afx_msg void OnEditMixPasteITStyle() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE_ITSTYLE, 0); }
-	afx_msg void OnEditPasteFlood() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTEFLOOD, 0); }
-	afx_msg void OnEditPushForwardPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PUSHFORWARDPASTE, 0); }
-	afx_msg void OnEditFind() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }
-	afx_msg void OnEditFindNext() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }
-	afx_msg void OnSwitchToView() { if (m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); }
+	afx_msg void OnEditCut();
+	afx_msg void OnEditCopy();
+	afx_msg void OnEditPaste();
+	afx_msg void OnEditMixPaste();
+	afx_msg void OnEditMixPasteITStyle();
+	afx_msg void OnEditPasteFlood();
+	afx_msg void OnEditPushForwardPaste();
+	afx_msg void OnEditFind();
+	afx_msg void OnEditFindNext();
+	afx_msg void OnSwitchToView();
 
 	//{{AFX_VIRTUAL(CModControlDlg)
 	void OnOK() override {}
@@ -167,14 +166,14 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnEditCut() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
-	afx_msg void OnEditCopy() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
-	afx_msg void OnEditPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }
-	afx_msg void OnEditMixPaste() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }		//rewbs.mixPaste
-	afx_msg void OnEditMixPasteITStyle() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE_ITSTYLE, 0); }
-	afx_msg void OnEditFind() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }
-	afx_msg void OnEditFindNext() { if (m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }
-	afx_msg void OnSwitchToView() { if (m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); }
+	afx_msg void OnEditCut();
+	afx_msg void OnEditCopy();
+	afx_msg void OnEditPaste();
+	afx_msg void OnEditMixPaste();
+	afx_msg void OnEditMixPasteITStyle();
+	afx_msg void OnEditFind();
+	afx_msg void OnEditFindNext();
+	afx_msg void OnSwitchToView();
 	afx_msg LRESULT OnActivateModView(WPARAM, LPARAM);
 	afx_msg LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetToolTipText(WPARAM, LPARAM);

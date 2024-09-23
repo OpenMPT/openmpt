@@ -22,6 +22,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "../soundlib/mod_specifications.h"
 
@@ -107,6 +108,18 @@ void CModControlDlg::RestoreLastFocusItem()
 {
 	OPENMPT_NAMESPACE::RestoreLastFocusItem(*this, m_lastFocusItem);
 }
+
+
+afx_msg void CModControlDlg::OnEditCut() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
+afx_msg void CModControlDlg::OnEditCopy() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
+afx_msg void CModControlDlg::OnEditPaste() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }
+afx_msg void CModControlDlg::OnEditMixPaste() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }
+afx_msg void CModControlDlg::OnEditMixPasteITStyle() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE_ITSTYLE, 0); }
+afx_msg void CModControlDlg::OnEditPasteFlood() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTEFLOOD, 0); }
+afx_msg void CModControlDlg::OnEditPushForwardPaste() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PUSHFORWARDPASTE, 0); }
+afx_msg void CModControlDlg::OnEditFind() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }
+afx_msg void CModControlDlg::OnEditFindNext() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }
+afx_msg void CModControlDlg::OnSwitchToView() { if(m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); }
 
 
 LRESULT CModControlDlg::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
@@ -512,6 +525,15 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 	}
 	return 0;
 }
+
+afx_msg void CModControlView::OnEditCut() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_CUT, 0); }
+afx_msg void CModControlView::OnEditCopy() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_COPY, 0); }
+afx_msg void CModControlView::OnEditPaste() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_PASTE, 0); }
+afx_msg void CModControlView::OnEditMixPaste() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE, 0); }
+afx_msg void CModControlView::OnEditMixPasteITStyle() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_MIXPASTE_ITSTYLE, 0); }
+afx_msg void CModControlView::OnEditFind() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FIND, 0); }
+afx_msg void CModControlView::OnEditFindNext() { if(m_hWndView) ::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_FINDNEXT, 0); }
+afx_msg void CModControlView::OnSwitchToView() { if(m_hWndView) ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETFOCUS, 0); }
 
 
 LRESULT CModControlView::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)

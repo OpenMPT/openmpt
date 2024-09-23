@@ -24,6 +24,7 @@
 #include "Mptrack.h"
 #include "OPLInstrDlg.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "SampleEditorDialogs.h"
 #include "WindowMessages.h"
 #include "../common/FileReader.h"

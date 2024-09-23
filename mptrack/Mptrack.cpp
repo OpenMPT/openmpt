@@ -28,6 +28,7 @@
 #include "MPTrackWine.h"
 #include "PlugNotFoundDlg.h"
 #include "Reporting.h"
+#include "resource.h"
 #include "TrackerSettings.h"
 #include "UpdateCheck.h"
 #include "WelcomeDialog.h"

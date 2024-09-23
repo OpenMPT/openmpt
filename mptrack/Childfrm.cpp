@@ -18,6 +18,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "resource.h"
 #include "view_com.h"
 #include "View_gen.h"
 #include "View_ins.h"
