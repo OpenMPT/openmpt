@@ -605,7 +605,7 @@ struct commandlineflags {
 			terminal_height = 25;
 		}
 #else
-		if (terminal_width <= 0) {
+		if ( terminal_width <= 0 ) {
 			terminal_width = 72;
 		}
 		if ( terminal_height <= 0 ) {
