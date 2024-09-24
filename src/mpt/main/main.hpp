@@ -176,7 +176,7 @@ inline std::vector<mpt::ustring> transcode_argv(int argc, Tchar * argv[]) {
 	MPT_MAIN_DECL \
 	MPT_MAIN_DEF_PREFIX int MPT_MAIN_NAME(int argc, MPT_MAIN_ARGV_TYPE * argv[]) { \
 		MPT_MAIN_PROLOG(); \
-		static_assert(std::is_same<decltype(ns::main), mpt::uint8(void); \
+		static_assert(std::is_same<decltype(ns::main), mpt::uint8(void)>::value); \
 		MPT_UNUSED(argc); \
 		MPT_UNUSED(argv); \
 		return static_cast<int>(ns::main()); \
