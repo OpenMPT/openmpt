@@ -2184,7 +2184,6 @@ public:
 
 static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
-	FILE_mode_guard stdin_text_guard( stdin, FILE_mode::text );
 	FILE_mode_guard stdout_text_guard( stdout, FILE_mode::text );
 	FILE_mode_guard stderr_text_guard( stderr, FILE_mode::text );
 
@@ -2276,7 +2275,8 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		[[maybe_unused]] std::optional<FILE_mode_guard> stdin_guard{ stdin_data ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::binary ) : std::nullopt };
 		[[maybe_unused]] std::optional<FILE_mode_guard> stdout_guard{ stdout_data ? std::make_optional<FILE_mode_guard>( stdout, FILE_mode::binary ) : std::nullopt };
 
-		// setup terminal
+		// setup terminal input
+		[[maybe_unused]] std::optional<FILE_mode_guard> stdin_text_guard{ stdin_text ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::text ) : std::nullopt };
 		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
 		// choose text output between quiet/stdout/stderr
