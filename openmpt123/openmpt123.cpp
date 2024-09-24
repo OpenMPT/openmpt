@@ -202,7 +202,68 @@ public:
 	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
 		impl->write( buffers, frames );
 	}
-};                                                                                                                
+};
+
+class realtime_audio_stream_raii : public write_buffers_interface {
+private:
+	std::unique_ptr<write_buffers_interface> impl;
+public:
+	realtime_audio_stream_raii( commandlineflags & flags, concat_stream<mpt::ustring> & log )
+		: impl(nullptr)
+	{
+		if constexpr ( false ) {
+			// nothing
+#if defined( MPT_WITH_PULSEAUDIO )
+		} else if ( flags.driver == MPT_USTRING("pulseaudio") || flags.driver.empty() ) {
+			impl = std::make_unique<pulseaudio_stream_raii>( flags, log );
+#endif
+#if defined( MPT_WITH_SDL2 )
+		} else if ( flags.driver == MPT_USTRING("sdl2") || flags.driver.empty() ) {
+			impl = std::make_unique<sdl2_stream_raii>( flags, log );
+#endif
+#if defined( MPT_WITH_PORTAUDIO )
+		} else if ( flags.driver == MPT_USTRING("portaudio") || flags.driver.empty() ) {
+			impl = std::make_unique<portaudio_stream_raii>( flags, log );
+#endif
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
+		} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
+			impl = std::make_unique<waveout_stream_raii>( flags );
+#endif
+#if defined( MPT_WITH_ALLEGRO42 )
+		} else if ( flags.driver == MPT_USTRING("allegro42") || flags.driver.empty() ) {
+			impl = std::make_unique<allegro42_stream_raii>( flags, log );
+#endif
+		} else if ( flags.driver.empty() ) {
+			throw exception(MPT_USTRING("openmpt123 is compiled without any audio driver"));
+		} else {
+			throw exception( MPT_USTRING("audio driver '") + flags.driver + MPT_USTRING("' not found") );
+		}
+	}
+	virtual ~realtime_audio_stream_raii() {
+		return;
+	}
+	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
+		impl->write_metadata( metadata );
+	}
+	void write_updated_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
+		impl->write_updated_metadata( metadata );
+	}
+	void write( const std::vector<float*> buffers, std::size_t frames ) override {
+		impl->write( buffers, frames );
+	}
+	void write( const std::vector<std::int16_t*> buffers, std::size_t frames ) override {
+		impl->write( buffers, frames );
+	}
+	bool unpause() override {
+		return impl->unpause();
+	}
+	bool sleep( int ms ) override {
+		return impl->sleep( ms );
+	}
+	bool is_dummy() const override {
+		return impl->is_dummy();
+	}
+};
 
 static mpt::ustring ctls_to_string( const std::map<std::string, std::string> & ctls ) {
 	mpt::ustring result;
@@ -2320,37 +2381,9 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 					flags.apply_default_buffer_sizes();
 					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream, prng );
-#if defined( MPT_WITH_PULSEAUDIO )
-				} else if ( flags.driver == MPT_USTRING("pulseaudio") || flags.driver.empty() ) {
-					pulseaudio_stream_raii pulseaudio_stream( flags, log );
-					render_files( flags, log, pulseaudio_stream, prng );
-#endif
-#if defined( MPT_WITH_SDL2 )
-				} else if ( flags.driver == MPT_USTRING("sdl2") || flags.driver.empty() ) {
-					sdl2_stream_raii sdl2_stream( flags, log );
-					render_files( flags, log, sdl2_stream, prng );
-#endif
-#if defined( MPT_WITH_PORTAUDIO )
-				} else if ( flags.driver == MPT_USTRING("portaudio") || flags.driver.empty() ) {
-					portaudio_stream_raii portaudio_stream( flags, log );
-					render_files( flags, log, portaudio_stream, prng );
-#endif
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-				} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
-					waveout_stream_raii waveout_stream( flags );
-					render_files( flags, log, waveout_stream, prng );
-#endif
-#if defined( MPT_WITH_ALLEGRO42 )
-				} else if ( flags.driver == MPT_USTRING("allegro42") || flags.driver.empty() ) {
-					allegro42_stream_raii allegro42_stream( flags, log );
-					render_files( flags, log, allegro42_stream, prng );
-#endif
 				} else {
-					if ( flags.driver.empty() ) {
-						throw exception( MPT_USTRING("openmpt123 is compiled without any audio driver") );
-					} else {
-						throw exception( MPT_USTRING("audio driver '") + flags.driver + MPT_USTRING("' not found") );
-					}
+					realtime_audio_stream_raii audio_stream( flags, log );
+					render_files( flags, log, audio_stream, prng );
 				}
 			} break;
 			case Mode::Render: {

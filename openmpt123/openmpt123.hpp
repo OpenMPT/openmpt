@@ -725,11 +725,10 @@ template < > std::int16_t convert_sample_to( float val ) {
 }
 
 class write_buffers_interface {
-protected:
+public:
 	virtual ~write_buffers_interface() {
 		return;
 	}
-public:
 	virtual void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) {
 		(void)metadata;
 		return;
