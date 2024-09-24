@@ -106,6 +106,9 @@
     <Filter Include="src\mpt\io_write">
       <UniqueIdentifier>{BE6C5801-AA65-7753-D397-5CD8BFEF565F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\main">
+      <UniqueIdentifier>{C1DDD503-AD40-65A8-56C6-9D5E4208312B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\mutex">
       <UniqueIdentifier>{8FBB9C7E-FB7B-18B5-C4B6-613230365D91}</UniqueIdentifier>
     </Filter>
@@ -929,6 +932,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp">
       <Filter>src\mpt\io_write</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\main\main.hpp">
+      <Filter>src\mpt\main</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
