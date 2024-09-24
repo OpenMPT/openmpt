@@ -2188,7 +2188,6 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 	FILE_mode_guard stdout_text_guard( stdout, FILE_mode::text );
 	FILE_mode_guard stderr_text_guard( stderr, FILE_mode::text );
 
-	textout_dummy dummy_log;
 	textout_wrapper<textout_destination::destination_stdout> std_out;
 	textout_wrapper<textout_destination::destination_stderr> std_err;
 
@@ -2281,6 +2280,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
 		// choose text output between quiet/stdout/stderr
+		textout_dummy dummy_log;
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : stdout_text ? static_cast<textout&>( std_out ) : static_cast<textout&>( std_err );
 
 		show_banner( log, flags.banner );
