@@ -463,51 +463,53 @@ enum verbosity : std::int8_t {
 };
 
 struct commandlineflags {
-	Mode mode;
-	std::int32_t ui_redraw_interval;
-	mpt::ustring driver;
-	mpt::ustring device;
-	std::int32_t buffer;
-	std::int32_t period;
-	std::int32_t samplerate;
-	std::int32_t channels;
-	std::int32_t gain;
-	std::int32_t separation;
-	std::int32_t filtertaps;
-	std::int32_t ramping; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
-	std::int32_t tempo;
-	std::int32_t pitch;
-	std::int32_t dither;
-	std::int32_t repeatcount;
-	std::int32_t subsong;
-	std::map<std::string, std::string> ctls;
-	double seek_target;
-	double end_time;
-	bool quiet;
-	verbosity banner;
-	bool verbose;
-	bool assume_terminal;
-	int terminal_width;
-	int terminal_height;
-	bool show_details;
-	bool show_message;
-	bool show_ui;
-	bool show_progress;
-	bool show_meters;
-	bool show_channel_meters;
-	bool show_pattern;
-	bool use_float;
-	bool use_stdout;
-	bool randomize;
-	bool shuffle;
-	bool restart;
-	std::size_t playlist_index;
-	std::vector<mpt::native_path> filenames;
-	mpt::native_path output_filename;
-	mpt::native_path output_extension;
-	bool force_overwrite;
-	bool paused;
-	mpt::ustring warnings;
+
+	Mode mode = Mode::UI;
+	std::int32_t ui_redraw_interval = default_high;
+	mpt::ustring driver = MPT_USTRING("");
+	mpt::ustring device = MPT_USTRING("");
+	std::int32_t buffer = default_high;
+	std::int32_t period = default_high;
+	std::int32_t samplerate = MPT_OS_DJGPP ? 44100 : 48000;
+	std::int32_t channels = 2;
+	std::int32_t gain = 0;
+	std::int32_t separation = 100;
+	std::int32_t filtertaps = 8;
+	std::int32_t ramping = -1; // ramping strength : -1:default 0:off 1 2 3 4 5 // roughly milliseconds
+	std::int32_t tempo = 0;
+	std::int32_t pitch = 0;
+	std::int32_t dither = 1;
+	std::int32_t repeatcount = 0;
+	std::int32_t subsong = -1;
+	std::map<std::string, std::string> ctls = {};
+	double seek_target = 0.0;
+	double end_time = 0.0;
+	bool quiet = false;
+	verbosity banner = verbosity_normal;
+	bool verbose = false;
+	bool assume_terminal = false;
+	int terminal_width = -1;
+	int terminal_height = -1;
+	bool show_details = true;
+	bool show_message = false;
+	bool show_ui = true;
+	bool show_progress = true;
+	bool show_meters = true;
+	bool show_channel_meters = false;
+	bool show_pattern = false;
+	bool use_float = MPT_OS_DJGPP ? false : mpt::float_traits<float>::is_hard && mpt::float_traits<float>::is_ieee754_binary;
+	bool use_stdout = false;
+	bool randomize = false;
+	bool shuffle = false;
+	bool restart = false;
+	std::size_t playlist_index = 0;
+	std::vector<mpt::native_path> filenames = {};
+	mpt::native_path output_filename = MPT_NATIVE_PATH("");
+	mpt::native_path output_extension = MPT_NATIVE_PATH("auto");
+	bool force_overwrite = false;
+	bool paused = false;
+	mpt::ustring warnings = MPT_USTRING("");
+
 	void apply_default_buffer_sizes() {
 		if ( ui_redraw_interval == default_high ) {
 			ui_redraw_interval = 50;
@@ -525,103 +527,7 @@ struct commandlineflags {
 			period = 10;
 		}
 	}
-	commandlineflags() {
-		mode = Mode::UI;
-		ui_redraw_interval = default_high;
-		driver = MPT_USTRING("");
-		device = MPT_USTRING("");
-		buffer = default_high;
-		period = default_high;
-#if MPT_OS_DJGPP
-		samplerate = 44100;
-		channels = 2;
-		use_float = false;
-#else
-		samplerate = 48000;
-		channels = 2;
-		use_float = mpt::float_traits<float>::is_hard && mpt::float_traits<float>::is_ieee754_binary;
-#endif
-		gain = 0;
-		separation = 100;
-		filtertaps = 8;
-		ramping = -1;
-		tempo = 0;
-		pitch = 0;
-		dither = 1;
-		repeatcount = 0;
-		subsong = -1;
-		seek_target = 0.0;
-		end_time = 0.0;
-		quiet = false;
-		banner = verbosity_normal;
-		verbose = false;
-		assume_terminal = false;
-#if MPT_OS_DJGPP
-		terminal_width = 80;
-		terminal_height = 25;
-#else
-		terminal_width = 72;
-		terminal_height = 23;
-#endif
-#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-		terminal_width = 72;
-		terminal_height = 23;
-		HANDLE hStdOutput = GetStdHandle( STD_OUTPUT_HANDLE );
-		if ( ( hStdOutput != NULL ) && ( hStdOutput != INVALID_HANDLE_VALUE ) ) {
-			CONSOLE_SCREEN_BUFFER_INFO csbi;
-			ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
-			if ( GetConsoleScreenBufferInfo( hStdOutput, &csbi ) != FALSE ) {
-				terminal_width = std::min( static_cast<int>( 1 + csbi.srWindow.Right - csbi.srWindow.Left ), static_cast<int>( csbi.dwSize.X ) );
-				terminal_height = std::min( static_cast<int>( 1 + csbi.srWindow.Bottom - csbi.srWindow.Top ), static_cast<int>( csbi.dwSize.Y ) );
-			}
-		}
-#else // !(MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10))
-		if ( isatty( STDERR_FILENO ) ) {
-			const char * env_columns = std::getenv( "COLUMNS" );
-			if ( env_columns ) {
-				int tmp = mpt::parse_or<int>( env_columns, 0 );
-				if ( tmp > 0 ) {
-					terminal_width = tmp;
-				}
-			}
-			const char * env_rows = std::getenv( "ROWS" );
-			if ( env_rows ) {
-				int tmp = mpt::parse_or<int>( env_rows, 0 );
-				if ( tmp > 0 ) {
-					terminal_height = tmp;
-				}
-			}
-			#if defined(TIOCGWINSZ)
-				struct winsize ts;
-				if ( ioctl( STDERR_FILENO, TIOCGWINSZ, &ts ) >= 0 ) {
-					terminal_width = ts.ws_col;
-					terminal_height = ts.ws_row;
-				}
-			#elif defined(TIOCGSIZE)
-				struct ttysize ts;
-				if ( ioctl( STDERR_FILENO, TIOCGSIZE, &ts ) >= 0 ) {
-					terminal_width = ts.ts_cols;
-					terminal_height = ts.ts_rows;
-				}
-			#endif
-		}
-#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-		show_details = true;
-		show_message = false;
-		show_ui = true;
-		show_progress = true;
-		show_meters = true;
-		show_channel_meters = false;
-		show_pattern = false;
-		use_stdout = false;
-		randomize = false;
-		shuffle = false;
-		restart = false;
-		playlist_index = 0;
-		output_extension = MPT_NATIVE_PATH("auto");
-		force_overwrite = false;
-		paused = false;
-	}
+
 	void check_and_sanitize() {
 		bool canUI = true;
 		bool canProgress = true;
@@ -634,6 +540,78 @@ struct commandlineflags {
 			canProgress = isatty( STDERR_FILENO ) ? true : false;
 #endif // MPT_OS_WINDOWS
 		}
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
+		HANDLE hStdOutput = GetStdHandle( STD_OUTPUT_HANDLE );
+		if ( ( hStdOutput != NULL ) && ( hStdOutput != INVALID_HANDLE_VALUE ) ) {
+			CONSOLE_SCREEN_BUFFER_INFO csbi;
+			ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
+			if ( GetConsoleScreenBufferInfo( hStdOutput, &csbi ) != FALSE ) {
+				if ( terminal_width <= 0 ) {
+					terminal_width = std::min( static_cast<int>( 1 + csbi.srWindow.Right - csbi.srWindow.Left ), static_cast<int>( csbi.dwSize.X ) );
+				}
+				if ( terminal_height <= 0 ) {
+					terminal_height = std::min( static_cast<int>( 1 + csbi.srWindow.Bottom - csbi.srWindow.Top ), static_cast<int>( csbi.dwSize.Y ) );
+				}
+			}
+		}
+#else // !(MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10))
+		if ( isatty( STDERR_FILENO ) ) {
+			if ( terminal_width <= 0 ) {
+				const char * env_columns = std::getenv( "COLUMNS" );
+				if ( env_columns ) {
+					int tmp = mpt::parse_or<int>( env_columns, 0 );
+					if ( tmp > 0 ) {
+						terminal_width = tmp;
+					}
+				}
+			}
+			if ( terminal_height <= 0 ) {
+				const char * env_rows = std::getenv( "ROWS" );
+				if ( env_rows ) {
+					int tmp = mpt::parse_or<int>( env_rows, 0 );
+					if ( tmp > 0 ) {
+						terminal_height = tmp;
+					}
+				}
+			}
+			#if defined(TIOCGWINSZ)
+				struct winsize ts;
+				if ( ioctl( STDERR_FILENO, TIOCGWINSZ, &ts ) >= 0 ) {
+					if ( terminal_width <= 0 ) {
+						terminal_width = ts.ws_col;
+					}
+					if ( terminal_height <= 0 ) {
+						terminal_height = ts.ws_row;
+					}
+				}
+			#elif defined(TIOCGSIZE)
+				struct ttysize ts;
+				if ( ioctl( STDERR_FILENO, TIOCGSIZE, &ts ) >= 0 ) {
+					if ( terminal_width <= 0 ) {
+						terminal_width = ts.ts_cols;
+					}
+					if ( terminal_height <= 0 ) {
+						terminal_height = ts.ts_rows;
+					}
+				}
+			#endif
+		}
+#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
+#if MPT_OS_DJGPP
+		if ( terminal_width <= 0 ) {
+			terminal_width = 80;
+		}
+		if ( terminal_height <= 0 ) {
+			terminal_height = 25;
+		}
+#else
+		if (terminal_width <= 0) {
+			terminal_width = 72;
+		}
+		if ( terminal_height <= 0 ) {
+			terminal_height = 23;
+		}
+#endif
 		if ( filenames.size() == 0 ) {
 			throw args_nofiles_exception();
 		}
@@ -732,6 +710,7 @@ struct commandlineflags {
 			output_extension = MPT_NATIVE_PATH("wav");
 		}
 	}
+
 };
 
 template < typename Tsample > Tsample convert_sample_to( float val );
