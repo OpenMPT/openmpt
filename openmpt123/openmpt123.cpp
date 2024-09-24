@@ -153,11 +153,24 @@ struct show_long_version_number_exception : public std::exception {
 constexpr auto libopenmpt_encoding = mpt::common_encoding::utf8;
 
 
-class file_audio_stream_raii : public file_audio_stream_base {
+class file_audio_stream : public file_audio_stream_base {
 private:
 	std::unique_ptr<file_audio_stream_base> impl;
 public:
-	file_audio_stream_raii( const commandlineflags & flags, const mpt::native_path & filename, concat_stream<mpt::ustring> & log )
+	static void show_versions( concat_stream<mpt::ustring> & log ) {
+#ifdef MPT_WITH_FLAC
+		log << MPT_USTRING(" FLAC ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VERSION_STRING ) << MPT_USTRING(", ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VENDOR_STRING ) << MPT_USTRING(", API ") << FLAC_API_VERSION_CURRENT << MPT_USTRING(".") << FLAC_API_VERSION_REVISION << MPT_USTRING(".") << FLAC_API_VERSION_AGE << MPT_USTRING(" <https://xiph.org/flac/>") << lf;
+#endif
+#ifdef MPT_WITH_SNDFILE
+		char sndfile_info[128];
+		std::memset( sndfile_info, 0, sizeof( sndfile_info ) );
+		sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
+		sndfile_info[127] = '\0';
+		log << MPT_USTRING(" libsndfile ") << mpt::transcode<mpt::ustring>( sndfile_encoding, sndfile_info ) << MPT_USTRING(" <http://mega-nerd.com/libsndfile/>") << lf;
+#endif
+	}
+public:
+	file_audio_stream( const commandlineflags & flags, const mpt::native_path & filename, concat_stream<mpt::ustring> & log )
 		: impl(nullptr)
 	{
 		if ( !flags.force_overwrite ) {
@@ -173,11 +186,11 @@ public:
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("wav") ) {
 			impl = std::make_unique<mmio_stream_raii>( filename, flags, log );
-#endif				
+#endif
 #ifdef MPT_WITH_FLAC
 		} else if ( flags.output_extension == MPT_NATIVE_PATH("flac") ) {
 			impl = std::make_unique<flac_stream_raii>( filename, flags, log );
-#endif				
+#endif
 #ifdef MPT_WITH_SNDFILE
 		} else {
 			impl = std::make_unique<sndfile_stream_raii>( filename, flags, log );
@@ -187,7 +200,7 @@ public:
 			throw exception( MPT_USTRING("file format handler '") + mpt::transcode<mpt::ustring>( flags.output_extension ) + MPT_USTRING("' not found") );
 		}
 	}
-	virtual ~file_audio_stream_raii() {
+	virtual ~file_audio_stream() {
 		return;
 	}
 	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
@@ -204,11 +217,74 @@ public:
 	}
 };
 
-class realtime_audio_stream_raii : public write_buffers_interface {
+class realtime_audio_stream : public write_buffers_interface {
 private:
 	std::unique_ptr<write_buffers_interface> impl;
 public:
-	realtime_audio_stream_raii( commandlineflags & flags, concat_stream<mpt::ustring> & log )
+	static void show_versions( concat_stream<mpt::ustring> & log ) {
+#ifdef MPT_WITH_SDL2
+		log << MPT_USTRING(" libSDL2 ");
+		SDL_version sdlver;
+		std::memset( &sdlver, 0, sizeof( SDL_version ) );
+		SDL_GetVersion( &sdlver );
+		log << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
+		const char * revision = SDL_GetRevision();
+		if ( revision ) {
+			log << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sdl2_encoding, revision ) << MPT_USTRING(")");
+		}
+		log << MPT_USTRING(", ");
+		std::memset( &sdlver, 0, sizeof( SDL_version ) );
+		SDL_VERSION( &sdlver );
+		log << MPT_USTRING("API: ") << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
+		log << MPT_USTRING(" <https://libsdl.org/>") << lf;
+#endif
+#ifdef MPT_WITH_PULSEAUDIO
+		log << MPT_USTRING(" ") << MPT_USTRING("libpulse, libpulse-simple") << MPT_USTRING(" (headers ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, pa_get_headers_version() ) << MPT_USTRING(", API ") << PA_API_VERSION << MPT_USTRING(", PROTOCOL ") << PA_PROTOCOL_VERSION << MPT_USTRING(", library ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) ) << MPT_USTRING(") <https://www.freedesktop.org/wiki/Software/PulseAudio/>") << lf;
+#endif
+#ifdef MPT_WITH_PORTAUDIO
+		log << MPT_USTRING(" ") << mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetVersionText() ) << MPT_USTRING(" (") << Pa_GetVersion() << MPT_USTRING(") <http://portaudio.com/>") << lf;
+#endif
+	}
+	static void show_drivers( concat_stream<mpt::ustring> & drivers ) {
+		drivers << MPT_USTRING(" Available drivers:") << lf;
+		drivers << MPT_USTRING("    default") << lf;
+#if defined( MPT_WITH_PULSEAUDIO )
+		drivers << MPT_USTRING("    pulseaudio") << lf;
+#endif
+#if defined( MPT_WITH_SDL2 )
+		drivers << MPT_USTRING("    sdl2") << lf;
+#endif
+#if defined( MPT_WITH_PORTAUDIO )
+		drivers << MPT_USTRING("    portaudio") << lf;
+#endif
+#if MPT_OS_WINDOWS
+		drivers << MPT_USTRING("    waveout") << lf;
+#endif
+#if defined( MPT_WITH_ALLEGRO42 )
+		drivers << MPT_USTRING("    allegro42") << lf;
+#endif
+	}
+	static void show_devices( concat_stream<mpt::ustring> & devices, concat_stream<mpt::ustring> & log ) {
+		devices << MPT_USTRING(" Available devices:") << lf;
+		devices << MPT_USTRING("    default: default") << lf;
+#if defined( MPT_WITH_PULSEAUDIO )
+		devices << show_pulseaudio_devices( log );
+#endif
+#if defined( MPT_WITH_SDL2 )
+		devices << show_sdl2_devices( log );
+#endif
+#if defined( MPT_WITH_PORTAUDIO )
+		devices << show_portaudio_devices( log );
+#endif
+#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
+		devices << show_waveout_devices( log );
+#endif
+#if defined( MPT_WITH_ALLEGRO42 )
+		devices << show_allegro42_devices( log );
+#endif
+	}
+public:
+	realtime_audio_stream( commandlineflags & flags, concat_stream<mpt::ustring> & log )
 		: impl(nullptr)
 	{
 		if constexpr ( false ) {
@@ -239,7 +315,7 @@ public:
 			throw exception( MPT_USTRING("audio driver '") + flags.driver + MPT_USTRING("' not found") );
 		}
 	}
-	virtual ~realtime_audio_stream_raii() {
+	virtual ~realtime_audio_stream() {
 		return;
 	}
 	void write_metadata( std::map<mpt::ustring, mpt::ustring> metadata ) override {
@@ -438,38 +514,8 @@ static void show_banner( concat_stream<mpt::ustring> & log, verbosity banner ) {
 	log << lf;
 	log << MPT_USTRING("  libopenmpt compiler: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "build_compiler" ) ) << lf;
 	log << MPT_USTRING("  libopenmpt features: ") << mpt::transcode<mpt::ustring>( libopenmpt_encoding, openmpt::string::get( "library_features" ) ) << lf;
-#ifdef MPT_WITH_SDL2
-	log << MPT_USTRING(" libSDL2 ");
-	SDL_version sdlver;
-	std::memset( &sdlver, 0, sizeof( SDL_version ) );
-	SDL_GetVersion( &sdlver );
-	log << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
-	const char * revision = SDL_GetRevision();
-	if ( revision ) {
-		log << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sdl2_encoding, revision ) << MPT_USTRING(")");
-	}
-	log << MPT_USTRING(", ");
-	std::memset( &sdlver, 0, sizeof( SDL_version ) );
-	SDL_VERSION( &sdlver );
-	log << MPT_USTRING("API: ") << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
-	log << MPT_USTRING(" <https://libsdl.org/>") << lf;
-#endif
-#ifdef MPT_WITH_PULSEAUDIO
-	log << MPT_USTRING(" ") << MPT_USTRING("libpulse, libpulse-simple") << MPT_USTRING(" (headers ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, pa_get_headers_version() ) << MPT_USTRING(", API ") << PA_API_VERSION << MPT_USTRING(", PROTOCOL ") << PA_PROTOCOL_VERSION << MPT_USTRING(", library ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) ) << MPT_USTRING(") <https://www.freedesktop.org/wiki/Software/PulseAudio/>") << lf;
-#endif
-#ifdef MPT_WITH_PORTAUDIO
-	log << MPT_USTRING(" ") << mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetVersionText() ) << MPT_USTRING(" (") << Pa_GetVersion() << MPT_USTRING(") <http://portaudio.com/>") << lf;
-#endif
-#ifdef MPT_WITH_FLAC
-	log << MPT_USTRING(" FLAC ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VERSION_STRING ) << MPT_USTRING(", ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VENDOR_STRING ) << MPT_USTRING(", API ") << FLAC_API_VERSION_CURRENT << MPT_USTRING(".") << FLAC_API_VERSION_REVISION << MPT_USTRING(".") << FLAC_API_VERSION_AGE << MPT_USTRING(" <https://xiph.org/flac/>") << lf;
-#endif
-#ifdef MPT_WITH_SNDFILE
-	char sndfile_info[128];
-	std::memset( sndfile_info, 0, sizeof( sndfile_info ) );
-	sf_command( 0, SFC_GET_LIB_VERSION, sndfile_info, sizeof( sndfile_info ) );
-	sndfile_info[127] = '\0';
-	log << MPT_USTRING(" libsndfile ") << mpt::transcode<mpt::ustring>( sndfile_encoding, sndfile_info ) << MPT_USTRING(" <http://mega-nerd.com/libsndfile/>") << lf;
-#endif
+	realtime_audio_stream::show_versions( log );
+	file_audio_stream::show_versions( log );
 	log << lf;
 }
 
@@ -1955,23 +2001,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 					// nothing
 				} else if ( nextarg == MPT_USTRING("help") ) {
 					string_concat_stream<mpt::ustring> drivers;
-					drivers << MPT_USTRING(" Available drivers:") << lf;
-					drivers << MPT_USTRING("    default") << lf;
-#if defined( MPT_WITH_PULSEAUDIO )
-					drivers << MPT_USTRING("    pulseaudio") << lf;
-#endif
-#if defined( MPT_WITH_SDL2 )
-					drivers << MPT_USTRING("    sdl2") << lf;
-#endif
-#if defined( MPT_WITH_PORTAUDIO )
-					drivers << MPT_USTRING("    portaudio") << lf;
-#endif
-#if MPT_OS_WINDOWS
-					drivers << MPT_USTRING("    waveout") << lf;
-#endif
-#if defined( MPT_WITH_ALLEGRO42 )
-					drivers << MPT_USTRING("    allegro42") << lf;
-#endif
+					realtime_audio_stream::show_drivers( drivers );
 					throw show_help_exception( drivers.str() );
 				} else if ( nextarg == MPT_USTRING("default") ) {
 					flags.driver = MPT_USTRING("");
@@ -1984,23 +2014,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 					// nothing
 				} else if ( nextarg == MPT_USTRING("help") ) {
 					string_concat_stream<mpt::ustring> devices;
-					devices << MPT_USTRING(" Available devices:") << lf;
-					devices << MPT_USTRING("    default: default") << lf;
-#if defined( MPT_WITH_PULSEAUDIO )
-					devices << show_pulseaudio_devices(log);
-#endif
-#if defined( MPT_WITH_SDL2 )
-					devices << show_sdl2_devices( log );
-#endif
-#if defined( MPT_WITH_PORTAUDIO )
-					devices << show_portaudio_devices( log );
-#endif
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-					devices << show_waveout_devices( log );
-#endif
-#if defined( MPT_WITH_ALLEGRO42 )
-					devices << show_allegro42_devices( log );
-#endif
+					realtime_audio_stream::show_devices( devices, log );
 					throw show_help_exception( devices.str() );
 				} else if ( nextarg == MPT_USTRING("default") ) {
 					flags.device = MPT_USTRING("");
@@ -2379,17 +2393,17 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 					render_files( flags, log, stdout_audio_stream, prng );
 				} else if ( !flags.output_filename.empty() ) {
 					flags.apply_default_buffer_sizes();
-					file_audio_stream_raii file_audio_stream( flags, flags.output_filename, log );
+					file_audio_stream file_audio_stream( flags, flags.output_filename, log );
 					render_files( flags, log, file_audio_stream, prng );
 				} else {
-					realtime_audio_stream_raii audio_stream( flags, log );
+					realtime_audio_stream audio_stream( flags, log );
 					render_files( flags, log, audio_stream, prng );
 				}
 			} break;
 			case Mode::Render: {
 				for ( const auto & filename : flags.filenames ) {
 					flags.apply_default_buffer_sizes();
-					file_audio_stream_raii file_audio_stream( flags, filename + MPT_NATIVE_PATH(".") + flags.output_extension, log );
+					file_audio_stream file_audio_stream( flags, filename + MPT_NATIVE_PATH(".") + flags.output_extension, log );
 					render_file( flags, filename, log, file_audio_stream );
 					flags.playlist_index++;
 				}
