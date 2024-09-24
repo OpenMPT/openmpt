@@ -157,7 +157,7 @@ class file_audio_stream : public file_audio_stream_base {
 private:
 	std::unique_ptr<file_audio_stream_base> impl;
 public:
-	static void show_versions( concat_stream<mpt::ustring> & log ) {
+	static void show_versions([[maybe_unused]] concat_stream<mpt::ustring> & log ) {
 #ifdef MPT_WITH_FLAC
 		log << MPT_USTRING(" FLAC ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VERSION_STRING ) << MPT_USTRING(", ") << mpt::transcode<mpt::ustring>( mpt::source_encoding, FLAC__VENDOR_STRING ) << MPT_USTRING(", API ") << FLAC_API_VERSION_CURRENT << MPT_USTRING(".") << FLAC_API_VERSION_REVISION << MPT_USTRING(".") << FLAC_API_VERSION_AGE << MPT_USTRING(" <https://xiph.org/flac/>") << lf;
 #endif
@@ -170,7 +170,7 @@ public:
 #endif
 	}
 public:
-	file_audio_stream( const commandlineflags & flags, const mpt::native_path & filename, concat_stream<mpt::ustring> & log )
+	file_audio_stream( const commandlineflags & flags, const mpt::native_path & filename, [[maybe_unused]] concat_stream<mpt::ustring> & log )
 		: impl(nullptr)
 	{
 		if ( !flags.force_overwrite ) {
@@ -221,7 +221,7 @@ class realtime_audio_stream : public write_buffers_interface {
 private:
 	std::unique_ptr<write_buffers_interface> impl;
 public:
-	static void show_versions( concat_stream<mpt::ustring> & log ) {
+	static void show_versions( [[maybe_unused]] concat_stream<mpt::ustring> & log ) {
 #ifdef MPT_WITH_SDL2
 		log << MPT_USTRING(" libSDL2 ");
 		SDL_version sdlver;
@@ -264,7 +264,7 @@ public:
 		drivers << MPT_USTRING("    allegro42") << lf;
 #endif
 	}
-	static void show_devices( concat_stream<mpt::ustring> & devices, concat_stream<mpt::ustring> & log ) {
+	static void show_devices( concat_stream<mpt::ustring> & devices, [[maybe_unused]] concat_stream<mpt::ustring> & log ) {
 		devices << MPT_USTRING(" Available devices:") << lf;
 		devices << MPT_USTRING("    default: default") << lf;
 #if defined( MPT_WITH_PULSEAUDIO )
@@ -284,7 +284,7 @@ public:
 #endif
 	}
 public:
-	realtime_audio_stream( commandlineflags & flags, concat_stream<mpt::ustring> & log )
+	realtime_audio_stream( commandlineflags & flags, [[maybe_unused]] concat_stream<mpt::ustring> & log )
 		: impl(nullptr)
 	{
 		if constexpr ( false ) {
