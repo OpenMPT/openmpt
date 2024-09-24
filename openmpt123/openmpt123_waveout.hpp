@@ -34,7 +34,7 @@ private:
 	std::vector<std::vector<char> > wavebuffers;
 	std::deque<char> byte_queue;
 public:
-	waveout_stream_raii( commandlineflags & flags )
+	waveout_stream_raii( commandlineflags & flags, concat_stream<mpt::ustring> & /* log */ )
 		: waveout(NULL)
 		, num_channels(0)
 		, num_chunks(0)

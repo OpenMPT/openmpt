@@ -227,7 +227,7 @@ public:
 #endif
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		} else if ( flags.driver == MPT_USTRING("waveout") || flags.driver.empty() ) {
-			impl = std::make_unique<waveout_stream_raii>( flags );
+			impl = std::make_unique<waveout_stream_raii>( flags, log );
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
 		} else if ( flags.driver == MPT_USTRING("allegro42") || flags.driver.empty() ) {
