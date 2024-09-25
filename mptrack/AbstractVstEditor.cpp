@@ -450,7 +450,7 @@ BOOL CAbstractVstEditor::PreTranslateMessage(MSG *msg)
 }
 
 
-bool CAbstractVstEditor::HandleKeyMessage(MSG &msg)
+bool CAbstractVstEditor::HandleKeyMessage(MSG &msg, bool handleGlobal)
 {
 	if(m_VstPlugin.m_passKeypressesToPlug)
 		return false;
@@ -465,6 +465,9 @@ bool CAbstractVstEditor::HandleKeyMessage(MSG &msg)
 
 	// If we successfully mapped to a command and plug does not listen for keypresses, no need to pass message on.
 	if(ih->KeyEvent(kCtxVSTGUI, event, this) != kcNull)
+		return true;
+
+	if(handleGlobal && HandleGlobalKeyMessage(msg))
 		return true;
 
 	// Don't forward key repeats if plug does not listen for keypresses

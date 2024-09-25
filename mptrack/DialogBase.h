@@ -21,6 +21,9 @@ public:
 	using CDialog::CDialog;
 
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+
+protected:
+	bool HandleGlobalKeyMessage(const MSG &msg) const;
 };
 
 OPENMPT_NAMESPACE_END

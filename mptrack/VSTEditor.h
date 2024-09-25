@@ -50,7 +50,7 @@ protected:
 	LRESULT HandlePreTranslateMessage(UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		MSG msg = {m_plugWindow, message, wParam, lParam, 0, {}};
-		return PreTranslateMessage(&msg);
+		return HandleKeyMessage(msg, true);
 	}
 
 	DECLARE_MESSAGE_MAP()

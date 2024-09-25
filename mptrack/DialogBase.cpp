@@ -17,22 +17,32 @@ OPENMPT_NAMESPACE_BEGIN
 
 BOOL DialogBase::PreTranslateMessage(MSG *pMsg)
 {
+	if(pMsg && HandleGlobalKeyMessage(*pMsg))
+		return TRUE;
+
+	return CDialog::PreTranslateMessage(pMsg);
+}
+
+
+bool DialogBase::HandleGlobalKeyMessage(const MSG &msg) const
+{
 	// We handle keypresses before Windows has a chance to handle them (for alt etc..)
-	if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP || pMsg->message == WM_SYSKEYUP || pMsg->message == WM_SYSKEYDOWN)
+	if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP || msg.message == WM_SYSKEYUP || msg.message == WM_SYSKEYDOWN)
 	{
 		if(CInputHandler *ih = CMainFrame::GetInputHandler())
 		{
-			const auto event = ih->Translate(*pMsg);
+			const auto event = ih->Translate(msg);
 			if(ih->KeyEvent(kCtxAllContexts, event) != kcNull)
 			{
 				// Special case: ESC is typically bound to stopping playback, but we also want to allow ESC to close dialogs
-				if(pMsg->message != WM_KEYDOWN || pMsg->wParam != VK_ESCAPE)
-					return TRUE;  // Mapped to a command, no need to pass message on.
+				if(msg.message != WM_KEYDOWN || msg.wParam != VK_ESCAPE)
+					return true;  // Mapped to a command, no need to pass message on.
 			}
 		}
 	}
 
-	return CDialog::PreTranslateMessage(pMsg);
+	return false;
 }
+
 
 OPENMPT_NAMESPACE_END

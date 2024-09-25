@@ -112,7 +112,7 @@ public:
 
 protected:
 	BOOL PreTranslateMessage(MSG *msg) override;
-	bool HandleKeyMessage(MSG &msg);
+	bool HandleKeyMessage(MSG &msg, bool handleGlobal = false);
 	void UpdatePresetMenu(bool force = false);
 	void GeneratePresetMenu(int32 offset, CMenu &parent);
 	void UpdateInputMenu();
