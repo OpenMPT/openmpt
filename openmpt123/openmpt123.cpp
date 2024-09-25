@@ -78,40 +78,17 @@ static const char * const license =
 #include <cstdlib>
 #include <cstring>
 
-#if MPT_OS_DJGPP
-#include <conio.h>
-#include <dpmi.h>
-#include <fcntl.h>
-#include <io.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <termios.h>
-#include <unistd.h>
-#elif MPT_OS_WINDOWS
-#include <conio.h>
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#if MPT_LIBC_MINGW
-#include <string.h>
-#endif
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <windows.h>
+#if MPT_OS_WINDOWS
 #include <mmsystem.h>
 #include <mmreg.h>
-#else
-#include <termios.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #endif
 
 #include <libopenmpt/libopenmpt.hpp>
 
 #include "openmpt123.hpp"
+#include "openmpt123_exception.hpp"
+#include "openmpt123_stdio.hpp"
+#include "openmpt123_terminal.hpp"
 
 #include "openmpt123_flac.hpp"
 #include "openmpt123_mmio.hpp"
@@ -1107,53 +1084,15 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( flags.mode == Mode::UI ) {
 
-#if MPT_OS_DJGPP
-
-			while ( kbhit() ) {
-				int c = getch();
-				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
-					return;
-				}
-			}
-
-#elif MPT_OS_WINDOWS && defined( UNICODE ) && !MPT_OS_WINDOWS_WINRT
-
-			while ( _kbhit() ) {
-				wint_t c = _getwch();
-				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
-					return;
-				}
-			}
-
-#elif MPT_OS_WINDOWS
-
-			while ( _kbhit() ) {
-				int c = _getch();
-				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
-					return;
-				}
-			}
-
-#else
-
-			while ( true ) {
-				pollfd pollfds;
-				pollfds.fd = STDIN_FILENO;
-				pollfds.events = POLLIN;
-				poll(&pollfds, 1, 0);
-				if ( !( pollfds.revents & POLLIN ) ) {
+			while ( terminal_input::is_input_available() ) {
+				auto c = terminal_input::read_input_char();
+				if ( !c ) {
 					break;
 				}
-				char c = 0;
-				if ( read( STDIN_FILENO, &c, 1 ) != 1 ) {
-					break;
-				}
-				if ( !handle_keypress( c, flags, mod, audio_stream ) ) {
+				if ( !handle_keypress( *c, flags, mod, audio_stream ) ) {
 					return;
 				}
 			}
-
-#endif
 
 			if ( flags.paused ) {
 				audio_stream.sleep( flags.ui_redraw_interval );
@@ -2169,110 +2108,6 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 	}
 
 }
-
-enum class FILE_mode {
-	text,
-	binary,
-};
-
-#if MPT_OS_WINDOWS
-
-class FILE_mode_guard {
-private:
-	FILE * file;
-	int old_mode;
-public:
-	FILE_mode_guard( FILE * file, FILE_mode new_mode )
-		: file(file)
-		, old_mode(-1)
-	{
-		switch (new_mode) {
-			case FILE_mode::text:
-				fflush( file );
-				#if defined(UNICODE)
-					old_mode = _setmode( _fileno( file ), _O_U8TEXT );
-				#else
-					old_mode = _setmode( _fileno( file ), _O_TEXT );
-				#endif
-				if ( old_mode == -1 ) {
-					throw exception( MPT_USTRING("failed to set TEXT mode on file descriptor") );
-				}
-				break;
-			case FILE_mode::binary:
-				fflush( file );
-				old_mode = _setmode( _fileno( file ), _O_BINARY );
-				if ( old_mode == -1 ) {
-					throw exception( MPT_USTRING("failed to set binary mode on file descriptor") );
-				}
-				break;
-		}
-	}
-	FILE_mode_guard( const FILE_mode_guard & ) = delete;
-	FILE_mode_guard( FILE_mode_guard && ) = default;
-	FILE_mode_guard & operator=( const FILE_mode_guard & ) = delete;
-	FILE_mode_guard & operator=( FILE_mode_guard && ) = default;
-	~FILE_mode_guard() {
-		if ( old_mode != -1 ) {
-			fflush( file );
-			old_mode = _setmode( _fileno( file ), old_mode );
-		}
-	}
-};
-
-class terminal_ui_guard {
-public:
-	terminal_ui_guard() = default;
-	terminal_ui_guard( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard( terminal_ui_guard && ) = default;
-	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
-	~terminal_ui_guard() = default;
-};
-
-#else
-
-class FILE_mode_guard {
-public:
-	FILE_mode_guard( FILE * /* file */, FILE_mode /* new_mode */ ) {
-		return;
-	}
-	FILE_mode_guard( const FILE_mode_guard & ) = delete;
-	FILE_mode_guard( FILE_mode_guard && ) = default;
-	FILE_mode_guard & operator=( const FILE_mode_guard & ) = delete;
-	FILE_mode_guard & operator=( FILE_mode_guard && ) = default;
-	~FILE_mode_guard() = default;
-};
-
-class terminal_ui_guard {
-private:
-	bool changed = false;
-	termios saved_attributes;
-public:
-	terminal_ui_guard() {
-		if ( !isatty( STDIN_FILENO ) ) {
-			return;
-		}
-		tcgetattr( STDIN_FILENO, &saved_attributes );
-		termios tattr = saved_attributes;
-		tattr.c_lflag &= ~( ICANON | ECHO );
-		tattr.c_cc[VMIN] = 1;
-		tattr.c_cc[VTIME] = 0;
-		tcsetattr( STDIN_FILENO, TCSAFLUSH, &tattr );
-		changed = true;
-	}
-	terminal_ui_guard( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard( terminal_ui_guard && ) = default;
-	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
-	~terminal_ui_guard() {
-		if ( changed ) {
-			tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
-		}
-	}
-};
-
-#endif
-
 
 static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 

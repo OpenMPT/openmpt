@@ -1123,6 +1123,7 @@
     <ClInclude Include="..\..\openmpt123\openmpt123.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_allegro42.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_config.hpp" />
+    <ClInclude Include="..\..\openmpt123\openmpt123_exception.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_flac.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_mmio.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_portaudio.hpp" />
@@ -1130,7 +1131,9 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_raw.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sdl2.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sndfile.hpp" />
+    <ClInclude Include="..\..\openmpt123\openmpt123_stdio.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_stdout.hpp" />
+    <ClInclude Include="..\..\openmpt123\openmpt123_terminal.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_waveout.hpp" />
     <ClInclude Include="..\..\src\mpt\base\algorithm.hpp" />
     <ClInclude Include="..\..\src\mpt\base\aligned_array.hpp" />

@@ -704,6 +704,7 @@ bin_openmpt123_SOURCES += $(MPT_FILES_SRC_MPT)
 bin_openmpt123_SOURCES += openmpt123/openmpt123_allegro42.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_config.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123.cpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_exception.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_flac.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_mmio.hpp
@@ -712,7 +713,9 @@ bin_openmpt123_SOURCES += openmpt123/openmpt123_pulseaudio.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_raw.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_sdl2.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_sndfile.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_stdio.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_stdout.hpp
+bin_openmpt123_SOURCES += openmpt123/openmpt123_terminal.hpp
 bin_openmpt123_SOURCES += openmpt123/openmpt123_waveout.hpp
 
 man1_MANS = man/openmpt123.1

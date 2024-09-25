@@ -60,6 +60,9 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_config.hpp">
       <Filter>openmpt123</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\openmpt123\openmpt123_exception.hpp">
+      <Filter>openmpt123</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\openmpt123\openmpt123_flac.hpp">
       <Filter>openmpt123</Filter>
     </ClInclude>
@@ -81,7 +84,13 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_sndfile.hpp">
       <Filter>openmpt123</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\openmpt123\openmpt123_stdio.hpp">
+      <Filter>openmpt123</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\openmpt123\openmpt123_stdout.hpp">
+      <Filter>openmpt123</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\openmpt123\openmpt123_terminal.hpp">
       <Filter>openmpt123</Filter>
     </ClInclude>
     <ClInclude Include="..\..\openmpt123\openmpt123_waveout.hpp">
