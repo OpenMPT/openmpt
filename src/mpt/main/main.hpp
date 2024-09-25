@@ -100,8 +100,8 @@ namespace main {
 /* clang-format off */
 #define MPT_MAIN_PROLOG() \
 	do { \
-		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY; \
 		assert(mpt::platform::libc().is_ok()); \
+		_crt0_startup_flags &= ~_CRT0_FLAG_LOCK_MEMORY; \
 	} while (0) \
 /**/
 /* clang-format on */
