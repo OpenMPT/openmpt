@@ -235,6 +235,7 @@ void CAbstractVstEditor::OnPasteParameters()
 			{
 				pModDoc->SetModified();
 			}
+			WindowSizeAdjuster adjuster(*this);
 			UpdatePresetField();
 		} else
 		{
@@ -340,7 +341,6 @@ void CAbstractVstEditor::UpdatePresetField()
 	}
 
 	DrawMenuBar();
-
 }
 
 
