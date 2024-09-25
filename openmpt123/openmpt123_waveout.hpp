@@ -177,22 +177,22 @@ public:
 	}
 };
 
-static mpt::ustring show_waveout_devices( concat_stream<mpt::ustring> & /*log*/ ) {
-	string_concat_stream<mpt::ustring> devices;
-	devices << MPT_USTRING(" waveout:") << lf;
+inline std::vector<mpt::ustring> show_waveout_devices( concat_stream<mpt::ustring> & /*log*/ ) {
+	std::vector<mpt::ustring> devices;
 	for ( UINT i = 0; i < waveOutGetNumDevs(); ++i ) {
-		devices << MPT_USTRING("    ") << i << MPT_USTRING(": ");
+		string_concat_stream<mpt::ustring> device;
+		device << i << MPT_USTRING(": ");
 		WAVEOUTCAPS caps;
 		ZeroMemory( &caps, sizeof( caps ) );
 		waveOutGetDevCaps( i, &caps, sizeof( caps ) );
 		#if defined(UNICODE)
-			devices << mpt::transcode<mpt::ustring>( caps.szPname );
+			device << mpt::transcode<mpt::ustring>( caps.szPname );
 		#else
-			devices << mpt::transcode<mpt::ustring>( mpt::logical_encoding::locale, caps.szPname );
+			device << mpt::transcode<mpt::ustring>( mpt::logical_encoding::locale, caps.szPname );
 		#endif
-		devices << lf;
+		devices.push_back( device.str() );
 	}
-	return devices.str();
+	return devices;
 }
 
 } // namespace openmpt123

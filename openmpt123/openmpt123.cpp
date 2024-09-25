@@ -223,26 +223,13 @@ private:
 public:
 	static void show_versions( [[maybe_unused]] concat_stream<mpt::ustring> & log ) {
 #ifdef MPT_WITH_SDL2
-		log << MPT_USTRING(" libSDL2 ");
-		SDL_version sdlver;
-		std::memset( &sdlver, 0, sizeof( SDL_version ) );
-		SDL_GetVersion( &sdlver );
-		log << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
-		const char * revision = SDL_GetRevision();
-		if ( revision ) {
-			log << MPT_USTRING(" (") << mpt::transcode<mpt::ustring>( sdl2_encoding, revision ) << MPT_USTRING(")");
-		}
-		log << MPT_USTRING(", ");
-		std::memset( &sdlver, 0, sizeof( SDL_version ) );
-		SDL_VERSION( &sdlver );
-		log << MPT_USTRING("API: ") << static_cast<int>( sdlver.major ) << MPT_USTRING(".") << static_cast<int>( sdlver.minor ) << MPT_USTRING(".") << static_cast<int>( sdlver.patch );
-		log << MPT_USTRING(" <https://libsdl.org/>") << lf;
+		log << MPT_USTRING(" ") << show_sdl2_version() << lf;
 #endif
 #ifdef MPT_WITH_PULSEAUDIO
-		log << MPT_USTRING(" ") << MPT_USTRING("libpulse, libpulse-simple") << MPT_USTRING(" (headers ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, pa_get_headers_version() ) << MPT_USTRING(", API ") << PA_API_VERSION << MPT_USTRING(", PROTOCOL ") << PA_PROTOCOL_VERSION << MPT_USTRING(", library ") << mpt::transcode<mpt::ustring>( pulseaudio_encoding, ( pa_get_library_version() ? pa_get_library_version() : "unknown" ) ) << MPT_USTRING(") <https://www.freedesktop.org/wiki/Software/PulseAudio/>") << lf;
+		log << MPT_USTRING(" ") << show_pulseaudio_version() << lf;
 #endif
 #ifdef MPT_WITH_PORTAUDIO
-		log << MPT_USTRING(" ") << mpt::transcode<mpt::ustring>( portaudio_encoding, Pa_GetVersionText() ) << MPT_USTRING(" (") << Pa_GetVersion() << MPT_USTRING(") <http://portaudio.com/>") << lf;
+		log << MPT_USTRING(" ") << show_portaudio_version() << lf;
 #endif
 	}
 	static void show_drivers( concat_stream<mpt::ustring> & drivers ) {
@@ -268,19 +255,49 @@ public:
 		devices << MPT_USTRING(" Available devices:") << lf;
 		devices << MPT_USTRING("    default: default") << lf;
 #if defined( MPT_WITH_PULSEAUDIO )
-		devices << show_pulseaudio_devices( log );
+		devices << MPT_USTRING(" pulseaudio:") << lf;
+		{
+			auto devs = show_pulseaudio_devices( log );
+			for ( const auto & dev : devs ) {
+				devices << MPT_USTRING("    ") << dev << lf;
+			}
+		}
 #endif
 #if defined( MPT_WITH_SDL2 )
-		devices << show_sdl2_devices( log );
+		devices << MPT_USTRING(" SDL2:") << lf;
+		{
+			auto devs = show_sdl2_devices( log );
+			for ( const auto & dev : devs ) {
+				devices << MPT_USTRING("    ") << dev << lf;
+			}
+		}
 #endif
 #if defined( MPT_WITH_PORTAUDIO )
-		devices << show_portaudio_devices( log );
+		devices << MPT_USTRING(" portaudio:") << lf;
+		{
+			auto devs = show_portaudio_devices( log );
+			for ( const auto & dev : devs ) {
+				devices << MPT_USTRING("    ") << dev << lf;
+			}
+		}
 #endif
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
-		devices << show_waveout_devices( log );
+		devices << MPT_USTRING(" waveout:") << lf;
+		{
+			auto devs = show_waveout_devices( log );
+			for ( const auto & dev : devs ) {
+				devices << MPT_USTRING("    ") << dev << lf;
+			}
+		}
 #endif
 #if defined( MPT_WITH_ALLEGRO42 )
-		devices << show_allegro42_devices( log );
+		devices << MPT_USTRING(" allegro42:") << lf;
+		{
+			auto devs = show_allegro42_devices( log );
+			for ( const auto & dev : devs ) {
+				devices << MPT_USTRING("    ") << dev << lf;
+			}
+		}
 #endif
 	}
 public:

@@ -174,11 +174,10 @@ public:
 	}
 };
 
-static mpt::ustring show_allegro42_devices( concat_stream<mpt::ustring> & /* log */ ) {
-	string_concat_stream<mpt::ustring> devices;
-	devices << MPT_USTRING(" allegro42:") << lf;
-	devices << MPT_USTRING("    ") << MPT_USTRING("0") << MPT_USTRING(": Default Device") << lf;
-	return devices.str();
+inline std::vector<mpt::ustring> show_allegro42_devices( concat_stream<mpt::ustring> & /* log */ ) {
+	string_concat_stream<mpt::ustring> device;
+	device << MPT_USTRING("0") << MPT_USTRING(": Default Device");
+	return { device.str() };
 }
 
 } // namespace openmpt123
