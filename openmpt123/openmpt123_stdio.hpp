@@ -23,8 +23,8 @@
 #if MPT_OS_WINDOWS
 #include <fcntl.h>
 #include <io.h>
-#include <stdio.h>
 #endif
+#include <stdio.h>
 
 namespace openmpt123 {
 
