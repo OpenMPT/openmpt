@@ -7,7 +7,7 @@
  *          UNIC files without file signature are not supported.
  * Authors: OpenMPT Devs
  *          Based on ProWizard by Asle
- * The OpenMPT source code is released under the BSD lUNICnse. Read LUNICNSE for more details.
+ * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
  */
 
 
