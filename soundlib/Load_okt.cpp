@@ -51,7 +51,8 @@ MPT_BINARY_STRUCT(OktSample, 32)
 // Parse the sample header block
 static void ReadOKTSamples(FileReader &chunk, CSoundFile &sndFile)
 {
-	sndFile.m_nSamples = std::min(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
+	static_assert(MAX_SAMPLES >= 72);  // For copies of type "B" samples
+	sndFile.m_nSamples = std::min(static_cast<SAMPLEINDEX>(chunk.BytesLeft() / sizeof(OktSample)), SAMPLEINDEX(36));
 
 	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 	{
@@ -66,6 +67,7 @@ static void ReadOKTSamples(FileReader &chunk, CSoundFile &sndFile)
 		mptSmp.nVolume = std::min(oktSmp.volume.get(), uint16(64)) * 4u;
 		mptSmp.nLength = oktSmp.length & ~1;
 		mptSmp.cues[0] = oktSmp.type;  // Temporary storage for pattern reader, will be reset later
+		mptSmp.cues[1] = 0;
 		// Parse loops
 		const SmpLength loopStart = oktSmp.loopStart * 2;
 		const SmpLength loopLength = oktSmp.loopLength * 2;
@@ -134,16 +136,17 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					// Default volume only works on raw Paula channels
 					if(pairedChn[chn] && sample.nVolume < 256)
 						m.SetVolumeCommand(VOLCMD_VOLUME, 64);
-					// Type "B" samples (can play on both paired and unpaired channels) can have loop information,
-					// which can only be used on unpaired channels. The correct fix would be to have a looped and unlooped variant of this sample,
-					// but it is probably quite unlikely that any module relies on this behaviour.
-					// On the other hand, sinfonia.okta has a type "B" sample with loop points set, and it only uses paired channels.
-					if(pairedChn[chn] && sample.uFlags[CHN_SUSTAINLOOP])
-						sample.uFlags.reset(CHN_SUSTAINLOOP);
 					
 					// If channel and sample type don't match, stop this channel (add 100 to the instrument number to make it understandable what happened during import)
 					if((sample.cues[0] == 1 && pairedChn[chn] != 0) || (sample.cues[0] == 0 && pairedChn[chn] == 0))
+					{
 						m.instr += 100;
+					} else if(sample.cues[0] == 2 && pairedChn[chn] && sample.uFlags[CHN_SUSTAINLOOP])
+					{
+						// Type "B" sample: Loops only work on raw Paula channels
+						sample.cues[1] = 1;
+						m.instr += 36;
+					}
 				}
 			}
 
@@ -446,12 +449,14 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read samples
 	size_t fileSmp = 0;
-	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
+	const SAMPLEINDEX origSamples = m_nSamples;
+	for(SAMPLEINDEX smp = 1; smp <= origSamples; smp++)
 	{
 		if(fileSmp >= sampleChunks.size() || !(loadFlags & loadSampleData))
 			break;
 
 		ModSample &mptSample = Samples[smp];
+		const bool needCopy = mptSample.cues[1] != 0;
 		mptSample.SetDefaultCuePoints();
 		if(mptSample.nLength == 0)
 			continue;
@@ -465,6 +470,20 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 			SampleIO::bigEndian,
 			SampleIO::signedPCM)
 			.ReadSample(mptSample, sampleChunks[fileSmp]);
+
+		if(needCopy)
+		{
+			// Type "B" samples (can play on both paired and unpaired channels) can have loop information,
+			// which can only be used on unpaired channels. So we need a looped and unlooped copy of the sample.
+			m_nSamples = std::max(m_nSamples, static_cast<SAMPLEINDEX>(smp + 36));
+			ModSample &copySample = Samples[smp + 36];
+			copySample.Initialize();
+			copySample.nC5Speed = mptSample.nC5Speed;
+			copySample.nVolume = mptSample.nVolume;
+			copySample.nLength = mptSample.nLength;
+			copySample.CopyWaveform(mptSample);
+			m_szNames[smp + 36] = m_szNames[smp];
+		}
 
 		fileSmp++;
 	}
