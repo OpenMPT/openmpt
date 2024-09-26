@@ -372,7 +372,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updat
 	InvalidateRow();
 
 	PatternCursor selStart(m_Cursor);
-	if(m_Status[psKeyboardDragSelect | psMouseDragSelect] && !m_Status[psDragnDropEdit])
+	if((m_Status[psMouseDragSelect] || IsSelectionPressed()) && !m_Status[psDragnDropEdit])
 	{
 		selStart.Set(m_StartSel);
 	}
@@ -395,7 +395,7 @@ bool CViewPattern::SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns
 
 	PatternCursor selStart(m_Cursor);
 
-	if(m_Status[psKeyboardDragSelect | psMouseDragSelect] && !m_Status[psDragnDropEdit])
+	if((m_Status[psMouseDragSelect] || IsSelectionPressed()) && !m_Status[psDragnDropEdit])
 	{
 		selStart = m_StartSel;
 	}
@@ -416,6 +416,12 @@ void CViewPattern::SetModified(bool updateAllViews)
 		pModDoc->UpdateAllViews(this, PatternHint(m_nPattern).Data(), updateAllViews ? nullptr : this);
 	}
 	CMainFrame::GetMainFrame()->NotifyAccessibilityUpdate(*this);
+}
+
+
+bool CViewPattern::IsSelectionPressed() const
+{
+	return CMainFrame::GetInputHandler()->SelectionPressed();
 }
 
 
@@ -782,7 +788,7 @@ void CViewPattern::OnKillFocus(CWnd *pNewWnd)
 {
 	CScrollView::OnKillFocus(pNewWnd);
 
-	m_Status.reset(psKeyboardDragSelect | psCtrlDragSelect | psFocussed);
+	m_Status.reset(psCtrlDragSelect | psFocussed);
 	InvalidateRow();
 }
 
@@ -3089,7 +3095,7 @@ void CViewPattern::OnDropSelection()
 	end.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels());
 	PatternRect destination(begin, end);
 
-	const bool moveSelection = !m_Status[psKeyboardDragSelect | psCtrlDragSelect];
+	const bool moveSelection = !m_Status[psCtrlDragSelect] && !IsSelectionPressed();
 
 	BeginWaitCursor();
 	pModDoc->GetPatternUndo().PrepareUndo(m_nPattern, 0, 0, sndFile.GetNumChannels(), pattern.GetNumRows(), moveSelection ? "Move Selection" : "Copy Selection");
@@ -4289,7 +4295,7 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
 	else
 		row += distance;
-	row = SetCurrentRow(row, m_Status[psKeyboardDragSelect | psMouseDragSelect] ? WrapMode::LimitAtPatternEnd : WrapMode::WrapAround);
+	row = SetCurrentRow(row, (m_Status[psMouseDragSelect] || IsSelectionPressed()) ? WrapMode::LimitAtPatternEnd : WrapMode::WrapAround);
 
 	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
@@ -4576,12 +4582,11 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSelect:
 			if(!m_Status[psDragnDropEdit | psRowSelection | psChannelSelection | psMouseDragSelect])
 				m_StartSel = m_Cursor;
-			m_Status.set(psKeyboardDragSelect);
 			return wParam;
 		case kcSelectOffWithCopySelect:
 		case kcSelectOffWithNav:
 		case kcSelectOff:
-			m_Status.reset(psKeyboardDragSelect | psShiftSelect);
+			m_Status.reset(psShiftSelect);
 			return wParam;
 		case kcCopySelectWithSelect:
 		case kcCopySelectWithNav:
@@ -5986,8 +5991,6 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 	{
 		if(m_nSpacing > 0)
 		{
-			// Shift from entering chord may have triggered this flag, which will prevent us from wrapping to the next pattern.
-			m_Status.reset(psKeyboardDragSelect);
 			SetCurrentRow(GetCurrentRow() + m_nSpacing, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL) ? WrapMode::WrapAround : WrapMode::LimitAtPatternEnd);
 		}
 		SetSelToCursor();

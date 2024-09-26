@@ -128,7 +128,6 @@ public:
 	enum PatternStatus
 	{
 		psMouseDragSelect    = 0x01,     // Creating a selection using the mouse
-		psKeyboardDragSelect = 0x02,     // Creating a selection using shortcuts
 		psFocussed           = 0x04,     // Is the pattern editor focussed
 		psFollowSong         = 0x08,     // Does the cursor follow playback
 		psRecordingEnabled   = 0x10,     // Recording enabled
@@ -241,6 +240,8 @@ public:
 	ModSequence &Order();
 
 	void SetModified(bool updateAllViews = true);
+
+	bool IsSelectionPressed() const;
 
 	bool UpdateSizes();
 	void UpdateScrollSize();
