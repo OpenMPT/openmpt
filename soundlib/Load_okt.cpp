@@ -400,7 +400,7 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read samples
 	size_t fileSmp = 0;
-	for(SAMPLEINDEX smp = 1; smp < m_nSamples; smp++)
+	for(SAMPLEINDEX smp = 1; smp <= m_nSamples; smp++)
 	{
 		if(fileSmp >= sampleChunks.size() || !(loadFlags & loadSampleData))
 			break;
