@@ -133,8 +133,10 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					auto &sample = sndFile.GetSample(m.instr);
 					// Default volume only works on raw Paula channels
 					if(pairedChn[chn] && sample.nVolume < 256)
+					{
 						m.volcmd = VOLCMD_VOLUME;
 						m.vol = 64;
+					}
 
 					// If channel and sample type don't match, stop this channel (add 100 to the instrument number to make it understandable what happened during import)
 					if((sample.cues[0] == 1 && pairedChn[chn] != 0) || (sample.cues[0] == 0 && pairedChn[chn] == 0))
