@@ -421,7 +421,7 @@ void CViewPattern::SetModified(bool updateAllViews)
 
 bool CViewPattern::IsSelectionPressed() const
 {
-	return CMainFrame::GetInputHandler()->SelectionPressed();
+	return ::GetFocus() == m_hWnd && CMainFrame::GetInputHandler()->SelectionPressed();
 }
 
 
@@ -1165,7 +1165,7 @@ void CViewPattern::OnLButtonDown(UINT nFlags, CPoint point)
 			SendCtrlMessage(CTRLMSG_PAT_FOLLOWSONG, 0);
 		}
 
-		if(CMainFrame::GetInputHandler()->SelectionPressed()
+		if(IsSelectionPressed()
 		   && (m_Status[psShiftSelect]
 		       || m_Selection.GetUpperLeft() == m_Selection.GetLowerRight()
 		       || !m_Selection.Contains(pointCursor)))
