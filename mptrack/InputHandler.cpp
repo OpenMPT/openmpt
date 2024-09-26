@@ -345,6 +345,8 @@ FlagSet<Modifiers> CInputHandler::GetModifierMask()
 {
 	BYTE keyStates[256];
 	FlagSet<Modifiers> modifierMask = ModNone;
+	if(GetActiveWindow() == nullptr)
+		return modifierMask;
 	if(!GetKeyboardState(keyStates))
 		return modifierMask;
 
