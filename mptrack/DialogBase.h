@@ -22,8 +22,7 @@ public:
 
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 
-protected:
-	bool HandleGlobalKeyMessage(const MSG &msg) const;
+	static bool HandleGlobalKeyMessage(const MSG &msg);
 };
 
 OPENMPT_NAMESPACE_END

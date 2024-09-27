@@ -24,7 +24,7 @@ BOOL DialogBase::PreTranslateMessage(MSG *pMsg)
 }
 
 
-bool DialogBase::HandleGlobalKeyMessage(const MSG &msg) const
+bool DialogBase::HandleGlobalKeyMessage(const MSG &msg)
 {
 	// We handle keypresses before Windows has a chance to handle them (for alt etc..)
 	if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP || msg.message == WM_SYSKEYUP || msg.message == WM_SYSKEYDOWN)
