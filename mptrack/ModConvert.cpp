@@ -586,7 +586,8 @@ bool CModDoc::ChangeModType(MODTYPE nNewType)
 			warnings.set(wFractionalTempo);
 		}
 
-		order.SetDefaultTempo(Clamp(order.GetDefaultTempo(), specs.GetTempoMin(), specs.GetTempoMax()));
+		// Special case: CModSpecifications for IT allow tempos up to 512 so that legacy modules play correctly.
+		order.SetDefaultTempo(Clamp(order.GetDefaultTempo(), specs.GetTempoMin(), nNewType == MOD_TYPE_IT ? TEMPO(255, 0) : specs.GetTempoMax()));
 		order.SetDefaultSpeed(Clamp(order.GetDefaultSpeed(), specs.speedMin, specs.speedMax));
 	}
 
