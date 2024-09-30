@@ -1132,7 +1132,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				S3MConvert(m, command, param, true);
 
 				// IT 1.xx does not support high offset command
-				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cmwt < 0x0200)
+				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cwtv < 0x0200)
 					m.command = CMD_DUMMY;
 				// Fix handling of commands V81-VFF in ITs made with old Schism Tracker versions
 				// (fixed in https://github.com/schismtracker/schismtracker/commit/ab5517d4730d4c717f7ebffb401445679bd30888 - one of the last versions to identify as v0.50)
