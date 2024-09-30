@@ -1135,6 +1135,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// Example: ckbounce.it
 				lastValue[ch].command = m.command;
 				lastValue[ch].param = m.param;
+				// Fix handling of commands V81-VFF in ITs made with old Schism Tracker versions
+				// (fixed in https://github.com/schismtracker/schismtracker/commit/ab5517d4730d4c717f7ebffb401445679bd30888 - one of the last versions to identify as v0.50)
+				if(m.command == CMD_GLOBALVOLUME && m.param > 0x80 && fileHeader.cwtv >= 0x1000 && fileHeader.cwtv <= 0x1050)
+					m.param = 0x80;
 			}
 		}
 	}
