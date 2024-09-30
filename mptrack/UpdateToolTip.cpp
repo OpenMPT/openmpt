@@ -32,7 +32,7 @@ bool UpdateToolTip::ShowUpdate(CWnd &parent, const CString &newVersion, const CS
 
 	m_infoURL = infoURL;
 
-	CString message = MPT_CFORMAT("OpenMPT {} has been released.\n<a>Click here to see what's new.</a>")(newVersion);
+	CString message = MPT_CFORMAT("OpenMPT {} has been released.\nClick on this message to install the update,\nor <a>click here to see what's new.</a>")(newVersion);
 	TOOLINFO ti{};
 	ti.cbSize = TTTOOLINFO_V1_SIZE;
 	ti.uFlags = TTF_TRACK | TTF_PARSELINKS;

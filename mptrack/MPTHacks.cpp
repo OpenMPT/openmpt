@@ -327,6 +327,13 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->VolEnv.nReleaseNode = instr->PanEnv.nReleaseNode = instr->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 		}
+		if((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (instr->nFadeOut % 32u) != 0)
+		{
+			foundHere = foundHacks = true;
+			if(autofix)
+				instr->nFadeOut = ((instr->nFadeOut + 16) / 32) * 32;
+		}
+
 		// Incompatible envelope shape
 		foundEnvelopes |= FindIncompatibleEnvelopes(instr->VolEnv, autofix);
 		foundEnvelopes |= FindIncompatibleEnvelopes(instr->PanEnv, autofix);
