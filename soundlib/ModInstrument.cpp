@@ -227,10 +227,11 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 		}
 	}
 
-	// Limit fadeout length for IT
+	// Limit fadeout length and precision for IT
 	if(toType & MOD_TYPE_IT)
 	{
 		LimitMax(nFadeOut, 8192u);
+		nFadeOut = ((nFadeOut + 16) / 32) * 32;
 	}
 
 	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock, cutoff / resonance swing and filter mode for other formats
