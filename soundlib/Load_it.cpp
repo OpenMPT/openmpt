@@ -1022,6 +1022,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 		auto patData = Patterns[pat].begin();
 		ROWINDEX row = 0;
+		ModCommand dummy{};
 		while(row < numRows && patternData.CanRead(1))
 		{
 			uint8 b = patternData.ReadUint8();
@@ -1052,7 +1053,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			}
 
 			// Now we grab the data for this particular row/channel.
-			ModCommand dummy{};
 			ModCommand &m = ch < GetNumChannels() ? patData[ch] : dummy;
 
 			if(chnMask[ch] & 0x10)
@@ -1135,6 +1135,10 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				// Example: ckbounce.it
 				lastValue[ch].command = m.command;
 				lastValue[ch].param = m.param;
+
+				// IT 1.xx does not support high offset command
+				if(m.command == CMD_S3MCMDEX && (m.param & 0xF0) == 0xA0 && fileHeader.cmwt < 0x0200)
+					m.command = CMD_DUMMY;
 				// Fix handling of commands V81-VFF in ITs made with old Schism Tracker versions
 				// (fixed in https://github.com/schismtracker/schismtracker/commit/ab5517d4730d4c717f7ebffb401445679bd30888 - one of the last versions to identify as v0.50)
 				if(m.command == CMD_GLOBALVOLUME && m.param > 0x80 && fileHeader.cwtv >= 0x1000 && fileHeader.cwtv <= 0x1050)
