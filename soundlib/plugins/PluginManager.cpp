@@ -137,52 +137,6 @@ mpt::ustring VSTPluginLib::GetPluginArchName(uint8 arch)
 }
 
 
-mpt::ustring VSTPluginLib::GetPluginArchNameUser(uint8 arch)
-{
-	mpt::ustring result;
-	#if defined(MPT_WITH_WINDOWS10)
-		switch(arch)
-		{
-		case PluginArch_x86:
-			result = U_("x86 (32bit)");
-			break;
-		case PluginArch_amd64:
-			result = U_("amd64 (64bit)");
-			break;
-		case PluginArch_arm:
-			result = U_("arm (32bit)");
-			break;
-		case PluginArch_arm64:
-			result = U_("arm64 (64bit)");
-			break;
-		default:
-			result = U_("");
-			break;
-		}
-	#else // !MPT_WITH_WINDOWS10
-		switch(arch)
-		{
-		case PluginArch_x86:
-			result = U_("32-Bit");
-			break;
-		case PluginArch_amd64:
-			result = U_("64-Bit");
-			break;
-		case PluginArch_arm:
-			result = U_("32-Bit");
-			break;
-		case PluginArch_arm64:
-			result = U_("64-Bit");
-			break;
-		default:
-			result = U_("");
-			break;
-		}
-	#endif // MPT_WITH_WINDOWS10
-	return result;
-}
-
-
 uint8 VSTPluginLib::GetDllArch(bool fromCache) const
 {
 	// Built-in plugins are always native.
@@ -208,7 +162,7 @@ mpt::ustring VSTPluginLib::GetDllArchName(bool fromCache) const
 
 mpt::ustring VSTPluginLib::GetDllArchNameUser(bool fromCache) const
 {
-	return GetPluginArchNameUser(GetDllArch(fromCache));
+	return GetPluginArchName(GetDllArch(fromCache));
 }
 
 

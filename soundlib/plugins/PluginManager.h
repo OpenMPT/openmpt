@@ -106,7 +106,6 @@ public:
 	// Get native phost process arch encoded as plugin arch
 	static uint8 GetNativePluginArch();
 	static mpt::ustring GetPluginArchName(uint8 arch);
-	static mpt::ustring GetPluginArchNameUser(uint8 arch);
 
 	// Check whether a plugin can be hosted inside OpenMPT or requires bridging
 	uint8 GetDllArch(bool fromCache = true) const;
