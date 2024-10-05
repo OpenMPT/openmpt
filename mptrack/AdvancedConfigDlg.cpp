@@ -32,7 +32,7 @@ END_MESSAGE_MAP()
 void COptionsAdvanced::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
+	//{{AFX_DATA_MAP(COptionsAdvanced)
 	DDX_Control(pDX, IDC_LIST1, m_List);
 	//}}AFX_DATA_MAP
 }

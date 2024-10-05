@@ -80,7 +80,7 @@ static constexpr struct GeneralOptionsDescriptions
 void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CModTypeDlg)
+	//{{AFX_DATA_MAP(COptionsGeneral)
 	DDX_Control(pDX, IDC_LIST1,		m_CheckList);
 	DDX_Control(pDX, IDC_EDIT1,		m_defaultArtist);
 	DDX_Control(pDX, IDC_COMBO2,	m_defaultTemplate);

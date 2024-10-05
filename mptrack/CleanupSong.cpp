@@ -80,7 +80,7 @@ CModCleanupDlg::CleanupOptions const CModCleanupDlg::m_MutuallyExclusive[CModCle
 // CModCleanupDlg
 
 BEGIN_MESSAGE_MAP(CModCleanupDlg, DialogBase)
-	//{{AFX_MSG_MAP(CModTypeDlg)
+	//{{AFX_MSG_MAP(CModCleanupDlg)
 	ON_COMMAND(IDC_BTN_CLEANUP_SONG,			&CModCleanupDlg::OnPresetCleanupSong)
 	ON_COMMAND(IDC_BTN_COMPO_CLEANUP,			&CModCleanupDlg::OnPresetCompoCleanup)
 
