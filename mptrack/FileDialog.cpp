@@ -241,7 +241,7 @@ bool BrowseForFolder::Show(CWnd *parent)
 		dlg.m_ofn.lpstrTitle = m_caption;
 		if(dlg.DoModal() != IDOK)
 			return false;
-		m_workingDirectory = mpt::PathString::FromCString(dlg.GetFolderPath());
+		m_workingDirectory = mpt::PathString::FromCString(dlg.GetPathName());
 		return true;
 	}
 
