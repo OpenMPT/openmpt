@@ -1357,6 +1357,11 @@ void CDoWaveConvert::Run()
 					lastPercent = percent;
 				}
 				ProcessMessages();
+				if(m_abort)
+				{
+					ok = IDCANCEL;
+					break;
+				}
 			}
 
 			framesProcessed += framesChunk;
