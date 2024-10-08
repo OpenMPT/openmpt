@@ -914,6 +914,7 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 				const auto rowBase = Patterns[pat].GetRow(row);
 
 				CHANNELINDEX writeChannels = std::min(CHANNELINDEX(32), GetNumChannels());
+				bool writePatternBreak = (Patterns[pat].GetNumRows() < 64 && row + 1 == Patterns[pat].GetNumRows() && !Patterns[pat].RowHasJump(row));
 				for(CHANNELINDEX chn = 0; chn < writeChannels; chn++)
 				{
 					const ModCommand &m = rowBase[chn];
@@ -978,6 +979,12 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 								globalCmdOnMutedChn = true;
 							}
 						}
+					}
+					if(writePatternBreak && !(info & s3mEffectPresent))
+					{
+						info |= s3mEffectPresent;
+						command = 'C' ^ 0x40;
+						writePatternBreak = false;
 					}
 
 					if(info & s3mAnyPresent)
