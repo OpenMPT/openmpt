@@ -63,7 +63,7 @@ jobs:
         sync_files: false
         shutdown_vm: false
         run: |
-          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
       uses: cross-platform-actions/action@595d543e5d1aeb6d48c0a176965028afe56c7018
       with:
