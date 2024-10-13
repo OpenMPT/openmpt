@@ -1278,6 +1278,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 					{SchismVersionFromDate<2024,  5, 12>::date, kITNoSustainOnPortamento      },  // https://github.com/schismtracker/schismtracker/commit/6f68f2855a7e5e4ffe825869244e631e15741037
 					{SchismVersionFromDate<2024,  5, 12>::date, kITEmptyNoteMapSlotIgnoreCell },  // https://github.com/schismtracker/schismtracker/commit/aa84148e019a65f3d52ecd33fd84bfecfdb87bf4
 					{SchismVersionFromDate<2024,  5, 27>::date, kITOffsetWithInstrNumber      },  // https://github.com/schismtracker/schismtracker/commit/9237960d45079a54ad73f87bacfe5dd8ae82e273
+					{SchismVersionFromDate<2024, 10, 13>::date, kITDoublePortamentoSlides     },  // https://github.com/schismtracker/schismtracker/commit/223e327d9448561931b8cac8a55180286b17276c
 				};
 				for(const auto &quirk : SchismQuirks)
 				{
