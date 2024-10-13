@@ -1088,8 +1088,8 @@ protected:
 	std::pair<uint16, bool> GetVolCmdTonePorta(const ModCommand &m, uint32 startTick) const;
 	bool TonePortamentoSharesEffectMemory() const;
 	void InitTonePortamento(ModChannel &chn, uint16 param) const;
-	void TonePortamento(CHANNELINDEX chn, uint16 param, bool volumeColumn);
-	int32 TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param, bool volumeColumn) const;
+	void TonePortamento(CHANNELINDEX chn, uint16 param);
+	int32 TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const;
 	void TonePortamentoWithDuration(ModChannel &chn, uint16 param = uint16_max) const;
 	void Vibrato(ModChannel &chn, uint32 param) const;
 	void FineVibrato(ModChannel &chn, uint32 param) const;

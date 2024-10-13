@@ -138,7 +138,7 @@ public:
 				case VOLCMD_TONEPORTAMENTO:
 					{
 						const auto [porta, clearEffectCommand] = sndFile.GetVolCmdTonePorta(m, 0);
-						sndFile.TonePortamento(*state, channel, porta, true);
+						sndFile.TonePortamento(*state, channel, porta);
 						if(clearEffectCommand)
 							command = CMD_NONE;
 					}
@@ -155,10 +155,10 @@ public:
 				switch(command)
 				{
 				case CMD_TONEPORTAMENTO:
-					sndFile.TonePortamento(*state, channel, m.param, false);
+					sndFile.TonePortamento(*state, channel, m.param);
 					break;
 				case CMD_TONEPORTAVOL:
-					sndFile.TonePortamento(*state, channel, 0, false);
+					sndFile.TonePortamento(*state, channel, 0);
 					break;
 				case CMD_PORTAMENTOUP:
 					if(m.param || !(sndFile.GetType() & MOD_TYPE_MOD))
@@ -193,7 +193,7 @@ public:
 				}
 
 				if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
-					sndFile.TonePortamento(*state, channel, chn.portamentoSlide, false);
+					sndFile.TonePortamento(*state, channel, chn.portamentoSlide);
 				else if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamentoWithDuration))
 					sndFile.TonePortamentoWithDuration(chn, 0);
 				if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
@@ -3147,7 +3147,7 @@ bool CSoundFile::ProcessEffects()
 		}
 
 		// IT compatibility: Various mind-boggling behaviours when combining volume colum and effect column portamentos
-		// The most crucial thing here is to initialize effect memory in the exact right order, and use different effect memory for tone portamento in the both columns.
+		// The most crucial thing here is to initialize effect memory in the exact right order.
 		// Test cases: DoubleSlide.it, DoubleSlideCompatGxx.it
 		if(m_playBehaviour[kITDoublePortamentoSlides] && chn.isFirstTick)
 		{
@@ -3179,7 +3179,7 @@ bool CSoundFile::ProcessEffects()
 				if(clearEffectCommand)
 					cmd = CMD_NONE;
 
-				TonePortamento(nChn, porta, true);
+				TonePortamento(nChn, porta);
 			} else
 			{
 				// FT2 Compatibility: FT2 ignores some volume commands with parameter = 0.
@@ -3359,13 +3359,13 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento
 		case CMD_TONEPORTAMENTO:
-			TonePortamento(nChn, static_cast<uint16>(param), false);
+			TonePortamento(nChn, static_cast<uint16>(param));
 			break;
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
 			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
-			TonePortamento(nChn, 0, false);
+			TonePortamento(nChn, 0);
 			break;
 
 		// Vibrato
@@ -3899,7 +3899,7 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 {
 	ModChannel &chn = playState.Chn[channel];
 	if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamento) && !chn.rowCommand.IsTonePortamento())
-		TonePortamento(channel, chn.portamentoSlide, false);
+		TonePortamento(channel, chn.portamentoSlide);
 	else if(chn.autoSlide.IsActive(AutoSlideCommand::TonePortamentoWithDuration))
 		TonePortamentoWithDuration(chn);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoUp))
@@ -4445,9 +4445,9 @@ void CSoundFile::InitTonePortamento(ModChannel &chn, uint16 param) const
 }
 
 
-void CSoundFile::TonePortamento(CHANNELINDEX nChn, uint16 param, bool volumeColumn)
+void CSoundFile::TonePortamento(CHANNELINDEX nChn, uint16 param)
 {
-	auto delta = TonePortamento(m_PlayState, nChn, param, volumeColumn);
+	auto delta = TonePortamento(m_PlayState, nChn, param);
 	if(!delta)
 		return;
 
@@ -4466,29 +4466,18 @@ void CSoundFile::TonePortamento(CHANNELINDEX nChn, uint16 param, bool volumeColu
 
 
 // Portamento Slide
-int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param, bool volumeColumn) const
+int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16 param) const
 {
 	ModChannel &chn = playState.Chn[nChn];
 	chn.dwFlags.set(CHN_PORTAMENTO);
 	if(m_SongFlags[SONG_AUTO_TONEPORTA])
 		chn.autoSlide.SetActive(AutoSlideCommand::TonePortamento, param != 0 || m_SongFlags[SONG_AUTO_TONEPORTA_CONT]);
 
-	int32 delta;
 	// IT compatibility: Initialize effect memory in the right order in case there are portamentos in both effect columns.
-	// Also, tone portamento in the effect column stores the slide amount separately from the regular E/F/G memory once the effect is running,
-	// while volume column tone portamento always accesses the effect memory directly.
 	// Test cases: DoubleSlide.it, DoubleSlideCompatGxx.it
-	if(m_playBehaviour[kITDoublePortamentoSlides])
-	{
-		if(volumeColumn && TonePortamentoSharesEffectMemory())
-			delta = chn.nOldPortaUp;
-		else
-			delta = chn.portamentoSlide;
-	} else
-	{
+	if(!m_playBehaviour[kITDoublePortamentoSlides])
 		InitTonePortamento(chn, param);
-		delta = chn.portamentoSlide;
-	}
+	int32 delta = chn.portamentoSlide;
 
 	if(chn.HasCustomTuning())
 	{
