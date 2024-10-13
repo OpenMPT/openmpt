@@ -2033,6 +2033,11 @@ else
 	svn export ./include/miniz/miniz.c                  bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/MINIZ.TXT    --native-eol CRLF
 	svn export ./include/stb_vorbis/stb_vorbis.c        bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/STBVORB.TXT  --native-eol CRLF
 endif
+	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/DJGPP
+	cp $(shell dirname $(shell which i386-pc-msdosdjgpp-gcc))/../license/copying     bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/DJGPP/COPYING
+	cp $(shell dirname $(shell which i386-pc-msdosdjgpp-gcc))/../license/copying.dj  bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/DJGPP/COPYING.DJ
+	cp $(shell dirname $(shell which i386-pc-msdosdjgpp-gcc))/../license/copying.lib bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/DJGPP/COPYING.LIB
+	cp $(shell dirname $(shell which i386-pc-msdosdjgpp-gcc))/../license/source.txt  bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/LICENSES/DJGPP/SOURCE.TXT
 	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC
 	cp build/externals/csdpmi7s.zip                     bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/SRC/CSDPMI7S.ZIP
 	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/BIN
