@@ -44,7 +44,7 @@ struct SymFileHeader
 		return !std::memcmp(magic, "SymM", 4)
 			&& version == 1
 			&& firstChunkID == -1
-			&& numChannels > 0 && numChannels <= MAX_BASECHANNELS;
+			&& numChannels > 0 && numChannels <= 256;
 	}
 };
 
@@ -1006,7 +1006,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	else if(loadFlags == onlyVerifyHeader)
 		return true;
 
-	InitializeGlobals(MOD_TYPE_MPT, static_cast<CHANNELINDEX>(fileHeader.numChannels));
+	InitializeGlobals(MOD_TYPE_MPT, std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(fileHeader.numChannels)));
 
 	m_SongFlags.set(SONG_LINEARSLIDES | SONG_EXFILTERRANGE | SONG_AUTO_VIBRATO | SONG_AUTO_TREMOLO | SONG_IMPORTED);
 	m_playBehaviour = GetDefaultPlaybackBehaviour(MOD_TYPE_IT);
@@ -1307,7 +1307,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	std::map<SymEvent, uint8> macroMap;
 
 	bool useDSP = false;
-	const uint32 patternSize = GetNumChannels() * trackLen;
+	const uint32 patternSize = fileHeader.numChannels * trackLen;
 	const PATTERNINDEX numPatterns = mpt::saturate_cast<PATTERNINDEX>(patternData.size() / patternSize);
 
 	Patterns.ResizeArray(numPatterns);
@@ -1384,7 +1384,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 patternSpeed = static_cast<uint8>(pos.speed);
 
 				// This may intentionally read into the next pattern
-				auto srcEvent = patternData.cbegin() + (pos.pattern * patternSize) + (pos.start * GetNumChannels());
+				auto srcEvent = patternData.cbegin() + (pos.pattern * patternSize) + (pos.start * fileHeader.numChannels);
 				const SymEvent emptyEvent{};
 				ModCommand syncPlayCommand;
 				for(ROWINDEX row = 0; row < pos.length; row++)
