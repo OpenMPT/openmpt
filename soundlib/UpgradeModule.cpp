@@ -601,6 +601,7 @@ void CSoundFile::UpgradeModule()
 			{ kITNoSustainOnPortamento,       MPT_V("1.32.00.13") },
 			{ kITEmptyNoteMapSlotIgnoreCell,  MPT_V("1.32.00.13") },
 			{ kITOffsetWithInstrNumber,       MPT_V("1.32.00.15") },
+			{ kITDoublePortamentoSlides,      MPT_V("1.32.00.27") },
 		};
 
 		for(const auto &b : behaviours)

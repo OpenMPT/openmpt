@@ -730,6 +730,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITOffsetWithInstrNumber: desc = _T("Offset command with instrument number recalls offset with last note"); break;
 		case kContinueSampleWithoutInstr: desc = _T("New note without instrument number does not play looped samples from the start"); break;
 		case kMIDINotesFromChannelPlugin: desc = _T("MIDI notes can be sent to channel plugins"); break;
+		case kITDoublePortamentoSlides: desc = _T("Parameters of conflicting volume and effect column portamento commands may overwrite each other"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
