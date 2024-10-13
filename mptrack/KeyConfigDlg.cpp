@@ -73,7 +73,7 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 {
-	if(pMsg)
+	if(pMsg && !m_bypassed)
 	{
 		if(pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)
 		{
@@ -134,6 +134,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,     &COptionsKeyboard::OnKeyChoiceSelect)
 	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,     &COptionsKeyboard::OnCategorySelChanged)
 	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, &COptionsKeyboard::OnChordWaitTimeChanged)
+	ON_COMMAND(IDC_BUTTON1,               &COptionsKeyboard::OnListenForKeys)
 	ON_COMMAND(IDC_DELETE,                &COptionsKeyboard::OnDeleteKeyChoice)
 	ON_COMMAND(IDC_RESTORE,               &COptionsKeyboard::OnRestoreKeyChoice)
 	ON_COMMAND(IDC_LOAD,                  &COptionsKeyboard::OnLoad)
@@ -148,6 +149,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_EN_CHANGE(IDC_FIND,                &COptionsKeyboard::OnSearchTermChanged)
 	ON_EN_CHANGE(IDC_FINDHOTKEY,          &COptionsKeyboard::OnFindHotKey)
 	ON_EN_SETFOCUS(IDC_FINDHOTKEY,        &COptionsKeyboard::OnClearHotKey)
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
@@ -204,6 +206,8 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_eFindHotKey.SetParent(m_hWnd, IDC_FINDHOTKEY, this);
 	m_eReport.FmtLines(TRUE);
 	m_eReport.SetWindowText(_T(""));
+
+	EnableKeyChoice(false);
 
 	m_eChordWaitTime.SetWindowText(mpt::cfmt::val(TrackerSettings::Instance().gnAutoChordWaitTime.Get()));
 	return TRUE;
@@ -630,19 +634,25 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 	const CommandID cmd = (selectedItem >= 0) ? static_cast<CommandID>(m_lbnCommandKeys.GetItemData(selectedItem)) : kcNull;
 	CString str;
 
+	EnableKeyChoice(false);
+
+	BOOL enableButton = (cmd == kcNull) ? FALSE : TRUE;
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(enableButton);
+	GetDlgItem(IDC_DELETE)->EnableWindow(enableButton);
+	GetDlgItem(IDC_RESTORE)->EnableWindow(enableButton);
+	m_cmbKeyChoice.EnableWindow(enableButton);
+	m_bKeyDown.EnableWindow(enableButton);
+	m_bKeyHold.EnableWindow(enableButton);
+	m_bKeyUp.EnableWindow(enableButton);
+
 	//Separator
 	if(cmd == kcNull)
 	{
 		m_cmbKeyChoice.SetWindowText(_T(""));
-		m_cmbKeyChoice.EnableWindow(FALSE);
 		m_eCustHotKey.SetWindowText(_T(""));
-		m_eCustHotKey.EnableWindow(FALSE);
 		m_bKeyDown.SetCheck(0);
-		m_bKeyDown.EnableWindow(FALSE);
 		m_bKeyHold.SetCheck(0);
-		m_bKeyHold.EnableWindow(FALSE);
 		m_bKeyUp.SetCheck(0);
-		m_bKeyUp.EnableWindow(FALSE);
 		m_curCommand = kcNull;
 	}
 
@@ -650,12 +660,6 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 	else if((cmd >= kcFirst && cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
 	{
 		m_forceUpdate = false;
-
-		m_cmbKeyChoice.EnableWindow(TRUE);
-		m_eCustHotKey.EnableWindow(TRUE);
-		m_bKeyDown.EnableWindow(TRUE);
-		m_bKeyHold.EnableWindow(TRUE);
-		m_bKeyUp.EnableWindow(TRUE);
 
 		m_curCommand = cmd;
 		m_curCategory = GetCategoryFromCommandID(cmd);
@@ -680,6 +684,8 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 //Fills or clears key choice info
 void COptionsKeyboard::OnKeyChoiceSelect()
 {
+	EnableKeyChoice(false);
+
 	int choice = static_cast<int>(m_cmbKeyChoice.GetItemData(m_cmbKeyChoice.GetCurSel()));
 	CommandID cmd = m_curCommand;
 
@@ -760,6 +766,34 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 	return;
 }
 
+
+void COptionsKeyboard::OnLButtonDblClk(UINT flags, CPoint point)
+{
+	ClientToScreen(&point);
+	CRect rect;
+	m_eCustHotKey.GetWindowRect(rect);
+	if(m_eCustHotKey.IsBypassed() && rect.PtInRect(point))
+		EnableKeyChoice(true);
+	else
+		CPropertyPage::OnLButtonDblClk(flags, point);
+}
+
+
+void COptionsKeyboard::OnListenForKeys()
+{
+	EnableKeyChoice(m_eCustHotKey.IsBypassed());
+}
+
+
+void COptionsKeyboard::EnableKeyChoice(bool enable)
+{
+	m_eCustHotKey.Bypass(!enable);
+	GetDlgItem(IDC_BUTTON1)->SetWindowText(enable ? _T("Cancel") : _T("&Set"));
+	if(enable)
+		m_eCustHotKey.SetFocus();
+}
+
+
 void COptionsKeyboard::OnDeleteKeyChoice()
 {
 	CommandID cmd = m_curCommand;
@@ -781,6 +815,8 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 
 void COptionsKeyboard::OnSetKeyChoice()
 {
+	EnableKeyChoice(false);
+
 	CommandID cmd = m_curCommand;
 	if(cmd == kcNull)
 	{

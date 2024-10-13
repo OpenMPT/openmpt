@@ -46,6 +46,7 @@ protected:
 	HWND m_hParent = nullptr;
 	UINT m_nCtrlId = 0;
 	bool m_isFocussed = false, m_isDummy = false;
+	bool m_bypassed = false;
 
 public:
 	FlagSet<Modifiers> mod = ModNone;
@@ -59,6 +60,9 @@ public:
 		m_pOptKeyDlg = pOKD;
 	}
 	void SetKey(FlagSet<Modifiers> mod, UINT code);
+
+	void Bypass(bool bypass) { m_bypassed = bypass; EnableWindow(bypass ? FALSE : TRUE); }
+	bool IsBypassed() const { return m_bypassed; }
 	
 protected:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
@@ -115,6 +119,8 @@ protected:
 	void UnlockControls() { m_lockCount--; MPT_ASSERT(m_lockCount >= 0); }
 	bool IsLocked() const noexcept { return m_lockCount != 0; }
 
+	void EnableKeyChoice(bool enable);
+
 	afx_msg void UpdateDialog();
 	afx_msg void OnKeyboardChanged();
 	afx_msg void OnKeyChoiceSelect();
@@ -126,6 +132,7 @@ protected:
 	afx_msg void OnCheck() { OnSetKeyChoice(); };
 	afx_msg void OnNotesRepeat();
 	afx_msg void OnNoNotesRepeat();
+	afx_msg void OnListenForKeys();
 	afx_msg void OnDeleteKeyChoice();
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();
@@ -134,6 +141,7 @@ protected:
 	afx_msg void OnRestoreDefaultKeymap();
 	afx_msg void OnClearHotKey();
 	afx_msg void OnFindHotKey();
+	afx_msg void OnLButtonDblClk(UINT flags, CPoint point);
 	afx_msg void OnDestroy();
 
 	DECLARE_MESSAGE_MAP()
