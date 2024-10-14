@@ -1330,7 +1330,7 @@ void CViewPattern::OnLButtonUp(UINT nFlags, CPoint point)
 		break;
 
 	case DragItem::PluginName:
-		if(sourceChn < MAX_BASECHANNELS)
+		if(sourceChn < modDoc->GetNumChannels())
 			TogglePluginEditor(sourceChn);
 		break;
 	}
@@ -1565,7 +1565,7 @@ void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
 	case DragItem::ChannelHeader:
 		if(nFlags & MK_SHIFT)
 		{
-			if(sourceChn < MAX_BASECHANNELS && sourceChn == targetChn)
+			if(sourceChn < pModDoc->GetNumChannels() && sourceChn == targetChn)
 			{
 				pModDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
 				InvalidateChannelsHeaders(sourceChn);
@@ -7283,7 +7283,7 @@ void CViewPattern::SelectBeatOrMeasure(bool selectBeat)
 			// Whole channel is already selected => expand selection to whole row.
 			startChannel = 0;
 			startColumn = PatternCursor::firstColumn;
-			endChannel = MAX_BASECHANNELS;
+			endChannel = GetDocument()->GetNumChannels() - 1;
 			endColumn = PatternCursor::lastColumn;
 		} else
 		{

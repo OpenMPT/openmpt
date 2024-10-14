@@ -804,14 +804,11 @@ void CViewGlobals::OnEditPan4() {OnEditPan(3, IDC_EDIT8);}
 
 void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	CModDoc *pModDoc;
-	CHANNELINDEX nChn;
-
 	CFormView::OnHScroll(nSBCode, nPos, pScrollBar);
 
-	pModDoc = GetDocument();
-	nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB);
-	if ((pModDoc) && (!IsLocked()) && (nChn < MAX_BASECHANNELS))
+	CModDoc *pModDoc = GetDocument();
+	const CHANNELINDEX nChn = (CHANNELINDEX)(m_nActiveTab * CHANNELS_IN_TAB);
+	if(pModDoc && !IsLocked() && nChn < pModDoc->GetNumChannels())
 	{
 		BOOL bUpdate = FALSE;
 		short int pos;
@@ -849,7 +846,6 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				}
 			}
 		}
-
 
 		if ((pScrollBar) && (pScrollBar->m_hWnd == m_sbDryRatio.m_hWnd))
 		{
