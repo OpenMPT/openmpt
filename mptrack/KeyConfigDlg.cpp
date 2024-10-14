@@ -787,6 +787,8 @@ void COptionsKeyboard::OnListenForKeys()
 
 void COptionsKeyboard::EnableKeyChoice(bool enable)
 {
+	if(!enable && GetFocus() == &m_eCustHotKey)
+		GetDlgItem(IDC_BUTTON1)->SetFocus();
 	m_eCustHotKey.Bypass(!enable);
 	GetDlgItem(IDC_BUTTON1)->SetWindowText(enable ? _T("Cancel") : _T("&Set"));
 	if(enable)
