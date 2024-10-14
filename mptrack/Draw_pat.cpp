@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "View_pat.h"
-#include "ChannelManagerDlg.h"
 #include "dlg_misc.h"
 #include "EffectVis.h"
 #include "Globals.h"

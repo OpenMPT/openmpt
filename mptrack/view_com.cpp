@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "view_com.h"
-#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Clipboard.h"
 #include "Ctrl_com.h"
@@ -22,6 +21,7 @@
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "resource.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"

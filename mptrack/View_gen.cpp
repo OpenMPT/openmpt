@@ -12,7 +12,6 @@
 #include "stdafx.h"
 #include "View_gen.h"
 #include "AbstractVstEditor.h"
-#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Ctrl_gen.h"
 #include "EffectVis.h"

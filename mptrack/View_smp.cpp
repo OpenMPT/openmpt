@@ -11,10 +11,10 @@
 
 #include "stdafx.h"
 #include "View_smp.h"
-#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Clipboard.h"
 #include "Ctrl_smp.h"
+#include "dlg_misc.h"  // CInputDlg
 #include "Dlsbank.h"
 #include "Globals.h"
 #include "ImageLists.h"

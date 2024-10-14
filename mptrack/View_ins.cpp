@@ -11,7 +11,6 @@
 
 #include "stdafx.h"
 #include "View_ins.h"
-#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Ctrl_ins.h"
 #include "Dlsbank.h"
@@ -25,6 +24,7 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "ScaleEnvPointsDlg.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/MIDIEvents.h"
