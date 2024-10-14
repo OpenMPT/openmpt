@@ -16,6 +16,7 @@
 #include "Childfrm.h"
 #include "CloseMainDialog.h"
 #include "ColorConfigDlg.h"
+#include "dlg_misc.h"
 #include "Dlsbank.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"

@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 #include "dlg_misc.h"
-#include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Dlsbank.h"
 #include "Moddoc.h"
@@ -18,6 +17,7 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "TempoSwingDialog.h"
+#include "TrackerSettings.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../common/version.h"
