@@ -255,13 +255,9 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 	}
 
 	std::vector<ModChannel> chns(m_SndFile.m_PlayState.Chn.begin(), m_SndFile.m_PlayState.Chn.begin() + oldNumChannels);
-	std::vector<RecordGroup> recordStates(oldNumChannels);
-	auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
-	for(CHANNELINDEX chn = 0; chn < oldNumChannels; chn++)
-	{
-		recordStates[chn] = GetChannelRecordGroup(chn);
-	}
-	ReinitRecordState();
+	const auto chnMutePendings = m_SndFile.m_bChannelMuteTogglePending;
+	const auto recordStates = m_multiRecordGroup;
+	m_multiRecordGroup.clear();
 
 	for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++)
 	{
@@ -270,7 +266,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 		{
 			m_SndFile.ChnSettings[chn] = settings[srcChn];
 			m_SndFile.m_PlayState.Chn[chn] = chns[srcChn];
-			SetChannelRecordGroup(chn, recordStates[srcChn]);
+			if(srcChn < recordStates.size())
+				SetChannelRecordGroup(chn, recordStates[srcChn]);
 			m_SndFile.m_bChannelMuteTogglePending[chn] = chnMutePendings[srcChn];
 			if(m_SndFile.m_opl)
 				m_SndFile.m_opl->MoveChannel(srcChn, chn);
