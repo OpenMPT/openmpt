@@ -164,10 +164,10 @@ struct PSMSubSong // For internal use (pattern conversion)
 	std::vector<bool> channelSurround;
 	char songName[10] = {};
 
-	PSMSubSong()
-	    : channelPanning(MAX_BASECHANNELS, 128)
-	    , channelVolume(MAX_BASECHANNELS, 64)
-	    , channelSurround(MAX_BASECHANNELS, false)
+	PSMSubSong(CHANNELINDEX numChannels)
+	    : channelPanning(numChannels, 128)
+	    , channelVolume(numChannels, 64)
+	    , channelSurround(numChannels, false)
 	{ }
 
 	void SetPanning(CHANNELINDEX chn, uint8 type, int16 pan, bool &subsongPanningDiffers, std::vector<PSMSubSong> &subsongs)
@@ -344,7 +344,7 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 		PSMSongHeader songHeader;
 		chunk.ReadStruct(songHeader);
 
-		PSMSubSong subsong;
+		PSMSubSong subsong{GetNumChannels()};
 		mpt::String::WriteAutoBuf(subsong.songName) = mpt::String::ReadBuf(mpt::String::nullTerminated, songHeader.songType);
 
 		if(!Order().empty())
