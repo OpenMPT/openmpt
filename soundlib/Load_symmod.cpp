@@ -1044,6 +1044,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 	uint16 sampleBoost   = 2500;
 	bool isSymphoniePro  = false;
 	bool externalSamples = false;
+	bool unknownHunks    = false;
 	std::vector<SymPosition> positions;
 	std::vector<SymSequence> sequences;
 	std::vector<SymEvent> patternData;
@@ -1197,9 +1198,10 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 			file.Skip(file.ReadUint32BE());
 			break;
 
-		// Unrecognized chunk/value type
+		// Unrecognized chunk/value type (e.g. garbage at the end of Natsh1.SymMOD)
 		default:
-			return false;
+			unknownHunks = true;
+			break;
 		}
 	}
 
@@ -1207,6 +1209,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	if((loadFlags & loadPatternData) && (positions.empty() || patternData.empty() || sequences.empty()))
 		return false;
+	if(unknownHunks)
+		AddToLog(LogWarning, U_("Unknown hunks were found and ignored."));
 
 	// Let's hope noone is going to use the 256th instrument ;)
 	if(instruments.size() >= MAX_INSTRUMENTS)
