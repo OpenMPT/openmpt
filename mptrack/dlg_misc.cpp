@@ -731,6 +731,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kContinueSampleWithoutInstr: desc = _T("New note without instrument number does not play looped samples from the start"); break;
 		case kMIDINotesFromChannelPlugin: desc = _T("MIDI notes can be sent to channel plugins"); break;
 		case kITDoublePortamentoSlides: desc = _T("Parameters of conflicting volume and effect column portamento commands may overwrite each other"); break;
+		case kS3MIgnoreCombinedFineSlides: desc =_T("Ignore combined fine slides (Kxy / Lxy)"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

@@ -599,6 +599,7 @@ enum PlayBehaviour
 	kContinueSampleWithoutInstr,    // FTM: A note without instrument number continues looped samples with the new pitch instead of retriggering them
 	kMIDINotesFromChannelPlugin,    // Behaviour before OpenMPT 1.26: Channel plugin can be used to send MIDI notes
 	kITDoublePortamentoSlides,      // IT only reads parameters once per row, so if two commands sharing effect parameters are found in the two effect columns, they influence each other
+	kS3MIgnoreCombinedFineSlides,   // S3M commands Kxy and Lxy ignore fine slides
 
 	// Add new play behaviours here.
 

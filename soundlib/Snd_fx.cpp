@@ -1208,7 +1208,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					case CMD_VIBRATOVOL:
 						if(m.param || (GetType() != MOD_TYPE_MOD))
 						{
-							for(uint32 i = 0; i < numTicks; i++)
+							// ST3 compatibility: Do not run combined slides (Kxy / Lxy) on first tick
+							// Test cases: NoCombinedSlidesOnFirstTick-Normal.s3m, NoCombinedSlidesOnFirstTick-Fast.s3m
+							for(uint32 i = (m_playBehaviour[kS3MIgnoreCombinedFineSlides] ? 1 : 0); i < numTicks; i++)
 							{
 								chn.isFirstTick = (i == 0);
 								VolumeSlide(chn, m.param);
@@ -3364,7 +3366,14 @@ bool CSoundFile::ProcessEffects()
 
 		// Tone-Portamento + Volume Slide
 		case CMD_TONEPORTAVOL:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
+			if(param || GetType() != MOD_TYPE_MOD)
+			{
+				// ST3 compatibility: Do not run combined slides (Kxy / Lxy) on first tick
+				// Test cases: NoCombinedSlidesOnFirstTick-Normal.s3m, NoCombinedSlidesOnFirstTick-Fast.s3m
+
+				if(!chn.isFirstTick || !m_playBehaviour[kS3MIgnoreCombinedFineSlides])
+					VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
+			}
 			TonePortamento(nChn, 0);
 			break;
 
@@ -3375,7 +3384,13 @@ bool CSoundFile::ProcessEffects()
 
 		// Vibrato + Volume Slide
 		case CMD_VIBRATOVOL:
-			if ((param) || (GetType() != MOD_TYPE_MOD)) VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
+			if(param || GetType() != MOD_TYPE_MOD)
+			{
+				// ST3 compatibility: Do not run combined slides (Kxy / Lxy) on first tick
+				// Test cases: NoCombinedSlidesOnFirstTick-Normal.s3m, NoCombinedSlidesOnFirstTick-Fast.s3m
+				if(!chn.isFirstTick || !m_playBehaviour[kS3MIgnoreCombinedFineSlides])
+					VolumeSlide(chn, static_cast<ModCommand::PARAM>(param));
+			}
 			Vibrato(chn, 0);
 			break;
 
