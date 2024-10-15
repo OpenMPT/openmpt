@@ -836,9 +836,9 @@ void CChannelManagerDlg::OnRButtonDown(UINT nFlags,CPoint point)
 
 void CChannelManagerDlg::OnMButtonDown(UINT /*nFlags*/, CPoint point)
 {
-	CHANNELINDEX chn;
 	CRect rect;
-	if(m_ModDoc != nullptr && (chn = ButtonHit(point, &rect) != CHANNELINDEX_INVALID))
+	CHANNELINDEX chn = ButtonHit(point, &rect);
+	if(m_ModDoc != nullptr && chn != CHANNELINDEX_INVALID))
 	{
 		ClientToScreen(&point);
 		m_quickChannelProperties->Show(m_ModDoc, m_states[chn].sourceChn, point);
