@@ -1391,13 +1391,10 @@ bool CModDoc::NoFxChannel(CHANNELINDEX nChn, bool bNoFx, bool updateMix)
 
 RecordGroup CModDoc::GetChannelRecordGroup(CHANNELINDEX channel) const
 {
-	if(channel >= GetNumChannels())
+	if(channel >= GetNumChannels() || channel >= m_multiRecordGroup.size())
 		return RecordGroup::NoGroup;
-	if(m_bsMultiRecordMask[channel])
-		return RecordGroup::Group1;
-	if(m_bsMultiSplitRecordMask[channel])
-		return RecordGroup::Group2;
-	return RecordGroup::NoGroup;
+	
+	return m_multiRecordGroup[channel];
 }
 
 
@@ -1405,8 +1402,10 @@ void CModDoc::SetChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGrou
 {
 	if(channel >= GetNumChannels())
 		return;
-	m_bsMultiRecordMask.set(channel, recordGroup == RecordGroup::Group1);
-	m_bsMultiSplitRecordMask.set(channel, recordGroup == RecordGroup::Group2);
+	if(channel >= m_multiRecordGroup.size())
+		m_multiRecordGroup.resize(channel + 1);
+	
+	m_multiRecordGroup[channel] = recordGroup;
 }
 
 
@@ -1414,22 +1413,19 @@ void CModDoc::ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordG
 {
 	if(channel >= GetNumChannels())
 		return;
-	if(recordGroup == RecordGroup::Group1)
-	{
-		m_bsMultiRecordMask.flip(channel);
-		m_bsMultiSplitRecordMask.reset(channel);
-	} else if(recordGroup == RecordGroup::Group2)
-	{
-		m_bsMultiRecordMask.reset(channel);
-		m_bsMultiSplitRecordMask.flip(channel);
-	}
+	if(channel >= m_multiRecordGroup.size())
+		m_multiRecordGroup.resize(channel + 1);
+
+	if(m_multiRecordGroup[channel] == recordGroup)
+		m_multiRecordGroup[channel] = RecordGroup::NoGroup;
+	else
+		m_multiRecordGroup[channel] = recordGroup;
 }
 
 
 void CModDoc::ReinitRecordState()
 {
-	m_bsMultiRecordMask.reset();
-	m_bsMultiSplitRecordMask.reset();
+	m_multiRecordGroup.clear();
 }
 
 

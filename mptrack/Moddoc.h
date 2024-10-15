@@ -151,8 +151,7 @@ protected:
 	std::array<std::bitset<128>, 16> m_midiPlayingNotes;
 	std::bitset<16> m_midiSustainActive;
 
-	std::bitset<MAX_BASECHANNELS> m_bsMultiRecordMask;
-	std::bitset<MAX_BASECHANNELS> m_bsMultiSplitRecordMask;
+	std::vector<RecordGroup> m_multiRecordGroup;
 
 protected: // create from serialization only
 	CModDoc();
