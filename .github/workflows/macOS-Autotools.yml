@@ -13,7 +13,7 @@ jobs:
       matrix:
         include:
           - { host: macos-14, compiler: '16.1' }
-          - { host: macos-14, compiler: '16'   }
+          - { host: macos-14, compiler: '16.0' }
           - { host: macos-14, compiler: '15.4' }
           - { host: macos-14, compiler: '15.3' }
           - { host: macos-13, compiler: '15.2' }
