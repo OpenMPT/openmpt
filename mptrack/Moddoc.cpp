@@ -1426,17 +1426,10 @@ void CModDoc::ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordG
 }
 
 
-void CModDoc::ReinitRecordState(bool unselect)
+void CModDoc::ReinitRecordState()
 {
-	if(unselect)
-	{
-		m_bsMultiRecordMask.reset();
-		m_bsMultiSplitRecordMask.reset();
-	} else
-	{
-		m_bsMultiRecordMask.set();
-		m_bsMultiSplitRecordMask.set();
-	}
+	m_bsMultiRecordMask.reset();
+	m_bsMultiSplitRecordMask.reset();
 }
 
 

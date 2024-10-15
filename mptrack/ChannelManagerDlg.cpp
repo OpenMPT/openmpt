@@ -359,7 +359,7 @@ void CChannelManagerDlg::OnRestore()
 				m_ModDoc->MuteChannel(state.sourceChn, state.memoryMute);
 			break;
 		case kRecordSelect:
-			m_ModDoc->ReinitRecordState(true);
+			m_ModDoc->ReinitRecordState();
 			for(auto &state : m_states)
 				m_ModDoc->SetChannelRecordGroup(state.sourceChn, static_cast<RecordGroup>(state.memoryRecordGroup));
 			break;

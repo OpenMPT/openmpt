@@ -283,7 +283,7 @@ public:
 	RecordGroup GetChannelRecordGroup(CHANNELINDEX channel) const;
 	void SetChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup);
 	void ToggleChannelRecordGroup(CHANNELINDEX channel, RecordGroup recordGroup);
-	void ReinitRecordState(bool unselect = true);
+	void ReinitRecordState();
 
 	CHANNELINDEX GetNumChannels() const noexcept { return m_SndFile.GetNumChannels(); }
 	UINT GetPatternSize(PATTERNINDEX nPat) const;
