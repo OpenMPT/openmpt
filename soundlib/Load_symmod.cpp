@@ -1395,12 +1395,14 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 				{
 					ModCommand *rowBase = Patterns[patternIndex].GetpModCommand(row, 0);
 					bool applySyncPlay = false;
-					for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
+					for(CHANNELINDEX chn = 0; chn < fileHeader.numChannels; chn++)
 					{
-						ModCommand &m = rowBase[chn];
 						const SymEvent &event = (srcEvent != patternData.cend()) ? *srcEvent : emptyEvent;
 						if(srcEvent != patternData.cend())
 							srcEvent++;
+						if(chn >= GetNumChannels())
+							continue;
+						ModCommand &m = rowBase[chn];
 
 						int8 note = (event.note >= 0 && event.note <= 84) ? event.note + 25 : -1;
 						uint8 origInst = event.inst;
