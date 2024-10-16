@@ -177,9 +177,7 @@ void CViewPattern::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
 	EnableToolTips();
-	ChnVUMeters.fill(0);
-	OldVUMeters.fill(0);
-	m_previousNote.fill(NOTE_NONE);
+	m_chnState.assign(GetDocument()->GetNumChannels(), {});
 	m_splitActiveNoteChannel.fill(NOTE_CHANNEL_MAP_INVALID);
 	m_activeNoteChannel.fill(NOTE_CHANNEL_MAP_INVALID);
 	m_nPlayPat = PATTERNINDEX_INVALID;
@@ -203,7 +201,6 @@ void CViewPattern::OnInitialUpdate()
 	m_nLastPlayedRow = 0;
 	m_nLastPlayedOrder = ORDERINDEX_INVALID;
 	m_prevChordNote = NOTE_NONE;
-	m_previousPCevent.fill({PLUGINDEX_INVALID, 0});
 }
 
 
@@ -3643,7 +3640,8 @@ LRESULT CViewPattern::OnPlayerNotify(Notification *pnotify)
 	if(pnotify->type[Notification::Stop])
 	{
 		m_baPlayingNote.reset();
-		ChnVUMeters.fill(0);  // Also zero all non-visible VU meters
+		for(auto &chnState : m_chnState)
+			chnState.vuMeter = 0;
 		SetPlayCursor(PATTERNINDEX_INVALID, ROWINDEX_INVALID, 0);
 	}
 
@@ -3673,7 +3671,7 @@ CHANNELINDEX CViewPattern::GetRecordChannelForPCEvent(PLUGINDEX plugSlot, PlugPa
 			continue;
 
 		const ModCommand &m = *sndFile.Patterns[pattern].GetpModCommand(row, c);
-		if((m_previousPCevent[c] == plugParam && m.IsEmpty()) || (m.IsPcNote() && m.instr == plugSlot + 1 && m.GetValueVolCol() == paramIndex))
+		if((c < m_chnState.size() && m_chnState[c].previousPCevent == plugParam && m.IsEmpty()) || (m.IsPcNote() && m.instr == plugSlot + 1 && m.GetValueVolCol() == paramIndex))
 		{
 			return c;
 			break;
@@ -3725,7 +3723,8 @@ LRESULT CViewPattern::OnRecordPlugParamChange(WPARAM plugSlot, LPARAM paramIndex
 		if(m.IsEmpty() || m.IsPcNote())
 		{
 			m.Set(NOTE_PCS, static_cast<ModCommand::INSTR>(plugSlot + 1), static_cast<uint16>(paramIndex), static_cast<uint16>(pPlug->GetParameter(static_cast<PlugParamIndex>(paramIndex)) * ModCommand::maxColumnValue));
-			m_previousPCevent[chn] = plugParam;
+			m_chnState.resize(sndFile.GetNumChannels());
+			m_chnState[chn].previousPCevent = plugParam;
 		}
 	} else if(sndFile.GetModSpecifications().HasCommand(CMD_SMOOTHMIDI))
 	{
@@ -3942,7 +3941,8 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		ModCommand &m = GetModCommand(sndFile, editPos);
 		pModDoc->GetPatternUndo().PrepareUndo(editPos.pattern, editPos.channel, editPos.row, 1, 1, "MIDI Mapping Record");
 		m.Set(NOTE_PCS, mappedIndex, static_cast<uint16>(paramIndex), static_cast<uint16>((paramValue * ModCommand::maxColumnValue) / 16383));
-		m_previousPCevent[editPos.channel] = std::make_pair(static_cast<PLUGINDEX>(mappedIndex - 1), paramIndex);
+		m_chnState.resize(pModDoc->GetNumChannels());
+		m_chnState[editPos.channel].previousPCevent = std::make_pair(static_cast<PLUGINDEX>(mappedIndex - 1), paramIndex);
 		if(!liveRecord)
 			InvalidateRow(editPos.row);
 		pModDoc->SetModified();
@@ -5255,7 +5255,7 @@ void CViewPattern::TempStopNote(ModCommand::NOTE note, const bool fromMidi, bool
 	bool modified = false;
 	for(int i = 0; i < numNotes; i++)
 	{
-		if(m_previousNote[noteChannels[i]] != notes[i])
+		if(noteChannels[i] < m_chnState.size() && m_chnState[noteChannels[i]].previousNote != notes[i])
 		{
 			// This might be a note-off from a past note, but since we already hit a new note on this channel, we ignore it.
 			continue;
@@ -5667,7 +5667,8 @@ void CViewPattern::TempEnterNote(ModCommand::NOTE note, int vol, bool fromMidi)
 
 	if(newcmd.IsNote())
 	{
-		m_previousNote[nChn] = note;
+		m_chnState.resize(sndFile.GetNumChannels());
+		m_chnState[nChn].previousNote = note;
 	}
 
 	// -- if recording, handle post note entry behaviour (move cursor etc..)
@@ -5891,7 +5892,8 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 		m_chordPatternChannels[i] = curChn;
 
 		ModCommand &m = newRow[curChn];
-		m_previousNote[curChn] = m.note = chordNotes[i];
+		m_chnState.resize(sndFile.GetNumChannels());
+		m_chnState[curChn].previousNote = m.note = chordNotes[i];
 		if(newRow[chn].instr)
 		{
 			m.instr = newRow[chn].instr;

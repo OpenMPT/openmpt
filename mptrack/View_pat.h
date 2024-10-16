@@ -211,19 +211,24 @@ protected:
 	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
 	std::bitset<16> m_midiSustainActive;
 
-	std::array<uint16, MAX_BASECHANNELS> ChnVUMeters;
-	std::array<uint16, MAX_BASECHANNELS> OldVUMeters;
+	struct ChannelState
+	{
+		uint16 vuMeter = 0;
+		uint16 vuMeterOld = 0;
+		std::pair<PLUGINDEX, PlugParamIndex> previousPCevent = {PLUGINDEX_INVALID, 0};
+		ModCommand::NOTE previousNote = NOTE_NONE;
+		uint8 selectedCols = 0;
+	};
 
+	std::vector<ChannelState> m_chnState;
 	std::bitset<128> m_baPlayingNote;
 	CModDoc::NoteToChannelMap m_noteChannel;  // Note -> Preview channel assignment
-	std::array<ModCommand::NOTE, 10> m_octaveKeyMemory;
-	std::array<ModCommand::NOTE, MAX_BASECHANNELS> m_previousNote;
-	std::array<std::pair<PLUGINDEX, PlugParamIndex>, MAX_BASECHANNELS> m_previousPCevent;  // For multichannel recording
+	std::array<ModCommand::NOTE, (NOTE_MAX - NOTE_MIN + 12) / 12> m_octaveKeyMemory;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> m_activeNoteChannel;
 	std::array<uint8, NOTE_MAX + NOTE_MIN> m_splitActiveNoteChannel;
 	static constexpr uint8 NOTE_CHANNEL_MAP_INVALID = 0xFF;
-	static_assert(MAX_BASECHANNELS <= std::numeric_limits<decltype(m_activeNoteChannel)::value_type>::max());
-	static_assert(MAX_BASECHANNELS <= NOTE_CHANNEL_MAP_INVALID);
+	static_assert(MAX_BASECHANNELS - 1 <= std::numeric_limits<decltype(m_activeNoteChannel)::value_type>::max());
+	static_assert(MAX_BASECHANNELS - 1 < NOTE_CHANNEL_MAP_INVALID);
 
 public:
 	std::unique_ptr<CEffectVis> m_pEffectVis;
@@ -488,8 +493,6 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSelectPlugin(UINT nID);
-	// cppcheck-suppress duplInheritedMember
-	afx_msg LRESULT OnUpdatePosition(WPARAM nOrd, LPARAM nRow);
 	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);

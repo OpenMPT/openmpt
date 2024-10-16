@@ -50,14 +50,9 @@ enum
 	COLUMN_BITS_FXPARAM       = 0x10,
 	COLUMN_BITS_FXCMDANDPARAM = 0x18,
 	COLUMN_BITS_ALLCOLUMNS    = 0x1F,
-	COLUMN_BITS_UNKNOWN       = 0x20,  // Appears to be unused
-	COLUMN_BITS_ALL           = 0x3F,
 	COLUMN_BITS_SKIP          = 0x40,
 	COLUMN_BITS_INVISIBLE     = 0x80,
 };
-
-
-
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -526,7 +521,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 	MPT_ASSERT(pDC);
 	UpdateSizes();
-	if ((pModDoc = GetDocument()) == nullptr) return;
+	if ((pModDoc = GetDocument()) == nullptr)
+		return;
+	m_chnState.resize(pModDoc->GetNumChannels());
 	
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
@@ -760,7 +757,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 				if(m_Status[psShowVUMeters])
 				{
-					OldVUMeters[ncolhdr] = 0;
+					m_chnState[ncolhdr].vuMeterOld = 0;
 					DrawChannelVUMeter(hdc, rect.left, rect.bottom, ncolhdr);
 					rect.top += vuHeight;
 					rect.bottom += vuHeight;
@@ -809,35 +806,34 @@ static constexpr UINT EncodeRowColor(int rowBkCol, int rowCol, bool rowSelected)
 void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable,
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 {
-	uint8 selectedCols[MAX_BASECHANNELS] = {};  // Bit mask of selected channel components
-	static_assert(1 << PatternCursor::lastColumn <= Util::MaxValueOfType(selectedCols[0]) , "Columns are used as bitmasks.");
+	static_assert(1 << PatternCursor::lastColumn <= Util::MaxValueOfType(ChannelState{}.selectedCols), "Columns are used as bitmasks");
+	static_assert(!((1 << PatternCursor::lastColumn) & (COLUMN_BITS_INVISIBLE | COLUMN_BITS_SKIP)), "Column bits and special bits overlap");
 
 	const CSoundFile &sndFile = GetDocument()->GetSoundFile();
 	if(!sndFile.Patterns.IsValidPat(nPattern))
-	{
 		return;
-	}
 	const CPattern &pattern = sndFile.Patterns[nPattern];
 	const auto patternSetupFlags = TrackerSettings::Instance().m_dwPatternSetup.Get();
 
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	CRect rect;
 	int xpaint, ypaint = *pypaint;
-	UINT nColumnWidth;
 	
-	CHANNELINDEX ncols = sndFile.GetNumChannels();
-	nColumnWidth = m_szCell.cx;
+	const CHANNELINDEX ncols = sndFile.GetNumChannels();
+	const UINT nColumnWidth = m_szCell.cx;
 	rect.SetRect(m_szHeader.cx, rcClient.top, m_szHeader.cx+nColumnWidth, rcClient.bottom);
 	for(CHANNELINDEX cmk = startChan; cmk < ncols; cmk++)
 	{
-		selectedCols[cmk] = selEnable ? m_Selection.GetSelectionBits(cmk) : 0;
-		if (!::RectVisible(hdc, &rect)) selectedCols[cmk] |= COLUMN_BITS_INVISIBLE;
+		m_chnState[cmk].selectedCols = selEnable ? m_Selection.GetSelectionBits(cmk) : 0;
+		if(!::RectVisible(hdc, &rect))
+			m_chnState[cmk].selectedCols |= COLUMN_BITS_INVISIBLE;
 		rect.left += nColumnWidth;
 		rect.right += nColumnWidth;
 	}
 	// Max Visible Column
 	CHANNELINDEX maxcol = ncols;
-	while ((maxcol > startChan) && (selectedCols[maxcol-1] & COLUMN_BITS_INVISIBLE)) maxcol--;
+	while((maxcol > startChan) && (m_chnState[maxcol -1].selectedCols & COLUMN_BITS_INVISIBLE))
+		maxcol--;
 	// Init bitmap border
 	{
 		UINT maxndx = sndFile.GetNumChannels() * m_szCell.cx;
@@ -878,7 +874,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		{
 			// No speedup for these columns next time
 			for(CHANNELINDEX iup = startChan; iup < maxcol; iup++)
-				selectedCols[iup] &= ~COLUMN_BITS_SKIP;
+				m_chnState[iup].selectedCols &= ~COLUMN_BITS_SKIP;
 			// skip row
 			ypaint += m_szCell.cy;
 			if(ypaint >= rcClient.bottom)
@@ -887,7 +883,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		}
 		rect.right = rect.left + m_szHeader.cx;
 
-		bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
+		const bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
 		TCHAR s[32];
 		if(hexNumbers)
 			wsprintf(s, _T("%s%02X"), compRow < 0 ? _T("-") : _T(""), std::abs(compRow));
@@ -948,14 +944,14 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		// Eliminate non-visible column
 		xpaint = m_szHeader.cx;
 		col = startChan;
-		while ((selectedCols[col] & COLUMN_BITS_INVISIBLE) && (col < maxcol))
+		while((m_chnState[col].selectedCols & COLUMN_BITS_INVISIBLE) && (col < maxcol))
 		{
-			selectedCols[col] &= ~COLUMN_BITS_SKIP;
+			m_chnState[col].selectedCols &= ~COLUMN_BITS_SKIP;
 			col++;
 			xpaint += nColumnWidth;
 		}
 		// Optimization: same row color ?
-		bool useSpeedUpMask = (oldrowcolor == EncodeRowColor(row_bkcol, row_col, bRowSel)) && !blendModeChanged;
+		const bool useSpeedUpMask = (oldrowcolor == EncodeRowColor(row_bkcol, row_col, bRowSel)) && !blendModeChanged;
 		xbmp = nbmp = 0;
 		do
 		{
@@ -967,7 +963,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const bool drawDefaultVolume = DrawDefaultVolume(m);
 
 			DWORD dwSpeedUpMask = 0;
-			if (useSpeedUpMask && (selectedCols[col] & COLUMN_BITS_SKIP) && (row))
+			if(useSpeedUpMask && (m_chnState[col].selectedCols & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
@@ -989,9 +985,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				}
 				if (dwSpeedUpMask == COLUMN_BITS_ALLCOLUMNS) goto DoBlit;
 			}
-			selectedCols[col] |= COLUMN_BITS_SKIP;
+			m_chnState[col].selectedCols |= COLUMN_BITS_SKIP;
 			col_sel = 0;
-			if (bRowSel) col_sel = selectedCols[col] & COLUMN_BITS_ALL;
+			if(bRowSel) col_sel = m_chnState[col].selectedCols & COLUMN_BITS_ALLCOLUMNS;
 			tx_col = row_col;
 			bk_col = row_bkcol;
 			if (col_sel)
@@ -1184,17 +1180,16 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		if (ypaint >= rcClient.bottom) break;
 	}
 	*pypaint = ypaint;
-
 }
 
 
 void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 {
-	if(ChnVUMeters[nChn] == OldVUMeters[nChn])
+	if(m_chnState[nChn].vuMeter == m_chnState[nChn].vuMeterOld)
 		return;
 	
-	uint8 vuL = static_cast<uint8>((ChnVUMeters[nChn] & 0xFF00) >> 8);
-	uint8 vuR = static_cast<uint8>(ChnVUMeters[nChn] & 0xFF);
+	uint8 vuL = static_cast<uint8>((m_chnState[nChn].vuMeter & 0xFF00) >> 8);
+	uint8 vuR = static_cast<uint8>(m_chnState[nChn].vuMeter & 0xFF);
 	vuL /= 15;
 	vuR /= 15;
 	LimitMax(vuL, uint8(8));
@@ -1216,7 +1211,7 @@ void CViewPattern::DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn)
 	BitBlt(hdc, x + midSpacer / 2, y, barWidth, m_ledHeight, m_vuMeterDC, srcOffsetX + barWidth, vuR * m_ledHeight, SRCCOPY);
 	m_vuMeterDC.SelectObject(oldBitmap);
 
-	OldVUMeters[nChn] = ChnVUMeters[nChn];
+	m_chnState[nChn].vuMeterOld = m_chnState[nChn].vuMeter;
 }
 
 
@@ -1799,7 +1794,8 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	const CModDoc *pModDoc = GetDocument();
 	
-	if ((!pModDoc) || (!pMainFrm)) return;
+	if(!pModDoc || !pMainFrm)
+		return;
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	int xofs = GetXScrollPos();
@@ -1807,11 +1803,13 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	const bool isPlaying = (pMainFrm->GetFollowSong(pModDoc) == m_hWnd);
 	int x = m_szHeader.cx;
 	CHANNELINDEX nChn = static_cast<CHANNELINDEX>(xofs);
+	const CHANNELINDEX numChannels = std::min(pModDoc->GetNumChannels(), static_cast<CHANNELINDEX>(m_chnState.size()));
 	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
-	while ((nChn < pModDoc->GetNumChannels()) && (x < rcClient.right))
+	while(nChn < numChannels && x < rcClient.right)
 	{
-		ChnVUMeters[nChn] = static_cast<uint16>(pnotify->pos[nChn]);
-		if ((!isPlaying) || pnotify->type[Notification::Stop]) ChnVUMeters[nChn] = 0;
+		m_chnState[nChn].vuMeter = static_cast<uint16>(pnotify->pos[nChn]);
+		if(!isPlaying || pnotify->type[Notification::Stop])
+			m_chnState[nChn].vuMeter = 0;
 		DrawChannelVUMeter(hdc, x, rcClient.top + yPos, nChn);
 		nChn++;
 		x += m_szCell.cx;
