@@ -67,10 +67,10 @@ jobs:
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
           - { host: macos-14, compiler: '15.3', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
           - { host: macos-13, compiler: '15.2', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
-          - { host: macos-12, compiler: '14.2', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
-          - { host: macos-12, compiler: '14.2', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
-          - { host: macos-12, compiler: '13.2', arch: x86_64, target: '10.13', deps: local, check: true , ancient: true  }
-          - { host: macos-12, compiler: '13.2', arch: x86_64, target: '10.13', deps: small, check: true , ancient: true  }
+          - { host: macos-13, compiler: '14.2', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
+          - { host: macos-13, compiler: '14.2', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
+          - { host: macos-13, compiler: '14.1', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
+          - { host: macos-13, compiler: '14.1', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.target}}-${{matrix.deps}}
       cancel-in-progress: true
@@ -79,24 +79,9 @@ jobs:
     - uses: actions/checkout@v4
     - name: update Homebrew
       run: brew update
-    - name: fixup GitHub Homebrew swiftlint breakage
-      if: ${{ matrix.host == 'macos-12' }}
-      run: brew pin swiftlint
-    - name: fixup GitHub Homebrew xcbeautify breakage
-      if: ${{ matrix.host == 'macos-12' }}
-      run: brew pin xcbeautify
-    - name: fixup GitHub Homebrew go breakage
-      if: ${{ matrix.host == 'macos-12' }}
-      run: brew unlink go@1.21 && brew unlink go && brew link --overwrite go
-    - name: fixup GitHub Homebrew node breakage
-      if: ${{ matrix.host == 'macos-12' }}
-      run: brew unlink node@18 && brew unlink node && brew link --overwrite node
     - name: fixup GitHub Homebrew python breakage
-      if: ${{ matrix.host == 'macos-12' || matrix.host == 'macos-13' }}
+      if: ${{ matrix.host == 'macos-13' }}
       run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
-    - name: upgrade packages
-      if: ${{ matrix.host != 'macos-12' }}
-      run: brew upgrade
     - name: install dependencies
       run: brew install p7zip help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     - name: selecting Xcode version
