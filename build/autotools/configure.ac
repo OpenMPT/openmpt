@@ -24,10 +24,10 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 # We need C++17 support.
-AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
+AX_CXX_COMPILE_STDCXX([20], [noext], [optional])
 AS_IF([test "x$HAVE_CXX20" != "x1"],
  [
-  AX_CXX_COMPILE_STDCXX(17, [noext], [mandatory])
+  AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
  ],[]
 )
 
