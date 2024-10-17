@@ -313,6 +313,9 @@ void CChannelManagerDlg::OnAction(uint8 action)
 				ResetState(false, false, false, true);
 			}
 			break;
+		case kNumTabs:
+			MPT_ASSERT_NOTREACHED();
+			break;
 	}
 
 	ResetState();
@@ -657,6 +660,9 @@ void CChannelManagerDlg::OnPaint()
 			case kReorderRemove:
 				color = state.removed ? redBrush : greenBrush;
 				break;
+			case kNumTabs:
+				MPT_ASSERT_NOTREACHED();
+				break;
 			}
 			::SetDCBrushColor(dc, color);
 			::FillRect(dc, rect, dcBrush);
@@ -941,6 +947,9 @@ void CChannelManagerDlg::MouseEvent(UINT nFlags,CPoint point, MouseButton button
 				{
 					m_moveRect = true;
 				}
+				break;
+			case kNumTabs:
+				MPT_ASSERT_NOTREACHED();
 				break;
 			}
 		}
