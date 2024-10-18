@@ -1046,7 +1046,8 @@ enum CommandID
 	kcOrderlistQueueAtBeatEnd,
 	kcOrderlistQueueAtRowEnd,
 	kcEndOrderlistQueue = kcOrderlistQueueAtRowEnd,
-	kcEndOrderlistCommands = kcEndOrderlistQueue,
+	kcOrderlistStreamExport,
+	kcEndOrderlistCommands = kcOrderlistStreamExport,
 
 	kcStartChnSettingsCommands,
 	kcChnSettingsPrev = kcStartChnSettingsCommands,

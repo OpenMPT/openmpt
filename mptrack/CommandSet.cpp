@@ -1394,6 +1394,7 @@ static constexpr struct
 	{2099, kcGotoCommandColumn, _T("Go to effect command column")},
 	{2100, kcGotoParamColumn, _T("Go to effect parameter column")},
 	{2101, kcContextMenu, _T("Open Context Menu")},
+	{2102, kcOrderlistStreamExport, _T("Stream Export")},
 };
 // clang-format on
 
