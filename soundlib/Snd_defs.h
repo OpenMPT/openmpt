@@ -52,7 +52,7 @@ inline constexpr PLUGINDEX MAX_MIXPLUGINS        = 250;
 
 inline constexpr SEQUENCEINDEX MAX_SEQUENCES     = 50;
 
-inline constexpr CHANNELINDEX MAX_BASECHANNELS   = 127; // Maximum pattern channels.
+inline constexpr CHANNELINDEX MAX_BASECHANNELS   = 192; // Maximum pattern channels.
 inline constexpr CHANNELINDEX MAX_CHANNELS       = 256; // Maximum number of mixing channels.
 
 enum { FREQ_FRACBITS = 4 }; // Number of fractional bits in return value of CSoundFile::GetFreqFromPeriod()
