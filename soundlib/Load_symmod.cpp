@@ -985,6 +985,30 @@ static bool ConvertDSP(const SymEvent event, MIDIMacroConfigData::Macro &macro, 
 }
 
 
+static uint8 MapToClosestMidiMacro(const SymEvent event, std::map<SymEvent, uint8> &macroMap)
+{
+	if(event.command == SymEvent::DSPDelay)
+		return 0;
+	uint8 bestMatch = 0;
+	uint32 bestDistance = uint32_max;
+	for(const auto &m : macroMap)
+	{
+		const auto &mapEvent = m.first;
+		if(event.command != mapEvent.command || event.note != mapEvent.note)
+			continue;
+		const uint32 diff1 = static_cast<uint32>(event.param) - mapEvent.param, diff2 = static_cast<uint32>(event.inst) - mapEvent.inst;
+		const uint32 distance = diff1 * diff1 + diff2 * diff2;
+		if(distance >= bestDistance)
+			continue;
+
+		bestMatch = m.second;
+		bestDistance = distance;
+	}
+	macroMap[event] = bestMatch;
+	return bestMatch;
+}
+
+
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSymMOD(MemoryFileReader file, const uint64 *pfilesize)
 {
 	MPT_UNREFERENCED_PARAMETER(pfilesize);
@@ -1640,9 +1664,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 						case SymEvent::DSPEcho:
 						case SymEvent::DSPDelay:
 #endif
-							if(macroMap.count(event))
+							if(auto it = macroMap.find(event); it != macroMap.end() && it->second != 0)
 							{
-								m.SetEffectCommand(CMD_MIDI, macroMap[event]);
+								m.SetEffectCommand(CMD_MIDI, it->second);
 							} else if(macroMap.size() < m_MidiCfg.Zxx.size())
 							{
 								uint8 param = static_cast<uint8>(macroMap.size());
@@ -1653,6 +1677,9 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									if(event.command == SymEvent::DSPEcho || event.command == SymEvent::DSPDelay)
 										useDSP = true;
 								}
+							} else if(uint8 param = MapToClosestMidiMacro(event, macroMap))
+							{
+								m.SetEffectCommand(CMD_MIDI, param);
 							}
 							break;
 
