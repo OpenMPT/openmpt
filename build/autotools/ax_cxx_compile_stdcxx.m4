@@ -44,7 +44,7 @@
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
-#serial 24
+#serial 25
 
 dnl  This macro is based on the code from the AX_CXX_COMPILE_STDCXX_11 macro
 dnl  (serial version number 13).
@@ -191,11 +191,11 @@ m4_define([_AX_CXX_COMPILE_STDCXX_testbody_20],
 dnl  Test body for checking C++23 support
 
 m4_define([_AX_CXX_COMPILE_STDCXX_testbody_23],
-  _AX_CXX_COMPILE_STDCXX_testbody_new_in_11
-  _AX_CXX_COMPILE_STDCXX_testbody_new_in_14
-  _AX_CXX_COMPILE_STDCXX_testbody_new_in_17
-  _AX_CXX_COMPILE_STDCXX_testbody_new_in_20
-  _AX_CXX_COMPILE_STDCXX_testbody_new_in_23
+  [_AX_CXX_COMPILE_STDCXX_testbody_new_in_11
+   _AX_CXX_COMPILE_STDCXX_testbody_new_in_14
+   _AX_CXX_COMPILE_STDCXX_testbody_new_in_17
+   _AX_CXX_COMPILE_STDCXX_testbody_new_in_20
+   _AX_CXX_COMPILE_STDCXX_testbody_new_in_23]
 )
 
 
