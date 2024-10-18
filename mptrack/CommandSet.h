@@ -1031,7 +1031,8 @@ enum CommandID
 	kcOrderlistLockPlayback = kcStartOrderlistLock,
 	kcOrderlistUnlockPlayback,
 	kcEndOrderlistLock = kcOrderlistUnlockPlayback,
-	kcEndOrderlistCommands = kcEndOrderlistLock,
+	kcOrderlistStreamExport,
+	kcEndOrderlistCommands = kcOrderlistStreamExport,
 
 	kcStartChnSettingsCommands,
 	kcChnSettingsPrev = kcStartChnSettingsCommands,

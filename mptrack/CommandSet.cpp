@@ -1374,6 +1374,7 @@ static constexpr struct
 	{2098, kcGotoVolumeColumn, _T("Go to volume effect column")},
 	{2099, kcGotoCommandColumn, _T("Go to effect command column")},
 	{2100, kcGotoParamColumn, _T("Go to effect parameter column")},
+	{2102, kcOrderlistStreamExport, _T("Stream Export")},
 };
 
 // Get command descriptions etc.. loaded up.

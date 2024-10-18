@@ -560,6 +560,9 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		OnMergePatterns(); return wParam;
 	case kcNewPattern:
 		OnCreateNewPattern(); return wParam;
+
+	case kcOrderlistStreamExport:
+		OnRenderOrder(); return wParam;
 	}
 
 	return kcNull;
@@ -1150,7 +1153,7 @@ void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
 	AppendMenu(hMenu, (sndFile.m_lockOrderStart == ORDERINDEX_INVALID ? (MF_STRING | MF_GRAYED) : MF_STRING), ID_ORDERLIST_UNLOCKPLAYBACK, ih->GetKeyTextFromCommand(kcOrderlistUnlockPlayback, _T("&Unlock Playback")));
 
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
-	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, _T("Render to &Wave"));
+	AppendMenu(hMenu, MF_STRING | greyed, ID_ORDERLIST_RENDER, ih->GetKeyTextFromCommand(kcOrderlistStreamExport, _T("Stream E&xport")));
 
 	ClientToScreen(&pt);
 	::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
