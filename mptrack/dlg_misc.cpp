@@ -79,7 +79,7 @@ CModTypeDlg::CModTypeDlg(CSoundFile &sf, CWnd *parent)
 BOOL CModTypeDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
-	m_nType = sndFile.GetType();
+	m_nType = sndFile.GetBestSaveFormat();
 	m_nChannels = sndFile.GetNumChannels();
 	m_tempoSwing = sndFile.m_tempoSwing;
 	m_playBehaviour = sndFile.m_playBehaviour;
@@ -732,6 +732,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kMIDINotesFromChannelPlugin: desc = _T("MIDI notes can be sent to channel plugins"); break;
 		case kITDoublePortamentoSlides: desc = _T("Parameters of conflicting volume and effect column portamento commands may overwrite each other"); break;
 		case kS3MIgnoreCombinedFineSlides: desc =_T("Ignore combined fine slides (Kxy / Lxy)"); break;
+		case kFT2AutoVibratoAbortSweep: desc = _T("Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

@@ -1848,23 +1848,33 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning
 		} else
 		{
 			// MPT's autovibrato code
+			int32 autoVibDepth = chn.nAutoVibDepth;
+			const int32 fullDepth = pSmp->nVibDepth * 256u;
 			if (pSmp->nVibSweep == 0 && !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)))
 			{
-				chn.nAutoVibDepth = pSmp->nVibDepth * 256;
+				autoVibDepth = fullDepth;
 			} else
 			{
 				// Calculate current autovibrato depth using vibsweep
-				if (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
+				if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT))
 				{
-					chn.nAutoVibDepth += pSmp->nVibSweep * 2u;
+					autoVibDepth += pSmp->nVibSweep * 2u;
+					LimitMax(autoVibDepth, fullDepth);
+					chn.nAutoVibDepth = autoVibDepth;
 				} else
 				{
-					if(!chn.dwFlags[CHN_KEYOFF])
+					if(!chn.dwFlags[CHN_KEYOFF] && autoVibDepth <= fullDepth)
 					{
-						chn.nAutoVibDepth += (pSmp->nVibDepth * 256u) / pSmp->nVibSweep;
+						autoVibDepth += fullDepth / pSmp->nVibSweep;
+						chn.nAutoVibDepth = autoVibDepth;
 					}
+					// FT2 compatibility: Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth
+					// Test case: AutoVibratoSweepKeyOff.xm
+					if(autoVibDepth > fullDepth)
+						autoVibDepth = fullDepth;
+					else if(chn.dwFlags[CHN_KEYOFF] && m_playBehaviour[kFT2AutoVibratoAbortSweep])
+						autoVibDepth = fullDepth / pSmp->nVibSweep;
 				}
-				LimitMax(chn.nAutoVibDepth, static_cast<int>(pSmp->nVibDepth * 256u));
 			}
 			chn.nAutoVibPos += pSmp->nVibRate;
 			int vdelta;
@@ -1896,7 +1906,7 @@ void CSoundFile::ProcessSampleAutoVibrato(ModChannel &chn, int32 &period, Tuning
 					vdelta = (-ITSinusTable[(chn.nAutoVibPos + 192) & 0xFF] + 64) / 2;
 				}
 			}
-			int n = (vdelta * chn.nAutoVibDepth) / 256;
+			int n = (vdelta * autoVibDepth) / 256;
 
 			if(hasTuning)
 			{
