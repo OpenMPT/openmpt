@@ -71,12 +71,12 @@ void ModSequence::AdjustToNewModType(const MODTYPE oldtype)
 		// If not supported, remove "+++" separator order items.
 		if(!specs.hasIgnoreIndex)
 		{
-			RemovePattern(GetIgnoreIndex());
+			RemovePattern(PATTERNINDEX_SKIP);
 		}
 		// If not supported, remove "---" items between patterns.
 		if(!specs.hasStopIndex)
 		{
-			RemovePattern(GetInvalidPatIndex());
+			RemovePattern(PATTERNINDEX_INVALID);
 		}
 	}
 
@@ -101,14 +101,14 @@ ORDERINDEX ModSequence::GetLengthTailTrimmed() const noexcept
 {
 	if(empty())
 		return 0;
-	auto last = std::find_if(rbegin(), rend(), [] (PATTERNINDEX pat) { return pat != GetInvalidPatIndex(); });
+	auto last = std::find_if(rbegin(), rend(), [] (PATTERNINDEX pat) { return pat != PATTERNINDEX_INVALID; });
 	return static_cast<ORDERINDEX>(std::distance(begin(), last.base()));
 }
 
 
 ORDERINDEX ModSequence::GetLengthFirstEmpty() const noexcept
 {
-	return static_cast<ORDERINDEX>(std::distance(begin(), std::find(begin(), end(), GetInvalidPatIndex())));
+	return static_cast<ORDERINDEX>(std::distance(begin(), std::find(begin(), end(), PATTERNINDEX_INVALID)));
 }
 
 
@@ -131,7 +131,7 @@ ORDERINDEX ModSequence::GetNextOrderIgnoringSkips(const ORDERINDEX start) const 
 		return 0;
 	auto length = GetLength();
 	ORDERINDEX next = std::min(ORDERINDEX(length - 1), ORDERINDEX(start + 1));
-	while(next + 1 < length && (*this)[next] == GetIgnoreIndex())
+	while(next + 1 < length && (*this)[next] == PATTERNINDEX_SKIP)
 		next++;
 	return next;
 }
@@ -143,7 +143,7 @@ ORDERINDEX ModSequence::GetPreviousOrderIgnoringSkips(const ORDERINDEX start) co
 	if(start == 0 || last == 0)
 		return 0;
 	ORDERINDEX prev = std::min(ORDERINDEX(start - 1), last);
-	while(prev > 0 && (*this)[prev] == GetIgnoreIndex())
+	while(prev > 0 && (*this)[prev] == PATTERNINDEX_SKIP)
 		prev--;
 	return prev;
 }
@@ -427,12 +427,12 @@ bool ModSequenceSet::SplitSubsongsToMultipleSequences()
 	for(ORDERINDEX ord = 0; ord < length; ord++)
 	{
 		// End of subsong?
-		if(!m_Sequences[0].IsValidPat(ord) && m_Sequences[0][ord] != GetIgnoreIndex())
+		if(!m_Sequences[0].IsValidPat(ord) && m_Sequences[0][ord] != PATTERNINDEX_SKIP)
 		{
 			// Remove all separator patterns between current and next subsong first
 			while(ord < length && !m_sndFile.Patterns.IsValidPat(m_Sequences[0][ord]))
 			{
-				m_Sequences[0][ord] = GetInvalidPatIndex();
+				m_Sequences[0][ord] = PATTERNINDEX_INVALID;
 				ord++;
 				modified = true;
 			}
@@ -448,11 +448,11 @@ bool ModSequenceSet::SplitSubsongsToMultipleSequences()
 			modified = true;
 
 			// Now, move all following orders to the new sequence
-			while(ord < length && m_Sequences[0][ord] != GetInvalidPatIndex())
+			while(ord < length && m_Sequences[0][ord] != PATTERNINDEX_INVALID)
 			{
 				PATTERNINDEX copyPat = m_Sequences[0][ord];
 				m_Sequences[newSeq].push_back(copyPat);
-				m_Sequences[0][ord] = GetInvalidPatIndex();
+				m_Sequences[0][ord] = PATTERNINDEX_INVALID;
 				ord++;
 
 				// Is this a valid pattern? adjust pattern jump commands, if necessary.
@@ -594,7 +594,7 @@ bool ModSequence::HasSubsongs() const noexcept
 {
 	const auto endPat = begin() + GetLengthTailTrimmed();
 	return std::find_if(begin(), endPat,
-		[&](PATTERNINDEX pat) { return pat != GetIgnoreIndex() && !m_sndFile.Patterns.IsValidPat(pat); }) != endPat;
+		[&](PATTERNINDEX pat) { return pat != PATTERNINDEX_SKIP && !m_sndFile.Patterns.IsValidPat(pat); }) != endPat;
 }
 #endif // MODPLUG_TRACKER
 
@@ -614,8 +614,10 @@ size_t ModSequence::WriteAsByte(std::ostream &f, const ORDERINDEX count, uint8 s
 		const PATTERNINDEX pat = (*this)[i];
 		uint8 temp = static_cast<uint8>(pat);
 
-		if(pat == GetInvalidPatIndex()) temp = stopIndex;
-		else if(pat == GetIgnoreIndex() || pat > 0xFF) temp = ignoreIndex;
+		if(pat == PATTERNINDEX_INVALID)
+			temp = stopIndex;
+		else if(pat == PATTERNINDEX_SKIP || pat > 0xFF)
+			temp = ignoreIndex;
 		mpt::IO::WriteIntLE<uint8>(f, temp);
 	}
 	// Fill non-existing order items with stop indices

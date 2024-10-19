@@ -107,7 +107,7 @@ bool CSoundFile::ReadETX(FileReader &file, ModLoadingFlags loadFlags)
 	ReadOrderFromFile<uint8>(Order(), file, 1024, 0xFF);
 	for(ORDERINDEX ord = 0; ord < Order().size(); ord++)
 	{
-		if(Order()[ord] == Order().GetInvalidPatIndex())
+		if(Order()[ord] == PATTERNINDEX_INVALID)
 			Order().resize(ord);
 		else if(Order()[ord] > 127)
 			return false;

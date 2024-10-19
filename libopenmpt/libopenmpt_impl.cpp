@@ -1415,9 +1415,9 @@ std::vector<std::string> module_impl::get_order_names() const {
 		if ( m_sndFile->Patterns.IsValidIndex( pat ) ) {
 			retval.push_back( mod_string_to_utf8( m_sndFile->Patterns[ m_sndFile->Order()[i] ].GetName() ) );
 		} else {
-			if ( pat == m_sndFile->Order.GetIgnoreIndex() ) {
+			if ( pat == OpenMPT::PATTERNINDEX_SKIP ) {
 				retval.push_back( "+++ skip" );
-			} else if ( pat == m_sndFile->Order.GetInvalidPatIndex() ) {
+			} else if ( pat == OpenMPT::PATTERNINDEX_INVALID ) {
 				retval.push_back( "--- stop" );
 			} else {
 				retval.push_back( "???" );

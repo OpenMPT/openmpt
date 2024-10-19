@@ -1385,7 +1385,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		// Sequences are all part of the same song, just add a skip index as a divider
 		ModSequence &order = Order();
 		if(!order.empty())
-			order.push_back(ModSequence::GetIgnoreIndex());
+			order.push_back(PATTERNINDEX_SKIP);
 
 		for(auto &pos : seqPositions)
 		{

@@ -1106,7 +1106,7 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 		if(!Patterns.IsValidPat(0xFE))
 			Order().RemovePattern(0xFE);
 		if(!Patterns.IsValidPat(0xFF))
-			Order().Replace(0xFF, Order.GetInvalidPatIndex());
+			Order().Replace(0xFF, PATTERNINDEX_INVALID);
 	}
 
 	m_modFormat.formatName = MPT_UFORMAT("FastTracker 2 v{}.{}")(fileHeader.version >> 8, mpt::ufmt::hex0<2>(fileHeader.version & 0xFF));
@@ -1186,7 +1186,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 	for(ORDERINDEX ord = 0; ord < trimmedLength; ord++)
 	{
 		PATTERNINDEX pat = Order()[ord];
-		if(pat == Order.GetIgnoreIndex() || pat == Order.GetInvalidPatIndex() || pat > uint8_max)
+		if(pat == PATTERNINDEX_SKIP || pat == PATTERNINDEX_INVALID || pat > uint8_max)
 		{
 			changeOrderList = true;
 		} else if(numOrders < orderLimit)

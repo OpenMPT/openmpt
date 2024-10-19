@@ -210,7 +210,7 @@ bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 
 	if(pSndFile == nullptr)
 		return false;
-	if(pat == pSndFile->Order.GetIgnoreIndex() || pat == pSndFile->Order.GetInvalidPatIndex())
+	if(pat == PATTERNINDEX_SKIP || pat == PATTERNINDEX_INVALID)
 		return false;
 	if(m_pEditWnd && m_pEditWnd->IsWindowVisible())
 		m_pEditWnd->ShowWindow(SW_HIDE);
@@ -1965,7 +1965,7 @@ bool CViewPattern::InsertOrDeleteRows(CHANNELINDEX firstChn, CHANNELINDEX lastCh
 	{
 		auto &order = Order();
 		const auto start = order.begin() + GetCurrentOrder();
-		const auto end = std::find(start, order.end(), order.GetInvalidPatIndex());
+		const auto end = std::find(start, order.end(), PATTERNINDEX_INVALID);
 
 		// As this is a global operation, ensure that all modified patterns are unique
 		bool orderListChanged = false;

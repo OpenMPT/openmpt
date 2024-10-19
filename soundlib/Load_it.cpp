@@ -707,7 +707,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 	if(fileHeader.cwtv == 0x0217 && fileHeader.cmwt == 0x0200 && fileHeader.reserved == 0 && !isBeRoTracker)
 	{
 		if(hasModPlugExtensions
-			|| (!Order().empty() && Order().back() == Order.GetInvalidPatIndex())
+			|| (!Order().empty() && Order().back() == PATTERNINDEX_INVALID)
 			|| memchr(fileHeader.chnpan, 0xFF, sizeof(fileHeader.chnpan)) != nullptr)
 		{
 			m_dwLastSavedWithVersion = MPT_V("1.16");

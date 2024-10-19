@@ -459,12 +459,12 @@ bool CSoundFile::ProcessRow()
 		// Check if pattern is valid
 		if(!m_PlayState.m_flags[SONG_PATTERNLOOP])
 		{
-			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : Order.GetInvalidPatIndex();
-			if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid()) m_PlayState.m_nPattern = Order.GetIgnoreIndex();
+			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : PATTERNINDEX_INVALID;
+			if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid()) m_PlayState.m_nPattern = PATTERNINDEX_SKIP;
 			while (m_PlayState.m_nPattern >= Patterns.Size())
 			{
 				// End of song?
-				if ((m_PlayState.m_nPattern == Order.GetInvalidPatIndex()) || (m_PlayState.m_nCurrentOrder >= Order().size()))
+				if ((m_PlayState.m_nPattern == PATTERNINDEX_INVALID) || (m_PlayState.m_nCurrentOrder >= Order().size()))
 				{
 					ORDERINDEX restartPosOverride = Order().GetRestartPos();
 					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order().size() && m_PlayState.m_nCurrentOrder > 0)
@@ -474,7 +474,7 @@ bool CSoundFile::ProcessRow()
 						// (i.e. the first order after the previous "---" item)
 						for(ORDERINDEX ord = m_PlayState.m_nCurrentOrder - 1; ord > 0; ord--)
 						{
-							if(Order()[ord] == Order.GetInvalidPatIndex())
+							if(Order()[ord] == PATTERNINDEX_INVALID)
 							{
 								// Jump back to first order of this subtune
 								restartPosOverride = ord + 1;
@@ -536,7 +536,7 @@ bool CSoundFile::ProcessRow()
 					m_PlayState.m_nCurrentOrder = restartPosOverride;
 					m_PlayState.m_flags.reset(SONG_BREAKTOROW);
 					//If restart pos points to +++, move along
-					while(m_PlayState.m_nCurrentOrder < Order().size() && Order()[m_PlayState.m_nCurrentOrder] == Order.GetIgnoreIndex())
+					while(m_PlayState.m_nCurrentOrder < Order().size() && Order()[m_PlayState.m_nCurrentOrder] == PATTERNINDEX_SKIP)
 					{
 						m_PlayState.m_nCurrentOrder++;
 					}
@@ -555,10 +555,10 @@ bool CSoundFile::ProcessRow()
 				if (m_PlayState.m_nCurrentOrder < Order().size())
 					m_PlayState.m_nPattern = Order()[m_PlayState.m_nCurrentOrder];
 				else
-					m_PlayState.m_nPattern = Order.GetInvalidPatIndex();
+					m_PlayState.m_nPattern = PATTERNINDEX_INVALID;
 
 				if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid())
-					m_PlayState.m_nPattern = Order.GetIgnoreIndex();
+					m_PlayState.m_nPattern = PATTERNINDEX_SKIP;
 			}
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
 

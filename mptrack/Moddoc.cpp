@@ -2198,7 +2198,8 @@ void CModDoc::OnPlayerPause()
 				{
 					for (ORDERINDEX nOrd = 0; nOrd < m_SndFile.Order().GetLength(); nOrd++)
 					{
-						if (m_SndFile.Order()[nOrd] == m_SndFile.Order.GetInvalidPatIndex()) break;
+						if (m_SndFile.Order()[nOrd] == PATTERNINDEX_INVALID)
+							break;
 						if (m_SndFile.Order()[nOrd] == nPat)
 						{
 							m_SndFile.m_PlayState.m_nCurrentOrder = nOrd;

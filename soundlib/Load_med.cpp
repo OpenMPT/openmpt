@@ -1400,7 +1400,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				file.ReadStruct(playSeq);
 
 				if(!order.empty())
-					order.push_back(order.GetIgnoreIndex());
+					order.push_back(PATTERNINDEX_SKIP);
 
 				const size_t orderStart = order.size();
 				size_t readOrders = playSeq.length;
@@ -1432,11 +1432,11 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 						if(command.command == MMDPlaySeqCommand::kStop)
 						{
-							order[ord] = order.GetInvalidPatIndex();
+							order[ord] = PATTERNINDEX_INVALID;
 						} else if(command.command == MMDPlaySeqCommand::kJump)
 						{
 							jumpTargets[ord] = chunk.ReadUint16BE();
-							order[ord] = order.GetIgnoreIndex();
+							order[ord] = PATTERNINDEX_SKIP;
 						}
 					}
 				}

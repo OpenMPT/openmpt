@@ -416,7 +416,7 @@ bool COrderList::SetCurSel(ORDERINDEX sel, bool setPlayPos, bool shiftClick, boo
 		}
 
 		m_pParent.SetCurrentPattern(n);
-	} else if(setPlayPos && !shiftClick && n != Order().GetIgnoreIndex() && n != Order().GetInvalidPatIndex())
+	} else if(setPlayPos && !shiftClick && n != PATTERNINDEX_SKIP && n != PATTERNINDEX_INVALID)
 	{
 		m_pParent.SetCurrentPattern(n);
 	}
@@ -599,7 +599,7 @@ void COrderList::EnterPatternNum(int enterNum)
 
 	PATTERNINDEX curIndex = Order()[m_nScrollPos];
 	const PATTERNINDEX maxIndex = std::max(PATTERNINDEX(1), sndFile.Patterns.GetNumPatterns()) - 1;
-	const PATTERNINDEX firstInvalid = sndFile.GetModSpecifications().hasIgnoreIndex ? sndFile.Order.GetIgnoreIndex() : sndFile.Order.GetInvalidPatIndex();
+	const PATTERNINDEX firstInvalid = sndFile.GetModSpecifications().hasIgnoreIndex ? PATTERNINDEX_SKIP : PATTERNINDEX_INVALID;
 
 	if(enterNum >= 0 && enterNum <= 9)  // enter 0...9
 	{
@@ -615,7 +615,7 @@ void COrderList::EnterPatternNum(int enterNum)
 	{
 		if(curIndex == 0)
 		{
-			curIndex = sndFile.Order.GetInvalidPatIndex();
+			curIndex = PATTERNINDEX_INVALID;
 		} else if(curIndex > maxIndex && curIndex <= firstInvalid)
 		{
 			curIndex = maxIndex;
@@ -628,7 +628,7 @@ void COrderList::EnterPatternNum(int enterNum)
 		}
 	} else if(enterNum == 11)  // increase pattern index
 	{
-		if(curIndex >= sndFile.Order.GetInvalidPatIndex())
+		if(curIndex >= PATTERNINDEX_INVALID)
 		{
 			curIndex = 0;
 		} else if(curIndex >= maxIndex && curIndex < firstInvalid)
@@ -644,12 +644,10 @@ void COrderList::EnterPatternNum(int enterNum)
 	} else if(enterNum == 12)  // ignore index (+++)
 	{
 		if(sndFile.GetModSpecifications().hasIgnoreIndex)
-		{
-			curIndex = sndFile.Order.GetIgnoreIndex();
-		}
+			curIndex = PATTERNINDEX_SKIP;
 	} else if(enterNum == 13)  // invalid index (---)
 	{
-		curIndex = sndFile.Order.GetInvalidPatIndex();
+		curIndex = PATTERNINDEX_INVALID;
 	}
 	// apply
 	if(curIndex != Order()[m_nScrollPos])
@@ -746,9 +744,9 @@ HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
 			s += _T(", ");
 		first = false;
 		PATTERNINDEX pat = order[o];
-		if(pat == ModSequence::GetIgnoreIndex())
+		if(pat == PATTERNINDEX_SKIP)
 			s += _T(" Skip");
-		else if(pat == ModSequence::GetInvalidPatIndex())
+		else if(pat == PATTERNINDEX_INVALID)
 			s += _T(" Stop");
 		else
 			s += MPT_CFORMAT("Pattern {}")(pat);
@@ -864,9 +862,9 @@ void COrderList::OnPaint()
 			const PATTERNINDEX pat = (ord < order.size()) ? order[ord] : PATTERNINDEX_INVALID;
 			if(ord < maxEntries && (rect.left + m_cxFont - 4) <= rcClient.right)
 			{
-				if(pat == order.GetInvalidPatIndex())
+				if(pat == PATTERNINDEX_INVALID)
 					_tcscpy(s, _T("---"));
-				else if(pat == order.GetIgnoreIndex())
+				else if(pat == PATTERNINDEX_SKIP)
 					_tcscpy(s, _T("+++"));
 				else
 					wsprintf(s, _T("%u"), pat);
@@ -1198,7 +1196,7 @@ void COrderList::OnLButtonDblClk(UINT, CPoint)
 	PATTERNINDEX pat = Order()[m_nScrollPos];
 	if(sndFile.Patterns.IsValidPat(pat))
 		m_pParent.SetCurrentPattern(pat);
-	else if(pat != sndFile.Order.GetIgnoreIndex())
+	else if(pat != PATTERNINDEX_SKIP)
 		OnCreateNewPattern();
 }
 
@@ -1300,14 +1298,14 @@ void COrderList::OnInsertSeparatorPattern()
 
 	if(!EnsureEditable(insertPos))
 		return;
-	if(order[insertPos] != order.GetInvalidPatIndex())
+	if(order[insertPos] != PATTERNINDEX_INVALID)
 	{
 		// If we're not inserting at a stop (---) index, we move on by one position.
 		insertPos++;
-		order.insert(insertPos, 1, order.GetIgnoreIndex());
+		order.insert(insertPos, 1, PATTERNINDEX_SKIP);
 	} else
 	{
-		order[insertPos] = order.GetIgnoreIndex();
+		order[insertPos] = PATTERNINDEX_SKIP;
 	}
 
 	InsertUpdatePlaystate(insertPos, insertPos);
@@ -1556,7 +1554,7 @@ void COrderList::QueuePattern(ORDERINDEX order, OrderTransitionMode transitionMo
 	const ORDERINDEX length = Order().GetLength();
 
 	// If this is not a playable order item, find the next valid item.
-	while(order < length && (Order()[order] == sndFile.Order.GetIgnoreIndex() || Order()[order] == sndFile.Order.GetInvalidPatIndex()))
+	while(order < length && (Order()[order] == PATTERNINDEX_SKIP || Order()[order] == PATTERNINDEX_INVALID))
 	{
 		order++;
 	}

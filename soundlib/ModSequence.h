@@ -59,14 +59,14 @@ public:
 	// Inserts 'count' orders starting from 'pos' using 'fill' as the pattern index for all inserted orders.
 	// Sequence will automatically grow if needed and if it can't grow enough, some tail orders will be discarded.
 	// Return: Number of orders inserted (up to 'count' many).
-	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count) { return insert(pos, count, GetInvalidPatIndex(), true); }
+	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count) { return insert(pos, count, PATTERNINDEX_INVALID, true); }
 	ORDERINDEX insert(ORDERINDEX pos, ORDERINDEX count, PATTERNINDEX fill, bool enforceFormatLimits = true);
 	ORDERINDEX insert(ORDERINDEX pos, const mpt::span<const PATTERNINDEX> orders, bool enforceFormatLimits = true);
 
-	void push_back() { push_back(GetInvalidPatIndex()); }
+	void push_back() { push_back(PATTERNINDEX_INVALID); }
 	void push_back(PATTERNINDEX pat) { if(GetLength() < MAX_ORDERS) std::vector<PATTERNINDEX>::push_back(pat); }
 
-	void resize(ORDERINDEX newSize) { resize(newSize, GetInvalidPatIndex()); }
+	void resize(ORDERINDEX newSize) { resize(newSize, PATTERNINDEX_INVALID); }
 	void resize(ORDERINDEX newSize, PATTERNINDEX pat) { std::vector<PATTERNINDEX>::resize(std::min(MAX_ORDERS, newSize), pat); }
 
 	// Removes orders from range [posBegin, posEnd].
@@ -87,11 +87,6 @@ public:
 	CPattern *PatternAt(ORDERINDEX ord) const noexcept;
 
 	void AdjustToNewModType(const MODTYPE oldtype);
-
-	// Returns the internal representation of a stop '---' index
-	static constexpr PATTERNINDEX GetInvalidPatIndex() noexcept { return uint16_max; }
-	// Returns the internal representation of an ignore '+++' index
-	static constexpr PATTERNINDEX GetIgnoreIndex() noexcept { return uint16_max - 1; }
 
 	// Returns the previous/next order ignoring skip indices (+++).
 	// If no previous/next order exists, return first/last order, and zero
@@ -174,11 +169,6 @@ public:
 	SEQUENCEINDEX AddSequence();
 	// Removes given sequence.
 	void RemoveSequence(SEQUENCEINDEX);
-
-	// Returns the internal representation of a stop '---' index
-	static constexpr PATTERNINDEX GetInvalidPatIndex() noexcept { return ModSequence::GetInvalidPatIndex(); }
-	// Returns the internal representation of an ignore '+++' index
-	static constexpr PATTERNINDEX GetIgnoreIndex() noexcept { return ModSequence::GetIgnoreIndex(); }
 
 #ifdef MODPLUG_TRACKER
 	// Assigns a new set of sequences. The vector contents indicate which existing sequences to keep / duplicate or if a new sequences should be inserted (SEQUENCEINDEX_INVALID)

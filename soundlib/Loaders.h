@@ -34,8 +34,8 @@ bool ReadOrderFromArray(ModSequence &order, const T(&orders)[arraySize], size_t 
 	for(int i = 0; i < readEntries; i++)
 	{
 		PATTERNINDEX pat = static_cast<PATTERNINDEX>(orders[i]);
-		if(pat == stopIndex) pat = order.GetInvalidPatIndex();
-		else if(pat == ignoreIndex) pat = order.GetIgnoreIndex();
+		if(pat == stopIndex) pat = PATTERNINDEX_INVALID;
+		else if(pat == ignoreIndex) pat = PATTERNINDEX_SKIP;
 		order.at(i) = pat;
 	}
 	return true;
@@ -59,8 +59,8 @@ bool ReadOrderFromFile(ModSequence &order, FileReader &file, size_t howMany, uin
 	{
 		file.ReadStruct(patF);
 		pat = static_cast<PATTERNINDEX>(patF);
-		if(pat == stopIndex) pat = order.GetInvalidPatIndex();
-		else if(pat == ignoreIndex) pat = order.GetIgnoreIndex();
+		if(pat == stopIndex) pat = PATTERNINDEX_INVALID;
+		else if(pat == ignoreIndex) pat = PATTERNINDEX_SKIP;
 	}
 	return true;
 }

@@ -1006,7 +1006,7 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 					}
 				} else
 				{
-					if(sndFile.Order(seq)[iOrd] == sndFile.Order.GetIgnoreIndex())
+					if(sndFile.Order(seq)[iOrd] == PATTERNINDEX_SKIP)
 					{
 						// +++ Item
 						wsprintf(s, _T("[%02u] Skip"), iOrd);
@@ -2657,19 +2657,15 @@ bool CModTree::CanDrop(HTREEITEM hItem, bool doDrop)
 						return false;
 					sequenceHint = 0;
 				}
-				sndFile->Order().resize(std::min(sndFile->GetModSpecifications().ordersMax, origSeq.GetLength()), sndFile->Order.GetInvalidPatIndex());
+				sndFile->Order().resize(std::min(sndFile->GetModSpecifications().ordersMax, origSeq.GetLength()), PATTERNINDEX_INVALID);
 				for(ORDERINDEX nOrd = 0; nOrd < std::min(sndFile->GetModSpecifications().ordersMax, origSeq.GetLengthTailTrimmed()); nOrd++)
 				{
 					PATTERNINDEX pat = dragSndFile.Order(origSeqId)[nOrd];
 					// translate pattern index
-					if(pat == dragSndFile.Order.GetInvalidPatIndex())
-						pat = sndFile->Order.GetInvalidPatIndex();
-					else if(pat == dragSndFile.Order.GetIgnoreIndex() && sndFile->GetModSpecifications().hasIgnoreIndex)
-						pat = sndFile->Order.GetIgnoreIndex();
-					else if(pat == dragSndFile.Order.GetIgnoreIndex() && !sndFile->GetModSpecifications().hasIgnoreIndex)
-						pat = sndFile->Order.GetInvalidPatIndex();
+					if(pat == PATTERNINDEX_SKIP && sndFile->GetModSpecifications().hasIgnoreIndex)
+						pat = PATTERNINDEX_SKIP;
 					else if(pat >= sndFile->GetModSpecifications().patternsMax)
-						pat = sndFile->Order.GetInvalidPatIndex();
+						pat = PATTERNINDEX_INVALID;
 					
 					sndFile->Order()[nOrd] = pat;
 				}
@@ -4486,9 +4482,9 @@ void CModTree::OnBeginLabelEdit(NMHDR *nmhdr, LRESULT *result)
 		case MODITEM_ORDER:
 			{
 				PATTERNINDEX pat = sndFile.Order(static_cast<SEQUENCEINDEX>(modItem.val2)).at(static_cast<ORDERINDEX>(modItem.val1));
-				if(pat == sndFile.Order.GetInvalidPatIndex())
+				if(pat == PATTERNINDEX_INVALID)
 					text = UL_("---");
-				else if(pat == sndFile.Order.GetIgnoreIndex())
+				else if(pat == PATTERNINDEX_SKIP)
 					text = UL_("+++");
 				else
 					text = mpt::ufmt::val(pat);
@@ -4593,11 +4589,11 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 				bool valid = true;
 				if(itemText[0] == UC_('-'))
 				{
-					pat = sndFile.Order.GetInvalidPatIndex();
+					pat = PATTERNINDEX_INVALID;
 				} else if(itemText[0] == UC_('+'))
 				{
 					if(modSpecs.hasIgnoreIndex)
-						pat = sndFile.Order.GetIgnoreIndex();
+						pat = PATTERNINDEX_SKIP;
 					else
 						valid = false;
 				} else

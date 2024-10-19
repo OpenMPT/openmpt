@@ -113,7 +113,7 @@ static bool ValidateSTMOrderList(ModSequence &order)
 	for(auto &pat : order)
 	{
 		if(pat == 99 || pat == 255)  // 99 is regular, sometimes a single 255 entry can be found too
-			pat = order.GetInvalidPatIndex();
+			pat = PATTERNINDEX_INVALID;
 		else if(pat > 63)
 			return false;
 	}

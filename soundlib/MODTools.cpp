@@ -459,8 +459,8 @@ PATTERNINDEX GetNumPatterns(FileReader &file, CSoundFile &sndFile, ORDERINDEX nu
 	} else if(numPatternsIllegal >= 0xFF)
 	{
 		// Patterns FE and FF are used with S3M semantics (e.g. some MODs written with old OpenMPT versions)
-		Order.Replace(0xFE, Order.GetIgnoreIndex());
-		Order.Replace(0xFF, Order.GetInvalidPatIndex());
+		Order.Replace(0xFE, PATTERNINDEX_SKIP);
+		Order.Replace(0xFF, PATTERNINDEX_INVALID);
 	}
 
 	return numPatterns;

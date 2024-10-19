@@ -3160,9 +3160,9 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetLengthTailTrimmed(), 3);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetName(), U_("First Sequence"));
-	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[0], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[0], PATTERNINDEX_SKIP);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[1], 0);
-	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[2], sndFile.Order.GetIgnoreIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order(0)[2], PATTERNINDEX_SKIP);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetRestartPos(), 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetDefaultTempo(), TEMPO(139, 999));
 	VERIFY_EQUAL_NONCONT(sndFile.Order(0).GetDefaultSpeed(), 5);
@@ -3370,8 +3370,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetRestartPos(), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Order().GetLengthTailTrimmed(), 5);
 	VERIFY_EQUAL_NONCONT(sndFile.Order()[0], 0);
-	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], sndFile.Order.GetIgnoreIndex());
-	VERIFY_EQUAL_NONCONT(sndFile.Order()[2], sndFile.Order.GetInvalidPatIndex());
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[1], PATTERNINDEX_SKIP);
+	VERIFY_EQUAL_NONCONT(sndFile.Order()[2], PATTERNINDEX_INVALID);
 	VERIFY_EQUAL_NONCONT(sndFile.Order()[3], 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Order()[4], 0);
 

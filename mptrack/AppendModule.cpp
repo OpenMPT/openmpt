@@ -202,12 +202,12 @@ void CModDoc::AppendModule(const CSoundFile &source)
 					continue;
 				}
 				insertPat = patternMapping[srcPat];
-			} else if(srcPat == srcOrder.GetIgnoreIndex() && specs.hasIgnoreIndex)
+			} else if(srcPat == PATTERNINDEX_SKIP && specs.hasIgnoreIndex)
 			{
-				insertPat = m_SndFile.Order.GetIgnoreIndex();
-			} else if(srcPat == srcOrder.GetInvalidPatIndex() && specs.hasStopIndex)
+				insertPat = PATTERNINDEX_SKIP;
+			} else if(srcPat == PATTERNINDEX_INVALID && specs.hasStopIndex)
 			{
-				insertPat = m_SndFile.Order.GetInvalidPatIndex();
+				insertPat = PATTERNINDEX_INVALID;
 			} else
 			{
 				continue;

@@ -87,14 +87,14 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 #endif // NO_PLUGINS
 
 	// Check for invalid order items
-	if(!originalSpecs->hasIgnoreIndex && mpt::contains(m_SndFile.Order(), m_SndFile.Order.GetIgnoreIndex()))
+	if(!originalSpecs->hasIgnoreIndex && mpt::contains(m_SndFile.Order(), PATTERNINDEX_SKIP))
 	{
 		foundHacks = true;
 		AddToLog("This format does not support separator (+++) patterns");
 
 		if(autofix)
 		{
-			m_SndFile.Order().RemovePattern(m_SndFile.Order.GetIgnoreIndex());
+			m_SndFile.Order().RemovePattern(PATTERNINDEX_SKIP);
 		}
 	}
 
@@ -105,7 +105,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 
 		if(autofix)
 		{
-			m_SndFile.Order().RemovePattern(m_SndFile.Order.GetInvalidPatIndex());
+			m_SndFile.Order().RemovePattern(PATTERNINDEX_INVALID);
 		}
 	}
 
@@ -339,7 +339,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->VolEnv.nReleaseNode = instr->PanEnv.nReleaseNode = instr->PitchEnv.nReleaseNode = ENV_RELEASE_NODE_UNSET;
 			}
 		}
-		if((m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (instr->nFadeOut % 32u) != 0)
+		if((modType & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (instr->nFadeOut % 32u) != 0)
 		{
 			foundHere = foundHacks = true;
 			if(autofix)

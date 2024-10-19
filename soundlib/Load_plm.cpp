@@ -385,7 +385,7 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 	PATTERNINDEX blankPat = PATTERNINDEX_INVALID;
 	for(auto &pat : Order())
 	{
-		if(pat == Order.GetInvalidPatIndex())
+		if(pat == PATTERNINDEX_INVALID)
 		{
 			if(blankPat == PATTERNINDEX_INVALID)
 			{

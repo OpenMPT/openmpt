@@ -88,10 +88,10 @@ bool PatternClipboard::Copy(const CSoundFile &sndFile, ORDERINDEX first, ORDERIN
 		if(ord != first)
 			data += ',';
 		
-		if(pattern == order.GetInvalidPatIndex())
+		if(pattern == PATTERNINDEX_INVALID)
 		{
 			data += '-';
-		} else if(pattern == order.GetIgnoreIndex())
+		} else if(pattern == PATTERNINDEX_SKIP)
 		{
 			data += '+';
 		} else if(sndFile.Patterns.IsValidPat(pattern))
@@ -451,10 +451,10 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 
 			if(data[curPos] == '+')
 			{
-				insertPat = order.GetIgnoreIndex();
+				insertPat = PATTERNINDEX_SKIP;
 			} else if(data[curPos] == '-')
 			{
-				insertPat = order.GetInvalidPatIndex();
+				insertPat = PATTERNINDEX_INVALID;
 			} else
 			{
 				insertPat = mpt::parse<PATTERNINDEX>(data.substr(curPos, 10));
@@ -482,8 +482,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 				}
 			}
 
-			if((insertPat == order.GetIgnoreIndex() && !sndFile.GetModSpecifications().hasIgnoreIndex)
-				|| (insertPat == order.GetInvalidPatIndex() && !sndFile.GetModSpecifications().hasStopIndex)
+			if((insertPat == PATTERNINDEX_SKIP && !sndFile.GetModSpecifications().hasIgnoreIndex)
 				|| insertPat == PATTERNINDEX_INVALID
 				|| patternMode == kMultiOverwrite)
 			{
