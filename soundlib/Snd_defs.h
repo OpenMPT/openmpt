@@ -602,6 +602,7 @@ enum PlayBehaviour
 	kITDoublePortamentoSlides,      // IT only reads parameters once per row, so if two commands sharing effect parameters are found in the two effect columns, they influence each other
 	kS3MIgnoreCombinedFineSlides,   // S3M commands Kxy and Lxy ignore fine slides
 	kFT2AutoVibratoAbortSweep,      // Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth
+	kLegacyPPQpos,                  // Report fake PPQ position to VST plugins
 
 	// Add new play behaviours here.
 

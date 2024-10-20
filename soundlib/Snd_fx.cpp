@@ -91,6 +91,8 @@ public:
 		state->m_lTotalSampleCount = 0;
 		state->m_nMusicSpeed = sndFile.Order(m_sequence).GetDefaultSpeed();
 		state->m_nMusicTempo = sndFile.Order(m_sequence).GetDefaultTempo();
+		state->m_ppqPosFract = 0.0;
+		state->m_ppqPosBeat = 0;
 		state->m_nGlobalVolume = sndFile.m_nDefaultGlobalVolume;
 		state->m_globalScriptState.Initialize(sndFile);
 		chnSettings.assign(sndFile.GetNumChannels(), {});
@@ -555,6 +557,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			playState.m_nRow = 0;
 		}
 
+		playState.UpdatePPQ(breakToRow);
 		playState.UpdateTimeSignature(*this);
 
 		if(ignoreRow)
@@ -1066,6 +1069,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		playState.m_lTotalSampleCount += rowDuration;
+		playState.m_ppqPosFract += 1.0 / playState.m_nCurrentRowsPerBeat;
 
 		if(adjustSamplePos)
 		{

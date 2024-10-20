@@ -362,6 +362,8 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 		countToRender -= countChunk;
 		m_PlayState.m_nBufferCount -= countChunk;
 		m_PlayState.m_lTotalSampleCount += countChunk;
+		if(!m_PlayState.m_nBufferCount && !m_PlayState.m_flags[SONG_PAUSED])
+			m_PlayState.m_ppqPosFract += 1.0 / (m_PlayState.m_nCurrentRowsPerBeat * m_PlayState.TicksOnRow());
 
 #ifdef MODPLUG_TRACKER
 		if(IsRenderingToDisc())
@@ -454,6 +456,8 @@ bool CSoundFile::ProcessRow()
 #else
 		MPT_UNUSED_VARIABLE(patternTransition);
 #endif // MODPLUG_TRACKER
+
+		m_PlayState.UpdatePPQ(patternTransition);
 
 		// Check if pattern is valid
 		if(!m_PlayState.m_flags[SONG_PATTERNLOOP])

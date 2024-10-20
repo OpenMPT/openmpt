@@ -294,6 +294,17 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		}
 		m_nextClock -= numFrames;
 
+		if(m_sendTimingInfo && !m_positionChanged && m_SndFile.m_PlayState.m_ppqPosFract == 0.0)
+		{
+			// Send Song Position on every pattern change or start of new measure
+			uint16 ppq = mpt::saturate_cast<uint16>((m_SndFile.m_PlayState.m_ppqPosBeat + m_SndFile.m_PlayState.m_ppqPosFract) * 4.0);
+			if(ppq < 16384)
+			{
+				uint32 midiCode = MIDIEvents::SongPosition(ppq);
+				m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode))));
+			}
+		}
+
 		double now = m_clock.Now() * (1.0 / 1000.0);
 		auto message = m_outQueue.begin();
 		while(message != m_outQueue.end() && message->m_time <= now)
@@ -308,6 +319,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		}
 		m_outQueue.erase(m_outQueue.begin(), message);
 	}
+	m_positionChanged = false;
 }
 
 
@@ -406,8 +418,12 @@ void MidiInOut::PositionChanged()
 	if(m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
 		MidiSend(0xFC);  // Stop
+		uint16 ppq = mpt::saturate_cast<uint16>((m_SndFile.m_PlayState.m_ppqPosBeat + m_SndFile.m_PlayState.m_ppqPosFract) * 4.0);
+		if(ppq < 16384)
+			MidiSend(MIDIEvents::SongPosition(ppq));
 		MidiSend(0xFA);  // Start
 	}
+	m_positionChanged = true;
 }
 
 

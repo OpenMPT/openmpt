@@ -733,6 +733,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kITDoublePortamentoSlides: desc = _T("Parameters of conflicting volume and effect column portamento commands may overwrite each other"); break;
 		case kS3MIgnoreCombinedFineSlides: desc =_T("Ignore combined fine slides (Kxy / Lxy)"); break;
 		case kFT2AutoVibratoAbortSweep: desc = _T("Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth"); break;
+		case kLegacyPPQpos: desc = _T("Report inaccurate PPQ position to VST plugins (like OpenMPT 1.31 and older)"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

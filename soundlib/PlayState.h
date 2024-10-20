@@ -32,7 +32,9 @@ protected:
 	double m_dBufferDiff = 0.0;        // Modern tempo rounding error compensation
 
 public:
-	uint32 m_nTickCount = 0;  // Current tick being processed
+	double m_ppqPosFract = 0.0;  // Fractional PPQ position within current measure
+	uint32 m_ppqPosBeat = 0;     // PPQ position of the last start of measure
+	uint32 m_nTickCount = 0;     // Current tick being processed
 protected:
 	uint32 m_nPatternDelay = 0;  // Pattern delay (rows)
 	uint32 m_nFrameDelay = 0;    // Fine pattern delay (ticks)
@@ -89,6 +91,7 @@ public:
 	void ResetGlobalVolumeRamping() noexcept;
 
 	void UpdateTimeSignature(const CSoundFile &sndFile) noexcept;
+	void UpdatePPQ(bool patternTransition) noexcept;
 
 	constexpr uint32 TicksOnRow() const noexcept
 	{

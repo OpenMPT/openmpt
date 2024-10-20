@@ -133,6 +133,7 @@ protected:
 	MidiDevice m_inputDevice;
 	MidiDevice m_outputDevice;
 	bool m_sendTimingInfo = true;
+	bool m_positionChanged = false;
 
 #ifdef MODPLUG_TRACKER
 	CString m_programName;

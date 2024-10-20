@@ -352,9 +352,12 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	};
 
 	CVstPlugin *pVstPlugin = nullptr;
+	CSoundFile *sndFile = nullptr;
 	if(effect != nullptr)
 	{
 		pVstPlugin = static_cast<CVstPlugin *>(effect->reservedForHost1);
+		if(pVstPlugin)
+			sndFile = &pVstPlugin->GetSoundFile();
 	}
 
 	switch(opcode)
@@ -412,12 +415,13 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			MemsetZero(timeInfo);
 
 			timeInfo.sampleRate = pVstPlugin->m_nSampleRate;
-			CSoundFile &sndFile = pVstPlugin->GetSoundFile();
 			if(pVstPlugin->IsSongPlaying())
 			{
-				timeInfo.flags |= kVstTransportPlaying;
-				if(pVstPlugin->GetSoundFile().m_PlayState.m_flags[SONG_PATTERNLOOP]) timeInfo.flags |= kVstTransportCycleActive;
-				timeInfo.samplePos = sndFile.GetTotalSampleCount();
+				if(!sndFile->m_PlayState.m_flags[SONG_PAUSED])
+					timeInfo.flags |= kVstTransportPlaying;
+				if(sndFile->m_PlayState.m_flags[SONG_PATTERNLOOP])
+					timeInfo.flags |= kVstTransportCycleActive;
+				timeInfo.samplePos = sndFile->GetTotalSampleCount();
 				if(pVstPlugin->m_positionChanged)
 				{
 					timeInfo.flags |= kVstTransportChanged;
@@ -437,20 +441,20 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			if((value & kVstPpqPosValid))
 			{
 				timeInfo.flags |= kVstPpqPosValid;
-				if (timeInfo.flags & kVstTransportPlaying)
-				{
-					timeInfo.ppqPos = (timeInfo.samplePos / timeInfo.sampleRate) * (sndFile.GetCurrentBPM() / 60.0);
-				} else
-				{
-					timeInfo.ppqPos = 0;
-				}
+				if(sndFile->m_playBehaviour[kLegacyPPQpos])
+					timeInfo.ppqPos = (timeInfo.samplePos / timeInfo.sampleRate) * (sndFile->GetCurrentBPM() / 60.0);
+				else
+					timeInfo.ppqPos = sndFile->m_PlayState.m_ppqPosBeat + sndFile->m_PlayState.m_ppqPosFract;
 
 				ROWINDEX rpm = pVstPlugin->GetSoundFile().m_PlayState.m_nCurrentRowsPerMeasure;
 				if(!rpm)
 					rpm = 4;
 				if((pVstPlugin->GetSoundFile().m_PlayState.m_nRow % rpm) == 0)
 				{
-					pVstPlugin->lastBarStartPos = std::floor(timeInfo.ppqPos);
+					if(sndFile->m_playBehaviour[kLegacyPPQpos])
+						pVstPlugin->lastBarStartPos = std::floor(timeInfo.ppqPos);
+					else
+						pVstPlugin->lastBarStartPos = sndFile->m_PlayState.m_ppqPosBeat;  // Only updated at start of measure
 				}
 				if(pVstPlugin->lastBarStartPos >= 0)
 				{
@@ -460,7 +464,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			}
 			if((value & kVstTempoValid))
 			{
-				timeInfo.tempo = sndFile.GetCurrentBPM();
+				timeInfo.tempo = sndFile->GetCurrentBPM();
 				if (timeInfo.tempo)
 				{
 					timeInfo.flags |= kVstTempoValid;
@@ -472,8 +476,8 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
 				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
-				ROWINDEX rpb = std::max(sndFile.m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
-				timeInfo.timeSigNumerator = std::max(sndFile.m_PlayState.m_nCurrentRowsPerMeasure, rpb) / rpb;
+				ROWINDEX rpb = std::max(sndFile->m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
+				timeInfo.timeSigNumerator = std::max(sndFile->m_PlayState.m_nCurrentRowsPerMeasure, rpb) / rpb;
 				timeInfo.timeSigDenominator = 4; //std::gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
 			}
 			return ToIntPtr(&timeInfo);
@@ -500,9 +504,9 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	// returns tempo (in bpm * 10000) at sample frame location passed in <value> - DEPRECATED in VST 2.4
 	case audioMasterTempoAt:
 		// Screw it! Let's just return the tempo at this point in time (might be a bit wrong).
-		if (pVstPlugin != nullptr)
+		if(sndFile != nullptr)
 		{
-			return mpt::saturate_round<int32>(pVstPlugin->GetSoundFile().GetCurrentBPM() * 10000);
+			return mpt::saturate_round<int32>(sndFile->GetCurrentBPM() * 10000);
 		}
 		return (125 * 10000);
 
@@ -571,7 +575,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 	case audioMasterGetOutputLatency:
 		if(pVstPlugin)
 		{
-			return mpt::saturate_round<intptr_t>(pVstPlugin->GetOutputLatency() * pVstPlugin->GetSoundFile().GetSampleRate());
+			return mpt::saturate_round<intptr_t>(pVstPlugin->GetOutputLatency() * sndFile->GetSampleRate());
 		}
 		break;
 
@@ -615,7 +619,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		return 1; //we replace.
 
 	case audioMasterGetCurrentProcessLevel:
-		if(pVstPlugin != nullptr && pVstPlugin->GetSoundFile().IsRenderingToDisc())
+		if(sndFile != nullptr && sndFile->IsRenderingToDisc())
 			return kVstProcessLevelOffline;
 		else
 			return kVstProcessLevelRealtime;

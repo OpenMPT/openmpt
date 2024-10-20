@@ -926,6 +926,8 @@ void CSoundFile::ResetPlayPos()
 	m_PlayState.m_nFrameDelay = 0;
 	m_PlayState.m_nextPatStartRow = 0;
 	m_PlayState.m_lTotalSampleCount = 0;
+	m_PlayState.m_ppqPosFract = 0.0;
+	m_PlayState.m_ppqPosBeat = 0;
 	m_PlayState.m_globalScriptState.Initialize(*this);
 }
 
