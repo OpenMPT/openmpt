@@ -5,6 +5,7 @@ The following changes have been made:
 - https://github.com/xiph/vorbis/pull/100 and
   https://github.com/xiph/vorbis/pull/101 have been applied.
 - GCC warnings in lib/lpc.c and lib/psy.c have been silenced.
+- os.h has been modified to build for ARM64EC.
 - All modifications have been marked with /* OpenMPT */.
 - For building, premake is used to generate Visual Studio project files.
   See ../build/premake/ for details.
