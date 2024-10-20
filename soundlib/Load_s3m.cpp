@@ -283,9 +283,16 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			// though several ST3.01/3.03 files with ultra-click values of 16 have been found as well.
 			// However, we won't fingerprint these values here as it's unlikely that there is any other tracker out there disguising as ST3 and using a strange ultra-click value.
 			// Also, re-saving a file with a strange ultra-click value in ST3 doesn't fix this value unless the user manually changes it, or if it's below 16.
-			madeWithTracker = UL_("Scream Tracker");
-			formatTrackerStr = true;
 			isST3 = true;
+			if(fileHeader.cwtv == S3MFileHeader::trkST3_20)
+			{
+				// 3.21 writes the version number as 3.20. There is no known way to differentiate between the two.
+				madeWithTracker = UL_("Scream Tracker 3.20 - 3.21");
+			} else
+			{
+				madeWithTracker = UL_("Scream Tracker");
+				formatTrackerStr = true;
+			}
 		}
 		break;
 	case S3MFileHeader::trkImagoOrpheus:
