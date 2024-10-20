@@ -1314,6 +1314,26 @@ Declare Function openmpt_module_is_pattern_stop_item(ByVal module As openmpt_mod
 '/
 Declare Function openmpt_module_get_pattern_num_rows(ByVal module As openmpt_module Ptr, ByVal pattern As Long) As Long
 
+/'* \brief Get the rows per beat of a pattern
+
+  \param mod The module handle to work on.
+  \param pattern The pattern whose time signature should be retrieved.
+  \return The rows per beat of the given pattern. If the pattern does not exist or the time signature is not defined, 0 is returned.
+  \remarks Many module formats lack time signature metadata. In this case, the returned value may be an incorrect estimation.
+  \since 0.8.0
+'/
+Declare Function openmpt_module_get_pattern_rows_per_beat(ByVal module As openmpt_module Ptr, ByVal pattern As Long) As Long
+
+/'* \brief Get the rows per measure of a pattern
+
+  \param mod The module handle to work on.
+  \param pattern The pattern whose time signature should be retrieved.
+  \return The rows per measure of the given pattern. If the pattern does not exist or the time signature is not defined, 0 is returned.
+  \remarks Many module formats lack time signature metadata. In this case, the returned value may be an incorrect estimation.
+  \since 0.8.0
+'/
+Declare Function openmpt_module_get_pattern_rows_per_measure(ByVal module As openmpt_module Ptr, ByVal pattern As Long) As Long
+
 /'* \brief Get raw pattern content
 
   \param module The module handle to work on.

@@ -1029,6 +1029,24 @@ public:
 	*/
 	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_pattern_num_rows( std::int32_t pattern ) const;
 
+	//! Get the rows per beat of a pattern
+	/*!
+	  \param pattern The pattern whose time signature should be retrieved.
+	  \return The rows per beat of the given pattern. If the pattern does not exist or the time signature is not defined, 0 is returned.
+	  \remarks Many module formats lack time signature metadata. In this case, the returned value may be an incorrect estimation.
+	  \since 0.8.0
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_pattern_rows_per_beat( std::int32_t pattern ) const;
+
+	//! Get the rows per measure of a pattern
+	/*!
+	  \param pattern The pattern whose time signature should be retrieved.
+	  \return The rows per measure of the given pattern. If the pattern does not exist or the time signature is not defined, 0 is returned.
+	  \remarks Many module formats lack time signature metadata. In this case, the returned value may be an incorrect estimation.
+	  \since 0.8.0
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_pattern_rows_per_measure( std::int32_t pattern ) const;
+
 	//! Get raw pattern content
 	/*!
 	  \param pattern The pattern whose data should be retrieved.

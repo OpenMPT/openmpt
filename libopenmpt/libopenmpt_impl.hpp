@@ -249,6 +249,8 @@ public:
 	bool is_order_stop_entry( std::int32_t order ) const;
 	static bool is_pattern_stop_item( std::int32_t pattern );
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
+	std::int32_t get_pattern_rows_per_beat( std::int32_t pattern ) const;
+	std::int32_t get_pattern_rows_per_measure( std::int32_t pattern ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::string format_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::string highlight_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;

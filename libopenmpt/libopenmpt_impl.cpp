@@ -1484,6 +1484,26 @@ std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 	return m_sndFile->Patterns[p].GetNumRows();
 }
 
+std::int32_t module_impl::get_pattern_rows_per_beat( std::int32_t p ) const {
+	if ( !mpt::is_in_range( p, std::numeric_limits<OpenMPT::PATTERNINDEX>::min(), std::numeric_limits<OpenMPT::PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<OpenMPT::PATTERNINDEX>( p ) ) ) {
+		return 0;
+	}
+	if ( m_sndFile->Patterns[p].GetOverrideSignature() ) {
+		return m_sndFile->Patterns[p].GetRowsPerBeat();
+	}
+	return m_sndFile->m_nDefaultRowsPerBeat;
+}
+
+std::int32_t module_impl::get_pattern_rows_per_measure( std::int32_t p ) const {
+	if ( !mpt::is_in_range( p, std::numeric_limits<OpenMPT::PATTERNINDEX>::min(), std::numeric_limits<OpenMPT::PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<OpenMPT::PATTERNINDEX>( p ) ) ) {
+		return 0;
+	}
+	if ( m_sndFile->Patterns[p].GetOverrideSignature() ) {
+		return m_sndFile->Patterns[p].GetRowsPerMeasure();
+	}
+	return m_sndFile->m_nDefaultRowsPerMeasure;
+}
+
 std::uint8_t module_impl::get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const {
 	if ( !mpt::is_in_range( p, std::numeric_limits<OpenMPT::PATTERNINDEX>::min(), std::numeric_limits<OpenMPT::PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<OpenMPT::PATTERNINDEX>( p ) ) ) {
 		return 0;

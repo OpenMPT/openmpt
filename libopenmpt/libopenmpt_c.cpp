@@ -1273,6 +1273,25 @@ int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t patte
 	return 0;
 }
 
+int32_t openmpt_module_get_pattern_rows_per_beat( openmpt_module * mod, int32_t pattern ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_pattern_rows_per_beat( pattern );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int32_t openmpt_module_get_pattern_rows_per_measure( openmpt_module * mod, int32_t pattern ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_pattern_rows_per_measure( pattern );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+
 uint8_t openmpt_module_get_pattern_row_channel_command( openmpt_module * mod, int32_t pattern, int32_t row, int32_t channel, int command ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
