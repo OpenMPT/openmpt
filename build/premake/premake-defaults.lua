@@ -20,6 +20,9 @@
 	filter { "platforms:arm64" }
 		system "Windows"
 		architecture "ARM64"
+	filter { "platforms:arm64ec" }
+		system "Windows"
+		architecture "ARM64EC"
 	filter {}
 	
 	function mpt_kind(mykind)
@@ -155,6 +158,8 @@
 		resdefines { "VER_ARCHNAME=\"arm\"" }
 	filter { "action:vs*", "architecture:ARM64" }
 		resdefines { "VER_ARCHNAME=\"arm64\"" }
+	filter { "action:vs*", "architecture:ARM64EC" }
+		resdefines { "VER_ARCHNAME=\"arm64ec\"" }
 	filter {}
 
   filter { "kind:StaticLib" }
@@ -209,14 +214,30 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
+  filter { "kind:not StaticLib", "configurations:Debug", "architecture:ARM64EC" }
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64ec" )
+  filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:ARM64EC" }
+		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64ec" )
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:ARM64EC" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64ec" )
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:ARM64EC" }
+		targetdir ( "../../bin/checked/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64ec" )
+  filter { "kind:not StaticLib", "configurations:Release", "architecture:ARM64EC" }
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64ec" )
+  filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64EC" }
+		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64ec" )
 
 	filter { "configurations:Debug", "architecture:ARM" }
 		editandcontinue "Off"
 	filter { "configurations:Debug", "architecture:ARM64" }
 		editandcontinue "Off"
+	filter { "configurations:Debug", "architecture:ARM64EC" }
+		editandcontinue "Off"
 	filter { "configurations:DebugShared", "architecture:ARM" }
 		editandcontinue "Off"
 	filter { "configurations:DebugShared", "architecture:ARM64" }
+		editandcontinue "Off"
+	filter { "configurations:DebugShared", "architecture:ARM64EC" }
 		editandcontinue "Off"
 
 	filter { "configurations:Debug" }
@@ -226,7 +247,9 @@
 		symbols "On"
 	filter { "configurations:Debug", "architecture:ARM64" }
 		symbols "On"
-	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64" }
+	filter { "configurations:Debug", "architecture:ARM64EC" }
+		symbols "On"
+	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64", "architecture:not ARM64EC" }
 		symbols "FastLink"
 	filter { "configurations:Debug" }
 		if _OPTIONS["windows-family"] ~= "uwp" then
@@ -405,6 +428,9 @@
 		filter {}
 		filter { "architecture:ARM64" }
 			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
+		filter {}
+		filter { "architecture:ARM64EC" }
+			defines { "NTDDI_VERSION=0x0A00000E" } -- Windows 11 Build 22000
 		filter {}
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
