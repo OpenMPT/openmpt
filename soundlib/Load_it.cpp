@@ -1234,15 +1234,18 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				if(fileHeader.cmwt > 0x0214)
 				{
 					madeWithTracker = UL_("Impulse Tracker 2.15");
-				} else if(fileHeader.cwtv > 0x0214)
-				{
-					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
-					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
-					// anything as far as file saving is concerned.
-					madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - 0x0214);
-				} else
+				} else if(fileHeader.cwtv <= 0x0214)
 				{
 					madeWithTracker = MPT_UFORMAT("Impulse Tracker {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
+				} else
+				{
+					switch(fileHeader.cwtv)
+					{
+					case 0x0215: madeWithTracker = UL_("Impulse Tracker 2.14p1 / 2.15");   break;
+					case 0x0216: madeWithTracker = UL_("Impulse Tracker 2.14p2/3 / 2.15"); break;  // Includes the 2.15 build on Modland
+					case 0x0217: madeWithTracker = UL_("Impulse Tracker 2.14p4/5 / 2.15"); break;  // Includes current GitHub version
+					default:     madeWithTracker = UL_("Impulse Tracker 2.15");
+					}
 				}
 				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{

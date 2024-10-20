@@ -308,12 +308,16 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			madeWithTracker = UL_("Impulse Tracker");
 			formatTrackerStr = true;
-		} else if(fileHeader.cwtv == S3MFileHeader::trkIT1_old)
-		{
-			madeWithTracker = UL_("Impulse Tracker 1.03");  // Could also be 1.02, maybe? I don't have that one
 		} else
 		{
-			madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
+			switch(fileHeader.cwtv)
+			{
+				case S3MFileHeader::trkIT1_old:    madeWithTracker = UL_("Impulse Tracker 1.03");            break;  // Could also be 1.02, maybe? I don't have that one
+				case S3MFileHeader::trkIT2_14 + 1: madeWithTracker = UL_("Impulse Tracker 2.14p1 / 2.15");   break;
+				case S3MFileHeader::trkIT2_14 + 2: madeWithTracker = UL_("Impulse Tracker 2.14p2/3 / 2.15"); break;  // Includes the 2.15 build on Modland
+				case S3MFileHeader::trkIT2_14 + 3: madeWithTracker = UL_("Impulse Tracker 2.14p4/5 / 2.15"); break;  // Includes current GitHub version
+				default:                           madeWithTracker = UL_("Impulse Tracker 2.15");
+			}
 		}
 		if(fileHeader.cwtv >= S3MFileHeader::trkIT2_07 && fileHeader.reserved3 != 0)
 		{
