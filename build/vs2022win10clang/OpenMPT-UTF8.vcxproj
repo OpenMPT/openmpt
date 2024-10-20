@@ -1684,6 +1684,7 @@
     <ClInclude Include="..\..\mptrack\plugins\MidiInOutEditor.h" />
     <ClInclude Include="..\..\mptrack\plugins\VstDefinitions.h" />
     <ClInclude Include="..\..\mptrack\plugins\VstEventQueue.h" />
+    <ClInclude Include="..\..\mptrack\plugins\VstOpCodes.h" />
     <ClInclude Include="..\..\mptrack\resource.h" />
     <ClInclude Include="..\..\mptrack\tuningRatioMapWnd.h" />
     <ClInclude Include="..\..\mptrack\view_com.h" />
@@ -1747,7 +1748,6 @@
     <ClInclude Include="..\..\soundlib\patternContainer.h" />
     <ClInclude Include="..\..\soundlib\plugins\DigiBoosterEcho.h" />
     <ClInclude Include="..\..\soundlib\plugins\LFOPlugin.h" />
-    <ClInclude Include="..\..\soundlib\plugins\OpCodes.h" />
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginManager.h" />
     <ClInclude Include="..\..\soundlib\plugins\PluginMixBuffer.h" />

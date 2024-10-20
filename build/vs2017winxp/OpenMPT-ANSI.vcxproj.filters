@@ -648,6 +648,9 @@
     <ClInclude Include="..\..\mptrack\plugins\VstEventQueue.h">
       <Filter>mptrack\plugins</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\plugins\VstOpCodes.h">
+      <Filter>mptrack\plugins</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\resource.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -835,9 +838,6 @@
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\LFOPlugin.h">
-      <Filter>soundlib\plugins</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\soundlib\plugins\OpCodes.h">
       <Filter>soundlib\plugins</Filter>
     </ClInclude>
     <ClInclude Include="..\..\soundlib\plugins\PlugInterface.h">

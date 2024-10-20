@@ -462,7 +462,6 @@
 		8F52A05ED3A145D015C87E9E /* Profiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Profiler.cpp; path = ../../common/Profiler.cpp; sourceTree = "<group>"; };
 		9061AC518460F5C3094C0A91 /* SampleFormatBRR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SampleFormatBRR.cpp; path = ../../soundlib/SampleFormatBRR.cpp; sourceTree = "<group>"; };
 		90E45EE632CDFAD829F50D26 /* mptStringBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptStringBuffer.h; path = ../../common/mptStringBuffer.h; sourceTree = "<group>"; };
-		9133E604FE5BF476FFEEE444 /* OpCodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = OpCodes.h; path = ../../soundlib/plugins/OpCodes.h; sourceTree = "<group>"; };
 		915D6003E8C2D2F59AD0EE43 /* message.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = message.hpp; path = ../../src/mpt/format/message.hpp; sourceTree = "<group>"; };
 		91AA522185A99B930A94B061 /* I3DL2Reverb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = I3DL2Reverb.h; path = ../../soundlib/plugins/dmo/I3DL2Reverb.h; sourceTree = "<group>"; };
 		91EC613953A4F2ABFABFBF79 /* libopenmpt_stream_callbacks_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = libopenmpt_stream_callbacks_file.h; path = ../../libopenmpt/libopenmpt_stream_callbacks_file.h; sourceTree = "<group>"; };
@@ -753,7 +752,6 @@
 				45D0E0DE525B9350CD405F1E /* DigiBoosterEcho.h */,
 				D6BBDE00997C3E72F6B11C40 /* LFOPlugin.cpp */,
 				6858F8CA2EE6F03C9CE9170A /* LFOPlugin.h */,
-				9133E604FE5BF476FFEEE444 /* OpCodes.h */,
 				D89E49F2E528FC64600DC832 /* PlugInterface.cpp */,
 				6058487C545791EED942A6BC /* PlugInterface.h */,
 				CE32D5B4DABD882655A253F4 /* PluginManager.cpp */,

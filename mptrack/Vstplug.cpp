@@ -26,12 +26,12 @@
 #endif // MODPLUG_TRACKER
 #include "FileDialog.h"
 #include "MIDIMappingDialog.h"
+#include "plugins/VstOpCodes.h"
 #include "../common/mptStringBuffer.h"
 #include "../misc/mptOSException.h"
 #include "../pluginBridge/BridgeOpCodes.h"
 #include "../pluginBridge/BridgeWrapper.h"
 #include "../soundlib/MIDIEvents.h"
-#include "../soundlib/plugins/OpCodes.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "../soundlib/Sndfile.h"
 #include "mpt/string/utility.hpp"
