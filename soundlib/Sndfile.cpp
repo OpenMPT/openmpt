@@ -1796,7 +1796,7 @@ std::vector<SubSong> CSoundFile::GetAllSubSongs()
 		subSongs.reserve(subSongs.size() + subSongsSeq.size());
 		for(const auto &song : subSongsSeq)
 		{
-			subSongs.push_back({song.duration, song.startRow, song.endRow, song.lastRow, song.startOrder, song.endOrder, song.restartOrder, seq});
+			subSongs.push_back({song.duration, song.startRow, song.endRow, song.restartRow, song.startOrder, song.endOrder, song.restartOrder, seq});
 		}
 	}
 	return subSongs;
