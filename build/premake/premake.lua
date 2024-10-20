@@ -202,7 +202,15 @@ mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
 mpt_bindirsuffix = _OPTIONS["windows-version"]
 
 if _OPTIONS["windows-version"] == "win10" then
-	allplatforms = { "x86", "x86_64", "arm", "arm64" }
+	if _OPTIONS["clang"] then
+		allplatforms = { "x86", "x86_64", "arm", "arm64" }
+	else
+		if _OPTIONS["windows-family"] == "uwp" then
+			allplatforms = { "x86", "x86_64", "arm", "arm64" }
+		else
+			allplatforms = { "x86", "x86_64", "arm", "arm64", "arm64ec" }
+		end
+	end
 elseif _OPTIONS["windows-version"] == "win81" then
 	allplatforms = { "x86", "x86_64", "arm" }
 elseif _OPTIONS["windows-version"] == "win8" then
