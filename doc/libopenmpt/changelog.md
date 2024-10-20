@@ -7,13 +7,51 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.0-pre
 
- *  [**New**] MOD: Can now read modified 8-channel MOD files from the DOS game
-    Aleshar - The World Of Ice.
+ *  [**New**] Can now read PumaTracker (`PUMA`) modules.
+ *  [**New**] Can now read Face The Music (`FTM`) modules.
+ *  [**New**] Can now read Game Music Creator (`GMC`) modules.
+ *  [**New**] Can now read Chuck Biscuits / Black Artist (`CBA`) modules from
+    the Expoze musicdisk by Heretics
+ *  [**New**] Can now read Real Tracker 2 (`RTM`) modules.
+ *  [**New**] Can now read Images Music System (`IMS`) modules.
+ *  [**New**] Can now read ChipTracker (`MOD`) modules.
+ *  [**New**] Can now read EasyTrax (`ETX`) modules.
+ *  [**New**] MED: Synthesized and hybrid instruments are now supported.
+ *  [**New**] GT2: Better support for old "envelopes", in particular adding
+    support for the previously missing tremor / tremolo / vibrato.
+ *  [**New**] NST: His Master's Noise "Mupp" instruments are now supported,
+    as well as command 7 "mega-arp".
+
  *  [**New**] `Makefile CONFIG=djgpp` now supports building LGPL libraries as
     DXE (use `ENABLE_DXE=0` to disable).
  *  [**New**] New `Makefile` `CONFIG=mingw-w64` option
     `WINDOWS_CRT=[crtdll,msvcrt,ucrt]` to select the toolchain CRT library.
  *  [**New**] 32bit ARM builds now support Windows 8 (Windows RT) again.
+ *  [**New**] libopenmpt: New APIs for determining whether order list entrys or
+    pattern indices have a special meaning:
+    `openmpt::module::is_order_skip_entry()`,
+    `openmpt::module::is_pattern_skip_item()`,
+    `openmpt::module::is_order_stop_entry()`,
+    `openmpt::module::is_pattern_stop_item()` (C++), and
+    `openmpt_module_is_order_skip_entry()`,
+    `openmpt_module_is_pattern_skip_item()`,
+    `openmpt_module_is_order_stop_entry()`,
+    `openmpt_module_is_pattern_stop_item()` (C).
+ *  [**New**] libopenmpt: New APIs for retrieving pattern time signature
+    information:
+    `openmpt::module::get_pattern_rows_per_beat()`,
+    `openmpt::module::get_pattern_rows_per_measure()` (C++), and
+    `openmpt_module_get_pattern_rows_per_beat()`,
+    `openmpt_module_get_pattern_rows_per_measure()` (C).
+ *  [**New**] libopenmpt: New APIs for retrieving the restart / loop position:
+    `openmpt::module::get_restart_order()`,
+    `openmpt::module::get_restart_row()` (C++), and
+    `openmpt_module_get_restart_order()`,
+    `openmpt_module_get_restart_row()` (C).
+ *  [**New**] libopenmpt: New API for retrieving the playback time at a given
+    order / row combination:
+    `openmpt::module::get_time_at_position()` (C++), and
+    `openmpt_module_get_time_at_position()` (C).
 
  *  [**Change**] DOS builds now use zlib, libmpg123, libogg, and libvorbis
     instead of miniz, minimp3, and stb_vorbis by default. 
@@ -25,6 +63,17 @@ is just a high-level summary.
     removed.
  *  [**Regression**] Using `EMSCRIPTEN_PORTS=1` with Emscripten older than
     3.1.54 now requires additionally specifying `ANCIENT=1`.
+
+ *  IT: Various plaback fixes. 
+ *  XM: If key-off is reached before auto-vibrato reaches full depth, the depth
+    is reset.
+ *  DTM: Portamentos are now also evaluated on the first tick of the row.
+ *  MO3: If multiple sample slots shared the same Ogg Vorbis sample, only one
+    sample slot was loaded.
+ *  MED: Tempo parameters > 255 BPM were not imported properly if the files was
+    imported as MOD instead of XM.
+ *  Better support for automatic slide commands (commands that keep sliding on
+    following rows) in various formats.
 
  *  xmp-openmpt: Memory consumption during file loading has been reduced.
 
