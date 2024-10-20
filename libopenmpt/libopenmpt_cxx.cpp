@@ -240,6 +240,13 @@ std::int32_t module::get_selected_subsong() const {
 	return impl->get_selected_subsong();
 }
 
+std::int32_t module::get_restart_order( std::int32_t subsong ) const {
+	return impl->get_restart_order( subsong );
+}
+std::int32_t module::get_restart_row( std::int32_t subsong ) const {
+	return impl->get_restart_row( subsong );
+}
+
 void module::set_repeat_count( std::int32_t repeat_count ) {
 	impl->set_repeat_count( repeat_count );
 }

@@ -107,7 +107,9 @@ protected:
 		std::int32_t start_row;
 		std::int32_t start_order;
 		std::int32_t sequence;
-		subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence );
+		std::int32_t restart_row;
+		std::int32_t restart_order;
+		subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence, std::int32_t restart_row, std::int32_t restart_order );
 	}; // struct subsong_data
 
 	typedef std::vector<subsong_data> subsongs_type;
@@ -198,6 +200,10 @@ public:
 public:
 	void select_subsong( std::int32_t subsong );
 	std::int32_t get_selected_subsong() const;
+	
+	std::int32_t get_restart_order( std::int32_t subsong ) const;
+	std::int32_t get_restart_row( std::int32_t subsong ) const;
+
 	void set_repeat_count( std::int32_t repeat_count );
 	std::int32_t get_repeat_count() const;
 	double get_duration_seconds() const;

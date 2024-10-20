@@ -741,6 +741,26 @@ int32_t openmpt_module_get_selected_subsong( openmpt_module * mod ) {
 	return -1;
 }
 
+int32_t openmpt_module_get_restart_order( openmpt_module * mod, int32_t subsong ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_restart_order( subsong );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return -1;
+}
+
+int32_t openmpt_module_get_restart_row( openmpt_module * mod, int32_t subsong ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_restart_row( subsong );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return -1;
+}
+
 int openmpt_module_set_repeat_count( openmpt_module * mod, int32_t repeat_count ) {
 	try {
 		openmpt::interface::check_soundfile( mod );

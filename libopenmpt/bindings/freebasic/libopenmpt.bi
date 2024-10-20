@@ -775,6 +775,25 @@ Declare Function openmpt_module_select_subsong(ByVal module As openmpt_module Pt
 '/
 Declare Function openmpt_module_get_selected_subsong(ByVal module As openmpt_module Ptr) As Long
 
+/'* \brief Get the restart order of the specified sub-song
+
+  \param module The module handle to work on.
+  \param subsong Index of the sub-song to retrieve the restart position from.
+  \return The restart order of the specified sub-song. This is the order to which playback returns after the last pattern row of the song has been played. -1 is returned if if sub-song is not in range [0,openmpt_module_get_num_subsongs()[
+  \sa openmpt_module_get_restart_row
+  \since 0.8.0
+'/
+Declare Function openmpt_module_get_restart_order(ByVal module As openmpt_module Ptr, ByVal subsong As Long) As Long
+/'* \brief Get the restart row of the specified sub-song
+
+  \param module The module handle to work on.
+  \param subsong Index of the sub-song to retrieve the restart position from.
+  \return The restart row of the specified sub-song. This is the first played row of the order to which playback returns after the last pattern row of the song has been played. -1 is returned if if sub-song is not in range [0,openmpt_module_get_num_subsongs()[
+  \sa openmpt_module_get_restart_order
+  \since 0.8.0
+'/
+Declare Function openmpt_module_get_restart_row(ByVal module As openmpt_module Ptr, ByVal subsong As Long) As Long
+
 /'* \brief Set Repeat Count
 
   \param module The module handle to work on.

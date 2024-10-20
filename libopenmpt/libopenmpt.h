@@ -875,6 +875,26 @@ LIBOPENMPT_API int openmpt_module_select_subsong( openmpt_module * mod, int32_t 
  * \since 0.3.0
  */
 LIBOPENMPT_API int32_t openmpt_module_get_selected_subsong( openmpt_module * mod );
+
+/*! \brief Get the restart order of the specified sub-song
+ *
+ * \param mod The module handle to work on.
+ * \param subsong Index of the sub-song to retrieve the restart position from.
+ * \return The restart order of the specified sub-song. This is the order to which playback returns after the last pattern row of the song has been played. -1 is returned if if sub-song is not in range [0,openmpt_module_get_num_subsongs()[
+ * \sa openmpt_module_get_restart_row
+ * \since 0.8.0
+ */
+LIBOPENMPT_API int32_t openmpt_module_get_restart_order( openmpt_module * mod, int32_t subsong );
+/*! \brief Get the restart row of the specified sub-song
+ *
+ * \param mod The module handle to work on.
+ * \param subsong Index of the sub-song to retrieve the restart position from.
+ * \return The restart row of the specified sub-song. This is the first played row of the order to which playback returns after the last pattern row of the song has been played. -1 is returned if if sub-song is not in range [0,openmpt_module_get_num_subsongs()[
+ * \sa openmpt_module_get_restart_order
+ * \since 0.8.0
+ */
+LIBOPENMPT_API int32_t openmpt_module_get_restart_row( openmpt_module * mod, int32_t subsong );
+
 /*! \brief Set Repeat Count
  *
  * \param mod The module handle to work on.

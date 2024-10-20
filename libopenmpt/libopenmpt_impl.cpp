@@ -306,11 +306,13 @@ void module_impl::PushToCSoundFileLog( int loglevel, const std::string & text ) 
 	m_sndFile->AddToLog( static_cast<OpenMPT::LogLevel>( loglevel ), mpt::transcode<mpt::ustring>( mpt::common_encoding::utf8, text ) );
 }
 
-module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence )
+module_impl::subsong_data::subsong_data( double duration, std::int32_t start_row, std::int32_t start_order, std::int32_t sequence, std::int32_t restart_row, std::int32_t restart_order )
 	: duration(duration)
 	, start_row(start_row)
 	, start_order(start_order)
 	, sequence(sequence)
+	, restart_row(restart_row)
+	, restart_order(restart_order)
 {
 	return;
 }
@@ -436,7 +438,7 @@ module_impl::subsongs_type module_impl::get_subsongs() const {
 	for ( OpenMPT::SEQUENCEINDEX seq = 0; seq < m_sndFile->Order.GetNumSequences(); ++seq ) {
 		const std::vector<OpenMPT::GetLengthType> lengths = m_sndFile->GetLength( OpenMPT::eNoAdjust, OpenMPT::GetLengthTarget( true ).StartPos( seq, 0, 0 ) );
 		for ( const auto & l : lengths ) {
-			subsongs.push_back( subsong_data( l.duration, l.startRow, l.startOrder, seq ) );
+			subsongs.push_back( subsong_data( l.duration, l.startRow, l.startOrder, seq, l.restartRow, l.restartOrder ) );
 		}
 	}
 	return subsongs;
@@ -1093,6 +1095,24 @@ void module_impl::select_subsong( std::int32_t subsong ) {
 std::int32_t module_impl::get_selected_subsong() const {
 	return m_current_subsong;
 }
+
+std::int32_t module_impl::get_restart_order( std::int32_t subsong ) const {
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	if ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) {
+		throw openmpt::exception( "invalid subsong" );
+	}
+	return subsongs[subsong].restart_order;
+}
+std::int32_t module_impl::get_restart_row( std::int32_t subsong ) const {
+	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
+	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
+	if ( subsong < 0 || subsong >= static_cast<std::int32_t>( subsongs.size() ) ) {
+		throw openmpt::exception( "invalid subsong" );
+	}
+	return subsongs[subsong].restart_row;
+}
+
 void module_impl::set_repeat_count( std::int32_t repeat_count ) {
 	m_sndFile->SetRepeatCount( repeat_count );
 }

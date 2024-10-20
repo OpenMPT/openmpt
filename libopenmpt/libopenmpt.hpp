@@ -592,6 +592,26 @@ public:
 	  \since 0.3.0
 	*/
 	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_selected_subsong() const;
+
+	//! Get the restart order of the specified sub-song
+	/*!
+	  \param subsong Index of the sub-song to retrieve the restart position from.
+	  \return The restart order of the specified sub-song. This is the order to which playback returns after the last pattern row of the song has been played.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if sub-song is not in range [0,openmpt::module::get_num_subsongs()[
+	  \sa openmpt::module::get_restart_row
+	  \since 0.8.0
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_restart_order( std::int32_t subsong ) const;
+	//! Get the restart row of the specified sub-song
+	/*!
+	  \param subsong Index of the sub-song to retrieve the restart position from.
+	  \return The restart row of the specified sub-song. This is the first played row of the order to which playback returns after the last pattern row of the song has been played.
+	  \throws openmpt::exception Throws an exception derived from openmpt::exception if sub-song is not in range [0,openmpt::module::get_num_subsongs()[
+	  \sa openmpt::module::get_restart_order
+	  \since 0.8.0
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_restart_row( std::int32_t subsong ) const;
+
 	//! Set Repeat Count
 	/*!
 	  \param repeat_count Repeat Count
