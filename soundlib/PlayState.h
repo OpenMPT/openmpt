@@ -88,6 +88,8 @@ public:
 
 	void ResetGlobalVolumeRamping() noexcept;
 
+	void UpdateTimeSignature(const CSoundFile &sndFile) noexcept;
+
 	constexpr uint32 TicksOnRow() const noexcept
 	{
 		return (m_nMusicSpeed + m_nFrameDelay) * std::max(m_nPatternDelay, uint32(1));

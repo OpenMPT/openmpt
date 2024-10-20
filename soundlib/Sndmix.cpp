@@ -225,7 +225,6 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 
 	while(!m_PlayState.m_flags[SONG_ENDREACHED] && countToRender > 0)
 	{
-
 		// Update Channel Data
 		if(!m_PlayState.m_nBufferCount)
 		{
@@ -719,7 +718,7 @@ bool CSoundFile::ProcessRow()
 		}
 
 		// Now that we know which pattern we're on, we can update time signatures (global or pattern-specific)
-		UpdateTimeSignature();
+		m_PlayState.UpdateTimeSignature(*this);
 
 		if(ignoreRow)
 		{

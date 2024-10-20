@@ -1131,8 +1131,6 @@ protected:
 	int SetupChannelFilter(ModChannel &chn, bool bReset, int envModifier = 256) const;
 	int HandleNoteChangeFilter(ModChannel &chn) const;
 
-	void UpdateTimeSignature();
-
 public:
 	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
 

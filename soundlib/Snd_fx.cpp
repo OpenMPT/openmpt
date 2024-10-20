@@ -555,6 +555,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			playState.m_nRow = 0;
 		}
 
+		playState.UpdateTimeSignature(*this);
+
 		if(ignoreRow)
 			continue;
 
@@ -1058,12 +1060,6 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			playState.m_nNextRow = playState.m_nRow;
 			playState.m_nNextOrder = playState.m_nCurrentOrder;
 			continue;
-		}
-
-		playState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
-		if(Patterns[playState.m_nPattern].GetOverrideSignature())
-		{
-			playState.m_nCurrentRowsPerBeat = Patterns[playState.m_nPattern].GetRowsPerBeat();
 		}
 
 		const uint32 tickDuration = GetTickDuration(playState);
@@ -6901,21 +6897,6 @@ void CSoundFile::HandleRowTransitionEvents(bool nextPattern)
 	}
 }
 #endif // MODPLUG_TRACKER
-
-
-// Update time signatures (global or pattern-specific). Don't forget to call this when changing the RPB/RPM settings anywhere!
-void CSoundFile::UpdateTimeSignature()
-{
-	if(!Patterns.IsValidIndex(m_PlayState.m_nPattern) || !Patterns[m_PlayState.m_nPattern].GetOverrideSignature())
-	{
-		m_PlayState.m_nCurrentRowsPerBeat = m_nDefaultRowsPerBeat;
-		m_PlayState.m_nCurrentRowsPerMeasure = m_nDefaultRowsPerMeasure;
-	} else
-	{
-		m_PlayState.m_nCurrentRowsPerBeat = Patterns[m_PlayState.m_nPattern].GetRowsPerBeat();
-		m_PlayState.m_nCurrentRowsPerMeasure = Patterns[m_PlayState.m_nPattern].GetRowsPerMeasure();
-	}
-}
 
 
 void CSoundFile::PortamentoMPT(ModChannel &chn, int param) const
