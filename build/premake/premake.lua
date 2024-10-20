@@ -67,6 +67,56 @@ require('vstudio')
 
 
 
+premake.ARM64EC = "ARM64EC"
+
+premake.api.unregister("architecture")
+
+premake.api.register {
+	name = "architecture",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"universal",
+		premake.X86,
+		premake.X86_64,
+		premake.ARM,
+		premake.ARM64,
+		premake.ARM64EC,
+	},
+	aliases = {
+		i386  = premake.X86,
+		amd64 = premake.X86_64,
+		x32   = premake.X86,
+		x64   = premake.X86_64,
+	},
+}
+
+premake.vstudio.vs200x_architectures =
+{
+	win32   = "x86",
+	x86     = "x86",
+	x86_64  = "x64",
+	ARM     = "ARM",
+	ARM64   = "ARM64",
+	ARM64EC = "ARM64EC",
+}
+
+function premake.vstudio.vc2010.windowsSDKDesktopARM64ECSupport(cfg)
+	if cfg.system == premake.WINDOWS then
+		if cfg.architecture == premake.ARM64EC then
+			premake.w('<WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>')
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.windowsSDKDesktopARMSupport, premake.vstudio.vc2010.windowsSDKDesktopARM64ECSupport)
+	return calls
+end)
+
+
+
 premake.api.register {
 	name = "spectremitigations",
 	scope = "config",
