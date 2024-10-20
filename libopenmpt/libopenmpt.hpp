@@ -638,6 +638,16 @@ public:
 	*/
 	LIBOPENMPT_CXX_API_MEMBER double get_duration_seconds() const;
 
+	//! Get approximate playback time in seconds at given position
+	/*!
+	  \param order The order position at which the time should be retrieved.
+	  \param row The pattern row number at which the time should be retrieved.
+	  \return Approximate playback time in seconds of current sub-song at the start of the given order and row combination. Negative if the position does not exist, or the pattern data is too complex to evaluate.
+	  \remarks If an order / row combination is played multiple times (e.g. due the pattern loops), the first occurence of this position is returned.
+	  \since 0.8.0
+	 */
+	LIBOPENMPT_CXX_API_MEMBER double get_time_at_position( std::int32_t order, std::int32_t row ) const;
+
 	//! Set approximate current song position
 	/*!
 	  \param seconds Seconds to seek to. If seconds is out of range, the position gets set to song start or end respectively.

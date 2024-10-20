@@ -791,6 +791,16 @@ double openmpt_module_get_duration_seconds( openmpt_module * mod ) {
 	return 0.0;
 }
 
+double openmpt_module_get_time_at_position( openmpt_module * mod, int32_t order, int32_t row ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_time_at_position( order, row );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return -1.0;
+}
+
 double openmpt_module_set_position_seconds( openmpt_module * mod, double seconds ) {
 	try {
 		openmpt::interface::check_soundfile( mod );

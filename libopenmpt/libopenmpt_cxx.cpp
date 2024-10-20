@@ -258,6 +258,10 @@ double module::get_duration_seconds() const {
 	return impl->get_duration_seconds();
 }
 
+double module::get_time_at_position( std::int32_t order, std::int32_t row ) const {
+	return impl->get_time_at_position( order, row );
+}
+
 double module::set_position_seconds( double seconds ) {
 	return impl->set_position_seconds( seconds );
 }

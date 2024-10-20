@@ -207,6 +207,7 @@ public:
 	void set_repeat_count( std::int32_t repeat_count );
 	std::int32_t get_repeat_count() const;
 	double get_duration_seconds() const;
+	double get_time_at_position( std::int32_t order, std::int32_t row ) const;
 	double set_position_seconds( double seconds );
 	double get_position_seconds() const;
 	double set_position_order_row( std::int32_t order, std::int32_t row );

@@ -925,6 +925,17 @@ LIBOPENMPT_API int32_t openmpt_module_get_repeat_count( openmpt_module * mod );
  */
 LIBOPENMPT_API double openmpt_module_get_duration_seconds( openmpt_module * mod );
 
+/*! \brief Get approximate playback time in seconds at given position
+ *
+ * \param mod The module handle to work on.
+ * \param order The order position at which the time should be retrieved.
+ * \param row The pattern row number at which the time should be retrieved.
+ * \return Approximate playback time in seconds of current sub-song at the start of the given order and row combination. Negative if the position does not exist, or the pattern data is too complex to evaluate.
+ * \remarks If an order / row combination is played multiple times (e.g. due the pattern loops), the first occurence of this position is returned.
+ * \since 0.8.0
+ */
+LIBOPENMPT_API double openmpt_module_get_time_at_position( openmpt_module * mod, int32_t order, int32_t row );
+
 /*! \brief Set approximate current song position
  *
  * \param mod The module handle to work on.
