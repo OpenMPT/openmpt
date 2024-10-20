@@ -208,7 +208,7 @@ namespace MidiExport
 				mpt::IO::WriteRaw(f, msg, 9);
 			}
 
-			if(!m_tempoTrack && !m_wroteLoopStart && m_sndFile.m_PlayState.m_nRow == m_songLength.lastRow && m_sndFile.m_PlayState.m_nCurrentOrder == m_songLength.lastOrder)
+			if(!m_tempoTrack && !m_wroteLoopStart && m_sndFile.m_PlayState.m_nRow == m_songLength.restartRow && m_sndFile.m_PlayState.m_nCurrentOrder == m_songLength.restartOrder)
 			{
 				WriteString(kCue, U_("loopStart"));
 				m_wroteLoopStart = true;

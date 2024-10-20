@@ -163,8 +163,8 @@ void CPatternGotoDialog::OnTimeChanged()
 	if(!result.targetReached)
 		return;
 
-	m_nOrder = result.lastOrder;
-	m_nRow = result.lastRow;
+	m_nOrder = result.restartOrder;
+	m_nRow = result.restartRow;
 	if(m_SndFile.Order().IsValidPat(m_nOrder))
 		m_nPattern = m_SndFile.Order()[m_nOrder];
 

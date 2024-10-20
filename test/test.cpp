@@ -3421,10 +3421,10 @@ static void TestLoadMODFile(CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(allSubSongs.size(), 2);
 	VERIFY_EQUAL_EPS(allSubSongs[0].duration, 2.04, 0.1);
 	VERIFY_EQUAL_EPS(allSubSongs[1].duration, 118.84, 0.1);
-	VERIFY_EQUAL_NONCONT(allSubSongs[0].lastOrder, 0);
-	VERIFY_EQUAL_NONCONT(allSubSongs[0].lastRow, 1);
-	VERIFY_EQUAL_NONCONT(allSubSongs[1].lastOrder, 2);
-	VERIFY_EQUAL_NONCONT(allSubSongs[1].lastRow, 61);
+	VERIFY_EQUAL_NONCONT(allSubSongs[0].restartOrder, 0);
+	VERIFY_EQUAL_NONCONT(allSubSongs[0].restartRow, 1);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].restartOrder, 2);
+	VERIFY_EQUAL_NONCONT(allSubSongs[1].restartRow, 61);
 	VERIFY_EQUAL_NONCONT(allSubSongs[1].startOrder, 2);
 	VERIFY_EQUAL_NONCONT(allSubSongs[1].startRow, 0);
 

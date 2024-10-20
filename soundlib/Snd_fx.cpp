@@ -442,8 +442,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 				if(!hasSearchTarget)
 				{
-					retval.lastOrder = playState.m_nCurrentOrder;
-					retval.lastRow = 0;
+					retval.restartOrder = playState.m_nCurrentOrder;
+					retval.restartRow = 0;
 				}
 				if(target.mode == GetLengthTarget::NoTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
 				{
@@ -523,8 +523,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		{
 			if(!hasSearchTarget)
 			{
-				retval.lastOrder = playState.m_nCurrentOrder;
-				retval.lastRow = playState.m_nRow;
+				retval.restartOrder = playState.m_nCurrentOrder;
+				retval.restartRow = playState.m_nRow;
 			}
 			if(target.mode == GetLengthTarget::NoTarget || !visitedRows.GetFirstUnvisitedRow(playState.m_nNextOrder, playState.m_nRow, true))
 			{
@@ -1352,8 +1352,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 
 	if(retval.targetReached)
 	{
-		retval.lastOrder = playState.m_nCurrentOrder;
-		retval.lastRow = playState.m_nRow;
+		retval.restartOrder = playState.m_nCurrentOrder;
+		retval.restartRow = playState.m_nRow;
 	}
 	retval.duration = memory.elapsedTime;
 	results.push_back(retval);

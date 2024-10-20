@@ -109,14 +109,14 @@ struct PatternCuePoint
 // Return values for GetLength()
 struct GetLengthType
 {
-	double     duration = 0.0;                 // Total time in seconds
-	ROWINDEX   lastRow = ROWINDEX_INVALID;     // Last parsed row (if no target is specified, this is the first row that is parsed twice, i.e. not the *last* played order)
-	ROWINDEX   endRow = ROWINDEX_INVALID;      // Last row before module loops (UNDEFINED if a target is specified)
-	ROWINDEX   startRow = 0;                   // First row of parsed subsong
-	ORDERINDEX lastOrder = ORDERINDEX_INVALID; // Last parsed order (see lastRow remark)
-	ORDERINDEX endOrder = ORDERINDEX_INVALID;  // Last order before module loops (UNDEFINED if a target is specified)
-	ORDERINDEX startOrder = 0;                 // First order of parsed subsong
-	bool       targetReached = false;          // True if the specified order/row combination or duration has been reached while going through the module
+	double     duration = 0.0;                     // Total time in seconds
+	ROWINDEX   restartRow = ROWINDEX_INVALID;      // First row to play after module loops (or last parsed row if target is specified; equal to target if it was found)
+	ROWINDEX   endRow = ROWINDEX_INVALID;          // Last row played before module loops (UNDEFINED if a target is specified)
+	ROWINDEX   startRow = 0;                       // First row of parsed subsong
+	ORDERINDEX restartOrder = ORDERINDEX_INVALID;  // First row to play after module loops (see restartRow remark)
+	ORDERINDEX endOrder = ORDERINDEX_INVALID;      // Last order played before module loops (UNDEFINED if a target is specified)
+	ORDERINDEX startOrder = 0;                     // First order of parsed subsong
+	bool       targetReached = false;              // True if the specified order/row combination or duration has been reached while going through the module
 };
 
 

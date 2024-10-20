@@ -601,7 +601,7 @@ bool CSoundFile::ProcessRow()
 				{
 					for(const auto &t : GetLength(eNoAdjust, GetLengthTarget(true)))
 					{
-						if(t.lastOrder == m_PlayState.m_nCurrentOrder && t.lastRow == m_PlayState.m_nRow)
+						if(t.restartOrder == m_PlayState.m_nCurrentOrder && t.restartRow == m_PlayState.m_nRow)
 						{
 							isReallyAtEnd = true;
 							break;
