@@ -676,6 +676,7 @@
 /include/premake/build/vs2019/.vs
 /include/premake/build/vs2019/bin
 /include/premake/build/vs2019/obj
+/include/premake/build/vs2022/.vs
 /include/premake/build/vs2022/bin
 /include/premake/build/vs2022/obj
 /include/pugixml/CMakeLists.txt
