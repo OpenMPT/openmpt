@@ -1021,7 +1021,7 @@ public:
 
 	//! Check if specified order is a skip ("+++") item
 	/*!
-	  \param The order item to check.
+	  \param order The order index to check.
 	  \return Returns true if the pattern index at the given order position represents a skip item. During playback, this item is ignored and playback resumes at the next order list item.
 	  \sa openmpt::module::is_order_stop_entry, openmpt::module::is_pattern_skip_item
 	  \since 0.8.0
@@ -1029,7 +1029,7 @@ public:
 	LIBOPENMPT_CXX_API_MEMBER bool is_order_skip_entry( std::int32_t order ) const ;
 	//! Check if specified pattern index is a skip ("+++") item
 	/*!
-	  \param The pattern index to check.
+	  \param pattern The pattern index to check.
 	  \return Returns true if the pattern index represents a skip item. During playback, this item is ignored and playback resumes at the next order list item.
 	  \sa openmpt::module::is_pattern_stop_item, openmpt::module::is_order_skip_entry, openmpt::module::get_order_pattern
 	  \since 0.8.0
@@ -1037,7 +1037,7 @@ public:
 	LIBOPENMPT_CXX_API_MEMBER bool is_pattern_skip_item( std::int32_t pattern ) const;
 	//! Check if specified order is a stop ("---") item
 	/*!
-	  \param The order item to check.
+	  \param order The order index to check.
 	  \return Returns true if the pattern index at the given order position represents a stop item. When this item is reached, playback continues at the restart position of the current sub-song.
 	  \sa openmpt::module::is_order_skip_entry, openmpt::module::is_pattern_stop_item
 	  \since 0.8.0
@@ -1045,7 +1045,7 @@ public:
 	LIBOPENMPT_CXX_API_MEMBER bool is_order_stop_entry( std::int32_t order ) const;
 	//! Check if specified pattern index is a stop ("---") item
 	/*!
-	  \param The pattern index to check.
+	  \param pattern The pattern index to check.
 	  \return Returns true if the pattern index represents a stop item. When this item is reached, playback continues at the restart position of the current sub-song.
 	  \sa openmpt::module::is_pattern_skip_item, openmpt::module::is_order_stop_entry, openmpt::module::get_order_pattern
 	  \since 0.8.0
