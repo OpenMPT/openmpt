@@ -1225,6 +1225,44 @@ int32_t openmpt_module_get_order_pattern( openmpt_module * mod, int32_t order ) 
 	return 0;
 }
 
+int openmpt_module_is_order_skip_entry( openmpt_module * mod, int32_t order ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->is_order_skip_entry( order ) ? 1 : 0;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_is_pattern_skip_item( openmpt_module * mod, int32_t pattern ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->is_pattern_skip_item( pattern ) ? 1 : 0;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_is_order_stop_entry( openmpt_module * mod, int32_t order ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->is_order_stop_entry( order ) ? 1 : 0;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+int openmpt_module_is_pattern_stop_item( openmpt_module * mod, int32_t pattern ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->is_pattern_stop_item( pattern ) ? 1 : 0;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+
+
 int32_t openmpt_module_get_pattern_num_rows( openmpt_module * mod, int32_t pattern ) {
 	try {
 		openmpt::interface::check_soundfile( mod );

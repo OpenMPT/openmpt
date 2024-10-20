@@ -244,6 +244,10 @@ public:
 	std::vector<std::string> get_instrument_names() const;
 	std::vector<std::string> get_sample_names() const;
 	std::int32_t get_order_pattern( std::int32_t o ) const;
+	bool is_order_skip_entry( std::int32_t order ) const;
+	static bool is_pattern_skip_item( std::int32_t pattern );
+	bool is_order_stop_entry( std::int32_t order ) const;
+	static bool is_pattern_stop_item( std::int32_t pattern );
 	std::int32_t get_pattern_num_rows( std::int32_t p ) const;
 	std::uint8_t get_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;
 	std::string format_pattern_row_channel_command( std::int32_t p, std::int32_t r, std::int32_t c, int cmd ) const;

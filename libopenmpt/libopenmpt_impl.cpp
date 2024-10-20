@@ -1457,6 +1457,26 @@ std::int32_t module_impl::get_order_pattern( std::int32_t o ) const {
 	}
 	return m_sndFile->Order()[o];
 }
+
+bool module_impl::is_order_skip_entry( std::int32_t order ) const {
+	if ( order < 0 || order >= m_sndFile->Order().GetLengthTailTrimmed() ) {
+		return false;
+	}
+	return is_pattern_skip_item( m_sndFile->Order()[order] );
+}
+bool module_impl::is_pattern_skip_item( std::int32_t pattern ) {
+	return pattern == OpenMPT::PATTERNINDEX_SKIP;
+}
+bool module_impl::is_order_stop_entry( std::int32_t order ) const {
+	if ( order < 0 || order >= m_sndFile->Order().GetLengthTailTrimmed() ) {
+		return false;
+	}
+	return is_pattern_stop_item( m_sndFile->Order()[order] );
+}
+bool module_impl::is_pattern_stop_item( std::int32_t pattern ) {
+	return pattern == OpenMPT::PATTERNINDEX_INVALID;
+}
+
 std::int32_t module_impl::get_pattern_num_rows( std::int32_t p ) const {
 	if ( !mpt::is_in_range( p, std::numeric_limits<OpenMPT::PATTERNINDEX>::min(), std::numeric_limits<OpenMPT::PATTERNINDEX>::max() ) || !m_sndFile->Patterns.IsValidPat( static_cast<OpenMPT::PATTERNINDEX>( p ) ) ) {
 		return 0;

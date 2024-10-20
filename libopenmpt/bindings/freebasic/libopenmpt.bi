@@ -1273,6 +1273,39 @@ Declare Function openmpt_module_get_sample_name_ Alias "openmpt_module_get_sampl
 '/
 Declare Function openmpt_module_get_order_pattern(ByVal module As openmpt_module Ptr, ByVal order As Long) As Long
 
+/'* \brief Check if specified order is a skip ("+++") item
+
+  \param The order item to check.
+  \return Returns non-zero value if the pattern index at the given order position represents a skip item. During playback, this item is ignored and playback resumes at the next order list item.
+  \sa openmpt_module_is_order_stop_entry, openmpt_module_is_pattern_skip_item
+  \since 0.8.0
+'/
+Declare Function openmpt_module_is_order_skip_entry(ByVal module As openmpt_module Ptr, ByVal order As Long) As Long
+/'* \brief Check if specified pattern index is a skip ("+++") item
+
+  \param The pattern index to check.
+  \return Returns non-zero value if the pattern index represents a skip item. During playback, this item is ignored and playback resumes at the next order list item.
+  \sa openmpt_module_is_pattern_stop_item, openmpt_module_is_order_skip_entry, openmpt_module_get_order_pattern
+  \since 0.8.0
+'/
+Declare Function openmpt_module_is_pattern_skip_item(ByVal module As openmpt_module Ptr, ByVal pattern As Long) As Long
+/'* \brief Check if specified order is a stop ("---") item
+
+  \param The order item to check.
+  \return Returns non-zero value if the pattern index at the given order position represents a stop item. When this item is reached, playback continues at the restart position of the current sub-song.
+  \sa openmpt_module_is_order_skip_entry, openmpt_module_is_pattern_stop_item
+  \since 0.8.0
+'/
+Declare Function openmpt_module_is_order_stop_entry(ByVal module As openmpt_module Ptr, ByVal order As Long) As Long
+/'* \brief Check if specified pattern index is a stop ("---") item
+
+  \param The pattern index to check.
+  \return Returns non-zero value if the pattern index represents a stop item. When this item is reached, playback continues at the restart position of the current sub-song.
+  \sa openmpt_module_is_pattern_skip_item, openmpt_module_is_order_stop_entry, openmpt_module_get_order_pattern
+  \since 0.8.0
+'/
+Declare Function openmpt_module_is_pattern_stop_item(ByVal module As openmpt_module Ptr, ByVal pattern As Long) As Long
+
 /'* \brief Get the number of rows in a pattern
 
   \param module The module handle to work on.
