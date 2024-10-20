@@ -16,6 +16,7 @@ is just a high-level summary.
  *  [**New**] Can now read Images Music System (`IMS`) modules.
  *  [**New**] Can now read ChipTracker (`MOD`) modules.
  *  [**New**] Can now read EasyTrax (`ETX`) modules.
+ *  [**New**] Can now load UNIC Tracker v1 (`UNIC`) files.
  *  [**New**] MED: Synthesized and hybrid instruments are now supported.
  *  [**New**] GT2: Better support for old "envelopes", in particular adding
     support for the previously missing tremor / tremolo / vibrato.
@@ -67,13 +68,18 @@ is just a high-level summary.
  *  IT: Various plaback fixes. 
  *  XM: If key-off is reached before auto-vibrato reaches full depth, the depth
     is reset.
+ *  S3M: Combined slides (Kxy / Lxy) are no longer run on the first tick of a
+    row in files made with Scream Tracker.
+ *  MOD: Groo's "The Ultimate Beeper" now plays like in ProTracker.
  *  DTM: Portamentos are now also evaluated on the first tick of the row.
  *  MO3: If multiple sample slots shared the same Ogg Vorbis sample, only one
     sample slot was loaded.
  *  MED: Tempo parameters > 255 BPM were not imported properly if the files was
     imported as MOD instead of XM.
+ *  SymMOD: Files containing more than 127 channels are no longer rejected. 
  *  Better support for automatic slide commands (commands that keep sliding on
     following rows) in various formats.
+ *  The pattern channel limit was raised from 127 to 192 for some formats.
 
  *  xmp-openmpt: Memory consumption during file loading has been reduced.
 
