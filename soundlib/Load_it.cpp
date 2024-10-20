@@ -352,7 +352,7 @@ mpt::ustring CSoundFile::GetImpulseTrackerVersion(uint16 cwtv, uint16 cmwt)
 	} else if(cwtv >= 0x0215 && cwtv <= 0x0217)
 	{
 		const mpt::uchar *versions[] = {UL_("1-2"), UL_("3"), UL_("4-5")};
-		version = MPT_UFORMAT("Impulse Tracker 2.14p{}")(versions[cwtv - 0x0215]);
+		version = MPT_UFORMAT("Impulse Tracker 2.14p{}")(mpt::ustring_view(versions[cwtv - 0x0215]));
 	} else
 	{
 		version = MPT_UFORMAT("Impulse Tracker {}.{}")((cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((cwtv & 0xFF)));
