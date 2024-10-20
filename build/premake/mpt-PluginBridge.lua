@@ -60,6 +60,8 @@
    targetsuffix "-arm"
   filter { "architecture:ARM64" }
    targetsuffix "-arm64"
+  filter { "architecture:ARM64EC" }
+   targetsuffix "-arm64ec"
 
  project "PluginBridgeLegacy"
   uuid "BDEC2D44-C957-4940-A32B-02824AF6E21D"
@@ -133,10 +135,14 @@
    targetsuffix "-arm"
   filter { "architecture:ARM64" }
    targetsuffix "-arm64"
+  filter { "architecture:ARM64EC" }
+   targetsuffix "-arm64ec"
   filter {}
 	filter {}
 	filter { "action:vs*", "architecture:x86_64" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter { "action:vs*", "architecture:ARM64" }
+		linkoptions { "/HIGHENTROPYVA:NO" }
+	filter { "action:vs*", "architecture:ARM64EC" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter {}
