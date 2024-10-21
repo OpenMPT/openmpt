@@ -466,6 +466,10 @@ bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &info
 	else
 		SetHorizontal();
 
+	// Trying to show the tooltip while the window is minimized hangs the application during TTM_TRACKACTIVATE.
+	if(!showHighLight || CMainFrame::GetMainFrame()->IsIconic())
+		return true;
+
 	CRect rect;
 	GetToolBarCtrl().GetRect(ID_UPDATE_AVAILABLE, &rect);
 	CPoint pt = rect.CenterPoint();
@@ -473,13 +477,7 @@ bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &info
 	CMainFrame::GetMainFrame()->GetWindowRect(rect);
 	LimitMax(pt.x, rect.right);
 
-	if(showHighLight)
-	{
-		return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
-	} else
-	{
-		return true;
-	}
+	return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
 }
 
 
