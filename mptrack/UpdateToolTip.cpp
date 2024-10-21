@@ -34,7 +34,7 @@ bool UpdateToolTip::ShowUpdate(CWnd &parent, const CString &newVersion, const CS
 
 	m_infoURL = infoURL;
 
-	CString message = MPT_CFORMAT("OpenMPT {} has been released.\nClick on this message to install the update,\nor <a>click here to see what's new.</a>")(newVersion);
+	CString message = MPT_CFORMAT("OpenMPT {} has been released.\nClick this message to install the update,\nor <a>click here to see what's new.</a>")(newVersion);
 	TOOLINFO ti{};
 	ti.cbSize = TTTOOLINFO_V1_SIZE;
 	ti.uFlags = TTF_TRACK | TTF_PARSELINKS;
@@ -46,6 +46,7 @@ bool UpdateToolTip::ShowUpdate(CWnd &parent, const CString &newVersion, const CS
 		return false;
 
 	SetTitle(TTI_INFO, _T("Update Available"));
+	SetMaxTipWidth(Util::ScalePixels(400, m_hWnd));  // When using automatic maximum width, only the first line of the text appears to be used for determining the width, causing subsequent lines to be cut off if they are longer.#
 	SendMessage(TTM_TRACKPOSITION, 0, static_cast<LPARAM>(MAKELONG(ptScreen.x, ptScreen.y)));
 	SendMessage(TTM_TRACKACTIVATE, TRUE, reinterpret_cast<LPARAM>(&ti));
 	return true;
