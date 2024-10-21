@@ -1733,6 +1733,10 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 		// Write pattern header
 		ROWINDEX writeRows = mpt::saturate_cast<uint16>(Patterns[pat].GetNumRows());
+		if(compatibilityExport)
+			writeRows = std::clamp(writeRows, ROWINDEX(32), ROWINDEX(200));
+		if(writeRows != Patterns[pat].GetNumRows())
+			AddToLog(LogWarning, MPT_UFORMAT("Warning: Pattern {} was resized from {} to {} rows.")(pat, Patterns[pat].GetNumRows(), writeRows));
 		uint16 writeSize = 0;
 		uint16le patinfo[4];
 		patinfo[0] = 0;
@@ -1749,11 +1753,12 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 		// Maximum 7 bytes per cell, plus end of row marker, so this buffer is always large enough to cover one row.
 		std::vector<uint8> buf(7 * maxChannels + 1);
 
-		for(ROWINDEX row = 0; row < writeRows; row++)
+		const ROWINDEX readRows = std::min(writeRows, Patterns[pat].GetNumRows());
+		for(ROWINDEX row = 0; row < readRows; row++)
 		{
 			uint32 len = 0;
 			const ModCommand *m = Patterns[pat].GetpModCommand(row, 0);
-
+			bool writePatternBreak = (readRows < writeRows && row + 1 == readRows && !Patterns[pat].RowHasJump(row));
 			for(CHANNELINDEX ch = 0; ch < maxChannels; ch++, m++)
 			{
 				// Skip mptm-specific notes.
@@ -1806,6 +1811,12 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 				{
 					S3MSaveConvert(*m, command, param, true, compatibilityExport);
 					if (command) b |= 8;
+				}
+				if(writePatternBreak && !(b & 8))
+				{
+					b |= 8;
+					command = 'C' ^ 0x40;
+					writePatternBreak = false;
 				}
 				// Packing information
 				if (b)
@@ -1889,11 +1900,25 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 				break;
 			} else
 			{
-				dwPos += len;
-				writeSize += (uint16)len;
+				writeSize += static_cast<uint16>(len);
 				mpt::IO::WriteRaw(f, buf.data(), len);
 			}
+			if(writePatternBreak)
+			{
+				// Didn't manage to put a pattern break, so put it on the next row instead.
+				const uint8 patternBreak[] = {1 | IT_bitmask_patternChanEnabled_c, 8, 'C' ^ 0x40, 0};
+				mpt::IO::Write(f, patternBreak);
+				writeSize += sizeof(patternBreak);
+			}
 		}
+		if(readRows < writeRows)
+		{
+			// Invent empty rows at end (if we end up here, the pattern is very short and we don't have to care about writeSize overflowing the 16-bit limit)
+			writeSize += static_cast<uint16>(writeRows - readRows);
+			buf.assign(writeRows - readRows, 0);
+			mpt::IO::Write(f, buf);
+		}
+		dwPos += writeSize;
 
 		mpt::IO::SeekAbsolute(f, dwPatPos);
 		patinfo[0] = writeSize;
