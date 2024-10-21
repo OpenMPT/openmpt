@@ -1130,7 +1130,7 @@ void PatternClipboardDialog::OnCancel()
 {
 	if(GetFocus() == &m_editNameBox)
 	{
-		// User pressed enter in clipboard name edit box => just cancel editing
+		// User pressed ESC in clipboard name edit box => just cancel editing
 		m_editNameBox.DestroyWindow();
 		return;
 	}

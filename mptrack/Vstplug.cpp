@@ -421,7 +421,6 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 					timeInfo.flags |= kVstTransportPlaying;
 				if(sndFile->m_PlayState.m_flags[SONG_PATTERNLOOP])
 					timeInfo.flags |= kVstTransportCycleActive;
-				timeInfo.samplePos = sndFile->GetTotalSampleCount();
 				if(pVstPlugin->m_positionChanged)
 				{
 					timeInfo.flags |= kVstTransportChanged;
@@ -430,9 +429,9 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 			} else
 			{
 				timeInfo.flags |= kVstTransportChanged; //just stopped.
-				timeInfo.samplePos = 0;
 				pVstPlugin->lastBarStartPos = -1.0;
 			}
+			timeInfo.samplePos = sndFile->GetTotalSampleCount();
 			if((value & kVstNanosValid))
 			{
 				timeInfo.flags |= kVstNanosValid;
@@ -475,7 +474,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 				timeInfo.flags |= kVstTimeSigValid;
 
 				// Time signature. numerator = rows per beats / rows pear measure (should sound somewhat logical to you).
-				// the denominator is a bit more tricky, since it cannot be set explicitely. so we just assume quarters for now.
+				// the denominator is a bit more tricky, since it cannot be set explicitly. so we just assume quarters for now.
 				ROWINDEX rpb = std::max(sndFile->m_PlayState.m_nCurrentRowsPerBeat, ROWINDEX(1));
 				timeInfo.timeSigNumerator = std::max(sndFile->m_PlayState.m_nCurrentRowsPerMeasure, rpb) / rpb;
 				timeInfo.timeSigDenominator = 4; //std::gcd(pSndFile->m_nCurrentRowsPerMeasure, pSndFile->m_nCurrentRowsPerBeat);
@@ -1359,7 +1358,7 @@ void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
 }
 
 
-// Helper function for retreiving parameter name / label / display
+// Helper function for retrieving parameter name / label / display
 CString CVstPlugin::GetParamPropertyString(PlugParamIndex param, Vst::VstOpcodeToPlugin opcode)
 {
 	if(m_Effect.numParams > 0 && param < m_Effect.numParams)
@@ -1463,7 +1462,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 
 	ResetSilence();
 
-	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
+	// I think we should only route events to plugins that are explicitly specified as output plugins of the current plugin.
 	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
 	PLUGINDEX receiver = m_pMixStruct->GetOutputPlugin();
 
@@ -1605,7 +1604,7 @@ bool CVstPlugin::MidiSend(uint32 dwMidiCode)
 	// ... ..|C-5 01
 	// C-5 01|=== ..
 	// TODO: Should not be used with real-time notes! Letting the key go too quickly
-	// (e.g. while output device is being initalized) will cause the note to be stuck!
+	// (e.g. while output device is being initialized) will cause the note to be stuck!
 	bool insertAtFront = (MIDIEvents::GetTypeFromEvent(dwMidiCode) == MIDIEvents::evNoteOff);
 
 	VstMidiEvent event{};
