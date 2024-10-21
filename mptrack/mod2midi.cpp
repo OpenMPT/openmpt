@@ -454,7 +454,7 @@ namespace MidiExport
 			}
 			if(!m_wasInstrumentMode)
 			{
-				m_sndFile.m_nInstruments = std::min<INSTRUMENTINDEX>(m_sndFile.m_nSamples, MAX_INSTRUMENTS - 1u);
+				m_sndFile.m_nInstruments = std::min<INSTRUMENTINDEX>(m_sndFile.GetNumSamples(), MAX_INSTRUMENTS - 1u);
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);

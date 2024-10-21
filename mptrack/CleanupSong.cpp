@@ -784,7 +784,7 @@ bool CModCleanupDlg::OptimizeSamples()
 		return false;
 	}
 
-	for(SAMPLEINDEX smp = 1; smp <= sndFile.m_nSamples; smp++)
+	for(SAMPLEINDEX smp = 1; smp <= sndFile.GetNumSamples(); smp++)
 	{
 		ModSample &sample = sndFile.GetSample(smp);
 

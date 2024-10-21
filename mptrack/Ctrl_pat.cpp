@@ -706,7 +706,7 @@ void CCtrlPatterns::OnInstrumentChanged()
 	if(n >= 0)
 	{
 		n = static_cast<int>(m_CbnInstrument.GetItemData(n));
-		int nmax = (m_sndFile.m_nInstruments) ? m_sndFile.m_nInstruments : m_sndFile.m_nSamples;
+		int nmax = m_sndFile.GetNumInstruments() ? m_sndFile.GetNumInstruments() : m_sndFile.GetNumSamples();
 		if((n >= 0) && (n <= nmax) && (n != (int)m_nInstrument))
 		{
 			m_nInstrument = static_cast<INSTRUMENTINDEX>(n);
