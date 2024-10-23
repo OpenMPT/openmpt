@@ -217,7 +217,8 @@ static PATTERNINDEX ReadPSMPatternIndex(FileReader &file, bool &sinariaFormat)
 {
 	char patternID[5];
 	uint8 offset = 1;
-	file.ReadString<mpt::String::spacePadded>(patternID, 4);
+	if(!file.ReadString<mpt::String::spacePadded>(patternID, 4))
+		return 0;
 	if(!memcmp(patternID, "PATT", 4))
 	{
 		file.ReadString<mpt::String::spacePadded>(patternID, 4);
@@ -708,36 +709,29 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 
 					// Portamento
 					case 0x0B: // fine portamento up
-						m.command = CMD_PORTAMENTOUP;
-						m.param = 0xF0 | ConvertPSMPorta(m.param, sinariaFormat);
+						m.SetEffectCommand(CMD_PORTAMENTOUP, 0xF0 | ConvertPSMPorta(m.param, sinariaFormat));
 						break;
 					case 0x0C: // portamento up
-						m.command = CMD_PORTAMENTOUP;
-						m.param = ConvertPSMPorta(m.param, sinariaFormat);
+						m.SetEffectCommand(CMD_PORTAMENTOUP, ConvertPSMPorta(m.param, sinariaFormat));
 						break;
 					case 0x0D: // fine portamento down
-						m.command = CMD_PORTAMENTODOWN;
-						m.param = 0xF0 | ConvertPSMPorta(m.param, sinariaFormat);
+						m.SetEffectCommand(CMD_PORTAMENTODOWN, 0xF0 | ConvertPSMPorta(m.param, sinariaFormat));
 						break;
 					case 0x0E: // portamento down
-						m.command = CMD_PORTAMENTODOWN;
-						m.param = ConvertPSMPorta(m.param, sinariaFormat);
+						m.SetEffectCommand(CMD_PORTAMENTODOWN, ConvertPSMPorta(m.param, sinariaFormat));
 						break;
 					case 0x0F: // tone portamento
 						m.command = CMD_TONEPORTAMENTO;
 						if(!sinariaFormat) m.param >>= 2;
 						break;
 					case 0x11: // glissando control
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x10 | (m.param & 0x01);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x10 | (m.param & 0x01));
 						break;
 					case 0x10: // tone portamento + volslide up
-						m.command = CMD_TONEPORTAVOL;
-						m.param = m.param & 0xF0;
+						m.SetEffectCommand(CMD_TONEPORTAVOL, m.param & 0xF0);
 						break;
 					case 0x12: // tone portamento + volslide down
-						m.command = CMD_TONEPORTAVOL;
-						m.param = (m.param >> 4) & 0x0F;
+						m.SetEffectCommand(CMD_TONEPORTAVOL, (m.param >> 4) & 0x0F);
 						break;
 
 					case 0x13: // ScreamTracker command S - actually hangs / crashes MASI
@@ -749,12 +743,10 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_VIBRATO;
 						break;
 					case 0x16: // vibrato waveform
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x30 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x30 | (m.param & 0x0F));
 						break;
 					case 0x17: // vibrato + volslide up
-						m.command = CMD_VIBRATOVOL;
-						m.param = 0xF0 | m.param;
+						m.SetEffectCommand(CMD_VIBRATOVOL, 0xF0 | m.param);
 						break;
 					case 0x18: // vibrato + volslide down
 						m.command = CMD_VIBRATOVOL;
@@ -765,47 +757,40 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_TREMOLO;
 						break;
 					case 0x20: // tremolo waveform
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x40 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x40 | (m.param & 0x0F));
 						break;
 
 					// Sample commands
 					case 0x29: // 3-byte offset - we only support the middle byte.
-						m.command = CMD_OFFSET;
-						m.param = rowChunk.ReadArray<uint8, 2>()[0];
+						m.SetEffectCommand(CMD_OFFSET, rowChunk.ReadArray<uint8, 2>()[0]);
 						break;
 					case 0x2A: // retrigger
 						m.command = CMD_RETRIG;
 						break;
 					case 0x2B: // note cut
-						m.command = CMD_S3MCMDEX;
-						m.param = 0xC0 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xC0 | (m.param & 0x0F));
 						break;
 					case 0x2C: // note delay
-						m.command = CMD_S3MCMDEX;
-						m.param = 0xD0 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xD0 | (m.param & 0x0F));
 						break;
 
 					// Position change
 					case 0x33: // position jump - MASI seems to ignore this command, and CONVERT.EXE never writes it
-						m.command = CMD_POSITIONJUMP;
-						m.param /= 2u;	// actually it is probably just an index into the order table
+						// Parameter actually is probably just an index into the order table
+						m.SetEffectCommand(CMD_POSITIONJUMP, m.param / 2u);
 						rowChunk.Skip(1);
 						break;
 					case 0x34: // pattern break
-						m.command = CMD_PATTERNBREAK;
 						// When converting from S3M, the parameter is double-BDC-encoded (wtf!)
 						// When converting from MOD, it's in binary.
 						// MASI ignores the parameter entirely, and so do we.
-						m.param = 0;
+						m.SetEffectCommand(CMD_PATTERNBREAK, 0);
 						break;
 					case 0x35: // loop pattern
-						m.command = CMD_S3MCMDEX;
-						m.param = 0xB0 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xB0 | (m.param & 0x0F));
 						break;
 					case 0x36: // pattern delay
-						m.command = CMD_S3MCMDEX;
-						m.param = 0xE0 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xE0 | (m.param & 0x0F));
 						break;
 
 					// speed change
@@ -821,18 +806,15 @@ bool CSoundFile::ReadPSM(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_ARPEGGIO;
 						break;
 					case 0x48: // set finetune
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x20 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x20 | (m.param & 0x0F));
 						break;
 					case 0x49: // set balance
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x80 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x80 | (m.param & 0x0F));
 						break;
 
 					default:
 						m.command = CMD_NONE;
 						break;
-
 					}
 				}
 			}
@@ -1180,33 +1162,27 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 					{
 					// Volslides
 					case 0x01: // fine volslide up
-						m.command = CMD_VOLUMESLIDE;
-						m.param = (m.param << 4) | 0x0F;
+						m.SetEffectCommand(CMD_VOLUMESLIDE, (m.param << 4) | 0x0F);
 						break;
 					case 0x02: // volslide up
-						m.command = CMD_VOLUMESLIDE;
-						m.param = (m.param << 4) & 0xF0;
+						m.SetEffectCommand(CMD_VOLUMESLIDE, (m.param << 4) & 0xF0);
 						break;
 					case 0x03: // fine voslide down
-						m.command = CMD_VOLUMESLIDE;
-						m.param = 0xF0 | m.param;
+						m.SetEffectCommand(CMD_VOLUMESLIDE, 0xF0 | m.param);
 						break;
 					case 0x04: // volslide down
-						m.command = CMD_VOLUMESLIDE;
-						m.param = m.param & 0x0F;
+						m.SetEffectCommand(CMD_VOLUMESLIDE, m.param & 0x0F);
 						break;
 
 					// Portamento
 					case 0x0A: // fine portamento up
-						m.command = CMD_PORTAMENTOUP;
-						m.param |= 0xF0;
+						m.SetEffectCommand(CMD_PORTAMENTOUP, 0xF0 | m.param);
 						break;
 					case 0x0B: // portamento down
 						m.command = CMD_PORTAMENTOUP;
 						break;
 					case 0x0C: // fine portamento down
-						m.command = CMD_PORTAMENTODOWN;
-						m.param |= 0xF0;
+						m.SetEffectCommand(CMD_PORTAMENTODOWN, m.param | 0xF0);
 						break;
 					case 0x0D: // portamento down
 						m.command = CMD_PORTAMENTODOWN;
@@ -1215,16 +1191,13 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_TONEPORTAMENTO;
 						break;
 					case 0x0F: // glissando control (note: this can be found in the Odyssey music from Silverball but it seems like it was actually a literal translation from MOD effect F)
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0x10;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x10 | (m.param & 0x0F));
 						break;
 					case 0x10: // tone portamento + volslide up
-						m.command = CMD_TONEPORTAVOL;
-						m.param <<= 4;
+						m.SetEffectCommand(CMD_TONEPORTAVOL, m.param << 4);
 						break;
 					case 0x11: // tone portamento + volslide down
-						m.command = CMD_TONEPORTAVOL;
-						m.param &= 0x0F;
+						m.SetEffectCommand(CMD_TONEPORTAVOL, m.param & 0x0F);
 						break;
 
 					// Vibrato
@@ -1232,16 +1205,13 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_VIBRATO;
 						break;
 					case 0x15: // vibrato waveform
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0x30;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x30 | (m.param & 0x0F));
 						break;
 					case 0x16: // vibrato + volslide up
-						m.command = CMD_VIBRATOVOL;
-						m.param <<= 4;
+						m.SetEffectCommand(CMD_VIBRATOVOL, m.param << 4);
 						break;
 					case 0x17: // vibrato + volslide down
-						m.command = CMD_VIBRATOVOL;
-						m.param &= 0x0F;
+						m.SetEffectCommand(CMD_VIBRATOVOL, m.param & 0x0F);
 						break;
 
 					// Tremolo
@@ -1249,18 +1219,15 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_TREMOLO;
 						break;
 					case 0x1F: // tremolo waveform
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0x40;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x40 | (m.param & 0x0F));
 						break;
 
 					// Sample commands
 					case 0x28: // 3-byte offset - we only support the middle byte.
-						m.command = CMD_OFFSET;
-						m.param = patternChunk.ReadArray<uint8, 2>()[0];
+						m.SetEffectCommand(CMD_OFFSET, patternChunk.ReadArray<uint8, 2>()[0]);
 						break;
 					case 0x29: // retrigger
-						m.command = CMD_RETRIG;
-						m.param &= 0x0F;
+						m.SetEffectCommand(CMD_RETRIG, m.param & 0x0F);
 						break;
 					case 0x2A: // note cut
 						m.command = CMD_S3MCMDEX;
@@ -1280,8 +1247,7 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.param |= 0xC0;
 						break;
 					case 0x2B: // note delay
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0xD0;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xD0 | (m.param & 0x0F));
 						break;
 
 					// Position change
@@ -1292,12 +1258,10 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_PATTERNBREAK;
 						break;
 					case 0x34: // loop pattern
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0xB0;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xB0 | (m.param & 0x0F));
 						break;
 					case 0x35: // pattern delay
-						m.command = CMD_S3MCMDEX;
-						m.param |= 0xE0;
+						m.SetEffectCommand(CMD_S3MCMDEX, 0xE0 | (m.param & 0x0F));
 						break;
 
 					// speed change
@@ -1313,12 +1277,10 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						m.command = CMD_ARPEGGIO;
 						break;
 					case 0x47: // set finetune
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x20 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x20 | (m.param & 0x0F));
 						break;
 					case 0x48: // set balance (panning?)
-						m.command = CMD_S3MCMDEX;
-						m.param = 0x80 | (m.param & 0x0F);
+						m.SetEffectCommand(CMD_S3MCMDEX, 0x80 | (m.param & 0x0F));
 						break;
 
 					default:
@@ -1326,11 +1288,6 @@ bool CSoundFile::ReadPSM16(FileReader &file, ModLoadingFlags loadFlags)
 						break;
 					}
 				}
-			}
-			// Pattern break for short patterns (so saving the modules as S3M won't break it)
-			if(patternHeader.numRows != 64)
-			{
-				Patterns[pat].WriteEffect(EffectWriter(CMD_PATTERNBREAK, 0).Row(patternHeader.numRows - 1).RetryNextRow());
 			}
 		}
 	}

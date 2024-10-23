@@ -380,7 +380,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 	}
 
-	InitializeGlobals(MOD_TYPE_DBM, Clamp<uint16, uint16>(infoData.channels, 1, MAX_BASECHANNELS));  // Note: MAX_BASECHANNELS is currently 127, but DBPro 2 supports up to 128 channels, DBPro 3 apparently up to 254.
+	InitializeGlobals(MOD_TYPE_DBM, Clamp<uint16, uint16>(infoData.channels, 1, MAX_BASECHANNELS));  // Note: MAX_BASECHANNELS is currently 192, but DBPro 3 apparently supports up to 254 channels.
 	m_SongFlags = SONG_ITCOMPATGXX | SONG_ITOLDEFFECTS;
 	m_nInstruments = std::min(static_cast<INSTRUMENTINDEX>(infoData.instruments), static_cast<INSTRUMENTINDEX>(MAX_INSTRUMENTS - 1));
 	m_nSamples = std::min(static_cast<SAMPLEINDEX>(infoData.samples), static_cast<SAMPLEINDEX>(MAX_SAMPLES - 1));
