@@ -411,6 +411,7 @@ void CModTypeDlg::OnOK()
 	
 	sndFile.m_nDefaultRowsPerBeat    = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERBEAT)), MAX_ROWS_PER_BEAT);
 	sndFile.m_nDefaultRowsPerMeasure = std::min(static_cast<ROWINDEX>(GetDlgItemInt(IDC_ROWSPERMEASURE)), MAX_ROWS_PER_BEAT);
+	sndFile.m_PlayState.UpdateTimeSignature(sndFile);
 
 	sel = m_TempoModeBox.GetCurSel();
 	if(sel >= 0)
