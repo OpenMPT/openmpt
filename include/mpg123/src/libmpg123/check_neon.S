@@ -6,6 +6,7 @@
 	initially written by Taihei Momma
 */
 
+#include "aarch64_defs.h"
 #include "mangle.h"
 
 #ifndef __aarch64__
