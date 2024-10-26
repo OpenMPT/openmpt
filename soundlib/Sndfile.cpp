@@ -695,7 +695,7 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	if(UseFinetuneAndTranspose())
 		m_playBehaviour.reset(kPeriodsAreHertz);
 
-	m_nMaxOrderPosition = 0;
+	m_restartOverridePos = m_maxOrderPosition = 0;
 
 	RecalculateSamplesPerTick();
 

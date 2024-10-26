@@ -527,7 +527,7 @@ public:
 
 	ResamplingMode m_nResampling; // Resampling mode (if overriding the globally set resampling)
 	int32 m_nRepeatCount = 0;     // -1 means repeat infinitely.
-	ORDERINDEX m_nMaxOrderPosition;
+	ORDERINDEX m_restartOverridePos = 0, m_maxOrderPosition = 0;
 	std::vector<ModChannelSettings> ChnSettings;  // Initial channels settings
 	CPatternContainer Patterns;
 	ModSequenceSet Order;  // Pattern sequences (order lists)

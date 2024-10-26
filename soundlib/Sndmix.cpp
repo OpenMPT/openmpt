@@ -252,12 +252,6 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 			} else
 			{
 				// No new pattern data
-				#ifdef MODPLUG_TRACKER
-					if((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition))
-					{
-						m_PlayState.m_flags.set(SONG_ENDREACHED);
-					}
-				#endif // MODPLUG_TRACKER
 				if(IsRenderingToDisc())
 				{
 					// Disable song fade when rendering or when requested in libopenmpt.
@@ -462,15 +456,18 @@ bool CSoundFile::ProcessRow()
 		// Check if pattern is valid
 		if(!m_PlayState.m_flags[SONG_PATTERNLOOP])
 		{
-			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < Order().size()) ? Order()[m_PlayState.m_nCurrentOrder] : PATTERNINDEX_INVALID;
-			if (m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid()) m_PlayState.m_nPattern = PATTERNINDEX_SKIP;
-			while (m_PlayState.m_nPattern >= Patterns.Size())
+			const size_t songEnd = m_maxOrderPosition ? m_maxOrderPosition : Order().size();
+			m_PlayState.m_nPattern = (m_PlayState.m_nCurrentOrder < songEnd) ? Order()[m_PlayState.m_nCurrentOrder] : PATTERNINDEX_INVALID;
+			if(m_PlayState.m_nPattern < Patterns.Size() && !Patterns[m_PlayState.m_nPattern].IsValid())
+				m_PlayState.m_nPattern = PATTERNINDEX_SKIP;
+
+			while(m_PlayState.m_nPattern >= Patterns.Size())
 			{
 				// End of song?
-				if ((m_PlayState.m_nPattern == PATTERNINDEX_INVALID) || (m_PlayState.m_nCurrentOrder >= Order().size()))
+				if ((m_PlayState.m_nPattern == PATTERNINDEX_INVALID) || (m_PlayState.m_nCurrentOrder >= songEnd))
 				{
-					ORDERINDEX restartPosOverride = Order().GetRestartPos();
-					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= Order().size() && m_PlayState.m_nCurrentOrder > 0)
+					ORDERINDEX restartPosOverride = m_maxOrderPosition ? m_restartOverridePos : Order().GetRestartPos();
+					if(restartPosOverride == 0 && m_PlayState.m_nCurrentOrder <= songEnd && m_PlayState.m_nCurrentOrder > 0)
 					{
 						// Subtune detection. Subtunes are separated by "---" order items, so if we're in a
 						// subtune and there's no restart position, we go to the first order of the subtune
@@ -564,10 +561,6 @@ bool CSoundFile::ProcessRow()
 					m_PlayState.m_nPattern = PATTERNINDEX_SKIP;
 			}
 			m_PlayState.m_nNextOrder = m_PlayState.m_nCurrentOrder;
-
-#ifdef MODPLUG_TRACKER
-			if ((m_nMaxOrderPosition) && (m_PlayState.m_nCurrentOrder >= m_nMaxOrderPosition)) return false;
-#endif // MODPLUG_TRACKER
 		}
 
 		// Weird stuff?

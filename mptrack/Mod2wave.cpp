@@ -12,6 +12,7 @@
 #include "mod2wave.h"
 #include "Dlsbank.h"
 #include "Mainfrm.h"
+#include "Moddoc.h"
 #include "Mpdlgs.h"
 #include "Mptrack.h"
 #include "Reporting.h"
@@ -56,21 +57,22 @@ static samplecount_t ReadInterleaved(CSoundFile &sndFile, Tsample *outputBuffer,
 // CWaveConvert - setup for converting a wave file
 
 BEGIN_MESSAGE_MAP(CWaveConvert, DialogBase)
-	ON_COMMAND(IDC_CHECK2,			&CWaveConvert::OnCheckTimeLimit)
-	ON_COMMAND(IDC_CHECK4,			&CWaveConvert::OnCheckChannelMode)
-	ON_COMMAND(IDC_CHECK6,			&CWaveConvert::OnCheckInstrMode)
-	ON_COMMAND(IDC_RADIO1,			&CWaveConvert::UpdateDialog)
-	ON_COMMAND(IDC_RADIO2,			&CWaveConvert::UpdateDialog)
-	ON_COMMAND(IDC_RADIO3,			&CWaveConvert::UpdateDialog)
-	ON_COMMAND(IDC_RADIO4,			&CWaveConvert::OnExportModeChanged)
-	ON_COMMAND(IDC_RADIO5,			&CWaveConvert::OnExportModeChanged)
-	ON_COMMAND(IDC_PLAYEROPTIONS,	&CWaveConvert::OnPlayerOptions)
-	ON_CBN_SELCHANGE(IDC_COMBO5,	&CWaveConvert::OnFileTypeChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO1,	&CWaveConvert::OnSamplerateChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO4,	&CWaveConvert::OnChannelsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO6,	&CWaveConvert::OnDitherChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,	&CWaveConvert::OnFormatChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO9,	&CWaveConvert::OnSampleSlotChanged)
+	ON_COMMAND(IDC_CHECK2,        &CWaveConvert::OnCheckTimeLimit)
+	ON_COMMAND(IDC_CHECK4,        &CWaveConvert::OnCheckChannelMode)
+	ON_COMMAND(IDC_CHECK6,        &CWaveConvert::OnCheckInstrMode)
+	ON_COMMAND(IDC_RADIO1,        &CWaveConvert::UpdateDialog)
+	ON_COMMAND(IDC_RADIO2,        &CWaveConvert::UpdateDialog)
+	ON_COMMAND(IDC_RADIO3,        &CWaveConvert::UpdateDialog)
+	ON_COMMAND(IDC_RADIO4,        &CWaveConvert::OnExportModeChanged)
+	ON_COMMAND(IDC_RADIO5,        &CWaveConvert::OnExportModeChanged)
+	ON_COMMAND(IDC_PLAYEROPTIONS, &CWaveConvert::OnPlayerOptions)
+	ON_CBN_SELCHANGE(IDC_COMBO5,  &CWaveConvert::OnFileTypeChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,  &CWaveConvert::OnSamplerateChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO4,  &CWaveConvert::OnChannelsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO6,  &CWaveConvert::OnDitherChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,  &CWaveConvert::OnFormatChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO9,  &CWaveConvert::OnSampleSlotChanged)
+	ON_EN_CHANGE(IDC_EDIT12,      &CWaveConvert::OnSubsongChanged)
 END_MESSAGE_MAP()
 
 
@@ -78,22 +80,21 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 	: DialogBase(IDD_WAVECONVERT, parent)
 	, m_Settings(theApp.GetSettings(), encFactories)
 	, m_SndFile(sndFile)
+	, m_subSongs{sndFile.GetAllSubSongs()}
+	, m_nNumOrders{numOrders}
 {
-	ASSERT(!encFactories.empty());
+	MPT_ASSERT(!encFactories.empty());
 	encTraits = m_Settings.GetTraits();
-	m_bGivePlugsIdleTime = false;
 	if(minOrder != ORDERINDEX_INVALID && maxOrder != ORDERINDEX_INVALID)
 	{
 		// render selection
 		m_Settings.minOrder = minOrder;
 		m_Settings.maxOrder = maxOrder;
 	}
-	m_Settings.repeatCount = 1;
-	m_Settings.minSequence = m_Settings.maxSequence = m_SndFile.Order.GetCurrentSequenceIndex();
-	m_nNumOrders = numOrders;
-
-	m_dwSongLimit = 0;
 }
+
+
+CWaveConvert::~CWaveConvert() {}
 
 
 void CWaveConvert::DoDataExchange(CDataExchange *pDX)
@@ -107,8 +108,7 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN3,		m_SpinMinOrder);
 	DDX_Control(pDX, IDC_SPIN4,		m_SpinMaxOrder);
 	DDX_Control(pDX, IDC_SPIN5,		m_SpinLoopCount);
-	DDX_Control(pDX, IDC_SPIN6,		m_SpinMinSequence);
-	DDX_Control(pDX, IDC_SPIN7,		m_SpinMaxSequence);
+	DDX_Control(pDX, IDC_SPIN6,		m_SpinSubsongIndex);
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSampleSlot);
 
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
@@ -131,8 +131,9 @@ BOOL CWaveConvert::OnInitDialog()
 	CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK6, BST_UNCHECKED);
 
+	// Export limits
 	const bool selection = (m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID);
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selection ? IDC_RADIO2 : IDC_RADIO1);
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selection ? IDC_RADIO2 : IDC_RADIO3);
 	if(selection)
 	{
 		SetDlgItemInt(IDC_EDIT3, m_Settings.minOrder);
@@ -141,16 +142,17 @@ BOOL CWaveConvert::OnInitDialog()
 	m_SpinMinOrder.SetRange32(0, m_nNumOrders);
 	m_SpinMaxOrder.SetRange32(0, m_nNumOrders);
 
-	const SEQUENCEINDEX numSequences = m_SndFile.Order.GetNumSequences();
-	const BOOL enableSeq = numSequences > 1 ? TRUE : FALSE;
-	GetDlgItem(IDC_RADIO3)->EnableWindow(enableSeq);
-	m_SpinMinSequence.SetRange32(1, numSequences);
-	m_SpinMaxSequence.SetRange32(1, numSequences);
-	SetDlgItemInt(IDC_EDIT12, m_Settings.minSequence + 1);
-	SetDlgItemInt(IDC_EDIT13, m_Settings.maxSequence + 1);
-
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange32(1, int16_max);
+
+	m_SpinSubsongIndex.SetRange32(1, static_cast<int>(m_subSongs.size()));
+	SetDlgItemInt(IDC_EDIT12, static_cast<UINT>(m_selectedSong + 1), FALSE);
+	if(m_subSongs.size() <= 1)
+	{
+		GetDlgItem(IDC_RADIO3)->SetWindowText(_T("&Entire Song"));
+		GetDlgItem(IDC_RADIO1)->EnableWindow(FALSE);
+	}
+	UpdateSubsongName();
 
 	FillFileTypes();
 	FillSamplerates();
@@ -181,6 +183,7 @@ BOOL CWaveConvert::OnInitDialog()
 		{
 			GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(TRUE);
 			GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(TRUE);
+			CheckDlgButton(IDC_RENDERSILENCE, BST_CHECKED);
 			break;
 		}
 	}
@@ -203,6 +206,7 @@ BOOL CWaveConvert::OnInitDialog()
 	CheckRadioButton(IDC_RADIO4, IDC_RADIO5, m_Settings.outputToSample ? IDC_RADIO5 : IDC_RADIO4);
 
 	UpdateDialog();
+	
 	return TRUE;
 }
 
@@ -238,8 +242,8 @@ void CWaveConvert::FillTags()
 	DWORD_PTR dwFormat = m_CbnSampleFormat.GetItemData(m_CbnSampleFormat.GetCurSel());
 	Encoder::Mode mode = (Encoder::Mode)((dwFormat >> 24) & 0xff);
 
-	CheckDlgButton(IDC_CHECK3, encTraits->canCues?encSettings.Cues?TRUE:FALSE:FALSE);
-	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues?TRUE:FALSE);
+	CheckDlgButton(IDC_CHECK3, (encTraits->canCues && encSettings.Cues) ? BST_CHECKED : BST_UNCHECKED);
+	::EnableWindow(::GetDlgItem(m_hWnd, IDC_CHECK3), encTraits->canCues ? TRUE : FALSE);
 
 	const BOOL canTags = encTraits->canTags ? TRUE : FALSE;
 	CheckDlgButton(IDC_CHECK7, encSettings.Tags ? canTags : FALSE);
@@ -565,6 +569,26 @@ void CWaveConvert::OnFormatChanged()
 }
 
 
+void CWaveConvert::OnSubsongChanged()
+{
+	BOOL ok = FALSE;
+	const auto newSubSong = std::clamp(static_cast<size_t>(GetDlgItemInt(IDC_EDIT12, &ok, FALSE)), size_t(1), m_subSongs.size()) - 1;
+	if(m_selectedSong == newSubSong || !ok)
+		return;
+	m_selectedSong = newSubSong;
+	UpdateSubsongName();
+}
+
+
+void CWaveConvert::UpdateSubsongName()
+{
+	const auto subsongText = GetDlgItem(IDC_SUBSONG);
+	if(subsongText == nullptr || m_selectedSong >= m_subSongs.size())
+		return;
+	subsongText->SetWindowText(m_SndFile.GetpModDoc()->FormatSubsongName(m_subSongs[m_selectedSong]).c_str());
+}
+
+
 void CWaveConvert::UpdateDialog()
 {
 	CheckDlgButton(IDC_CHECK2, (m_dwSongLimit) ? BST_CHECKED : 0);
@@ -578,15 +602,8 @@ void CWaveConvert::UpdateDialog()
 	m_SpinMinOrder.EnableWindow(sel == IDC_RADIO2);
 	m_SpinMaxOrder.EnableWindow(sel == IDC_RADIO2);
 
-	GetDlgItem(IDC_EDIT5)->EnableWindow(sel == IDC_RADIO1);
-	m_SpinLoopCount.EnableWindow(sel == IDC_RADIO1);
-
-	const SEQUENCEINDEX numSequences = m_SndFile.Order.GetNumSequences();
-	const BOOL enableSeq = (numSequences > 1 && sel == IDC_RADIO3) ? TRUE : FALSE;
-	GetDlgItem(IDC_EDIT12)->EnableWindow(enableSeq);
-	GetDlgItem(IDC_EDIT13)->EnableWindow(enableSeq);
-	m_SpinMinSequence.EnableWindow(enableSeq);
-	m_SpinMaxSequence.EnableWindow(enableSeq);
+	GetDlgItem(IDC_EDIT12)->EnableWindow(sel == IDC_RADIO1);
+	m_SpinSubsongIndex.EnableWindow(sel == IDC_RADIO1);
 
 	// No free slots => Cannot do instrument- or channel-based export to sample
 	BOOL canDoMultiExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;
@@ -691,6 +708,7 @@ void CWaveConvert::OnOK()
 	if(selection)
 	{
 		// Play selection
+		m_subSongs.clear();
 		m_Settings.minOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT3, NULL, FALSE));
 		m_Settings.maxOrder = static_cast<ORDERINDEX>(GetDlgItemInt(IDC_EDIT4, NULL, FALSE));
 		if(m_Settings.minOrder > m_Settings.maxOrder)
@@ -699,16 +717,11 @@ void CWaveConvert::OnOK()
 	{
 		m_Settings.minOrder = m_Settings.maxOrder = ORDERINDEX_INVALID;
 	}
-	if(IsDlgButtonChecked(IDC_RADIO3))
+	if(IsDlgButtonChecked(IDC_RADIO1))
 	{
-		const UINT maxSequence = m_SndFile.Order.GetNumSequences();
-		m_Settings.minSequence = static_cast<SEQUENCEINDEX>(std::clamp(GetDlgItemInt(IDC_EDIT12, NULL, FALSE), 1u, maxSequence) - 1u);
-		m_Settings.maxSequence = static_cast<SEQUENCEINDEX>(std::clamp(GetDlgItemInt(IDC_EDIT13, NULL, FALSE), 1u, maxSequence) - 1u);
-		if(m_Settings.minSequence > m_Settings.maxSequence)
-			std::swap(m_Settings.minSequence, m_Settings.maxSequence);
-	} else
-	{
-		m_Settings.minSequence = m_Settings.maxSequence = m_SndFile.Order.GetCurrentSequenceIndex();
+		// Specific subsong
+		size_t subsong = std::clamp(static_cast<size_t>(GetDlgItemInt(IDC_EDIT12, nullptr, FALSE)), size_t(1), m_subSongs.size()) - 1;
+		m_subSongs = {m_subSongs[subsong]};
 	}
 
 	m_Settings.repeatCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
@@ -883,12 +896,6 @@ CWaveConvertSettings::CWaveConvertSettings(SettingsContainer &conf, const std::v
 	, EncoderName(conf, U_("Export"), U_("Encoder"), U_(""))
 	, EncoderIndex(FindEncoder(EncoderName))
 	, storedTags(conf)
-	, repeatCount(0)
-	, minOrder(ORDERINDEX_INVALID), maxOrder(ORDERINDEX_INVALID)
-	, sampleSlot(0)
-	, normalize(false)
-	, silencePlugBuffers(false)
-	, outputToSample(false)
 {
 	Tags.encoder = Version::Current().GetOpenMPTVersionString();
 	for(const auto & factory : EncoderFactories)
@@ -1063,38 +1070,31 @@ void CDoWaveConvert::Run()
 	// Calculate maximum samples
 	uint64 max = m_dwSongLimit ? ullMaxSamples : uint64_max;
 
-	// Reset song position tracking
-	m_SndFile.ResetPlayPos();
 	m_SndFile.m_PlayState.m_flags.reset(SONG_PATTERNLOOP);
 	ORDERINDEX startOrder = 0;
-	GetLengthTarget target;
+	double duration = m_subSong.duration;
 	if(m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID)
 	{
-		m_SndFile.SetRepeatCount(0);
 		startOrder = m_Settings.minOrder;
 		ORDERINDEX endOrder = m_Settings.maxOrder;
 		while(!m_SndFile.Order().IsValidPat(endOrder) && endOrder > startOrder)
 		{
 			endOrder--;
 		}
+		GetLengthTarget target;
 		if(m_SndFile.Order().IsValidPat(endOrder))
 		{
 			target = GetLengthTarget(endOrder, m_SndFile.Patterns[m_SndFile.Order()[endOrder]].GetNumRows() - 1);
 		}
 		target.StartPos(m_SndFile.Order.GetCurrentSequenceIndex(), startOrder, 0);
-		m_SndFile.m_nMaxOrderPosition = endOrder + 1;
-	} else
-	{
-		m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
+		m_SndFile.m_restartOverridePos = m_Settings.minOrder;
+		m_SndFile.m_maxOrderPosition = endOrder + 1;
+		duration = m_SndFile.GetLength(eNoAdjust, target).front().duration;
 	}
-	uint64 l = mpt::saturate_round<uint64>(m_SndFile.GetLength(eNoAdjust, target).front().duration * samplerate * (1 + m_SndFile.GetRepeatCount()));
+	m_SndFile.SetRepeatCount(std::max(0, m_Settings.repeatCount - 1));
+	uint64 l = mpt::saturate_round<uint64>(duration * samplerate * (1 + m_SndFile.GetRepeatCount()));
 
-	m_SndFile.SetCurrentOrder(startOrder);
-	m_SndFile.GetLength(eAdjust, GetLengthTarget(startOrder, 0));	// adjust playback variables / visited rows vector
-	m_SndFile.m_PlayState.m_nCurrentOrder = startOrder;
-
-	if (l < max) max = l;
-
+	LimitMax(max, l);
 	SetRange(0, max);
 	EnableTaskbarProgress();
 
@@ -1105,17 +1105,20 @@ void CDoWaveConvert::Run()
 
 	// Process the conversion
 
+	auto mainFrame = CMainFrame::GetMainFrame();
+	mainFrame->PauseMod();
+
+	// Reset song position tracking
+	m_SndFile.ResetPlayPos();
+	m_SndFile.GetLength(eAdjust, GetLengthTarget(m_subSong.startOrder, m_subSong.startRow).StartPos(m_subSong.sequence, 0, 0));
+	m_SndFile.m_PlayState.m_flags.reset();
+
+	mainFrame->InitRenderer(&m_SndFile);
+
 	// For calculating the remaining time
 	auto dwStartTime = timeGetTime(), prevTime = dwStartTime;
 	uint32 timeRemaining = 0;
-
 	uint64 bytesWritten = 0;
-
-	auto mainFrame = CMainFrame::GetMainFrame();
-	mainFrame->PauseMod();
-	m_SndFile.m_PlayState.m_flags.reset(SONG_STEP | SONG_PATTERNLOOP);
-	mainFrame->InitRenderer(&m_SndFile);
-
 	while(true)
 	{
 		UINT lRead = 0;
@@ -1262,7 +1265,7 @@ void CDoWaveConvert::Run()
 		}
 	}
 
-	m_SndFile.m_nMaxOrderPosition = 0;
+	m_SndFile.m_restartOverridePos = m_SndFile.m_maxOrderPosition = 0;
 
 	mainFrame->StopRenderer(&m_SndFile);
 

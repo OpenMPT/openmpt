@@ -1759,23 +1759,33 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	int oldRepeat = m_SndFile.GetRepeatCount();
 
 	const SEQUENCEINDEX currentSeq = m_SndFile.Order.GetCurrentSequenceIndex();
-	for(SEQUENCEINDEX seq = wsdlg.m_Settings.minSequence; seq <= wsdlg.m_Settings.maxSequence; seq++)
+	if(wsdlg.m_subSongs.empty())
 	{
-		m_SndFile.Order.SetSequence(seq);
+		// Render selection
+		SubSong subsong{};
+		subsong.sequence = currentSeq;
+		subsong.startOrder = wsdlg.m_Settings.minOrder;
+		wsdlg.m_subSongs.push_back(subsong);
+	}
+	for(size_t subsong = 0; subsong < wsdlg.m_subSongs.size(); subsong++)
+	{
+		const auto &song = wsdlg.m_subSongs[subsong];
 		mpt::ustring fileNameAdd;
 		for(int i = 0; i < nRenderPasses; i++)
 		{
 			mpt::PathString thisName = fileName;
 			CString caption = _T("file");
 			fileNameAdd.clear();
-			if(wsdlg.m_Settings.minSequence != wsdlg.m_Settings.maxSequence)
+			if(wsdlg.m_subSongs.size() > 1)
 			{
-				fileNameAdd = MPT_UFORMAT("-{}")(mpt::ufmt::dec0<2>(seq + 1));
-				mpt::ustring seqName = m_SndFile.Order(seq).GetName();
+				fileNameAdd = MPT_UFORMAT("-{}")(mpt::ufmt::dec0<2>(subsong + 1));
+				mpt::ustring seqName = m_SndFile.Order(song.sequence).GetName();
 				if(!seqName.empty())
-				{
 					fileNameAdd += UL_("-") + seqName;
-				}
+				const auto startPattern = m_SndFile.Order(song.sequence).PatternAt(song.startOrder);
+				const auto orderName = startPattern ? startPattern->GetName() : std::string{};
+				if(!orderName.empty())
+					fileNameAdd += UL_("-") + mpt::ToUnicode(m_SndFile.GetCharsetInternal(), orderName);
 			}
 
 			// Channel mode
@@ -1878,7 +1888,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 				} else
 				{
 					BypassInputHandler bih;
-					CDoWaveConvert dwcdlg(m_SndFile, f, caption, wsdlg.m_Settings, pMainFrm);
+					CDoWaveConvert dwcdlg(m_SndFile, f, caption, wsdlg.m_Settings, song, pMainFrm);
 					dwcdlg.m_bGivePlugsIdleTime = wsdlg.m_bGivePlugsIdleTime;
 					dwcdlg.m_dwSongLimit = wsdlg.m_dwSongLimit;
 					cancel = dwcdlg.DoModal() != IDOK;
