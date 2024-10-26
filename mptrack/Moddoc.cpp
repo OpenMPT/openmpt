@@ -2001,41 +2001,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 void CModDoc::OnFileMidiConvert()
 {
 #ifndef NO_PLUGINS
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-
-	if ((!pMainFrm) || (!m_SndFile.GetType())) return;
-
-	mpt::PathString filename = GetPathNameMpt().ReplaceExtension(P_(".mid"));
-
-	FileDialog dlg = SaveFileDialog()
-		.DefaultExtension(U_("mid"))
-		.DefaultFilename(filename)
-		.ExtensionFilter(U_("MIDI Files (*.mid)|*.mid||"));
-	if(!dlg.Show()) return;
-
-	CModToMidi mididlg(m_SndFile, pMainFrm);
+	CModToMidi mididlg(*this, CMainFrame::GetMainFrame());
 	BypassInputHandler bih;
-	if(mididlg.DoModal() == IDOK)
-	{
-		try
-		{
-			mpt::IO::SafeOutputFile sf(dlg.GetFirstFile(), std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-			mpt::IO::ofstream &f = sf;
-			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
-
-			if(!f.good())
-			{
-				Reporting::Error("Could not open file for writing. Is it open in another application?");
-				return;
-			}
-			
-			CDoMidiConvert doconv(m_SndFile, f, mididlg.m_instrMap);
-			doconv.DoModal();
-		} catch(const std::exception &)
-		{
-			Reporting::Error(_T("Error while writing file!"));
-		}
-	}
+	mididlg.DoModal();
 #else
 	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
 #endif // NO_PLUGINS
@@ -3073,6 +3041,20 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 			displayName.Format(TEXT("%s (%s)"), instrumentName.GetString(), pluginName.GetString());
 	}
 	return displayName;
+}
+
+
+mpt::tstring CModDoc::FormatSubsongName(const SubSong &song)
+{
+	const auto sequenceName = m_SndFile.Order(song.sequence).GetName();
+	const auto startPattern = m_SndFile.Order(song.sequence).PatternAt(song.startOrder);
+	const auto orderName = startPattern ? startPattern->GetName() : std::string{};
+	return MPT_TFORMAT("Sequence {}{}\nOrder {} to {}{}")(
+		song.sequence + 1,
+		sequenceName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(sequenceName),
+		song.startOrder,
+		song.endOrder,
+		orderName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(mpt::ToWin(m_SndFile.GetCharsetInternal(), orderName)));
 }
 
 

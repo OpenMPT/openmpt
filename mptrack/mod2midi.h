@@ -19,7 +19,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CSoundFile;
+class CModDoc;
+struct SubSong;
 
 namespace MidiExport
 {
@@ -32,23 +33,34 @@ namespace MidiExport
 }
 
 
-class CModToMidi : public DialogBase
+class CModToMidi : public CProgressDialog
 {
 protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
 	CSpinButtonCtrl m_SpinInstrument;
-	CSoundFile &m_sndFile;
+	CModDoc &m_modDoc;
+	MidiExport::InstrMap m_instrMap;
+	std::vector<SubSong> m_subSongs;
+	size_t m_selectedSong = 0;
 	size_t m_currentInstr = 1;
 	bool m_percussion = false;
+	bool m_conversionRunning = false;
+	bool m_locked = true;
 public:
-	MidiExport::InstrMap m_instrMap;
 	static bool s_overlappingInstruments;
 
 public:
-	CModToMidi(CSoundFile &sndFile, CWnd *pWndParent = nullptr);
+	CModToMidi(CModDoc &modDoc, CWnd *parent = nullptr);
+	~CModToMidi();
 
 protected:
+	void Run() override {};
+	
+	void UpdateSubsongName();
+	void DoConversion(const mpt::PathString &fileName);
+
 	void OnOK() override;
+	void OnCancel() override;
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange *pDX) override;
 	void FillProgramBox(bool percussion);
@@ -57,25 +69,9 @@ protected:
 	afx_msg void OnChannelChanged();
 	afx_msg void OnProgramChanged();
 	afx_msg void OnOverlapChanged();
+	afx_msg void OnSubsongChanged();
+
 	DECLARE_MESSAGE_MAP();
-};
-
-
-class CDoMidiConvert: public CProgressDialog
-{
-public:
-	CSoundFile &m_sndFile;
-	std::ostream &m_file;
-	const MidiExport::InstrMap &m_instrMap;
-
-public:
-	CDoMidiConvert(CSoundFile &sndFile, std::ostream &f, const MidiExport::InstrMap &instrMap, CWnd *parent = nullptr)
-		: CProgressDialog(parent)
-		, m_sndFile(sndFile)
-		, m_file(f)
-		, m_instrMap(instrMap)
-	{ }
-	void Run() override;
 };
 
 

@@ -454,17 +454,7 @@ public:
 		const auto subsongText = GetDlgItem(IDC_SUBSONG);
 		if(subsongText == nullptr || m_selectedSong >= m_subSongs.size())
 			return;
-		const auto &song = m_subSongs[m_selectedSong];
-		const auto sequenceName = m_sndFile.Order(song.sequence).GetName();
-		const auto startPattern = m_sndFile.Order(song.sequence).PatternAt(song.startOrder);
-		const auto orderName = startPattern ? startPattern->GetName() : std::string{};
-		subsongText->SetWindowText(MPT_TFORMAT("Sequence {}{}\nOrder {} to {}{}")(
-									   song.sequence + 1,
-									   sequenceName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(sequenceName),
-									   song.startOrder,
-									   song.endOrder,
-									   orderName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(mpt::ToWin(m_sndFile.GetCharsetInternal(), orderName)))
-									   .c_str());
+		subsongText->SetWindowText(m_modDoc.FormatSubsongName(m_subSongs[m_selectedSong]).c_str());
 	}
 
 	void DoConversion(const mpt::PathString &fileName)
@@ -512,10 +502,13 @@ public:
 
 		const auto songIndexFmt = mpt::format_simple_spec<mpt::ustring>{}.Dec().FillNul().Width(1 + static_cast<int>(std::log10(m_subSongs.size())));
 
-		size_t totalSamples = 0;
+		uint64 totalSamples = 0;
 		for(size_t i = 0; i < m_subSongs.size() && !m_abort; i++)
 		{
 			const auto &song = m_subSongs[i];
+
+			m_selectedSong = i;
+			UpdateSubsongName();
 
 			m_sndFile.ResetPlayPos();
 			m_sndFile.GetLength(eAdjust, GetLengthTarget(song.startOrder, song.startRow).StartPos(song.sequence, 0, 0));
