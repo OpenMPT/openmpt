@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.5.35-pre
+
 ### libopenmpt 0.5.34 (2024-10-26)
 
  *  OKT: The last sample slot was never loaded.
