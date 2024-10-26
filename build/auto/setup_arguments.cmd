@@ -79,6 +79,17 @@ if "%MPT_VS_ARCH%" == "ARM64" (
 	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win10
 	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
 )
+if "%MPT_VS_ARCH%" == "ARM64EC" (
+	if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET=winxpansi
+	if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET=winxp
+	if "%MPT_VS_TARGET%" == "vista"   set MPT_BIN_TARGET=vista
+	if "%MPT_VS_TARGET%" == "win7"    set MPT_BIN_TARGET=win7
+	if "%MPT_VS_TARGET%" == "win8"    set MPT_BIN_TARGET=win8
+	if "%MPT_VS_TARGET%" == "win81"   set MPT_BIN_TARGET=win81
+	if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET=win10
+	if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET=win10
+	if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET=win10clang
+)
 
 if "%MPT_VS_TARGET%" == "winxpansi" set MPT_BIN_TARGET32=winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_BIN_TARGET32=winxp
@@ -100,15 +111,17 @@ if "%MPT_VS_TARGET%" == "win10"   set MPT_BIN_TARGET64=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_BIN_TARGET64=win10
 if "%MPT_VS_TARGET%" == "win10clang" set MPT_BIN_TARGET64=win10clang
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_BIN_ARCH_TRK=x86
-if "%MPT_VS_ARCH%" == "x64"   set MPT_BIN_ARCH_TRK=amd64
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_BIN_ARCH_TRK=arm
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_BIN_ARCH_TRK=arm64
+if "%MPT_VS_ARCH%" == "Win32"   set MPT_BIN_ARCH_TRK=x86
+if "%MPT_VS_ARCH%" == "x64"     set MPT_BIN_ARCH_TRK=amd64
+if "%MPT_VS_ARCH%" == "ARM"     set MPT_BIN_ARCH_TRK=arm
+if "%MPT_VS_ARCH%" == "ARM64"   set MPT_BIN_ARCH_TRK=arm64
+if "%MPT_VS_ARCH%" == "ARM64EC" set MPT_BIN_ARCH_TRK=arm64ec
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_BIN_ARCH=x86
-if "%MPT_VS_ARCH%" == "x64"   set MPT_BIN_ARCH=amd64
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_BIN_ARCH=arm
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_BIN_ARCH=arm64
+if "%MPT_VS_ARCH%" == "Win32"   set MPT_BIN_ARCH=x86
+if "%MPT_VS_ARCH%" == "x64"     set MPT_BIN_ARCH=amd64
+if "%MPT_VS_ARCH%" == "ARM"     set MPT_BIN_ARCH=arm
+if "%MPT_VS_ARCH%" == "ARM64"   set MPT_BIN_ARCH=arm64
+if "%MPT_VS_ARCH%" == "ARM64EC" set MPT_BIN_ARCH=arm64ec
 
 if "%MPT_VS_CONF%" == "Release"       set MPT_BIN_CONF=release
 if "%MPT_VS_CONF%" == "ReleaseShared" set MPT_BIN_CONF=release
@@ -117,10 +130,11 @@ if "%MPT_VS_CONF%" == "Release"       set MPT_BIN_RUNTIME=static
 if "%MPT_VS_CONF%" == "ReleaseShared" set MPT_BIN_RUNTIME=shared
 
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_DIST_VARIANT_ARCH=x86
-if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_ARCH=amd64
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_ARCH=arm
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_ARCH=arm64
+if "%MPT_VS_ARCH%" == "Win32"   set MPT_DIST_VARIANT_ARCH=x86
+if "%MPT_VS_ARCH%" == "x64"     set MPT_DIST_VARIANT_ARCH=amd64
+if "%MPT_VS_ARCH%" == "ARM"     set MPT_DIST_VARIANT_ARCH=arm
+if "%MPT_VS_ARCH%" == "ARM64"   set MPT_DIST_VARIANT_ARCH=arm64
+if "%MPT_VS_ARCH%" == "ARM64EC" set MPT_DIST_VARIANT_ARCH=arm64ec
 
 if "%MPT_VS_TARGET%" == "winxpansi" set MPT_DIST_VARIANT_OS=winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_DIST_VARIANT_OS=winxp
@@ -145,10 +159,11 @@ if "%MPT_VS_TARGET%" == "win10"   set MPT_DIST_VARIANT_PREFIX=win10
 if "%MPT_VS_TARGET%" == "default" set MPT_DIST_VARIANT_PREFIX=
 if "%MPT_VS_TARGET%" == "win10clang" set MPT_DIST_VARIANT_PREFIX=win10clang
 
-if "%MPT_VS_ARCH%" == "Win32" set MPT_DIST_VARIANT_SUFFIX=x86
-if "%MPT_VS_ARCH%" == "x64"   set MPT_DIST_VARIANT_SUFFIX=amd64
-if "%MPT_VS_ARCH%" == "ARM"   set MPT_DIST_VARIANT_SUFFIX=arm
-if "%MPT_VS_ARCH%" == "ARM64" set MPT_DIST_VARIANT_SUFFIX=arm64
+if "%MPT_VS_ARCH%" == "Win32"   set MPT_DIST_VARIANT_SUFFIX=x86
+if "%MPT_VS_ARCH%" == "x64"     set MPT_DIST_VARIANT_SUFFIX=amd64
+if "%MPT_VS_ARCH%" == "ARM"     set MPT_DIST_VARIANT_SUFFIX=arm
+if "%MPT_VS_ARCH%" == "ARM64"   set MPT_DIST_VARIANT_SUFFIX=arm64
+if "%MPT_VS_ARCH%" == "ARM64EC" set MPT_DIST_VARIANT_SUFFIX=arm64ec
 
 set MPT_DIST_VARIANT_TRK=%MPT_DIST_VARIANT_PREFIX%-%MPT_DIST_VARIANT_SUFFIX%
 
