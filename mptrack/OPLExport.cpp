@@ -472,6 +472,7 @@ public:
 		const int controls[] = {IDC_RADIO1, IDC_RADIO2, IDC_RADIO3, IDC_RADIO4, IDC_RADIO5, IDC_EDIT1, IDC_EDIT2, IDC_EDIT3, IDC_EDIT4, IDC_EDIT5, IDC_SPIN1, IDOK};
 		for(int control : controls)
 			GetDlgItem(control)->EnableWindow(FALSE);
+		GetDlgItem(IDCANCEL)->SetFocus();
 
 		BypassInputHandler bih;
 		CMainFrame::GetMainFrame()->StopMod(&m_modDoc);
