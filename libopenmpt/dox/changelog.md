@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.35-pre
 
+ *  mpg123: Update to v1.32.8 (2024-10-26).
+
 ### libopenmpt 0.5.34 (2024-10-26)
 
  *  OKT: The last sample slot was never loaded.
