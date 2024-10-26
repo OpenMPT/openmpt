@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.21-pre
 
+ *  mpg123: Update to v1.32.8 (2024-10-26).
+
 ### libopenmpt 0.6.20 (2024-10-26)
 
  *  OKT: Disable loop on type "B" samples if they're used on a mixed channel.
