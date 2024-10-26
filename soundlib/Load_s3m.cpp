@@ -304,17 +304,11 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		nonCompatTracker = true;
 		break;
 	case S3MFileHeader::trkImpulseTracker:
-		if(fileHeader.cwtv <= S3MFileHeader::trkIT2_14)
-		{
-			madeWithTracker = UL_("Impulse Tracker");
-			formatTrackerStr = true;
-		} else if(fileHeader.cwtv == S3MFileHeader::trkIT1_old)
-		{
+		if(fileHeader.cwtv == S3MFileHeader::trkIT1_old)
 			madeWithTracker = UL_("Impulse Tracker 1.03");  // Could also be 1.02, maybe? I don't have that one
-		} else
-		{
-			madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - S3MFileHeader::trkIT2_14);
-		}
+		else
+			madeWithTracker = GetImpulseTrackerVersion(fileHeader.cwtv, 0);
+
 		if(fileHeader.cwtv >= S3MFileHeader::trkIT2_07 && fileHeader.reserved3 != 0)
 		{
 			// Starting from version 2.07, IT stores the total edit time of a module in the "reserved" field

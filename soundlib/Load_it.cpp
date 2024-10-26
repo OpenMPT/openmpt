@@ -341,6 +341,26 @@ static void CopyPatternName(CPattern &pattern, FileReader &file)
 }
 
 
+// Get version of Impulse Tracker that was used to create an IT/S3M file.
+mpt::ustring CSoundFile::GetImpulseTrackerVersion(uint16 cwtv, uint16 cmwt)
+{
+	mpt::ustring version;
+	cwtv &= 0xFFF;
+	if(cmwt > 0x0214)
+	{
+		version = UL_("Impulse Tracker 2.15");
+	} else if(cwtv >= 0x0215 && cwtv <= 0x0217)
+	{
+		const mpt::uchar *versions[] = {UL_("1-2"), UL_("3"), UL_("4-5")};
+		version = MPT_UFORMAT("Impulse Tracker 2.14p{}")(versions[cwtv - 0x0215]);
+	} else
+	{
+		version = MPT_UFORMAT("Impulse Tracker {}.{}")((cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((cwtv & 0xFF)));
+	}
+	return version;
+}
+
+
 // Get version of Schism Tracker that was used to create an IT/S3M file.
 mpt::ustring CSoundFile::GetSchismTrackerVersion(uint16 cwtv, uint32 reserved)
 {
@@ -1239,19 +1259,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				madeWithTracker = U_("Unknown");
 			} else if(fileHeader.cmwt < 0x0300 && madeWithTracker.empty())
 			{
-				if(fileHeader.cmwt > 0x0214)
-				{
-					madeWithTracker = U_("Impulse Tracker 2.15");
-				} else if(fileHeader.cwtv > 0x0214)
-				{
-					// Patched update of IT 2.14 (0x0215 - 0x0217 == p1 - p3)
-					// p4 (as found on modland) adds the ITVSOUND driver, but doesn't seem to change
-					// anything as far as file saving is concerned.
-					madeWithTracker = MPT_UFORMAT("Impulse Tracker 2.14p{}")(fileHeader.cwtv - 0x0214);
-				} else
-				{
-					madeWithTracker = MPT_UFORMAT("Impulse Tracker {}.{}")((fileHeader.cwtv & 0x0F00) >> 8, mpt::ufmt::hex0<2>((fileHeader.cwtv & 0xFF)));
-				}
+				madeWithTracker = GetImpulseTrackerVersion(fileHeader.cwtv, fileHeader.cmwt);
 				if(m_FileHistory.empty() && fileHeader.reserved != 0)
 				{
 					// Starting from  version 2.07, IT stores the total edit time of a module in the "reserved" field
