@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.20-pre
 
+ *  OKT: Disable loop on type "B" samples if they're used on a mixed channel.
+ *  OKT: The last sample slot was never loaded.
+ *  PTM: Halve offset command strength for 16-bit samples.
+
 ### libopenmpt 0.6.19 (2024-09-22)
 
  *  [**Sec**] Possible out-of-bounds read with malformed IT / MPTM / XM files
