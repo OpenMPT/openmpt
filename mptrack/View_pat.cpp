@@ -4879,6 +4879,7 @@ void CViewPattern::TempEnterVol(int v)
 	if(m != target)
 	{
 		PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
+		target = m;
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
@@ -5010,6 +5011,7 @@ void CViewPattern::TempEnterFXparam(int v)
 	if(m != target)
 	{
 		PrepareUndo(m_Cursor, m_Cursor, "Parameter Entry");
+		target = m;
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
@@ -5291,6 +5293,7 @@ void CViewPattern::TempEnterIns(int val)
 	if(m != target)
 	{
 		PrepareUndo(m_Cursor, m_Cursor, "Instrument Entry");
+		target = m;
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
