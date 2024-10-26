@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.6.20-pre
+### libopenmpt 0.6.20 (2024-10-26)
 
  *  OKT: Disable loop on type "B" samples if they're used on a mixed channel.
  *  OKT: The last sample slot was never loaded.
