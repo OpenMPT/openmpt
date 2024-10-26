@@ -12,6 +12,7 @@
 #include "SampleEdit.h"
 #include "../soundlib/AudioCriticalSection.h"
 #include "../soundlib/MixFuncTable.h"
+#include "../soundlib/mod_specifications.h"
 #include "../soundlib/modsmp_ctrl.h"
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/Sndfile.h"
@@ -830,7 +831,7 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
 
 // Resample using given resampling method (SRCMODE_DEFAULT = r8brain).
 // Returns end point of resampled data, or 0 on failure.
-SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc)
+SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, bool updatePatternNotes, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc)
 {
 	if(!smp.HasSampleData() || smp.uFlags[CHN_ADLIB] || start >= end)
 		return 0;
@@ -1013,15 +1014,15 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 		LimitMax(point, newTotalLength);
 	}
 
+	const SAMPLEINDEX sampleIndex = static_cast<SAMPLEINDEX>(std::distance(&sndFile.GetSample(0), &smp));
+	bool patternUndoCreated = false;
 	if(updatePatternCommands)
 	{
-		const SAMPLEINDEX sample = static_cast<SAMPLEINDEX>(std::distance(&sndFile.GetSample(0), &smp));
-		bool patternUndoCreated = false;
 		sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
 		{
 			if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET && m.command != CMD_OFFSETPERCENTAGE)
 				return;
-			if(sndFile.GetSampleIndex(m.note, m.instr) != sample)
+			if(sndFile.GetSampleIndex(m.note, m.instr) != sampleIndex)
 				return;
 			SmpLength point = m.param * 256u;
 
@@ -1051,10 +1052,50 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 		});
 	}
 
-	if(!partialResample && sndFile.GetType() != MOD_TYPE_MOD)
+	const double transpose = 12.0 * std::log(static_cast<double>(newRate) / oldRate) / std::log(2.0);
+	int noteAdjust = mpt::saturate_round<int>(transpose);
+	if(updatePatternNotes && noteAdjust != 0)
 	{
-		smp.nC5Speed = newRate;
-		smp.FrequencyToTranspose();
+		sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
+		{
+			if(!m.IsNote())
+				return;
+			if(sndFile.GetSampleIndex(m.note, m.instr) != sampleIndex)
+				return;
+			
+			const auto newNote = static_cast<ModCommand::NOTE>(Clamp(m.note + noteAdjust, sndFile.GetModSpecifications().noteMin, sndFile.GetModSpecifications().noteMax));
+			if(m.note == newNote)
+				return;
+			
+			if(!patternUndoCreated)
+			{
+				patternUndoCreated = true;
+				preparePatternUndoFunc();
+			}
+			m.note = newNote;
+		});
+	}
+
+	if(!partialResample || updatePatternNotes)
+	{
+		if (sndFile.GetBestSaveFormat() == MOD_TYPE_MOD)
+		{
+			int finetuneAdjust = smp.nFineTune / 16 + mpt::saturate_round<int>((transpose - noteAdjust) * 8.0);
+			if(finetuneAdjust >= 8)
+			{
+				finetuneAdjust -= 16;
+				noteAdjust++;
+			} else if(finetuneAdjust < -8)
+			{
+				finetuneAdjust += 16;
+				noteAdjust--;
+			}
+			smp.nFineTune = MOD2XMFineTune(finetuneAdjust);
+		} else
+		{
+			smp.nC5Speed = newRate;
+			smp.FrequencyToTranspose();
+		}
 	}
 
 	smp.ReplaceWaveform(newSample, newTotalLength, sndFile);

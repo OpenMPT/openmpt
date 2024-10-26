@@ -96,7 +96,7 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop);
 
 // Resample using given resampling method (SRCMODE_DEFAULT = r8brain).
 // Returns end point of resampled data, or 0 on failure.
-SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc);
+SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRate, ResamplingMode mode, CSoundFile &sndFile, bool updatePatternCommands, bool updatePatternNotes, const std::function<void()> &prepareSampleUndoFunc, const std::function<void()> &preparePatternUndoFunc);
 
 } // namespace SampleEdit
 

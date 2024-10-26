@@ -1793,7 +1793,7 @@ void CCtrlSamples::OnResample()
 	}
 	
 	const uint32 oldRate = sample.GetSampleRate(m_sndFile.GetType());
-	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler, first != last);
+	CResamplingDlg dlg(this, oldRate, TrackerSettings::Instance().sampleEditorDefaultResampler, first != last, m_sndFile.GetBestSaveFormat() == MOD_TYPE_MOD);
 	if(dlg.DoModal() != IDOK)
 		return;
 	
@@ -1808,12 +1808,12 @@ void CCtrlSamples::OnResample()
 			newFreq = sampleFreq / 2;
 		else if(newFreq == sampleFreq)
 			continue;
-		ApplyResample(smp, newFreq, dlg.GetFilter(), first != last, dlg.UpdatePatternCommands());
+		ApplyResample(smp, newFreq, dlg.GetFilter(), first != last, dlg.UpdatePatternCommands(), dlg.UpdatePatternNotes());
 	}
 }
 
 
-void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection, bool updatePatternCommands)
+void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode mode, bool ignoreSelection, bool updatePatternCommands, bool updatePatternNotes)
 {
 	BeginWaitCursor();
 
@@ -1848,7 +1848,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 	{
 		m_modDoc.PrepareUndoForAllPatterns(false, "Resample (Adjust Offsets)");
 	};
-	SmpLength newSelEnd = SampleEdit::Resample(sample, selection.nStart, selection.nEnd, newRate, mode, m_sndFile, updatePatternCommands, prepareSampleUndoFunc, preparePatternUndoFunc);
+	SmpLength newSelEnd = SampleEdit::Resample(sample, selection.nStart, selection.nEnd, newRate, mode, m_sndFile, updatePatternCommands, updatePatternNotes, prepareSampleUndoFunc, preparePatternUndoFunc);
 	if(!newSelEnd)
 	{
 		MessageBeep(MB_ICONWARNING);
@@ -1857,7 +1857,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 	}
 
 	SetModified(smp, SampleHint().Info().Data(), smp == m_nSample, true);
-	if(updatePatternCommands)
+	if(updatePatternCommands || updatePatternNotes)
 	{
 		m_modDoc.UpdateAllViews(nullptr, PatternHint().Data(), this);
 	}

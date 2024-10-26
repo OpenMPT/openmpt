@@ -790,18 +790,20 @@ BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 
 CResamplingDlg::ResamplingOption CResamplingDlg::m_lastChoice = CResamplingDlg::Upsample;
 uint32 CResamplingDlg::m_lastFrequency = 0;
-bool CResamplingDlg::m_updatePatterns = false;
+bool CResamplingDlg::m_updatePatternCommands = false;
+bool CResamplingDlg::m_updatePatternNotes = false;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, DialogBase)
 	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
 END_MESSAGE_MAP()
 
 
-CResamplingDlg::CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll)
+CResamplingDlg::CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll, bool allowAdjustNotes)
 	: DialogBase{IDD_RESAMPLE, parent}
 	, m_srcMode{srcMode}
 	, m_frequency{frequency}
 	, m_resampleAll{resampleAll}
+	, m_allowAdjustNotes{allowAdjustNotes}
 {
 }
 
@@ -848,7 +850,9 @@ BOOL CResamplingDlg::OnInitDialog()
 	}
 	cbnResampling->SetRedraw(TRUE);
 
-	CheckDlgButton(IDC_CHECK1, m_updatePatterns ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK1, m_updatePatternCommands ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(IDC_CHECK2, (m_updatePatternNotes && m_allowAdjustNotes) ? BST_CHECKED : BST_UNCHECKED);
+	GetDlgItem(IDC_CHECK2)->EnableWindow(m_allowAdjustNotes ? TRUE : FALSE);
 
 	return TRUE;
 }
@@ -883,7 +887,8 @@ void CResamplingDlg::OnOK()
 	CComboBox *cbnResampling = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO_FILTER));
 	m_srcMode = static_cast<ResamplingMode>(cbnResampling->GetItemData(cbnResampling->GetCurSel()));
 
-	m_updatePatterns = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	m_updatePatternCommands = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
+	m_updatePatternNotes = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 
 	DialogBase::OnOK();
 }

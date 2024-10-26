@@ -224,17 +224,20 @@ public:
 protected:
 	ResamplingMode m_srcMode;
 	uint32 m_frequency;
-	bool m_resampleAll;
+	const bool m_resampleAll;
+	const bool m_allowAdjustNotes;
 	static uint32 m_lastFrequency;
 	static ResamplingOption m_lastChoice;
-	static bool m_updatePatterns;
+	static bool m_updatePatternCommands;
+	static bool m_updatePatternNotes;
 
 public:
-	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll);
+	CResamplingDlg(CWnd *parent, uint32 frequency, ResamplingMode srcMode, bool resampleAll, bool allowAdjustNotes);
 	uint32 GetFrequency() const { return m_frequency; }
 	ResamplingMode GetFilter() const { return m_srcMode; }
 	static ResamplingOption GetResamplingOption() { return m_lastChoice; }
-	static bool UpdatePatternCommands() { return m_updatePatterns; }
+	static bool UpdatePatternCommands() { return m_updatePatternCommands; }
+	static bool UpdatePatternNotes() { return m_updatePatternNotes; }
 
 protected:
 	BOOL OnInitDialog() override;
