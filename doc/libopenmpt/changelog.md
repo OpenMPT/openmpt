@@ -32,6 +32,8 @@ is just a high-level summary.
  *  OKT: The last sample slot was never loaded.
  *  PTM: Halve offset command strength for 16-bit samples.
 
+ *  mpg123: Update to v1.32.8-dev+r5433 (2024-10-24).
+
 ### libopenmpt 0.7.10 (2024-09-22)
 
  *  [**Change**] FST was added to the list of supported file extension. AMP uses
