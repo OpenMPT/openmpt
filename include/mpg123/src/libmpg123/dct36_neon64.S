@@ -6,6 +6,7 @@
 	initially written by Taihei Monma
 */
 
+#include "aarch64_defs.h"
 #include "mangle.h"
 
 #ifndef __APPLE__
