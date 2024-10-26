@@ -33,6 +33,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.12.00 (26 October 2024, revision 21983)
+---------------------------------------------
+Pattern tab
+- [Fix] <js> Keyboard entry was broken in several pattern columns in OpenMPT 1.31.11.00 (http://bugs.openmpt.org/view.php?id=1834).
+
+
 v1.31.11.00 (26 October 2024, revision 21948)
 ---------------------------------------------
 Pattern tab
@@ -83,7 +89,7 @@ Misc
 - [Fix] <js> Prevent "Close All" keyboard shortcut from being activated when a dialog is open. It was not possible to close any files in this situation, but the modified status of all files was reset.
 
 Third-Party Libraries
-- [Imp] Update mpg123 (v1.32.8-dev)
+- [Imp] Update mpg123 (v1.32.8)
 
 
 v1.31.10.00 (22 September 2024, revision 21662)
