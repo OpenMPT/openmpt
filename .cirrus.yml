@@ -9,7 +9,7 @@ task:
 task:
     name: macos14-xcode15
     macos_instance:
-        image: ghcr.io/cirruslabs/macos-sonoma-xcode:15.3
+        image: ghcr.io/cirruslabs/macos-sonoma-xcode:15.4
     install_script: brew update && brew install p7zip help2man doxygen autoconf-archive mpg123 libogg libvorbis portaudio flac libsndfile sdl2
     build_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1
     test_script: make -j$(sysctl -n hw.ncpu) STRICT=1 FORCE_DEPS=1 check
