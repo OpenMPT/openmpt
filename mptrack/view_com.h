@@ -63,6 +63,7 @@ protected:
 	afx_msg void OnRClickListItem(NMHDR *, LRESULT *);
 	afx_msg void OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCopyNames();
+	afx_msg void OnPasteNames();
 	afx_msg LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG

@@ -20,6 +20,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
 #include "WindowMessages.h"
@@ -86,17 +87,18 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	//{{AFX_MSG_MAP(CViewComments)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,		&CViewComments::OnCustomKeyMsg)
-	ON_MESSAGE(WM_MOD_MIDIMSG,			&CViewComments::OnMidiMsg)
-	ON_COMMAND(IDC_LIST_SAMPLES,		&CViewComments::OnShowSamples)
-	ON_COMMAND(IDC_LIST_INSTRUMENTS,	&CViewComments::OnShowInstruments)
-	ON_COMMAND(IDC_LIST_PATTERNS,		&CViewComments::OnShowPatterns)
-	ON_COMMAND(ID_COPY_ALL_NAMES,		&CViewComments::OnCopyNames)
-	ON_NOTIFY(LVN_ENDLABELEDIT,		IDC_LIST_DETAILS,	&CViewComments::OnEndLabelEdit)
-	ON_NOTIFY(LVN_BEGINLABELEDIT,	IDC_LIST_DETAILS,	&CViewComments::OnBeginLabelEdit)
-	ON_NOTIFY(NM_DBLCLK, IDC_LIST_DETAILS,	&CViewComments::OnDblClickListItem)
-	ON_NOTIFY(NM_RCLICK, IDC_LIST_DETAILS,	&CViewComments::OnRClickListItem)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_DETAILS, &CViewComments::OnCustomDrawList)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,       &CViewComments::OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_MIDIMSG,          &CViewComments::OnMidiMsg)
+	ON_COMMAND(IDC_LIST_SAMPLES,        &CViewComments::OnShowSamples)
+	ON_COMMAND(IDC_LIST_INSTRUMENTS,    &CViewComments::OnShowInstruments)
+	ON_COMMAND(IDC_LIST_PATTERNS,       &CViewComments::OnShowPatterns)
+	ON_COMMAND(ID_EDIT_COPY,            &CViewComments::OnCopyNames)
+	ON_COMMAND(ID_EDIT_PASTE,           &CViewComments::OnPasteNames)
+	ON_NOTIFY(LVN_ENDLABELEDIT,   IDC_LIST_DETAILS, &CViewComments::OnEndLabelEdit)
+	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_LIST_DETAILS, &CViewComments::OnBeginLabelEdit)
+	ON_NOTIFY(NM_DBLCLK,          IDC_LIST_DETAILS, &CViewComments::OnDblClickListItem)
+	ON_NOTIFY(NM_RCLICK,          IDC_LIST_DETAILS, &CViewComments::OnRClickListItem)
+	ON_NOTIFY(NM_CUSTOMDRAW,      IDC_LIST_DETAILS, &CViewComments::OnCustomDrawList)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -255,6 +257,14 @@ LRESULT CViewComments::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 	} else if(wParam == kcRenameSmpInsListItem)
 	{
 		m_ItemList.EditLabel(item - 1);
+		return wParam;
+	} else if(wParam == kcEditCopy)
+	{
+		OnCopyNames();
+		return wParam;
+	} else if(wParam == kcEditPaste)
+	{
+		OnPasteNames();
 		return wParam;
 	}
 	return kcNull;
@@ -681,8 +691,10 @@ void CViewComments::OnDblClickListItem(NMHDR *, LRESULT *)
 
 void CViewComments::OnRClickListItem(NMHDR *, LRESULT *)
 {
+	const auto ih = CMainFrame::GetMainFrame()->GetInputHandler();
 	HMENU menu = ::CreatePopupMenu();
-	::AppendMenu(menu, MF_STRING, ID_COPY_ALL_NAMES, _T("&Copy Names"));
+	::AppendMenu(menu, MF_STRING, ID_EDIT_COPY, ih->GetKeyTextFromCommand(kcEditCopy, _T("&Copy Names")));
+	::AppendMenu(menu, MF_STRING | (IsClipboardFormatAvailable(CF_UNICODETEXT) ? 0 : MF_DISABLED), ID_EDIT_PASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("&Paste Names")));
 	CPoint pt;
 	::GetCursorPos(&pt);
 	::TrackPopupMenu(menu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
@@ -742,6 +754,57 @@ void CViewComments::OnCopyNames()
 	{
 		std::memcpy(dst.data(), names.c_str(), sizeBytes);
 	}
+}
+
+
+void CViewComments::OnPasteNames()
+{
+	Clipboard clipboard(CF_UNICODETEXT);
+	if(!clipboard.IsValid())
+		return;
+
+	if(Reporting::Confirm(MPT_UFORMAT("Replace all {} names?")(m_nListId == IDC_LIST_INSTRUMENTS ? U_("instrument") : U_("sample"))) != cnfYes)
+		return;
+
+	auto whitespace = mpt::default_whitespace<std::wstring>();
+	whitespace.push_back(L'\0');
+	const auto names = mpt::split(mpt::trim_right(std::wstring{clipboard.GetWideString()}, whitespace), std::wstring{L"\n"});
+
+	CSoundFile &sndFile = GetDocument()->GetSoundFile();
+	const auto FormatName = [&](size_t index, size_t maxLength)
+	{
+		if(index >= names.size())
+			return std::string{};
+		return mpt::replace(mpt::ToCharset(sndFile.GetCharsetInternal(), names[index]), "\t", " ").substr(0, maxLength);
+	};
+
+	CriticalSection cs;
+	if(m_nListId == IDC_LIST_SAMPLES)
+	{
+		if(sndFile.GetNumSamples() < names.size())
+			sndFile.m_nSamples = std::min(sndFile.GetModSpecifications().samplesMax, mpt::saturate_cast<SAMPLEINDEX>(names.size()));
+
+		for(SAMPLEINDEX i = 1; i <= sndFile.GetNumSamples(); i++)
+		{
+			sndFile.m_szNames[i] = FormatName(i - 1, sndFile.GetModSpecifications().sampleNameLengthMax);
+		}
+		cs.Leave();
+		GetDocument()->UpdateAllViews(SampleHint().Names());
+	} else if(m_nListId == IDC_LIST_INSTRUMENTS)
+	{
+		if(sndFile.GetNumInstruments() < names.size())
+			sndFile.m_nInstruments = std::min(sndFile.GetModSpecifications().instrumentsMax, mpt::saturate_cast<INSTRUMENTINDEX>(names.size()));
+
+		for(INSTRUMENTINDEX i = 1; i <= sndFile.GetNumInstruments(); i++)
+		{
+			if(sndFile.Instruments[i] || sndFile.AllocateInstrument(i))
+				sndFile.Instruments[i]->name = FormatName(i - 1, sndFile.GetModSpecifications().instrNameLengthMax);
+		}
+		cs.Leave();
+		GetDocument()->UpdateAllViews(InstrumentHint().Names());
+	}
+
+	GetDocument()->SetModified();
 }
 
 
