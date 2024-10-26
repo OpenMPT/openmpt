@@ -625,7 +625,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 	}
 
-	InitializeGlobals(MOD_TYPE_MID, MAX_BASECHANNELS);
+	InitializeGlobals(MOD_TYPE_MID, GetModSpecifications(MOD_TYPE_MPT).channelsMax);
 
 #ifdef MODPLUG_TRACKER
 	const uint32 quantize = Clamp(TrackerSettings::Instance().midiImportQuantize.Get(), 4u, 256u);
