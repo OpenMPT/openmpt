@@ -33,6 +33,59 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.11.00 (26 October 2024, revision 21948)
+---------------------------------------------
+Pattern tab
+- [Imp] <js> Undo steps are no longer created when entering data into the pattern that doesn't actually result in any change (e.g. adding another 0 to an effect parameter that is already 0).
+- [Imp] <js> There is now a shortcut for stream export from the order list (http://bugs.openmpt.org/view.php?id=1831).
+- [Mod] <js> Rename "Render to Wave" context menu item to "Stream Export".
+
+Instrument tab
+- [Fix] <js> When importing instruments in an IT file, restrict fadeout value to multiples of 32.
+
+Mod Conversion
+- [Mod] <js> When converting to IT, clamp maximum tempo to 255 BPM and restrict instrument fadeout to multiples of 32.
+
+VST / DMO Plugins
+- [Fix] <js> Plugin editor: Adjust window height after pasting a preset if the menu bar height changed due to a longer or shorter preset name.
+
+IT
+- [Imp] <js> Don't import SAx High Offset command for IT 1.xx modules. This feature was added in Impulse Tracker 2.00.
+- [Imp] <js> Limit Vxx parameter to V80 for files made with old Schism Tracker versions (see http://github.com/schismtracker/schismtracker/issues/531).
+- [Mod] <js> When using compatibility export, pattern length is restricted to 32 - 200 rows. Pattern break commands are inserted when required.
+- [Fix] <js> Impulse Tracker 2.14 patch version information was incorrect (tx cs127).
+
+S3M
+- [Imp] <js> Insert pattern break commands on the last pattern row when trying to save patterns shorter than 64 rows.
+- [Mod] <js> O00 effects are no longer ignored if the tracker version in the file header indicates Scream Tracker 3.00 / 3.01, but the file was clearly saved with another tool (e.g. UNMO3).
+- [Mod] <cs127> As files made with Scream Tracker 3.20 and 3.21 cannot be told apart, both versions are now shown in the "last saved with" information (http://github.com/OpenMPT/openmpt/pull/24).
+- [Fix] <js> Impulse Tracker 2.14 patch version information was incorrect (tx cs127).
+
+MOD
+- [Imp] <js> Insert pattern break commands on the last pattern row when trying to save patterns shorter than 64 rows.
+
+Other formats
+- [Imp] <js> ULT: Try to preserve global commands if there's e.g. both a speed and tempo command in the same cell. Fixes trance mission.ult (http://www.un4seen.com/forum/?topic=15448.msg143764#msg143764).
+- [Imp] <cs127> STM: Improve "last saved with" tracker identification (http://github.com/OpenMPT/openmpt/pull/23)
+- [Imp] <js> SymMOD: When running out of Zxx macros, try to find the closest macro to use instead. Fixes files like ocean view.symmod with tons of filter sweeps (http://www.un4seen.com/forum/?topic=15448.msg143932#msg143932).
+- [Mod] <js> SymMOD: Ignore unknown hunks instead of rejecting entire file, as that's what Symphonie does as well. Fixes reading of Natsh1.SymMOD, which has garbage at the end of the file (http://www.un4seen.com/forum/?topic=15448.msg143961#msg143961).
+- [Fix] <js> OKT: Disable loop on type "B" samples if they're used on a mixed channel. Fixes sinfonia.okta (http://www.un4seen.com/forum/?topic=15448.msg143764#msg143764).
+- [Fix] <js> OKT: The last sample slot was never loaded.
+- [Fix] <js> PTM: Halve offset command strength for 16-bit samples. Fixes leveled.ptm (http://www.un4seen.com/forum/?topic=15448.msg143764#msg143764).
+
+Stream Export
+- [Fix] <js> Aborting was not possible during the normalization step.
+
+Misc
+- [Imp] <js> Keyboard Config Dialog: New shortcuts are now accepted by pressing the new "Set" button or by double-clicking into the shortcut field to improve accesibility (http://bugs.openmpt.org/view.php?id=1825).
+- [Mod] <js> "Find MPT Hacks" now detects IT instruments with fadeout values that are not multiples of 32, and warns about patterns shorter than 32 rows.
+- [Fix] <js> The "update available" tooltip could cause a really long hang if the previous OpenMPT session was ended in a minimized window state (http://bugs.openmpt.org/view.php?id=1723).
+- [Fix] <js> Prevent "Close All" keyboard shortcut from being activated when a dialog is open. It was not possible to close any files in this situation, but the modified status of all files was reset.
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.32.8-dev)
+
+
 v1.31.10.00 (22 September 2024, revision 21662)
 -----------------------------------------------
 Tree view
@@ -253,7 +306,7 @@ Instrument tab
 - [Fix] <js> Clearing the note map due to plugin assignment didn't update other instrument tabs of the same song accordingly.
 
 VST / DMO Plugins
-- [Fix] <js> Prior to OpenMPT 1.30, if an instrument was set to use MIDI program 1 or bank 1, this program or bank change was not set to plugins (unless another instrument previously explicitly selected a different program or bank for this plugin). This was fixed in OpenMPT 1.30, but that behaviour change broke existing modules, so for tracks made with earlier OpenMPT versions, the old behaviour is applied again.
+- [Fix] <js> Prior to OpenMPT 1.30, if an instrument was set to use MIDI program 1 or bank 1, this program or bank change was not sent to plugins (unless another instrument previously explicitly selected a different program or bank for this plugin). This was fixed in OpenMPT 1.30, but that behaviour change broke existing modules, so for tracks made with earlier OpenMPT versions, the old behaviour is applied again.
 
 IT
 - [Imp] <js> A few more compatibility flags are now disabled for modules saved with earlier Schism Tracker versions.
