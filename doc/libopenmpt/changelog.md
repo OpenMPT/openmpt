@@ -11,6 +11,27 @@ is just a high-level summary.
     `CPPFLAGS` directly. This caused build settings to get lost when the user
     overwrote these flags.
 
+ *  IT: Don't import SAx High Offset command for IT 1.xx modules. This feature
+    was added in Impulse Tracker 2.00.
+ *  IT: Limit Vxx parameter to V80 for files made with old Schism Tracker
+    versions.
+ *  IT / S3M: Impulse Tracker 2.14 patch version information was incorrect.
+ *  S3M: O00 effects are no longer ignored if the tracker version in the file
+    header indicates Scream Tracker 3.00 / 3.01, but the file was clearly saved
+    with another tool (e.g. UNMO3).
+ *  S3M: As files made with Scream Tracker 3.20 and 3.21 cannot be told apart,
+    both versions are now listed in the tracker metadata.
+ *  ULT: Try to preserve global commands if there's e.g. both a speed and tempo
+    command in the same cell.
+ *  STM: Improved tracker identification metadata.
+ *  SymMOD: When running out of Zxx macros, try to find the closest macro to use
+    instead.
+ *  SymMOD: Ignore unknown hunks instead of rejecting entire file, as that's
+    what Symphonie does as well.
+ *  OKT: Disable loop on type "B" samples if they're used on a mixed channel.
+ *  OKT: The last sample slot was never loaded.
+ *  PTM: Halve offset command strength for 16-bit samples.
+
 ### libopenmpt 0.7.10 (2024-09-22)
 
  *  [**Change**] FST was added to the list of supported file extension. AMP uses
