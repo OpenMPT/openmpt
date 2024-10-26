@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.12-pre
+
 ### libopenmpt 0.7.11 (2024-10-26)
 
  *  [**Bug**] The Autotools build system did use `CPPFLAGS`, `CFLAGS`, and
