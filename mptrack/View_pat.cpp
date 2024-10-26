@@ -4811,20 +4811,18 @@ void CViewPattern::TempEnterVol(int v)
 	if(pSndFile == nullptr || !IsEditingEnabled_bmsg())
 		return;
 
-	PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
-
 	ModCommand &target = GetCursorCommand();
-	ModCommand oldcmd = target;  // This is the command we are about to overwrite
+	ModCommand m = target;  // This is the command we are about to overwrite
 	const bool isDigit = (v >= 0) && (v <= 9);
 
-	if(target.IsPcNote())
+	if(m.IsPcNote())
 	{
-		if(EnterPCNoteValue(v, target, &ModCommand::GetValueVolCol, &ModCommand::SetValueVolCol))
-			m_PCNoteEditMemory = target;
+		if(EnterPCNoteValue(v, m, &ModCommand::GetValueVolCol, &ModCommand::SetValueVolCol))
+			m_PCNoteEditMemory = m;
 	} else
 	{
-		ModCommand::VOLCMD volcmd = target.volcmd;
-		uint16 vol = target.vol;
+		ModCommand::VOLCMD volcmd = m.volcmd;
+		uint16 vol = m.vol;
 		if(isDigit)
 		{
 			vol = ((vol * 10) + v) % 100;
@@ -4849,7 +4847,7 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeITPortaDown:  volcmd = VOLCMD_PORTADOWN; break;
 			case kcSetVolumeITOffset:     volcmd = VOLCMD_OFFSET; break;
 			}
-			if(target.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
+			if(m.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
 			{
 				vol = m_cmdOld.vol;
 			}
@@ -4871,22 +4869,23 @@ void CViewPattern::TempEnterVol(int v)
 			vol %= 10;
 		if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
 		{
-			m_cmdOld.volcmd = target.volcmd = volcmd;
-			m_cmdOld.vol = target.vol = static_cast<ModCommand::VOL>(vol);
+			m_cmdOld.volcmd = m.volcmd = volcmd;
+			m_cmdOld.vol = m.vol = static_cast<ModCommand::VOL>(vol);
 		}
 	}
 
 	SetSelToCursor();
 
-	if(oldcmd != target)
+	if(m != target)
 	{
+		PrepareUndo(m_Cursor, m_Cursor, "Volume Entry");
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
 	}
 
 	// Cursor step for command letter
-	if(!target.IsPcNote() && !isDigit && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	if(!m.IsPcNote() && !isDigit && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
@@ -4917,52 +4916,52 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 	}
 
 	ModCommand &target = GetCursorCommand();
-	ModCommand oldcmd = target;  // This is the command we are about to overwrite
+	ModCommand m = target;
 
-	PrepareUndo(m_Cursor, m_Cursor, "Effect Entry");
-
-	if(target.IsPcNote())
+	if(m.IsPcNote())
 	{
-		if(EnterPCNoteValue(c, target, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
-			m_PCNoteEditMemory = target;
+		if(EnterPCNoteValue(c, m, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
+			m_PCNoteEditMemory = m;
 	} else if(pSndFile->GetModSpecifications().HasCommand(c))
 	{
 		if(c != CMD_NONE)
 		{
-			if((c == m_cmdOld.command) && (!target.param) && (target.command == CMD_NONE))
+			if((c == m_cmdOld.command) && (!m.param) && (m.command == CMD_NONE))
 			{
-				target.param = m_cmdOld.param;
+				m.param = m_cmdOld.param;
 			} else
 			{
 				m_cmdOld.param = 0;
 			}
 			m_cmdOld.command = c;
 		}
-		target.command = c;
+		m.command = c;
 		if(v >= 0)
 		{
-			target.param = static_cast<ModCommand::PARAM>(v);
+			m.param = static_cast<ModCommand::PARAM>(v);
 		}
 
 		// Check for MOD/XM Speed/Tempo command
 		if((pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
-		   && (target.command == CMD_SPEED || target.command == CMD_TEMPO))
+		   && (m.command == CMD_SPEED || m.command == CMD_TEMPO))
 		{
-			target.command = static_cast<ModCommand::COMMAND>((target.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO);
+			m.command = static_cast<ModCommand::COMMAND>((m.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO);
 		}
 	}
 
 	SetSelToCursor();
 
-	if(oldcmd != target)
+	if(m != target)
 	{
+		PrepareUndo(m_Cursor, m_Cursor, "Effect Entry");
+		target = m;
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
 	}
 
 	// Cursor step for command letter
-	if(!target.IsPcNote() && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
+	if(!m.IsPcNote() && m_nSpacing > 0 && !IsLiveRecord() && TrackerSettings::Instance().patternStepCommands)
 	{
 		if(m_Cursor.GetRow() + m_nSpacing < pSndFile->Patterns[m_nPattern].GetNumRows() || (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CONTSCROLL))
 		{
@@ -4983,35 +4982,34 @@ void CViewPattern::TempEnterFXparam(int v)
 	}
 
 	ModCommand &target = GetCursorCommand();
-	ModCommand oldcmd = target;  // This is the command we are about to overwrite
+	ModCommand m = target;
 
-	PrepareUndo(m_Cursor, m_Cursor, "Parameter Entry");
-
-	if(target.IsPcNote())
+	if(m.IsPcNote())
 	{
-		if(EnterPCNoteValue(v, target, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
-			m_PCNoteEditMemory = target;
+		if(EnterPCNoteValue(v, m, &ModCommand::GetValueEffectCol, &ModCommand::SetValueEffectCol))
+			m_PCNoteEditMemory = m;
 	} else
 	{
 
-		target.param = static_cast<ModCommand::PARAM>((target.param << 4) | v);
-		if(target.command == m_cmdOld.command)
+		m.param = static_cast<ModCommand::PARAM>((m.param << 4) | v);
+		if(m.command == m_cmdOld.command)
 		{
-			m_cmdOld.param = target.param;
+			m_cmdOld.param = m.param;
 		}
 
 		// Check for MOD/XM Speed/Tempo command
 		if((pSndFile->GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM))
-		   && (target.command == CMD_SPEED || target.command == CMD_TEMPO))
+		   && (m.command == CMD_SPEED || m.command == CMD_TEMPO))
 		{
-			target.command = static_cast<ModCommand::COMMAND>((target.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO);
+			m.command = static_cast<ModCommand::COMMAND>((m.param <= pSndFile->GetModSpecifications().speedMax) ? CMD_SPEED : CMD_TEMPO);
 		}
 	}
 
 	SetSelToCursor();
 
-	if(target != oldcmd)
+	if(m != target)
 	{
+		PrepareUndo(m_Cursor, m_Cursor, "Parameter Entry");
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
@@ -5235,7 +5233,7 @@ void CViewPattern::TempEnterOctave(int val)
 		Limit(note, NOTE_MIN, NOTE_MAX);
 		TempEnterNote(static_cast<ModCommand::NOTE>(note));
 		// Memorize note for key-up
-		ASSERT(size_t(val) < m_octaveKeyMemory.size());
+		MPT_ASSERT(size_t(val) < m_octaveKeyMemory.size());
 		m_octaveKeyMemory[val] = target.note;
 	}
 }
@@ -5244,7 +5242,7 @@ void CViewPattern::TempEnterOctave(int val)
 // Stop note that has been triggered by entering an octave in the pattern.
 void CViewPattern::TempStopOctave(int val)
 {
-	ASSERT(size_t(val) < m_octaveKeyMemory.size());
+	MPT_ASSERT(size_t(val) < m_octaveKeyMemory.size());
 	if(m_octaveKeyMemory[val] != NOTE_NONE)
 	{
 		TempStopNote(m_octaveKeyMemory[val]);
@@ -5262,13 +5260,11 @@ void CViewPattern::TempEnterIns(int val)
 		return;
 	}
 
-	PrepareUndo(m_Cursor, m_Cursor, "Instrument Entry");
-
 	ModCommand &target = GetCursorCommand();
-	ModCommand oldcmd = target;  // This is the command we are about to overwrite
+	ModCommand m = target;  // This is the command we are about to overwrite
 
-	UINT instr = target.instr, nTotalMax, nTempMax;
-	if(target.IsPcNote())  // this is a plugin index
+	UINT instr = m.instr, nTotalMax, nTempMax;
+	if(m.IsPcNote())  // this is a plugin index
 	{
 		nTotalMax = MAX_MIXPLUGINS + 1;
 		nTempMax = MAX_MIXPLUGINS + 1;
@@ -5288,20 +5284,21 @@ void CViewPattern::TempEnterIns(int val)
 	if(nTempMax < 100)        // if we're using samples & have less than 100 samples
 		instr = instr % 100;  // or if we're using instruments and have less than 100 instruments
 	// --> ensure the entered instrument value is less than 100.
-	target.instr = static_cast<ModCommand::INSTR>(instr);
+	m.instr = static_cast<ModCommand::INSTR>(instr);
 
 	SetSelToCursor();
 
-	if(target != oldcmd)
+	if(m != target)
 	{
+		PrepareUndo(m_Cursor, m_Cursor, "Instrument Entry");
 		SetModified(false);
 		InvalidateCell(m_Cursor);
 		UpdateIndicator();
 	}
 
-	if(target.IsPcNote())
+	if(m.IsPcNote())
 	{
-		m_PCNoteEditMemory = target;
+		m_PCNoteEditMemory = m;
 	}
 }
 

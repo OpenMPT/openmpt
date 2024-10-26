@@ -682,11 +682,11 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 			if (c != ' ')
 			{
 				n = (10 * pIns->Keyboard[m_nNote] + (c - '0')) % 10000;
-				if ((n >= MAX_SAMPLES) || ((sndFile.m_nSamples < 1000) && (n >= 1000)))
+				if ((n >= MAX_SAMPLES) || ((sndFile.GetNumSamples() < 1000) && (n >= 1000)))
 					n = (n % 1000);
-				if ((n >= MAX_SAMPLES) || ((sndFile.m_nSamples < 100) && (n >= 100)))
+				if ((n >= MAX_SAMPLES) || ((sndFile.GetNumSamples() < 100) && (n >= 100)))
 					n = (n % 100);
-				else if ((n > 31) && (sndFile.m_nSamples < 32) && (n % 10))
+				else if ((n > 31) && (sndFile.GetNumSamples() < 32) && (n % 10))
 					n = (n % 10);
 			}
 

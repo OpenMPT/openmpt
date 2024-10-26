@@ -110,7 +110,7 @@ bool CSampleGenerator::CanRenderSample() const
 // Actual render loop.
 bool CSampleGenerator::RenderSample(CSoundFile *pSndFile, SAMPLEINDEX nSample)
 {
-	if(!CanRenderSample() || !TestExpression() || (pSndFile == nullptr) || (nSample < 1) || (nSample > pSndFile->m_nSamples)) return false;
+	if(!CanRenderSample() || !TestExpression() || (pSndFile == nullptr) || (nSample < 1) || (nSample > pSndFile->GetNumSamples())) return false;
 
 	// allocate a new buffer
 	sample_buffer = (mu::value_type *)malloc(sample_length * sizeof(mu::value_type));
