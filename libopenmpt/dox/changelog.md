@@ -11,6 +11,8 @@ is just a high-level summary.
  *  OKT: The last sample slot was never loaded.
  *  PTM: Halve offset command strength for 16-bit samples.
 
+ *  mpg123: Update to v1.32.8-dev+r5433 (2024-10-24).
+
 ### libopenmpt 0.6.19 (2024-09-22)
 
  *  [**Sec**] Possible out-of-bounds read with malformed IT / MPTM / XM files
