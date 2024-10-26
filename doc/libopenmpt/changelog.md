@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.12-pre
 
+ *  mpg123: Update to v1.32.8 (2024-10-26).
+
 ### libopenmpt 0.7.11 (2024-10-26)
 
  *  [**Bug**] The Autotools build system did use `CPPFLAGS`, `CFLAGS`, and
