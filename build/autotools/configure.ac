@@ -33,7 +33,6 @@ AS_IF([test "x$HAVE_CXX23" != "x1"],
     AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
    ],[]
   )
-  AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
  ],[]
 )
 
