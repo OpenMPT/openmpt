@@ -1678,7 +1678,10 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order().GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
 	{
 		BypassInputHandler bih;
-		if (wsdlg.DoModal() != IDOK) return;
+		wsdlg.m_Settings.normalize = TrackerSettings::Instance().ExportNormalize;
+		wsdlg.m_Settings.silencePlugBuffers = TrackerSettings::Instance().ExportClearPluginBuffers;
+		if (wsdlg.DoModal() != IDOK)
+			return;
 	}
 
 	EncoderFactoryBase *encFactory = wsdlg.m_Settings.GetEncoderFactory();
@@ -1690,10 +1693,13 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 		.DefaultFilename(GetPathNameMpt().GetFilenameBase() + P_(".") + extension)
 		.ExtensionFilter(encFactory->GetTraits().fileDescription + U_(" (*.") + extension.ToUnicode() + U_(")|*.") + extension.ToUnicode() + U_("||"))
 		.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
-	if(!wsdlg.m_Settings.outputToSample && !dlg.Show()) return;
+	if(!wsdlg.m_Settings.outputToSample && !dlg.Show())
+		return;
 
 	// will set default dir here because there's no setup option for export dir yet (feel free to add one...)
 	TrackerSettings::Instance().PathExport.SetDefaultDir(dlg.GetWorkingDirectory(), true);
+	TrackerSettings::Instance().ExportNormalize = wsdlg.m_Settings.normalize;
+	TrackerSettings::Instance().ExportClearPluginBuffers = wsdlg.m_Settings.silencePlugBuffers;
 
 	mpt::PathString drive, dir, name, ext;
 	dlg.GetFirstFile().SplitPath(nullptr, &drive, &dir, &name, &ext);

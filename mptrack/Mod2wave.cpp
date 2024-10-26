@@ -125,7 +125,7 @@ BOOL CWaveConvert::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
 
-	CheckDlgButton(IDC_CHECK5, BST_UNCHECKED);	// Normalize
+	CheckDlgButton(IDC_CHECK5, m_Settings.normalize ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK3, BST_CHECKED);	// Cue points
 
 	CheckDlgButton(IDC_CHECK4, BST_UNCHECKED);
@@ -183,7 +183,7 @@ BOOL CWaveConvert::OnInitDialog()
 		{
 			GetDlgItem(IDC_GIVEPLUGSIDLETIME)->EnableWindow(TRUE);
 			GetDlgItem(IDC_RENDERSILENCE)->EnableWindow(TRUE);
-			CheckDlgButton(IDC_RENDERSILENCE, BST_CHECKED);
+			CheckDlgButton(IDC_RENDERSILENCE, m_Settings.silencePlugBuffers ? BST_CHECKED : BST_UNCHECKED);
 			break;
 		}
 	}
@@ -726,7 +726,8 @@ void CWaveConvert::OnOK()
 
 	m_Settings.repeatCount = static_cast<uint16>(GetDlgItemInt(IDC_EDIT5, NULL, FALSE));
 	m_Settings.normalize = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
-	m_Settings.silencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
+	if(GetDlgItem(IDC_RENDERSILENCE)->IsWindowEnabled())
+		m_Settings.silencePlugBuffers = IsDlgButtonChecked(IDC_RENDERSILENCE) != BST_UNCHECKED;
 	m_Settings.outputToSample = IsDlgButtonChecked(IDC_RADIO5) != BST_UNCHECKED;
 	m_bGivePlugsIdleTime = IsDlgButtonChecked(IDC_GIVEPLUGSIDLETIME) != BST_UNCHECKED;
 	if (m_bGivePlugsIdleTime)

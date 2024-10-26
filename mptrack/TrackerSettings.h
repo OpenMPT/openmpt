@@ -827,6 +827,8 @@ public:
 
 	Setting<bool> ExportDefaultToSoundcardSamplerate;
 	StreamEncoderSettingsConf ExportStreamEncoderSettings;
+	Setting<bool> ExportNormalize;
+	Setting<bool> ExportClearPluginBuffers;
 
 	// Components
 

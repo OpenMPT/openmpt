@@ -296,6 +296,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Export
 	, ExportDefaultToSoundcardSamplerate(conf, U_("Export"), U_("DefaultToSoundcardSamplerate"), true)
 	, ExportStreamEncoderSettings(conf, U_("Export"))
+	, ExportNormalize(conf, U_("Export"), U_("Normalize"), false)
+	, ExportClearPluginBuffers(conf, U_("Export"), U_("ClearPluginBuffers"), true)
 	// Components
 	, ComponentsLoadOnStartup(conf, U_("Components"), U_("LoadOnStartup"), ComponentManagerSettingsDefault().LoadOnStartup())
 	, ComponentsKeepLoaded(conf, U_("Components"), U_("KeepLoaded"), ComponentManagerSettingsDefault().KeepLoaded())
