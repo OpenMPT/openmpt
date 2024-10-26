@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.11-pre
 
+ *  [**Bug**] The Autotools build system did use `CPPFLAGS`, `CFLAGS`, and
+    `CPPFLAGS` directly. This caused build settings to get lost when the user
+    overwrote these flags.
+
 ### libopenmpt 0.7.10 (2024-09-22)
 
  *  [**Change**] FST was added to the list of supported file extension. AMP uses
