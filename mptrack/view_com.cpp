@@ -275,6 +275,13 @@ BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
 {
 	if(pMsg)
 	{
+		if(m_editLabel && pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
+		{
+			m_editLabel = false;
+			m_ItemList.CancelEditLabel();
+			return TRUE;
+		}
+
 		if((pMsg->message == WM_SYSKEYUP) || (pMsg->message == WM_KEYUP)
 			|| (pMsg->message == WM_SYSKEYDOWN) || (pMsg->message == WM_KEYDOWN))
 		{
@@ -568,6 +575,7 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 	CEdit *editCtrl = m_ItemList.GetEditControl();
 	if(editCtrl)
 	{
+		m_editLabel = true;
 		const CModSpecifications &specs = GetDocument()->GetSoundFile().GetModSpecifications();
 		const auto maxStrLen = (m_nListId == IDC_LIST_SAMPLES) ? specs.sampleNameLengthMax : specs.instrNameLengthMax;
 		editCtrl->LimitText(maxStrLen);
@@ -576,9 +584,16 @@ void CViewComments::OnBeginLabelEdit(LPNMHDR, LRESULT *)
 }
 
 
-void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *)
+void CViewComments::OnEndLabelEdit(LPNMHDR pnmhdr, LRESULT *result)
 {
 	CMainFrame::GetInputHandler()->Bypass(false);
+	if(!m_editLabel)
+	{
+		*result = FALSE;
+		return;
+	}
+	m_editLabel = false;
+
 	LV_DISPINFO &lvDispInfo = *reinterpret_cast<LV_DISPINFO *>(pnmhdr);
 	LV_ITEM &lvItem = lvDispInfo.item;
 	CModDoc *pModDoc = GetDocument();

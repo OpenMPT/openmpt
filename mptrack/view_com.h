@@ -34,6 +34,7 @@ protected:
 	ModCommand::NOTE m_lastNote = NOTE_NONE;
 	CHANNELINDEX m_noteChannel = CHANNELINDEX_INVALID;
 	INSTRUMENTINDEX m_noteInstr = INSTRUMENTINDEX_INVALID;
+	bool m_editLabel = false;
 
 public:
 	void RecalcLayout();
