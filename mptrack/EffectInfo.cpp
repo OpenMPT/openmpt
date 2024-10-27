@@ -917,7 +917,7 @@ bool EffectInfo::GetEffectNameEx(CString &pszName, const ModCommand &m, uint32 p
 								if((param & 0x0F) == 0)
 									s = _T("Stop");
 								else
-									s.Format(_T("Speed %d"), param & 0x0F);
+									s.Format(_T("Speed %d (%d)"), param & 0x0F, ModEFxTable[param & 0x0F]);
 							} else
 							{
 								// macro
