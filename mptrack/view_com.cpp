@@ -278,7 +278,7 @@ BOOL CViewComments::PreTranslateMessage(MSG *pMsg)
 		if(m_editLabel && pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_ESCAPE)
 		{
 			m_editLabel = false;
-			m_ItemList.CancelEditLabel();
+			m_ItemList.SetFocus();
 			return TRUE;
 		}
 
