@@ -761,7 +761,11 @@ static int64_t internal_lseek64(void *handle, int64_t offset, int whence)
 		errno = EOVERFLOW;
 		return -1;
 	}
+#if defined(_UCRT)  /* OpenMPT */
+	return _lseek(ioh->fd, (off_t)offset, whence);  /* OpenMPT */
+#else  /* OpenMPT */
 	return lseek(ioh->fd, (off_t)offset, whence);
+#endif  /* OpenMPT */
 #endif
 }
 
@@ -902,7 +906,11 @@ int attribute_align_arg mpg123_replace_reader(mpg123_handle *mh, mpg123_ssize_t 
 		ioh->iotype = IO_FD;
 		ioh->fd = -1; /* On next mpg123_open_fd(), this gets a value. */
 		ioh->r_read = r_read != NULL ? r_read : fallback_read;
+#if defined(_UCRT)  /* OpenMPT */
+		ioh->r_lseek = r_lseek != NULL ? r_lseek : _lseek;  /* OpenMPT */
+#else  /* OpenMPT */
 		ioh->r_lseek = r_lseek != NULL ? r_lseek : lseek;
+#endif  /* OpenMPT */
 	}
 
 	/* The real reader replacement will happen while opening. */

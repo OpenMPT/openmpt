@@ -6,6 +6,9 @@ The following changes have been made:
  *  `ports/Xcode/config.h` has been modified to let the build system set
     `OPT_*`.
  *  `ports/Xcode/config.h` has been modified to `#define HAVE_DIRENT_H`.
+ *  `src/libmpg123/lfs_wrap.c` has been modified to work-around
+    <https://sourceforge.net/p/mpg123/bugs/373/> ("weird LNK4286 warning when
+    building against ARM64EC UCRT for lseek").
  *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.
