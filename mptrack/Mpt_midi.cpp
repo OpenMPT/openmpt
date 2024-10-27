@@ -33,21 +33,20 @@ HMIDIIN CMainFrame::shMidiIn = nullptr;
 
 //Get Midi message(dwParam1), apply MIDI settings having effect on volume, and return
 //the volume value [0, 256]. In addition value -1 is used as 'use default value'-indicator.
-int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE midivolume)
+int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, uint8 midiChannelVolume)
 {
 	int nVol = MIDIEvents::GetDataByte2FromEvent(dwParam1);
 	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
 	{
-		nVol = (CDLSBank::DLSMidiVolumeToLinear(nVol)+255) >> 8;
-		nVol *= TrackerSettings::Instance().midiVelocityAmp / 100;
+		if(!(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL))
+			midiChannelVolume = 127;
+		nVol = Util::muldivr_unsigned(CDLSBank::DLSMidiVolumeToLinear(nVol), TrackerSettings::Instance().midiVelocityAmp * midiChannelVolume, 100 * 127 * 256);
 		Limit(nVol, 1, 256);
-		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
-			nVol = static_cast<int>((midivolume / 127.0) * nVol);
 	} else
 	{
 		// Case: No velocity record.
 		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
-			nVol = 4*((midivolume+1)/2);
+			nVol = (midiChannelVolume + 1) * 2;
 		else //Use default volume
 			nVol = -1;
 	}
