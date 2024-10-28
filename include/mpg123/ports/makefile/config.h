@@ -35,6 +35,13 @@
 #define SIZEOF_OFF_T 8
 #endif
 
+/* Windows/DOS */
+#if defined(__DJGPP__)
+#define HAVE_SETMODE
+#elif defined(_WIN32)
+#define HAVE__SETMODE
+#endif
+
 /* Features */
 
 /* #define LFS_LARGEFILE_64 1 */
