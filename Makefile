@@ -1488,6 +1488,9 @@ ifeq ($(SHARED_SONAME),1)
 LIBOPENMPT_LDFLAGS += -Wl,-soname,$(LIBOPENMPT_SONAME)
 endif
 
+MISC_OUTPUTS += bin/distversion
+MISC_OUTPUTS += bin/distversion-pure
+MISC_OUTPUTS += bin/distversion-tarball
 MISC_OUTPUTS += bin/$(FLAVOUR_DIR)empty.cpp
 MISC_OUTPUTS += bin/$(FLAVOUR_DIR)empty.out
 MISC_OUTPUTS += bin/$(FLAVOUR_DIR)openmpt123$(EXESUFFIX).norpath
@@ -2316,12 +2319,12 @@ clean-dist:
 
 .PHONY: distversion
 distversion:
-	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION)"
+	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION)" > bin/distversion
 
 .PHONY: distversion-pure
 distversion-pure:
-	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION_PURE)"
+	$(SILENT)echo "$(DIST_LIBOPENMPT_VERSION_PURE)" > bin/distversion-pure
 
 .PHONY: distversion-tarball
 distversion-tarball:
-	$(SILENT)echo "$(DIST_LIBOPENMPT_TARBALL_VERSION)"
+	$(SILENT)echo "$(DIST_LIBOPENMPT_TARBALL_VERSION)" > bin/distversion-tarball
