@@ -18,6 +18,7 @@
 #include "mpt/io/io_stdstream.hpp"
 #include "../common/mptFileIO.h"
 #ifdef MODPLUG_TRACKER
+#include "../mptrack/Moddoc.h"
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
 #endif // MODPLUG_NO_FILESAVE
@@ -252,6 +253,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	const bool usePanningTable = fileHeader.usePanningTable == S3MFileHeader::idPanning;
 	const bool offsetsAreCanonical = !patternOffsets.empty() && !sampleOffsets.empty() && patternOffsets[0] > sampleOffsets[0];
 	const int32 schismDateVersion = SchismTrackerEpoch + ((fileHeader.cwtv == 0x4FFF) ? fileHeader.reserved2 : (fileHeader.cwtv - 0x4050));
+	uint32 editTimer = 0;
 	switch(fileHeader.cwtv & S3MFileHeader::trackerMask)
 	{
 	case S3MFileHeader::trkAkord & S3MFileHeader::trackerMask:
@@ -329,11 +331,7 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		if(fileHeader.cwtv >= S3MFileHeader::trkIT2_07 && fileHeader.reserved3 != 0)
 		{
 			// Starting from version 2.07, IT stores the total edit time of a module in the "reserved" field
-			uint32 editTime = DecodeITEditTimer(fileHeader.cwtv, fileHeader.reserved3);
-
-			FileHistory hist;
-			hist.openTime = static_cast<uint32>(editTime * (HISTORY_TIMER_PRECISION / 18.2));
-			m_FileHistory.push_back(hist);
+			editTimer = DecodeITEditTimer(fileHeader.cwtv, fileHeader.reserved3);
 		}
 		nonCompatTracker = true;
 		m_playBehaviour.set(kPeriodsAreHertz);
@@ -359,6 +357,12 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 			if(schismDateVersion >= SchismVersionFromDate<2016, 05, 13>::date)
 				m_playBehaviour.set(kITShortSampleRetrig);
 			m_playBehaviour.reset(kST3TonePortaWithAdlibNote);
+
+			if(fileHeader.cwtv == (S3MFileHeader::trkSchismTracker | 0xFFF) && fileHeader.reserved3 != 0)
+			{
+				// Added in commit 6c4b71f10d4e0bf202dddfa8bd781de510b8bc0b
+				editTimer = fileHeader.reserved3;
+			}
 		}
 		nonCompatTracker = true;
 		break;
@@ -379,7 +383,12 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			uint32 mptVersion = (fileHeader.cwtv & S3MFileHeader::versionMask) << 16;
 			if(mptVersion >= 0x01'29'00'00)
+			{
 				mptVersion |= fileHeader.reserved2;
+				// Added in OpenMPT 1.32.00.31
+				if(fileHeader.reserved3 != 0)
+					editTimer = fileHeader.reserved3;
+			}
 			m_dwLastSavedWithVersion = Version(mptVersion);
 			madeWithTracker = UL_("OpenMPT ") + mpt::ufmt::val(m_dwLastSavedWithVersion);
 		} else
@@ -402,6 +411,14 @@ bool CSoundFile::ReadS3M(FileReader &file, ModLoadingFlags loadFlags)
 	if(formatTrackerStr)
 	{
 		madeWithTracker = MPT_UFORMAT("{} {}.{}")(madeWithTracker, (fileHeader.cwtv & 0xF00) >> 8, mpt::ufmt::hex0<2>(fileHeader.cwtv & 0xFF));
+	}
+
+	// IT edit timer
+	if(editTimer != 0)
+	{
+		FileHistory hist;
+		hist.openTime = static_cast<uint32>(editTimer * (HISTORY_TIMER_PRECISION / 18.2));
+		m_FileHistory.push_back(hist);
 	}
 
 	m_modFormat.formatName = UL_("Scream Tracker 3");
@@ -830,6 +847,21 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 	fileHeader.masterVolume = static_cast<uint8>(Clamp(m_nSamplePreAmp, 16u, 127u) | 0x80);
 	fileHeader.ultraClicks = 16;
 	fileHeader.usePanningTable = S3MFileHeader::idPanning;
+
+	// IT edit timer
+	uint64 editTimer = 0;
+	for(const auto &mptHistory : GetFileHistory())
+	{
+		editTimer += static_cast<uint32>(mptHistory.openTime * HISTORY_TIMER_PRECISION / 18.2);
+	}
+#ifdef MODPLUG_TRACKER
+	if(const auto modDoc = GetpModDoc(); modDoc != nullptr)
+	{
+		auto creationTime = modDoc->GetCreationTime();
+		editTimer += mpt::saturate_round<uint64>((mpt::Date::UnixAsSeconds(mpt::Date::UnixNow()) - mpt::Date::UnixAsSeconds(creationTime)) * HISTORY_TIMER_PRECISION);
+	}
+#endif  // MODPLUG_TRACKER
+	fileHeader.reserved3 = mpt::saturate_cast<uint32>(editTimer);
 
 	mpt::IO::Write(f, fileHeader);
 	Order().WriteAsByte(f, writeOrders);
