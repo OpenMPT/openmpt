@@ -10,8 +10,10 @@
 */
 
 #include "config.h"
+#if !defined(__DJGPP__)  /* OpenMPT */
 /* This source file does need _POSIX_SOURCE to get some sigaction. */
 #define _POSIX_SOURCE
+#endif  /* OpenMPT */
 #include "compat.h"
 
 #ifdef _MSC_VER
