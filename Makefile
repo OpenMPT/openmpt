@@ -144,18 +144,41 @@ all:
 INFO       = @echo
 SILENT     = @
 VERYSILENT = @
-
+define PRINT_TRACE
+endef
+define PRINT_DEBUG
+endef
+define PRINT_INFO
+$(info $1)
+endef
 
 ifeq ($(VERBOSE),2)
 INFO       = @true
 SILENT     = 
 VERYSILENT = 
+define PRINT_TRACE
+$(info $1)
+endef
+define PRINT_DEBUG
+$(info $1)
+endef
+define PRINT_INFO
+$(info $1)
+endef
 endif
 
 ifeq ($(VERBOSE),1)
 INFO       = @true
 SILENT     = 
 VERYSILENT = @
+define PRINT_TRACE
+endef
+define PRINT_DEBUG
+$(info $1)
+endef
+define PRINT_INFO
+$(info $1)
+endef
 endif
 
 
@@ -163,8 +186,13 @@ ifeq ($(QUIET),1)
 INFO       = @true
 SILENT     = @
 VERYSILENT = @
+define PRINT_TRACE
+endef
+define PRINT_DEBUG
+endef
+define PRINT_INFO
+endef
 endif
-
 
 # general settings
 
@@ -642,7 +670,9 @@ ifeq ($(HACK_ARCHIVE_SUPPORT),1)
 NO_ZLIB:=1
 endif
 
+$(call PRINT_TRACE,[DEP] zlib)
 ifeq ($(LOCAL_ZLIB),1)
+$(call PRINT_INFO,[DEP] zlib: local)
 CPPFLAGS_ZLIB := -DMPT_WITH_ZLIB
 LDFLAGS_ZLIB  :=
 LDLIBS_ZLIB   :=
@@ -671,14 +701,18 @@ ALL_DEPENDS += $(ZLIB_DEPENDS)
 OBJECTS_ZLIB = $(ZLIB_OBJECTS)
 else
 ifeq ($(NO_ZLIB),1)
+$(call PRINT_INFO,[DEP] zlib: disabled)
 else
 #LDLIBS   += -lz
+$(call PRINT_DEBUG,[DEP] zlib: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists zlib && echo yes),yes)
+$(call PRINT_INFO,[DEP] zlib: pkg-config/zlib)
 CPPFLAGS_ZLIB := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I zlib ) -DMPT_WITH_ZLIB
 LDFLAGS_ZLIB  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   zlib ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other zlib )
 LDLIBS_ZLIB   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   zlib )
 PC_REQUIRES_ZLIB := zlib
 else
+$(call PRINT_INFO,[DEP] zlib: no)
 ifeq ($(FORCE_DEPS),1)
 $(error zlib not found)
 else
@@ -689,7 +723,9 @@ endif
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] mpg123)
 ifeq ($(LOCAL_MPG123),1)
+$(call PRINT_INFO,[DEP] mpg123: local)
 
 ifeq ($(ENABLE_DXE),1)
 
@@ -793,14 +829,18 @@ endif
 
 else
 ifeq ($(NO_MPG123),1)
+$(call PRINT_INFO,[DEP] mpg123: disabled)
 else
 #LDLIBS   += -lmpg123
+$(call PRINT_DEBUG,[DEP] mpg123: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'libmpg123 >= 1.14.0' && echo yes),yes)
+$(call PRINT_INFO,[DEP] mpg123: pkg-config/mpg123)
 CPPFLAGS_MPG123 := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'libmpg123 >= 1.14.0' ) -DMPT_WITH_MPG123
 LDFLAGS_MPG123  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'libmpg123 >= 1.14.0' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'libmpg123 >= 1.14.0' )
 LDLIBS_MPG123   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'libmpg123 >= 1.14.0' )
 PC_REQUIRES_MPG123 := libmpg123
 else
+$(call PRINT_INFO,[DEP] mpg123: no)
 ifeq ($(FORCE_DEPS),1)
 $(error mpg123 not found)
 else
@@ -811,7 +851,9 @@ endif
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] ogg)
 ifeq ($(LOCAL_OGG),1)
+$(call PRINT_INFO,[DEP] ogg: local)
 CPPFLAGS_OGG := -DMPT_WITH_OGG
 LDFLAGS_OGG  := 
 LDLIBS_OGG   := 
@@ -827,14 +869,18 @@ ALL_DEPENDS += $(OGG_DEPENDS)
 OBJECTS_OGG = $(OGG_OBJECTS)
 else
 ifeq ($(NO_OGG),1)
+$(call PRINT_INFO,[DEP] ogg: disabled)
 else
 #LDLIBS   += -logg
+$(call PRINT_DEBUG,[DEP] ogg: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists ogg && echo yes),yes)
+$(call PRINT_INFO,[DEP] ogg: pkg-config/ogg)
 CPPFLAGS_OGG := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I ogg ) -DMPT_WITH_OGG
 LDFLAGS_OGG  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   ogg ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other ogg )
 LDLIBS_OGG   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   ogg )
 PC_REQUIRES_OGG := ogg
 else
+$(call PRINT_INFO,[DEP] ogg: no)
 ifeq ($(FORCE_DEPS),1)
 $(error ogg not found)
 else
@@ -845,7 +891,9 @@ endif
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] vorbis)
 ifeq ($(LOCAL_VORBIS),1)
+$(call PRINT_INFO,[DEP] vorbis: local)
 CPPFLAGS_VORBIS := -DMPT_WITH_VORBIS
 LDFLAGS_VORBIS  := 
 LDLIBS_VORBIS   := 
@@ -884,14 +932,18 @@ ALL_DEPENDS += $(VORBIS_DEPENDS)
 OBJECTS_VORBIS = $(VORBIS_OBJECTS)
 else
 ifeq ($(NO_VORBIS),1)
+$(call PRINT_INFO,[DEP] vorbis: disabled)
 else
 #LDLIBS   += -lvorbis
+$(call PRINT_DEBUG,[DEP] vorbis: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists vorbis && echo yes),yes)
+$(call PRINT_INFO,[DEP] vorbis: pkg-config/vorbis)
 CPPFLAGS_VORBIS := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbis ) -DMPT_WITH_VORBIS
 LDFLAGS_VORBIS  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbis ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other vorbis )
 LDLIBS_VORBIS   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbis )
 PC_REQUIRES_VORBIS := vorbis
 else
+$(call PRINT_INFO,[DEP] vorbis: no)
 ifeq ($(FORCE_DEPS),1)
 $(error vorbis not found)
 else
@@ -902,20 +954,26 @@ endif
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] vorbisfile)
 ifeq ($(LOCAL_VORBIS),1)
+$(call PRINT_INFO,[DEP] vorbisfile: local)
 CPPFLAGS_VORBISFILE := -DMPT_WITH_VORBISFILE
 LDFLAGS_VORBISFILE  := 
 LDLIBS_VORBISFILE   := 
 else
 ifeq ($(NO_VORBISFILE),1)
+$(call PRINT_INFO,[DEP] vorbisfile: disabled)
 else
 #LDLIBS   += -lvorbisfile
+$(call PRINT_DEBUG,[DEP] vorbisfile: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists vorbisfile && echo yes),yes)
+$(call PRINT_INFO,[DEP] vorbisfile: pkg-config/vorbisfile)
 CPPFLAGS_VORBISFILE := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I vorbisfile ) -DMPT_WITH_VORBISFILE
 LDFLAGS_VORBISFILE  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   vorbisfile ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other vorbisfile )
 LDLIBS_VORBISFILE   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   vorbisfile )
 PC_REQUIRES_VORBISFILE := vorbisfile
 else
+$(call PRINT_INFO,[DEP] vorbisfile: no)
 ifeq ($(FORCE_DEPS),1)
 $(error vorbisfile not found)
 else
@@ -926,14 +984,19 @@ endif
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] SDL2)
 ifeq ($(NO_SDL2),1)
+$(call PRINT_INFO,[DEP] SDL2: disabled)
 else
 #LDLIBS   += -lsdl2
+$(call PRINT_DEBUG,[DEP] SDL2: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'sdl2 >= 2.0.4' && echo yes),yes)
+$(call PRINT_INFO,[DEP] SDL2: pkg-config/sdl2)
 CPPFLAGS_SDL2 := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'sdl2 >= 2.0.4' ) -DMPT_WITH_SDL2
 LDFLAGS_SDL2  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'sdl2 >= 2.0.4' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'sdl2 >= 2.0.4' )
 LDLIBS_SDL2   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'sdl2 >= 2.0.4' )
 else
+$(call PRINT_INFO,[DEP] SDL2: no)
 ifeq ($(FORCE_DEPS),1)
 $(error sdl2 not found)
 else
@@ -943,14 +1006,19 @@ NO_SDL2:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] PortAudio)
 ifeq ($(NO_PORTAUDIO),1)
+$(call PRINT_INFO,[DEP] PortAudio: disabled)
 else
 #LDLIBS   += -lportaudio
+$(call PRINT_DEBUG,[DEP] PortAudio: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists portaudio-2.0 && echo yes),yes)
+$(call PRINT_INFO,[DEP] PortAudio: pkg-config/portaudio-2.0)
 CPPFLAGS_PORTAUDIO := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudio-2.0 ) -DMPT_WITH_PORTAUDIO
 LDFLAGS_PORTAUDIO  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudio-2.0 ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other portaudio-2.0 )
 LDLIBS_PORTAUDIO   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudio-2.0 )
 else
+$(call PRINT_INFO,[DEP] PortAudio: no)
 ifeq ($(FORCE_DEPS),1)
 $(error portaudio not found)
 else
@@ -960,14 +1028,19 @@ NO_PORTAUDIO:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] PortAudio-C++)
 ifeq ($(NO_PORTAUDIOCPP),1)
+$(call PRINT_INFO,[DEP] PortAudio-C++: disabled)
 else
 #LDLIBS   += -lportaudiocpp
+$(call PRINT_DEBUG,[DEP] PortAudio-C++: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists portaudiocpp && echo yes),yes)
+$(call PRINT_INFO,[DEP] PortAudio-C++: pkg-config/portaudiocpp)
 CPPFLAGS_PORTAUDIOCPP := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I portaudiocpp ) -DMPT_WITH_PORTAUDIOCPP
 LDFLAGS_PORTAUDIOCPP  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   portaudiocpp ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other portaudiocpp )
 LDLIBS_PORTAUDIOCPP   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   portaudiocpp )
 else
+$(call PRINT_INFO,[DEP] PortAudio-C++: no)
 ifeq ($(FORCE_DEPS),1)
 $(error portaudiocpp not found)
 else
@@ -977,14 +1050,20 @@ NO_PORTAUDIOCPP:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] PulseAudio)
 ifeq ($(NO_PULSEAUDIO),1)
+$(call PRINT_INFO,[DEP] PulseAudio: disabled)
 else
 #LDLIBS   += -lpulse-simple
+$(call PRINT_DEBUG,[DEP] PulseAudio: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists libpulse libpulse-simple && echo yes),yes)
+$(call PRINT_INFO,[DEP] PulseAudio: pkg-config/libpulse)
+$(call PRINT_INFO,[DEP] PulseAudio: pkg-config/libpulse-simple)
 CPPFLAGS_PULSEAUDIO := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I libpulse libpulse-simple ) -DMPT_WITH_PULSEAUDIO
 LDFLAGS_PULSEAUDIO  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   libpulse libpulse-simple ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other libpulse libpulse-simple )
 LDLIBS_PULSEAUDIO   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   libpulse libpulse-simple )
 else
+$(call PRINT_INFO,[DEP] PulseAudio: no)
 ifeq ($(FORCE_DEPS),1)
 $(error pulseaudio not found)
 else
@@ -994,14 +1073,19 @@ NO_PULSEAUDIO:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] FLAC)
 ifeq ($(NO_FLAC),1)
+$(call PRINT_INFO,[DEP] FLAC: disabled)
 else
 #LDLIBS   += -lFLAC
+$(call PRINT_DEBUG,[DEP] FLAC: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists 'flac >= 1.3.0' && echo yes),yes)
+$(call PRINT_INFO,[DEP] FLAC: pkg-config/flac)
 CPPFLAGS_FLAC := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I 'flac >= 1.3.0' ) -DMPT_WITH_FLAC
 LDFLAGS_FLAC  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L   'flac >= 1.3.0' ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other 'flac >= 1.3.0' )
 LDLIBS_FLAC   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l   'flac >= 1.3.0' )
 else
+$(call PRINT_INFO,[DEP] FLAC: no)
 ifeq ($(FORCE_DEPS),1)
 $(error flac not found)
 else
@@ -1011,14 +1095,19 @@ NO_FLAC:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] sndfile)
 ifeq ($(NO_SNDFILE),1)
+$(call PRINT_INFO,[DEP] sndfile: disabled)
 else
 #LDLIBS   += -lsndfile
+$(call PRINT_DEBUG,[DEP] sndfile: checking pkg-config ...)
 ifeq ($(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --exists sndfile && echo yes),yes)
+$(call PRINT_INFO,[DEP] sndfile: pkg-config/sndfile)
 CPPFLAGS_SNDFILE := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --cflags-only-I   sndfile ) -DMPT_WITH_SNDFILE
 LDFLAGS_SNDFILE  := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-L     sndfile ) $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-other sndfile )
 LDLIBS_SNDFILE   := $(shell $(PKG_CONFIG)$(TOOLCHAIN_SUFFIX) --libs-only-l     sndfile )
 else
+$(call PRINT_INFO,[DEP] sndfile: no)
 ifeq ($(FORCE_DEPS),1)
 $(error sndfile not found)
 else
@@ -1028,7 +1117,9 @@ NO_SNDFILE:=1
 endif
 endif
 
+$(call PRINT_TRACE,[DEP] Allegro-4.2)
 ifeq ($(USE_ALLEGRO42),1)
+$(call PRINT_INFO,[DEP] Allegro-4.2: local)
 
 CPPFLAGS_ALLEGRO42 := -Iinclude/allegro42/include -DALLEGRO_HAVE_STDINT_H -DLONG_LONG="long long" -DMPT_WITH_ALLEGRO42
 LDFLAGS_ALLEGRO42 :=
@@ -1041,6 +1132,8 @@ include/allegro42/lib/djgpp/liballeg.a:
 
 MISC_OUTPUTS += include/allegro42/lib/djgpp/liballeg.a
 
+else
+$(call PRINT_INFO,[DEP] Allegro-4.2: disabled)
 endif
 
 
