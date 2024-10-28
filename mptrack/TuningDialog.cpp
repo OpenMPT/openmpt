@@ -45,7 +45,7 @@ using NOTEINDEXTYPE = Tuning::NOTEINDEXTYPE;
 
 // CTuningDialog dialog
 CTuningDialog::CTuningDialog(CWnd* pParent, INSTRUMENTINDEX inst, CSoundFile &csf)
-	: DialogBase(IDD_TUNING, pParent)
+	: ResizableDialog(IDD_TUNING, pParent)
 	, m_sndFile(csf)
 	, m_TreeCtrlTuning(this)
 	, m_TreeItemTuningItemMap(s_notFoundItemTree, s_notFoundItemTuning)
@@ -152,7 +152,7 @@ void CTuningDialog::DeleteTreeItem(CTuningCollection* pTC)
 
 BOOL CTuningDialog::OnInitDialog()
 {
-	DialogBase::OnInitDialog();
+	ResizableDialog::OnInitDialog();
 
 	m_EditRatioPeriod.SubclassDlgItem(IDC_EDIT_RATIOPERIOD, this);
 	m_EditRatio.SubclassDlgItem(IDC_EDIT_RATIOVALUE, this);
@@ -348,7 +348,7 @@ void CTuningDialog::UpdateView(const int updateMask)
 
 void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 {
-	DialogBase::DoDataExchange(pDX);
+	ResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATICRATIOMAP, m_RatioMapWnd);
 	DDX_Control(pDX, IDC_COMBO_TTYPE, m_CombobTuningType);
 	DDX_Control(pDX, IDC_EDIT_STEPS, m_EditSteps);
@@ -366,7 +366,7 @@ void CTuningDialog::DoDataExchange(CDataExchange* pDX)
 
 
 
-BEGIN_MESSAGE_MAP(CTuningDialog, DialogBase)
+BEGIN_MESSAGE_MAP(CTuningDialog, ResizableDialog)
 	ON_EN_CHANGE(IDC_EDIT_STEPS, &CTuningDialog::OnEnChangeEditSteps)
 	ON_EN_CHANGE(IDC_EDIT_RATIOPERIOD, &CTuningDialog::OnEnChangeEditRatioperiod)
 	ON_EN_CHANGE(IDC_EDIT_NOTENAME, &CTuningDialog::OnEnChangeEditNotename)
@@ -1452,7 +1452,7 @@ void CTuningDialog::OnOK()
 	if(GetKeyState(VK_RETURN) <= -127 && GetFocus() != GetDlgItem(IDOK))
 		return;
 	else
-		DialogBase::OnOK();
+		ResizableDialog::OnOK();
 }
 
 

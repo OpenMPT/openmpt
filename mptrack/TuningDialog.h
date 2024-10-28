@@ -13,7 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CDecimalSupport.h"
-#include "DialogBase.h"
+#include "ResizableDialog.h"
 #include "tuningcollection.h"
 #include "tuningRatioMapWnd.h"
 
@@ -187,7 +187,7 @@ public:
 
 // CTuningDialog dialog
 
-class CTuningDialog : public DialogBase
+class CTuningDialog : public ResizableDialog
 {
 	friend class CTuningTreeCtrl;
 
