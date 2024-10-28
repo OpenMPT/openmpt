@@ -33,6 +33,9 @@
 #define strcasecmp _strcmpi
 #define strncasecmp _strnicmp
 
+/* Windows/DOS */
+#define HAVE__SETMODE
+
 /* Features */
 
 /* #define LFS_LARGEFILE_64 1 */
