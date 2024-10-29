@@ -7,6 +7,8 @@ The following changes have been made:
     `OPT_*`.
  *  `ports/Xcode/config.h` has been modified to `#define HAVE_DIRENT_H`.
  *  `src/compat/compat.c` has been modified for DJGPP compatibility.
+ *  `src/compat/compat.c` has been modified to silence MSVC static analyzer
+    warnings.
  *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.
