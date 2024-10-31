@@ -97,16 +97,28 @@ public:
 };
 
 
+#if MPT_OS_WINDOWS
+inline std::optional<DWORD> StdHandleFromFd( int fd ) {
+	std::optional<DWORD> stdHandle;
+	if ( fd == _fileno( stdin ) ) {
+		stdHandle = STD_INPUT_HANDLE;
+	} else if ( fd == _fileno( stdout ) ) {
+		stdHandle = STD_OUTPUT_HANDLE;
+	} else if ( fd == _fileno( stderr ) ) {
+		stdHandle = STD_ERROR_HANDLE;
+	}
+	return stdHandle;
+}
+#endif
+
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 inline bool IsConsole( DWORD stdHandle ) {
 	HANDLE hStd = GetStdHandle( stdHandle );
-	if ( ( hStd != NULL ) && ( hStd != INVALID_HANDLE_VALUE ) ) {
-		DWORD mode = 0;
-		if ( GetConsoleMode( hStd, &mode ) != FALSE ) {
-			return true;
-		}
+	if ( ( hStd == NULL ) || ( hStd == INVALID_HANDLE_VALUE ) ) {
+		return false;
 	}
-	return false;
+	DWORD mode = 0;
+	return GetConsoleMode( hStd, &mode ) != FALSE;
 }
 #endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 
@@ -115,15 +127,11 @@ inline bool IsTerminal( int fd ) {
 	if ( !_isatty( fd ) ) {
 		return false;
 	}
-	DWORD stdHandle = 0;
-	if ( fd == 0 ) {
-		stdHandle = STD_INPUT_HANDLE;
-	} else if ( fd == 1 ) {
-		stdHandle = STD_OUTPUT_HANDLE;
-	} else if ( fd == 2 ) {
-		stdHandle = STD_ERROR_HANDLE;
+	std::optional<DWORD> stdHandle = StdHandleFromFd( fd );
+	if ( !stdHandle ) {
+		return false;
 	}
-	return IsConsole( stdHandle );
+	return IsConsole( *stdHandle );
 #else
 	return isatty( fd ) ? true : false;
 #endif
