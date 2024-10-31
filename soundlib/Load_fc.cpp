@@ -373,7 +373,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 					prevNote[chn] = {p[0], static_cast<uint8>(m->instr)};
 				} else if(row == 0 && ord > 0 && orderData[ord - 1].channels[chn].noteTranspose != chnInfo.noteTranspose && prevNote[chn][0] > 0)
 				{
-					m->note = NOTE_MIN + (chnInfo.noteTranspose + prevNote[chn][0]) & 0x7F;
+					m->note = NOTE_MIN + ((chnInfo.noteTranspose + prevNote[chn][0]) & 0x7F);
 					m->instr = prevNote[chn][1];
 					m->SetVolumeCommand(VOLCMD_TONEPORTAMENTO, 9);
 				}
