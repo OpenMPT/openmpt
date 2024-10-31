@@ -17,12 +17,21 @@
 #define MPT_LIBC_GENERIC 1
 #elif (defined(__MINGW32__) || defined(__MINGW64__))
 #define MPT_LIBC_MINGW 1
+#if defined(_UCRT)
+#define MPT_LIBC_MINGW_UCRT 1
+#elif defined(__MSVCRT__)
+#define MPT_LIBC_MINGW_MSVCRT 1
+#elif defined(__CRTDLL__)
+#define MPT_LIBC_MINGW_CRTDLL 1
+#endif
 #elif (defined(__GLIBC__) || defined(__GNU_LIBRARY__))
 #define MPT_LIBC_GLIBC 1
 #elif defined(_UCRT)
 #define MPT_LIBC_MS 1
+#define MPT_LIBC_MS_UCRT 1
 #elif MPT_COMPILER_MSVC
 #define MPT_LIBC_MS 1
+#define MPT_LIBC_MS_MSVCRT 1
 #elif MPT_COMPILER_CLANG && MPT_OS_WINDOWS
 #define MPT_LIBC_MS 1
 #elif defined(__BIONIC__)
@@ -44,8 +53,23 @@
 #ifndef MPT_LIBC_MINGW
 #define MPT_LIBC_MINGW 0
 #endif
+#ifndef MPT_LIBC_MINGW_UCRT
+#define MPT_LIBC_MINGW_UCRT 0
+#endif
+#ifndef MPT_LIBC_MINGW_MSVCRT
+#define MPT_LIBC_MINGW_MSVCRT 0
+#endif
+#ifndef MPT_LIBC_MINGW_CRTDLL
+#define MPT_LIBC_MINGW_CRTDLL 0
+#endif
 #ifndef MPT_LIBC_MS
 #define MPT_LIBC_MS 0
+#endif
+#ifndef MPT_LIBC_MS_UCRT
+#define MPT_LIBC_MS_UCRT 0
+#endif
+#ifndef MPT_LIBC_MS_MSVCRT
+#define MPT_LIBC_MS_MSVCRT 0
 #endif
 #ifndef MPT_LIBC_BIONIC
 #define MPT_LIBC_BIONIC 0
