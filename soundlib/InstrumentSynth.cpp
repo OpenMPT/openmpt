@@ -980,7 +980,7 @@ bool InstrumentSynth::States::State::HandleFCVolumeBend(bool forceRun)
 		int32 target = m_volumeFactor + m_fcVolumeBendSpeed * 256;
 		if(target < 0 || target >= 32768)
 			m_fcVolumeBendRemain = 0;
-		m_volumeFactor = static_cast<uint16>(std::clamp(target, 0, 16384));
+		m_volumeFactor = static_cast<uint16>(std::clamp(target, int32(0), int32(16384)));
 	}
 	return true;
 }
