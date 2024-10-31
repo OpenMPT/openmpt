@@ -1,7 +1,7 @@
 /*
  * InstrumentSynth.h
  * -----------------
- * Purpose: "Script" / "Synth" processor for various file formats (MED, GT2, Puma, His Master's Noise)
+ * Purpose: "Script" / "Synth" processor for various file formats (MED, GT2, Puma, His Master's Noise, Face The Music, Future Composer)
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -30,7 +30,7 @@ struct InstrumentSynth
 			Jump,                 // Parameter: Event index (uint16)
 			JumpIfTrue,           // Parameter: Event index (uint16)
 			Delay,                // Parameter: Number of ticks (uint16)
-			SetStepSpeed,         // Parameter: Speed (uint8)
+			SetStepSpeed,         // Parameter: Speed (uint8), update speed now? (bool)
 			JumpMarker,           // Parameter: Marker ID (uint16)
 			SampleOffset,         // Parameter: Offset (uint32)
 			SampleOffsetAdd,      // Parameter: Offset (uint32)
@@ -93,6 +93,12 @@ struct InstrumentSynth
 			FTM_SetTempo,          // Parameter: Tempo (uint16)
 			FTM_SetSpeed,          // Parameter: Speed (uint16)
 			FTM_SetPlayPosition,   // Parameter: Pattern to play (uint16), row in pattern (uint8)
+
+			FC_SetWaveform,  // Parameter: Command type (uint8), waveform (uint8), sample pack (uint8)
+			FC_SetPitch,     // Parameter: Pitch (int8)
+			FC_SetVibrato,   // Parameter: Speed (uint8), depth (uint8), delay (uint8)
+			FC_PitchSlide,   // Parameter: Speed (uint8), time (uint8)
+			FC_VolumeSlide,  // Parameter: Speed (uint8), time (uint8)
 		};
 
 		static constexpr Type JumpEvents[] =
@@ -120,7 +126,7 @@ struct InstrumentSynth
 		static constexpr Event Jump(uint16 target) noexcept { return Event{Type::Jump, target}; }
 		static constexpr Event JumpIfTrue(uint16 target) noexcept { return Event{Type::JumpIfTrue, target}; }
 		static constexpr Event Delay(uint16 ticks) noexcept { return Event{Type::Delay, ticks}; }
-		static constexpr Event SetStepSpeed(uint8 speed) noexcept { return Event{Type::SetStepSpeed, speed}; }
+		static constexpr Event SetStepSpeed(uint8 speed, bool updateNow) noexcept { return Event{Type::SetStepSpeed, speed, uint8(updateNow ? 1 : 0)}; }
 		static constexpr Event JumpMarker(uint16 data) noexcept { return Event{Type::JumpMarker, data}; }
 		static constexpr Event SampleOffset(uint32 offset) noexcept { return Event24Bit(Type::SampleOffset, offset); }
 		static constexpr Event SampleOffsetAdd(uint32 offset) noexcept { return Event24Bit(Type::SampleOffsetAdd, offset); }
@@ -183,6 +189,12 @@ struct InstrumentSynth
 		static constexpr Event FTM_SetTempo(uint16 tempo) noexcept { return Event{Type::FTM_SetTempo, tempo}; }
 		static constexpr Event FTM_SetSpeed(uint16 speed) noexcept { return Event{Type::FTM_SetSpeed, speed}; }
 		static constexpr Event FTM_SetPlayPosition(uint16 pattern, uint8 row) noexcept { return Event{Type::FTM_SetPlayPosition, pattern, row}; }
+
+		static constexpr Event FC_SetWaveform(uint8 command, uint8 waveform, uint8 samplePack) noexcept { return Event{Type::FC_SetWaveform, command, waveform, samplePack}; }
+		static constexpr Event FC_SetPitch(int8 pitch) noexcept { return Event{Type::FC_SetPitch, pitch}; }
+		static constexpr Event FC_SetVibrato(uint8 speed, uint8 depth, uint8 delay) noexcept { return Event{Type::FC_SetVibrato, speed, depth, delay}; }
+		static constexpr Event FC_PitchSlide(uint8 speed, uint8 time) noexcept { return Event{Type::FC_PitchSlide, speed, time}; }
+		static constexpr Event FC_VolumeSlide(uint8 speed, uint8 time) noexcept { return Event{Type::FC_VolumeSlide, speed, time}; }
 
 		constexpr Event() noexcept : u8{}, u16{} {}
 		constexpr Event(const Event &other) noexcept = default;

@@ -206,6 +206,8 @@ public:
 					sndFile.FinePortamentoUp(chn, chn.nOldFinePortaUpDown);
 				else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown))
 					sndFile.FinePortamentoDown(chn, chn.nOldFinePortaUpDown);
+				if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoFC))
+					sndFile.PortamentoFC(chn);
 
 				updateInc = true;
 			}
@@ -1272,6 +1274,10 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 					case CMD_AUTO_PORTADOWN_FINE:
 						chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, m.param != 0);
 						chn.nOldFinePortaUpDown = m.param;
+						break;
+					case CMD_AUTO_PORTAMENTO_FC:
+						chn.autoSlide.SetActive(AutoSlideCommand::PortamentoFC, m.param != 0);
+						chn.nOldPortaUp = chn.nOldPortaDown = m.param;
 						break;
 
 					case CMD_TONEPORTA_DURATION:
@@ -3353,6 +3359,10 @@ bool CSoundFile::ProcessEffects()
 			chn.autoSlide.SetActive(AutoSlideCommand::FinePortamentoDown, param != 0);
 			chn.nOldFinePortaUpDown = static_cast<uint8>(param);
 			break;
+		case CMD_AUTO_PORTAMENTO_FC:
+			chn.autoSlide.SetActive(AutoSlideCommand::PortamentoFC, param != 0);
+			chn.nOldPortaUp = chn.nOldPortaDown = static_cast<uint8>(param);
+			break;
 
 		// Volume Slide
 		case CMD_VOLUMESLIDE:
@@ -3925,6 +3935,8 @@ void CSoundFile::ProcessAutoSlides(PlayState &playState, CHANNELINDEX channel)
 		FinePortamentoUp(chn, chn.nOldFinePortaUpDown);
 	else if(chn.autoSlide.IsActive(AutoSlideCommand::FinePortamentoDown))
 		FinePortamentoDown(chn, chn.nOldFinePortaUpDown);
+	if(chn.autoSlide.IsActive(AutoSlideCommand::PortamentoFC))
+		PortamentoFC(chn);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideUp) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
 		FineVolumeUp(chn, 0, false);
 	if(chn.autoSlide.IsActive(AutoSlideCommand::FineVolumeSlideDown) && chn.rowCommand.command != CMD_AUTO_VOLUMESLIDE)
@@ -4054,6 +4066,15 @@ ROWINDEX CSoundFile::PatternBreak(PlayState &state, CHANNELINDEX chn, uint8 para
 	state.m_nextPatStartRow = 0; // FT2 E60 bug
 
 	return static_cast<ROWINDEX>(CalculateXParam(state.m_nPattern, state.m_nRow, chn));
+}
+
+
+void CSoundFile::PortamentoFC(ModChannel &chn) const
+{
+	chn.fcPortaTick = !chn.fcPortaTick;
+	if(!chn.fcPortaTick)
+		return;
+	chn.nPeriod -= static_cast<int8>(chn.nOldPortaUp) * 4;
 }
 
 

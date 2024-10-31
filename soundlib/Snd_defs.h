@@ -129,6 +129,7 @@ enum class AutoSlideCommand
 	PortamentoDown,
 	FinePortamentoUp,
 	FinePortamentoDown,
+	PortamentoFC,
 	FineVolumeSlideUp,
 	FineVolumeSlideDown,
 	VolumeDownETX,

@@ -115,9 +115,10 @@ enum EffectCommand : uint8
 	CMD_AUTO_PORTADOWN      = 51,
 	CMD_AUTO_PORTAUP_FINE   = 52,
 	CMD_AUTO_PORTADOWN_FINE = 53,
-	CMD_TONEPORTA_DURATION  = 54, // Parameter = how many rows the slide should last
-	CMD_VOLUMEDOWN_DURATION = 55, // Parameter = how many rows the slide should last
-	CMD_VOLUMEDOWN_ETX      = 56, // EasyTrax fade-out (parameter = speed, independent of song tempo)
+	CMD_AUTO_PORTAMENTO_FC  = 54, // Future Composer
+	CMD_TONEPORTA_DURATION  = 55, // Parameter = how many rows the slide should last
+	CMD_VOLUMEDOWN_DURATION = 56, // Parameter = how many rows the slide should last
+	CMD_VOLUMEDOWN_ETX      = 57, // EasyTrax fade-out (parameter = speed, independent of song tempo)
 	MAX_EFFECTS
 };
 

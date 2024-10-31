@@ -133,6 +133,7 @@ static constexpr MPTEffectInfo gFXInfo[] =
 	{CMD_AUTO_PORTADOWN, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento Down")},
 	{CMD_AUTO_PORTAUP_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Up")},
 	{CMD_AUTO_PORTADOWN_FINE, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Fine Portamento Down")},
+	{CMD_AUTO_PORTAMENTO_FC, 0, 0, 0, MOD_TYPE_NONE, _T("Automatic Portamento (Future Composer)")},
 	{CMD_TONEPORTA_DURATION, 0, 0, 0, MOD_TYPE_NONE, _T("Tone Portamento with Duration")},
 	{CMD_VOLUMEDOWN_DURATION, 0, 0, 0, MOD_TYPE_NONE, _T("Channel Volume Down with Duration")},
 	{CMD_VOLUMEDOWN_ETX, 0, 0, 0, MOD_TYPE_NONE, _T("ETX Volume Slide Down")},

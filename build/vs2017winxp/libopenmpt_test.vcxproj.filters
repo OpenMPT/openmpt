@@ -1283,6 +1283,9 @@
     <ClCompile Include="..\..\soundlib\Load_far.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_fc.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_fmt.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

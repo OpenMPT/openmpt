@@ -658,7 +658,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 
 static void TranslateMEDSynthScript(std::array<uint8, 128> &arr, size_t numEntries, uint8 speed, uint8 hold, uint8 decay, InstrumentSynth::Events &events, bool isVolume)
 {
-	events.push_back(InstrumentSynth::Event::SetStepSpeed(speed));
+	events.push_back(InstrumentSynth::Event::SetStepSpeed(speed, false));
 	if(hold && isVolume)
 		events.push_back(InstrumentSynth::Event::MED_HoldDecay(hold, decay));
 
@@ -737,7 +737,7 @@ static void TranslateMEDSynthScript(std::array<uint8, 128> &arr, size_t numEntri
 			events.push_back(InstrumentSynth::Event::Delay(std::max(chunk.ReadUint8(), uint8(1)) - 1));
 			break;
 		case 0xF0:  // SPD - Set Speed
-			events.push_back(InstrumentSynth::Event::SetStepSpeed(chunk.ReadUint8()));
+			events.push_back(InstrumentSynth::Event::SetStepSpeed(chunk.ReadUint8(), false));
 			break;
 		default:
 			if(isVolume && b <= 64)

@@ -54,7 +54,8 @@ struct ModChannel
 		{
 			return IsActive(AutoSlideCommand::TonePortamento)
 				|| IsActive(AutoSlideCommand::PortamentoUp) || IsActive(AutoSlideCommand::PortamentoDown)
-				|| IsActive(AutoSlideCommand::FinePortamentoUp) || IsActive(AutoSlideCommand::FinePortamentoDown);
+				|| IsActive(AutoSlideCommand::FinePortamentoUp) || IsActive(AutoSlideCommand::FinePortamentoDown)
+				|| IsActive(AutoSlideCommand::PortamentoFC);
 		}
 	private:
 		std::bitset<static_cast<size_t>(AutoSlideCommand::NumCommands)> m_set;
@@ -151,6 +152,7 @@ struct ModChannel
 	bool isPreviewNote : 1;                  // Notes preview in editor
 	bool isPaused : 1;                       // Don't mix or increment channel position, but keep the note alive
 	bool portaTargetReached : 1;             // Tone portamento is finished
+	bool fcPortaTick : 1;                    // Future Composer portamento state
 
 	//-->Variables used to make user-definable tuning modes work with pattern effects.
 	//If true, freq should be recalculated in ReadNote() on first tick.

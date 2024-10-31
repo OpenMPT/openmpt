@@ -33,8 +33,8 @@ static constexpr EffectType effectTypes[] =
 	EffectType::Pitch,  EffectType::Pitch,   EffectType::Normal, EffectType::Normal,
 	EffectType::Normal, EffectType::Normal,  EffectType::Volume, EffectType::Normal,
 	EffectType::Normal, EffectType::Volume,  EffectType::Pitch,  EffectType::Pitch,
-	EffectType::Pitch,  EffectType::Pitch,   EffectType::Pitch,  EffectType::Volume,
-	EffectType::Volume,
+	EffectType::Pitch,  EffectType::Pitch,   EffectType::Pitch,  EffectType::Pitch,
+	EffectType::Volume, EffectType::Volume,
 };
 
 static_assert(std::size(effectTypes) == MAX_EFFECTS);
@@ -963,6 +963,7 @@ bool ModCommand::IsAnyPitchSlide() const
 	case CMD_AUTO_PORTADOWN:
 	case CMD_AUTO_PORTAUP_FINE:
 	case CMD_AUTO_PORTADOWN_FINE:
+	case CMD_AUTO_PORTAMENTO_FC:
 	case CMD_TONEPORTA_DURATION:
 		return true;
 	case CMD_MODCMDEX:
@@ -1009,6 +1010,7 @@ bool ModCommand::IsContinousCommand(const CSoundFile &sndFile) const
 	case CMD_AUTO_PORTADOWN:
 	case CMD_AUTO_PORTAUP_FINE:
 	case CMD_AUTO_PORTADOWN_FINE:
+	case CMD_AUTO_PORTAMENTO_FC:
 		return true;
 	case CMD_PORTAMENTOUP:
 	case CMD_PORTAMENTODOWN:
@@ -1190,6 +1192,7 @@ size_t ModCommand::GetEffectWeight(COMMAND cmd)
 		CMD_NOTESLIDEDOWNRETRIG,
 		CMD_NOTESLIDEDOWN,
 		CMD_PORTAMENTOUP,
+		CMD_AUTO_PORTAMENTO_FC,
 		CMD_AUTO_PORTAUP_FINE,
 		CMD_AUTO_PORTAUP,
 		CMD_PORTAMENTODOWN,

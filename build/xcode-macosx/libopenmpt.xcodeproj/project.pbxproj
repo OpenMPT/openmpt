@@ -117,6 +117,7 @@
 		BD4216739C5F30A578688CB3 /* Load_fmt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9CF744BB2F850EAD985DB2FB /* Load_fmt.cpp */; };
 		BE9B2A6B02AEFB9DF68080AB /* Snd_fx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 74D7DB33E5FA7C259BC12973 /* Snd_fx.cpp */; };
 		C0082C03041BFD35F7ED8243 /* Reverb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B50C144B262EB53DDBF5628B /* Reverb.cpp */; };
+		C3D725375C240AE98A6B0B77 /* Load_fc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6BBD03FFB0A75B13D31AE7F /* Load_fc.cpp */; };
 		C55C8AFDA479A52F8083013D /* UMXTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C7851FA55A12E997C2EB8DE5 /* UMXTools.cpp */; };
 		C6B55BA579AB6557CACDC1E5 /* InstrumentSynth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89879ACD7D86E43F0271F90D /* InstrumentSynth.cpp */; };
 		C746074BA663217D826C7D8B /* Load_mt2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E85EC13A113B60509EC5A53 /* Load_mt2.cpp */; };
@@ -524,6 +525,7 @@
 		B547A5AF29A1EAA1A78573EF /* type_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = type_traits.hpp; path = ../../src/mpt/endian/type_traits.hpp; sourceTree = "<group>"; };
 		B55D7A70F9AC1FE23BD358B0 /* GzipWriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GzipWriter.h; path = ../../common/GzipWriter.h; sourceTree = "<group>"; };
 		B569F9F747F7C3E9B0D06837 /* Load_669.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_669.cpp; path = ../../soundlib/Load_669.cpp; sourceTree = "<group>"; };
+		B6BBD03FFB0A75B13D31AE7F /* Load_fc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_fc.cpp; path = ../../soundlib/Load_fc.cpp; sourceTree = "<group>"; };
 		B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MixerLoops.cpp; path = ../../soundlib/MixerLoops.cpp; sourceTree = "<group>"; };
 		B99E396D4C2C035FB504A7AD /* Load_c67.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_c67.cpp; path = ../../soundlib/Load_c67.cpp; sourceTree = "<group>"; };
 		B9B7FE84CBE1DB36FFD2C4C4 /* windows.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = windows.hpp; path = ../../src/mpt/check/windows.hpp; sourceTree = "<group>"; };
@@ -1318,6 +1320,7 @@
 				0D18D5B79FA69FA9087F43F7 /* Load_dtm.cpp */,
 				14754CCFA70316C10FDBBB0F /* Load_etx.cpp */,
 				9BB2E75F2E40B1519719559F /* Load_far.cpp */,
+				B6BBD03FFB0A75B13D31AE7F /* Load_fc.cpp */,
 				9CF744BB2F850EAD985DB2FB /* Load_fmt.cpp */,
 				0C4FEA7B9EDDB46D07B658BB /* Load_ftm.cpp */,
 				97BF12BD2A4CDCAF932580FD /* Load_gdm.cpp */,
@@ -1662,6 +1665,7 @@
 				F5A6792FD4C39361B0CCEF6F /* Load_dtm.cpp in Sources */,
 				CE9155C7ADAE6FF989B7CC07 /* Load_etx.cpp in Sources */,
 				D1EA5157B1076B898D10C797 /* Load_far.cpp in Sources */,
+				C3D725375C240AE98A6B0B77 /* Load_fc.cpp in Sources */,
 				BD4216739C5F30A578688CB3 /* Load_fmt.cpp in Sources */,
 				609638333FB352651BBCAE73 /* Load_ftm.cpp in Sources */,
 				707EA3954F9BBDC72BA519D5 /* Load_gdm.cpp in Sources */,
