@@ -364,7 +364,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 				
 				if(p[0] > 0 && p[0] != 0x49)
 				{
-					m->note = NOTE_MIN + (chnInfo.noteTranspose + p[0]) & 0x7F;
+					m->note = NOTE_MIN + ((chnInfo.noteTranspose + p[0]) & 0x7F);
 					if(int instr = (p[1] & 0x3F) + chnInfo.instrTranspose + 1; instr >= 1 && instr <= m_nInstruments)
 						m->instr = static_cast<ModCommand::INSTR>(instr);
 					else
