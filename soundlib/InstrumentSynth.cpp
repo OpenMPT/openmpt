@@ -568,6 +568,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		return false;
 	case Event::Type::GTK_SetVolume:
 		m_volumeFactor = event.u16;
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return false;
 	case Event::Type::GTK_SetPitch:
 		m_gtkPitch = event.u16;
@@ -637,6 +638,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 	case Event::Type::Puma_VolumeRamp:
 		m_ticksRemain = event.Byte2();
 		m_volumeAdd = static_cast<int16>(event.Byte0() * 256 - 16384);
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return true;
 	case Event::Type::Puma_StopVoice:
 		chn.nRealVolume = 0;
@@ -657,6 +659,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 	case Event::Type::Mupp_SetWaveform:
 		ChannelSetSample(chn, sndFile, static_cast<SAMPLEINDEX>(32 + event.Byte0() * 28 + event.Byte1()));
 		m_volumeFactor = static_cast<uint16>(std::min(event.Byte2() & 0x7F, 64) * 256u);
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return true;
 
 	case Event::Type::MED_DefineArpeggio:
@@ -683,6 +686,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		return false;
 	case Event::Type::MED_SetVolume:
 		m_volumeFactor = event.u8 * 256u;
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return true;
 	case Event::Type::MED_SetWaveform:
 		if(chn.pModInstrument)
@@ -765,6 +769,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		return false;
 	case Event::Type::FTM_SetVolume:
 		chn.nGlobalVol = std::min(event.u8, uint8(64));
+		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return false;
 	case Event::Type::FTM_AddVolume:
 		chn.nGlobalVol = static_cast<uint8>(std::clamp(chn.nGlobalVol + event.i16, 0, 64));
