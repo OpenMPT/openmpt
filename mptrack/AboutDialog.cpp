@@ -250,14 +250,13 @@ BOOL CAboutDlg::OnInitDialog()
 	DialogBase::OnInitDialog();
 
 	mpt::ustring app;
-	app += MPT_UFORMAT("OpenMPT{} ({} ({} bit))")(
+	app += MPT_UFORMAT("OpenMPT{} ({}, {} bit)\r\n")(
 			mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_VARIANT_MONIKER),
 			mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture()),
 			mpt::arch_bits)
-		+ U_("\n");
-	app += U_("Version ") + Build::GetVersionStringSimple() + U_("\n\n");
-	app += Build::GetURL(Build::Url::Website) + U_("\n");
-	SetDlgItemText(IDC_EDIT3, mpt::ToCString(mpt::replace(app, U_("\n"), U_("\r\n"))));
+		+ UL_("Version ") + Build::GetVersionStringSimple() + UL_("\r\n\r\n")
+		+ Build::GetURL(Build::Url::Website) + UL_("\r\n");
+	SetDlgItemText(IDC_EDIT3, mpt::ToCString(app));
 
 	m_bmp.SubclassDlgItem(IDC_BITMAP1, this);
 
@@ -303,10 +302,10 @@ static mpt::ustring CPUFeaturesToString(mpt::arch::current::feature_flags procSu
 	std::vector<mpt::ustring> features;
 #if MPT_COMPILER_MSVC
 #if defined(MPT_ENABLE_ARCH_X86)
-	features.push_back(U_("x86"));
+	features.push_back(UL_("x86"));
 #endif
 #if defined(MPT_ENABLE_ARCH_AMD64)
-	features.push_back(U_("amd64"));
+	features.push_back(UL_("amd64"));
 #endif
 	struct ProcFlag
 	{
@@ -342,9 +341,9 @@ static mpt::ustring CPUFeaturesToString(mpt::arch::current::feature_flags procSu
 
 mpt::ustring CAboutDlg::GetTabText(int tab)
 {
-	const mpt::ustring lf = U_("\n");
-	const mpt::ustring yes = U_("yes");
-	const mpt::ustring no = U_("no");
+	const mpt::ustring lf = UL_("\n");
+	const mpt::ustring yes = UL_("yes");
+	const mpt::ustring no = UL_("no");
 #ifdef MPT_ENABLE_ARCH_INTRINSICS
 	const mpt::arch::current::cpu_info CPUInfo = mpt::arch::get_cpu_info();
 #endif // MPT_ENABLE_ARCH_INTRINSICS
@@ -352,7 +351,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 	switch(tab)
 	{
 		case 0:
-			text = U_("OpenMPT - Open ModPlug Tracker\n\n")
+			text = UL_("OpenMPT - Open ModPlug Tracker\n\n")
 				+ MPT_UFORMAT("Version: {}\n")(Build::GetVersionStringExtended())
 				+ MPT_UFORMAT("Source Code: {}\n")(SourceInfo::Current().GetUrlWithRevision() + UL_(" ") + SourceInfo::Current().GetStateString())
 				+ MPT_UFORMAT("Build Date: {}\n")(Build::GetBuildDateString())
@@ -361,18 +360,18 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				+ MPT_UFORMAT("Required Windows Kernel Level: {}\n")(mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::GetMinimumKernelLevel()))
 				+ MPT_UFORMAT("Required Windows API Level: {}\n")(mpt::OS::Windows::Version::GetName(mpt::OS::Windows::Version::GetMinimumAPILevel()));
 			{
-				text += U_("Required CPU features: ");
+				text += UL_("Required CPU features: ");
 				std::vector<mpt::ustring> features;
 				#ifdef MPT_ENABLE_ARCH_INTRINSICS
 					#if MPT_ARCH_AMD64
-						features.push_back(U_("x86-64"));
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(U_("avx"));
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(U_("avx2"));
+						features.push_back(UL_("x86-64"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(UL_("avx"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(UL_("avx2"));
 					#elif MPT_ARCH_X86
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse) features.push_back(U_("sse"));
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse2) features.push_back(U_("sse2"));
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(U_("avx"));
-						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(U_("avx2"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse) features.push_back(UL_("sse"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::sse2) features.push_back(UL_("sse2"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx) features.push_back(UL_("avx"));
+						if(mpt::arch::current::assumed_features() & mpt::arch::current::feature::avx2) features.push_back(UL_("avx2"));
 					#endif
 				#endif
 				text += mpt::join_format(features, U_(" "));
@@ -398,16 +397,16 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("Available CPU features: {}\n")(CPUFeaturesToString(CPUInfo.get_features()));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetCurrentName());
-			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
-			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
-			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
+			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
+			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
 			break;
 		case 1:
 			{
 			std::vector<std::string> components = ComponentManager::Instance()->GetRegisteredComponents();
 			if(!TrackerSettings::Instance().ComponentsKeepLoaded)
 				{
-					text += U_("Components are loaded and unloaded as needed.\n\n");
+					text += UL_("Components are loaded and unloaded as needed.\n\n");
 					for(const auto &component : components)
 					{
 						ComponentInfo info = ComponentManager::Instance()->GetComponentInfo(component);
@@ -424,10 +423,10 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 					{
 						if(available)
 						{
-							text += U_("Loaded Components:\n");
+							text += UL_("Loaded Components:\n");
 						} else
 						{
-							text += U_("\nUnloaded Components:\n");
+							text += UL_("\nUnloaded Components:\n");
 						}
 						for(const auto &component : components)
 						{
@@ -441,22 +440,22 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							}
 							text += MPT_UFORMAT("{}: {}")
 								( name
-								, info.state == ComponentStateAvailable ? U_("ok") :
-									info.state == ComponentStateUnavailable? U_("missing") :
-									info.state == ComponentStateUnintialized ? U_("not loaded") :
-									info.state == ComponentStateBlocked ? U_("blocked") :
-									info.state == ComponentStateUnregistered ? U_("unregistered") :
-									U_("unknown")
+								, info.state == ComponentStateAvailable ? UL_("ok") :
+									info.state == ComponentStateUnavailable? UL_("missing") :
+									info.state == ComponentStateUnintialized ? UL_("not loaded") :
+									info.state == ComponentStateBlocked ? UL_("blocked") :
+									info.state == ComponentStateUnregistered ? UL_("unregistered") :
+									UL_("unknown")
 								);
 							if(info.type != ComponentTypeUnknown)
 							{
 								text += MPT_UFORMAT(" ({})")
-									( info.type == ComponentTypeBuiltin ? U_("builtin") :
-										info.type == ComponentTypeSystem ? U_("system") :
-										info.type == ComponentTypeSystemInstallable ? U_("system, optional") :
-										info.type == ComponentTypeBundled ? U_("bundled") :
-										info.type == ComponentTypeForeign ? U_("foreign") :
-										U_("unknown")
+									( info.type == ComponentTypeBuiltin ? UL_("builtin") :
+										info.type == ComponentTypeSystem ? UL_("system") :
+										info.type == ComponentTypeSystemInstallable ? UL_("system, optional") :
+										info.type == ComponentTypeBundled ? UL_("bundled") :
+										info.type == ComponentTypeForeign ? UL_("foreign") :
+										UL_("unknown")
 									);
 							}
 							text += lf;
@@ -472,17 +471,17 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += Build::GetLicenseString();
 			break;
 		case 4:
-			text += U_("Website:\n") + Build::GetURL(Build::Url::Website);
-			text += U_("\n\nForum:\n") + Build::GetURL(Build::Url::Forum);
-			text += U_("\n\nBug Tracker:\n") + Build::GetURL(Build::Url::Bugtracker);
-			text += U_("\n\nUpdates:\n") + Build::GetURL(Build::Url::Updates);
+			text += UL_("Website:\n") + Build::GetURL(Build::Url::Website);
+			text += UL_("\n\nForum:\n") + Build::GetURL(Build::Url::Forum);
+			text += UL_("\n\nBug Tracker:\n") + Build::GetURL(Build::Url::Bugtracker);
+			text += UL_("\n\nUpdates:\n") + Build::GetURL(Build::Url::Updates);
 			break;
 		case 5:
 			try
 			{
 				if(!theApp.GetWine())
 				{
-					text += U_("Wine integration not available.\n");
+					text += UL_("Wine integration not available.\n");
 				} else
 				{
 
@@ -493,20 +492,20 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						);
 					text += MPT_UFORMAT("Windows version: {}\n")
 						( 
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win81) ? U_("Windows 8.1") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win8) ? U_("Windows 8") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win7) ? U_("Windows 7") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? U_("Windows Vista") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP) ? U_("Windows XP") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000) ? U_("Windows 2000") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinNT4) ? U_("Windows NT4") :
-						U_("unknown")
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win81) ? UL_("Windows 8.1") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win8) ? UL_("Windows 8") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win7) ? UL_("Windows 7") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? UL_("Windows Vista") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP) ? UL_("Windows XP") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000) ? UL_("Windows 2000") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinNT4) ? UL_("Windows NT4") :
+						UL_("unknown")
 						);
 					text += MPT_UFORMAT("Windows original: {}\n")
 						( mpt::OS::Windows::IsOriginal() ? yes : no
 						);
 
-					text += U_("\n");
+					text += UL_("\n");
 
 					text += MPT_UFORMAT("Wine: {}\n")
 						( mpt::OS::Windows::IsWine() ? yes : no
@@ -524,7 +523,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.VersionContext().RawHostRelease())
 						);
 
-					text += U_("\n");
+					text += UL_("\n");
 
 					text += MPT_UFORMAT("uname -m: {}\n")
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.Uname_m())
@@ -542,7 +541,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						( mpt::ToUnicode(mpt::Charset::UTF8, wine.XDG_CONFIG_HOME())
 						);
 
-					text += U_("\n");
+					text += UL_("\n");
 
 					text += MPT_UFORMAT("OpenMPT folder: {}\n")
 						( theApp.GetInstallPath().ToUnicode()
@@ -563,7 +562,7 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 				}
 			} catch(const mpt::Wine::Exception & e)
 			{
-				text += U_("Exception: ") + mpt::get_exception_text<mpt::ustring>(e) + U_("\n");
+				text += UL_("Exception: ") + mpt::get_exception_text<mpt::ustring>(e) + UL_("\n");
 			}
 			break;
 	}
