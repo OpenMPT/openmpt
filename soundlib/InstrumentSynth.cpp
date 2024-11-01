@@ -157,7 +157,7 @@ static void ChannelSetSample(ModChannel &chn, const CSoundFile &sndFile, SAMPLEI
 {
 	if(smp < 1 || smp > sndFile.GetNumSamples())
 		return;
-	const bool channelIsActive = chn.pCurrentSample;// && chn.nLength;
+	const bool channelIsActive = chn.pCurrentSample && chn.nLength;
 	if(sndFile.m_playBehaviour[kMODSampleSwap] && smp <= uint8_max && swapAtEnd && channelIsActive)
 	{
 		chn.nNewIns = static_cast<uint8>(smp);
