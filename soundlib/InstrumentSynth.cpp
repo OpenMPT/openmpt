@@ -439,7 +439,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 		if(m_flags[kFCPitchBendStep])
 		{
 			m_fcPitchBendRemain--;
-			m_periodAdd -= m_fcPitchBendSpeed * 4;
+			m_periodAdd -= static_cast<int16>(m_fcPitchBendSpeed * 4);
 		}
 	}
 }
@@ -483,7 +483,7 @@ void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &p
 
 		if(doVibratoFC)
 		{
-			uint16 note = (fcNote * 2) + 160;
+			int note = (fcNote * 2) + 160;
 			while(note < 256)
 			{
 				vibratoFC *= 2;
@@ -906,7 +906,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		{
 			uint8 waveform = event.Byte1() + 1;
 			if(event.Byte0() == 0xE9)
-				waveform += event.Byte2() * 10 + 90;
+				waveform += static_cast<uint8>(event.Byte2() * 10 + 90);
 			ChannelSetSample(chn, sndFile, waveform, event.Byte0() == 0xE4);
 		}
 		return false;

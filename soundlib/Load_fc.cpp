@@ -138,7 +138,7 @@ static void TranslateFCScript(InstrumentSynth::Events &events, const mpt::span<c
 		// Luckily this is not possible with frequency sequences - as multiple frequency sequences can be chained using command E7,
 		// not having to care for that bug there makes the book-keeping a bit easier for us, as jumps will always be "local" within the currently selected sequence,
 		// and a jump target address cannot belong to two parsed sequences.
-		const uint16 maxScriptJumpPos = currentSequenceOffset + (isVolume ? 260 : 63);
+		const uint16 maxScriptJumpPos = static_cast<uint16>(currentSequenceOffset + (isVolume ? 260 : 63));
 		uint16 maxJump = 0;
 		bool nextByteIsPitch = false;
 		while(file.CanRead(1))
@@ -224,7 +224,7 @@ static void TranslateFCScript(InstrumentSynth::Events &events, const mpt::span<c
 					if(isVolume && script[0] > 1)
 					{
 						events.push_back(InstrumentSynth::Event::SetStepSpeed(1, true));
-						events.push_back(InstrumentSynth::Event::Delay(delay + script[0] - 2));
+						events.push_back(InstrumentSynth::Event::Delay(static_cast<uint16>(delay + script[0] - 2)));
 						events.push_back(InstrumentSynth::Event::SetStepSpeed(script[0], true));
 					} else if(delay)
 					{
@@ -414,7 +414,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 		const auto freqSeq = mpt::as_span(freqSequences).subspan((volSeq[1] * 64u) % freqSequences.size());
 		uint8 defaultSample = freqSeq[1];
 		if(freqSeq[0] == 0xE9)
-			defaultSample = 90 + defaultSample * 10 + freqSeq[2];
+			defaultSample = static_cast<uint8>(90 + defaultSample * 10 + freqSeq[2]);
 
 		ModInstrument *instr = AllocateInstrument(ins, defaultSample + 1);
 		if(!instr)
