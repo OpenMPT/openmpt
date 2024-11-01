@@ -112,6 +112,7 @@ struct ModChannel
 	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
 	uint16 nnaGeneration;         // For PlaybackTest implementation
 	CHANNELINDEX nMasterChn;
+	SAMPLEINDEX swapSampleIndex;  // Sample to swap to when current sample (loop) has finished playing
 	ModCommand rowCommand;
 	// 8-bit members
 	uint8 nGlobalVol;  // Channel volume (CV in ITTECH.TXT) 0...64

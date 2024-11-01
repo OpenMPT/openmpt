@@ -27,6 +27,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nNote = nNewNote = (sndFile.m_playBehaviour[kITInitialNoteMemory] ? NOTE_MIN : NOTE_NONE);
 		nArpeggioLastNote = lastMidiNoteWithoutArp = NOTE_NONE;
 		nNewIns = nOldIns = 0;
+		swapSampleIndex = 0;
 		pModSample = defaultSample;
 		pModInstrument = nullptr;
 		nPortamentoDest = 0;

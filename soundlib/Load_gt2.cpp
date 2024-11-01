@@ -460,8 +460,8 @@ static void TranslateGraoumfEffect(CSoundFile &sndFile, ModCommand &m, const uin
 						m.vol = 9;
 					} else
 					{
-						m.command = CMD_TONEPORTAMENTO;
-						m.param = 0xFF;
+						m.command = CMD_TONEPORTA_DURATION;
+						m.param = 0;
 					}
 				}
 			}

@@ -338,7 +338,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 	Order().resize(numOrders);
 	if(loadFlags & loadPatternData)
 		Patterns.ResizeArray(numOrders);
-	std::array<std::array<uint8, 2>, 4> prevNote = {{}};
+	std::array<uint8, 4> prevNote = {{}};
 	for(ORDERINDEX ord = 0; ord < numOrders; ord++)
 	{
 		Order()[ord] = ord;
@@ -364,20 +364,21 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 				
 				if(p[0] > 0 && p[0] != 0x49)
 				{
+					prevNote[chn] = p[0];
 					m->note = NOTE_MIN + ((chnInfo.noteTranspose + p[0]) & 0x7F);
 					if(int instr = (p[1] & 0x3F) + chnInfo.instrTranspose + 1; instr >= 1 && instr <= m_nInstruments)
 						m->instr = static_cast<ModCommand::INSTR>(instr);
 					else
 						m->instr = static_cast<ModCommand::INSTR>(m_nInstruments);
-					
-					prevNote[chn] = {p[0], static_cast<uint8>(m->instr)};
-				} else if(row == 0 && ord > 0 && orderData[ord - 1].channels[chn].noteTranspose != chnInfo.noteTranspose && prevNote[chn][0] > 0)
+				} else if(row == 0 && ord > 0 && orderData[ord - 1].channels[chn].noteTranspose != chnInfo.noteTranspose && prevNote[chn] > 0)
 				{
-					m->note = NOTE_MIN + ((chnInfo.noteTranspose + prevNote[chn][0]) & 0x7F);
-					m->instr = prevNote[chn][1];
-					m->SetVolumeCommand(VOLCMD_TONEPORTAMENTO, 9);
+					m->note = NOTE_MIN + ((chnInfo.noteTranspose + prevNote[chn]) & 0x7F);
+					if(p[1] & 0xC0)
+						m->SetVolumeCommand(VOLCMD_TONEPORTAMENTO, 9);
+					else
+						m->SetEffectCommand(CMD_TONEPORTA_DURATION, 0);
 				}
-				if((p[1] & 0xC0))
+				if(p[1] & 0xC0)
 					m->SetEffectCommand(CMD_AUTO_PORTAMENTO_FC, 0);
 				if(p[1] & 0x80)
 				{

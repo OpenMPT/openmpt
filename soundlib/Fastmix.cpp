@@ -482,7 +482,7 @@ void CSoundFile::CreateStereoMix(int count)
 
 			const bool pastLoopEnd = chn.position.GetUInt() >= chn.nLoopEnd && chn.dwFlags[CHN_LOOP];
 			const bool pastSampleEnd = chn.position.GetUInt() >= chn.nLength && !chn.dwFlags[CHN_LOOP] && chn.nLength && !chn.nMasterChn;
-			const bool doSampleSwap = m_playBehaviour[kMODSampleSwap] && chn.nNewIns && chn.nNewIns <= GetNumSamples() && chn.pModSample != &Samples[chn.nNewIns];
+			const bool doSampleSwap = m_playBehaviour[kMODSampleSwap] && chn.swapSampleIndex && chn.swapSampleIndex <= GetNumSamples() && chn.pModSample != &Samples[chn.swapSampleIndex];
 			if((pastLoopEnd || pastSampleEnd) && doSampleSwap)
 			{
 				// ProTracker compatibility: Instrument changes without a note do not happen instantly, but rather when the sample loop has finished playing.
@@ -498,7 +498,7 @@ void CSoundFile::CreateStereoMix(int count)
 					}
 				}
 #endif
-				const ModSample &smp = Samples[chn.nNewIns];
+				const ModSample &smp = Samples[chn.swapSampleIndex];
 				chn.pModSample = &smp;
 				chn.pCurrentSample = smp.samplev();
 				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | smp.uFlags;
@@ -511,11 +511,10 @@ void CSoundFile::CreateStereoMix(int count)
 				chn.nLoopStart = smp.nLoopStart;
 				chn.nLoopEnd = smp.nLoopEnd;
 				chn.position.SetInt(chn.nLoopStart);
+				chn.swapSampleIndex = 0;
 				mixLoopState.UpdateLookaheadPointers(chn);
 				if(!chn.pCurrentSample)
-				{
 					break;
-				}
 			} else if(pastLoopEnd && !doSampleSwap && m_playBehaviour[kMODOneShotLoops] && chn.nLoopStart == 0)
 			{
 				// ProTracker "oneshot" loops (if loop start is 0, play the whole sample once and then repeat until loop end)

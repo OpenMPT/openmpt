@@ -160,7 +160,7 @@ static void ChannelSetSample(ModChannel &chn, const CSoundFile &sndFile, SAMPLEI
 	const bool channelIsActive = chn.pCurrentSample && chn.nLength;
 	if(sndFile.m_playBehaviour[kMODSampleSwap] && smp <= uint8_max && swapAtEnd && channelIsActive)
 	{
-		chn.nNewIns = static_cast<uint8>(smp);
+		chn.swapSampleIndex = smp;
 		return;
 	}
 	const ModSample &sample = sndFile.GetSample(smp);
@@ -790,7 +790,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		chn.nGlobalVol = static_cast<uint8>(std::clamp(chn.nGlobalVol + event.i16, 0, 64));
 		return false;
 	case Event::Type::FTM_SetSample:
-		chn.nNewIns = event.u8 + 1;
+		chn.swapSampleIndex = event.u8 + 1;
 		return false;
 	case Event::Type::FTM_SetSampleStart:
 		// Documentation says this should be in words, but it really appears to work with bytes.
@@ -848,6 +848,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 			if(event.Byte1() & (0x04 | 0x08))
 			{
 				chn.nNewIns = srcChn.nNewIns;
+				chn.swapSampleIndex = srcChn.swapSampleIndex;
 				chn.pModSample = srcChn.pModSample;
 				chn.position = srcChn.position;
 				chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | (srcChn.dwFlags & CHN_SAMPLEFLAGS);

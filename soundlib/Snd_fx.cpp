@@ -601,7 +601,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 				if (ModCommand::IsNote(note) && Instruments[p->instr]->Keyboard[note - NOTE_MIN] == 0)
 				{
 					chn.nNewNote = chn.nLastNote = note;
-					chn.nNewIns = static_cast<ModCommand::INSTR>(p->instr);
+					chn.nNewIns = p->instr;
 					chn.rowCommand.Clear();
 					continue;
 				}
@@ -679,7 +679,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 				if(chn.rowCommand.instr)
 				{
-					chn.nNewIns = chn.rowCommand.instr;
+					chn.swapSampleIndex = chn.nNewIns = chn.rowCommand.instr;
 					memory.chnSettings[nChn].vol = 0xFF;
 				}
 				if(chn.rowCommand.IsNote())
@@ -1486,7 +1486,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			// We won't ignore them if a plugin is assigned to this slot, so that VSTis still work as intended.
 			// Test case: emptyslot.it, PortaInsNum.it, gxsmp.it, gxsmp2.it
 			chn.pModInstrument = nullptr;
-			chn.nNewIns = 0;
+			chn.swapSampleIndex = chn.nNewIns = 0;
 			return;
 		}
 		pSmp = nullptr;
@@ -1595,7 +1595,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 	if(returnAfterVolumeAdjust) return;
 
 	// Instrument adjust
-	chn.nNewIns = 0;
+	chn.swapSampleIndex = chn.nNewIns = 0;
 
 	// IT Compatiblity: NNA is reset on every note change, not every instrument change (fixes s7xinsnum.it).
 	if (pIns && ((!m_playBehaviour[kITNNAReset] && pSmp) || pIns->nMixPlug || instrumentChanged))
@@ -1961,7 +1961,7 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 	chn.isPaused = false;
 
 	if ((!bPorta) || (GetType() & (MOD_TYPE_S3M|MOD_TYPE_IT|MOD_TYPE_MPT)))
-		chn.nNewIns = 0;
+		chn.swapSampleIndex = chn.nNewIns = 0;
 
 	uint32 period = GetPeriodFromNote(note, chn.nFineTune, chn.nC5Speed);
 	chn.nPanbrelloOffset = 0;
@@ -2779,6 +2779,7 @@ bool CSoundFile::ProcessEffects()
 			if(!triggerNote && chn.IsSamplePlaying())
 			{
 				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
+				chn.swapSampleIndex = GetSampleIndex(chn.nLastNote, instr);
 				if(instr <= GetNumSamples())
 				{
 					chn.nVolume = Samples[instr].nVolume;
@@ -2791,7 +2792,11 @@ bool CSoundFile::ProcessEffects()
 		if(triggerNote)
 		{
 			ModCommand::NOTE note = chn.rowCommand.note;
-			if(instr) chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
+			if(instr)
+			{
+				chn.nNewIns = static_cast<ModCommand::INSTR>(instr);
+				chn.swapSampleIndex = GetSampleIndex(ModCommand::IsNote(note) ? note : chn.nLastNote, instr);
+			}
 
 			if(ModCommand::IsNote(note) && m_playBehaviour[kFT2Transpose])
 			{
@@ -3084,7 +3089,7 @@ bool CSoundFile::ProcessEffects()
 
 					InstrumentChange(chn, chn.nNewIns, bPorta, chn.pModSample == nullptr && chn.pModInstrument == nullptr, !(GetType() & (MOD_TYPE_XM|MOD_TYPE_MT2)));
 					chn.nNewNote = note;
-					chn.nNewIns = 0;
+					chn.swapSampleIndex = chn.nNewIns = 0;
 				}
 				if(!chn.dwFlags[CHN_MUTE | CHN_SYNCMUTE] && chn.pModSample != nullptr && chn.pModSample->uFlags[CHN_ADLIB] && m_opl && (instrChange || !m_opl->IsActive(nChn)))
 				{

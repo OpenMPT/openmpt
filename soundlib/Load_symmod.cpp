@@ -1503,7 +1503,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 									if(mappedInst != chnState.lastInst)
 										break;
 									m.note = note;
-									m.SetEffectCommand(CMD_TONEPORTAMENTO, 0xFF);
+									m.SetEffectCommand(CMD_TONEPORTA_DURATION, 0);
 									chnState.curPitchSlide = 0;
 									chnState.tonePortaRemain = 0;
 									chnState.retrigVibrato = chnState.retrigTremolo = true;
@@ -1654,7 +1654,7 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 							break;
 						case SymEvent::AddHalfTone:
 							m.note = chnState.lastNote = Clamp(static_cast<uint8>(chnState.lastNote + event.param), NOTE_MIN, NOTE_MAX);
-							m.SetEffectCommand(CMD_TONEPORTAMENTO, 0xFF);
+							m.SetEffectCommand(CMD_TONEPORTA_DURATION, 0);
 							chnState.tonePortaRemain = 0;
 							break;
 
