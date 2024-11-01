@@ -644,7 +644,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		m_SongFlags.set(SONG_ISAMIGA);
 	}
-	if(isGenericMultiChannel || isMdKd)
+	if(isGenericMultiChannel || isMdKd || IsMagic(magic, "M!K!"))
 	{
 		m_playBehaviour.set(kFT2MODTremoloRampWaveform);
 	}
