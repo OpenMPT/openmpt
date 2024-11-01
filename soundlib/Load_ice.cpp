@@ -125,7 +125,7 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading patterns
 	Order().resize(numOrders);
-	uint8 speed[2] = {0, 0}, speedPos = 0;
+	uint8 speed = 0;
 	if(loadFlags & loadPatternData)
 		Patterns.ResizeArray(numOrders);
 	for(PATTERNINDEX pat = 0; pat < numOrders; pat++)
@@ -164,26 +164,21 @@ bool CSoundFile::ReadICE(FileReader &file, ModLoadingFlags loadFlags)
 				if(m->command == CMD_SPEED || m->command == CMD_TEMPO)
 				{
 					m->command = CMD_SPEED;
-					speedPos = 0;
 					if(m->param & 0xF0)
 					{
 						if((m->param >> 4) != (m->param & 0x0F) && (m->param & 0x0F) != 0)
 						{
 							// Both nibbles set
-							speed[0] = m->param >> 4;
-							speed[1] = m->param & 0x0F;
-							speedPos = 1;
+							speed = m->param;
 						}
 						m->param >>= 4;
 					}
 				}
 			}
-			if(speedPos)
+			if(speed)
 			{
-				Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, speed[speedPos - 1]).Row(row));
-				speedPos++;
-				if(speedPos == 3)
-					speedPos = 1;
+				speed = mpt::rotr(speed, 4);
+				Patterns[pat].WriteEffect(EffectWriter(CMD_SPEED, speed & 0x0F).Row(row));
 			}
 		}
 	}
