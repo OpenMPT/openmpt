@@ -849,7 +849,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// (as this would indicate that e.g. a F30 command was really meant to set
 	// the ticks per row to 48, and not the tempo to 48 BPM).
 	// In the pattern loader above, a second condition is used: Only tempo commands
-	// below 100 BPM are taken into account. Furthermore, only M.K. (ProTracker)
+	// below 100 BPM are taken into account. Furthermore, only ProTracker (M.K. / M!K!)
 	// modules are checked.
 	if((isMdKd || IsMagic(magic, "M!K!")) && hasTempoCommands && !definitelyCIA)
 	{
