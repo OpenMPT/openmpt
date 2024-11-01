@@ -398,8 +398,10 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	std::vector<uint8> freqSequences, volSequences;
+	freqSequences.reserve(64 * 256);
 	if(!file.Seek(fileHeader.freqSequenceOffset) || !file.ReadVector(freqSequences, fileHeader.freqSequenceSize))
 		return false;
+	freqSequences.resize(64 * 256);
 	volSequences.reserve(fileHeader.volSequenceSize + 8);
 	if(!file.Seek(fileHeader.volSequenceOffset) || !file.ReadVector(volSequences, fileHeader.volSequenceSize))
 		return false;
@@ -411,7 +413,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 	for(INSTRUMENTINDEX ins = 1; ins <= m_nInstruments; ins++)
 	{
 		const auto volSeq = mpt::as_span(volSequences).subspan((ins - 1) * 64u);
-		const auto freqSeq = mpt::as_span(freqSequences).subspan((volSeq[1] * 64u) % freqSequences.size());
+		const auto freqSeq = mpt::as_span(freqSequences).subspan(volSeq[1] * 64u);
 		uint8 defaultSample = freqSeq[1];
 		if(freqSeq[0] == 0xE9)
 			defaultSample = static_cast<uint8>(90 + defaultSample * 10 + freqSeq[2]);
