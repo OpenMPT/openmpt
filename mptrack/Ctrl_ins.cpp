@@ -1328,21 +1328,21 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_EditName.SetLimitText(specs.instrNameLengthMax);
 		m_EditFileName.SetLimitText(specs.instrFilenameLengthMax);
 
-		const BOOL bITandMPT = ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
-		const BOOL bITandXM = ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))  && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
-		const BOOL bMPTOnly = ((m_sndFile.GetType() == MOD_TYPE_MPT) && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), bITandXM);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), bITandXM);
-		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), bITandXM);
-		m_EditName.EnableWindow(bITandXM);
-		m_EditFileName.EnableWindow(bITandMPT);
-		m_CbnMidiCh.EnableWindow(bITandXM);
-		m_CbnMixPlug.EnableWindow(bITandXM);
-		m_SpinMidiPR.EnableWindow(bITandXM);
-		m_SpinMidiBK.EnableWindow(bITandXM);
+		const BOOL onlyITandMPT = ((m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
+		const BOOL anyFormat = m_sndFile.GetNumInstruments() ? TRUE : FALSE;
+		const BOOL onlyMPT = ((m_sndFile.GetType() == MOD_TYPE_MPT) && (m_sndFile.GetNumInstruments())) ? TRUE : FALSE;
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT10), anyFormat);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT11), anyFormat);
+		::EnableWindow(::GetDlgItem(m_hWnd, IDC_EDIT7), anyFormat);
+		m_EditName.EnableWindow(anyFormat);
+		m_EditFileName.EnableWindow(onlyITandMPT);
+		m_CbnMidiCh.EnableWindow(anyFormat);
+		m_CbnMixPlug.EnableWindow(anyFormat);
+		m_SpinMidiPR.EnableWindow(anyFormat);
+		m_SpinMidiBK.EnableWindow(anyFormat);
 
 		const bool extendedFadeoutRange = !(m_sndFile.GetType() & MOD_TYPE_IT);
-		m_SpinFadeOut.EnableWindow(bITandXM);
+		m_SpinFadeOut.EnableWindow(anyFormat);
 		m_SpinFadeOut.SetRange(0, extendedFadeoutRange ? 32767 : 8192);
 		m_EditFadeOut.SetLimitText(extendedFadeoutRange ? 5 : 4);
 		// XM-style fade-out is 32 times more precise than IT
@@ -1361,36 +1361,36 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 			m_SpinPWD.SetRange(0, 36);
 		else
 			m_SpinPWD.SetRange(-128, 127);
-		m_EditPWD.EnableWindow(bITandXM);
-		m_SpinPWD.EnableWindow(bITandXM);
+		m_EditPWD.EnableWindow(anyFormat);
+		m_SpinPWD.EnableWindow(anyFormat);
 
-		m_NoteMap.EnableWindow(bITandXM);
+		m_NoteMap.EnableWindow(anyFormat);
 
-		m_ComboNNA.EnableWindow(bITandMPT);
-		m_SliderVolSwing.EnableWindow(bITandMPT);
-		m_SliderPanSwing.EnableWindow(bITandMPT);
-		m_ComboDCT.EnableWindow(bITandMPT);
-		m_ComboDCA.EnableWindow(bITandMPT);
-		m_ComboPPC.EnableWindow(bITandMPT);
-		m_SpinPPS.EnableWindow(bITandMPT);
-		m_EditGlobalVol.EnableWindow(bITandMPT);
-		m_SpinGlobalVol.EnableWindow(bITandMPT);
-		m_EditPanning.EnableWindow(bITandMPT);
-		m_SpinPanning.EnableWindow(bITandMPT);
-		m_CheckPanning.EnableWindow(bITandMPT);
-		m_EditPPS.EnableWindow(bITandMPT);
-		m_CheckCutOff.EnableWindow(bITandMPT);
-		m_CheckResonance.EnableWindow(bITandMPT);
-		m_SliderCutOff.EnableWindow(bITandMPT);
-		m_SliderResonance.EnableWindow(bITandMPT);
-		m_ComboTuning.EnableWindow(bMPTOnly);
-		m_EditPitchTempoLock.EnableWindow(bMPTOnly);
-		m_CheckPitchTempoLock.EnableWindow(bMPTOnly);
+		m_ComboNNA.EnableWindow(onlyITandMPT);
+		m_SliderVolSwing.EnableWindow(onlyITandMPT);
+		m_SliderPanSwing.EnableWindow(onlyITandMPT);
+		m_ComboDCT.EnableWindow(onlyITandMPT);
+		m_ComboDCA.EnableWindow(onlyITandMPT);
+		m_ComboPPC.EnableWindow(onlyITandMPT);
+		m_SpinPPS.EnableWindow(onlyITandMPT);
+		m_EditGlobalVol.EnableWindow(onlyITandMPT);
+		m_SpinGlobalVol.EnableWindow(onlyITandMPT);
+		m_EditPanning.EnableWindow(onlyITandMPT);
+		m_SpinPanning.EnableWindow(onlyITandMPT);
+		m_CheckPanning.EnableWindow(onlyITandMPT);
+		m_EditPPS.EnableWindow(onlyITandMPT);
+		m_CheckCutOff.EnableWindow(onlyITandMPT);
+		m_CheckResonance.EnableWindow(onlyITandMPT);
+		m_SliderCutOff.EnableWindow(onlyITandMPT);
+		m_SliderResonance.EnableWindow(onlyITandMPT);
+		m_ComboTuning.EnableWindow(onlyMPT);
+		m_EditPitchTempoLock.EnableWindow(onlyMPT);
+		m_CheckPitchTempoLock.EnableWindow(onlyMPT);
 
 		// MIDI Channel
 		// XM has no "mapped" MIDI channels.
 		m_CbnMidiCh.ResetContent();
-		for(int ich = MidiNoChannel; ich <= (bITandMPT ? MidiMappedChannel : MidiLastChannel); ich++)
+		for(int ich = MidiNoChannel; ich <= (onlyITandMPT ? MidiMappedChannel : MidiLastChannel); ich++)
 		{
 			CString s;
 			if (ich == MidiNoChannel)
