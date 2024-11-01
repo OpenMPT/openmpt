@@ -24,6 +24,7 @@ struct InstrumentSynth::States::State
 	{
 		kJumpConditionSet,
 		kGTKTremorEnabled,
+		kGTKTremorMute,
 		kGTKTremoloEnabled,
 		kGTKVibratoEnabled,
 		kFCVibratoDelaySet,
@@ -60,6 +61,7 @@ struct InstrumentSynth::States::State
 	int8 m_pumaWaveformStep = 0;
 
 	uint8 m_medVibratoEnvelope = uint8_max, m_medVibratoSpeed = 0, m_medVibratoDepth = 0;
+	int8 m_medVibratoValue = 0;
 	uint16 m_medVibratoPos = 0;
 	int16 m_medVolumeStep = 0;
 	int16 m_medPeriodStep = 0;
@@ -91,7 +93,7 @@ struct InstrumentSynth::States::State
 	uint8 m_fcVolumeBendRemain = 0, m_fcPitchBendRemain = 0;
 
 	void JumpToPosition(const Events &events, uint16 position);
-	void NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile, States &states);
+	void NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile, States &states);
 	void ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile &sndFile);
 	bool EvaluateEvent(const Event &event, PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile, States &states);
 	void EvaluateRunningEvent(const Event &event);
@@ -155,13 +157,14 @@ static void ChannelSetSample(ModChannel &chn, const CSoundFile &sndFile, SAMPLEI
 {
 	if(smp < 1 || smp > sndFile.GetNumSamples())
 		return;
-	if(sndFile.m_playBehaviour[kMODSampleSwap] && smp <= uint8_max && swapAtEnd && chn.pCurrentSample)
+	const bool channelIsActive = chn.pCurrentSample;// && chn.nLength;
+	if(sndFile.m_playBehaviour[kMODSampleSwap] && smp <= uint8_max && swapAtEnd && channelIsActive)
 	{
 		chn.nNewIns = static_cast<uint8>(smp);
 		return;
 	}
 	const ModSample &sample = sndFile.GetSample(smp);
-	if(chn.pModSample == &sample && chn.pCurrentSample)
+	if(chn.pModSample == &sample && channelIsActive)
 		return;
 	chn.pModSample = &sample;
 	chn.pCurrentSample = sample.samplev();
@@ -190,7 +193,7 @@ void InstrumentSynth::States::Stop()
 }
 
 
-void InstrumentSynth::States::NextTick(PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile)
+void InstrumentSynth::States::NextTick(PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile)
 {
 	ModChannel &chn = playState.Chn[channel];
 	if(!chn.pModInstrument || !chn.pModInstrument->synth.HasScripts())
@@ -206,7 +209,18 @@ void InstrumentSynth::States::NextTick(PlayState &playState, CHANNELINDEX channe
 		if(i == 1 && chn.rowCommand.command == CMD_MED_SYNTH_JUMP && chn.isFirstTick)
 			state.JumpToPosition(scripts[i], chn.rowCommand.param);
 
-		state.NextTick(scripts[i], playState, channel, period, sndFile, *this);
+		state.NextTick(scripts[i], playState, channel, sndFile, *this);
+	}
+}
+
+
+void InstrumentSynth::States::ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile &sndFile)
+{
+	if(!chn.pModInstrument || !chn.pModInstrument->synth.HasScripts())
+		return;
+
+	for(auto &state : states)
+	{
 		state.ApplyChannelState(chn, period, sndFile);
 	}
 }
@@ -226,7 +240,7 @@ void InstrumentSynth::States::State::JumpToPosition(const Events &events, uint16
 }
 
 
-void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile, States &states)
+void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile, States &states)
 {
 	if(events.empty())
 		return;
@@ -322,9 +336,9 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 		static_assert(std::size(ModSinusTable) == 64);
 		uint16 offset = m_medVibratoPos / 16u;
 		if(m_medVibratoEnvelope == uint8_max)
-			period += ModSinusTable[(offset * 2) % std::size(ModSinusTable)] * m_medVibratoDepth / 64;
+			m_medVibratoValue = ModSinusTable[(offset * 2) % std::size(ModSinusTable)];
 		else if(chn->pModInstrument)
-			period += MEDEnvelopeFromSample(*chn->pModInstrument, sndFile, m_medVibratoEnvelope, offset) * m_medVibratoDepth / 64;
+			m_medVibratoValue = MEDEnvelopeFromSample(*chn->pModInstrument, sndFile, m_medVibratoEnvelope, offset);
 		m_medVibratoPos = (m_medVibratoPos + m_medVibratoSpeed) % (32u * 16u);
 	}
 
@@ -346,8 +360,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 	{
 		if(m_gtkTremorPos >= m_gtkTremorOnTime + m_gtkTremorOffTime)
 			m_gtkTremorPos = 0;
-		else if(m_gtkTremorPos >= m_gtkTremorOnTime)
-			chn->nRealVolume = 0;
+		m_flags.set(kGTKTremorMute, m_gtkTremorPos >= m_gtkTremorOnTime);
 		m_gtkTremorPos++;
 	}
 	if(m_flags[kGTKTremoloEnabled])
@@ -357,7 +370,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 	}
 	if(m_flags[kGTKVibratoEnabled])
 	{
-		sndFile.DoFreqSlide(*chn, period, -ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 96, false);
+		m_periodFreqSlide = static_cast<int16>(-ModSinusTable[(m_gtkVibratoPos / 4u) % std::size(ModSinusTable)] * m_gtkVibratoWidth / 96);
 		m_gtkVibratoPos += m_gtkVibratoSpeed;
 	}
 
@@ -448,13 +461,12 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile &sndFile)
 {
 	if(m_volumeFactor != 16384)
-	{
 		chn.nRealVolume = Util::muldivr(chn.nRealVolume, m_volumeFactor, 16384);
-	}
 	if(m_volumeAdd != int16_min)
-	{
 		chn.nRealVolume = std::clamp(chn.nRealVolume + m_volumeAdd, int32(0), int32(16384));
-	}
+	if(m_flags[kGTKTremorEnabled] && m_flags[kGTKTremorMute])
+		chn.nRealVolume = 0;
+
 	if(m_panning != 2048)
 	{
 		if(chn.nRealPan >= 128)
@@ -462,6 +474,7 @@ void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &p
 		else
 			chn.nRealPan += ((m_panning - 2048) * (chn.nRealPan)) / 2048;
 	}
+
 	const bool periodsAreFrequencies = sndFile.PeriodsAreFrequencies();
 	if(m_linearPitchFactor != 0)
 		period = ApplyLinearPitchSlide(period, m_linearPitchFactor, periodsAreFrequencies);
@@ -471,6 +484,8 @@ void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &p
 		period -= m_periodAdd;
 	else
 		period += m_periodAdd;
+	if(m_medVibratoDepth)
+		period += m_medVibratoValue * m_medVibratoDepth / 64;
 
 	int16 vibratoFC = m_fcVibratoValue - m_fcVibratoDepth;
 	const bool doVibratoFC = vibratoFC != 0 && m_fcVibratoDelay < 1;
@@ -610,6 +625,7 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		return false;
 	case Event::Type::GTK_EnableVibrato:
 		m_flags.set(kGTKVibratoEnabled, event.u8 != 0);
+		m_periodFreqSlide = 0;
 		m_gtkVibratoPos = 0;
 		if(!m_gtkVibratoWidth)
 			m_gtkVibratoWidth = 3;
@@ -641,7 +657,6 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		chn.dwFlags.set(CHN_FASTVOLRAMP);
 		return true;
 	case Event::Type::Puma_StopVoice:
-		chn.nRealVolume = 0;
 		chn.Stop();
 		m_nextRow = STOP_ROW;
 		return true;
@@ -1009,8 +1024,7 @@ void GlobalScriptState::NextTick(PlayState &playState, const CSoundFile &sndFile
 		auto &modChn = playState.Chn[chn];
 		if(modChn.rowCommand.command == CMD_MED_SYNTH_JUMP && !playState.m_nTickCount)
 			states[chn].JumpToPosition(sndFile.m_globalScript, modChn.rowCommand.param);
-		int32 period = 0;
-		state.NextTick(sndFile.m_globalScript, playState, chn, period, sndFile, *this);
+		state.NextTick(sndFile.m_globalScript, playState, chn, sndFile, *this);
 	}
 }
 

@@ -18,6 +18,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
+struct ModChannel;
 struct PlayState;
 
 struct InstrumentSynth
@@ -254,7 +255,8 @@ struct InstrumentSynth
 		States& operator=(States &&other) noexcept;
 
 		void Stop();
-		void NextTick(PlayState &playState, CHANNELINDEX channel, int32 &period, const CSoundFile &sndFile);
+		void NextTick(PlayState &playState, CHANNELINDEX channel, const CSoundFile &sndFile);
+		void ApplyChannelState(ModChannel &chn, int32 &period, const CSoundFile& sndFile);
 
 	protected:
 		std::vector<State> states;

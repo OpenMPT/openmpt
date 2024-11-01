@@ -2188,6 +2188,8 @@ bool CSoundFile::ReadNote()
 		// Calc Frequency
 		int32 period = 0;
 
+		chn.synthState.NextTick(m_PlayState, nChn, *this);
+
 		// Also process envelopes etc. when there's a plugin on this channel, for possible fake automation using volume and pan data.
 		// We only care about master channels, though, since automation only "happens" on them.
 		const bool samplePlaying = (chn.nPeriod && chn.nLength);
@@ -2360,7 +2362,7 @@ bool CSoundFile::ReadNote()
 
 		if(samplePlaying)
 		{
-			chn.synthState.NextTick(m_PlayState, nChn, period, *this);
+			chn.synthState.ApplyChannelState(chn, period, *this);
 			m_PlayState.m_globalScriptState.ApplyChannelState(m_PlayState, nChn, period, *this);
 
 			int nPeriodFrac = 0;
