@@ -1123,7 +1123,7 @@ static void ConvertGT2Envelope(InstrumentSynth &synth, const uint16 envNum, std:
 				events.push_back(InstrumentSynth::Event::GTK_EnableTremolo(true));
 				break;
 			case 0x84:  // 84: Tremolo Off
-				events.push_back(InstrumentSynth::Event::GTK_EnableTremolo(true));
+				events.push_back(InstrumentSynth::Event::GTK_EnableTremolo(false));
 				break;
 			case 0x85:  // 85: Set Tremolo Width
 				events.push_back(InstrumentSynth::Event::GTK_SetVibratoParams(std::max(chunk.ReadUint8(), uint8(1)), 0));
@@ -1136,7 +1136,7 @@ static void ConvertGT2Envelope(InstrumentSynth &synth, const uint16 envNum, std:
 				events.push_back(InstrumentSynth::Event::GTK_EnableVibrato(true));
 				break;
 			case 0xA4:  // A4: Vibrato Off
-				events.push_back(InstrumentSynth::Event::GTK_EnableVibrato(true));
+				events.push_back(InstrumentSynth::Event::GTK_EnableVibrato(false));
 				break;
 			case 0xA5:  // A5: Set Vibrato Width
 				events.push_back(InstrumentSynth::Event::GTK_SetVibratoParams(std::max(chunk.ReadUint8(), uint8(1)), 0));
