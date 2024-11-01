@@ -745,6 +745,8 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 		m_nInstruments = 31;
 #endif
 
+		mpt::deterministic_random_device rd;
+		auto prng = mpt::make_prng<mpt::deterministic_fast_engine>(rd);
 		for(SAMPLEINDEX smp = 1; smp <= m_nInstruments; smp++)
 		{
 			// For Startrekker AM synthesis, we need instrument envelopes.
@@ -759,7 +761,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			// Allow partial reads for fa.worse face.mod
 			if(amData.ReadStructPartial(am) && !memcmp(am.am, "AM", 2) && am.waveform < 4)
 			{
-				am.ConvertToMPT(Samples[smp], *ins, AccessPRNG());
+				am.ConvertToMPT(Samples[smp], *ins, prng);
 			}
 
 			// This extra padding is probably present to have identical block sizes for AM and FM instruments.
