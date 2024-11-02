@@ -185,16 +185,18 @@ constexpr Tdstchar unsafe_char_convert(Tsrcchar src) noexcept {
 using widestring = std::wstring;
 using widestring_view = std::wstring_view;
 using widechar = wchar_t;
-#define MPT_WIDECHAR(x)    L##x
-#define MPT_WIDELITERAL(x) L##x
-#define MPT_WIDESTRING(x)  std::wstring(L##x)
+#define MPT_WIDECHAR(x)       L##x
+#define MPT_WIDELITERAL(x)    L##x
+#define MPT_WIDESTRING(x)     std::wstring(L##x)
+#define MPT_WIDESTRINGVIEW(x) std::wstring_view(L##x)
 #else // MPT_COMPILER_QUIRK_NO_WCHAR
 using widestring = std::u32string;
 using widestring_view = std::u32string_view;
 using widechar = char32_t;
-#define MPT_WIDECHAR(x)    U##x
-#define MPT_WIDELITERAL(x) U##x
-#define MPT_WIDESTRING(x)  std::u32string(U##x)
+#define MPT_WIDECHAR(x)       U##x
+#define MPT_WIDELITERAL(x)    U##x
+#define MPT_WIDESTRING(x)     std::u32string(U##x)
+#define MPT_WIDESTRINGVIEW(x) std::u32string_view(U##x)
 #endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
