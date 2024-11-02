@@ -110,7 +110,7 @@
 
 typedef unsigned char byte;
 
-#if (defined(_UCRT) || defined(_MSC_VER) || (defined(__MINGW32__) || defined(__MINGW64__))) && !defined(__CYGWIN__)
+#if (defined(_UCRT) || defined(_MSC_VER) || (defined(__MINGW32__) || defined(__MINGW64__)) || (defined(__WATCOMC__) && defined(__NT__))) && !defined(__CYGWIN__)
 #define MPG123_COMPAT_MSVCRT_IO
 #endif
 
@@ -131,6 +131,13 @@ typedef unsigned char byte;
 #endif
 #if defined(__MINGW32__) || defined(__MINGW64__)
 #if (defined(__MSVCRT__) || defined(_UCRT)) && !defined(__CRTDLL__)
+#ifndef MPG123_COMPAT_MSVCRT_IO_64
+#define MPG123_COMPAT_MSVCRT_IO_64
+#endif
+#endif
+#endif
+#if defined(__WATCOMC__) && defined(__NT__)
+#if (__WATCOMC__ >= 1100)
 #ifndef MPG123_COMPAT_MSVCRT_IO_64
 #define MPG123_COMPAT_MSVCRT_IO_64
 #endif
