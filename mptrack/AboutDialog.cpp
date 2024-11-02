@@ -397,9 +397,9 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 			text += MPT_UFORMAT("Available CPU features: {}\n")(CPUFeaturesToString(CPUInfo.get_features()));
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 			text += MPT_UFORMAT("Operating System: {}\n\n")(mpt::OS::Windows::Version::GetCurrentName());
-			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
-			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
-			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? UL_(" (portable)") : UL_(""));
+			text += MPT_UFORMAT("OpenMPT Install Path{1}: {0}\n")(theApp.GetInstallPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("OpenMPT Executable Path{1}: {0}\n")(theApp.GetInstallBinArchPath(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
+			text += MPT_UFORMAT("Settings{1}: {0}\n")(theApp.GetConfigFileName(), theApp.IsPortableMode() ? U_(" (portable)") : U_(""));
 			break;
 		case 1:
 			{
@@ -440,22 +440,22 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 							}
 							text += MPT_UFORMAT("{}: {}")
 								( name
-								, info.state == ComponentStateAvailable ? UL_("ok") :
-									info.state == ComponentStateUnavailable? UL_("missing") :
-									info.state == ComponentStateUnintialized ? UL_("not loaded") :
-									info.state == ComponentStateBlocked ? UL_("blocked") :
-									info.state == ComponentStateUnregistered ? UL_("unregistered") :
-									UL_("unknown")
+								, info.state == ComponentStateAvailable ? U_("ok") :
+									info.state == ComponentStateUnavailable? U_("missing") :
+									info.state == ComponentStateUnintialized ? U_("not loaded") :
+									info.state == ComponentStateBlocked ? U_("blocked") :
+									info.state == ComponentStateUnregistered ? U_("unregistered") :
+									U_("unknown")
 								);
 							if(info.type != ComponentTypeUnknown)
 							{
 								text += MPT_UFORMAT(" ({})")
-									( info.type == ComponentTypeBuiltin ? UL_("builtin") :
-										info.type == ComponentTypeSystem ? UL_("system") :
-										info.type == ComponentTypeSystemInstallable ? UL_("system, optional") :
-										info.type == ComponentTypeBundled ? UL_("bundled") :
-										info.type == ComponentTypeForeign ? UL_("foreign") :
-										UL_("unknown")
+									( info.type == ComponentTypeBuiltin ? U_("builtin") :
+										info.type == ComponentTypeSystem ? U_("system") :
+										info.type == ComponentTypeSystemInstallable ? U_("system, optional") :
+										info.type == ComponentTypeBundled ? U_("bundled") :
+										info.type == ComponentTypeForeign ? U_("foreign") :
+										U_("unknown")
 									);
 							}
 							text += lf;
@@ -492,14 +492,14 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						);
 					text += MPT_UFORMAT("Windows version: {}\n")
 						( 
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win81) ? UL_("Windows 8.1") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win8) ? UL_("Windows 8") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win7) ? UL_("Windows 7") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? UL_("Windows Vista") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP) ? UL_("Windows XP") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000) ? UL_("Windows 2000") :
-						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinNT4) ? UL_("Windows NT4") :
-						UL_("unknown")
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win81) ? U_("Windows 8.1") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win8) ? U_("Windows 8") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win7) ? U_("Windows 7") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinVista) ? U_("Windows Vista") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP) ? U_("Windows XP") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000) ? U_("Windows 2000") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinNT4) ? U_("Windows NT4") :
+						U_("unknown")
 						);
 					text += MPT_UFORMAT("Windows original: {}\n")
 						( mpt::OS::Windows::IsOriginal() ? yes : no
