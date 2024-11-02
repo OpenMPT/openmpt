@@ -73,8 +73,6 @@ using mpg123_off_t = off_t;
 
 using mpg123_size_t = size_t;
 
-#endif
-
 // Check for exactly _MSC_VER as libmpg123 does, in order to also catch clang-cl.
 #ifdef _MSC_VER
 // ssize_t definition in libmpg123.h.in should never have existed at all.
@@ -82,6 +80,8 @@ using mpg123_size_t = size_t;
 using mpg123_ssize_t = ptrdiff_t;
 #else
 using mpg123_ssize_t = ssize_t;
+#endif
+
 #endif
 
 class ComponentMPG123
