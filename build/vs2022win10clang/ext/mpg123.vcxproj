@@ -1186,9 +1186,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\mpg123\ports\MSVC++\config.h" />
+    <ClInclude Include="..\..\..\include\mpg123\ports\makefile\config.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\common\abi_align.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\common\debug.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\common\sample.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\common\swap_bytes_impl.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\common\true.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\compat\compat.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\compat\wpathconv.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\include\fmt123.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\include\mpg123.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\costabs.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\decode.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\dither.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\dither_impl.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\frame.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\gapless.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\getbits.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\getcpuflags.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\huffman.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\icy.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\icy2utf8.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\id3.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\index.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\init_costabs.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\init_layer12.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\init_layer3.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\l12tabs.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\l2tables.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\l3bandgain.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\lfs_wrap.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\mangle.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\mpeghead.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\mpg123lib_intern.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\newhuffman.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\optimize.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\parse.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\reader.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\synth.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\synth_8bit.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\synth_mono.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\synth_ntom.h" />
+    <ClInclude Include="..\..\..\include\mpg123\src\libmpg123\synths.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat_str.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64.c" />
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dither.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\equalizer.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\feature.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\format.c" />
