@@ -95,7 +95,7 @@ public:
 	static int FileReaderRead(void *fp, void *buf, size_t count, size_t *returned)
 	{
 		FileReader &file = *static_cast<FileReader *>(fp);
-		std::size_t readBytes = std::min(count, static_cast<size_t>(file.BytesLeft()));
+		std::size_t readBytes = std::min(count, mpt::saturate_cast<size_t>(file.BytesLeft()));
 		file.ReadRaw(mpt::span(mpt::void_cast<std::byte*>(buf), readBytes));
 		if(!returned)
 		{
