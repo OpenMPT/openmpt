@@ -51,9 +51,12 @@
 #  XMP_OPENMPT=0       Build xmp-openmpt (XMPlay plugin)
 #  SHARED_SONAME=1     Set SONAME of shared library
 #  DEBUG=0             Build debug binaries without optimization and with symbols
-#  OPTIMIZE=vectorize  -O3
+#  OPTIMIZE=default    vectorize
+#           vectorize  -O3
 #           speed      -O2
-#           size       -Os/-Oz
+#           size       -Os
+#           extrasize  -Oz
+#           some       -O1
 #           test       -Og
 #           debug      -O0
 #           none
@@ -203,7 +206,7 @@ EXAMPLES=1
 FUZZ=0
 SHARED_SONAME=1
 DEBUG=0
-OPTIMIZE=vectorize
+OPTIMIZE=default
 OPTIMIZE_LTO=0
 OPTIMIZE_FASTMATH=0
 TEST=1
@@ -467,15 +470,56 @@ CXXFLAGS += -g
 CFLAGS   += -g
 else ifeq ($(OPTIMIZE),debug)
 CPPFLAGS += 
-CXXFLAGS += -O0 -fno-omit-frame-pointer
-CFLAGS   += -O0 -fno-omit-frame-pointer
+ifneq ($(MPT_COMPILER_NO_O),1)
+CXXFLAGS += -O0
+CFLAGS   += -O0
+endif
+CXXFLAGS += -fno-omit-frame-pointer
+CFLAGS   += -fno-omit-frame-pointer
 else ifeq ($(OPTIMIZE),test)
 CPPFLAGS += 
-CXXFLAGS += -Og -fno-omit-frame-pointer
-CFLAGS   += -Og -fno-omit-frame-pointer
+ifneq ($(MPT_COMPILER_NO_O),1)
+CXXFLAGS += -Og
+CFLAGS   += -Og
+endif
+CXXFLAGS += -fno-omit-frame-pointer
+CFLAGS   += -fno-omit-frame-pointer
+else ifeq ($(OPTIMIZE),some)
+ifneq ($(MPT_COMPILER_NO_O),1)
+CXXFLAGS += -O1
+CFLAGS   += -O1
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+LDFLAGS  += -Wl,--gc-sections
+endif
+else ifeq ($(OPTIMIZE),extrasize)
+ifneq ($(MPT_COMPILER_NO_O),1)
+CXXFLAGS += -Oz
+CFLAGS   += -Oz
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
+LDFLAGS  += 
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+LDFLAGS  += -Wl,--gc-sections
+endif
 else ifeq ($(OPTIMIZE),size)
+ifneq ($(MPT_COMPILER_NO_O),1)
 CXXFLAGS += -Os
-CFLAGS   += -Os -fno-strict-aliasing
+CFLAGS   += -Os
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
 LDFLAGS  += 
 ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
@@ -485,8 +529,12 @@ ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 LDFLAGS  += -Wl,--gc-sections
 endif
 else ifeq ($(OPTIMIZE),speed)
+ifneq ($(MPT_COMPILER_NO_O),1)
 CXXFLAGS += -O2
-CFLAGS   += -O2 -fno-strict-aliasing
+CFLAGS   += -O2
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
 ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
@@ -495,8 +543,26 @@ ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
 LDFLAGS  += -Wl,--gc-sections
 endif
 else ifeq ($(OPTIMIZE),vectorize)
+ifneq ($(MPT_COMPILER_NO_O),1)
 CXXFLAGS += -O3
-CFLAGS   += -O3 -fno-strict-aliasing
+CFLAGS   += -O3
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
+ifneq ($(MPT_COMPILER_NOSECTIONS),1)
+CXXFLAGS += -ffunction-sections -fdata-sections
+CFLAGS   += -ffunction-sections -fdata-sections
+endif
+ifneq ($(MPT_COMPILER_NOGCSECTIONS),1)
+LDFLAGS  += -Wl,--gc-sections
+endif
+else ifeq ($(OPTIMIZE),default)
+ifneq ($(MPT_COMPILER_NO_O),1)
+CXXFLAGS += -O3
+CFLAGS   += -O3
+endif
+CXXFLAGS +=
+CFLAGS   += -fno-strict-aliasing
 ifneq ($(MPT_COMPILER_NOSECTIONS),1)
 CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
@@ -635,6 +701,9 @@ endif
 CXXFLAGS += -Wall -Wextra -Wpedantic $(CXXFLAGS_WARNINGS)
 CFLAGS   += -Wall -Wextra -Wpedantic $(CFLAGS_WARNINGS)
 LDFLAGS  += $(LDFLAGS_WARNINGS)
+
+CXXFLAGS += $(OVERWRITE_CXXFLAGS)
+CFLAGS   += $(OVERWRITE_CFLAGS)
 
 endif
 
