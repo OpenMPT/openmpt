@@ -625,7 +625,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 				param1 = param;
 			}
 			// Octave wrapping for 4-channel modules
-			if(ctx.hardwareMixSamples && note >= NOTE_MIDDLEC + 2 * 12)
+			if(note >= NOTE_MIDDLEC + 2 * 12)
 				needInstruments = true;
 
 			if(note >= NOTE_MIN && note <= NOTE_MAX)
@@ -1055,13 +1055,14 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			needInstruments = true;
 			instr.Transpose(-24);
-		} else if(!isSynth && hardwareMixSamples)
+		} else if(!isSynth && (hardwareMixSamples || sampleHeader.sampleTranspose))
 		{
+			int offset = NOTE_MIDDLEC + (hardwareMixSamples ? 24 : 36);
 			for(auto &note : instr.NoteMap)
 			{
 				int realNote = note + sampleHeader.sampleTranspose;
-				if(realNote >= NOTE_MIDDLEC + 24)
-					note -= static_cast<uint8>(mpt::align_down(realNote - NOTE_MIDDLEC - 12, 12));
+				if(realNote >= offset)
+					note -= static_cast<uint8>(mpt::align_down(realNote - offset + 12, 12));
 			}
 		}
 
