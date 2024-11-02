@@ -37,8 +37,10 @@ CFLAGS_STDC = -std=gnu17
 else
 CFLAGS_STDC = -std=gnu11
 endif
-CXXFLAGS += $(CXXFLAGS_STDCXX) -fallow-store-data-races -fno-threadsafe-statics
-CFLAGS   += $(CFLAGS_STDC)     -fallow-store-data-races
+CXXFLAGS += $(CXXFLAGS_STDCXX) 
+CFLAGS   += $(CFLAGS_STDC)
+OVERWRITE_CXXFLAGS += -fallow-store-data-races -fno-threadsafe-statics
+OVERWRITE_CFLAGS   += -fallow-store-data-races
 
 CPU?=generic/compatible
 
@@ -95,6 +97,8 @@ OPT_SIZEX := -Oz
 
 
 
+ifeq ($(OPTIMIZE),default)
+
 OPT_UARCH_EMUL := -Os   # interpreter
 OPT_UARCH_CISC := -Os   # non-pipelined, scalar,       in-order,     optimize for size  i386       am386
 OPT_UARCH_PIPE := -Os   # pipelined,     scalar,       in-order,     optimize for size  i486       am486 cx486slc
@@ -125,6 +129,17 @@ OPT_UARCH_PIPE_128 := -O3   # pipelined,     scalar,       in-order,     optimiz
 OPT_UARCH_SCAL_128 := -O3   # pipelined,     super-scalar, in-order,     optimize for speed
 OPT_UARCH_OOOE_128 := -O3   # pipelined,     super-scalar, out-of-order, optimize for speed
 OPT_UARCH_COMP_128 := -O3   # recompiler
+endif
+
+else
+
+OPT_UARCH_EMUL := 
+OPT_UARCH_CISC := 
+OPT_UARCH_PIPE := 
+OPT_UARCH_SCAL := 
+OPT_UARCH_OOOE := 
+OPT_UARCH_COMP := 
+
 endif
 
 
@@ -394,25 +409,25 @@ CPUFLAGS := $($(CPU))
 
 # parse CPU optimization options
 ifeq ($(findstring -O3,$(CPUFLAGS)),-O3)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -O2,$(CPUFLAGS)),-O2)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -Os,$(CPUFLAGS)),-Os)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -Oz,$(CPUFLAGS)),-Oz)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -O1,$(CPUFLAGS)),-O1)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -O0,$(CPUFLAGS)),-O0)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 ifeq ($(findstring -Og,$(CPUFLAGS)),-Og)
-OPTIMIZE=none
+MPT_COMPILER_NO_O=1
 endif
 
 # Handle the no-FPU case by linking DJGPP's own emulator.
@@ -456,7 +471,13 @@ ifeq ($(findstring -msse,$(CPUFLAGS)),-msse)
 EXESUFFIX:=-SSE$(EXESUFFIX)
 SOSUFFIX:=-SSE$(SOSUFFIX)
 endif
-ifeq ($(OPTIMIZE),size)
+ifeq ($(OPTIMIZE),some)
+EXESUFFIX:=-O1$(EXESUFFIX)
+SOSUFFIX:=-O1$(SOSUFFIX)
+else ifeq ($(OPTIMIZE),extrasize)
+EXESUFFIX:=-Oz$(EXESUFFIX)
+SOSUFFIX:=-Oz$(SOSUFFIX)
+else ifeq ($(OPTIMIZE),size)
 EXESUFFIX:=-Os$(EXESUFFIX)
 SOSUFFIX:=-Os$(SOSUFFIX)
 else ifeq ($(OPTIMIZE),speed)
@@ -512,6 +533,7 @@ IS_CROSS=1
 MPT_COMPILER_NOVISIBILITY=1
 
 # causes crashes on process shutdown with liballegro
+MPT_COMPILER_NOSECTIONS=1
 MPT_COMPILER_NOGCSECTIONS=1
 
 MPT_COMPILER_NOALLOCAH=1
