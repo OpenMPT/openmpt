@@ -396,13 +396,22 @@ CPUFLAGS := $($(CPU))
 ifeq ($(findstring -O3,$(CPUFLAGS)),-O3)
 OPTIMIZE=none
 endif
-ifeq ($(findstring -O3,$(CPUFLAGS)),-O2)
+ifeq ($(findstring -O2,$(CPUFLAGS)),-O2)
 OPTIMIZE=none
 endif
 ifeq ($(findstring -Os,$(CPUFLAGS)),-Os)
 OPTIMIZE=none
 endif
-ifeq ($(findstring -Os,$(CPUFLAGS)),-Oz)
+ifeq ($(findstring -Oz,$(CPUFLAGS)),-Oz)
+OPTIMIZE=none
+endif
+ifeq ($(findstring -O1,$(CPUFLAGS)),-O1)
+OPTIMIZE=none
+endif
+ifeq ($(findstring -O0,$(CPUFLAGS)),-O0)
+OPTIMIZE=none
+endif
+ifeq ($(findstring -Og,$(CPUFLAGS)),-Og)
 OPTIMIZE=none
 endif
 
