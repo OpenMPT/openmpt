@@ -1285,7 +1285,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// For Windows 10, Creators Update (1703) and newer
 	{
 		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
-		if (user32.IsValid())
+		if(user32.IsValid())
 		{
 			enum MPT_DPI_AWARENESS_CONTEXT
 			{
@@ -1299,12 +1299,12 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 			PSETPROCESSDPIAWARENESSCONTEXT SetProcessDpiAwarenessContext = nullptr;
 			if(user32.Bind(SetProcessDpiAwarenessContext, "SetProcessDpiAwarenessContext"))
 			{
-				if (TrackerSettings::Instance().highResUI)
+				if(TrackerSettings::Instance().highResUI)
 				{
 					setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) == TRUE);
 				} else
 				{
-					if (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) == TRUE)
+					if(TrackerSettings::Instance().useGDIUpcaling && SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) == TRUE)
 						setDPI = true;
 					else
 						setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE)) == TRUE);
