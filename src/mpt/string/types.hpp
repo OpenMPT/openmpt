@@ -285,10 +285,10 @@ using winstring_view = mpt::tstring_view;
 using u8string = std::u8string;
 using u8string_view = std::u8string_view;
 using u8char = char8_t;
-#define MPT_U8CHAR(x)      u8##x
-#define MPT_U8LITERAL(x)   u8##x
-#define MPT_U8STRING(x)    std::u8string(u8##x)
-#define MPT_U8STRINVIEW(x) std::u8string_view(u8##x)
+#define MPT_U8CHAR(x)       u8##x
+#define MPT_U8LITERAL(x)    u8##x
+#define MPT_U8STRING(x)     std::u8string(u8##x)
+#define MPT_U8STRINGVIEW(x) std::u8string_view(u8##x)
 
 #else // !C++20
 
