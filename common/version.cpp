@@ -657,7 +657,7 @@ mpt::ustring GetFullCreditsString()
 		"https://github.com/iamgreaser/it2everything/\n"
 		"\n"
 		"Antti S. Lankila for Amiga resampler implementation\n"
-		"https://bel.fi/alankila/modguide/interpolate.txt\n"
+		"https://web.archive.org/web/20221228071135/https://bel.fi/alankila/modguide/\n"
 		"\n"
 		"Shayde / Reality Productions for Opal OPL3 emulator\n"
 		"https://www.3eality.com/\n"
@@ -771,7 +771,7 @@ mpt::ustring GetFullCreditsString()
 		"https://www.behance.net/ulfurkolka\n"
 		"\n"
 		"Nobuyuki for file icon\n"
-		"https://twitter.com/nobuyukinyuu\n"
+		"https://github.com/nobuyukinyuu/\n"
 		"\n"
 #endif
 		"Daniel Collin (emoon/TBL) for providing test infrastructure\n"
@@ -781,8 +781,8 @@ mpt::ustring GetFullCreditsString()
 		"in the form of ideas, testing and support;\n"
 		"thanks particularly to:\n"
 		"33, 8bitbubsy, AliceLR, Anboi, BooT-SectoR-ViruZ, Bvanoudtshoorn\n"
-		"christofori, cubaxd, Diamond, Ganja, Georg, Goor00,\n"
-		"Harbinger, jmkz, KrazyKatz, LPChip, Nofold, Rakib, Sam Zen\n"
+		"a11cf0, christofori, cubaxd, Diamond, Ganja, Georg, Goor00,\n"
+		"Harbinger, jmkz, KrazyKatz, LPChip, MiDoRi, Nofold, Rakib, Sam Zen\n"
 		"Skaven, Skilletaudio, Snu, Squirrel Havoc, Teimoso, Waxhead\n"
 		"\n"
 #ifdef MPT_WITH_VST
