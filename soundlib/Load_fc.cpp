@@ -423,6 +423,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 		if(!instr)
 			return false;
 
+		static_assert(NOTE_MAX - NOTE_MIN + 1 >= 128, "Need at least a note range of 128 for correct emulation of note wrap-around logic in Future Composer");
 		for(uint8 note = 0; note < static_cast<uint8>(instr->NoteMap.size()); note++)
 		{
 			if(note < 48)

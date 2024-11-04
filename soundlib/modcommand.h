@@ -23,7 +23,7 @@ enum : uint8 // ModCommand::NOTE
 {
 	NOTE_NONE        = 0,    // Empty note cell
 	NOTE_MIN         = 1,    // Minimum note value
-	NOTE_MAX         = 120,  // Maximum note value
+	NOTE_MAX         = 128,  // Maximum note value
 	NOTE_MIDDLEC     = (5 * 12 + NOTE_MIN),
 	NOTE_KEYOFF      = 0xFF, // === (Note Off, releases envelope / fades samples, stops plugin note)
 	NOTE_NOTECUT     = 0xFE, // ^^^ (Cuts sample / stops all plugin notes)

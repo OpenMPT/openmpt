@@ -1643,9 +1643,10 @@ mpt::ustring CSoundFile::GetNoteName(const ModCommand::NOTE note, const NoteName
 		return specialNoteNames[note - NOTE_MIN_SPECIAL];
 	} else if(ModCommand::IsNote(note))
 	{
+		const int octave = (note - NOTE_MIN) / 12;
 		return mpt::ustring()
 			.append(noteNames[(note - NOTE_MIN) % 12])
-			.append(1, static_cast<mpt::uchar>(UC_('0') + ((note - NOTE_MIN) / 12)))
+			.append(1, static_cast<mpt::uchar>((octave <= 9 ? UC_('0') : UC_('A') - 10) + octave))
 			;	// e.g. "C#" + "5"
 	} else if(note == NOTE_NONE)
 	{
@@ -2014,7 +2015,7 @@ bool CSoundFile::IsSampleReferencedByInstrument(SAMPLEINDEX sample, INSTRUMENTIN
 	if(targetIns == nullptr)
 		return false;
 
-	return mpt::contains(mpt::as_span(targetIns->Keyboard).first(NOTE_MAX), sample);
+	return mpt::contains(mpt::as_span(targetIns->Keyboard).first(NOTE_MAX - NOTE_MIN + 1), sample);
 }
 
 

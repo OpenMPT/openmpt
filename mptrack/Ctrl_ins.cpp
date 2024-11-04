@@ -175,6 +175,13 @@ void CNoteMapWnd::OnPaint()
 	dc.IntersectClipRect(&rcClient);
 
 	const CSoundFile &sndFile = m_modDoc.GetSoundFile();
+	const auto &modSpecs = sndFile.GetModSpecifications();
+	int noteMin = 0, noteMax = NOTE_MAX - NOTE_MIN;
+	if(modSpecs.instrumentsMax)
+	{
+		noteMin = modSpecs.noteMin - NOTE_MIN;
+		noteMax = modSpecs.noteMax - NOTE_MIN;
+	}
 	if (m_cxFont > 0 && m_cyFont > 0)
 	{
 		const bool focus = (::GetFocus() == m_hWnd);
@@ -185,11 +192,11 @@ void CNoteMapWnd::OnPaint()
 		int nPos = m_nNote - (nNotes/2);
 		int ypaint = 0;
 		mpt::winstring s;
-		for (int ynote=0; ynote<nNotes; ynote++, ypaint+=m_cyFont, nPos++)
+		for(int ynote = 0; ynote < nNotes; ynote++, ypaint += m_cyFont, nPos++)
 		{
 			// Note
-			bool isValidPos = (nPos >= 0) && (nPos < NOTE_MAX - NOTE_MIN + 1);
-			if (isValidPos)
+			const bool isValidPos = mpt::is_in_range(nPos, noteMin, noteMax);
+			if(isValidPos)
 			{
 				s = mpt::ToWin(sndFile.GetNoteName(static_cast<ModCommand::NOTE>(nPos + 1), m_nInstrument));
 				s.resize(4);
@@ -230,7 +237,7 @@ void CNoteMapWnd::OnPaint()
 			rect.left = rcClient.left + m_cxFont * 2 + 3;
 			rect.right = rcClient.right;
 			s = _T(" ..");
-			if(pIns && nPos >= 0 && nPos < NOTE_MAX && pIns->Keyboard[nPos])
+			if(pIns && isValidPos && pIns->Keyboard[nPos])
 			{
 				s = mpt::tfmt::right(3, mpt::tfmt::dec(pIns->Keyboard[nPos]));
 			}
@@ -755,40 +762,48 @@ bool CNoteMapWnd::HandleNav(WPARAM k)
 	bool redraw = false;
 
 	//HACK: handle numpad (convert numpad number key to normal number key)
-	if ((k >= VK_NUMPAD0) && (k <= VK_NUMPAD9)) return HandleChar(k-VK_NUMPAD0+'0');
+	if ((k >= VK_NUMPAD0) && (k <= VK_NUMPAD9))
+		return HandleChar(k-VK_NUMPAD0+'0');
+
+	const CSoundFile &sndFile = m_modDoc.GetSoundFile();
+	const auto &modSpecs = sndFile.GetModSpecifications();
+	UINT noteMin = 0, noteMax = NOTE_MAX - NOTE_MIN;
+	if(modSpecs.instrumentsMax)
+	{
+		noteMin = modSpecs.noteMin - NOTE_MIN;
+		noteMax = modSpecs.noteMax - NOTE_MIN;
+	}
 
 	switch(k)
 	{
 	case VK_RIGHT:
-		if (!m_bIns) { m_bIns = true; redraw = true; } else
-		if (m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote++; m_bIns = false; redraw = true; }
+		if (!m_bIns) { m_bIns = true; redraw = true; }
+		else if (m_nNote < noteMax) { m_nNote++; m_bIns = false; redraw = true; }
 		break;
 	case VK_LEFT:
-		if (m_bIns) { m_bIns = false; redraw = true; } else
-		if (m_nNote) { m_nNote--; m_bIns = true; redraw = true; }
+		if (m_bIns) { m_bIns = false; redraw = true; }
+		else if (m_nNote > noteMin) { m_nNote--; m_bIns = true; redraw = true; }
 		break;
 	case VK_UP:
-		if (m_nNote > 0) { m_nNote--; redraw = true; }
+		if (m_nNote > noteMin) { m_nNote--; redraw = true; }
 		break;
 	case VK_DOWN:
-		if (m_nNote < NOTE_MAX - 1) { m_nNote++; redraw = true; }
+		if (m_nNote < noteMax) { m_nNote++; redraw = true; }
 		break;
 	case VK_PRIOR:
-		if (m_nNote > 3) { m_nNote -= 3; redraw = true; } else
-		if (m_nNote > 0) { m_nNote = 0; redraw = true; }
+		if (m_nNote > noteMin + 3) { m_nNote -= 3; redraw = true; }
+		else if (m_nNote > noteMin) { m_nNote = noteMin; redraw = true; }
 		break;
 	case VK_NEXT:
-		if (m_nNote+3 < NOTE_MAX) { m_nNote += 3; redraw = true; } else
-		if (m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote = NOTE_MAX - NOTE_MIN; redraw = true; }
+		if (m_nNote + 3 < noteMax) { m_nNote += 3; redraw = true; }
+		else if (m_nNote < noteMax) { m_nNote = noteMax; redraw = true; }
 		break;
 	case VK_HOME:
-		if(m_nNote > 0) { m_nNote = 0; redraw = true; }
+		if(m_nNote > noteMin) { m_nNote = noteMin; redraw = true; }
 		break;
 	case VK_END:
-		if(m_nNote < NOTE_MAX - NOTE_MIN) { m_nNote = NOTE_MAX - NOTE_MIN; redraw = true; }
+		if(m_nNote < noteMax) { m_nNote = noteMax; redraw = true; }
 		break;
-// 	case VK_TAB:
-// 		return true;
 	case VK_RETURN:
 		{
 			ModInstrument *pIns = m_modDoc.GetSoundFile().Instruments[m_nInstrument];

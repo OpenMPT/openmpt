@@ -493,7 +493,7 @@ void InstrumentSynth::States::State::ApplyChannelState(ModChannel &chn, int32 &p
 	{
 		uint8 fcNote = static_cast<uint8>(m_fcPitch >= 0 ? m_fcPitch + chn.nLastNote - NOTE_MIN : m_fcPitch) & 0x7F;
 		static_assert(mpt::array_size<decltype(chn.pModInstrument->NoteMap)>::size > 0x7F);
-		if(m_fcPitch)
+		if(m_fcPitch && ModCommand::IsNote(chn.nLastNote))
 			period += (sndFile.GetPeriodFromNote(chn.pModInstrument->NoteMap[fcNote], chn.nFineTune, chn.nC5Speed) - sndFile.GetPeriodFromNote(chn.pModInstrument->NoteMap[chn.nLastNote - NOTE_MIN], chn.nFineTune, chn.nC5Speed));
 
 		if(doVibratoFC)

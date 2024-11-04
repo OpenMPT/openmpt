@@ -2863,6 +2863,9 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->volcmd, VOLCMD_VIBRATOSPEED);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->vol, 15);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 1)->note, NOTE_MIN + 12);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 1)->note, NOTE_MIN + 12 + 95);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(2, 1)->note, NOTE_KEYOFF);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
@@ -3128,7 +3131,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->pluginVelocityHandling, PLUGIN_VELOCITYHANDLING_VOLUME);
 		VERIFY_EQUAL_NONCONT(pIns->pluginVolumeHandling, PLUGIN_VOLUMEHANDLING_MIDI);
 
-		for(size_t i = 0; i < NOTE_MAX; i++)
+		for(size_t i = 0; i < 120; i++)
 		{
 			VERIFY_EQUAL_NONCONT(pIns->Keyboard[i], (i == NOTE_MIDDLEC - 1) ? (ins * 1111) : 1);
 			VERIFY_EQUAL_NONCONT(pIns->NoteMap[i], (i == NOTE_MIDDLEC - 1) ? (i + 13) : (i + 1));
@@ -3211,6 +3214,17 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->instr, 99);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueVolCol(), 1);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->GetValueEffectCol(), 200);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 0)->IsPcNote(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 0)->note, NOTE_PCS);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 0)->instr, 250);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 0)->GetValueVolCol(), 999);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 0)->GetValueEffectCol(), 999);
+
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 1)->note, NOTE_MIN);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 1)->note, NOTE_MIN + 119);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(2, 1)->note, NOTE_KEYOFF);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(3, 1)->note, NOTE_NOTECUT);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(4, 1)->note, NOTE_FADE);
 
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);

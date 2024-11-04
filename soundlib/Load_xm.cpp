@@ -1262,9 +1262,12 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 			uint8 note = p->note, command = 0, param = 0;
 			ModSaveCommand(*p, command, param, true, compatibilityExport);
 
-			if (note >= NOTE_MIN_SPECIAL) note = 97; else
-			if ((note <= 12) || (note > 96+12)) note = 0; else
-			note -= 12;
+			if(note >= NOTE_MIN_SPECIAL)
+				note = 97;
+			else if(note < NOTE_MIN + 12 || note >= NOTE_MIN + 12 + 96)
+				note = 0;
+			else
+				note -= 12;
 			uint8 vol = 0;
 			if (p->volcmd != VOLCMD_NONE)
 			{

@@ -1098,11 +1098,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				uint8 note = patternData.ReadUint8();
 				if(note < 0x80)
 					note += NOTE_MIN;
-				if(!(GetType() & MOD_TYPE_MPT))
-				{
-					if(note > NOTE_MAX && note < 0xFD) note = NOTE_FADE;
-					else if(note == 0xFD) note = NOTE_NONE;
-				}
+				else if(note == 0xFF)
+					note = NOTE_KEYOFF;
+				else if(note == 0xFE)
+					note = NOTE_NOTECUT;
+				else if(note == 0xFD && GetType() != MOD_TYPE_MPT)
+					note = NOTE_NONE;  // Note: in MPTM format, NOTE_FADE is written as 0xFD to preserve compatibility with older OpenMPT versions.
+				else
+					note = NOTE_FADE;
 				m.note = lastValue[ch].note = note;
 			}
 			if(chnMask[ch] & 2)
@@ -1769,14 +1772,23 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 				}
 
 				auto &chnState = chnStates[ch];
-				uint8 b = 0;
+				uint8 b = 1;
 				uint8 vol = 0xFF;
 				uint8 note = m->note;
-				if (note != NOTE_NONE) b |= 1;
-				if (m->IsNote()) note -= NOTE_MIN;
-				if (note == NOTE_FADE && GetType() != MOD_TYPE_MPT) note = 0xF6;
-				if (m->instr) b |= 2;
-				if (m->volcmd != VOLCMD_NONE)
+				if(note >= NOTE_MIN && note <= NOTE_MIN + 119)
+					note = m->note - NOTE_MIN;
+				else if(note == NOTE_FADE)
+					note = (GetType() == MOD_TYPE_MPT) ? 0xFD : 0xF6;
+				else if(note == NOTE_NOTECUT)
+					note = 0xFE;
+				else if(note == NOTE_KEYOFF)
+					note = 0xFF;
+				else
+					b = 0;
+				
+				if(m->instr)
+					b |= 2;
+				if(m->volcmd != VOLCMD_NONE)
 				{
 					vol = std::min(m->vol, uint8(9));
 					switch(m->volcmd)
@@ -1801,7 +1813,8 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 					default: vol = 0xFF;
 					}
 				}
-				if (vol != 0xFF) b |= 4;
+				if(vol != 0xFF)
+					b |= 4;
 				uint8 command = 0, param = 0;
 				if(m->command == CMD_VOLUME && vol == 0xFF)
 				{

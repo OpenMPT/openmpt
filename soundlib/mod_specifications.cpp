@@ -29,7 +29,7 @@ constexpr CModSpecifications mptm_ =
 	MOD_TYPE_MPT,								// Internal MODTYPE value
 	"mptm",										// File extension
 	NOTE_MIN,									// Minimum note index
-	NOTE_MAX,									// Maximum note index
+	NOTE_MIN + 119,								// Maximum note index
 	4000,										// Pattern max.
 	4000,										// Order max.
 	MAX_SEQUENCES,								// Sequences max
