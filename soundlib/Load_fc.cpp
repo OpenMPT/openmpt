@@ -118,8 +118,9 @@ static void TranslateFCScript(InstrumentSynth::Events &events, const mpt::span<c
 {
 	FileReader file{script};
 	const bool isVolume = startSequence > 255;
+	const uint8 volScriptSpeed = (script[0] > 0) ? script[0] : uint8_max;
 	if(isVolume)
-		events.push_back(InstrumentSynth::Event::SetStepSpeed(script[0], true));
+		events.push_back(InstrumentSynth::Event::SetStepSpeed(volScriptSpeed, true));
 
 	std::vector<uint8> sequencesToParse(1, static_cast<uint8>(isVolume ? 0 : startSequence));
 	std::bitset<256> parsedSequences;
@@ -221,11 +222,11 @@ static void TranslateFCScript(InstrumentSynth::Events &events, const mpt::span<c
 			case 0xE8:  // Sustain (time)
 				{
 					const uint8 delay = file.ReadUint8();
-					if(isVolume && script[0] > 1)
+					if(isVolume && volScriptSpeed > 1)
 					{
 						events.push_back(InstrumentSynth::Event::SetStepSpeed(1, true));
-						events.push_back(InstrumentSynth::Event::Delay(static_cast<uint16>(delay + script[0] - 2)));
-						events.push_back(InstrumentSynth::Event::SetStepSpeed(script[0], true));
+						events.push_back(InstrumentSynth::Event::Delay(static_cast<uint16>(delay + volScriptSpeed - 2)));
+						events.push_back(InstrumentSynth::Event::SetStepSpeed(volScriptSpeed, true));
 					} else if(delay)
 					{
 						events.push_back(InstrumentSynth::Event::Delay(delay - 1));
@@ -473,7 +474,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 	{
 		32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
 		32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
-		16, 16, 16, 16, 16, 16, 16, 16, 32, 16, 32, 32, 16, 16, 48,
+		16, 16, 16, 16, 16, 16, 16, 16, 32, 16, 32, 32, 16, 16, 48,  // Future Composer 1.4 imports the last sample with a length of 32 instead, causing some older FC files to be detuned.
 	};
 
 	static constexpr uint8 SampleData[] =
