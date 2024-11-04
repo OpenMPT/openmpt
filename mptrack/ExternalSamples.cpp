@@ -270,6 +270,8 @@ void ModifiedExternalSamplesDlg::GenerateList()
 
 		if(m_sndFile.GetSample(smp).uFlags[SMP_MODIFIED])
 			status = _T("modified");
+		else if(!m_sndFile.GetSample(smp).HasSampleData())
+			continue;  // Sample was already missing when the file was loaded, nothing we can do here
 		else if(!mpt::native_fs{}.is_file(m_sndFile.GetSamplePath(smp)))
 			status = _T("missing");
 		else
