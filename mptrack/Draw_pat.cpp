@@ -1686,7 +1686,7 @@ CString CViewPattern::GetCursorDescription() const
 					{
 						ModInstrument *pIns = sndFile.Instruments[m->instr];
 						s += mpt::ToCString(sndFile.GetCharsetInternal(), pIns->name);
-						if((m->note) && (m->note <= NOTE_MAX))
+						if(m->IsNote())
 						{
 							const SAMPLEINDEX nsmp = pIns->Keyboard[m->note - 1];
 							if((nsmp) && (nsmp <= sndFile.GetNumSamples()))

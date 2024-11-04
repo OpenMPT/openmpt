@@ -1165,12 +1165,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 	DialogBase::OnInitDialog();
 	ModInstrument *pIns = sndFile.Instruments[m_nInstrument];
 	if(pIns)
-	{
-		for(UINT i = 0; i < NOTE_MAX; i++)
-		{
-			KeyboardMap[i] = pIns->Keyboard[i];
-		}
-	}
+		KeyboardMap = pIns->Keyboard;
 	m_Keyboard.Init(this, 3, TRUE);
 	m_SbOctave.SetRange(0, 7);
 	m_SbOctave.SetPos(4);

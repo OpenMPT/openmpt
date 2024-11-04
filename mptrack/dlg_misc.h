@@ -166,8 +166,8 @@ protected:
 	bool m_mouseCapture = false, m_cursorNotify = false;
 	bool m_mouseDown = false;
 
-	uint8 KeyFlags[NOTE_MAX]; // 10 octaves max
-	SAMPLEINDEX m_sampleNum[NOTE_MAX];
+	std::array<uint8, NOTE_MAX> KeyFlags; // 10 octaves max
+	std::array<SAMPLEINDEX, NOTE_MAX> m_sampleNum;
 
 public:
 	CKeyboardControl() = default;
@@ -211,7 +211,7 @@ protected:
 
 	CSoundFile &sndFile;
 	const INSTRUMENTINDEX m_nInstrument;
-	SAMPLEINDEX KeyboardMap[NOTE_MAX];
+	std::array<SAMPLEINDEX, NOTE_MAX - NOTE_MIN + 1> KeyboardMap;
 	MouseAction mouseAction = MouseAction::Unknown;
 
 public:
