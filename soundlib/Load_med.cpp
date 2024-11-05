@@ -914,6 +914,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			sampleIO |= SampleIO::stereoSplit;
 			length /= 2;
+			m_SongFlags.reset(SONG_ISAMIGA);  // Amiga resampler does not handle stereo samples
 		}
 		if(instrHeader.type & MMDInstrHeader::DELTA)
 		{
