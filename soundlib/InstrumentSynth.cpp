@@ -166,6 +166,8 @@ static void ChannelSetSample(ModChannel &chn, const CSoundFile &sndFile, SAMPLEI
 	const ModSample &sample = sndFile.GetSample(smp);
 	if(chn.pModSample == &sample && channelIsActive)
 		return;
+	if(chn.increment.IsZero() && chn.nLength == 0 && chn.nVolume == 0)
+		chn.nVolume = 256;
 	chn.pModSample = &sample;
 	chn.pCurrentSample = sample.samplev();
 	chn.dwFlags = (chn.dwFlags & CHN_CHANNELFLAGS) | sample.uFlags;
