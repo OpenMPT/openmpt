@@ -6665,7 +6665,7 @@ uint32 CSoundFile::GetPeriodFromNote(uint32 note, int32 nFineTune, uint32 nC5Spe
 
 		if(m_SongFlags[SONG_LINEARSLIDES])
 		{
-			int l = ((NOTE_MAX - note) << 6) - (nFineTune / 2);
+			int l = ((120 - note) << 6) - (nFineTune / 2);
 			if (l < 1) l = 1;
 			return static_cast<uint32>(l);
 		} else
