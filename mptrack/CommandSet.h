@@ -337,7 +337,10 @@ enum CommandID
 	kcToggleOverflowPaste,
 	kcToggleNoteOffRecordPC,
 	kcToggleNoteOffRecordMIDI,
-	kcEndPatternEditMisc = kcToggleNoteOffRecordMIDI,
+	kcToggleVisibilityInstrColumn,
+	kcToggleVisibilityVolumeColumn,
+	kcToggleVisibilityEffectColumn,
+	kcEndPatternEditMisc = kcToggleVisibilityEffectColumn,
 
 	kcStartChannelKeys,
 	kcChannelMute = kcStartChannelKeys,

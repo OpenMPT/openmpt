@@ -38,6 +38,7 @@ enum
 	VUMETERS_HEIGHT        = 13,      // Height of vu-meters (including padding)
 	VUMETERS_HEIGHT_LED    = 10,      // Height of vu-meters (without padding)
 	VUMETERS_LEDS_PER_SIDE = 8,
+	SEPARATOR_WIDTH        = 4,
 };
 
 enum
@@ -104,6 +105,18 @@ void CViewPattern::UpdateColors()
 }
 
 
+void CViewPattern::UpdateVisibileColumns(std::bitset<PatternCursor::numColumns> visibleColumns)
+{
+	m_visibleColumns = visibleColumns;
+	m_visibleColumns.set(PatternCursor::noteColumn);  // Cannot be disabled at the moment
+	m_visibleColumns.set(PatternCursor::paramColumn, m_visibleColumns[PatternCursor::effectColumn]);
+	UpdateSizes();
+	UpdateScrollSize();
+	SetCurrentColumn(m_Cursor);
+	InvalidatePattern(true, true);
+}
+
+
 bool CViewPattern::UpdateSizes()
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
@@ -113,10 +126,12 @@ bool CViewPattern::UpdateSizes()
 	m_szPluginHeader.cx = 0;
 	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? MulDiv(PLUGNAME_HEIGHT, m_nDPIy, 96) : 0;
 	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
-	m_szCell.cx = 4 + pfnt->nEltWidths[0];
-	if (m_nDetailLevel >= PatternCursor::instrColumn) m_szCell.cx += pfnt->nEltWidths[1];
-	if (m_nDetailLevel >= PatternCursor::volumeColumn) m_szCell.cx += pfnt->nEltWidths[2];
-	if (m_nDetailLevel >= PatternCursor::effectColumn) m_szCell.cx += pfnt->nEltWidths[3] + pfnt->nEltWidths[4];
+	m_szCell.cx = SEPARATOR_WIDTH;
+	for(size_t i = 0; i <= PatternCursor::lastColumn; i++)
+	{
+		if(m_visibleColumns[static_cast<PatternCursor::Columns>(i)])
+			m_szCell.cx += pfnt->nEltWidths[i];
+	}
 	m_szCell.cy = pfnt->nHeight;
 
 	m_szHeader.cx = MulDiv(m_szHeader.cx, m_nDPIx, 96);
@@ -230,21 +245,16 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) const
 
 	PatternCursor::Columns imax = cursor.GetColumnType();
 	LimitMax(imax, PatternCursor::lastColumn);
-// 	if(imax > m_nDetailLevel)
-// 	{
-// 		// Extend to next channel
-// 		imax = PatternCursor::firstColumn;
-// 		cursor.Move(0, 1, 0);
-// 	}
-
 	pt.x = (cursor.GetChannel() - xofs) * GetChannelWidth();
 
 	for(int i = 0; i < imax; i++)
 	{
-		pt.x += pfnt->nEltWidths[i];
+		if(m_visibleColumns[static_cast<PatternCursor::Columns>(i)])
+			pt.x += pfnt->nEltWidths[i];
 	}
 
-	if (pt.x < 0) pt.x = 0;
+	if(pt.x < 0)
+		pt.x = 0;
 	pt.x += Util::ScalePixels(ROWHDR_WIDTH, m_hWnd);
 	pt.y = (cursor.GetRow() - yofs + m_nMidRow) * m_szCell.cy;
 
@@ -266,11 +276,10 @@ PatternCursor CViewPattern::GetPositionFromPoint(POINT pt) const
 	int y = yofs - m_nMidRow + (pt.y - m_szHeader.cy + GetSmoothScrollOffset()) / m_szCell.cy;
 	if (y < 0) y = 0;
 	int xx = (pt.x - m_szHeader.cx) % GetChannelWidth(), dx = 0;
-	int imax = 4;
-	if (imax > (int)m_nDetailLevel + 1) imax = m_nDetailLevel + 1;
-	int i = 0;
-	for (i=0; i<imax; i++)
+	size_t i = 0;
+	for(; i < PatternCursor::lastColumn; i++)
 	{
+		if(m_visibleColumns[static_cast<PatternCursor::Columns>(i)])
 		dx += pfnt->nEltWidths[i];
 		if(xx < dx)
 			break;
@@ -371,7 +380,7 @@ void CViewPattern::DrawLetter(int x, int y, char8_t letter, int sizex, int ofsx)
 }
 #endif
 
-static MPT_FORCEINLINE void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, int col)
+static MPT_FORCEINLINE void DrawPadding(CFastBitmap &dib, const PATTERNFONT *pfnt, int x, int y, PatternCursor::Columns col)
 {
 	if(pfnt->padding[col])
 		dib.TextBlt(x + pfnt->nEltWidths[col] - pfnt->padding[col], y, pfnt->padding[col], pfnt->spacingY, pfnt->nClrX + pfnt->nEltWidths[col] - pfnt->padding[col], pfnt->nClrY, pfnt->dib);
@@ -440,7 +449,7 @@ void CViewPattern::DrawNote(int x, int y, UINT note, CTuning* pTuning)
 				DrawLetter(x + pfnt->nNoteWidth[0] + pfnt->nNoteWidth[1], y, '?', pfnt->nOctaveWidth);
 		}
 	}
-	DrawPadding(m_Dib, pfnt, x, y, 0);
+	DrawPadding(m_Dib, pfnt, x, y, PatternCursor::noteColumn);
 }
 
 
@@ -462,7 +471,7 @@ void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 	{
 		m_Dib.TextBlt(x, y, pfnt->nEltWidths[1], pfnt->spacingY, pfnt->nClrX+pfnt->nEltWidths[0], pfnt->nClrY, pfnt->dib);
 	}
-	DrawPadding(m_Dib, pfnt, x, y, 1);
+	DrawPadding(m_Dib, pfnt, x, y, PatternCursor::instrColumn);
 }
 
 
@@ -504,11 +513,13 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 							pfnt->nNumX, pfnt->nNumY + (vol % 10) * pfnt->spacingY, pfnt->dib);
 		} else
 		{
-			int srcx = pfnt->nEltWidths[0] + pfnt->nEltWidths[1];
+			int srcx = pfnt->nEltWidths[0];
+			if(m_visibleColumns[PatternCursor::instrColumn])
+				srcx += pfnt->nEltWidths[1];
 			m_Dib.TextBlt(x, y, pfnt->nEltWidths[2], pfnt->spacingY, pfnt->nClrX+srcx, pfnt->nClrY, pfnt->dib);
 		}
 	}
-	DrawPadding(m_Dib, pfnt, x, y, 2);
+	DrawPadding(m_Dib, pfnt, x, y, PatternCursor::volumeColumn);
 }
 
 
@@ -700,9 +711,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
 				if(channel.szName[0] != 0)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
-				else if(m_nDetailLevel < PatternCursor::volumeColumn)
+				else if(const auto numVisibleColums = m_visibleColumns.count(); numVisibleColums < 2)
+					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[%u]" : "%u";
+				else if(numVisibleColums < 3)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
-				else if(m_nDetailLevel < PatternCursor::effectColumn)
+				else if(numVisibleColums < 5)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
 				sprintf(s, pszfmt, ncolhdr + 1, channel.szName.buf);
 				DrawButtonRect(hdc, &rect, s,
@@ -834,6 +847,18 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	CHANNELINDEX maxcol = ncols;
 	while((maxcol > startChan) && (m_chnState[maxcol -1].selectedCols & COLUMN_BITS_INVISIBLE))
 		maxcol--;
+
+	// Check if there's no "hole" in the visible columns (to speed up empty pattern cell drawing)
+	bool allColumnsConsecutive = true;
+	for(int i = LastVisibleColumn(); i >= 0; i--)
+	{
+		if(!m_visibleColumns[static_cast<PatternCursor::Columns>(i)])
+		{
+			allColumnsConsecutive = false;
+			break;
+		}
+	}
+
 	// Init bitmap border
 	{
 		UINT maxndx = sndFile.GetNumChannels() * m_szCell.cx;
@@ -842,7 +867,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		do
 		{
 			ibmp += nColumnWidth;
-			m_Dib.TextBlt(ibmp-4, 0, 4, m_szCell.cy, pfnt->nClrX+pfnt->nWidth-4, pfnt->nClrY, pfnt->dib);
+			m_Dib.TextBlt(ibmp - SEPARATOR_WIDTH, 0, SEPARATOR_WIDTH, m_szCell.cy, pfnt->nClrX + pfnt->nWidth - SEPARATOR_WIDTH, pfnt->nClrY, pfnt->dib);
 		} while (ibmp + nColumnWidth <= maxndx);
 	}
 
@@ -955,7 +980,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		xbmp = nbmp = 0;
 		do
 		{
-			int x, bk_col, tx_col, col_sel, fx_col;
+			int x = 0, xClear = 0, bk_col, tx_col, col_sel, fx_col;
 
 			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
@@ -968,20 +993,26 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				const ModCommand *mold = m - ncols;
 				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
 
-				if (m->note == mold->note) dwSpeedUpMask |= COLUMN_BITS_NOTE;
-				if ((m->instr == mold->instr) || (m_nDetailLevel < PatternCursor::instrColumn)) dwSpeedUpMask |= COLUMN_BITS_INSTRUMENT;
-				if ( m->IsPcNote() || mold->IsPcNote() )
+				if(m->note == mold->note || !m_visibleColumns[PatternCursor::noteColumn])
+					dwSpeedUpMask |= COLUMN_BITS_NOTE;
+				if((m->instr == mold->instr) || !m_visibleColumns[PatternCursor::instrColumn])
+					dwSpeedUpMask |= COLUMN_BITS_INSTRUMENT;
+				if (m->IsPcNote() || mold->IsPcNote())
 				{
 					// Handle speedup mask for PC notes.
 					if(m->note == mold->note)
 					{
-						if(m->GetValueVolCol() == mold->GetValueVolCol() || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= COLUMN_BITS_VOLUME;
-						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= COLUMN_BITS_FXCMDANDPARAM;
+						if(m->GetValueVolCol() == mold->GetValueVolCol() || !m_visibleColumns[PatternCursor::volumeColumn])
+							dwSpeedUpMask |= COLUMN_BITS_VOLUME;
+						if(m->GetValueEffectCol() == mold->GetValueEffectCol() || !m_visibleColumns[PatternCursor::effectColumn])
+							dwSpeedUpMask |= COLUMN_BITS_FXCMDANDPARAM;
 					}
 				} else
 				{
-					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || (m_nDetailLevel < PatternCursor::volumeColumn)) dwSpeedUpMask |= COLUMN_BITS_VOLUME;
-					if ((m->command == mold->command) || (m_nDetailLevel < PatternCursor::effectColumn)) dwSpeedUpMask |= (m->command != CMD_NONE) ? COLUMN_BITS_FXCMD : COLUMN_BITS_FXCMDANDPARAM;
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || !m_visibleColumns[PatternCursor::volumeColumn])
+						dwSpeedUpMask |= COLUMN_BITS_VOLUME;
+					if ((m->command == mold->command) || !m_visibleColumns[PatternCursor::effectColumn])
+						dwSpeedUpMask |= (m->command != CMD_NONE) ? COLUMN_BITS_FXCMD : COLUMN_BITS_FXCMDANDPARAM;
 				}
 				if (dwSpeedUpMask == COLUMN_BITS_ALLCOLUMNS) goto DoBlit;
 			}
@@ -996,13 +1027,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				bk_col = MODCOLOR_BACKSELECTED;
 			}
 			// Speedup: Empty command which is either not or fully selected
-			if (m->IsEmpty() && ((!col_sel) || (col_sel == COLUMN_BITS_ALLCOLUMNS)))
+			if (m->IsEmpty() && ((!col_sel) || (col_sel == COLUMN_BITS_ALLCOLUMNS)) && allColumnsConsecutive)
 			{
 				m_Dib.SetTextColor(tx_col, bk_col);
-				m_Dib.TextBlt(xbmp, 0, nColumnWidth-4, m_szCell.cy, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
+				m_Dib.TextBlt(xbmp, 0, nColumnWidth - SEPARATOR_WIDTH, m_szCell.cy, pfnt->nClrX, pfnt->nClrY, pfnt->dib);
 				goto DoBlit;
 			}
-			x = 0;
+
 			// Note
 			if (!(dwSpeedUpMask & COLUMN_BITS_NOTE))
 			{
@@ -1041,8 +1072,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					DrawNote(xbmp+x, 0, m->note);
 			}
 			x += pfnt->nEltWidths[0];
+			xClear += pfnt->nEltWidths[0];
 			// Instrument
-			if (m_nDetailLevel >= PatternCursor::instrColumn)
+			if (m_visibleColumns[PatternCursor::instrColumn])
 			{
 				if (!(dwSpeedUpMask & COLUMN_BITS_INSTRUMENT))
 				{
@@ -1063,8 +1095,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				}
 				x += pfnt->nEltWidths[1];
 			}
+			xClear += pfnt->nEltWidths[1];
 			// Volume
-			if (m_nDetailLevel >= PatternCursor::volumeColumn)
+			if (m_visibleColumns[PatternCursor::volumeColumn])
 			{
 				if (!(dwSpeedUpMask & COLUMN_BITS_VOLUME))
 				{
@@ -1091,8 +1124,9 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				}
 				x += pfnt->nEltWidths[2];
 			}
+			xClear += pfnt->nEltWidths[2];
 			// Command & param
-			if (m_nDetailLevel >= PatternCursor::effectColumn)
+			if (m_visibleColumns[PatternCursor::effectColumn])
 			{
 				const bool isPCnote = m->IsPcNote();
 				uint16 val = m->GetValueEffectCol();
@@ -1119,7 +1153,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					m_Dib.SetTextColor(tx_col, bk_col);
 					if(isPCnote)
 					{
-						m_Dib.TextBlt(xbmp + x, 0, 2, pfnt->spacingY, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
+						m_Dib.TextBlt(xbmp + x, 0, 2, pfnt->spacingY, pfnt->nClrX + xClear, pfnt->nClrY, pfnt->dib);
 						m_Dib.TextBlt(xbmp + x + pfnt->pcValMargin, 0, pfnt->nEltWidths[3], m_szCell.cy, pfnt->nNumX, pfnt->nNumY+(val / 100)*pfnt->spacingY, pfnt->dib);
 					} else
 					{
@@ -1130,12 +1164,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 							DrawLetter(xbmp+x, 0, n, pfnt->nEltWidths[3], pfnt->nCmdOfs);
 						} else
 						{
-							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[3], pfnt->spacingY, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
+							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[3], pfnt->spacingY, pfnt->nClrX + xClear, pfnt->nClrY, pfnt->dib);
 						}
 					}
-					DrawPadding(m_Dib, pfnt, xbmp + x, 0, 3);
+					DrawPadding(m_Dib, pfnt, xbmp + x, 0, PatternCursor::effectColumn);
 				}
 				x += pfnt->nEltWidths[3];
+				xClear += pfnt->nEltWidths[3];
 				// Param
 				if (!(dwSpeedUpMask & COLUMN_BITS_FXPARAM))
 				{
@@ -1162,10 +1197,10 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 							m_Dib.TextBlt(xbmp + x + pfnt->nParamHiWidth, 0, pfnt->nEltWidths[4] - pfnt->padding[4] - pfnt->nParamHiWidth, m_szCell.cy, pfnt->nNumX+pfnt->paramLoMargin, pfnt->nNumY+(m->param & 0x0F)*pfnt->spacingY, pfnt->dib);
 						} else
 						{
-							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[4], m_szCell.cy, pfnt->nClrX+x, pfnt->nClrY, pfnt->dib);
+							m_Dib.TextBlt(xbmp+x, 0, pfnt->nEltWidths[4], m_szCell.cy, pfnt->nClrX + xClear, pfnt->nClrY, pfnt->dib);
 						}
 					}
-					DrawPadding(m_Dib, pfnt, xbmp + x, 0, 4);
+					DrawPadding(m_Dib, pfnt, xbmp + x, 0, PatternCursor::paramColumn);
 				}
 			}
 		DoBlit:
@@ -1279,7 +1314,7 @@ void CViewPattern::DrawDragSel(HDC hdc)
 	if(end.GetColumnType() == PatternCursor::firstColumn)
 	{
 		// Special case: If selection ends on the last column of a channel, subtract the channel separator width.
-		ptBottomRight.x -= 4;
+		ptBottomRight.x -= SEPARATOR_WIDTH;
 	}
 
 	// invert the brush pattern (looks just like frame window sizing)
@@ -1514,7 +1549,7 @@ void CViewPattern::SetCurSel(PatternCursor beginSel, PatternCursor endSel)
 	m_Selection = PatternRect(beginSel, endSel);
 	if(const CSoundFile *sndFile = GetSoundFile(); sndFile != nullptr && sndFile->Patterns.IsValidPat(m_nPattern))
 	{
-		m_Selection.Sanitize(sndFile->Patterns[m_nPattern].GetNumRows(), sndFile->GetNumChannels(), m_nDetailLevel);
+		m_Selection.Sanitize(sndFile->Patterns[m_nPattern].GetNumRows(), sndFile->GetNumChannels(), LastVisibleColumn());
 	}
 	UpdateIndicator();
 

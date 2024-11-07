@@ -387,7 +387,9 @@ bool CViewPattern::SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns
 		return false;
 	}
 
-	LimitMax(column, m_nDetailLevel);
+	LimitMax(column, LastVisibleColumn());
+	while(!m_visibleColumns[column])
+		column = static_cast<PatternCursor::Columns>(column + 1);
 	m_Cursor.SetColumn(channel, column);
 
 	PatternCursor selStart(m_Cursor);
@@ -400,6 +402,18 @@ bool CViewPattern::SetCurrentColumn(CHANNELINDEX channel, PatternCursor::Columns
 	// Fix: If cursor isn't on screen move both scrollbars to make it visible
 	UpdateScrollbarPositions();
 	return true;
+}
+
+
+PatternCursor::Columns CViewPattern::LastVisibleColumn() const noexcept
+{
+	for(size_t i = PatternCursor::lastColumn; i > PatternCursor::firstColumn; i--)
+	{
+		if(m_visibleColumns[i])
+			return static_cast<PatternCursor::Columns>(i);
+	}
+	return PatternCursor::firstColumn;
+
 }
 
 
@@ -980,7 +994,7 @@ void CViewPattern::OnClearSelectionFromMenu()
 	OnClearSelection();
 }
 
-void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm)  //Default RowMask: all elements enabled
+void CViewPattern::OnClearSelection(bool ITStyle, std::bitset<PatternCursor::numColumns> rm)
 {
 	CSoundFile *pSndFile = GetSoundFile();
 	if(pSndFile == nullptr || !pSndFile->Patterns.IsValidPat(m_nPattern) || !IsEditingEnabled_bmsg())
@@ -1008,7 +1022,7 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm)  //Default RowMask
 		for(int i = PatternCursor::firstColumn; i <= PatternCursor::lastColumn; i++)
 		{
 			PatternCursor cell(row, chn, static_cast<PatternCursor::Columns>(i));
-			if(!m_Selection.ContainsHorizontal(cell))
+			if(!m_Selection.ContainsHorizontal(cell) || !rm[i])
 			{
 				// We might have to skip the first / last few entries.
 				continue;
@@ -1017,61 +1031,46 @@ void CViewPattern::OnClearSelection(bool ITStyle, RowMask rm)  //Default RowMask
 			switch(i)
 			{
 			case PatternCursor::noteColumn:  // Clear note
-				if(rm.note)
+				if(m.IsPcNote())
+				{  // Clear whole cell if clearing PC note
+					m.Clear();
+				} else
 				{
-					if(m.IsPcNote())
-					{  // Clear whole cell if clearing PC note
-						m.Clear();
-					} else
-					{
-						m.note = NOTE_NONE;
-						if(ITStyle)
-							m.instr = 0;
-					}
+					m.note = NOTE_NONE;
+					if(ITStyle)
+						m.instr = 0;
 				}
 				break;
 
 			case PatternCursor::instrColumn:  // Clear instrument
-				if(rm.instrument)
-				{
-					m.instr = 0;
-				}
+				m.instr = 0;
 				break;
 
 			case PatternCursor::volumeColumn:  // Clear volume
-				if(rm.volume)
-				{
-					m.volcmd = VOLCMD_NONE;
-					m.vol = 0;
-				}
+				m.volcmd = VOLCMD_NONE;
+				m.vol = 0;
 				break;
 
 			case PatternCursor::effectColumn:  // Clear Command
-				if(rm.command)
+				m.command = CMD_NONE;
+				if(m.IsPcNote())
 				{
-					m.command = CMD_NONE;
-					if(m.IsPcNote())
-					{
-						m.SetValueEffectCol(0);
-					}
+					m.SetValueEffectCol(0);
 				}
 				break;
 
 			case PatternCursor::paramColumn:  // Clear Command Param
-				if(rm.parameter)
+				m.param = 0;
+				if(m.IsPcNote())
 				{
-					m.param = 0;
-					if(m.IsPcNote())
-					{
-						m.SetValueEffectCol(0);
+					m.SetValueEffectCol(0);
 
-						if(cell.CompareColumn(m_Selection.GetUpperLeft()) == 0)
-						{
-							// If this is the first selected column, update effect column char as well
-							PatternCursor upper(m_Selection.GetUpperLeft());
-							upper.Move(0, 0, -1);
-							m_Selection = PatternRect(upper, m_Selection.GetLowerRight());
-						}
+					if(cell.CompareColumn(m_Selection.GetUpperLeft()) == 0)
+					{
+						// If this is the first selected column, update effect column char as well
+						PatternCursor upper(m_Selection.GetUpperLeft());
+						upper.Move(0, 0, -1);
+						m_Selection = PatternRect(upper, m_Selection.GetLowerRight());
 					}
 				}
 				break;
@@ -3854,8 +3853,8 @@ void CViewPattern::SanitizeCursor()
 	if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(GetCurrentPattern()))
 	{
 		const auto &pattern = GetSoundFile()->Patterns[m_nPattern];
-		m_Cursor.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), m_nDetailLevel);
-		m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), m_nDetailLevel);
+		m_Cursor.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), LastVisibleColumn());
+		m_Selection.Sanitize(pattern.GetNumRows(), pattern.GetNumChannels(), LastVisibleColumn());
 	}
 };
 
@@ -4195,8 +4194,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if(lParam)
 		{
 			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
-			if(pState->nDetailLevel != PatternCursor::firstColumn)
-				m_nDetailLevel = pState->nDetailLevel;
+			UpdateVisibileColumns(pState->visibleColumns);
 			if(pState->initialized)
 			{
 				SetCurrentPattern(pState->nPattern);
@@ -4215,8 +4213,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			pState->nPattern = m_nPattern;
 			pState->cursor = m_Cursor;
 			pState->selection = m_Selection;
-			pState->nDetailLevel = m_nDetailLevel;
 			pState->nOrder = GetCurrentOrder();
+			pState->visibleColumns = m_visibleColumns;
 		}
 		break;
 
@@ -4261,15 +4259,11 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		OnPatternAmplify();
 		break;
 
+	case VIEWMSG_GETDETAIL:
+		return m_visibleColumns.to_ulong();
+
 	case VIEWMSG_SETDETAIL:
-		if(lParam != m_nDetailLevel)
-		{
-			m_nDetailLevel = static_cast<PatternCursor::Columns>(lParam);
-			UpdateSizes();
-			UpdateScrollSize();
-			SetCurrentColumn(m_Cursor);
-			InvalidatePattern(true, true);
-		}
+		UpdateVisibileColumns(lParam);
 		break;
 	case VIEWMSG_DOSCROLL:
 		OnMouseWheel(0, static_cast<short>(lParam), CPoint(0, 0));
@@ -4513,8 +4507,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		case kcEndHorizontalSelect:
 		case kcEndHorizontal:
-			if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0)
-				SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, LastVisibleColumn())) < 0)
+				SetCurrentColumn(sndFile.GetNumChannels() - 1, LastVisibleColumn());
 			else if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
 				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 			return wParam;
@@ -4522,12 +4516,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEndVertical:
 			if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
 				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
-			else if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, m_nDetailLevel)) < 0)
-				SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			else if(m_Cursor.CompareColumn(PatternCursor(0, sndFile.GetNumChannels() - 1, LastVisibleColumn())) < 0)
+				SetCurrentColumn(sndFile.GetNumChannels() - 1, LastVisibleColumn());
 			return wParam;
 		case kcEndAbsoluteSelect:
 		case kcEndAbsolute:
-			SetCurrentColumn(sndFile.GetNumChannels() - 1, m_nDetailLevel);
+			SetCurrentColumn(sndFile.GetNumChannels() - 1, LastVisibleColumn());
 			if(GetCurrentRow() < pModDoc->GetPatternSize(m_nPattern) - 1)
 				SetCurrentRow(pModDoc->GetPatternSize(m_nPattern) - 1);
 			return wParam;
@@ -4613,12 +4607,12 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			SetCurSel(PatternCursor(m_Selection.GetStartRow(), 0, PatternCursor::firstColumn), PatternCursor(m_Selection.GetEndRow(), sndFile.GetNumChannels(), PatternCursor::lastColumn));
 			return wParam;
 
-		case kcClearRow:              OnClearField(RowMask(), false); return wParam;
-		case kcClearField:            OnClearField(RowMask(m_Cursor), false); return wParam;
-		case kcClearFieldITStyle:     OnClearField(RowMask(m_Cursor), false, true); return wParam;
-		case kcClearRowStep:          OnClearField(RowMask(), true); return wParam;
-		case kcClearFieldStep:        OnClearField(RowMask(m_Cursor), true); return wParam;
-		case kcClearFieldStepITStyle: OnClearField(RowMask(m_Cursor), true, true); return wParam;
+		case kcClearRow:              OnClearField(std::bitset<PatternCursor::numColumns>{}.set(), false); return wParam;
+		case kcClearField:            OnClearField(std::bitset<PatternCursor::numColumns>{}.set(m_Cursor.GetColumnType()), false); return wParam;
+		case kcClearFieldITStyle:     OnClearField(std::bitset<PatternCursor::numColumns>{}.set(m_Cursor.GetColumnType()), false, true); return wParam;
+		case kcClearRowStep:          OnClearField(std::bitset<PatternCursor::numColumns>{}.set(), true); return wParam;
+		case kcClearFieldStep:        OnClearField(std::bitset<PatternCursor::numColumns>{}.set(m_Cursor.GetColumnType()), true); return wParam;
+		case kcClearFieldStepITStyle: OnClearField(std::bitset<PatternCursor::numColumns>{}.set(m_Cursor.GetColumnType()), true, true); return wParam;
 
 		case kcDeleteRow:            OnDeleteRow(); return wParam;
 		case kcDeleteWholeRow:       OnDeleteWholeRow(); return wParam;
@@ -4695,6 +4689,10 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcToggleNoteOffRecordPC:   TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
 		case kcToggleNoteOffRecordMIDI: TrackerSettings::Instance().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
 		
+		case kcToggleVisibilityInstrColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::instrColumn)); return wParam;
+		case kcToggleVisibilityVolumeColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::volumeColumn)); return wParam;
+		case kcToggleVisibilityEffectColumn : UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::effectColumn)); return wParam;
+
 		case kcPatternEditPCNotePlugin: OnTogglePCNotePluginEditor(); return wParam;
 		case kcQuantizeSettings:        OnSetQuantize(); return wParam;
 		case kcLockPlaybackToRows:      OnLockPatternRows(); return wParam;
@@ -4872,16 +4870,19 @@ void CViewPattern::MoveCursor(bool moveRight)
 		if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP) && m_Cursor.IsInFirstColumn())
 		{
 			// Wrap around to last channel
-			SetCurrentColumn(GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
+			SetCurrentColumn(GetDocument()->GetNumChannels() - 1, LastVisibleColumn());
 		} else if(!m_Cursor.IsInFirstColumn())
 		{
-			m_Cursor.Move(0, 0, -1);
+			do
+			{
+				m_Cursor.Move(0, 0, -1);
+			} while(!m_visibleColumns[m_Cursor.GetColumnType()]);
 			SetCurrentColumn(m_Cursor);
 		}
 	} else
 	{
 		// Move cursor one column to the right
-		const PatternCursor rightmost(0, GetDocument()->GetNumChannels() - 1, m_nDetailLevel);
+		const PatternCursor rightmost(0, GetDocument()->GetNumChannels() - 1, LastVisibleColumn());
 		if(m_Cursor.CompareColumn(rightmost) >= 0)
 		{
 			if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_WRAP))
@@ -4897,7 +4898,7 @@ void CViewPattern::MoveCursor(bool moveRight)
 			do
 			{
 				m_Cursor.Move(0, 0, 1);
-			} while(m_Cursor.GetColumnType() > m_nDetailLevel);
+			} while(!m_visibleColumns[m_Cursor.GetColumnType()]);
 			SetCurrentColumn(m_Cursor);
 		}
 	}
@@ -6269,7 +6270,7 @@ CHANNELINDEX CViewPattern::FindGroupRecordChannel(RecordGroup recordGroup, bool 
 }
 
 
-void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
+void CViewPattern::OnClearField(const std::bitset<PatternCursor::numColumns> mask, bool step, bool ITStyle)
 {
 	CSoundFile *sndFile = GetSoundFile();
 	if(sndFile == nullptr || !IsEditingEnabled_bmsg())
@@ -6287,7 +6288,7 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 	ModCommand &target = GetCursorCommand();
 	ModCommand oldcmd = target;
 
-	if(mask.note)
+	if(mask[PatternCursor::noteColumn])
 	{
 		// Clear note
 		if(target.IsPcNote())
@@ -6303,29 +6304,29 @@ void CViewPattern::OnClearField(const RowMask &mask, bool step, bool ITStyle)
 			}
 		}
 	}
-	if(mask.instrument)
+	if(mask[PatternCursor::instrColumn])
 	{
 		// Clear instrument
 		target.instr = 0;
 	}
-	if(mask.volume)
+	if(mask[PatternCursor::volumeColumn])
 	{
 		// Clear volume effect
 		target.volcmd = VOLCMD_NONE;
 		target.vol = 0;
 	}
-	if(mask.command)
+	if(mask[PatternCursor::effectColumn])
 	{
 		// Clear effect command
 		target.command = CMD_NONE;
 	}
-	if(mask.parameter)
+	if(mask[PatternCursor::paramColumn])
 	{
 		// Clear effect parameter
 		target.param = 0;
 	}
 
-	if((mask.command || mask.parameter) && (target.IsPcNote()))
+	if((mask[PatternCursor::effectColumn] || mask[PatternCursor::paramColumn]) && (target.IsPcNote()))
 	{
 		target.SetValueEffectCol(0);
 	}

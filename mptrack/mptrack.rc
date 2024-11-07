@@ -3227,15 +3227,13 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_SAMPLE_TRIM          "Delete everything except the current selection\nTrim Sample"
-    ID_FILE_SAVEMIDI        "Export the current song to a standard MIDI file"
-    ID_INSTRUMENT_SAMPLEMAP "Edit the sample map"
-    ID_SAMPLE_ZOOMUP        "Zoom In"
-    ID_SAMPLE_ZOOMDOWN      "Zoom Out"
-    ID_PATTERNDETAIL_LO     "Low pattern detail level\nLow pattern detail level"
-    ID_PATTERNDETAIL_MED    "Medium pattern detail level\nMedium pattern detail level"
-    ID_PATTERNDETAIL_HI     "High pattern detail level\nHigh pattern detail level"
-    ID_PATTERN_AMPLIFY      "Amplify selection\nAmplify"
+    ID_SAMPLE_TRIM             "Delete everything except the current selection\nTrim Sample"
+    ID_FILE_SAVEMIDI           "Export the current song to a standard MIDI file"
+    ID_INSTRUMENT_SAMPLEMAP    "Edit the sample map"
+    ID_SAMPLE_ZOOMUP           "Zoom In"
+    ID_SAMPLE_ZOOMDOWN         "Zoom Out"
+    ID_PATTERNDETAIL_DROPDOWN  "Toggle visibility of pattern columns\nToggle visibility of pattern columns"
+    ID_PATTERN_AMPLIFY         "Amplify selection\nAmplify"
 END
 
 STRINGTABLE

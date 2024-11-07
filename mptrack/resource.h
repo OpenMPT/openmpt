@@ -1092,11 +1092,12 @@
 #define ID_SAMPLE_SLICE                 32885
 #define ID_INSTRUMENT_SAMPLEMAP         32886
 #define ID_SAMPLE_MONOCONVERT           32887
+#define ID_PATTERNDETAIL_DROPDOWN       32888
 #define ID_SAMPLE_ZOOMUP                32889
 #define ID_SAMPLE_ZOOMDOWN              32890
-#define ID_PATTERNDETAIL_LO             32891
-#define ID_PATTERNDETAIL_MED            32892
-#define ID_PATTERNDETAIL_HI             32893
+#define ID_PATTERNDETAIL_INSTR          32891
+#define ID_PATTERNDETAIL_VOLUME         32892
+#define ID_PATTERNDETAIL_EFFECT         32893
 #define ID_INSTRUMENT_DUPLICATE         32894
 #define ID_PATTERN_AMPLIFY              32895
 #define ID_MODTREE_MUTE                 32896

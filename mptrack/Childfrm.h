@@ -37,9 +37,9 @@ struct PATTERNVIEWSTATE
 	PATTERNINDEX nPattern = 0;
 	PatternCursor cursor = 0;
 	PatternRect selection;
-	PatternCursor::Columns nDetailLevel = PatternCursor::firstColumn;
 	ORDERINDEX nOrder = 0;
 	ORDERINDEX initialOrder = ORDERINDEX_INVALID;
+	std::bitset<PatternCursor::numColumns> visibleColumns = std::bitset<PatternCursor::numColumns>{}.set();
 	bool initialized = false;
 };
 

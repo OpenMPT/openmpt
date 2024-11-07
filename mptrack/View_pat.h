@@ -65,50 +65,6 @@ public:
 inline constexpr ROWINDEX MAX_SPACING = MAX_PATTERN_ROWS;
 
 
-// Struct for controlling selection clearing. This is used to define which data fields should be cleared.
-struct RowMask
-{
-	bool note : 1;
-	bool instrument : 1;
-	bool volume : 1;
-	bool command : 1;
-	bool parameter : 1;
-
-	// Default row mask (all rows are selected)
-	RowMask()
-	{
-		note = instrument = volume = command = parameter = true;
-	};
-
-	// Construct mask from list
-	RowMask(bool n, bool i, bool v, bool c, bool p)
-	{
-		note = n;
-		instrument = i;
-		volume = v;
-		command = c;
-		parameter = p;
-	}
-
-	// Construct mask from column index
-	RowMask(const PatternCursor &cursor)
-	{
-		const PatternCursor::Columns column = cursor.GetColumnType();
-
-		note = (column == PatternCursor::noteColumn);
-		instrument = (column == PatternCursor::instrColumn);
-		volume = (column == PatternCursor::volumeColumn);
-		command = (column == PatternCursor::effectColumn);
-		parameter = (column == PatternCursor::paramColumn);
-	}
-
-	void Clear()
-	{
-		note = instrument = volume = command = parameter = false;
-	}
-};
-
-
 struct PatternEditPos
 {
 	ROWINDEX row = ROWINDEX_INVALID;
@@ -172,7 +128,7 @@ protected:
 
 	int m_nXScroll = 0, m_nYScroll = 0;
 	int m_ledWidth = 0, m_ledHeight = 0;
-	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
+	std::bitset<PatternCursor::numColumns> m_visibleColumns;
 
 	// Cursor and selection positions
 	PatternCursor m_Cursor;               // Current cursor position in pattern.
@@ -254,6 +210,7 @@ public:
 	void UpdateIndicator(bool updateAccessibility = true);
 	void UpdateXInfoText();
 	void UpdateColors();
+	void UpdateVisibileColumns(std::bitset<PatternCursor::numColumns> visibleColumns);
 
 	CString GetCursorDescription() const;
 
@@ -372,7 +329,7 @@ public:
 	PATTERNINDEX GetNextPattern() const;
 
 	void SetSpacing(int n);
-	void OnClearField(const RowMask &mask, bool step, bool ITStyle = false);
+	void OnClearField(const std::bitset<PatternCursor::numColumns> mask, bool step, bool ITStyle = false);
 	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 
 	void FindInstrument();
@@ -428,7 +385,7 @@ protected:
 	afx_msg void OnEditPasteFlood() { ExecutePaste(PatternClipboard::pmPasteFlood); };
 	afx_msg void OnEditPushForwardPaste() { ExecutePaste(PatternClipboard::pmPushForward); };
 
-	afx_msg void OnClearSelection(bool ITStyle = false, RowMask sb = RowMask());
+	afx_msg void OnClearSelection(bool ITStyle = false, std::bitset<PatternCursor::numColumns> sb = std::bitset<PatternCursor::numColumns>{}.set());
 	afx_msg void OnGrowSelection();
 	afx_msg void OnShrinkSelection();
 	afx_msg void OnEditSelectAll();
@@ -592,6 +549,8 @@ private:
 	void StopPreview(ROWINDEX row, CHANNELINDEX channel);
 
 	void CreateVUMeterBitmap();
+
+	PatternCursor::Columns LastVisibleColumn() const noexcept;
 
 public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);

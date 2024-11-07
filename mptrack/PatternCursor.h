@@ -31,6 +31,7 @@ public:
 		effectColumn,
 		paramColumn,
 		lastColumn = paramColumn,
+		numColumns
 	};
 
 protected:

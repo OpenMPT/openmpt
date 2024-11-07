@@ -14,7 +14,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "Globals.h"
-#include "PatternCursor.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -198,7 +197,6 @@ protected:
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinSequence;
 	CModControlBar m_ToolBar;
 	INSTRUMENTINDEX m_nInstrument = 0;
-	PatternCursor::Columns m_nDetailLevel = PatternCursor::lastColumn;  // Visible Columns
 	bool m_bRecord = false, m_bVUMeters = false, m_bPluginNames = false;
 	bool m_instrDropdownOpen = false;
 
@@ -228,7 +226,8 @@ public:
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlPatterns)
-	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
+	afx_msg void OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSequenceNext();
 	afx_msg void OnSequencePrev();
 	afx_msg void OnChannelManager();
@@ -239,7 +238,6 @@ protected:
 	afx_msg void OnPatternMerge();
 	afx_msg void OnPatternStop();
 	afx_msg void OnPatternPlay();
-	afx_msg void OnPatternPlayNoLoop();
 	afx_msg void OnPatternPlayRow();
 	afx_msg void OnPatternPlayFromStart();
 	afx_msg void OnPatternRecord();
@@ -262,9 +260,10 @@ protected:
 	afx_msg void OnPatternNameChanged();
 	afx_msg void OnSequenceNameChanged();
 	afx_msg void OnChordEditor();
-	afx_msg void OnDetailLo();
-	afx_msg void OnDetailMed();
-	afx_msg void OnDetailHi();
+	afx_msg void OnDetailSwitch();
+	afx_msg void OnDetailInstr();
+	afx_msg void OnDetailVolume();
+	afx_msg void OnDetailEffect();
 	afx_msg void OnEditUndo();
 	afx_msg void OnUpdateRecord(CCmdUI *pCmdUI);
 	afx_msg void TogglePluginEditor();

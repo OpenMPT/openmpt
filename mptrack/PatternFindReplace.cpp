@@ -40,7 +40,7 @@ void CViewPattern::OnEditFind()
 		} else if(sndFile.Patterns.IsValidPat(m_nPattern))
 		{
 			const CPattern &pat = sndFile.Patterns[m_nPattern];
-			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels(), m_nDetailLevel);
+			m_Cursor.Sanitize(pat.GetNumRows(), pat.GetNumChannels(), LastVisibleColumn());
 			m = *pat.GetpModCommand(m_Cursor.GetRow(), m_Cursor.GetChannel());
 		}
 
@@ -155,7 +155,7 @@ void CViewPattern::OnEditFindNext()
 
 			for(; chn <= lastChannel; chn++, m++)
 			{
-				RowMask findWhere;
+				std::bitset<PatternCursor::numColumns> findWhere = std::bitset<PatternCursor::numColumns>{}.set();
 
 				if(FindReplace::instance.findFlags[FindReplace::InPatSelection])
 				{
@@ -169,42 +169,31 @@ void CViewPattern::OnEditFindNext()
 						{
 							PatternCursor cursor(row, chn, static_cast<PatternCursor::Columns>(i));
 							if(!FindReplace::instance.selection.Contains(cursor))
-							{
-								switch(i)
-								{
-								case PatternCursor::noteColumn:		findWhere.note = false; break;
-								case PatternCursor::instrColumn:	findWhere.instrument = false; break;
-								case PatternCursor::volumeColumn:	findWhere.volume = false; break;
-								case PatternCursor::effectColumn:	findWhere.command = false; break;
-								case PatternCursor::paramColumn:	findWhere.parameter = false; break;
-								}
-							}
+								findWhere.reset(i);
 						}
 					} else
 					{
 						// For channels inside the selection, we have an easier job to solve.
 						if(!FindReplace::instance.selection.Contains(PatternCursor(row, chn)))
-						{
-							findWhere.Clear();
-						}
+							findWhere.reset();
 					}
 				}
 
 				if(m->instr > 0)
 					lastInstr[chn] = m->instr;
 
-				if((FindReplace::instance.findFlags[FindReplace::Note] && (!findWhere.note || m->note < FindReplace::instance.findNoteMin || m->note > FindReplace::instance.findNoteMax))
-					|| (FindReplace::instance.findFlags[FindReplace::Instr] && (!findWhere.instrument || m->instr < FindReplace::instance.findInstrMin || m->instr > FindReplace::instance.findInstrMax)))
+				if((FindReplace::instance.findFlags[FindReplace::Note] && (!findWhere[PatternCursor::noteColumn] || m->note < FindReplace::instance.findNoteMin || m->note > FindReplace::instance.findNoteMax))
+					|| (FindReplace::instance.findFlags[FindReplace::Instr] && (!findWhere[PatternCursor::instrColumn] || m->instr < FindReplace::instance.findInstrMin || m->instr > FindReplace::instance.findInstrMax)))
 				{
 					continue;
 				}
 
 				if(!m->IsPcNote())
 				{
-					if((FindReplace::instance.findFlags[FindReplace::VolCmd] && (!findWhere.volume || m->volcmd != FindReplace::instance.findVolCmd))
-						|| (FindReplace::instance.findFlags[FindReplace::Volume] && (!findWhere.volume || m->volcmd == VOLCMD_NONE || m->vol < FindReplace::instance.findVolumeMin || m->vol > FindReplace::instance.findVolumeMax))
-						|| (FindReplace::instance.findFlags[FindReplace::Command] && (!findWhere.command || m->command != FindReplace::instance.findCommand))
-						|| (FindReplace::instance.findFlags[FindReplace::Param] && (!findWhere.parameter || m->command == CMD_NONE ||  m->param < FindReplace::instance.findParamMin || m->param > FindReplace::instance.findParamMax))
+					if((FindReplace::instance.findFlags[FindReplace::VolCmd] && (!findWhere[PatternCursor::volumeColumn] || m->volcmd != FindReplace::instance.findVolCmd))
+						|| (FindReplace::instance.findFlags[FindReplace::Volume] && (!findWhere[PatternCursor::volumeColumn] || m->volcmd == VOLCMD_NONE || m->vol < FindReplace::instance.findVolumeMin || m->vol > FindReplace::instance.findVolumeMax))
+						|| (FindReplace::instance.findFlags[FindReplace::Command] && (!findWhere[PatternCursor::effectColumn] || m->command != FindReplace::instance.findCommand))
+						|| (FindReplace::instance.findFlags[FindReplace::Param] && (!findWhere[PatternCursor::paramColumn] || m->command == CMD_NONE ||  m->param < FindReplace::instance.findParamMin || m->param > FindReplace::instance.findParamMax))
 						|| FindReplace::instance.findFlags[FindReplace::PCParam]
 						|| FindReplace::instance.findFlags[FindReplace::PCValue])
 					{
@@ -212,8 +201,8 @@ void CViewPattern::OnEditFindNext()
 					}
 				} else
 				{
-					if((FindReplace::instance.findFlags[FindReplace::PCParam] && (!findWhere.volume || m->GetValueVolCol() < FindReplace::instance.findParamMin || m->GetValueVolCol() > FindReplace::instance.findParamMax))
-						|| (FindReplace::instance.findFlags[FindReplace::PCValue] && (!(findWhere.command || findWhere.parameter) || m->GetValueEffectCol() < FindReplace::instance.findVolumeMin || m->GetValueEffectCol() > FindReplace::instance.findVolumeMax))
+					if((FindReplace::instance.findFlags[FindReplace::PCParam] && (!findWhere[PatternCursor::volumeColumn] || m->GetValueVolCol() < FindReplace::instance.findParamMin || m->GetValueVolCol() > FindReplace::instance.findParamMax))
+						|| (FindReplace::instance.findFlags[FindReplace::PCValue] && (!(findWhere[PatternCursor::effectColumn] || findWhere[PatternCursor::paramColumn]) || m->GetValueEffectCol() < FindReplace::instance.findVolumeMin || m->GetValueEffectCol() > FindReplace::instance.findVolumeMax))
 						|| FindReplace::instance.findFlags[FindReplace::VolCmd]
 						|| FindReplace::instance.findFlags[FindReplace::Volume]
 						|| FindReplace::instance.findFlags[FindReplace::Command]
