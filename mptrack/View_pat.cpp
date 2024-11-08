@@ -201,6 +201,11 @@ void CViewPattern::OnInitialUpdate()
 	m_nLastPlayedRow = 0;
 	m_nLastPlayedOrder = ORDERINDEX_INVALID;
 	m_prevChordNote = NOTE_NONE;
+
+	m_visibleColumns.set();
+	CModDoc *modDoc = GetDocument();
+	if(modDoc->GetModType() == MOD_TYPE_MOD && !modDoc->GetSoundFile().m_SongFlags[SONG_IMPORTED] && TrackerSettings::Instance().autoHideVolumeColumnForMOD)
+		m_visibleColumns.reset(PatternCursor::volumeColumn);
 }
 
 
@@ -4208,7 +4213,8 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		if(lParam)
 		{
 			PatternViewState *pState = (PatternViewState *)lParam;
-			UpdateVisibileColumns(pState->visibleColumns);
+			if(pState->visibleColumns.any())
+				UpdateVisibileColumns(pState->visibleColumns);
 			if(pState->initialized)
 			{
 				SetCurrentPattern(pState->nPattern);

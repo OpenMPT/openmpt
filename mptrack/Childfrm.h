@@ -42,7 +42,7 @@ struct PatternViewState
 	PatternRect selection;
 	ORDERINDEX nOrder = 0;
 	ORDERINDEX initialOrder = ORDERINDEX_INVALID;
-	std::bitset<PatternCursor::numColumns> visibleColumns = std::bitset<PatternCursor::numColumns>{}.set();
+	std::bitset<PatternCursor::numColumns> visibleColumns;
 	bool initialized = false;
 
 	std::string Serialize() const;

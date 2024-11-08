@@ -1,7 +1,7 @@
 /*
  * TrackerSettings.cpp
  * -------------------
- * Purpose: Code for managing, loading and saving all applcation settings.
+ * Purpose: Code for managing, loading and saving all application settings.
  * Notes  : (currently none)
  * Authors: Olivier Lapicque
  *          OpenMPT Devs
@@ -281,6 +281,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, patternAccessibilityFormat(conf, UL_("Pattern Editor"), UL_("AccessibilityFormat"), _T("Row %row%, Channel %channel%, %column_type%: %column_description%"))
 	, patternAlwaysDrawWholePatternOnScrollSlow(conf, UL_("Pattern Editor"), UL_("AlwaysDrawWholePatternOnScrollSlow"), false)
 	, orderListOldDropBehaviour(conf, UL_("Pattern Editor"), UL_("OrderListOldDropBehaviour"), false)
+	, autoHideVolumeColumnForMOD(conf, UL_("Pattern Editor"), UL_("AutoHideVolumeColumnForMOD"), false)
 	// Sample Editor
 	, m_SampleUndoBufferSize(conf, UL_("Sample Editor"), UL_("UndoBufferSize"), SampleUndoBufferSize())
 	, sampleEditorKeyBehaviour(conf, UL_("Sample Editor"), UL_("KeyBehaviour"), seNoteOffOnNewKey)

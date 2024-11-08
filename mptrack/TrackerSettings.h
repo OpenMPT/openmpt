@@ -808,6 +808,7 @@ public:
 	Setting<CString> patternAccessibilityFormat;
 	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
 	CachedSetting<bool> orderListOldDropBehaviour;
+	Setting<bool> autoHideVolumeColumnForMOD;
 
 	// Sample Editor
 
