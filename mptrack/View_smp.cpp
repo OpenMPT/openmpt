@@ -728,7 +728,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_LOADSTATE:
 		if (lParam)
 		{
-			SAMPLEVIEWSTATE *pState = (SAMPLEVIEWSTATE *)lParam;
+			SampleViewState *pState = (SampleViewState *)lParam;
 			if (pState->nSample == m_nSample)
 			{
 				SetCurSel(pState->dwBeginSel, pState->dwEndSel);
@@ -742,7 +742,7 @@ LRESULT CViewSample::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_SAVESTATE:
 		if (lParam)
 		{
-			SAMPLEVIEWSTATE *pState = (SAMPLEVIEWSTATE *)lParam;
+			SampleViewState *pState = (SampleViewState *)lParam;
 			pState->dwScrollPos = m_nScrollPosX;
 			pState->dwBeginSel = m_dwBeginSel;
 			pState->dwEndSel = m_dwEndSel;

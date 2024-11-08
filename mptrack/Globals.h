@@ -112,6 +112,7 @@ public:
 class CModControlView: public CView
 {
 public:
+	// Note: Page IDs are serialized to module window settings!
 	enum class Page
 	{
 		Unknown = -1,
@@ -121,12 +122,12 @@ public:
 		Samples,
 		Instruments,
 		Comments,
-		MaxPages
+		NumPages
 	};
 
 protected:
 	CModTabCtrl m_TabCtrl;
-	std::array<CModControlDlg *, int(Page::MaxPages)> m_Pages = {{}};
+	std::array<CModControlDlg *, int(Page::NumPages)> m_Pages = {{}};
 	Page m_nActiveDlg = Page::Unknown;
 	int m_nInstrumentChanged = -1;
 	HWND m_hWndView = nullptr, m_hWndMDI = nullptr;

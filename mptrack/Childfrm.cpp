@@ -414,34 +414,52 @@ const char *CChildFrame::GetCurrentViewClassName() const
 }
 
 
-std::string CChildFrame::SerializeView() const
+void CChildFrame::SaveAllViewStates()
 {
+	void *ptr = nullptr;
+	if(strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
+		ptr = &m_ViewPatterns;
+	else if(strcmp(CViewSample::classCViewSample.m_lpszClassName, m_szCurrentViewClassName) == 0)
+		ptr = &m_ViewSamples;
+	else if(strcmp(CViewInstrument::classCViewInstrument.m_lpszClassName, m_szCurrentViewClassName) == 0)
+		ptr = &m_ViewInstruments;
+	else if(strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
+		ptr = &m_ViewGeneral;
+	else if(strcmp(CViewComments::classCViewComments.m_lpszClassName, m_szCurrentViewClassName) == 0)
+		ptr = &m_ViewComments;
+	::SendMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SAVESTATE, reinterpret_cast<LPARAM>(ptr));
+}
+
+
+std::string CChildFrame::SerializeView()
+{
+	SaveAllViewStates();
+
 	std::ostringstream f(std::ios::out | std::ios::binary);
 	// Version
-	mpt::IO::WriteVarInt(f, 0u);
+	mpt::IO::WriteVarInt(f, 1u);
 	// Current page
 	mpt::IO::WriteVarInt(f, static_cast<uint8>(GetModControlView()->GetActivePage()));
 
-	CModControlView *view = GetModControlView();
-	if (strcmp(CViewPattern::classCViewPattern.m_lpszClassName, m_szCurrentViewClassName) == 0)
+	const auto Serialize = [](std::ostringstream &f, CModControlView::Page page, const std::string &s)
 	{
-		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTORDER));	// Order number
-	} else if (strcmp(CViewSample::classCViewSample.m_lpszClassName, m_szCurrentViewClassName) == 0)
-	{
-		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Sample number
-	} else if (strcmp(CViewInstrument::classCViewInstrument.m_lpszClassName, m_szCurrentViewClassName) == 0)
-	{
-		mpt::IO::WriteVarInt(f, (uint32)view->SendMessage(WM_MOD_CTRLMSG, CTRLMSG_GETCURRENTINSTRUMENT));	// Instrument number
-	}
-	return f.str();
+		mpt::IO::WriteVarInt(f, static_cast<uint8>(page));
+		mpt::IO::WriteVarInt(f, s.size());
+		mpt::IO::WriteRaw(f, s.data(), s.size());
+	};
+	Serialize(f, CModControlView::Page::Patterns, m_ViewPatterns.Serialize());
+	Serialize(f, CModControlView::Page::Samples, m_ViewSamples.Serialize());
+	Serialize(f, CModControlView::Page::Instruments, m_ViewInstruments.Serialize());
+
+	return std::move(f).str();
 }
 
 
 void CChildFrame::DeserializeView(FileReader &file)
 {
 	uint32 version, page;
-	if(file.ReadVarInt(version) && version == 0 &&
-		file.ReadVarInt(page) && page >= 0 && static_cast<CModControlView::Page>(page) < CModControlView::Page::MaxPages)
+	if(file.ReadVarInt(version) && version < 2 &&
+		file.ReadVarInt(page) && page >= 0 && static_cast<CModControlView::Page>(page) < CModControlView::Page::NumPages)
 	{
 		UINT pageDlg = 0;
 		switch(static_cast<CModControlView::Page>(page))
@@ -451,24 +469,51 @@ void CChildFrame::DeserializeView(FileReader &file)
 			break;
 		case CModControlView::Page::Patterns:
 			pageDlg = IDD_CONTROL_PATTERNS;
-			file.ReadVarInt(m_ViewPatterns.initialOrder);
+			if(version == 0)
+				m_ViewPatterns.Deserialize(file);
 			break;
 		case CModControlView::Page::Samples:
 			pageDlg = IDD_CONTROL_SAMPLES;
-			file.ReadVarInt(m_ViewSamples.initialSample);
+			if(version == 0)
+				m_ViewSamples.Deserialize(file);
 			break;
 		case CModControlView::Page::Instruments:
 			pageDlg = IDD_CONTROL_INSTRUMENTS;
-			file.ReadVarInt(m_ViewInstruments.initialInstrument);
+			if(version == 0)
+				m_ViewInstruments.Deserialize(file);
 			break;
 		case CModControlView::Page::Comments:
 			pageDlg = IDD_CONTROL_COMMENTS;
 			break;
 		case CModControlView::Page::Unknown:
-		case CModControlView::Page::MaxPages:
+		case CModControlView::Page::NumPages:
 			break;
 		}
-		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg, (LPARAM)-1);
+
+		// Version 1 extensions
+		while(file.CanRead(3))
+		{
+			uint32 size = 0;
+			file.ReadVarInt(page);
+			file.ReadVarInt(size);
+			FileReader chunk = file.ReadChunk(size);
+			if(page >= 0 && static_cast<CModControlView::Page>(page) < CModControlView::Page::NumPages && chunk.IsValid())
+			{
+				switch(static_cast<CModControlView::Page>(page))
+				{
+				case CModControlView::Page::Globals:     m_ViewGeneral.Deserialize(chunk); break;
+				case CModControlView::Page::Patterns:    m_ViewPatterns.Deserialize(chunk); break;
+				case CModControlView::Page::Samples:     m_ViewSamples.Deserialize(chunk); break;
+				case CModControlView::Page::Instruments: m_ViewInstruments.Deserialize(chunk); break;
+				case CModControlView::Page::Comments:    m_ViewComments.Deserialize(chunk); break;
+				case CModControlView::Page::Unknown:
+				case CModControlView::Page::NumPages:
+					break;
+				}
+			}
+		}
+
+		GetModControlView()->PostMessage(WM_MOD_ACTIVATEVIEW, pageDlg, LPARAM(-1));
 	}
 }
 
@@ -481,5 +526,52 @@ void CChildFrame::ToggleViews()
 	else if(focus == GetHwndCtrl() || ::IsChild(GetHwndCtrl(), focus))
 		SendViewMessage(VIEWMSG_SETFOCUS);
 }
+
+
+std::string PatternViewState::Serialize() const
+{
+	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::IO::WriteVarInt(f, initialized ? nOrder : initialOrder);
+	mpt::IO::WriteVarInt(f, visibleColumns.to_ulong());
+	return std::move(f).str();
+}
+
+
+void PatternViewState::Deserialize(FileReader &f)
+{
+	f.ReadVarInt(initialOrder);
+	unsigned long columns = 0;
+	if(f.ReadVarInt(columns))
+		visibleColumns = columns;
+}
+
+
+std::string SampleViewState::Serialize() const
+{
+	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::IO::WriteVarInt(f, nSample ? nSample : initialSample);
+	return std::move(f).str();
+}
+
+
+void SampleViewState::Deserialize(FileReader &f)
+{
+	f.ReadVarInt(initialSample);
+}
+
+
+std::string InstrumentViewState::Serialize() const
+{
+	std::ostringstream f(std::ios::out | std::ios::binary);
+	mpt::IO::WriteVarInt(f, instrument ? instrument : initialInstrument);
+	return std::move(f).str();
+}
+
+
+void InstrumentViewState::Deserialize(FileReader &f)
+{
+	f.ReadVarInt(initialInstrument);
+}
+
 
 OPENMPT_NAMESPACE_END

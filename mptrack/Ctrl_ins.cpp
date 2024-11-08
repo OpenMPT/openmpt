@@ -1214,7 +1214,7 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	m_CbnMixPlug.Update(PluginComboBox::Config{PluginComboBox::ShowNoPlugin | PluginComboBox::ShowEmptySlots}, m_sndFile);
 
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-	INSTRUMENTVIEWSTATE &instrumentState = pFrame->GetInstrumentViewState();
+	InstrumentViewState &instrumentState = pFrame->GetInstrumentViewState();
 	if(instrumentState.initialInstrument != 0)
 	{
 		m_nInstrument = instrumentState.initialInstrument;

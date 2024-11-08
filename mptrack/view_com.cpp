@@ -123,7 +123,7 @@ void CViewComments::OnInitialUpdate()
 
 	if (pFrame)
 	{
-		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
+		CommentsViewState &commentState = pFrame->GetCommentViewState();
 		if (commentState.initialized)
 		{
 			m_nListId = commentState.nId;
@@ -154,7 +154,7 @@ void CViewComments::OnDestroy()
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 	if (pFrame)
 	{
-		COMMENTVIEWSTATE &commentState = pFrame->GetCommentViewState();
+		CommentsViewState &commentState = pFrame->GetCommentViewState();
 		commentState.initialized = true;
 		commentState.nId = m_nListId;
 	}

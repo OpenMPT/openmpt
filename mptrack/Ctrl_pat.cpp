@@ -618,7 +618,7 @@ void CCtrlPatterns::OnActivatePage(LPARAM lParam)
 		CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
 
 		// Restore all save pattern state, except pattern number which we might have just set.
-		PATTERNVIEWSTATE &patternViewState = pFrame->GetPatternViewState();
+		PatternViewState &patternViewState = pFrame->GetPatternViewState();
 		if(patternViewState.initialOrder != ORDERINDEX_INVALID)
 		{
 			if(CMainFrame::GetMainFrame()->GetModPlaying() != &m_modDoc)

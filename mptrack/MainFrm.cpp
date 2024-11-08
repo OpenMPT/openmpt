@@ -2965,7 +2965,7 @@ void CMainFrame::OnHelp()
 				case CModControlView::Page::Instruments: page = "::/Instruments.html"; break;
 				case CModControlView::Page::Comments: page = "::/Comments.html"; break;
 				case CModControlView::Page::Unknown: /* nothing */ break;
-				case CModControlView::Page::MaxPages: /* nothing */ break;
+				case CModControlView::Page::NumPages: /* nothing */ break;
 			}
 		}
 	}

@@ -4207,7 +4207,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_LOADSTATE:
 		if(lParam)
 		{
-			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
+			PatternViewState *pState = (PatternViewState *)lParam;
 			UpdateVisibileColumns(pState->visibleColumns);
 			if(pState->initialized)
 			{
@@ -4222,7 +4222,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_SAVESTATE:
 		if(lParam)
 		{
-			PATTERNVIEWSTATE *pState = (PATTERNVIEWSTATE *)lParam;
+			PatternViewState *pState = (PatternViewState *)lParam;
 			pState->initialized = true;
 			pState->nPattern = m_nPattern;
 			pState->cursor = m_Cursor;

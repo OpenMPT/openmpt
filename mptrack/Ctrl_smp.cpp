@@ -386,7 +386,7 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	}
 
 	CChildFrame *pFrame = (CChildFrame *)GetParentFrame();
-	SAMPLEVIEWSTATE &sampleState = pFrame->GetSampleViewState();
+	SampleViewState &sampleState = pFrame->GetSampleViewState();
 	if(sampleState.initialSample != 0)
 	{
 		m_nSample = sampleState.initialSample;
@@ -2853,7 +2853,7 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 CCtrlSamples::SampleSelectionPoints CCtrlSamples::GetSelectionPoints()
 {
 	SampleSelectionPoints points;
-	SAMPLEVIEWSTATE viewstate{};
+	SampleViewState viewstate{};
 	const ModSample &sample = m_sndFile.GetSample(m_nSample);
 
 	SendViewMessage(VIEWMSG_SAVESTATE, reinterpret_cast<LPARAM>(&viewstate));
@@ -2880,7 +2880,7 @@ void CCtrlSamples::SetSelectionPoints(SmpLength nStart, SmpLength nEnd)
 	Limit(nStart, SmpLength(0), sample.nLength);
 	Limit(nEnd, SmpLength(0), sample.nLength);
 
-	SAMPLEVIEWSTATE viewstate{};
+	SampleViewState viewstate{};
 	SendViewMessage(VIEWMSG_SAVESTATE, reinterpret_cast<LPARAM>(&viewstate));
 
 	viewstate.dwBeginSel = nStart;

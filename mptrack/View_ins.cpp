@@ -256,7 +256,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_LOADSTATE:
 		if(lParam)
 		{
-			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
+			InstrumentViewState *pState = (InstrumentViewState *)lParam;
 			if(pState->initialized)
 			{
 				m_zoom = pState->zoom;
@@ -269,11 +269,12 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_SAVESTATE:
 		if(lParam)
 		{
-			INSTRUMENTVIEWSTATE *pState = (INSTRUMENTVIEWSTATE *)lParam;
+			InstrumentViewState *pState = (InstrumentViewState *)lParam;
 			pState->initialized = true;
 			pState->zoom = m_zoom;
 			pState->nEnv = m_nEnv;
 			pState->bGrid = m_bGrid;
+			pState->instrument = m_nInstrument;
 		}
 		break;
 

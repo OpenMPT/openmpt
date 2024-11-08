@@ -317,7 +317,7 @@ void CModControlView::ForceRefresh()
 
 CModControlDlg *CModControlView::GetCurrentControlDlg() const
 {
-	if(m_nActiveDlg >= Page::First && m_nActiveDlg < Page::MaxPages)
+	if(m_nActiveDlg >= Page::First && m_nActiveDlg < Page::NumPages)
 		return m_Pages[static_cast<size_t>(m_nActiveDlg)];
 	else
 		return nullptr;
@@ -357,7 +357,7 @@ bool CModControlView::SetActivePage(Page page, LPARAM lParam)
 			return false;
 	}
 
-	if(page < Page::First || page >= Page::MaxPages || !pMainFrm)
+	if(page < Page::First || page >= Page::NumPages || !pMainFrm)
 		return false;
 
 	CModControlDlg *oldActiveDlg = GetCurrentControlDlg();
@@ -476,7 +476,7 @@ void CModControlView::UpdateView(UpdateHint lHint, CObject *pObject)
 		}
 	}
 	// Update child dialogs
-	for (UINT nIndex=0; nIndex<int(Page::MaxPages); nIndex++)
+	for (UINT nIndex=0; nIndex<int(Page::NumPages); nIndex++)
 	{
 		CModControlDlg *pDlg = m_Pages[nIndex];
 		if ((pDlg) && (pObject != pDlg)) pDlg->UpdateView(UpdateHint(lHint), pObject);
@@ -504,7 +504,7 @@ LRESULT CModControlView::OnActivateModView(WPARAM nIndex, LPARAM lParam)
 
 	if (m_TabCtrl.m_hWnd)
 	{
-		if (static_cast<Page>(nIndex) < Page::MaxPages)
+		if (static_cast<Page>(nIndex) < Page::NumPages)
 		{
 			m_TabCtrl.SetCurSel(static_cast<int>(nIndex));
 			SetActivePage(static_cast<Page>(nIndex), lParam);

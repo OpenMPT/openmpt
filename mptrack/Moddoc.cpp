@@ -2455,7 +2455,7 @@ void CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 
 	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
 	{
-		PATTERNVIEWSTATE patternViewState;
+		PatternViewState patternViewState;
 		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
 
 		pat = patternViewState.nPattern;
@@ -2464,7 +2464,7 @@ void CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 	} else
 	{
 		//patern editor object does not exist (i.e. is not active)  - use saved state.
-		PATTERNVIEWSTATE &patternViewState = pChildFrm->GetPatternViewState();
+		PatternViewState &patternViewState = pChildFrm->GetPatternViewState();
 
 		pat = patternViewState.nPattern;
 		row = patternViewState.cursor.GetRow();
