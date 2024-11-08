@@ -1794,6 +1794,10 @@ CString CViewPattern::GetCursorDescription() const
 			}
 		}
 		break;
+
+	case PatternCursor::numColumns:
+		MPT_ASSERT_NOTREACHED();
+		break;
 	}
 	return s;
 }

@@ -2293,6 +2293,10 @@ void CViewPattern::OnCursorCopy()
 		m_cmdOld.command = m.command;
 		m_cmdOld.param = m.param;
 		break;
+
+	case PatternCursor::numColumns:
+		MPT_ASSERT_NOTREACHED();
+		break;
 	}
 }
 
@@ -2338,6 +2342,10 @@ void CViewPattern::OnCursorPaste()
 			break;
 		m.command = m_cmdOld.command;
 		m.param = m_cmdOld.param;
+		break;
+
+	case PatternCursor::numColumns:
+		MPT_ASSERT_NOTREACHED();
 		break;
 	}
 
@@ -2491,6 +2499,9 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 				[](const ModCommand &start) { return start.command != CMD_NONE || start.IsPcNote(); },
 				[](const ModCommand &start, const ModCommand &end) { return (end.command == start.command || (start.IsNormalVolumeSlide() && end.IsNormalVolumeSlide()) || start.IsPcNote()) && (!start.IsPcNote() || end.IsPcNote()); });
 			break;
+		case PatternCursor::numColumns:
+			MPT_ASSERT_NOTREACHED();
+			break;
 		}
 
 		if(sweepSelection.GetNumRows() > 1)
@@ -2525,6 +2536,9 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			case PatternCursor::effectColumn:
 			case PatternCursor::paramColumn:
 				description = "Interpolate Effect Column";
+				break;
+			case PatternCursor::numColumns:
+				MPT_ASSERT_NOTREACHED();
 				break;
 			}
 			PrepareUndo(m_Selection, description);

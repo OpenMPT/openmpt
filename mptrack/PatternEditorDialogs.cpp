@@ -437,6 +437,9 @@ bool CEditCommand::ShowEditWindow(PATTERNINDEX pat, const PatternCursor &cursor,
 	case PatternCursor::paramColumn:
 		sldParam.SetFocus();
 		break;
+	case PatternCursor::numColumns:
+		MPT_ASSERT_NOTREACHED();
+		break;
 	}
 
 	// Update Window Title
