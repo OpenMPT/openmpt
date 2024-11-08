@@ -532,7 +532,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 		return false;
 
 	FileReader smpFile{mpt::as_span(SampleData)};
-	const mpt::span<const uint8> sampleLengths = isFC14 ? mpt::as_span(waveTableLengths) : mpt::as_span(SampleLengths);
+	const auto sampleLengths = isFC14 ? mpt::span<const uint8>(waveTableLengths) : mpt::as_span(SampleLengths);
 	SampleIO sampleIO{SampleIO::_8bit, SampleIO::mono, SampleIO::bigEndian, SampleIO::signedPCM};
 	for(SAMPLEINDEX smp = 0; smp < sampleLengths.size(); smp++)
 	{
