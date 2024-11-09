@@ -1744,13 +1744,20 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 	//Note: pszText points to a TCHAR array of length 256 (see CChildFrame::OnToolTipText).
 	//Note2: If there's problems in getting tooltips showing for certain tools,
 	//		 setting the tab order may have effect.
-	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-
-	if(pIns == nullptr) return FALSE;
 	if ((pszText) && (uId))
 	{
 		CWnd *wnd = GetDlgItem(uId);
 		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
+		if(!isEnabled && !m_sndFile.GetNumInstruments())
+		{
+			_tcscpy(pszText, _T("Create a new instrument to enable instrument mode."));
+			return TRUE;
+		}
+
+		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
+		if(pIns == nullptr)
+			return FALSE;
+
 		const auto plusMinus = mpt::ToWin(mpt::Charset::UTF8, "\xC2\xB1");
 		const TCHAR *s = nullptr;
 		CommandID cmd = kcNull;
