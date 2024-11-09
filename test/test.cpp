@@ -2866,7 +2866,8 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 1)->note, NOTE_MIN + 12);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(1, 1)->note, NOTE_MIN + 12 + 95);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(2, 1)->note, NOTE_KEYOFF);
-	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(30, 0)->IsEmpty(), true);  // Test for resaved out-of-range note
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 0)->IsEmpty(), true);  // Test for resaved out-of-range note
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsEmpty(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->IsPcNote(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(31, 1)->note, NOTE_MIDDLEC + 12);
@@ -3412,7 +3413,8 @@ static void TestLoadS3MFile(const CSoundFile &sndFile, bool resaved)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(3, 0)->IsEmpty(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(3, 0)->note, NOTE_NONE);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(3, 0)->instr, 99);
-	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(4, 0)->IsEmpty(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(4, 0)->IsEmpty(), true);  // Test for resaved out-of-range note
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetpModCommand(5, 0)->IsEmpty(), true);  // Test for resaved out-of-range note
 
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetNumRows(), 64);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
@@ -3714,6 +3716,8 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		// file still works.
 		GetSoundFile(sndFileContainer).m_nSamples++;
 		GetSoundFile(sndFileContainer).Instruments[1]->Keyboard[110] = GetSoundFile(sndFileContainer).GetNumSamples();
+		GetSoundFile(sndFileContainer).Patterns[1].GetpModCommand(30, 0)->note = NOTE_MIN;        // Should not be saved to file
+		GetSoundFile(sndFileContainer).Patterns[1].GetpModCommand(31, 0)->note = NOTE_MIN + 108;  // Ditto
 
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
@@ -3774,6 +3778,8 @@ static MPT_NOINLINE void TestLoadSaveFile()
 		#ifndef MODPLUG_NO_FILESAVE
 			// Test file saving
 			sndFile.ChnSettings[1].dwFlags.set(CHN_MUTE);
+			sndFile.Patterns[0].GetpModCommand(4, 0)->note = NOTE_MIN;        // Should not be saved to file
+			sndFile.Patterns[0].GetpModCommand(5, 0)->note = NOTE_MIN + 108;  // Ditto
 			sndFile.m_dwLastSavedWithVersion = Version::Current();
 #if MPT_OS_DJGPP
 			SaveS3M(sndFileContainer, filenameBase + P_("ss3"));
