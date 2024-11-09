@@ -86,8 +86,8 @@ protected:
 	CEdit m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat, m_StaticGlobalVolume;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat, m_SpinGlobalVolume;
-	int nCurrentSpeed = 0, nCurrentOctave = 0, nCurrentRowsPerBeat = 0, m_currentGlobalVolume = 0;
-	TEMPO nCurrentTempo;
+	int m_currentSpeed = 0, m_currentOctave = -1, m_currentRowsPerBeat = 0, m_currentGlobalVolume = 0;
+	TEMPO m_currentTempo{1, 0};
 public:
 	CStereoVU m_VuMeter;
 

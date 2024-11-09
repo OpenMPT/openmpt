@@ -234,11 +234,6 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	SetButtons(MainButtons, static_cast<int>(std::size(MainButtons)));
 
-	nCurrentSpeed = 6;
-	nCurrentTempo.Set(125);
-	nCurrentRowsPerBeat = 4;
-	nCurrentOctave = -1;
-
 	// Placeholder rect, text width will be determined later
 	CRect rect{0, 0, SPINNER_WIDTH, SPINNER_HEIGHT};
 
@@ -440,7 +435,7 @@ void CMainToolBar::ToggleVisibility(MainToolBarItem item)
 
 UINT CMainToolBar::GetBaseOctave() const
 {
-	if(nCurrentOctave >= MIN_BASEOCTAVE) return (UINT)nCurrentOctave;
+	if(m_currentOctave >= MIN_BASEOCTAVE) return (UINT)m_currentOctave;
 	return 4;
 }
 
@@ -450,9 +445,9 @@ BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
 	TCHAR s[64];
 
 	if((nOctave < MIN_BASEOCTAVE) || (nOctave > MAX_BASEOCTAVE)) return FALSE;
-	if(nOctave != (UINT)nCurrentOctave)
+	if(nOctave != (UINT)m_currentOctave)
 	{
-		nCurrentOctave = nOctave;
+		m_currentOctave = nOctave;
 		wsprintf(s, _T("Octave %d"), nOctave);
 		m_EditOctave.SetWindowText(s);
 		m_SpinOctave.SetPos(nOctave);
@@ -502,11 +497,11 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	{
 		TCHAR s[32];
 		// Update play/pause button
-		if(nCurrentTempo == TEMPO(0, 0))
+		if(m_currentTempo == TEMPO(0, 0))
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
-		if(nSpeed != nCurrentSpeed)
+		if(nSpeed != m_currentSpeed)
 		{
 			CModDoc *modDoc = pSndFile->GetpModDoc();
 			if(modDoc != nullptr)
@@ -515,29 +510,29 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 				modDoc->UpdateAllViews(InstrumentHint().Envelope());
 			}
 
-			if(nCurrentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
-			nCurrentSpeed = nSpeed;
-			wsprintf(s, _T("%u"), static_cast<unsigned int>(nCurrentSpeed));
+			if(m_currentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
+			m_currentSpeed = nSpeed;
+			wsprintf(s, _T("%u"), static_cast<unsigned int>(m_currentSpeed));
 			m_EditSpeed.SetWindowText(s);
 		}
 		TEMPO nTempo = pSndFile->m_PlayState.m_nMusicTempo;
-		if(nTempo != nCurrentTempo)
+		if(nTempo != m_currentTempo)
 		{
-			if(nCurrentTempo <= TEMPO(0, 0)) m_SpinTempo.EnableWindow(TRUE);
-			nCurrentTempo = nTempo;
-			if(nCurrentTempo.GetFract() == 0)
-				_stprintf(s, _T("%u"), nCurrentTempo.GetInt());
+			if(m_currentTempo <= TEMPO(0, 0)) m_SpinTempo.EnableWindow(TRUE);
+			m_currentTempo = nTempo;
+			if(m_currentTempo.GetFract() == 0)
+				_stprintf(s, _T("%u"), m_currentTempo.GetInt());
 			else
-				_stprintf(s, _T("%.4f"), nCurrentTempo.ToDouble());
+				_stprintf(s, _T("%.4f"), m_currentTempo.ToDouble());
 			m_EditTempo.SetWindowText(s);
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
-		if(nRowsPerBeat != nCurrentRowsPerBeat)
+		if(nRowsPerBeat != m_currentRowsPerBeat)
 		{
-			if(nCurrentRowsPerBeat < 0)
+			if(m_currentRowsPerBeat < 0)
 				m_SpinRowsPerBeat.EnableWindow(TRUE);
-			nCurrentRowsPerBeat = nRowsPerBeat;
-			wsprintf(s, _T("%u"), static_cast<unsigned int>(nCurrentRowsPerBeat));
+			m_currentRowsPerBeat = nRowsPerBeat;
+			wsprintf(s, _T("%u"), static_cast<unsigned int>(m_currentRowsPerBeat));
 			m_EditRowsPerBeat.SetWindowText(s);
 		}
 		int globalVol = pSndFile->m_PlayState.m_nGlobalVolume;
@@ -551,22 +546,22 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		}
 	} else
 	{
-		if(nCurrentTempo > TEMPO(0, 0))
+		if(m_currentTempo > TEMPO(0, 0))
 		{
-			nCurrentTempo.Set(0);
+			m_currentTempo.Set(0);
 			m_EditTempo.SetWindowText(_T("---"));
 			m_SpinTempo.EnableWindow(FALSE);
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
-		if(nCurrentSpeed != -1)
+		if(m_currentSpeed != -1)
 		{
-			nCurrentSpeed = -1;
+			m_currentSpeed = -1;
 			m_EditSpeed.SetWindowText(_T("---"));
 			m_SpinSpeed.EnableWindow(FALSE);
 		}
-		if(nCurrentRowsPerBeat != -1)
+		if(m_currentRowsPerBeat != -1)
 		{
-			nCurrentRowsPerBeat = -1;
+			m_currentRowsPerBeat = -1;
 			m_EditRowsPerBeat.SetWindowText(_T("---"));
 			m_SpinRowsPerBeat.EnableWindow(FALSE);
 		}
@@ -590,11 +585,11 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 	pScrollBar->SetFocus();
 
 	short int oct = (short int)m_SpinOctave.GetPos();
-	if((oct >= MIN_BASEOCTAVE) && ((int)oct != nCurrentOctave))
+	if((oct >= MIN_BASEOCTAVE) && ((int)oct != m_currentOctave))
 	{
 		SetBaseOctave(oct);
 	}
-	if((nCurrentSpeed < 0) || (nCurrentTempo <= TEMPO(0, 0))) return;
+	if((m_currentSpeed < 0) || (m_currentTempo <= TEMPO(0, 0))) return;
 	if((pMainFrm = CMainFrame::GetMainFrame()) != nullptr)
 	{
 		CSoundFile *pSndFile = pMainFrm->GetSoundFilePlaying();
@@ -617,24 +612,24 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 				{
 					newTempo = TEMPO(n, 0);
 				}
-				newTempo += nCurrentTempo;
+				newTempo += m_currentTempo;
 				pSndFile->SetTempo(Clamp(newTempo, specs.GetTempoMin(), specs.GetTempoMax()), true);
 				m_SpinTempo.SetPos(0);
 			}
 			if((n = mpt::signum(m_SpinSpeed.GetPos32())) != 0)
 			{
-				pSndFile->m_PlayState.m_nMusicSpeed = Clamp(uint32(nCurrentSpeed + n), specs.speedMin, specs.speedMax);
+				pSndFile->m_PlayState.m_nMusicSpeed = Clamp(uint32(m_currentSpeed + n), specs.speedMin, specs.speedMax);
 				m_SpinSpeed.SetPos(0);
 			}
 			if((n = m_SpinRowsPerBeat.GetPos32()) != 0)
 			{
 				if(n < 0)
 				{
-					if(nCurrentRowsPerBeat > 1)
-						SetRowsPerBeat(nCurrentRowsPerBeat - 1);
-				} else if(static_cast<ROWINDEX>(nCurrentRowsPerBeat) < pSndFile->m_PlayState.m_nCurrentRowsPerMeasure)
+					if(m_currentRowsPerBeat > 1)
+						SetRowsPerBeat(m_currentRowsPerBeat - 1);
+				} else if(static_cast<ROWINDEX>(m_currentRowsPerBeat) < pSndFile->m_PlayState.m_nCurrentRowsPerMeasure)
 				{
-						SetRowsPerBeat(nCurrentRowsPerBeat + 1);
+						SetRowsPerBeat(m_currentRowsPerBeat + 1);
 				}
 				m_SpinRowsPerBeat.SetPos(0);
 
