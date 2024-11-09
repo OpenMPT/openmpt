@@ -124,7 +124,7 @@ int HighDPISupport::GetSystemMetrics(int index, uint32 dpi)
 int HighDPISupport::GetSystemMetrics(int index, HWND hwnd)
 {
 	if(auto instance = GetHighDPISupportData(); instance->m_GetSystemMetricsForDpi)
-		return instance->m_GetSystemMetricsForDpi(index, GetDpiForWindow(hwnd));
+		return instance->m_GetSystemMetricsForDpi(index, HighDPISupport::GetDpiForWindow(hwnd));
 	else
 		return ::GetSystemMetrics(index);
 }
@@ -142,7 +142,7 @@ BOOL HighDPISupport::SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvP
 BOOL HighDPISupport::SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvParam, UINT fWinIni, HWND hwnd)
 {
 	if(auto instance = GetHighDPISupportData(); instance->m_SystemParametersInfoForDpi)
-		return instance->m_SystemParametersInfoForDpi(uiAction, uiParam, pvParam, fWinIni, GetDpiForWindow(hwnd));
+		return instance->m_SystemParametersInfoForDpi(uiAction, uiParam, pvParam, fWinIni, HighDPISupport::GetDpiForWindow(hwnd));
 	else
 		return ::SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
 }
