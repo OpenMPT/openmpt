@@ -1526,17 +1526,17 @@ void CStereoVU::DrawVuMeter(CDC &dc, const CRect &rect, int index, bool redraw)
 		const int cy = std::max(1, rect.Height());
 		int v = (vu * cy) >> 8;
 
-		for(int ry = rect.bottom - 1; ry > rect.top; ry -= 2)
+		for(int ry = rect.bottom - 1; ry >= rect.top; ry -= 2)
 		{
 			const int y0 = rect.bottom - ry;
 			int pen = Clamp((y0 * NUM_VUMETER_PENS) / cy, 0, NUM_VUMETER_PENS - 1);
-			const bool last = (ry == rect.top + 1);
+			const bool last = (ry <= rect.top + 1);
 
 			// Darken everything above volume, unless it's the clip indicator
 			if(v <= y0 && (!last || !clip))
 				pen += NUM_VUMETER_PENS;
 
-			bool draw = redraw || (v < lastV[index] && v<=ry && ry<=lastV[index]) || (lastV[index] < v && lastV[index]<=ry && ry<=v);
+			bool draw = redraw || (v < lastV[index] && v<=y0 && y0<=lastV[index]) || (lastV[index] < v && lastV[index]<=y0 && y0<=v);
 			draw = draw || (last && clip != lastClip[index]);
 			if(draw) dc.FillSolidRect(rect.left, ry, rect.Width(), 1, CMainFrame::gcolrefVuMeter[pen]);
 			if(last) lastClip[index] = clip;
