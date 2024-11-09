@@ -157,6 +157,7 @@ enum ToolbarItemIndex
 #define SPINNER_HEIGHT      SCALEPIXELS(20)
 #define VUMETER_WIDTH       SCALEPIXELS(255)
 #define VUMETER_HEIGHT      SCALEPIXELS(19)
+#define TREEVIEW_PADDING    SCALEPIXELS(3)
 
 static UINT MainButtons[] =
 {
@@ -813,7 +814,7 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	m_pModTree = new CModTree(m_pModTreeData);
 	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
 	m_dwStatus = 0;
-	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + 3;
+	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + TREEVIEW_PADDING;
 	m_sizeDefault.cy = 32767;
 	return l;
 }
@@ -914,7 +915,8 @@ void CModTreeBar::RecalcLayout()
 		int cytree, cydata, cyavail;
 
 		GetClientRect(&rect);
-		cyavail = rect.Height() - 3;
+		const int padding = TREEVIEW_PADDING;
+		cyavail = rect.Height() - padding;
 		if(cyavail < 0) cyavail = 0;
 		cytree = (cyavail * m_nTreeSplitRatio) >> 8;
 		cydata = cyavail - cytree;
@@ -923,18 +925,18 @@ void CModTreeBar::RecalcLayout()
 		{
 			int editHeight = HighDPISupport::ScalePixels(20, m_hWnd);
 			::DeferWindowPos(dwp, *m_pModTree, nullptr, 0, 0, rect.Width(), cytree - editHeight, SWP_NOZORDER | SWP_NOACTIVATE);
-			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + 3, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
+			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + padding, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
 			::DeferWindowPos(dwp, m_filterEdit, *m_pModTree, 0, cytree - editHeight, rect.Width(), editHeight, SWP_NOACTIVATE);
 		} else if(m_filterSource == m_pModTreeData)
 		{
 			int editHeight = HighDPISupport::ScalePixels(20, m_hWnd);
 			::DeferWindowPos(dwp, *m_pModTree, nullptr, 0, 0, rect.Width(), cytree, SWP_NOZORDER | SWP_NOACTIVATE);
-			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + 3, rect.Width(), cydata - editHeight, SWP_NOZORDER | SWP_NOACTIVATE);
-			::DeferWindowPos(dwp, m_filterEdit, *m_pModTreeData, 0, cytree + 3 + cydata - editHeight, rect.Width(), editHeight, SWP_NOACTIVATE);
+			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + padding, rect.Width(), cydata - editHeight, SWP_NOZORDER | SWP_NOACTIVATE);
+			::DeferWindowPos(dwp, m_filterEdit, *m_pModTreeData, 0, cytree + padding + cydata - editHeight, rect.Width(), editHeight, SWP_NOACTIVATE);
 		} else
 		{
 			::DeferWindowPos(dwp, *m_pModTree, nullptr, 0, 0, rect.Width(), cytree, SWP_NOZORDER | SWP_NOACTIVATE);
-			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + 3, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
+			::DeferWindowPos(dwp, *m_pModTreeData, nullptr, 0, cytree + padding, rect.Width(), cydata, SWP_NOZORDER | SWP_NOACTIVATE);
 		}
 		::EndDeferWindowPos(dwp);
 	}
@@ -947,7 +949,7 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 	CSize sz;
 	m_sizeDefault.cx = width;
 	m_sizeDefault.cy = 32767;
-	sz.cx = width + 3;
+	sz.cx = width + TREEVIEW_PADDING;
 	if(sz.cx < 4) sz.cx = 4;
 	sz.cy = 32767;
 	return sz;
@@ -984,7 +986,7 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 			}
 		} else
 		{
-			pt.x -= ptDragging.x - m_cxOriginal + 3;
+			pt.x -= ptDragging.x - m_cxOriginal + TREEVIEW_PADDING;
 			if(pt.x < 0) pt.x = 0;
 			if((!(m_dwStatus & MTB_TRACKER)) || (pt.x != (int)m_nTrackPos))
 			{
@@ -1073,10 +1075,11 @@ void CModTreeBar::DoLButtonUp()
 			OnInvertTracker(m_nTrackPos);
 			m_dwStatus &= ~MTB_TRACKER;
 		}
+		const int padding = TREEVIEW_PADDING;
 		if(m_dwStatus & MTB_VERTICAL)
 		{
 			GetClientRect(&rect);
-			int cyavail = rect.Height() - 3;
+			int cyavail = rect.Height() - padding;
 			if(cyavail < 4) cyavail = 4;
 			int ratio = (m_nTrackPos << 8) / cyavail;
 			if(ratio < 0) ratio = 0;
@@ -1087,12 +1090,12 @@ void CModTreeBar::DoLButtonUp()
 		} else
 		{
 			GetWindowRect(&rect);
-			m_nTrackPos += 3;
+			m_nTrackPos += padding;
 			if(m_nTrackPos < 4) m_nTrackPos = 4;
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			if((m_nTrackPos != (UINT)rect.Width()) && (pMainFrm))
 			{
-				TrackerSettings::Instance().glTreeWindowWidth = HighDPISupport::ScalePixelsInv(m_nTrackPos - 3, m_hWnd);
+				TrackerSettings::Instance().glTreeWindowWidth = HighDPISupport::ScalePixelsInv(m_nTrackPos - padding, m_hWnd);
 				m_sizeDefault.cx = m_nTrackPos;
 				m_sizeDefault.cy = 32767;
 				pMainFrm->RecalcLayout();
@@ -1186,7 +1189,7 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 	CDialogBar::OnNcCalcSize(bCalcValidRects, lpncsp);
 	if(lpncsp)
 	{
-		lpncsp->rgrc[0].right -= 3;
+		lpncsp->rgrc[0].right -= TREEVIEW_PADDING;
 		if(lpncsp->rgrc[0].right < lpncsp->rgrc[0].left) lpncsp->rgrc[0].right = lpncsp->rgrc[0].left;
 	}
 }
@@ -1198,7 +1201,7 @@ LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 
 	GetWindowRect(&rect);
 	rect.DeflateRect(1,1);
-	rect.right -= 3;
+	rect.right -= TREEVIEW_PADDING;
 	if(!rect.PtInRect(point)) return HTBORDER;
 	return CDialogBar::OnNcHitTest(point);
 }
@@ -1214,7 +1217,7 @@ void CModTreeBar::OnNcPaint()
 	rect.right -= rect.left;
 	rect.bottom -= rect.top;
 	rect.top = 0;
-	rect.left = rect.right - 3;
+	rect.left = rect.right - TREEVIEW_PADDING;
 	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();
