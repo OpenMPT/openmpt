@@ -16,6 +16,7 @@
 #include "dlg_misc.h"
 #include "FileDialog.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -299,6 +300,14 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	SetRedraw(TRUE);
 	return TRUE;
+}
+
+
+void CCtrlSamples::OnDPIChanged()
+{
+	m_ToolBar1.OnDPIChanged();
+	m_ToolBar2.OnDPIChanged();
+	CModControlDlg::OnDPIChanged();
 }
 
 
@@ -1134,7 +1143,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
-	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
+	const int offset = HighDPISupport::ScalePixels(4, m_hWnd);  // Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
 	CMenu menu;
 	switch(pToolBar->iItem)

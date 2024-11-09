@@ -51,7 +51,7 @@ public:
 	COrderList(CCtrlPatterns &parent, CModDoc &document);
 
 public:
-	BOOL Init(const CRect&, HFONT hFont);
+	BOOL Init(const CRect &);
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	void InvalidateSelection();
 	PATTERNINDEX GetCurrentPattern() const;
@@ -140,6 +140,7 @@ protected:
 	bool EnsureEditable(ORDERINDEX ord);
 
 	//{{AFX_MSG(COrderList)
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC *) { return TRUE; }
 	afx_msg void OnSetFocus(CWnd *);
@@ -223,6 +224,7 @@ public:
 	void OnActivatePage(LPARAM) override;
 	void OnDeactivatePage() override;
 	BOOL GetToolTipText(UINT, LPTSTR) override;
+	void OnDPIChanged() override;
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlPatterns)

@@ -81,7 +81,7 @@ class CMainToolBar: public CToolBarEx
 protected:
 	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
-	CStatic m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
+	CEdit m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
 	int nCurrentSpeed = 0, nCurrentOctave = 0, nCurrentRowsPerBeat = 0;
@@ -119,7 +119,10 @@ public:
 	void RemoveUpdateInfo();
 
 protected:
+	void UpdateSizes();
+
 	//{{AFX_MSG(CMainToolBar)
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);

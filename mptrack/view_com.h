@@ -43,6 +43,7 @@ public:
 public:
 	//{{AFX_VIRTUAL(CViewComments)
 	void OnInitialUpdate() override;
+	void OnDPIChanged() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam) override;
 	void UpdateView(UpdateHint hint, CObject *pObject = nullptr) override;

@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "MIDIMacroDialog.h"
+#include "HighDPISupport.h"
 #include "Mptrack.h"
 #include "Reporting.h"
 #include "resource.h"
@@ -111,7 +112,7 @@ BOOL CMidiMacroSetup::OnInitDialog()
 
 	UpdateDialog();
 
-	auto ScalePixels = [&](auto x) { return Util::ScalePixels(x, m_hWnd); };
+	auto ScalePixels = [&](auto x) { return HighDPISupport::ScalePixels(x, m_hWnd); };
 	int offsetx = ScalePixels(19), offsety = ScalePixels(30), separatorx = ScalePixels(4), separatory = ScalePixels(2);
 	int height = ScalePixels(18), widthMacro = ScalePixels(30), widthVal = ScalePixels(179), widthType = ScalePixels(135), widthBtn = ScalePixels(70);
 

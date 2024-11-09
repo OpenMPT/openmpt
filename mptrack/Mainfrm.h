@@ -373,6 +373,8 @@ protected:
 
 	void ShowToolbarMenu(CPoint screenPt);
 
+	void RecreateImageLists();
+
 public:
 	void UpdateMRUList();
 
@@ -398,6 +400,7 @@ protected:
 	afx_msg void OnRButtonDown(UINT, CPoint);
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT_PTR);
+	afx_msg LRESULT OnDPIChanged(WPARAM, LPARAM);
 
 	afx_msg void OnPluginManager();
 	afx_msg void OnClipboardManager();

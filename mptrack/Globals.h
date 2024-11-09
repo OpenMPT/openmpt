@@ -32,6 +32,7 @@ public:
 	BOOL Init(CImageList &icons, CImageList &disabledIcons);
 	void UpdateStyle();
 	BOOL AddButton(UINT nID, int iImage=0, UINT nStyle=TBSTYLE_BUTTON, UINT nState=TBSTATE_ENABLED);
+	void OnDPIChanged();
 };
 
 
@@ -44,7 +45,6 @@ protected:
 	HWND m_hWndView = nullptr;
 	HWND m_lastFocusItem = nullptr;
 	LONG m_nLockCount = 0;
-	int m_nDPIx = 0, m_nDPIy = 0;  // Cached DPI settings
 	BOOL m_bInitialized = FALSE;
 
 public:
@@ -80,6 +80,7 @@ public:
 	//{{AFX_VIRTUAL(CModControlDlg)
 	void OnOK() override {}
 	void OnCancel() override {}
+	void OnDPIChanged() override { RecalcLayout(); }
 	virtual void RecalcLayout() = 0;
 	virtual void UpdateView(UpdateHint, CObject *) = 0;
 	virtual CRuntimeClass *GetAssociatedViewClass() { return nullptr; }
@@ -94,7 +95,6 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnUnlockControls(WPARAM, LPARAM) { if (m_nLockCount > 0) m_nLockCount--; return 0; }
 	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -106,6 +106,7 @@ public:
 	BOOL InsertItem(int nIndex, LPCTSTR pszText, LPARAM lParam=0, int iImage=-1);
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	LPARAM GetItemData(int nIndex);
+	void OnDPIChanged();
 };
 
 
@@ -165,6 +166,7 @@ protected:
 	//{{AFX_MSG(CModControlView)
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM = 0, LPARAM = 0);
 	afx_msg void OnDestroy();
 	afx_msg void OnTabSelchange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEditCut();
@@ -196,7 +198,7 @@ protected:
 	HWND m_lastFocusItem = nullptr;
 	int m_nScrollPosX = 0, m_nScrollPosY = 0;
 	int m_nScrollPosXfine = 0, m_nScrollPosYfine = 0;
-	int m_nDPIx = 0, m_nDPIy = 0;  // Cached DPI settings
+	int m_dpi = 0;  // Cached DPI settings
 
 public:
 	DECLARE_SERIAL(CModScrollView)
@@ -216,6 +218,7 @@ public:
 	void OnDraw(CDC *) override {}
 	void OnPrepareDC(CDC *, CPrintInfo *) override {}
 	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
+	virtual void OnDPIChanged() { Invalidate(); }
 	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
@@ -236,7 +239,7 @@ protected:
 	afx_msg void OnMouseHWheel(UINT fFlags, short zDelta, CPoint point);
 	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
-	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	//}}AFX_MSG
 
 	// Fixes for 16-bit limitation in MFC's CScrollView and support for fractional mouse wheel movements

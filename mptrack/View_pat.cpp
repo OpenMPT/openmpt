@@ -209,6 +209,13 @@ void CViewPattern::OnInitialUpdate()
 }
 
 
+void CViewPattern::OnDPIChanged()
+{
+	CModScrollView::OnDPIChanged();
+	PatternFont::UpdateFont(m_hWnd);
+}
+
+
 bool CViewPattern::SetCurrentPattern(PATTERNINDEX pat, ROWINDEX row)
 {
 	const CSoundFile *pSndFile = GetSoundFile();

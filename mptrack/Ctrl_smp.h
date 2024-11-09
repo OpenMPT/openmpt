@@ -98,6 +98,7 @@ public:
 	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
 	BOOL GetToolTipText(UINT uId, LPTSTR pszText) override;
 	BOOL PreTranslateMessage(MSG* pMsg) override;
+	void OnDPIChanged() override;
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlSamples)

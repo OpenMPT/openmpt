@@ -314,6 +314,7 @@ protected:
 
 protected:
 	//{{AFX_MSG(CModTree)
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);

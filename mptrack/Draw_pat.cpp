@@ -14,6 +14,7 @@
 #include "dlg_misc.h"
 #include "EffectVis.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
@@ -124,7 +125,7 @@ bool CViewPattern::UpdateSizes()
 	m_szHeader.cx = ROWHDR_WIDTH;
 	m_szHeader.cy = COLHDR_HEIGHT;
 	m_szPluginHeader.cx = 0;
-	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? MulDiv(PLUGNAME_HEIGHT, m_nDPIy, 96) : 0;
+	m_szPluginHeader.cy = m_Status[psShowPluginNames] ? MulDiv(PLUGNAME_HEIGHT, m_dpi, 96) : 0;
 	if(m_Status[psShowVUMeters]) m_szHeader.cy += VUMETERS_HEIGHT;
 	m_szCell.cx = SEPARATOR_WIDTH;
 	for(size_t i = 0; i <= PatternCursor::lastColumn; i++)
@@ -134,8 +135,8 @@ bool CViewPattern::UpdateSizes()
 	}
 	m_szCell.cy = pfnt->nHeight;
 
-	m_szHeader.cx = MulDiv(m_szHeader.cx, m_nDPIx, 96);
-	m_szHeader.cy = MulDiv(m_szHeader.cy, m_nDPIy, 96);
+	m_szHeader.cx = MulDiv(m_szHeader.cx, m_dpi, 96);
+	m_szHeader.cy = MulDiv(m_szHeader.cy, m_dpi, 96);
 	m_szHeader.cy += m_szPluginHeader.cy;
 
 	if(oldy != m_szCell.cy)
@@ -255,7 +256,7 @@ POINT CViewPattern::GetPointFromPosition(PatternCursor cursor) const
 
 	if(pt.x < 0)
 		pt.x = 0;
-	pt.x += Util::ScalePixels(ROWHDR_WIDTH, m_hWnd);
+	pt.x += HighDPISupport::ScalePixels(ROWHDR_WIDTH, m_hWnd);
 	pt.y = (cursor.GetRow() - yofs + m_nMidRow) * m_szCell.cy;
 
 	if (pt.y < 0) pt.y = 0;
@@ -536,11 +537,11 @@ void CViewPattern::OnDraw(CDC *pDC)
 		return;
 	m_chnState.resize(pModDoc->GetNumChannels());
 	
-	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_nDPIy, 96);
-	const int colHeight = MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
-	const int chanColorHeight = MulDiv(4, m_nDPIy, 96);
-	const int chanColorOffset = MulDiv(2, m_nDPIy, 96);
-	const int recordInsX = MulDiv(3, m_nDPIx, 96);
+	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_dpi, 96);
+	const int colHeight = MulDiv(COLHDR_HEIGHT, m_dpi, 96);
+	const int chanColorHeight = MulDiv(4, m_dpi, 96);
+	const int chanColorOffset = MulDiv(2, m_dpi, 96);
+	const int recordInsX = MulDiv(3, m_dpi, 96);
 	const bool doSmoothScroll = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0;
 
 	GetClientRect(&rcClient);
@@ -673,7 +674,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	}
 	if (ypaint < rcClient.bottom)
 	{
-		int width = Util::ScalePixels(1, m_hWnd);
+		int width = HighDPISupport::ScalePixels(1, m_hWnd);
 		rc.SetRect(0, ypaint, rcClient.right + 1, rcClient.bottom + 1);
 		if(width == 1)
 			DrawButtonRect(hdc, &rc, _T(""));
@@ -698,7 +699,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		DrawButtonRect(hdc, &rect, s, FALSE,
 			(m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader) ? TRUE : FALSE);
 
-		const int dropWidth = Util::ScalePixels(2, m_hWnd);
+		const int dropWidth = HighDPISupport::ScalePixels(2, m_hWnd);
 
 		// Drawing Channel Headers
 		while (xpaint < rcClient.right)
@@ -1843,7 +1844,7 @@ void CViewPattern::UpdateAllVUMeters(Notification *pnotify)
 	int x = m_szHeader.cx;
 	CHANNELINDEX nChn = static_cast<CHANNELINDEX>(xofs);
 	const CHANNELINDEX numChannels = std::min(pModDoc->GetNumChannels(), static_cast<CHANNELINDEX>(m_chnState.size()));
-	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, m_nDPIy, 96);
+	const int yPos = rcClient.top + MulDiv(COLHDR_HEIGHT, m_dpi, 96);
 	while(nChn < numChannels && x < rcClient.right)
 	{
 		m_chnState[nChn].vuMeter = static_cast<uint16>(pnotify->pos[nChn]);
@@ -1879,7 +1880,7 @@ void CViewPattern::CreateVUMeterBitmap()
 	m_vuMeterDC.DeleteDC();
 	m_vuMeterDC.CreateCompatibleDC(dc);
 
-	const int availableWidth = m_szCell.cx - Util::ScalePixels(2, m_hWnd);
+	const int availableWidth = m_szCell.cx - HighDPISupport::ScalePixels(2, m_hWnd);
 	m_ledWidth = static_cast<int>(availableWidth / (VUMETERS_LEDS_PER_SIDE * 2 + 0.5f));
 	if(m_ledWidth < 2)
 	{
@@ -1887,7 +1888,7 @@ void CViewPattern::CreateVUMeterBitmap()
 		m_ledWidth = std::max(availableWidth / (VUMETERS_LEDS_PER_SIDE * 2), 1);
 	}
 
-	m_ledHeight = Util::ScalePixels(VUMETERS_HEIGHT_LED, m_hWnd);
+	m_ledHeight = HighDPISupport::ScalePixels(VUMETERS_HEIGHT_LED, m_hWnd);
 	const int barWidth = m_ledWidth * VUMETERS_LEDS_PER_SIDE;
 	const int ledBlockHeight = m_ledHeight - 2;
 	

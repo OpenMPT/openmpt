@@ -12,6 +12,7 @@
 #include "Clipboard.h"
 #include "dlg_misc.h"
 #include "Dlsbank.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
@@ -647,7 +648,7 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 	if(target.editorX != int32_min)
 	{
 		// Move target editor a bit to visually distinguish it from the original editor
-		int addPixels = Util::ScalePixels(16, CMainFrame::GetMainFrame()->m_hWnd);
+		int addPixels = HighDPISupport::ScalePixels(16, CMainFrame::GetMainFrame()->m_hWnd);
 		target.editorX += addPixels;
 		target.editorY += addPixels;
 	}

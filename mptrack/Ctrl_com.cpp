@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "Ctrl_com.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
@@ -81,7 +82,7 @@ BOOL CCtrlComments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
 	// Initialize comments
-	UINT margin = Util::ScalePixels(MPT_COMMENTS_MARGIN, m_EditComments.m_hWnd);
+	UINT margin = HighDPISupport::ScalePixels(MPT_COMMENTS_MARGIN, m_EditComments.m_hWnd);
 	m_EditComments.SetMargins(margin, margin);
 	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
@@ -112,42 +113,58 @@ void CCtrlComments::RecalcLayout()
 		int cx = rect.Width(), cy = rect.Height();
 		if(m_sndFile.GetModSpecifications().commentLineLengthMax != 0)
 		{
-			int cxmax = Util::ScalePixels(GetSystemMetrics(SM_CXBORDER) + MPT_COMMENTS_MARGIN + m_sndFile.GetModSpecifications().commentLineLengthMax * charWidth + MPT_COMMENTS_MARGIN + GetSystemMetrics(SM_CXVSCROLL) + GetSystemMetrics(SM_CXBORDER) - 1, m_EditComments.m_hWnd);
-			if (cx > cxmax && cxmax != 0) cx = cxmax;
+			const int cxBorder = HighDPISupport::GetSystemMetrics(SM_CXBORDER, GetDPI());
+			const int cxVScroll = HighDPISupport::GetSystemMetrics(SM_CXVSCROLL, GetDPI());
+			int cxmax = cxBorder + m_sndFile.GetModSpecifications().commentLineLengthMax * charWidth + cxVScroll + cxBorder + HighDPISupport::ScalePixels(MPT_COMMENTS_MARGIN + MPT_COMMENTS_MARGIN - 1, m_EditComments.m_hWnd);
+			if(cx != cxmax && cxmax != 0)
+				cx = cxmax;
 			//SetWindowLong(m_EditComments.m_hWnd, GWL_STYLE, GetWindowLong(m_EditComments.m_hWnd, GWL_STYLE) & ~WS_HSCROLL);
 		} else
 		{
 			//SetWindowLong(m_EditComments.m_hWnd, GWL_STYLE, GetWindowLong(m_EditComments.m_hWnd, GWL_STYLE) | WS_HSCROLL);
 		}
-		if ((cx != cx0) || (cy != cy0)) m_EditComments.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
+		if(cx != cx0 || cy != cy0)
+			m_EditComments.SetWindowPos(NULL, 0,0, cx, cy, SWP_NOMOVE|SWP_NOZORDER|SWP_DRAWFRAME);
 	}
+}
+
+
+void CCtrlComments::OnDPIChanged()
+{
+	UpdateView(GeneralHint().MPTOptions(), nullptr);
+	CModControlDlg::OnDPIChanged();
 }
 
 
 void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 {
 	CommentHint commentHint = hint.ToType<CommentHint>();
-	if (pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE]) return;
-	if (IsLocked()) return;
+	if(pHint == this || !commentHint.GetType()[HINT_MODCOMMENTS | HINT_MPTOPTIONS | HINT_MODTYPE])
+		return;
+	if(IsLocked())
+		return;
 	LockControls();
 
+	HFONT &hFont = CMainFrame::GetCommentsFont();
 	static FontSetting previousFont;
+	static int previousFontSize = 0;
 	FontSetting font = TrackerSettings::Instance().commentsFont;
 	// Point size to pixels
-	int32 fontSize = -MulDiv(font.size, m_nDPIy, 720);
-	if(previousFont != font)
+	int32 fontSize = -MulDiv(font.size, GetDPI(), 720);
+	if(previousFont != font || previousFontSize != fontSize)
 	{
 		previousFont = font;
-		DeleteFont(CMainFrame::GetCommentsFont());
-		CMainFrame::GetCommentsFont() = ::CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
+		previousFontSize = fontSize;
+		DeleteFont(hFont);
+		hFont = ::CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
 			font.flags[FontSetting::Italic] ? TRUE :FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
 			CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			FIXED_PITCH | FF_MODERN, mpt::ToCString(font.name));
 	}
-	m_EditComments.SendMessage(WM_SETFONT, (WPARAM)CMainFrame::GetCommentsFont());
-	CDC * pDC = m_EditComments.GetDC();
-	pDC->SelectObject(CMainFrame::GetCommentsFont());
+	m_EditComments.SendMessage(WM_SETFONT, reinterpret_cast<WPARAM>(hFont));
+	CDC *pDC = m_EditComments.GetDC();
+	pDC->SelectObject(hFont);
 	TEXTMETRIC tm;
 	pDC->GetTextMetrics(&tm);
 	charWidth = tm.tmAveCharWidth;

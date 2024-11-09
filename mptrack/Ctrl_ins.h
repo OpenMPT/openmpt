@@ -86,7 +86,8 @@ protected:
 	afx_msg void OnEditSample(UINT nID);
 	afx_msg void OnEditSampleMap();
 	afx_msg void OnInstrumentDuplicate();
-	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
+	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -138,6 +139,7 @@ public:
 	//{{AFX_VIRTUAL(CCtrlInstruments)
 	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
 	CRuntimeClass *GetAssociatedViewClass() override;
 	void RecalcLayout() override;

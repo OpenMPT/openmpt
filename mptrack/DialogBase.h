@@ -20,9 +20,22 @@ class DialogBase : public CDialog
 public:
 	using CDialog::CDialog;
 
+	BOOL OnInitDialog() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 
 	static bool HandleGlobalKeyMessage(const MSG &msg);
+
+protected:
+	virtual void OnDPIChanged() {}
+	void UpdateDPI();
+	int GetDPI() const { return m_dpi; }
+
+	afx_msg LRESULT OnDPIChanged(WPARAM, LPARAM);
+
+	DECLARE_MESSAGE_MAP()
+
+private:
+	int m_dpi = 0;
 };
 
 OPENMPT_NAMESPACE_END

@@ -17,6 +17,7 @@
 #include "Ctrl_ins.h"
 #include "Ctrl_pat.h"
 #include "Ctrl_smp.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -47,9 +48,6 @@ static void RestoreLastFocusItem(HWND parent, HWND &lastFocusItem)
 BEGIN_MESSAGE_MAP(CModControlDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
-#if !defined(MPT_BUILD_RETRO)
-	ON_MESSAGE(WM_DPICHANGED, &CModControlDlg::OnDPIChanged)
-#endif
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,            &CModControlDlg::OnUnlockControls)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
@@ -71,18 +69,8 @@ CModControlDlg::~CModControlDlg()
 BOOL CModControlDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
-	m_nDPIx = Util::GetDPIx(m_hWnd);
-	m_nDPIy = Util::GetDPIy(m_hWnd);
 	EnableToolTips(TRUE);
 	return TRUE;
-}
-
-
-LRESULT CModControlDlg::OnDPIChanged(WPARAM wParam, LPARAM)
-{
-	m_nDPIx = LOWORD(wParam);
-	m_nDPIy = HIWORD(wParam);
-	return 0;
 }
 
 
@@ -197,8 +185,7 @@ BOOL CModTabCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if (!pMainFrm) return FALSE;
 	if (!CTabCtrl::Create(dwStyle, rect, pParentWnd, nID)) return FALSE;
-	SendMessage(WM_SETFONT, (WPARAM)pMainFrm->GetGUIFont());
-	SetImageList(&pMainFrm->m_MiscIcons);
+	OnDPIChanged();
 	return TRUE;
 }
 
@@ -224,6 +211,14 @@ LPARAM CModTabCtrl::GetItemData(int nIndex)
 }
 
 
+void CModTabCtrl::OnDPIChanged()
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	SendMessage(WM_SETFONT, (WPARAM)pMainFrm->GetGUIFont());
+	SetImageList(&pMainFrm->m_MiscIcons);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////
 // CModControlView
 
@@ -234,6 +229,7 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT,  &CModControlView::OnDPIChangedAfterParent)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1, &CModControlView::OnTabSelchange)
 	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,        &CModControlView::OnActivateModView)
 	ON_MESSAGE(WM_MOD_CTRLMSG,             &CModControlView::OnModCtrlMsg)
@@ -279,6 +275,15 @@ void CModControlView::OnSize(UINT nType, int cx, int cy)
 	{
 		RecalcLayout();
 	}
+}
+
+
+LRESULT CModControlView::OnDPIChangedAfterParent(WPARAM, LPARAM)
+{
+	auto result = Default();
+	m_TabCtrl.OnDPIChanged();
+	RecalcLayout();
+	return result;
 }
 
 
@@ -600,12 +605,10 @@ BEGIN_MESSAGE_MAP(CModScrollView, CScrollView)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_MOUSEHWHEEL()
 	ON_WM_SETFOCUS()
-#if !defined(MPT_BUILD_RETRO)
-	ON_MESSAGE(WM_DPICHANGED, &CModScrollView::OnDPIChanged)
-#endif
-	ON_MESSAGE(WM_MOD_VIEWMSG,        &CModScrollView::OnReceiveModViewMsg)
-	ON_MESSAGE(WM_MOD_DRAGONDROPPING, &CModScrollView::OnDragonDropping)
-	ON_MESSAGE(WM_MOD_UPDATEPOSITION, &CModScrollView::OnUpdatePosition)
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CModScrollView::OnDPIChangedAfterParent)
+	ON_MESSAGE(WM_MOD_VIEWMSG,            &CModScrollView::OnReceiveModViewMsg)
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING,     &CModScrollView::OnDragonDropping)
+	ON_MESSAGE(WM_MOD_UPDATEPOSITION,     &CModScrollView::OnUpdatePosition)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -678,9 +681,7 @@ LRESULT CModScrollView::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 void CModScrollView::OnInitialUpdate()
 {
-	CScrollView::OnInitialUpdate();
-	m_nDPIx = Util::GetDPIx(m_hWnd);
-	m_nDPIy = Util::GetDPIy(m_hWnd);
+	m_dpi = HighDPISupport::GetDpiForWindow(m_hWnd);
 }
 
 
@@ -699,11 +700,12 @@ BOOL CModScrollView::PreTranslateMessage(MSG *pMsg)
 }
 
 
-LRESULT CModScrollView::OnDPIChanged(WPARAM wParam, LPARAM)
+LRESULT CModScrollView::OnDPIChangedAfterParent(WPARAM, LPARAM)
 {
-	m_nDPIx = LOWORD(wParam);
-	m_nDPIy = HIWORD(wParam);
-	return 0;
+	auto result = Default();
+	m_dpi = HighDPISupport::GetDpiForWindow(m_hWnd);
+	OnDPIChanged();
+	return result;
 }
 
 
@@ -860,10 +862,8 @@ BOOL CModScrollView::OnGesturePan(CPoint ptFrom, CPoint ptTo)
 
 BOOL CModControlBar::Init(CImageList &icons, CImageList &disabledIcons)
 {
-	const int imgSize = Util::ScalePixels(16, m_hWnd), btnSizeX = Util::ScalePixels(26, m_hWnd), btnSizeY = Util::ScalePixels(24, m_hWnd);
 	SetButtonStructSize(sizeof(TBBUTTON));
-	SetBitmapSize(CSize(imgSize, imgSize));
-	SetButtonSize(CSize(btnSizeX, btnSizeY));
+	OnDPIChanged();
 
 	// Add bitmaps
 	SetImageList(&icons);
@@ -900,6 +900,19 @@ void CModControlBar::UpdateStyle()
 		SetWindowLong(m_hWnd, GWL_STYLE, lStyleOld);
 		Invalidate();
 	}
+}
+
+
+void CModControlBar::OnDPIChanged()
+{
+	const int imgSize = HighDPISupport::ScalePixels(16, m_hWnd), btnSizeX = HighDPISupport::ScalePixels(26, m_hWnd), btnSizeY = HighDPISupport::ScalePixels(24, m_hWnd);
+	const auto extendedStyle = GetExtendedStyle();
+	// Forcing button size after dropdown buttons have been enabled enforces a larger minimum button width, so we temporarily disable dropdown buttons
+	// (See comment in MFC's CToolBar::OnPreserveSizingPolicyHelper)
+	SetExtendedStyle(extendedStyle & ~TBSTYLE_EX_DRAWDDARROWS);
+	SetBitmapSize(CSize(imgSize, imgSize));
+	SetButtonSize(CSize(btnSizeX, btnSizeY));
+	SetExtendedStyle(extendedStyle);
 }
 
 

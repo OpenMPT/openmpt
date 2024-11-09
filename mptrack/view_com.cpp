@@ -30,7 +30,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#define DETAILS_TOOLBAR_CY	Util::ScalePixels(28, m_hWnd)
+#define DETAILS_TOOLBAR_CY HighDPISupport::ScalePixels(28, m_hWnd)
 
 enum
 {
@@ -139,9 +139,19 @@ void CViewComments::OnInitialUpdate()
 	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
 	m_ToolBar.AddButton(IDC_LIST_INSTRUMENTS, IMAGE_INSTRUMENTS);
 	//m_ToolBar.AddButton(IDC_LIST_PATTERNS, TIMAGE_TAB_PATTERNS);
-	m_ToolBar.SetIndent(4);
 	UpdateButtonState();
-	UpdateView(UpdateHint().ModType().MPTOptions());
+	OnDPIChanged();
+}
+
+
+void CViewComments::OnDPIChanged()
+{
+	UpdateView(GeneralHint().MPTOptions().ModType());
+	m_ToolBar.SetIndent(HighDPISupport::ScalePixels(4, m_hWnd));
+	const int imgSize = HighDPISupport::ScalePixels(16, m_hWnd), btnSizeX = HighDPISupport::ScalePixels(26, m_hWnd), btnSizeY = HighDPISupport::ScalePixels(24, m_hWnd);
+	m_ToolBar.SetButtonSize(CSize(btnSizeX, btnSizeY));
+	m_ToolBar.SetBitmapSize(CSize(imgSize, imgSize));
+	RecalcLayout();
 }
 
 

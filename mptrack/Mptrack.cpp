@@ -1275,75 +1275,23 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// requires SetupPaths+CreatePaths called
 	LoadStdProfileSettings(0);
 
-	// Set process priority class
-	#ifndef _DEBUG
-		SetPriorityClass(GetCurrentProcess(), TrackerSettings::Instance().MiscProcessPriorityClass);
-	#endif
+// Set process priority class
+#ifndef _DEBUG
+	SetPriorityClass(GetCurrentProcess(), TrackerSettings::Instance().MiscProcessPriorityClass);
+#endif
 
 	// Dynamic DPI-awareness. Some users might want to disable DPI-awareness because of their DPI-unaware VST plugins.
-	bool setDPI = false;
-	// For Windows 10, Creators Update (1703) and newer
-	{
-		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
-		if(user32.IsValid())
-		{
-			enum MPT_DPI_AWARENESS_CONTEXT
-			{
-				MPT_DPI_AWARENESS_CONTEXT_UNAWARE = -1,
-				MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2,
-				MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3,
-				MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4,
-				MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = -5, // 1809 update and newer
-			};
-			using PSETPROCESSDPIAWARENESSCONTEXT = BOOL(WINAPI *)(HANDLE);
-			PSETPROCESSDPIAWARENESSCONTEXT SetProcessDpiAwarenessContext = nullptr;
-			if(user32.Bind(SetProcessDpiAwarenessContext, "SetProcessDpiAwarenessContext"))
-			{
-				if(TrackerSettings::Instance().highResUI)
-				{
-					setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) == TRUE);
-				} else
-				{
-					if(TrackerSettings::Instance().useGDIUpcaling && SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) == TRUE)
-						setDPI = true;
-					else
-						setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE)) == TRUE);
-				}
-			}
-		}
-	}
-	// For Windows 8.1 and newer
-	if(!setDPI)
-	{
-		mpt::Library shcore(mpt::LibraryPath::System(P_("SHCore")));
-		if(shcore.IsValid())
-		{
-			using PSETPROCESSDPIAWARENESS = HRESULT (WINAPI *)(int);
-			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = nullptr;
-			if(shcore.Bind(SetProcessDPIAwareness, "SetProcessDpiAwareness"))
-			{
-				setDPI = (SetProcessDPIAwareness(TrackerSettings::Instance().highResUI ? 2 : 0) == S_OK);
-			}
-		}
-	}
-	// For Vista and newer
-	if(!setDPI && TrackerSettings::Instance().highResUI)
-	{
-		mpt::Library user32(mpt::LibraryPath::System(P_("user32")));
-		if(user32.IsValid())
-		{
-			using PSETPROCESSDPIAWARE = BOOL (WINAPI *)();
-			PSETPROCESSDPIAWARE SetProcessDPIAware = nullptr;
-			if(user32.Bind(SetProcessDPIAware, "SetProcessDPIAware"))
-			{
-				SetProcessDPIAware();
-			}
-		}
-	}
+	if(TrackerSettings::Instance().highResUI)
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpi);
+	else if(TrackerSettings::Instance().useGDIUpcaling)
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::LowDpiUpscaled);
+	else
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::LowDpi);
 
 	// create main MDI Frame window
-	CMainFrame* pMainFrame = new CMainFrame();
-	if(!pMainFrame->LoadFrame(IDR_MAINFRAME)) return FALSE;
+	CMainFrame *pMainFrame = new CMainFrame();
+	if(!pMainFrame->LoadFrame(IDR_MAINFRAME))
+		return FALSE;
 	m_pMainWnd = pMainFrame;
 
 	// Show splash screen
@@ -1476,7 +1424,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	{
 		// On high-DPI devices, automatically upscale pattern font
 		FontSetting font = TrackerSettings::Instance().patternFont;
-		font.size = Clamp(Util::GetDPIy(m_pMainWnd->m_hWnd) / 96 - 1, 0, 9);
+		font.size = Clamp(static_cast<int>(HighDPISupport::GetDpiForWindow(m_pMainWnd->m_hWnd)) / 96 - 1, 0, 9);
 		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
 	} else
@@ -1853,8 +1801,8 @@ BOOL CSplashScreen::OnInitDialog()
 
 	CRect rect;
 	GetWindowRect(&rect);
-	const int width = Util::ScalePixels(m_Image->GetWidth(), m_hWnd) / 2;
-	const int height = Util::ScalePixels(m_Image->GetHeight(), m_hWnd) / 2;
+	const int width = HighDPISupport::ScalePixels(m_Image->GetWidth(), m_hWnd) / 2;
+	const int height = HighDPISupport::ScalePixels(m_Image->GetHeight(), m_hWnd) / 2;
 	SetWindowPos(nullptr,
 		rect.left - ((width - rect.Width()) / 2),
 		rect.top - ((height - rect.Height()) / 2),
@@ -2009,7 +1957,7 @@ int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT form
 template<typename Tchar>
 static void DrawButtonRectImpl(HDC hdc, CRect rect, const Tchar *lpszText, bool disabled, bool pushed, DWORD textFlags, uint32 topMargin)
 {
-	int width = Util::ScalePixels(1, WindowFromDC(hdc));
+	int width = HighDPISupport::ScalePixels(1, WindowFromDC(hdc));
 	if(width != 1)
 	{
 		// Draw "real" buttons in Hi-DPI mode

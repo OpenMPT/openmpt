@@ -15,6 +15,7 @@
 #include "dlg_misc.h"
 #include "FileDialog.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -66,6 +67,7 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_COMMAND(ID_INSTRUMENT_SAMPLEMAP,      &CNoteMapWnd::OnEditSampleMap)
 	ON_COMMAND(ID_INSTRUMENT_DUPLICATE,      &CNoteMapWnd::OnInstrumentDuplicate)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,            &CNoteMapWnd::OnCustomKeyMsg)
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT,    &CNoteMapWnd::OnDPIChangedAfterParent)
 	ON_COMMAND_RANGE(ID_NOTEMAP_EDITSAMPLE, ID_NOTEMAP_EDITSAMPLE + MAX_SAMPLES, &CNoteMapWnd::OnEditSample)
 END_MESSAGE_MAP()
 
@@ -112,6 +114,14 @@ BOOL CNoteMapWnd::PreTranslateMessage(MSG *pMsg)
 	}
 
 	return CStatic::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT CNoteMapWnd::OnDPIChangedAfterParent(WPARAM, LPARAM)
+{
+	auto result = Default();
+	m_cxFont = m_cyFont = 0;
+	return result;
 }
 
 
@@ -757,6 +767,7 @@ bool CNoteMapWnd::HandleChar(WPARAM c)
 	return false;
 }
 
+
 bool CNoteMapWnd::HandleNav(WPARAM k)
 {
 	bool redraw = false;
@@ -1111,6 +1122,13 @@ BOOL CCtrlInstruments::OnInitDialog()
 }
 
 
+void CCtrlInstruments::OnDPIChanged()
+{
+	m_ToolBar.OnDPIChanged();
+	CModControlDlg::OnDPIChanged();
+}
+
+
 Setting<LONG> &CCtrlInstruments::GetSplitPosRef() { return TrackerSettings::Instance().glInstrumentWindowHeight; }
 
 
@@ -1124,7 +1142,7 @@ void CCtrlInstruments::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton)); // TrackPopupMenu uses screen coords
-	const int offset = Util::ScalePixels(4, m_hWnd);	// Compared to the main toolbar, the offset seems to be a bit wrong here...?
+	const int offset = HighDPISupport::ScalePixels(4, m_hWnd);  // Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
 	CMenu menu;
 	switch(pToolBar->iItem)

@@ -10,8 +10,10 @@
 
 #include "stdafx.h"
 #include "AboutDialog.h"
+#include "HighDPISupport.h"
 #include "Image.h"
 #include "Mptrack.h"
+#include "MPTrackUtil.h"
 #include "TrackerSettings.h"
 #include "mpt/format/join.hpp"
 #include "mpt/string/utility.hpp"
@@ -82,8 +84,8 @@ void CRippleBitmap::OnMouseMove(UINT nFlags, CPoint point)
 	m_lastRipple = now;
 
 	// Initiate ripples at cursor location
-	point.x = Util::ScalePixelsInv(point.x, m_hWnd);
-	point.y = Util::ScalePixelsInv(point.y, m_hWnd);
+	point.x = HighDPISupport::ScalePixelsInv(point.x, m_hWnd);
+	point.y = HighDPISupport::ScalePixelsInv(point.y, m_hWnd);
 	Limit(point.x, 1, int(m_bitmapSrc->Width()) - 2);
 	Limit(point.y, 2, int(m_bitmapSrc->Height()) - 3);
 	int32 *p = m_backBuf + point.x + point.y * m_bitmapSrc->Width();

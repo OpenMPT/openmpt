@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "PatternFont.h"
+#include "HighDPISupport.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "TrackerSettings.h"
@@ -139,12 +140,15 @@ void PatternFont::UpdateFont(HWND hwnd)
 	currentFont = &pf;
 
 	static FontSetting previousFont;
-	if(previousFont == font)
+	static int previousDPI = 0;
+	const int dpi = HighDPISupport::GetDpiForWindow(hwnd);
+	if(previousFont == font && previousDPI == dpi)
 	{
 		// Nothing to do
 		return;
 	}
 	previousFont = font;
+	previousDPI = dpi;
 	DeleteFontData();
 	pf.dib = &customFontBitmap;
 	pf.dibASCII = nullptr;
@@ -253,7 +257,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 	CDC hDC;
 	hDC.CreateCompatibleDC(CDC::FromHandle(::GetDC(hwnd)));
 	// Point size to pixels
-	font.size = -MulDiv(font.size, Util::GetDPIy(hwnd), 720);
+	font.size = -MulDiv(font.size, dpi, 720);
 
 	CFont gdiFont;
 	gdiFont.CreateFont(font.size, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL, font.flags[FontSetting::Italic] ? TRUE : FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FIXED_PITCH | FF_DONTCARE, mpt::ToCString(font.name));

@@ -12,7 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "MPTrackUtil.h"
 #include "../common/mptRandom.h"
 #include "../misc/mptMutex.h"
 #include "../soundlib/MIDIMacros.h"

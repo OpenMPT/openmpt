@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "ColorPickerButton.h"
-#include "MPTrackUtil.h"
+#include "HighDPISupport.h"
 #include "Sndfile.h"
 
 #include <algorithm>
@@ -89,7 +89,7 @@ void ColorPickerButton::DrawItem(DRAWITEMSTRUCT *dis)
 	}
 	if((dis->itemState & ODS_FOCUS))
 	{
-		int offset = Util::ScalePixels(1, dis->hwndItem);
+		int offset = HighDPISupport::ScalePixels(1, dis->hwndItem);
 		rect.DeflateRect(offset, offset);
 		::DrawFocusRect(hdc, rect);
 	}

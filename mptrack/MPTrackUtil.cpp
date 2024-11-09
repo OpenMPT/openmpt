@@ -54,7 +54,7 @@ bool CreateShellFileLink(const mpt::PathString &path, const mpt::PathString &tar
 mpt::const_byte_span GetResource(LPCTSTR lpName, LPCTSTR lpType)
 {
 	HINSTANCE hInstance = AfxGetInstanceHandle();
-	HRSRC hRsrc = FindResource(hInstance, lpName, lpType); 
+	HRSRC hRsrc = FindResource(hInstance, lpName, lpType);
 	if(hRsrc == NULL)
 	{
 		return mpt::const_byte_span();

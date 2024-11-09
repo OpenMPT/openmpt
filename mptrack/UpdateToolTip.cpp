@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "UpdateToolTip.h"
+#include "HighDPISupport.h"
 #include "Mptrack.h"
 #include "Mainfrm.h"
 #include "WindowMessages.h"
@@ -46,7 +47,7 @@ bool UpdateToolTip::ShowUpdate(CWnd &parent, const CString &newVersion, const CS
 		return false;
 
 	SetTitle(TTI_INFO, _T("Update Available"));
-	SetMaxTipWidth(Util::ScalePixels(400, m_hWnd));  // When using automatic maximum width, only the first line of the text appears to be used for determining the width, causing subsequent lines to be cut off if they are longer.#
+	SetMaxTipWidth(HighDPISupport::ScalePixels(400, m_hWnd));  // When using automatic maximum width, only the first line of the text appears to be used for determining the width, causing subsequent lines to be cut off if they are longer.#
 	SendMessage(TTM_TRACKPOSITION, 0, static_cast<LPARAM>(MAKELONG(ptScreen.x, ptScreen.y)));
 	SendMessage(TTM_TRACKACTIVATE, TRUE, reinterpret_cast<LPARAM>(&ti));
 	return true;

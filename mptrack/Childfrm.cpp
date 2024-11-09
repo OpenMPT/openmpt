@@ -15,6 +15,7 @@
 #include "Ctrl_pat.h"
 #include "Ctrl_smp.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
@@ -45,8 +46,9 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_WM_DESTROY()
 	ON_WM_NCACTIVATE()
 	ON_WM_MDIACTIVATE()
-	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,	&CChildFrame::OnChangeViewClass)
-	ON_MESSAGE(WM_MOD_INSTRSELECTED,	&CChildFrame::OnInstrumentSelected)
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CChildFrame::OnDPIChangedAfterParent)
+	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,    &CChildFrame::OnChangeViewClass)
+	ON_MESSAGE(WM_MOD_INSTRSELECTED,      &CChildFrame::OnInstrumentSelected)
 	// toolbar "tooltip" notification
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CChildFrame::OnToolTipText)
 	//}}AFX_MSG_MAP
@@ -83,7 +85,7 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateStatic(this, 2, 1)) return FALSE;
 
 	// add the first splitter pane - the default view in row 0
-	int cy = Util::ScalePixels(TrackerSettings::Instance().glGeneralWindowHeight, m_hWnd);	//rewbs.varWindowSize - default to general tab.
+	int cy = HighDPISupport::ScalePixels(TrackerSettings::Instance().glGeneralWindowHeight, m_hWnd);  //rewbs.varWindowSize - default to general tab.
 	if (cy <= 1) cy = (lpcs->cy*2) / 3;
 	if (!m_wndSplitter.CreateView(0, 0, pContext->m_pNewViewClass, CSize(0, cy), pContext)) return FALSE;
 
@@ -105,7 +107,23 @@ BOOL CChildFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 void CChildFrame::SetSplitterHeight(int cy)
 {
 	if (cy <= 1) cy = 188;	//default to 188? why not..
-	m_wndSplitter.SetRowInfo(0, Util::ScalePixels(cy, m_hWnd), 15);
+	cy = HighDPISupport::ScalePixels(cy, m_hWnd);
+	m_wndSplitter.SetRowInfo(0, cy, 15);
+}
+
+
+LRESULT CChildFrame::OnDPIChangedAfterParent(WPARAM, LPARAM)
+{
+	auto result = Default();
+	if(CModControlView *pModView = GetModControlView())
+	{
+		if(CModControlDlg *pDlg = pModView->GetCurrentControlDlg())
+		{
+			SetSplitterHeight(pDlg->GetSplitPosRef());
+			m_wndSplitter.RecalcLayout();
+		}
+	}
+	return result;
 }
 
 
@@ -271,7 +289,7 @@ void CChildFrame::SavePosition(BOOL bForce)
 				pWnd->GetWindowRect(&rect);
 				if(rect.Width() == 0)
 					return;
-				int l = Util::ScalePixelsInv(rect.Height(), m_hWnd);
+				int l = HighDPISupport::ScalePixelsInv(rect.Height(), m_hWnd);
 				//rewbs.varWindowSize - not the nicest piece of code, but we need to distinguish between the views:
 				if (strcmp(CViewGlobals::classCViewGlobals.m_lpszClassName, m_szCurrentViewClassName) == 0)
 					TrackerSettings::Instance().glGeneralWindowHeight = l;
@@ -299,7 +317,7 @@ int CChildFrame::GetSplitterHeight()
 		if (pWnd)
 		{
 			pWnd->GetWindowRect(&rect);
-			return Util::ScalePixelsInv(rect.Height(), m_hWnd);
+			return HighDPISupport::ScalePixelsInv(rect.Height(), m_hWnd);
 		}
 	}
 	return 15;	// tidy default

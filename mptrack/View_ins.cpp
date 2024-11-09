@@ -16,11 +16,13 @@
 #include "Dlsbank.h"
 #include "FileDialog.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "MPTrackUtil.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "ScaleEnvPointsDlg.h"
@@ -41,11 +43,11 @@ namespace
 
 
 // Non-client toolbar
-#define ENV_LEFTBAR_CY			Util::ScalePixels(29, m_hWnd)
-#define ENV_LEFTBAR_CXSEP		Util::ScalePixels(14, m_hWnd)
-#define ENV_LEFTBAR_CXSPC		Util::ScalePixels(3, m_hWnd)
-#define ENV_LEFTBAR_CXBTN		Util::ScalePixels(24, m_hWnd)
-#define ENV_LEFTBAR_CYBTN		Util::ScalePixels(22, m_hWnd)
+#define ENV_LEFTBAR_CY    HighDPISupport::ScalePixels(29, m_hWnd)
+#define ENV_LEFTBAR_CXSEP HighDPISupport::ScalePixels(14, m_hWnd)
+#define ENV_LEFTBAR_CXSPC HighDPISupport::ScalePixels(3, m_hWnd)
+#define ENV_LEFTBAR_CXBTN HighDPISupport::ScalePixels(24, m_hWnd)
+#define ENV_LEFTBAR_CYBTN HighDPISupport::ScalePixels(22, m_hWnd)
 
 
 static constexpr UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
@@ -79,9 +81,6 @@ IMPLEMENT_SERIAL(CViewInstrument, CModScrollView, 0)
 
 BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	//{{AFX_MSG_MAP(CViewInstrument)
-#if !defined(MPT_BUILD_RETRO)
-	ON_MESSAGE(WM_DPICHANGED, &CViewInstrument::OnDPIChanged)
-#endif
 	ON_WM_ERASEBKGND()
 	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
@@ -147,9 +146,6 @@ CViewInstrument::CViewInstrument()
 	m_rcClient.bottom = 2;
 	m_dwNotifyPos.fill(uint32(Notification::PosInvalid));
 	MemsetZero(m_NcButtonState);
-
-	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_EnvelopeIcons);
-
 	m_baPlayingNote.reset();
 }
 
@@ -158,8 +154,8 @@ void CViewInstrument::OnInitialUpdate()
 {
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
-	m_zoom = (ENV_POINT_SIZE * m_nDPIx) / 96.0f;
-	m_envPointSize = Util::ScalePixels(ENV_POINT_SIZE, m_hWnd);
+	m_zoom = (ENV_POINT_SIZE * m_dpi) / 96.0f;
+	m_envPointSize = HighDPISupport::ScalePixels(ENV_POINT_SIZE, m_hWnd);
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	EnableToolTips();
@@ -188,11 +184,11 @@ void CViewInstrument::UpdateScrollSize()
 }
 
 
-LRESULT CViewInstrument::OnDPIChanged(WPARAM wParam, LPARAM lParam)
+void CViewInstrument::OnDPIChanged()
 {
-	LRESULT res = CModScrollView::OnDPIChanged(wParam, lParam);
-	m_envPointSize = Util::ScalePixels(4, m_hWnd);
-	return res;
+	m_envPointSize = HighDPISupport::ScalePixels(ENV_POINT_SIZE, m_hWnd);
+	UpdateScrollSize();
+	CModScrollView::OnDPIChanged();
 }
 
 
@@ -1304,8 +1300,8 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		rect.left += xofs;
 		rect.top += yofs;
 		if(dwStyle & NCBTNS_CHECKED)
-			m_bmpEnvBar.Draw(pDC, IIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
-		m_bmpEnvBar.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
+			CMainFrame::GetMainFrame()->m_EnvelopeIcons.Draw(pDC, IIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
+		CMainFrame::GetMainFrame()->m_EnvelopeIcons.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
 	} else
 	{
 		c1 = c2 = crFc;
@@ -1654,7 +1650,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 		uint32 maxpoint = EnvGetLastPoint();
 		uint32 oldDragItem = m_nDragItem;
 		m_nDragItem = 0;
-		const int hitboxSize = static_cast<int>((6 * m_nDPIx) / 96.0f);
+		const int hitboxSize = static_cast<int>((6 * m_dpi) / 96.0f);
 		for(uint32 i = 0; i <= maxpoint; i++)
 		{
 			int x = PointToScreen(i);

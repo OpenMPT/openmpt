@@ -38,7 +38,6 @@ enum DragPoints
 class CViewInstrument: public CModScrollView
 {
 protected:
-	CImageList m_bmpEnvBar;
 	CPoint m_ptMenu;
 	CRect m_rcClient, m_rcOldClient;
 
@@ -183,6 +182,7 @@ public:
 	//{{AFX_VIRTUAL(CViewInstrument)
 	void OnDraw(CDC *) override;
 	void OnInitialUpdate() override;
+	void OnDPIChanged() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
@@ -199,7 +199,6 @@ protected:
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	// cppcheck-suppress duplInheritedMember
-	afx_msg LRESULT OnDPIChanged(WPARAM = 0, LPARAM = 0);
 	afx_msg void OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp);
 	afx_msg LRESULT OnNcHitTest(CPoint point);
 	afx_msg void OnNcPaint();

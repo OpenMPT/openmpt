@@ -79,6 +79,7 @@ protected:
 	std::vector<State> m_states;
 	CModDoc *m_ModDoc = nullptr;
 	HBITMAP m_bkgnd = nullptr;
+	CFont m_font;
 	CRect m_drawableArea;
 	Tab m_currentTab = kSoloMute;
 	int m_downX = 0, m_downY = 0;
@@ -99,6 +100,7 @@ protected:
 	BOOL OnInitDialog() override;
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CChannelManagerDlg)
+	void OnDPIChanged() override;
 	afx_msg void OnApply();
 	afx_msg void OnClose();
 	afx_msg void OnSelectAll();

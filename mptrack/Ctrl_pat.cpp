@@ -14,6 +14,7 @@
 #include "ChannelManagerDlg.h"
 #include "Childfrm.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -132,15 +133,16 @@ BOOL CCtrlPatterns::OnInitDialog()
 	SetRedraw(FALSE);
 	LockControls();
 	// Order List
+	const int cyHScroll = HighDPISupport::GetSystemMetrics(SM_CYHSCROLL, GetDPI());
 	m_BtnNext.GetWindowRect(&rect);
 	ScreenToClient(&rect);
-	auto margins = Util::ScalePixels(4, m_hWnd);
+	auto margins = HighDPISupport::ScalePixels(4, m_hWnd);
 	rcOrderList.left = rect.right + margins;
 	rcOrderList.top = rect.top;
-	rcOrderList.bottom = rect.bottom + GetSystemMetrics(SM_CYHSCROLL);
+	rcOrderList.bottom = rect.bottom + cyHScroll;
 	GetClientRect(&rect);
 	rcOrderList.right = rect.right - margins;
-	m_OrderList.Init(rcOrderList, pMainFrm->GetGUIFont());
+	m_OrderList.Init(rcOrderList);
 	// Toolbar buttons
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_PatternIcons, CMainFrame::GetMainFrame()->m_PatternIconsDisabled);
 	m_ToolBar.SetExtendedStyle(m_ToolBar.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
@@ -195,7 +197,16 @@ BOOL CCtrlPatterns::OnInitDialog()
 	return FALSE;
 }
 
+
+void CCtrlPatterns::OnDPIChanged()
+{
+	m_ToolBar.OnDPIChanged();
+	CModControlDlg::OnDPIChanged();
+}
+
+
 Setting<LONG> &CCtrlPatterns::GetSplitPosRef() { return TrackerSettings::Instance().glPatternWindowHeight; }
+
 
 void CCtrlPatterns::RecalcLayout()
 {
@@ -204,11 +215,11 @@ void CCtrlPatterns::RecalcLayout()
 	{
 		CRect rect;
 		int cx, cy, cellcx;
-
+		int cyHScroll = HighDPISupport::GetSystemMetrics(SM_CYHSCROLL, GetDPI());
 		m_BtnNext.GetWindowRect(&rect);
 		ScreenToClient(&rect);
 		cx = -(rect.right + 4);
-		cy = rect.bottom - rect.top + GetSystemMetrics(SM_CYHSCROLL);
+		cy = rect.bottom - rect.top + cyHScroll;
 		GetClientRect(&rect);
 		cx += rect.right - 8;
 		cellcx = m_OrderList.GetFontWidth();
@@ -1212,7 +1223,7 @@ void CCtrlPatterns::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
 	ClientToScreen(&(pToolBar->rcButton));            // TrackPopupMenu uses screen coords
-	const int offset = Util::ScalePixels(4, m_hWnd);  // Compared to the main toolbar, the offset seems to be a bit wrong here...?
+	const int offset = HighDPISupport::ScalePixels(4, m_hWnd);  // Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
 	const auto visibleColumns = std::bitset<PatternCursor::numColumns>{static_cast<unsigned long>(SendViewMessage(VIEWMSG_GETDETAIL))};
 	CMenu menu;

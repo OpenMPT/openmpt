@@ -65,7 +65,6 @@ protected:
 	};
 
 	std::unique_ptr<OPLInstrDlg> m_oplEditor;
-	CImageList m_bmpEnvBar;
 	CRect m_rcClient;
 	CDC m_offScreenDC, m_waveformDC;
 	CBitmap m_offScreenBitmap, m_waveformBitmap;

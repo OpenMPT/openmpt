@@ -153,6 +153,7 @@ public:
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CChildFrame)
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnNcActivate(BOOL bActivate);
 	afx_msg void OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd);

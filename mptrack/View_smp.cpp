@@ -17,11 +17,13 @@
 #include "dlg_misc.h"  // CInputDlg
 #include "Dlsbank.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
+#include "MPTrackUtil.h"
 #include "OPLInstrDlg.h"
 #include "Reporting.h"
 #include "resource.h"
@@ -46,16 +48,16 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Non-client toolbar
-#define SMP_LEFTBAR_CY    Util::ScalePixels(29, m_hWnd)
-#define SMP_LEFTBAR_CXSEP Util::ScalePixels(14, m_hWnd)
-#define SMP_LEFTBAR_CXSPC Util::ScalePixels(3, m_hWnd)
-#define SMP_LEFTBAR_CXBTN Util::ScalePixels(24, m_hWnd)
-#define SMP_LEFTBAR_CYBTN Util::ScalePixels(22, m_hWnd)
+#define SMP_LEFTBAR_CY    HighDPISupport::ScalePixels(29, m_hWnd)
+#define SMP_LEFTBAR_CXSEP HighDPISupport::ScalePixels(14, m_hWnd)
+#define SMP_LEFTBAR_CXSPC HighDPISupport::ScalePixels(3, m_hWnd)
+#define SMP_LEFTBAR_CXBTN HighDPISupport::ScalePixels(24, m_hWnd)
+#define SMP_LEFTBAR_CYBTN HighDPISupport::ScalePixels(22, m_hWnd)
 static constexpr int TIMELINE_HEIGHT = 26;
 
 static int TimelineHeight(HWND hwnd)
 {
-	auto height = Util::ScalePixels(TIMELINE_HEIGHT, hwnd);
+	auto height = HighDPISupport::ScalePixels(TIMELINE_HEIGHT, hwnd);
 	if(height % 2)
 		height++;  // Avoid weird-looking triangles if timeline is scaled to odd height
 	return height;
@@ -167,7 +169,6 @@ CViewSample::CViewSample()
 {
 	MemsetZero(m_NcButtonState);
 	m_dwNotifyPos.fill(Notification::PosInvalid);
-	m_bmpEnvBar.Create(&CMainFrame::GetMainFrame()->m_SampleIcons);
 }
 
 
@@ -279,7 +280,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 		return;
 
 	const TimelineFormat format = TrackerSettings::Instance().sampleEditorTimelineFormat;
-	double timelineInterval = MulDiv(150, m_nDPIx, 96);  // Timeline interval should be around 150 pixels
+	double timelineInterval = MulDiv(150, m_dpi, 96);  // Timeline interval should be around 150 pixels
 	if(m_nZoom > 0)
 		timelineInterval *= 1 << (m_nZoom - 1);
 	else if(m_nZoom < 0)
@@ -661,7 +662,7 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 	const bool inTimeline = point.y < m_timelineHeight;
 	if(m_dwEndSel > m_dwBeginSel && !inTimeline && !m_dwStatus[SMPSTATUS_DRAWING])
 	{
-		const int margin = Util::ScalePixels(5, m_hWnd);
+		const int margin = HighDPISupport::ScalePixels(5, m_hWnd);
 		if(HitTest(point.x, SampleToScreen(m_dwBeginSel), margin, margin, m_timelineHeight, m_rcClient.bottom, rect))
 			return {HitTestItem::SelectionStart, m_dwBeginSel};
 		if(HitTest(point.x, SampleToScreen(m_dwEndSel), margin, margin, m_timelineHeight, m_rcClient.bottom, rect))
@@ -1021,7 +1022,8 @@ void CViewSample::OnDraw(CDC *pDC)
 
 		NONCLIENTMETRICS metrics;
 		metrics.cbSize = sizeof(metrics);
-		SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
+		metrics.cbSize = sizeof(metrics);
+		HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
 		metrics.lfMessageFont.lfHeight = mpt::saturate_round<int>(metrics.lfMessageFont.lfHeight * 0.8);
 		metrics.lfMessageFont.lfWidth = mpt::saturate_round<int>(metrics.lfMessageFont.lfWidth * 0.8);
 		m_timelineFont.DeleteObject();
@@ -1061,7 +1063,7 @@ void CViewSample::OnDraw(CDC *pDC)
 		{
 			rc = timeline;
 			const auto sampleRate = sample.GetSampleRate(sndFile.GetType());
-			const int textOffset = Util::ScalePixels(4, m_hWnd);
+			const int textOffset = HighDPISupport::ScalePixels(4, m_hWnd);
 			mpt::tstring text;
 			for(int x = -(SampleToScreen(ScrollPosToSamplePos(), true) % m_timelineInterval); x < m_rcClient.right + m_timelineInterval; x += m_timelineInterval)
 			{
@@ -1529,8 +1531,9 @@ void CViewSample::DrawNcButton(CDC *pDC, UINT nBtn)
 		pDC->FillSolidRect(&rect, crFc);
 		rect.left += xofs;
 		rect.top += yofs;
-		if (dwStyle & NCBTNS_CHECKED) m_bmpEnvBar.Draw(pDC, SIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
-		m_bmpEnvBar.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
+		if(dwStyle & NCBTNS_CHECKED)
+			CMainFrame::GetMainFrame()->m_SampleIcons.Draw(pDC, SIMAGE_CHECKED, rect.TopLeft(), ILD_NORMAL);
+		CMainFrame::GetMainFrame()->m_SampleIcons.Draw(pDC, nImage, rect.TopLeft(), ILD_NORMAL);
 	} else
 	{
 		c1 = c2 = crFc;
@@ -1823,7 +1826,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			x = ScreenToSample(point.x);
 		} else if(m_fineDrag)
 		{
-			x = m_startDragValue + (point.x - m_startDragPoint.x) / Util::ScalePixels(2, m_hWnd);
+			x = m_startDragValue + (point.x - m_startDragPoint.x) / HighDPISupport::ScalePixels(2, m_hWnd);
 		} else if(dragItemIsInWaveform && (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength < static_cast<SmpLength>(m_rcClient.Width()))))
 		{
 			// Don't adjust selection to mouse down point when zooming into the sample

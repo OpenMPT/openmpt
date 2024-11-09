@@ -13,6 +13,7 @@
 #include "Mainfrm.h"
 #include "ModDocTemplate.h"
 #include "Mptrack.h"
+#include "MPTrackUtil.h"
 
 #include "../common/version.h"
 

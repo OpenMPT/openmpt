@@ -350,6 +350,7 @@ public:
 	//{{AFX_VIRTUAL(CViewPattern)
 	void OnDraw(CDC *) override;
 	void OnInitialUpdate() override;
+	void OnDPIChanged() override;
 	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;

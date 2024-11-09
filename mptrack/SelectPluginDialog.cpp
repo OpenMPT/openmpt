@@ -16,6 +16,7 @@
 #include "SelectPluginDialog.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -100,12 +101,11 @@ BOOL CSelectPluginDlg::OnInitDialog()
 		::EnableWindow(::GetDlgItem(m_hWnd, IDOK), FALSE);
 	}
 
-	const int dpiX = Util::GetDPIx(m_hWnd);
-	const int dpiY = Util::GetDPIy(m_hWnd);
+	const int dpi = HighDPISupport::GetDpiForWindow(m_hWnd);
 	CRect rect
 	(
-		CPoint(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpiX, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpiY, 96)),
-		CSize(MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpiX, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpiY, 96))
+		CPoint(MulDiv(TrackerSettings::Instance().gnPlugWindowX, dpi, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowY, dpi, 96)),
+		CSize(MulDiv(TrackerSettings::Instance().gnPlugWindowWidth, dpi, 96), MulDiv(TrackerSettings::Instance().gnPlugWindowHeight, dpi, 96))
 	);
 	::MapWindowPoints(GetParent()->m_hWnd, HWND_DESKTOP, (CPoint *)&rect, 2);
 	WINDOWPLACEMENT wnd;
@@ -118,6 +118,15 @@ BOOL CSelectPluginDlg::OnInitDialog()
 	UpdatePluginsList();
 	OnSelChanged(NULL, NULL);
 	return TRUE;
+}
+
+
+void CSelectPluginDlg::OnDPIChanged()
+{
+	DialogBase::OnDPIChanged();
+	// TODO: Icon scaling will be wrong if main window is on a screen with different DPI
+	m_treePlugins.SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons, TVSIL_NORMAL);
+	m_treePlugins.SetIndent(0);
 }
 
 
@@ -255,12 +264,10 @@ void CSelectPluginDlg::SaveWindowPos() const
 	GetWindowPlacement(&wnd);
 	CRect rect = wnd.rcNormalPosition;
 	::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (CPoint *)&rect, 2);
-	const int dpiX = Util::GetDPIx(m_hWnd);
-	const int dpiY = Util::GetDPIy(m_hWnd);
-	TrackerSettings::Instance().gnPlugWindowX = MulDiv(rect.left, 96, dpiX);
-	TrackerSettings::Instance().gnPlugWindowY = MulDiv(rect.top, 96, dpiY);
-	TrackerSettings::Instance().gnPlugWindowWidth  = MulDiv(rect.Width(), 96, dpiY);
-	TrackerSettings::Instance().gnPlugWindowHeight = MulDiv(rect.Height(), 96, dpiX);
+	TrackerSettings::Instance().gnPlugWindowX = HighDPISupport::ScalePixels(rect.left, m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowY = HighDPISupport::ScalePixels(rect.top, m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowWidth = HighDPISupport::ScalePixels(rect.Width(), m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowHeight = HighDPISupport::ScalePixels(rect.Height(), m_hWnd);
 }
 
 

@@ -75,6 +75,7 @@ protected:
 
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
 	void OnOK() override;
 	void OnCancel() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;

@@ -1253,6 +1253,7 @@
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\Globals.h" />
     <ClInclude Include="..\..\mptrack\HTTP.h" />
+    <ClInclude Include="..\..\mptrack\HighDPISupport.h" />
     <ClInclude Include="..\..\mptrack\IPCWindow.h" />
     <ClInclude Include="..\..\mptrack\Image.h" />
     <ClInclude Include="..\..\mptrack\ImageLists.h" />
@@ -1695,6 +1696,7 @@
     <ClCompile Include="..\..\mptrack\GeneralConfigDlg.cpp" />
     <ClCompile Include="..\..\mptrack\Globals.cpp" />
     <ClCompile Include="..\..\mptrack\HTTP.cpp" />
+    <ClCompile Include="..\..\mptrack\HighDPISupport.cpp" />
     <ClCompile Include="..\..\mptrack\IPCWindow.cpp" />
     <ClCompile Include="..\..\mptrack\Image.cpp" />
     <ClCompile Include="..\..\mptrack\InputHandler.cpp" />

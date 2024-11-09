@@ -22,6 +22,7 @@
 #include "FolderScanner.h"
 #include "GeneralConfigDlg.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "IPCWindow.h"
@@ -144,6 +145,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SHOWWINDOW()
 	ON_WM_ACTIVATEAPP()
+	ON_MESSAGE(WM_DPICHANGED, &CMainFrame::OnDPIChanged)
 END_MESSAGE_MAP()
 
 // Globals
@@ -228,8 +230,8 @@ void CMainFrame::Initialize()
 	}
 
 	// Setup timer
-	OnUpdateUser(NULL);
-	m_nTimer = SetTimer(TIMERID_GUI, MPTTIMER_PERIOD, NULL);
+	OnUpdateUser(nullptr);
+	m_nTimer = SetTimer(TIMERID_GUI, MPTTIMER_PERIOD, nullptr);
 
 	// Setup Keyboard Hook
 	g_focusHook = SetWindowsHookEx(WH_CBT, FocusChangeProc, AfxGetInstanceHandle(), GetCurrentThreadId());
@@ -266,36 +268,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Load resources
 	m_hIcon = theApp.LoadIcon(IDR_MAINFRAME);
 
-	// Toolbar and other icons
-	CDC *dc = GetDC();
-	const double scaling = Util::GetDPIx(m_hWnd) / 96.0;
-	static constexpr int miscIconsInvert[] = {IMAGE_PATTERNS, IMAGE_OPLINSTRACTIVE, IMAGE_OPLINSTRMUTE};
-	static constexpr int patternIconsInvert[] = {TIMAGE_PREVIEW, TIMAGE_MACROEDITOR, TIMAGE_PATTERN_OVERFLOWPASTE, TIMAGE_PATTERN_PLUGINS, TIMAGE_SAMPLE_UNSIGN};
-	static constexpr int envelopeIconsInvert[] = {IIMAGE_CHECKED, IIMAGE_VOLSWITCH, IIMAGE_PANSWITCH, IIMAGE_PITCHSWITCH, IIMAGE_FILTERSWITCH, IIMAGE_NOPITCHSWITCH, IIMAGE_NOFILTERSWITCH};
-	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false, miscIconsInvert);
-	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, true, miscIconsInvert);
-	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, dc, scaling, false, patternIconsInvert);
-	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, dc, scaling, true, patternIconsInvert);
-	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1, dc, scaling, false, envelopeIconsInvert);
-	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, dc, scaling, false);
-	ReleaseDC(dc);
+	RecreateImageLists();
 
-	NONCLIENTMETRICS metrics;
-	metrics.cbSize = sizeof(metrics);
-	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
-	m_hGUIFont = CreateFontIndirect(&metrics.lfMessageFont);
-
-	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
-	penGray99 = ::CreatePen(PS_SOLID,0, RGB(0x99, 0x99, 0x99));
-	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
-
-	// Cursors
-	curDragging = theApp.LoadCursor(IDC_DRAGGING);
-	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
-	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
-	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
-	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
-	// bitmaps
+	// Pattern note bitmap
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	// Toolbars
 	EnableDocking(CBRS_ALIGN_ANY);
@@ -328,6 +303,53 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #endif
 
 	return 0;
+}
+
+
+LRESULT CMainFrame::OnDPIChanged(WPARAM, LPARAM suggestedRect)
+{
+	// Default() doesn't appear to do the right thing?
+	const auto &rect = *reinterpret_cast<const CRect *>(suggestedRect);
+	SetWindowPos(nullptr, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
+	auto result = Default();
+
+	RecreateImageLists();
+	m_wndTree.RecalcLayout();
+	return result;
+}
+
+
+void CMainFrame::RecreateImageLists()
+{
+	// Toolbar and other icons
+	CDC *dc = GetDC();
+	const double scaling = HighDPISupport::GetDpiForWindow(m_hWnd) / 96.0;
+	static constexpr int miscIconsInvert[] = {IMAGE_PATTERNS, IMAGE_OPLINSTRACTIVE, IMAGE_OPLINSTRMUTE};
+	static constexpr int patternIconsInvert[] = {TIMAGE_PREVIEW, TIMAGE_MACROEDITOR, TIMAGE_PATTERN_OVERFLOWPASTE, TIMAGE_PATTERN_PLUGINS, TIMAGE_SAMPLE_UNSIGN};
+	static constexpr int envelopeIconsInvert[] = {IIMAGE_CHECKED, IIMAGE_VOLSWITCH, IIMAGE_PANSWITCH, IIMAGE_PITCHSWITCH, IIMAGE_FILTERSWITCH, IIMAGE_NOPITCHSWITCH, IIMAGE_NOFILTERSWITCH};
+	m_MiscIcons.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false, miscIconsInvert);
+	m_MiscIconsDisabled.Create(IDB_IMAGELIST, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, true, miscIconsInvert);
+	m_PatternIcons.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, dc, scaling, false, patternIconsInvert);
+	m_PatternIconsDisabled.Create(IDB_PATTERNS, 16, 16, PATTERNIMG_NUMIMAGES, 1, dc, scaling, true, patternIconsInvert);
+	m_EnvelopeIcons.Create(IDB_ENVTOOLBAR, 20, 18, ENVIMG_NUMIMAGES, 1, dc, scaling, false, envelopeIconsInvert);
+	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, dc, scaling, false);
+	ReleaseDC(dc);
+
+	NONCLIENTMETRICS metrics;
+	metrics.cbSize = sizeof(metrics);
+	HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
+	m_hGUIFont = CreateFontIndirect(&metrics.lfMessageFont);
+
+	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
+	penGray99 = ::CreatePen(PS_SOLID, 0, RGB(0x99, 0x99, 0x99));
+	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
+
+	// Cursors
+	curDragging = theApp.LoadCursor(IDC_DRAGGING);
+	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
+	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
+	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
+	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 }
 
 

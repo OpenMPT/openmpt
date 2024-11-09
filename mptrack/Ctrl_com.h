@@ -29,6 +29,7 @@ public:
 	//{{AFX_VIRTUAL(CCtrlComments)
 	Setting<LONG> &GetSplitPosRef() override;
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
 	void DoDataExchange(CDataExchange *pDX) override;  // DDX/DDV support
 	void RecalcLayout() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;

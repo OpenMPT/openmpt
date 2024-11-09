@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "DefaultVstEditor.h"
+#include "HighDPISupport.h"
 #include "resource.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -42,12 +43,12 @@ struct Measurements
 	const int totalHeight;
 
 	Measurements(HWND hWnd)
-		: spacing(Util::ScalePixels(edSpacing, hWnd))
-		, lineHeight(Util::ScalePixels(edLineHeight, hWnd))
-		, editWidth(Util::ScalePixels(edEditWidth, hWnd))
-		, perMilWidth(Util::ScalePixels(edPerMilWidth, hWnd))
-		, rightWidth(Util::ScalePixels(edRightWidth, hWnd))
-		, totalHeight(Util::ScalePixels(edTotalHeight, hWnd))
+		: spacing(HighDPISupport::ScalePixels(edSpacing, hWnd))
+		, lineHeight(HighDPISupport::ScalePixels(edLineHeight, hWnd))
+		, editWidth(HighDPISupport::ScalePixels(edEditWidth, hWnd))
+		, perMilWidth(HighDPISupport::ScalePixels(edPerMilWidth, hWnd))
+		, rightWidth(HighDPISupport::ScalePixels(edRightWidth, hWnd))
+		, totalHeight(HighDPISupport::ScalePixels(edTotalHeight, hWnd))
 	{ }
 };
 

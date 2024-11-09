@@ -29,7 +29,9 @@ protected:
 	const CTuning* m_pTuning = nullptr;
 	CTuningDialog* m_pParent = nullptr;
 
+	CFont m_font;
 	int m_cxFont = 0, m_cyFont = 0;
+	int m_dpi = 0;
 	NOTEINDEXTYPE m_nNote = NOTE_MIDDLEC;
 
 	NOTEINDEXTYPE m_nNoteCentre = NOTE_MIDDLEC;

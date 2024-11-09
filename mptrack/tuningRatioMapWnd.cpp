@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "tuningRatioMapWnd.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
 #include "TuningDialog.h"
@@ -38,7 +39,8 @@ void CTuningRatioMapWnd::OnPaint()
 {
 	CPaintDC dc(this);
 
-	if(!m_pTuning) return;
+	if(!m_pTuning)
+		return;
 
 	CRect rcClient;
 	GetClientRect(&rcClient);
@@ -47,7 +49,21 @@ void CTuningRatioMapWnd::OnPaint()
 	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	const auto highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), windowBrush = GetSysColorBrush(COLOR_WINDOW);
 
-	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
+	if(int dpi = HighDPISupport::GetDpiForWindow(m_hWnd); m_dpi != dpi)
+	{
+		m_font.DeleteObject();
+		m_dpi = dpi;
+	}
+	if(!m_font.m_hObject)
+	{
+		NONCLIENTMETRICS metrics;
+		metrics.cbSize = sizeof(metrics);
+		HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
+		m_font.CreateFontIndirect(&metrics.lfMessageFont);
+		m_cxFont = m_cyFont = 0;
+	}
+
+	auto oldFont = dc.SelectObject(m_font);
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
 	{

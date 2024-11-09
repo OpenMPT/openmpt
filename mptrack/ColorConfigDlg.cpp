@@ -12,6 +12,7 @@
 #include "ColorConfigDlg.h"
 #include "ColorSchemes.h"
 #include "FileDialog.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Mptrack.h"
 #include "Reporting.h"
@@ -131,7 +132,7 @@ BOOL COptionsColors::OnInitDialog()
 
 	m_BtnPreview.SetWindowPos(nullptr,
 		0, 0,
-		Util::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, Util::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
+		HighDPISupport::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, HighDPISupport::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
 		SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
@@ -265,7 +266,7 @@ void COptionsColors::OnChoosePatternFont()
 	MemsetZero(lf);
 	const int32 size = patternFont.size < 10 ? 120 : patternFont.size;
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(size, Util::GetDPIy(m_hWnd), 720);
+	lf.lfHeight = -MulDiv(size, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::WriteWinBuf(lf.lfFaceName) = mpt::ToWin(patternFont.name);
@@ -300,7 +301,7 @@ void COptionsColors::OnChooseCommentFont()
 	LOGFONT lf;
 	MemsetZero(lf);
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(commentFont.size, Util::GetDPIy(m_hWnd), 720);
+	lf.lfHeight = -MulDiv(commentFont.size, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::WriteWinBuf(lf.lfFaceName) = mpt::ToWin(commentFont.name);

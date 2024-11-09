@@ -10,9 +10,9 @@
 
 #include "stdafx.h"
 #include "ChannelManagerDlg.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
-#include "MPTrackUtil.h"
 #include "PatternEditorDialogs.h"
 #include "resource.h"
 #include "UpdateHints.h"
@@ -169,13 +169,21 @@ BOOL CChannelManagerDlg::OnInitDialog()
 	TabCtrl_InsertItem(menu, kReorderRemove, &tie);
 	m_currentTab = kSoloMute;
 
-	m_buttonHeight = MulDiv(CM_BT_HEIGHT, Util::GetDPIy(m_hWnd), 96);
+	m_buttonHeight = HighDPISupport::ScalePixels(CM_BT_HEIGHT, m_hWnd);
 	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), SW_HIDE);
 
 	ResetState(true, true, true, true);
 
 	return TRUE;
 }
+
+
+void CChannelManagerDlg::OnDPIChanged()
+{
+	m_font.DeleteObject();
+	ResizeWindow();
+}
+
 
 void CChannelManagerDlg::OnApply()
 {
@@ -432,12 +440,13 @@ void CChannelManagerDlg::OnTabSelchange(NMHDR* /*header*/, LRESULT* /*pResult*/)
 
 void CChannelManagerDlg::ResizeWindow()
 {
-	if(!m_hWnd || !m_ModDoc) return;
+	if(!m_hWnd || !m_ModDoc)
+		return;
 
-	const int dpiX = Util::GetDPIx(m_hWnd);
-	const int dpiY = Util::GetDPIy(m_hWnd);
+	const int dpi = HighDPISupport::GetDpiForWindow(m_hWnd);
 
-	m_buttonHeight = MulDiv(CM_BT_HEIGHT, dpiY, 96);
+	const auto oldButtonHeight = m_buttonHeight;
+	m_buttonHeight = MulDiv(CM_BT_HEIGHT, dpi, 96);
 
 	CHANNELINDEX channels = m_ModDoc->GetNumChannels();
 	int lines = channels / CM_NB_COLS + (channels % CM_NB_COLS ? 1 : 0);
@@ -448,18 +457,19 @@ void CChannelManagerDlg::ResizeWindow()
 	CRect client;
 	GetClientRect(client);
 	m_drawableArea = client;
-	m_drawableArea.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
+	m_drawableArea.DeflateRect(MulDiv(10, dpi, 96), MulDiv(38, dpi, 96), MulDiv(8, dpi, 96), MulDiv(30, dpi, 96));
 
 	int chnSizeY = m_drawableArea.Height() / lines;
 
-	if(chnSizeY != m_buttonHeight)
+	if(chnSizeY != m_buttonHeight || oldButtonHeight != m_buttonHeight)
 	{
 		SetWindowPos(nullptr, 0, 0, window.Width(), window.Height() + (m_buttonHeight - chnSizeY) * lines, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREDRAW);
 
 		GetClientRect(client);
 
 		// Move butttons to bottom of the window
-		for(auto id : { IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6 })
+		auto dwp = ::BeginDeferWindowPos(6);
+		for(auto id : {IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3, IDC_BUTTON4, IDC_BUTTON5, IDC_BUTTON6})
 		{
 			CWnd *button = GetDlgItem(id);
 			if(button != nullptr)
@@ -467,9 +477,11 @@ void CChannelManagerDlg::ResizeWindow()
 				CRect btn;
 				button->GetClientRect(btn);
 				button->MapWindowPoints(this, btn);
-				button->SetWindowPos(nullptr, btn.left, client.Height() - btn.Height() - MulDiv(3, dpiY, 96), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+				::DeferWindowPos(dwp, *button, nullptr, btn.left, client.Height() - btn.Height() - MulDiv(3, dpi, 96), 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 			}
 		}
+
+		::EndDeferWindowPos(dwp);
 
 		if(m_bkgnd)
 		{
@@ -478,8 +490,8 @@ void CChannelManagerDlg::ResizeWindow()
 		}
 
 		m_drawableArea = client;
-		m_drawableArea.DeflateRect(MulDiv(10, dpiX, 96), MulDiv(38, dpiY, 96), MulDiv(8, dpiX, 96), MulDiv(30, dpiY, 96));
-		InvalidateRect(nullptr, FALSE);
+		m_drawableArea.DeflateRect(MulDiv(10, dpi, 96), MulDiv(38, dpi, 96), MulDiv(8, dpi, 96), MulDiv(30, dpi, 96));
+		Invalidate(FALSE);
 	}
 }
 
@@ -498,8 +510,13 @@ void CChannelManagerDlg::OnPaint()
 		return;
 	}
 
-	const int dpiX = Util::GetDPIx(m_hWnd);
-	const int dpiY = Util::GetDPIy(m_hWnd);
+	if(!m_font.m_hObject)
+	{
+		NONCLIENTMETRICS metrics;
+		metrics.cbSize = sizeof(metrics);
+		HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
+		m_font.CreateFontIndirect(&metrics.lfMessageFont);
+	}
 
 	PAINTSTRUCT pDC;
 	::BeginPaint(m_hWnd, &pDC);
@@ -546,11 +563,12 @@ void CChannelManagerDlg::OnPaint()
 	if(!m_bkgnd)
 		m_bkgnd = ::CreateCompatibleBitmap(pDC.hdc, client.Width(), client.Height());
 	HGDIOBJ oldBmp = ::SelectObject(dc, m_bkgnd);
-	HGDIOBJ oldFont = ::SelectObject(dc, CMainFrame::GetGUIFont());
+	HGDIOBJ oldFont = ::SelectObject(dc, m_font);
 
 	const auto dcBrush = GetStockBrush(DC_BRUSH);
 
-	client.SetRect(client.left + MulDiv(2, dpiX, 96), client.top + MulDiv(32, dpiY, 96), client.right - MulDiv(2, dpiX, 96), client.bottom - MulDiv(24, dpiY, 96));
+	const int dpi = HighDPISupport::GetDpiForWindow(m_hWnd);
+	client.SetRect(client.left + MulDiv(2, dpi, 96), client.top + MulDiv(32, dpi, 96), client.right - MulDiv(2, dpi, 96), client.bottom - MulDiv(24, dpi, 96));
 	// Draw background
 	{
 		const auto bgIntersected = client & pDC.rcPaint;  // In case of partial redraws, FillRect may still draw into areas that are not part of the redraw area and thus make some buttons disappear
@@ -580,12 +598,12 @@ void CChannelManagerDlg::OnPaint()
 		else
 			s = MPT_CFORMAT("Channel {}")(sourceChn + 1);
 
-		const int borderX = MulDiv(3, dpiX, 96), borderY = MulDiv(3, dpiY, 96);
+		const int border = HighDPISupport::ScalePixels(3, m_hWnd);
 		CRect btn;
-		btn.left = client.left + col * chnSizeX + borderX;
-		btn.right = btn.left + chnSizeX - borderX;
-		btn.top = client.top + row * chnSizeY + borderY;
-		btn.bottom = btn.top + chnSizeY - borderY;
+		btn.left = client.left + col * chnSizeX + border;
+		btn.right = btn.left + chnSizeX - border;
+		btn.top = client.top + row * chnSizeY + border;
+		btn.bottom = btn.top + chnSizeY - border;
 		col++;
 		if(col >= CM_NB_COLS)
 		{
@@ -629,8 +647,8 @@ void CChannelManagerDlg::OnPaint()
 		// Text
 		{
 			auto rect = btnAdjusted;
-			rect.left += Util::ScalePixels(9, m_hWnd);
-			rect.right -= Util::ScalePixels(3, m_hWnd);
+			rect.left += HighDPISupport::ScalePixels(9, m_hWnd);
+			rect.right -= HighDPISupport::ScalePixels(3, m_hWnd);
 
 			::SetBkMode(dc, TRANSPARENT);
 			::SetTextColor(dc, GetSysColor(enable || activate ? COLOR_BTNTEXT : COLOR_GRAYTEXT));
@@ -639,10 +657,10 @@ void CChannelManagerDlg::OnPaint()
 
 		// Draw red/green markers
 		{
-			const int margin = Util::ScalePixels(1, m_hWnd);
+			const int margin = HighDPISupport::ScalePixels(1, m_hWnd);
 			auto rect = btnAdjusted;
 			rect.DeflateRect(margin, margin);
-			rect.right = rect.left + Util::ScalePixels(7, m_hWnd);
+			rect.right = rect.left + HighDPISupport::ScalePixels(7, m_hWnd);
 			const auto &brushes = activate ? brushColorsBright : brushColors;
 			const auto redBrush = brushes[2], greenBrush = brushes[1];
 			COLORREF color = 0;

@@ -12,11 +12,11 @@
 #include "stdafx.h"
 #include "Ctrl_pat.h"
 #include "Globals.h"
-#include "Mainfrm.h"
+#include "HighDPISupport.h"
 #include "InputHandler.h"
+#include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
-#include "MPTrackUtil.h"
 #include "PatternClipboard.h"
 #include "Reporting.h"
 #include "resource.h"
@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_COMMAND(ID_QUEUE_AT_ROW_END,           &COrderList::OnQueueAtRowEnd)
 	ON_MESSAGE(WM_MOD_DRAGONDROPPING,         &COrderList::OnDragonDropping)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,             &COrderList::OnCustomKeyMsg)
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT,     &COrderList::OnDPIChangedAfterParent)
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,             &COrderList::OnToolTipText)
 
 	ON_COMMAND_RANGE(ID_SEQUENCE_ITEM, ID_SEQUENCE_ITEM + kMaxSequenceActions - 1, &COrderList::OnSelectSequence)
@@ -204,10 +205,10 @@ CRect COrderList::GetRectFromOrder(ORDERINDEX ord) const
 }
 
 
-BOOL COrderList::Init(const CRect &rect, HFONT hFont)
+BOOL COrderList::Init(const CRect &rect)
 {
 	CreateEx(WS_EX_STATICEDGE, NULL, _T(""), WS_CHILD | WS_VISIBLE, rect, &m_pParent, IDC_ORDERLIST);
-	m_hFont = hFont;
+	m_hFont = CMainFrame::GetGUIFont();
 	SendMessage(WM_SETFONT, (WPARAM)m_hFont);
 	SetScrollPos(0);
 	EnableScrollBarCtrl(SB_HORZ, TRUE);
@@ -765,6 +766,16 @@ HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
 /////////////////////////////////////////////////////////////////
 // COrderList messages
 
+LRESULT COrderList::OnDPIChangedAfterParent(WPARAM, LPARAM)
+{
+	auto result = Default();
+	m_cxFont = m_cyFont = 0;
+	m_hFont = CMainFrame::GetGUIFont();
+	Invalidate(FALSE);
+	return result;
+}
+
+
 void COrderList::OnPaint()
 {
 	TCHAR s[64];
@@ -795,8 +806,8 @@ void COrderList::OnPaint()
 		dc.SetBkMode(TRANSPARENT);
 		const OrdSelection selection = GetCurSel();
 
-		const int lineWidth1 = Util::ScalePixels(1, m_hWnd);
-		const int lineWidth2 = Util::ScalePixels(2, m_hWnd);
+		const int lineWidth1 = HighDPISupport::ScalePixels(1, m_hWnd);
+		const int lineWidth2 = HighDPISupport::ScalePixels(2, m_hWnd);
 		const bool isFocussed = (::GetFocus() == m_hWnd);
 
 		const auto &order = Order();

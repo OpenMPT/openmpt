@@ -441,6 +441,9 @@
     <ClInclude Include="..\..\mptrack\HTTP.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\HighDPISupport.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\IPCWindow.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -1761,6 +1764,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\HTTP.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\HighDPISupport.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\IPCWindow.cpp">

@@ -12,6 +12,7 @@
 #include "dlg_misc.h"
 #include "Childfrm.h"
 #include "Dlsbank.h"
+#include "HighDPISupport.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
@@ -111,7 +112,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, mpt::ToCString(sndFile.m_modFormat.madeWithTracker.empty() ? sndFile.m_modFormat.formatName : sndFile.m_modFormat.madeWithTracker));
 
-	const int iconSize = Util::ScalePixels(32, m_hWnd);
+	const int iconSize = HighDPISupport::ScalePixels(32, m_hWnd);
 	m_warnIcon = (HICON)::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED);
 
 	UpdateDialog();
@@ -910,7 +911,7 @@ void CKeyboardControl::Init(CWnd *parent, int octaves, bool cursorNotify)
 	MemsetZero(m_sampleNum);
 	
 	// Point size to pixels
-	int fontSize = -MulDiv(60, Util::GetDPIy(m_hWnd), 720);
+	int fontSize = -MulDiv(60, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
 	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
 }
 

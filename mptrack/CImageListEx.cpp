@@ -10,6 +10,7 @@
 #include "stdafx.h"
 #include "CImageListEx.h"
 #include "Image.h"
+#include "MPTrackUtil.h"
 #include "../misc/mptColor.h"
 
 #include "Mptrack.h"
@@ -72,7 +73,8 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 
 	bool result;
 
-	if(dc == nullptr) dc = CDC::FromHandle(GetDC(NULL));
+	if(dc == nullptr)
+		dc = CDC::FromHandle(GetDC(nullptr));
 
 	// Use 1-bit transperency when there is no alpha channel.
 	if(GetDeviceCaps(dc->GetSafeHdc(), BITSPIXEL) * GetDeviceCaps(dc->GetSafeHdc(), PLANES) < 32)
@@ -123,8 +125,17 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 		dibMask.CreateCompatibleBitmap(dc, bitmap->Width(), bitmap->Height());
 		SetDIBits(dc->GetSafeHdc(), dibMask, 0, bitmap->Height(), bitmapMask.data(), reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS);
 
-		result = CImageList::Create(cx, cy, ILC_COLOR24 | ILC_MASK, nInitial, nGrow)
-			&& CImageList::Add(&ddb, &dibMask);
+		if(m_hImageList)
+		{
+			ImageList_RemoveAll(m_hImageList);
+			ImageList_SetIconSize(m_hImageList, cx, cy);
+			result = true;
+		} else
+		{
+			if(!CImageList::Create(cx, cy, ILC_COLOR24 | ILC_MASK, nInitial, nGrow))
+				return false;
+		}
+		result = CImageList::Add(&ddb, &dibMask) != 0;
 	} else
 	{
 		// 32-bit image on modern system
@@ -143,8 +154,16 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 
 		CBitmap ddb;
 		CopyToCompatibleBitmap(ddb, *dc, *bitmap);
-		result = CImageList::Create(cx, cy, ILC_COLOR32 | ILC_MASK, nInitial, nGrow)
-			&& CImageList::Add(&ddb, RGB(255, 0, 255));
+		if(m_hImageList)
+		{
+			ImageList_RemoveAll(m_hImageList);
+			ImageList_SetIconSize(m_hImageList, cx, cy);
+		} else
+		{
+			if(!CImageList::Create(cx, cy, ILC_COLOR32 | ILC_MASK, nInitial, nGrow))
+				return false;
+		}
+		result = CImageList::Add(&ddb, RGB(255, 0, 255)) != 0;
 	}
 
 	return result;

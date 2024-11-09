@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "MPTrackUtil.h"
+#include "HighDPISupport.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -30,7 +30,7 @@ public:
 		for(int i = 0; i < static_cast<int>(header.size()); i++)
 		{
 			int width = header[i].width;
-			InsertColumn(i, header[i].text, header[i].mask, width >= 0 ? Util::ScalePixels(width, m_hWnd) : 16);
+			InsertColumn(i, header[i].text, header[i].mask, width >= 0 ? HighDPISupport::ScalePixels(width, m_hWnd) : 16);
 			if(width < 0)
 				SetColumnWidth(i, width);
 		}
@@ -103,7 +103,7 @@ public:
 	{
 		for(int i = 0; i < static_cast<int>(header.size()); i++)
 		{
-			InsertColumn(i, header[i].text, header[i].mask, Util::ScalePixels(header[i].width, m_hWnd));
+			InsertColumn(i, header[i].text, header[i].mask, HighDPISupport::ScalePixels(header[i].width, m_hWnd));
 		}
 	}
 

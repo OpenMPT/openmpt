@@ -19,11 +19,13 @@
 #include "FileDialog.h"
 #include "FolderScanner.h"
 #include "Globals.h"
+#include "HighDPISupport.h"
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "LinkResolver.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
+#include "MPTrackUtil.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
@@ -102,6 +104,7 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_WM_RBUTTONUP()
 	ON_WM_XBUTTONUP()
 	ON_WM_DROPFILES()
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CModTree::OnDPIChangedAfterParent)
 
 	ON_NOTIFY_REFLECT(NM_DBLCLK,          &CModTree::OnItemDblClk)
 	ON_NOTIFY_REFLECT(NM_RETURN,          &CModTree::OnItemReturn)
@@ -255,6 +258,15 @@ void CModTree::Init()
 	RefreshDlsBanks();
 	RefreshInstrumentLibrary();
 	m_DropTarget.Register(this);
+}
+
+
+LRESULT CModTree::OnDPIChangedAfterParent(WPARAM, LPARAM)
+{
+	auto result = Default();
+	SetImageList(&CMainFrame::GetMainFrame()->m_MiscIcons, TVSIL_NORMAL);
+	SetIndent(0);  // Set to minimum after going back from high-DPI to low-DPI
+	return result;
 }
 
 
@@ -3531,7 +3543,8 @@ void CModTree::OnMouseMove(UINT nFlags, CPoint point)
 					}
 				}
 			}
-			if((point.x >= -1) && (point.x <= rect.right + GetSystemMetrics(SM_CXVSCROLL)))
+
+			if((point.x >= -1) && (point.x <= rect.right + HighDPISupport::GetSystemMetrics(SM_CXVSCROLL, m_hWnd)))
 			{
 				if(point.y <= 0)
 				{

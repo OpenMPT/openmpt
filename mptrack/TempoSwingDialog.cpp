@@ -10,8 +10,8 @@
 
 #include "stdafx.h"
 #include "TempoSwingDialog.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
-#include "MPTrackUtil.h"
 #include "resource.h"
 
 
@@ -94,16 +94,16 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		const int scrollbarWidth;
 
 		Measurements(HWND hWnd)
-			: rowLabelWidth(Util::ScalePixels(edRowLabelWidth, hWnd))
-			, sliderWidth(Util::ScalePixels(edSliderWidth, hWnd))
-			, sliderHeight(Util::ScalePixels(edSliderHeight, hWnd))
-			, valueLabelWidth(Util::ScalePixels(edValueLabelWidth, hWnd))
-			, paddingX(Util::ScalePixels(edPaddingX, hWnd))
-			, paddingY(Util::ScalePixels(edPaddingY, hWnd))
-			, paddingTop(Util::ScalePixels(edPaddingTop, hWnd))
-			, rowHeight(Util::ScalePixels(edRowHeight, hWnd))
-			, footerHeight(Util::ScalePixels(edFooterHeight, hWnd))
-			, scrollbarWidth(Util::ScalePixels(edScrollbarWidth, hWnd))
+			: rowLabelWidth(HighDPISupport::ScalePixels(edRowLabelWidth, hWnd))
+			, sliderWidth(HighDPISupport::ScalePixels(edSliderWidth, hWnd))
+			, sliderHeight(HighDPISupport::ScalePixels(edSliderHeight, hWnd))
+			, valueLabelWidth(HighDPISupport::ScalePixels(edValueLabelWidth, hWnd))
+			, paddingX(HighDPISupport::ScalePixels(edPaddingX, hWnd))
+			, paddingY(HighDPISupport::ScalePixels(edPaddingY, hWnd))
+			, paddingTop(HighDPISupport::ScalePixels(edPaddingTop, hWnd))
+			, rowHeight(HighDPISupport::ScalePixels(edRowHeight, hWnd))
+			, footerHeight(HighDPISupport::ScalePixels(edFooterHeight, hWnd))
+			, scrollbarWidth(HighDPISupport::ScalePixels(edScrollbarWidth, hWnd))
 		{ }
 	};
 
@@ -182,12 +182,13 @@ BOOL CTempoSwingDlg::OnInitDialog()
 	rect.MoveToY(m.paddingTop + containerRect.bottom + m.paddingY);
 	{
 		// Buttons at dialog bottom
+		const int cxEdge = HighDPISupport::GetSystemMetrics(SM_CYHSCROLL, GetDPI());
 		CRect buttonRect;
 		for(auto i : { IDOK, IDCANCEL, IDC_BUTTON2 })
 		{
 			auto wnd = GetDlgItem(i);
 			wnd->GetWindowRect(buttonRect);
-			wnd->SetWindowPos(nullptr, buttonRect.left - windowRect.left - GetSystemMetrics(SM_CXEDGE), rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
+			wnd->SetWindowPos(nullptr, buttonRect.left - windowRect.left - cxEdge, rect.top, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER);
 		}
 	}
 
