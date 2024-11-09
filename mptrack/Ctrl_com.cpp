@@ -133,6 +133,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	if(previousFont != font)
 	{
 		previousFont = font;
+		DeleteFont(CMainFrame::GetCommentsFont());
 		CMainFrame::GetCommentsFont() = ::CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
 			font.flags[FontSetting::Italic] ? TRUE :FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
