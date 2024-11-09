@@ -966,9 +966,13 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 					uint8 note = m.note;
 
 					if(note != NOTE_NONE || m.instr != 0)
-					{
 						info |= s3mNotePresent;
 
+					if(note == NOTE_NONE)
+					{
+						note = s3mNoteNone;
+					} else
+					{
 						if(ModCommand::IsSpecialNote(note))
 						{
 							// Note Cut
@@ -986,15 +990,15 @@ bool CSoundFile::SaveS3M(std::ostream &f) const
 						{
 							note = s3mNoteNone;
 						}
+					}
 
-						if(m.instr > 0 && m.instr <= GetNumSamples())
-						{
-							const ModSample &smp = Samples[m.instr];
-							if(smp.uFlags[CHN_ADLIB])
-								channelType[chn].set(S3MChannelType::kAdlib);
-							else if(smp.HasSampleData())
-								channelType[chn].set(S3MChannelType::kPCM);
-						}
+					if(m.instr > 0 && m.instr <= GetNumSamples())
+					{
+						const ModSample &smp = Samples[m.instr];
+						if(smp.uFlags[CHN_ADLIB])
+							channelType[chn].set(S3MChannelType::kAdlib);
+						else if(smp.HasSampleData())
+							channelType[chn].set(S3MChannelType::kPCM);
 					}
 
 					uint8 vol = std::min(m.vol, ModCommand::VOL(64));
