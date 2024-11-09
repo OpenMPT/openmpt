@@ -361,6 +361,22 @@ template<> inline Resampling::AmigaFilter FromSettingValue(const SettingValue &v
 template<> inline SettingValue ToSettingValue(const NewFileAction &val) { return SettingValue(int32(val)); }
 template<> inline NewFileAction FromSettingValue(const SettingValue &val) { return NewFileAction(val.as<int32>()); }
 
+enum class MainToolBarItem : uint8
+{
+	Octave = 0x01,
+	Tempo = 0x02,
+	Speed = 0x04,
+	RowsPerBeat = 0x08,
+	GlobalVolume = 0x10,
+	VUMeter = 0x20,
+
+	Default = Octave | Tempo | Speed | GlobalVolume | VUMeter
+};
+DECLARE_FLAGSET(MainToolBarItem)
+
+template<> inline SettingValue ToSettingValue(const MainToolBarItem &val) { return SettingValue(static_cast<int32>(val)); }
+template<> inline MainToolBarItem FromSettingValue(const SettingValue &val) { return static_cast<MainToolBarItem>(val.as<int32>()); }
+
 template<> inline SettingValue ToSettingValue(const std::bitset<128> &val)
 {
 	return SettingValue(IgnoredCCsToString(val), "IgnoredCCs");
@@ -698,6 +714,8 @@ public:
 	Setting<DefaultChannelColors> defaultRainbowChannelColors;
 
 	Setting<FontSetting> commentsFont;
+
+	Setting<MainToolBarItem> mainToolBarVisibleItems;
 
 	// Misc
 

@@ -125,13 +125,19 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_UPDATE_AVAILABLE,			&CMainFrame::OnUpdateAvailable)
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
 #if defined(MPT_ENABLE_UPDATE)
-	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START, &CMainFrame::OnUpdateCheckStart)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START,    &CMainFrame::OnUpdateCheckStart)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, &CMainFrame::OnUpdateCheckProgress)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_CANCELED, &CMainFrame::OnUpdateCheckCanceled)
-	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE, &CMainFrame::OnUpdateCheckFailure)
-	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS, &CMainFrame::OnUpdateCheckSuccess)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE,  &CMainFrame::OnUpdateCheckFailure)
+	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS,  &CMainFrame::OnUpdateCheckSuccess)
 #endif // MPT_ENABLE_UPDATE
-	ON_COMMAND(ID_HELPSHOW,					&CMainFrame::OnHelp)
+	ON_COMMAND(ID_HELPSHOW,                  &CMainFrame::OnHelp)
+	ON_COMMAND(ID_MAINBAR_SHOW_OCTAVE,       &CMainFrame::OnToggleMainBarShowOctave)
+	ON_COMMAND(ID_MAINBAR_SHOW_TEMPO,        &CMainFrame::OnToggleMainBarShowTempo)
+	ON_COMMAND(ID_MAINBAR_SHOW_SPEED,        &CMainFrame::OnToggleMainBarShowSpeed)
+	ON_COMMAND(ID_MAINBAR_SHOW_ROWSPERBEAT,  &CMainFrame::OnToggleMainBarShowRowsPerBeat)
+	ON_COMMAND(ID_MAINBAR_SHOW_GLOBALVOLUME, &CMainFrame::OnToggleMainBarShowGlobalVolume)
+	ON_COMMAND(ID_MAINBAR_SHOW_VUMETER,      &CMainFrame::OnToggleMainBarShowVUMeter)
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	ON_COMMAND(ID_CREATE_MIXERDUMP, &CMainFrame::OnCreateMixerDump)
@@ -571,12 +577,12 @@ LRESULT CALLBACK CMainFrame::FocusChangeProc(int code, WPARAM wParam, LPARAM lPa
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	// Right-click menu to disable/enable tree view and main toolbar when right-clicking on either the menu strip or main toolbar
-	if((pMsg->message == WM_RBUTTONDOWN) || (pMsg->message == WM_NCRBUTTONDOWN))
+	if((pMsg->message == WM_RBUTTONUP) || (pMsg->message == WM_NCRBUTTONUP))
 	{
 		CControlBar *pBar = nullptr;
-		if(CWnd *pWnd = CWnd::FromHandlePermanent(pMsg->hwnd); pWnd && (pMsg->message == WM_RBUTTONDOWN))
+		if(CWnd *pWnd = CWnd::FromHandlePermanent(pMsg->hwnd); pWnd && (pMsg->message == WM_RBUTTONUP))
 			pBar = dynamic_cast<CControlBar *>(pWnd);
-		if(pBar != nullptr || (pMsg->message == WM_NCRBUTTONDOWN && pMsg->wParam == HTMENU))
+		if(pBar != nullptr || (pMsg->message == WM_NCRBUTTONUP && pMsg->wParam == HTMENU))
 		{
 			CPoint pt;
 			GetCursorPos(&pt);
@@ -2511,13 +2517,32 @@ void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 
 void CMainFrame::ShowToolbarMenu(CPoint screenPt)
 {
-	CMenu menu;
-	if(!menu.CreatePopupMenu())
+	CMenu menu, subMenu;
+	if(!menu.CreatePopupMenu() || !subMenu.CreatePopupMenu())
 		return;
 	menu.AppendMenu(MF_STRING, ID_VIEW_TOOLBAR, m_InputHandler->GetMenuText(ID_VIEW_TOOLBAR));
 	menu.AppendMenu(MF_STRING, IDD_TREEVIEW, m_InputHandler->GetMenuText(IDD_TREEVIEW));
+	
+	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
+
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Octave] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_OCTAVE, _T("Base &Octave"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Tempo] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_TEMPO, _T("&Tempo"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Speed] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_SPEED, _T("Ticks/&Row"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::RowsPerBeat] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_ROWSPERBEAT, _T("Rows Per &Beat"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::GlobalVolume] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_GLOBALVOLUME, _T("&Global Volume"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::VUMeter] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_VUMETER, _T("&VU Meters"));
+	menu.AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(subMenu.m_hMenu), _T("Main Toolbar &Items"));
+
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, screenPt.x, screenPt.y, this);
 }
+
+
+void CMainFrame::OnToggleMainBarShowOctave() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Octave); }
+void CMainFrame::OnToggleMainBarShowTempo() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Tempo); }
+void CMainFrame::OnToggleMainBarShowSpeed() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Speed); }
+void CMainFrame::OnToggleMainBarShowRowsPerBeat() { m_wndToolBar.ToggleVisibility(MainToolBarItem::RowsPerBeat); }
+void CMainFrame::OnToggleMainBarShowGlobalVolume() { m_wndToolBar.ToggleVisibility(MainToolBarItem::GlobalVolume); }
+void CMainFrame::OnToggleMainBarShowVUMeter() { m_wndToolBar.ToggleVisibility(MainToolBarItem::VUMeter); }
 
 
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)

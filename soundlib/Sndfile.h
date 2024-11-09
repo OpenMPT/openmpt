@@ -1169,6 +1169,11 @@ public:
 		return UseCombinedPortamentoCommands(GetType());
 	}
 
+	uint32 GlobalVolumeRange() const noexcept
+	{
+		return !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_IMF | MOD_TYPE_J2B | MOD_TYPE_MID | MOD_TYPE_AMS | MOD_TYPE_DBM | MOD_TYPE_PTM | MOD_TYPE_MDL | MOD_TYPE_DTM)) ? 64 : 128;
+	}
+
 	bool DestroySample(SAMPLEINDEX nSample);
 	bool DestroySampleThreadsafe(SAMPLEINDEX nSample);
 

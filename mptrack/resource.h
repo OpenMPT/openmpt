@@ -763,6 +763,7 @@
 #define IDC_EDIT_MISC_ACTIONS           2284
 #define IDC_TREE_TUNING                 2292
 #define IDC_PATTERN_FOLLOWSONG          2293
+#define IDC_TEXT_GLOBALVOL              2299
 #define IDC_TEXT_BPM                    2300
 #define IDC_TEXT_RPB                    2301
 #define IDC_SPIN_RPB                    2302
@@ -1173,6 +1174,12 @@
 #define ID_ADDTUNINGGENERAL             36034
 #define ID_ADDTUNINGGROUPGEOMETRIC      36035
 #define ID_ADDTUNINGGEOMETRIC           36036
+#define ID_MAINBAR_SHOW_OCTAVE          36037
+#define ID_MAINBAR_SHOW_TEMPO           36038
+#define ID_MAINBAR_SHOW_SPEED           36039
+#define ID_MAINBAR_SHOW_ROWSPERBEAT     36040
+#define ID_MAINBAR_SHOW_GLOBALVOLUME    36041
+#define ID_MAINBAR_SHOW_VUMETER         36042
 #define ID_SELECTINST                   36100
 // From here: Command range [ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS]
 #define ID_PLUG_RECORDAUTOMATION        37003

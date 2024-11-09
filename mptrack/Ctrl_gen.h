@@ -79,7 +79,6 @@ private:
 	//}}AFX_VIRTUAL
 
 protected:
-	static constexpr int MAX_SLIDER_GLOBAL_VOL = 256;
 	static constexpr int MAX_SLIDER_VSTI_VOL = 255;
 	static constexpr int MAX_SLIDER_SAMPLE_VOL = 255;
 

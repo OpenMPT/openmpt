@@ -201,6 +201,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, useOldStyleFolderBrowser(conf, UL_("Display"), UL_("UseOldStyleFolderBrowser"), false)
 	, defaultRainbowChannelColors(conf, UL_("Display"), UL_("DefaultChannelColors"), DefaultChannelColors::Random)
 	, commentsFont(conf, UL_("Display"), UL_("Comments Font"), FontSetting(UL_("Courier New"), 120))
+	, mainToolBarVisibleItems(conf, UL_("Display"), UL_("MainToolBarVisibleItems"), MainToolBarItem::Default)
 	// Misc
 	, defaultModType(conf, UL_("Misc"), UL_("DefaultModType"), MOD_TYPE_IT)
 	, defaultNewFileAction(conf, UL_("Misc"), UL_("DefaultNewFileAction"), nfDefaultFormat)

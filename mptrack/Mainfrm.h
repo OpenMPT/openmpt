@@ -444,6 +444,13 @@ protected:
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnActivateApp(BOOL active, DWORD threadID);
 
+	afx_msg void OnToggleMainBarShowOctave();
+	afx_msg void OnToggleMainBarShowTempo();
+	afx_msg void OnToggleMainBarShowSpeed();
+	afx_msg void OnToggleMainBarShowRowsPerBeat();
+	afx_msg void OnToggleMainBarShowGlobalVolume();
+	afx_msg void OnToggleMainBarShowVUMeter();
+
 	afx_msg void OnCreateMixerDump();
 	afx_msg void OnVerifyMixerDump();
 	afx_msg void OnConvertMixerDumpToText();

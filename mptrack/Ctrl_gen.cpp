@@ -93,7 +93,7 @@ CCtrlGeneral::CCtrlGeneral(CModControlView &parent, CModDoc &document) : CModCon
 // Display range for XM / S3M should be 0...64, for other formats it's 0...256.
 uint32 CCtrlGeneral::GetGlobalVolumeFactor() const
 {
-	return (m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_S3M)) ? uint32(MAX_SLIDER_GLOBAL_VOL / 64) : uint32(MAX_SLIDER_GLOBAL_VOL / 128);
+	return MAX_GLOBAL_VOLUME / m_sndFile.GlobalVolumeRange();
 }
 
 
@@ -109,7 +109,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_SpinVSTiVol.SetRange(0, 2000);
 	m_SpinRestartPos.SetRange32(0, ORDERINDEX_MAX);
 	
-	m_SliderGlobalVol.SetRange(0, MAX_SLIDER_GLOBAL_VOL);
+	m_SliderGlobalVol.SetRange(0, MAX_GLOBAL_VOLUME);
 	m_SliderVSTiVol.SetRange(0, MAX_SLIDER_VSTI_VOL);
 	m_SliderSamplePreAmp.SetRange(0, MAX_SLIDER_SAMPLE_VOL);
 
@@ -372,7 +372,7 @@ void CCtrlGeneral::UpdateView(UpdateHint hint, CObject *pHint)
 			SetDlgItemInt(IDC_EDIT_SAMPLEPA, m_sndFile.m_nSamplePreAmp, FALSE);
 		}
 
-		m_SliderGlobalVol.SetPos(MAX_SLIDER_GLOBAL_VOL - m_sndFile.m_nDefaultGlobalVolume);
+		m_SliderGlobalVol.SetPos(MAX_GLOBAL_VOLUME - m_sndFile.m_nDefaultGlobalVolume);
 		m_SliderVSTiVol.SetPos(MAX_SLIDER_VSTI_VOL - m_sndFile.m_nVSTiVolume);
 		m_SliderSamplePreAmp.SetPos(MAX_SLIDER_SAMPLE_VOL - m_sndFile.m_nSamplePreAmp);
 	}
@@ -421,8 +421,8 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 		else if (pSlider == &m_SliderGlobalVol)
 		{
-			const UINT gv = MAX_SLIDER_GLOBAL_VOL - m_SliderGlobalVol.GetPos();
-			if ((gv >= 0) && (gv <= MAX_SLIDER_GLOBAL_VOL) && (gv != m_sndFile.m_nDefaultGlobalVolume))
+			const UINT gv = MAX_GLOBAL_VOLUME - m_SliderGlobalVol.GetPos();
+			if ((gv >= 0) && (gv <= MAX_GLOBAL_VOLUME) && (gv != m_sndFile.m_nDefaultGlobalVolume))
 			{
 				m_sndFile.m_PlayState.m_nGlobalVolume = gv;
 				m_sndFile.m_nDefaultGlobalVolume = gv;

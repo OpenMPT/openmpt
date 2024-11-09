@@ -18,6 +18,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum class MainToolBarItem : uint8;
+
 class CStereoVU: public CStatic
 {
 protected:
@@ -63,7 +65,7 @@ public:
 	~CToolBarEx() override {}
 
 public:
-	BOOL EnableControl(CWnd &wnd, UINT nIndex, UINT nHeight=0);
+	void UpdateControl(bool show, CWnd &wnd, int index, int id, int height = 0);
 	void ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle);
 	void EnableFlatButtons(BOOL bFlat);
 
@@ -81,10 +83,10 @@ class CMainToolBar: public CToolBarEx
 protected:
 	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
-	CEdit m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat;
-	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat;
-	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat;
-	int nCurrentSpeed = 0, nCurrentOctave = 0, nCurrentRowsPerBeat = 0;
+	CEdit m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
+	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat, m_StaticGlobalVolume;
+	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat, m_SpinGlobalVolume;
+	int nCurrentSpeed = 0, nCurrentOctave = 0, nCurrentRowsPerBeat = 0, m_currentGlobalVolume = 0;
 	TEMPO nCurrentTempo;
 public:
 	CStereoVU m_VuMeter;
@@ -118,8 +120,12 @@ public:
 	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight);
 	void RemoveUpdateInfo();
 
+	void ToggleVisibility(MainToolBarItem item);
+
 protected:
+	void RefreshToolbar();
 	void UpdateSizes();
+	void UpdateControls();
 
 	//{{AFX_MSG(CMainToolBar)
 	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
