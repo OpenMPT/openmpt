@@ -3340,7 +3340,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 IDD_MIDIPARAMCONTROL DIALOGEX 0, 0, 413, 247
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "MIDI Mapping"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
@@ -3583,6 +3583,32 @@ END
 IDD_CHANNELMANAGER AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+IDD_MIDIPARAMCONTROL AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    100, 0, 0, 100,
+    100, 100, 0, 0,
+    0, 0, 0, 0
 END
 
 

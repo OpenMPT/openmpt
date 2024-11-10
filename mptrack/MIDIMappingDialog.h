@@ -15,8 +15,8 @@
 #ifndef NO_PLUGINS
 
 #include "CListCtrl.h"
-#include "DialogBase.h"
 #include "MIDIMapping.h"
+#include "ResizableDialog.h"
 #include "PluginComboBox.h"
 
 
@@ -25,7 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class CMIDIMapper;
 
-class CMIDIMappingDialog : public DialogBase
+class CMIDIMappingDialog : public ResizableDialog
 {
 public:
 	CMIDIMappingDirective m_Setting;
