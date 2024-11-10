@@ -147,9 +147,9 @@ public:
 	static HHOOK g_focusHook;
 
 	// GDI
-	static HICON m_hIcon;
+	CFont m_hCommentsFont;
 	static CFont m_hGUIFont;
-	static HFONT m_hFixedFont;
+	static HICON m_hIcon;
 	static HPEN penDarkGray, penHalfDarkGray, penGray99;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static MODPLUGDIB *bmpNotes;
@@ -261,12 +261,13 @@ public:
 	static void UpdateColors();
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
-	static HFONT &GetCommentsFont() { return m_hFixedFont; }
 	static LRESULT CALLBACK FocusChangeProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler;
 
 	// Misc functions
 public:
+	CFont &GetCommentsFont() { return m_hCommentsFont; }
+
 	void SetUserText(LPCTSTR lpszText);
 	void SetInfoText(LPCTSTR lpszText);
 	void SetXInfoText(LPCTSTR lpszText);

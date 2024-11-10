@@ -161,7 +161,6 @@ HHOOK CMainFrame::g_focusHook = nullptr;
 // GDI
 HICON CMainFrame::m_hIcon = nullptr;
 CFont CMainFrame::m_hGUIFont;
-HFONT CMainFrame::m_hFixedFont = nullptr;
 HPEN CMainFrame::penDarkGray = nullptr;
 HPEN CMainFrame::penGray99 = nullptr;
 HPEN CMainFrame::penHalfDarkGray = nullptr;
@@ -404,8 +403,8 @@ BOOL CMainFrame::DestroyWindow()
 	m_hGUIFont.DeleteObject();
 #define DeleteGDIObject(h) ::DeleteObject(h); h = NULL;
 	DeleteGDIObject(penDarkGray);
-	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penGray99);
+	DeleteGDIObject(penHalfDarkGray);
 #undef DeleteGDIObject
 
 	return CMDIFrameWnd::DestroyWindow();

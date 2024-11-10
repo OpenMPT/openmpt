@@ -145,7 +145,7 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 		return;
 	LockControls();
 
-	HFONT &hFont = CMainFrame::GetCommentsFont();
+	CFont &hFont = CMainFrame::GetMainFrame()->GetCommentsFont();
 	static FontSetting previousFont;
 	static int previousFontSize = 0;
 	FontSetting font = TrackerSettings::Instance().commentsFont;
@@ -155,14 +155,14 @@ void CCtrlComments::UpdateView(UpdateHint hint, CObject *pHint)
 	{
 		previousFont = font;
 		previousFontSize = fontSize;
-		DeleteFont(hFont);
-		hFont = ::CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
+		hFont.DeleteObject();
+		hFont.CreateFont(fontSize, 0, 0, 0, font.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL,
 			font.flags[FontSetting::Italic] ? TRUE :FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
 			CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
 			FIXED_PITCH | FF_MODERN, mpt::ToCString(font.name));
 	}
-	m_EditComments.SendMessage(WM_SETFONT, reinterpret_cast<WPARAM>(hFont));
+	m_EditComments.SendMessage(WM_SETFONT, reinterpret_cast<WPARAM>(hFont.m_hObject));
 	CDC *pDC = m_EditComments.GetDC();
 	pDC->SelectObject(hFont);
 	TEXTMETRIC tm;
