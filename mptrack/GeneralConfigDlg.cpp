@@ -144,6 +144,7 @@ BOOL COptionsGeneral::OnInitDialog()
 		m_CheckList.SetCheck(idx, check);
 	}
 	m_CheckList.SetCurSel(0);
+	m_CheckList.SetItemHeight(0, 0);  // Workaround to force MFC to correctly compute the height of the first list item, in particular on high-DPI setups
 	OnOptionSelChanged();
 
 	return TRUE;

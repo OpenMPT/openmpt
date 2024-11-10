@@ -574,6 +574,7 @@ CLegacyPlaybackSettingsDlg::CLegacyPlaybackSettingsDlg(CWnd *parent, PlayBehavio
 BOOL CLegacyPlaybackSettingsDlg::OnInitDialog()
 {
 	ResizableDialog::OnInitDialog();
+	m_CheckList.SetItemHeight(0, 0);  // Workaround to force MFC to correctly compute the height of the first list item, in particular on high-DPI setups
 	OnFilterStringChanged();
 	UpdateSelectDefaults();
 	return TRUE;
