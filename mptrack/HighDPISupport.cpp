@@ -153,6 +153,7 @@ void HighDPISupport::CreateGUIFont(CFont &font, HWND hwnd)
 	NONCLIENTMETRICS metrics;
 	metrics.cbSize = sizeof(metrics);
 	HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, hwnd);
+	font.DeleteObject();
 	font.CreateFontIndirect(&metrics.lfMessageFont);
 }
 

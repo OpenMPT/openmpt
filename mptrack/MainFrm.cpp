@@ -284,6 +284,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	RecreateImageLists();
 
+	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
+	penGray99 = ::CreatePen(PS_SOLID, 0, RGB(0x99, 0x99, 0x99));
+	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
+
+	// Cursors
+	curDragging = theApp.LoadCursor(IDC_DRAGGING);
+	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
+	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
+	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
+	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
+
 	// Pattern note bitmap
 	bmpNotes = LoadDib(MAKEINTRESOURCE(IDB_PATTERNVIEW));
 	// Toolbars
@@ -350,17 +361,6 @@ void CMainFrame::RecreateImageLists()
 	ReleaseDC(dc);
 
 	HighDPISupport::CreateGUIFont(m_hGUIFont, m_hWnd);
-
-	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
-	penGray99 = ::CreatePen(PS_SOLID, 0, RGB(0x99, 0x99, 0x99));
-	penHalfDarkGray = ::CreatePen(PS_DOT, 0, GetSysColor(COLOR_BTNSHADOW));
-
-	// Cursors
-	curDragging = theApp.LoadCursor(IDC_DRAGGING);
-	curArrow = theApp.LoadStandardCursor(IDC_ARROW);
-	curNoDrop = theApp.LoadStandardCursor(IDC_NO);
-	curNoDrop2 = theApp.LoadCursor(IDC_NODRAG);
-	curVSplit = theApp.LoadCursor(AFX_IDC_HSPLITBAR);
 }
 
 
