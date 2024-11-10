@@ -24,6 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class CModDocTemplate;
 class CVstPluginManager;
+struct UpdateHint;
 namespace SoundDevice
 {
 class Manager;
@@ -214,6 +215,8 @@ public:
 	int GetOpenDocumentCount() const;
 	std::vector<CModDoc *> GetOpenDocuments() const;
 
+	void UpdateAllViews(UpdateHint hint, CObject *pHint = nullptr);
+
 public:
 	inline mpt::recursive_mutex_with_lock_count &GetGlobalMutexRef() { return m_GlobalMutex; }
 	bool InGuiThread() const { return GetCurrentThreadId() == m_GuiThreadId; }
@@ -308,10 +311,9 @@ public:
 	static CString GetResamplingModeName(ResamplingMode mode, int length, bool addTaps);
 
 	// Overrides
-public:
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTrackApp)
-public:
 	BOOL InitInstance() override;
 	BOOL InitInstanceEarly(CMPTCommandLineInfo &cmdInfo);
 	BOOL InitInstanceLate(CMPTCommandLineInfo &cmdInfo);
@@ -345,7 +347,6 @@ public:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-protected:
 	size_t AddScannedDLSBanks();
 
 	void InitializeDXPlugins();

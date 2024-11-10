@@ -2839,7 +2839,7 @@ void CModDoc::SetLoopSong(bool loop)
 {
 	TrackerSettings::Instance().gbLoopSong = loop;
 	m_SndFile.SetRepeatCount(loop ? -1 : 0);
-	CMainFrame::GetMainFrame()->UpdateAllViews(UpdateHint().MPTOptions());
+	theApp.UpdateAllViews(UpdateHint().MPTOptions());
 }
 
 

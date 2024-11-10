@@ -262,7 +262,6 @@ public:
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT &GetCommentsFont() { return m_hFixedFont; }
-	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
 	static LRESULT CALLBACK FocusChangeProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler;
 
@@ -346,10 +345,10 @@ public:
 
 	void IdleHandlerSounddevice();
 
-	BOOL ResetSoundCard();
-	BOOL SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset = false);
-	BOOL SetupMiscOptions();
-	BOOL SetupPlayer();
+	void ResetSoundCard();
+	void SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset = false);
+	void SetupMiscOptions();
+	void SetupPlayer();
 
 	void SetupMidi(DWORD d, UINT n);
 	HWND GetFollowSong() const;

@@ -289,6 +289,18 @@ std::vector<CModDoc *> CTrackApp::GetOpenDocuments() const
 }
 
 
+void CTrackApp::UpdateAllViews(UpdateHint hint, CObject *pHint)
+{
+	if(auto *pDocTmpl = GetModDocTemplate())
+	{
+		for(auto &doc : *pDocTmpl)
+		{
+			doc->UpdateAllViews(nullptr, hint, pHint);
+		}
+	}
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Command Line options
 

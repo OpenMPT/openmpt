@@ -1797,14 +1797,14 @@ void CMainFrame::IdleHandlerSounddevice()
 }
 
 
-BOOL CMainFrame::ResetSoundCard()
+void CMainFrame::ResetSoundCard()
 {
 	MPT_TRACE_SCOPE();
-	return CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceIdentifier()), TrackerSettings::Instance().GetSoundDeviceIdentifier(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
+	CMainFrame::SetupSoundCard(TrackerSettings::Instance().GetSoundDeviceSettings(TrackerSettings::Instance().GetSoundDeviceIdentifier()), TrackerSettings::Instance().GetSoundDeviceIdentifier(), TrackerSettings::Instance().m_SoundSettingsStopMode, true);
 }
 
 
-BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset)
+void CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevice::Identifier deviceIdentifier, SoundDeviceStopMode stoppedMode, bool forceReset)
 {
 	MPT_TRACE_SCOPE();
 	if(forceReset
@@ -1852,19 +1852,17 @@ BOOL CMainFrame::SetupSoundCard(SoundDevice::Settings deviceSettings, SoundDevic
 		CriticalSection cs;
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
 	}
-	return TRUE;
 }
 
 
-BOOL CMainFrame::SetupPlayer()
+void CMainFrame::SetupPlayer()
 {
 	CriticalSection cs;
 	if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying(), FALSE);
-	return TRUE;
 }
 
 
-BOOL CMainFrame::SetupMiscOptions()
+void CMainFrame::SetupMiscOptions()
 {
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
 		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
@@ -1878,8 +1876,7 @@ BOOL CMainFrame::SetupMiscOptions()
 	m_wndToolBar.EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
 
 	UpdateTree(nullptr, UpdateHint().MPTOptions());
-	UpdateAllViews(UpdateHint().MPTOptions());
-	return true;
+	theApp.UpdateAllViews(UpdateHint().MPTOptions());
 }
 
 
@@ -1893,19 +1890,6 @@ void CMainFrame::SetupMidi(DWORD d, UINT n)
 		// Device has changed, close the old one.
 		midiCloseDevice();
 		midiOpenDevice();
-	}
-}
-
-
-void CMainFrame::UpdateAllViews(UpdateHint hint, CObject *pHint)
-{
-	CModDocTemplate *pDocTmpl = theApp.GetModDocTemplate();
-	if (pDocTmpl)
-	{
-		for(auto &doc : *pDocTmpl)
-		{
-			doc->UpdateAllViews(nullptr, hint, pHint);
-		}
 	}
 }
 
@@ -2372,7 +2356,7 @@ void CMainFrame::OnUpdateMRUItem(CCmdUI *cmd)
 
 LRESULT CMainFrame::OnInvalidatePatterns(WPARAM, LPARAM)
 {
-	UpdateAllViews(UpdateHint().MPTOptions());
+	theApp.UpdateAllViews(UpdateHint().MPTOptions());
 	return TRUE;
 }
 
