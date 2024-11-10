@@ -135,7 +135,7 @@ void CModTypeDlg::OnDPIChanged()
 		using PLOADICONWITHSCALEDOWN = HRESULT(WINAPI *)(HINSTANCE, PCWSTR, int, int, HICON *);
 		PLOADICONWITHSCALEDOWN LoadIconWithScaleDown = nullptr;
 		if(comctl32.Bind(LoadIconWithScaleDown, "LoadIconWithScaleDown"))
-			LoadIconWithScaleDown(NULL, IDI_EXCLAMATION, iconSize, iconSize, &m_warnIcon);
+			LoadIconWithScaleDown(NULL, MAKEINTRESOURCEW(reinterpret_cast<uintptr_t>(IDI_EXCLAMATION)), iconSize, iconSize, &m_warnIcon);
 	}
 	if(!m_warnIcon)
 		m_warnIcon = reinterpret_cast<HICON>(::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED));
