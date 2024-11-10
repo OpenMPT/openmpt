@@ -182,6 +182,7 @@ void CChannelManagerDlg::OnDPIChanged()
 {
 	m_font.DeleteObject();
 	ResizeWindow();
+	DialogBase::OnDPIChanged();
 }
 
 

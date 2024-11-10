@@ -36,7 +36,8 @@ public:
 	PlayBehaviourSet m_playBehaviour;
 	CHANNELINDEX m_nChannels = 0;
 	MODTYPE m_nType = MOD_TYPE_NONE;
-	bool initialized = false;
+	bool m_showWarning = false;
+	bool m_initialized = false;
 
 public:
 	CModTypeDlg(CSoundFile &sf, CWnd *parent);
@@ -56,6 +57,7 @@ protected:
 	//{{AFX_VIRTUAL(CModTypeDlg)
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
 	void OnOK() override;
 	//}}AFX_VIRTUAL
 

@@ -84,7 +84,7 @@ BOOL CModTypeDlg::OnInitDialog()
 	m_nChannels = sndFile.GetNumChannels();
 	m_tempoSwing = sndFile.m_tempoSwing;
 	m_playBehaviour = sndFile.m_playBehaviour;
-	initialized = false;
+	m_initialized = false;
 
 	// Mod types
 
@@ -112,14 +112,36 @@ BOOL CModTypeDlg::OnInitDialog()
 	if(sndFile.m_dwCreatedWithVersion) SetDlgItemText(IDC_EDIT_CREATEDWITH, _T("OpenMPT ") + FormatVersionNumber(sndFile.m_dwCreatedWithVersion));
 	SetDlgItemText(IDC_EDIT_SAVEDWITH, mpt::ToCString(sndFile.m_modFormat.madeWithTracker.empty() ? sndFile.m_modFormat.formatName : sndFile.m_modFormat.madeWithTracker));
 
-	const int iconSize = HighDPISupport::ScalePixels(32, m_hWnd);
-	m_warnIcon = (HICON)::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED);
-
+	OnDPIChanged();
 	UpdateDialog();
 
-	initialized = true;
+	m_initialized = true;
 	EnableToolTips(TRUE);
 	return TRUE;
+}
+
+
+void CModTypeDlg::OnDPIChanged()
+{
+	DialogBase::OnDPIChanged();
+
+	const int iconSize = HighDPISupport::ScalePixels(32, m_hWnd);
+	DestroyIcon(m_warnIcon);
+	m_warnIcon = nullptr;
+
+	mpt::Library comctl32(mpt::LibraryPath::System(P_("Comctl32")));
+	if(comctl32.IsValid())
+	{
+		using PLOADICONWITHSCALEDOWN = HRESULT(WINAPI *)(HINSTANCE, PCWSTR, int, int, HICON *);
+		PLOADICONWITHSCALEDOWN LoadIconWithScaleDown = nullptr;
+		if(comctl32.Bind(LoadIconWithScaleDown, "LoadIconWithScaleDown"))
+			LoadIconWithScaleDown(NULL, IDI_EXCLAMATION, iconSize, iconSize, &m_warnIcon);
+	}
+	if(!m_warnIcon)
+		m_warnIcon = reinterpret_cast<HICON>(::LoadImage(NULL, IDI_EXCLAMATION, IMAGE_ICON, iconSize, iconSize, LR_SHARED));
+
+	if(m_showWarning)
+		static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon(m_warnIcon);
 }
 
 
@@ -186,7 +208,7 @@ void CModTypeDlg::UpdateDialog()
 	if(allowedFlags[SONG_PT_MODE]) OnPTModeChanged();
 
 	// Tempo modes
-	const TempoMode oldTempoMode = initialized ? static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
+	const TempoMode oldTempoMode = m_initialized ? static_cast<TempoMode>(m_TempoModeBox.GetItemData(m_TempoModeBox.GetCurSel())) : sndFile.m_nTempoMode;
 	m_TempoModeBox.ResetContent();
 
 	m_TempoModeBox.SetItemData(m_TempoModeBox.AddString(_T("Classic")), static_cast<DWORD_PTR>(TempoMode::Classic));
@@ -206,7 +228,7 @@ void CModTypeDlg::UpdateDialog()
 	OnTempoModeChanged();
 
 	// Mix levels
-	const MixLevels oldMixLevels = initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
+	const MixLevels oldMixLevels = m_initialized ? static_cast<MixLevels>(m_PlugMixBox.GetItemData(m_PlugMixBox.GetCurSel())) : sndFile.GetMixLevels();
 	m_PlugMixBox.ResetContent();
 	if(m_nType == MOD_TYPE_MPT || sndFile.GetMixLevels() == MixLevels::v1_17RC3) // In XM/IT, this is only shown for backwards compatibility with existing tunes
 		m_PlugMixBox.SetItemData(m_PlugMixBox.AddString(_T("OpenMPT 1.17RC3")), static_cast<DWORD_PTR>(MixLevels::v1_17RC3));
@@ -252,7 +274,8 @@ void CModTypeDlg::UpdateDialog()
 	// Compatibility settings
 	const PlayBehaviourSet defaultBehaviour = CSoundFile::GetDefaultPlaybackBehaviour(m_nType);
 	const PlayBehaviourSet supportedBehaviour = CSoundFile::GetSupportedPlaybackBehaviour(m_nType);
-	bool enableSetDefaults = false, showWarning = false;
+	bool enableSetDefaults = false;
+	m_showWarning = false;
 	if(m_nType & (MOD_TYPE_MPT | MOD_TYPE_IT | MOD_TYPE_XM))
 	{
 		for(size_t i = 0; i < m_playBehaviour.size(); i++)
@@ -265,7 +288,7 @@ void CModTypeDlg::UpdateDialog()
 				enableSetDefaults = true;
 				if(!isMPTM)
 				{
-					showWarning = true;
+					m_showWarning = true;
 					break;
 				}
 			}
@@ -273,13 +296,13 @@ void CModTypeDlg::UpdateDialog()
 			{
 
 				enableSetDefaults = true;
-				showWarning = true;
+				m_showWarning = true;
 				break;
 			}
 		}
 	}
-	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon(showWarning ? m_warnIcon : nullptr);
-	GetDlgItem(IDC_STATIC2)->SetWindowText(showWarning
+	static_cast<CStatic *>(GetDlgItem(IDC_STATIC1))->SetIcon(m_showWarning ? m_warnIcon : nullptr);
+	GetDlgItem(IDC_STATIC2)->SetWindowText(m_showWarning
 		? _T("Playback settings have been set to legacy compatibility mode. Click \"Set Defaults\" to use the recommended settings instead.")
 		: _T("Compatibility settings are currently optimal. It is advised to not edit them."));
 	GetDlgItem(IDC_BUTTON3)->EnableWindow(enableSetDefaults ? TRUE : FALSE);

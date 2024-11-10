@@ -152,6 +152,7 @@ void CViewComments::OnDPIChanged()
 	m_ToolBar.SetButtonSize(CSize(btnSizeX, btnSizeY));
 	m_ToolBar.SetBitmapSize(CSize(imgSize, imgSize));
 	RecalcLayout();
+	CModScrollView::OnDPIChanged();
 }
 
 
