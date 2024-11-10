@@ -160,7 +160,7 @@ HHOOK CMainFrame::g_focusHook = nullptr;
 
 // GDI
 HICON CMainFrame::m_hIcon = nullptr;
-HFONT CMainFrame::m_hGUIFont = nullptr;
+CFont CMainFrame::m_hGUIFont;
 HFONT CMainFrame::m_hFixedFont = nullptr;
 HPEN CMainFrame::penDarkGray = nullptr;
 HPEN CMainFrame::penGray99 = nullptr;
@@ -349,10 +349,7 @@ void CMainFrame::RecreateImageLists()
 	m_SampleIcons.Create(IDB_SMPTOOLBAR, 20, 18, SAMPLEIMG_NUMIMAGES, 1, dc, scaling, false);
 	ReleaseDC(dc);
 
-	NONCLIENTMETRICS metrics;
-	metrics.cbSize = sizeof(metrics);
-	HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
-	m_hGUIFont = CreateFontIndirect(&metrics.lfMessageFont);
+	HighDPISupport::CreateGUIFont(m_hGUIFont, m_hWnd);
 
 	penDarkGray = ::CreatePen(PS_SOLID, 0, GetSysColor(COLOR_BTNSHADOW));
 	penGray99 = ::CreatePen(PS_SOLID, 0, RGB(0x99, 0x99, 0x99));
@@ -404,9 +401,9 @@ BOOL CMainFrame::DestroyWindow()
 	PatternFont::DeleteFontData();
 
 	// Kill GDI Objects
+	m_hGUIFont.DeleteObject();
 #define DeleteGDIObject(h) ::DeleteObject(h); h = NULL;
 	DeleteGDIObject(penDarkGray);
-	DeleteGDIObject(m_hGUIFont);
 	DeleteGDIObject(m_hFixedFont);
 	DeleteGDIObject(penGray99);
 #undef DeleteGDIObject

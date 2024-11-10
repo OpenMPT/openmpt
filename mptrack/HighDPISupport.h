@@ -41,6 +41,8 @@ namespace HighDPISupport
 	BOOL SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvParam, UINT fWinIni, uint32 dpi);
 	BOOL SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvParam, UINT fWinIni, HWND hwnd);
 
+	void CreateGUIFont(CFont &font, HWND hwnd);
+
 	// Applies DPI scaling factor to some given size
 	MPT_FORCEINLINE int ScalePixels(int pixels, HWND hwnd)
 	{

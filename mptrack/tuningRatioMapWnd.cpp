@@ -56,10 +56,7 @@ void CTuningRatioMapWnd::OnPaint()
 	}
 	if(!m_font.m_hObject)
 	{
-		NONCLIENTMETRICS metrics;
-		metrics.cbSize = sizeof(metrics);
-		HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
-		m_font.CreateFontIndirect(&metrics.lfMessageFont);
+		HighDPISupport::CreateGUIFont(m_font, m_hWnd);
 		m_cxFont = m_cyFont = 0;
 	}
 
@@ -91,7 +88,7 @@ void CTuningRatioMapWnd::OnPaint()
 
 			rect.SetRect(0, ypaint, m_cxFont, ypaint + m_cyFont);
 			const auto noteStr = isValidNote ? mpt::tfmt::val(noteToDraw) : mpt::tstring(_T("..."));
-			DrawButtonRect(dc, &rect, noteStr.c_str(), FALSE, FALSE);
+			DrawButtonRect(dc, m_font, &rect, noteStr.c_str(), false, false);
 
 			// Mapped Note
 			const bool highLight = focus && (nPos == (int)m_nNote);
@@ -117,7 +114,7 @@ void CTuningRatioMapWnd::OnPaint()
 
 		}
 		rect.SetRect(rcClient.left + m_cxFont * 4 - 1, rcClient.top, rcClient.left + m_cxFont * 4 + 3, ypaint);
-		DrawButtonRect(dc, &rect, _T(""));
+		DrawButtonRect(dc, m_font, &rect, _T(""));
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);

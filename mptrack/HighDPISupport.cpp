@@ -148,4 +148,13 @@ BOOL HighDPISupport::SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvP
 }
 
 
+void HighDPISupport::CreateGUIFont(CFont &font, HWND hwnd)
+{
+	NONCLIENTMETRICS metrics;
+	metrics.cbSize = sizeof(metrics);
+	HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, hwnd);
+	font.CreateFontIndirect(&metrics.lfMessageFont);
+}
+
+
 OPENMPT_NAMESPACE_END

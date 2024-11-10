@@ -84,6 +84,7 @@ class CMainToolBar: public CToolBarEx
 protected:
 	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
+	CFont m_font;
 	CNumberEdit m_EditTempo;
 	CEdit m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat, m_StaticGlobalVolume;

@@ -513,10 +513,7 @@ void CChannelManagerDlg::OnPaint()
 
 	if(!m_font.m_hObject)
 	{
-		NONCLIENTMETRICS metrics;
-		metrics.cbSize = sizeof(metrics);
-		HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, m_hWnd);
-		m_font.CreateFontIndirect(&metrics.lfMessageFont);
+		HighDPISupport::CreateGUIFont(m_font, m_hWnd);
 	}
 
 	PAINTSTRUCT pDC;

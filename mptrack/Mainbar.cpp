@@ -308,6 +308,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 LRESULT CMainToolBar::OnDPIChangedAfterParent(WPARAM, LPARAM)
 {
 	auto result = Default();
+	m_font.DeleteObject();
 	UpdateSizes();
 	RefreshToolbar();
 	return result;
@@ -327,7 +328,9 @@ void CMainToolBar::RefreshToolbar()
 void CMainToolBar::UpdateSizes()
 {
 	CDC *dc = GetDC();
-	const auto hFont = reinterpret_cast<WPARAM>(CMainFrame::GetGUIFont());
+	if(!m_font.m_hObject)
+		HighDPISupport::CreateGUIFont(m_font, m_hWnd);
+	const auto hFont = reinterpret_cast<WPARAM>(m_font.m_hObject);
 	const double scaling = HighDPISupport::GetDpiForWindow(m_hWnd) / 96.0;
 	const int imgSize = HighDPISupport::ScalePixels(16, m_hWnd), btnSizeX = HighDPISupport::ScalePixels(23, m_hWnd), btnSizeY = HighDPISupport::ScalePixels(22, m_hWnd);
 	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false);
@@ -352,7 +355,7 @@ void CMainToolBar::UpdateSizes()
 		{m_EditGlobalVolume,   _T("999"),            EDITGLOBALVOL_INDEX, IDC_EDIT_GLOBALVOL   },
 	};
 	
-	auto oldFont = dc->SelectObject(CMainFrame::GetGUIFont());
+	auto oldFont = dc->SelectObject(m_font);
 	const int textPaddingX = HighDPISupport::ScalePixels(10, m_hWnd), textPaddingY = HighDPISupport::ScalePixels(4, m_hWnd), textMinHeight = HighDPISupport::ScalePixels(20, m_hWnd);
 	for(auto &info : TextWnds)
 	{

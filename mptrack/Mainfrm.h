@@ -148,7 +148,8 @@ public:
 
 	// GDI
 	static HICON m_hIcon;
-	static HFONT m_hGUIFont, m_hFixedFont;
+	static CFont m_hGUIFont;
+	static HFONT m_hFixedFont;
 	static HPEN penDarkGray, penHalfDarkGray, penGray99;
 	static HCURSOR curDragging, curNoDrop, curArrow, curNoDrop2, curVSplit;
 	static MODPLUGDIB *bmpNotes;
@@ -262,7 +263,6 @@ public:
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static HFONT &GetCommentsFont() { return m_hFixedFont; }
 	static void UpdateAllViews(UpdateHint hint, CObject *pHint=NULL);
-	static LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK FocusChangeProc(int code, WPARAM wParam, LPARAM lParam);
 	static CInputHandler *m_InputHandler;
 
