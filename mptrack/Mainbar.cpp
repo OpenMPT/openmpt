@@ -234,6 +234,11 @@ BEGIN_MESSAGE_MAP(CMainToolBar, CToolBarEx)
 	ON_NOTIFY_REFLECT(TBN_DROPDOWN, &CMainToolBar::OnTbnDropDownToolBar)
 	ON_COMMAND_RANGE(ID_SELECT_MIDI_DEVICE, ID_SELECT_MIDI_DEVICE + MAX_MIDI_DEVICES, &CMainToolBar::OnSelectMIDIDevice)
 	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CMainToolBar::OnDPIChangedAfterParent)
+
+	ON_EN_CHANGE(IDC_EDIT_CURRENTSPEED, &CMainToolBar::OnSpeedChanged)
+	ON_EN_CHANGE(IDC_EDIT_CURRENTTEMPO, &CMainToolBar::OnTempoChanged)
+	ON_EN_CHANGE(IDC_EDIT_RPB,          &CMainToolBar::OnRPBChanged)
+	ON_EN_CHANGE(IDC_EDIT_GLOBALVOL,    &CMainToolBar::OnGlobalVolChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -249,24 +254,24 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	CRect rect{0, 0, SPINNER_WIDTH, SPINNER_HEIGHT};
 
 	// Octave
-	m_EditOctave.Create(WS_CHILD | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL | ES_CENTER, rect, this, IDC_EDIT_BASEOCTAVE);
-	m_SpinOctave.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_BASEOCTAVE);
+	m_EditOctave.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_CENTER, rect, this, IDC_EDIT_BASEOCTAVE);
+	m_SpinOctave.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_BASEOCTAVE);
 	// Tempo
 	m_StaticTempo.Create(_T("Tempo:"), WS_CHILD | SS_CENTER | SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTTEMPO);
-	m_EditTempo.Create(WS_CHILD | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL, rect, this, IDC_EDIT_CURRENTTEMPO);
-	m_SpinTempo.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_CURRENTTEMPO);
+	m_EditTempo.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_CURRENTTEMPO);
+	m_SpinTempo.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_CURRENTTEMPO);
 	// Speed
 	m_StaticSpeed.Create(_T("Ticks/Row:"), WS_CHILD | SS_CENTER | SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTSPEED);
-	m_EditSpeed.Create(WS_CHILD | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_CURRENTSPEED);
-	m_SpinSpeed.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_CURRENTSPEED);
+	m_EditSpeed.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_CURRENTSPEED);
+	m_SpinSpeed.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_CURRENTSPEED);
 	// Rows per Beat
 	m_StaticRowsPerBeat.Create(_T("Rows/Beat:"), WS_CHILD | SS_CENTER | SS_CENTERIMAGE, rect, this, IDC_TEXT_RPB);
-	m_EditRowsPerBeat.Create(WS_CHILD | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_RPB);
-	m_SpinRowsPerBeat.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_RPB);
+	m_EditRowsPerBeat.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_RPB);
+	m_SpinRowsPerBeat.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_RPB);
 	// Global Volume
 	m_StaticGlobalVolume.Create(_T("Global Volume:"), WS_CHILD | SS_CENTER | SS_CENTERIMAGE, rect, this, IDC_TEXT_GLOBALVOL);
-	m_EditGlobalVolume.Create(WS_CHILD | WS_BORDER | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_GLOBALVOL);
-	m_SpinGlobalVolume.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_GLOBALVOL);
+	m_EditGlobalVolume.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_GLOBALVOL);
+	m_SpinGlobalVolume.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_GLOBALVOL);
 
 	// VU Meter
 	rect.SetRect(0, 0, VUMETER_WIDTH, VUMETER_HEIGHT);
@@ -284,6 +289,9 @@ BOOL CMainToolBar::Create(CWnd *parent)
 	m_SpinRowsPerBeat.SetPos(0);
 	m_SpinGlobalVolume.SetRange(-1, 1);
 	m_SpinGlobalVolume.SetPos(0);
+
+	m_EditTempo.AllowNegative(false);
+	m_EditTempo.SetLimitText(9);
 
 	// Display everything
 	SetWindowText(_T("Main"));
@@ -497,63 +505,69 @@ void CMainToolBar::RemoveUpdateInfo()
 
 BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 {
-	static CSoundFile *sndFile = nullptr;
-	if(pSndFile != sndFile)
-	{
-		sndFile = pSndFile;
-	}
-
 	// Update Info
 	if(pSndFile)
 	{
-		TCHAR s[32];
 		// Update play/pause button
 		if(m_currentTempo == TEMPO(0, 0))
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
-		if(nSpeed != m_currentSpeed)
+		const CWnd *focus = GetFocus();
+		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed)
 		{
-			CModDoc *modDoc = pSndFile->GetpModDoc();
-			if(modDoc != nullptr)
+			if(CModDoc *modDoc = pSndFile->GetpModDoc(); modDoc != nullptr)
 			{
 				// Update envelope views if speed has changed
 				modDoc->UpdateAllViews(InstrumentHint().Envelope());
 			}
 
-			if(m_currentSpeed < 0) m_SpinSpeed.EnableWindow(TRUE);
+			if(m_currentSpeed < 0)
+			{
+				m_EditSpeed.SetReadOnly(FALSE);
+				m_SpinSpeed.EnableWindow(TRUE);
+			}
 			m_currentSpeed = nSpeed;
-			wsprintf(s, _T("%u"), static_cast<unsigned int>(m_currentSpeed));
-			m_EditSpeed.SetWindowText(s);
+			SetDlgItemInt(IDC_EDIT_CURRENTSPEED, m_currentSpeed, FALSE);
 		}
 		TEMPO nTempo = pSndFile->m_PlayState.m_nMusicTempo;
-		if(nTempo != m_currentTempo)
+		if(nTempo != m_currentTempo && focus != &m_EditTempo)
 		{
-			if(m_currentTempo <= TEMPO(0, 0)) m_SpinTempo.EnableWindow(TRUE);
+			if(m_currentTempo <= TEMPO(0, 0))
+			{
+				m_EditTempo.SetReadOnly(FALSE);
+				m_SpinTempo.EnableWindow(TRUE);
+			}
+
 			m_currentTempo = nTempo;
-			if(m_currentTempo.GetFract() == 0)
-				_stprintf(s, _T("%u"), m_currentTempo.GetInt());
-			else
-				_stprintf(s, _T("%.4f"), m_currentTempo.ToDouble());
-			m_EditTempo.SetWindowText(s);
+			m_EditTempo.SetTempoValue(m_currentTempo);
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
-		if(nRowsPerBeat != m_currentRowsPerBeat)
+		if(nRowsPerBeat != m_currentRowsPerBeat && focus != &m_EditRowsPerBeat)
 		{
 			if(m_currentRowsPerBeat < 0)
+			{
+				m_EditRowsPerBeat.SetReadOnly(FALSE);
 				m_SpinRowsPerBeat.EnableWindow(TRUE);
+			}
+
 			m_currentRowsPerBeat = nRowsPerBeat;
-			wsprintf(s, _T("%u"), static_cast<unsigned int>(m_currentRowsPerBeat));
-			m_EditRowsPerBeat.SetWindowText(s);
+			SetDlgItemInt(IDC_EDIT_RPB, m_currentRowsPerBeat, FALSE);
 		}
 		int globalVol = pSndFile->m_PlayState.m_nGlobalVolume;
-		if(globalVol != m_currentGlobalVolume)
+		if(globalVol != m_currentGlobalVolume && focus != &m_EditGlobalVolume)
 		{
 			if(m_currentGlobalVolume < 0)
+			{
+				static_assert(MAX_GLOBAL_VOLUME <= 999);
+				m_EditGlobalVolume.SetLimitText(3);
+				m_EditGlobalVolume.SetReadOnly(FALSE);
 				m_SpinGlobalVolume.EnableWindow(TRUE);
+			}
+
 			m_currentGlobalVolume = globalVol;
-			wsprintf(s, _T("%u"), static_cast<unsigned int>(Util::muldivr(m_currentGlobalVolume, pSndFile->GlobalVolumeRange(), MAX_GLOBAL_VOLUME)));
-			m_EditGlobalVolume.SetWindowText(s);
+			uint32 displayVolume = Util::muldivr_unsigned(m_currentGlobalVolume, pSndFile->GlobalVolumeRange(), MAX_GLOBAL_VOLUME);
+			SetDlgItemInt(IDC_EDIT_GLOBALVOL, displayVolume, FALSE);
 		}
 	} else
 	{
@@ -561,6 +575,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		{
 			m_currentTempo.Set(0);
 			m_EditTempo.SetWindowText(_T("---"));
+			m_EditTempo.SetReadOnly();
 			m_SpinTempo.EnableWindow(FALSE);
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
@@ -568,18 +583,21 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		{
 			m_currentSpeed = -1;
 			m_EditSpeed.SetWindowText(_T("---"));
+			m_EditSpeed.SetReadOnly();
 			m_SpinSpeed.EnableWindow(FALSE);
 		}
 		if(m_currentRowsPerBeat != -1)
 		{
 			m_currentRowsPerBeat = -1;
 			m_EditRowsPerBeat.SetWindowText(_T("---"));
+			m_EditRowsPerBeat.SetReadOnly();
 			m_SpinRowsPerBeat.EnableWindow(FALSE);
 		}
 		if(m_currentGlobalVolume != -1)
 		{
 			m_currentGlobalVolume = -1;
 			m_EditGlobalVolume.SetWindowText(_T("---"));
+			m_EditGlobalVolume.SetReadOnly();
 			m_SpinGlobalVolume.EnableWindow(FALSE);
 		}
 	}
@@ -655,6 +673,67 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 			}
 
 			SetCurrentSong(pSndFile);
+		}
+	}
+}
+
+
+void CMainToolBar::OnSpeedChanged()
+{
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	{
+		BOOL ok = FALSE;
+		uint32 newSpeed = GetDlgItemInt(IDC_EDIT_CURRENTSPEED, &ok, FALSE);
+		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
+		if(sndFile && ok)
+		{
+			const auto &specs = sndFile->GetModSpecifications();
+			sndFile->m_PlayState.m_nMusicSpeed = Clamp(newSpeed, specs.speedMin, specs.speedMax);
+		}
+	}
+}
+
+
+void CMainToolBar::OnTempoChanged()
+{
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	{
+		TEMPO newTempo = m_EditTempo.GetTempoValue();
+		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
+		if(sndFile && m_EditTempo.GetWindowTextLength() > 0)
+		{
+			const auto &specs = sndFile->GetModSpecifications();
+			sndFile->m_PlayState.m_nMusicTempo = Clamp(newTempo, specs.GetTempoMin(), specs.GetTempoMax());
+		}
+	}
+}
+
+
+void CMainToolBar::OnRPBChanged()
+{
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	{
+		BOOL ok = FALSE;
+		uint32 newRPB = GetDlgItemInt(IDC_EDIT_RPB, &ok, FALSE);
+		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
+		if(sndFile && ok)
+		{
+			SetRowsPerBeat(newRPB);
+		}
+	}
+}
+
+
+void CMainToolBar::OnGlobalVolChanged()
+{
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	{
+		BOOL ok = FALSE;
+		uint32 newGlobalVol = GetDlgItemInt(IDC_EDIT_GLOBALVOL, &ok, FALSE);
+		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
+		if(sndFile && ok)
+		{
+			sndFile->m_PlayState.m_nGlobalVolume = Clamp(Util::muldivr_unsigned(newGlobalVol, MAX_GLOBAL_VOLUME, sndFile->GlobalVolumeRange()), uint32(0), MAX_GLOBAL_VOLUME);
 		}
 	}
 }

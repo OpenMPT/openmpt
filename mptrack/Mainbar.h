@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "CDecimalSupport.h"
 #include "CImageListEx.h"
 #include "UpdateHints.h"
 #include "UpdateToolTip.h"
@@ -83,7 +84,8 @@ class CMainToolBar: public CToolBarEx
 protected:
 	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
-	CEdit m_EditTempo, m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
+	CNumberEdit m_EditTempo;
+	CEdit m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat, m_StaticGlobalVolume;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat, m_SpinGlobalVolume;
 	int m_currentSpeed = 0, m_currentOctave = -1, m_currentRowsPerBeat = 0, m_currentGlobalVolume = 0;
@@ -133,6 +135,12 @@ protected:
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelectMIDIDevice(UINT id);
+
+	afx_msg void OnSpeedChanged();
+	afx_msg void OnTempoChanged();
+	afx_msg void OnRPBChanged();
+	afx_msg void OnGlobalVolChanged();
+
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
