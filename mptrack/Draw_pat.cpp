@@ -986,13 +986,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
-			const bool drawDefaultVolume = DrawDefaultVolume(m);
+			const bool drawDefaultVolume = DrawDefaultVolume(m, sndFile);
 
 			DWORD dwSpeedUpMask = 0;
 			if(useSpeedUpMask && (m_chnState[col].selectedCols & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
-				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
+				const bool drawOldDefaultVolume = DrawDefaultVolume(mold, sndFile);
 
 				if(m->note == mold->note || !m_visibleColumns[PatternCursor::noteColumn])
 					dwSpeedUpMask |= COLUMN_BITS_NOTE;

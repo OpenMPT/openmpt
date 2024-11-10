@@ -301,7 +301,16 @@ public:
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
 	// True if default volume should be drawn for a given cell.
-	static bool DrawDefaultVolume(const ModCommand *m) { return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) && m->volcmd == VOLCMD_NONE && m->command != CMD_VOLUME && m->command != CMD_VOLUME8 && m->instr != 0 && m->IsNote(); }
+	static bool DrawDefaultVolume(const ModCommand *m, const CSoundFile &sndFile)
+	{
+		return
+			(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWDEFAULTVOLUME) &&
+			m->volcmd == VOLCMD_NONE &&
+			m->command != CMD_VOLUME &&
+			m->command != CMD_VOLUME8 &&
+			m->instr != 0 &&
+			(m->IsNote() || (m->IsNoteOrEmpty() && sndFile.m_nInstruments == 0));
+	}
 
 	void CursorJump(int distance, bool snap);
 
