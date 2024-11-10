@@ -54,6 +54,16 @@ namespace HighDPISupport
 	{
 		return MulDiv(pixels, 96, HighDPISupport::GetDpiForWindow(hwnd));
 	}
+
+	class DPIAwarenessBypass
+	{
+	public:
+		DPIAwarenessBypass();
+		~DPIAwarenessBypass();
+
+	private:
+		HANDLE m_previous = {};
+	};
 };
 
 OPENMPT_NAMESPACE_END

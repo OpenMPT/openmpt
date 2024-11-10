@@ -21,12 +21,16 @@ struct HighDPISupportData
 	HighDPISupportData()
 		: m_user32{mpt::LibraryPath::System(P_("user32"))}
 	{
+		m_user32.Bind(m_SetThreadDpiAwarenessContext, "SetThreadDpiAwarenessContext");
 		m_user32.Bind(m_GetDpiForWindow, "GetDpiForWindow");
 		m_user32.Bind(m_GetSystemMetricsForDpi, "GetSystemMetricsForDpi");
 		m_user32.Bind(m_SystemParametersInfoForDpi, "SystemParametersInfoForDpi");
 	}
 
 	mpt::Library m_user32;
+
+	using PSETTHREADDPIAWARENESSCONTEXT = HANDLE(WINAPI *)(HANDLE);
+	PSETTHREADDPIAWARENESSCONTEXT m_SetThreadDpiAwarenessContext = nullptr;
 
 	using PGETDPIFORWINDOW = UINT(WINAPI *)(HWND);
 	PGETDPIFORWINDOW m_GetDpiForWindow = nullptr;
@@ -36,6 +40,16 @@ struct HighDPISupportData
 
 	using PSYSTEMPARAMETERSINFOFORPDI = BOOL(WINAPI *)(UINT, UINT, void *, UINT, UINT);
 	PSYSTEMPARAMETERSINFOFORPDI m_SystemParametersInfoForDpi = nullptr;
+};
+
+
+enum MPT_DPI_AWARENESS_CONTEXT
+{
+	MPT_DPI_AWARENESS_CONTEXT_UNAWARE = -1,
+	MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2,
+	MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3,
+	MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4,  // Windows 10 version 1703 and newer
+	MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = -5,     // Windows 10 version 1809 update and newer
 };
 
 
@@ -56,14 +70,6 @@ void HighDPISupport::SetDPIAwareness(Mode mode)
 	// For Windows 10, Creators Update (1703) and newer
 	if(instance->m_user32.IsValid())
 	{
-		enum MPT_DPI_AWARENESS_CONTEXT
-		{
-			MPT_DPI_AWARENESS_CONTEXT_UNAWARE = -1,
-			MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2,
-			MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3,
-			MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4,  // Windows 10 version 1703 and newer
-			MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = -5,     // Windows 10 version 1809 update and newer
-		};
 		using PSETPROCESSDPIAWARENESSCONTEXT = BOOL(WINAPI *)(HANDLE);
 		PSETPROCESSDPIAWARENESSCONTEXT SetProcessDpiAwarenessContext = nullptr;
 		if(instance->m_user32.Bind(SetProcessDpiAwarenessContext, "SetProcessDpiAwarenessContext"))
@@ -155,6 +161,20 @@ void HighDPISupport::CreateGUIFont(CFont &font, HWND hwnd)
 	HighDPISupport::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, hwnd);
 	font.DeleteObject();
 	font.CreateFontIndirect(&metrics.lfMessageFont);
+}
+
+
+HighDPISupport::DPIAwarenessBypass::DPIAwarenessBypass()
+{
+	if(auto instance = GetHighDPISupportData(); instance->m_SetThreadDpiAwarenessContext)
+		m_previous = instance->m_SetThreadDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE));
+}
+
+
+HighDPISupport::DPIAwarenessBypass::~DPIAwarenessBypass()
+{
+	if(auto instance = GetHighDPISupportData(); instance->m_SetThreadDpiAwarenessContext)
+		instance->m_SetThreadDpiAwarenessContext(m_previous);
 }
 
 

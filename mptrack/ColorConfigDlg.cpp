@@ -24,6 +24,26 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+
+class CFontDialogEx : public CFontDialog
+{
+	using CFontDialog::CFontDialog;
+
+public:
+	INT_PTR DoModal() override
+	{
+		// CHOOSEFONT is not compatible with mixed-DPI. Temporarily disable mixed-DPI awareness just for this dialog.
+		// https://blogs.windows.com/windowsdeveloper/2016/10/24/high-dpi-scaling-improvements-for-desktop-applications-and-mixed-mode-dpi-scaling-in-the-windows-10-anniversary-update/
+		HighDPISupport::DPIAwarenessBypass bypass;
+		HDC dc = ::GetDC(nullptr);
+		uint32 dpi = ::GetDeviceCaps(dc, LOGPIXELSX);
+		::ReleaseDC(m_hWnd, dc);
+		m_cf.lpLogFont->lfHeight = -MulDiv(m_cf.lpLogFont->lfHeight, dpi, 720);
+		return CFontDialog::DoModal();
+	}
+};
+
+
 static constexpr struct ColorDescriptions
 {
 	const TCHAR *name;
@@ -266,11 +286,11 @@ void COptionsColors::OnChoosePatternFont()
 	MemsetZero(lf);
 	const int32 size = patternFont.size < 10 ? 120 : patternFont.size;
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(size, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
+	lf.lfHeight = size;
 	lf.lfWeight = patternFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = patternFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::WriteWinBuf(lf.lfFaceName) = mpt::ToWin(patternFont.name);
-	CFontDialog dlg(&lf);
+	CFontDialogEx dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	if(patternFont.name != PATTERNFONT_SMALL && patternFont.name != PATTERNFONT_LARGE)
 	{
@@ -301,11 +321,11 @@ void COptionsColors::OnChooseCommentFont()
 	LOGFONT lf;
 	MemsetZero(lf);
 	// Point size to pixels
-	lf.lfHeight = -MulDiv(commentFont.size, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
+	lf.lfHeight = commentFont.size;
 	lf.lfWeight = commentFont.flags[FontSetting::Bold] ? FW_BOLD : FW_NORMAL;
 	lf.lfItalic = commentFont.flags[FontSetting::Italic] ? TRUE : FALSE;
 	mpt::String::WriteWinBuf(lf.lfFaceName) = mpt::ToWin(commentFont.name);
-	CFontDialog dlg(&lf);
+	CFontDialogEx dlg(&lf);
 	dlg.m_cf.hwndOwner = m_hWnd;
 	dlg.m_cf.lpLogFont = &lf;
 	dlg.m_cf.Flags &= ~CF_EFFECTS;
