@@ -329,7 +329,8 @@ public:
 	CModDoc *NewDocument(MODTYPE newType = MOD_TYPE_NONE);
 
 	afx_msg void OnFileNew() { NewDocument(); }
-	afx_msg void OnFileNewMOD() { NewDocument(MOD_TYPE_MOD); }
+	afx_msg void OnFileNewMOD_Amiga() { NewDocument(MOD_TYPE_MOD); }
+	afx_msg void OnFileNewMOD_PC() { NewDocument(MOD_TYPE_MOD_PC); }
 	afx_msg void OnFileNewS3M() { NewDocument(MOD_TYPE_S3M); }
 	afx_msg void OnFileNewXM() { NewDocument(MOD_TYPE_XM); }
 	afx_msg void OnFileNewIT() { NewDocument(MOD_TYPE_IT); }

@@ -2778,7 +2778,8 @@ BEGIN
             MENUITEM "&IT",                         ID_FILE_NEWIT
             MENUITEM "&XM",                         ID_FILE_NEWXM
             MENUITEM "&S3M",                        ID_FILE_NEWS3M
-            MENUITEM "M&OD",                        ID_FILE_NEWMOD
+            MENUITEM "M&OD (Amiga)",                ID_FILE_NEWMOD
+            MENUITEM "MOD (&PC)",                   ID_FILE_NEWMOD_PC
             MENUITEM "Open&MPT Module",             ID_NEW_MPT
         END
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN

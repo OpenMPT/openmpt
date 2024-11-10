@@ -625,6 +625,10 @@ void CModDoc::InitializeMod()
 		case MOD_TYPE_MOD:
 			m_SndFile.ChnSettings.resize(4);
 			break;
+		case MOD_TYPE_MOD_PC:
+			m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
+			m_SndFile.ChnSettings.resize(8);
+			break;
 		case MOD_TYPE_S3M:
 			m_SndFile.ChnSettings.resize(16);
 			break;
@@ -661,6 +665,17 @@ void CModDoc::InitializeMod()
 		m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
 		// Setup LRRL panning scheme for MODs
 		m_SndFile.SetupMODPanning();
+
+		if(GetModType() == MOD_TYPE_MOD)
+		{
+			const bool isAmiga = GetNumChannels() == 4;
+			m_SndFile.m_SongFlags.set(SONG_ISAMIGA | SONG_AMIGALIMITS | SONG_PT_MODE, isAmiga);
+			m_SndFile.m_playBehaviour.set(kMODOneShotLoops, isAmiga);
+			m_SndFile.m_playBehaviour.set(kMODSampleSwap, isAmiga);
+			m_SndFile.m_playBehaviour.set(kMODOutOfRangeNoteDelay, isAmiga);
+			m_SndFile.m_playBehaviour.set(kMODTempoOnSecondTick, isAmiga);
+			m_SndFile.m_playBehaviour.set(kFT2MODTremoloRampWaveform);
+		}
 	}
 	if (!m_SndFile.m_nSamples)
 	{

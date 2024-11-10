@@ -95,13 +95,14 @@ BOOL COptionsGeneral::OnInitDialog()
 
 	m_defaultArtist.SetWindowText(mpt::ToCString(TrackerSettings::Instance().defaultArtist.Get()));
 
-	const struct
+	static constexpr struct
 	{
 		MODTYPE type;
 		const TCHAR *str;
 	} formats[] =
 	{
-		{ MOD_TYPE_MOD, _T("MOD") },
+		{ MOD_TYPE_MOD, _T("MOD (Amiga)") },
+		{ MOD_TYPE_MOD_PC, _T("MOD (PC)")},
 		{ MOD_TYPE_XM, _T("XM") },
 		{ MOD_TYPE_S3M, _T("S3M") },
 		{ MOD_TYPE_IT, _T("IT") },

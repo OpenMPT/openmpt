@@ -1148,6 +1148,7 @@
 // From here: Command range [ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS]
 #define ID_VSTMACRO_INFO                36002
 #define ID_VSTINPUT_INFO                36003
+#define ID_FILE_NEWMOD_PC               36004
 #define ID_APPROX_BPM                   36007
 #define ID_FACTORY_MENU                 36008
 #define ID_PLUG_BYPASS                  36009

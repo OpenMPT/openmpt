@@ -77,12 +77,18 @@ static Version GetPreviousSettingsVersion(const mpt::ustring &iniVersion)
 
 mpt::ustring SettingsModTypeToString(MODTYPE modtype)
 {
-	return CSoundFile::GetModSpecifications(modtype).GetFileExtension();
+	if(modtype == MOD_TYPE_MOD_PC)
+		return UL_("mod-pc");
+	else
+		return CSoundFile::GetModSpecifications(modtype).GetFileExtension();
 }
 
 MODTYPE SettingsStringToModType(const mpt::ustring &str)
 {
-	return CModSpecifications::ExtensionToType(str);
+	if(str == UL_("mod-pc"))
+		return MOD_TYPE_MOD_PC;
+	else
+		return CModSpecifications::ExtensionToType(str);
 }
 
 
