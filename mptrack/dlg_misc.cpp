@@ -25,6 +25,10 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+#include <afxtaskdialog.h>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1549,33 +1553,20 @@ void CInputDlg::OnOK()
 ///////////////////////////////////////////////////////////////////////////////////////
 // Messagebox with 'don't show again'-option.
 
-class CMsgBoxHidable : public DialogBase
-{
-public:
-	CMsgBoxHidable(const TCHAR *strMsg, bool checkStatus = true, CWnd* pParent = NULL);
-	enum { IDD = IDD_MSGBOX_HIDABLE };
-
-	const TCHAR *m_StrMsg;
-	int m_nCheckStatus;
-protected:
-	void DoDataExchange(CDataExchange* pDX) override;   // DDX/DDV support
-	BOOL OnInitDialog() override;
-};
-
-
 struct MsgBoxHidableMessage
 {
+	const TCHAR *mainTitle;
 	const TCHAR *message;
-	uint32 mask;
-	bool defaultDontShowAgainStatus; // true for don't show again, false for show again.
+	const uint32 mask;
+	const bool defaultDontShowAgainStatus; // true for don't show again, false for show again.
 };
 
 static constexpr MsgBoxHidableMessage HidableMessages[] =
 {
-	{ _T("Note: First two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true },
-	{ _T("Hint: To create IT-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 1, true },
-	{ _T("Hint: To create XM-files without MPT-specific extensions included, try compatibility export from File-menu."), 1 << 3, true },
-	{ _T("Warning: The exported file will not contain any of MPT's file format hacks."), 1 << 4, true },
+	{ _T("Compatibility Notice"), _T("The first two bytes of oneshot samples are silenced for ProTracker compatibility."), 1, true },
+	{ _T("Compatibility Hint"), _T("To create IT files without OpenMPT-specific extensions included, try compatibility export from File menu."), 1 << 1, true },
+	{ _T("Compatibility Hint"), _T("To create XM files without OpenMPT-specific extensions included, try compatibility export from File menu."), 1 << 3, true },
+	{ _T("Compatibility Notice"), _T("The exported file will not contain any of OpenMPT's file format hacks."), 1 << 4, true },
 };
 
 static_assert(mpt::array_size<decltype(HidableMessages)>::size == enMsgBoxHidableMessage_count);
@@ -1585,41 +1576,29 @@ static_assert(mpt::array_size<decltype(HidableMessages)>::size == enMsgBoxHidabl
 // controls the show/don't show-flags.
 void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 {
-	// Check whether the message should be shown.
-	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & HidableMessages[enMsg].mask) == 0)
+	const auto &msg = HidableMessages[enMsg];
+	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & msg.mask) == 0)
 		return;
 
-	// Show dialog.
-	CMsgBoxHidable dlg(HidableMessages[enMsg].message, HidableMessages[enMsg].defaultDontShowAgainStatus);
-	dlg.DoModal();
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	if(CTaskDialog::IsSupported()
+	   && !(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(3, 13, 0))))
+	{
+		CTaskDialog taskDialog(msg.message, msg.mainTitle ? CString{msg.mainTitle} : CString{}, AfxGetAppName(), TDCBF_OK_BUTTON);
+		taskDialog.SetVerificationCheckboxText(_T("Do not show this message again"));
+		taskDialog.SetVerificationCheckbox(msg.defaultDontShowAgainStatus);
+		taskDialog.DoModal();
 
-	// Update visibility flags.
-	const uint32 mask = HidableMessages[enMsg].mask;
-	if(dlg.m_nCheckStatus == BST_CHECKED)
-		TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~mask;
-	else
-		TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= mask;
-}
-
-
-CMsgBoxHidable::CMsgBoxHidable(const  TCHAR *strMsg, bool checkStatus, CWnd* pParent)
-	: DialogBase(CMsgBoxHidable::IDD, pParent)
-	, m_StrMsg(strMsg)
-	, m_nCheckStatus((checkStatus) ? BST_CHECKED : BST_UNCHECKED)
-{}
-
-BOOL CMsgBoxHidable::OnInitDialog()
-{
-	DialogBase::OnInitDialog();
-	SetDlgItemText(IDC_MESSAGETEXT, m_StrMsg);
-	SetWindowText(AfxGetAppName());
-	return TRUE;
-}
-
-void CMsgBoxHidable::DoDataExchange(CDataExchange* pDX)
-{
-	DialogBase::DoDataExchange(pDX);
-	DDX_Check(pDX, IDC_DONTSHOWAGAIN, m_nCheckStatus);
+		if(taskDialog.GetVerificationCheckboxState())
+			TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~msg.mask;
+		else
+			TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= msg.mask;
+	} else
+#endif
+	{
+		Reporting::Information(msg.message, msg.mainTitle ? CString{msg.mainTitle} : CString{});
+		TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= msg.mask;
+	}
 }
 
 

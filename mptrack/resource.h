@@ -95,7 +95,6 @@
 #define IDD_MIXSAMPLES                  513
 #define IDS_ERR_TUNING_SERIALISATION    514
 #define IDD_MIDIPARAMCONTROL            515
-#define IDD_MSGBOX_HIDABLE              516
 #define IDD_ADDSILENCE                  517
 #define IDD_OPLEXPORT                   518
 #define IDD_OPL_PARAMS                  520
@@ -802,8 +801,6 @@
 #define IDC_EDIT_STRETCHPARAMS          2338
 #define IDC_MIDI_MACRO_CONTROL          2339
 #define IDC_MIDIPLAYPATTERNONMIDIIN     2340
-#define IDC_DONTSHOWAGAIN               2341
-#define IDC_MESSAGETEXT                 2342
 #define IDC_SAMPLE_DCOFFSET             2343
 #define IDC_OPTIONS_DIR_MODS            2344
 #define IDC_OPTIONS_DIR_SAMPS           2345
