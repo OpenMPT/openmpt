@@ -45,6 +45,19 @@ void CToolBarEx::SetVertical()
 
 CSize CToolBarEx::CalcDynamicLayout(int nLength, DWORD dwMode)
 {
+	// Make the toolbar go into multiline mode when it's docked
+	if(dwMode & LM_HORZDOCK)
+	{
+		if(auto mainFrm = CMainFrame::GetMainFrame())
+		{
+			CRect rect;
+			mainFrm->GetClientRect(rect);
+			nLength = rect.right;
+			dwMode &= ~LM_HORZDOCK;
+			dwMode |= LM_COMMIT;
+		}
+	}
+
 	CSize sizeResult;
 	// if we're committing set the buttons appropriately
 	if(dwMode & LM_COMMIT)
@@ -227,9 +240,7 @@ END_MESSAGE_MAP()
 
 BOOL CMainToolBar::Create(CWnd *parent)
 {
-	DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY;
-
-	if(!CToolBar::Create(parent, dwStyle))
+	if(!CToolBar::Create(parent, WS_CHILD | WS_VISIBLE | CBRS_TOP | CBRS_SIZE_DYNAMIC | CBRS_TOOLTIPS | CBRS_FLYBY))
 		return FALSE;
 
 	SetButtons(MainButtons, static_cast<int>(std::size(MainButtons)));
