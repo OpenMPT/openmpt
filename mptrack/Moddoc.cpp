@@ -182,13 +182,9 @@ BOOL CModDoc::OnNewDocument()
 	if (!CDocument::OnNewDocument()) return FALSE;
 
 	m_SndFile.Create(FileReader(), CSoundFile::loadCompleteModule, this);
-	m_SndFile.ChangeModTypeTo(CTrackApp::GetDefaultDocType());
-
-	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
-	m_SndFile.m_SongFlags.set((SONG_LINEARSLIDES | SONG_ISAMIGA) & m_SndFile.GetModSpecifications().songFlags);
+	InitializeMod();
 
 	ReinitRecordState();
-	InitializeMod();
 	SetModified(false);
 	return TRUE;
 }
@@ -617,89 +613,79 @@ void CModDoc::OnAppendModule()
 
 void CModDoc::InitializeMod()
 {
-	// New module ?
-	if (!m_SndFile.GetNumChannels())
+	const auto defaultType = CTrackApp::GetDefaultDocType();
+	m_SndFile.ChangeModTypeTo((defaultType == MOD_TYPE_MOD_PC) ? MOD_TYPE_MOD : defaultType);
+
+	theApp.GetDefaultMidiMacro(m_SndFile.m_MidiCfg);
+	m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES & m_SndFile.GetModSpecifications().songFlags);
+
+	switch(defaultType)
 	{
-		switch(GetModType())
-		{
-		case MOD_TYPE_MOD:
-			m_SndFile.ChnSettings.resize(4);
-			break;
-		case MOD_TYPE_MOD_PC:
-			m_SndFile.ChangeModTypeTo(MOD_TYPE_MOD);
-			m_SndFile.ChnSettings.resize(8);
-			break;
-		case MOD_TYPE_S3M:
-			m_SndFile.ChnSettings.resize(16);
-			break;
-		default:
-			m_SndFile.ChnSettings.resize(32);
-			break;
-		}
-
-		SetDefaultChannelColors();
-
-		if(GetModType() == MOD_TYPE_MPT)
-		{
-			m_SndFile.m_nTempoMode = TempoMode::Modern;
-			m_SndFile.m_SongFlags.set(SONG_EXFILTERRANGE);
-		}
-		m_SndFile.SetDefaultPlaybackBehaviour(GetModType());
-
-		// Refresh mix levels now that the correct mod type has been set
-		m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
-
-		m_SndFile.Order().assign(1, 0);
-		if (!m_SndFile.Patterns.IsValidPat(0))
-		{
-			m_SndFile.Patterns.Insert(0, 64);
-		}
-
-		Clear(m_SndFile.m_szNames);
-
-		m_SndFile.Order().SetDefaultTempoInt(125);
-		m_SndFile.Order().SetDefaultSpeed(6);
-
-		// Set up mix levels
-		m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
-		m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
-		// Setup LRRL panning scheme for MODs
-		m_SndFile.SetupMODPanning();
-
-		if(GetModType() == MOD_TYPE_MOD)
-		{
-			const bool isAmiga = GetNumChannels() == 4;
-			m_SndFile.m_SongFlags.set(SONG_ISAMIGA | SONG_AMIGALIMITS | SONG_PT_MODE, isAmiga);
-			m_SndFile.m_playBehaviour.set(kMODOneShotLoops, isAmiga);
-			m_SndFile.m_playBehaviour.set(kMODSampleSwap, isAmiga);
-			m_SndFile.m_playBehaviour.set(kMODOutOfRangeNoteDelay, isAmiga);
-			m_SndFile.m_playBehaviour.set(kMODTempoOnSecondTick, isAmiga);
-			m_SndFile.m_playBehaviour.set(kFT2MODTremoloRampWaveform);
-		}
+	case MOD_TYPE_MOD:
+		m_SndFile.ChnSettings.resize(4);
+		break;
+	case MOD_TYPE_MOD_PC:
+		m_SndFile.ChnSettings.resize(8);
+		break;
+	case MOD_TYPE_S3M:
+		m_SndFile.ChnSettings.resize(16);
+		break;
+	default:
+		m_SndFile.ChnSettings.resize(32);
+		break;
 	}
-	if (!m_SndFile.m_nSamples)
+
+	SetDefaultChannelColors();
+
+	if(GetModType() == MOD_TYPE_MPT)
 	{
-		m_SndFile.m_szNames[1] = "untitled";
-		m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
-
-		SampleEdit::ResetSamples(m_SndFile, SampleEdit::SmpResetInit);
-
-		m_SndFile.GetSample(1).Initialize(m_SndFile.GetType());
-
-		if ((!m_SndFile.m_nInstruments) && (m_SndFile.GetType() & MOD_TYPE_XM))
-		{
-			if(m_SndFile.AllocateInstrument(1, 1))
-			{
-				m_SndFile.m_nInstruments = 1;
-				InitializeInstrument(m_SndFile.Instruments[1]);
-			}
-		}
-		if (m_SndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
-		{
-			m_SndFile.m_SongFlags.set(SONG_LINEARSLIDES);
-		}
+		m_SndFile.m_nTempoMode = TempoMode::Modern;
+		m_SndFile.m_SongFlags.set(SONG_EXFILTERRANGE);
 	}
-	m_SndFile.ResetPlayPos();
+	m_SndFile.SetDefaultPlaybackBehaviour(GetModType());
+
+	// Refresh mix levels now that the correct mod type has been set
+	m_SndFile.SetMixLevels(m_SndFile.GetModSpecifications().defaultMixLevels);
+
+	m_SndFile.Order().assign(1, 0);
+	if(!m_SndFile.Patterns.IsValidPat(0))
+		m_SndFile.Patterns.Insert(0, 64);
+
+	Clear(m_SndFile.m_szNames);
+
+	m_SndFile.Order().SetDefaultTempoInt(125);
+	m_SndFile.Order().SetDefaultSpeed(6);
+
+	// Set up mix levels
+	m_SndFile.m_PlayState.m_nGlobalVolume = m_SndFile.m_nDefaultGlobalVolume = MAX_GLOBAL_VOLUME;
+	m_SndFile.m_nSamplePreAmp = m_SndFile.m_nVSTiVolume = 48;
+	// Setup LRRL panning scheme for MODs
+	m_SndFile.SetupMODPanning();
+
+	if(GetModType() == MOD_TYPE_MOD)
+	{
+		const bool isAmiga = (defaultType != MOD_TYPE_MOD_PC);
+		m_SndFile.m_SongFlags.set(SONG_ISAMIGA | SONG_AMIGALIMITS | SONG_PT_MODE, isAmiga);
+		m_SndFile.m_playBehaviour.set(kMODOneShotLoops, isAmiga);
+		m_SndFile.m_playBehaviour.set(kMODSampleSwap, isAmiga);
+		m_SndFile.m_playBehaviour.set(kMODOutOfRangeNoteDelay, isAmiga);
+		m_SndFile.m_playBehaviour.set(kMODTempoOnSecondTick, isAmiga);
+		m_SndFile.m_playBehaviour.set(kFT2MODTremoloRampWaveform);
+	}
+
+	m_SndFile.m_szNames[1] = "untitled";
+	m_SndFile.m_nSamples = (GetModType() == MOD_TYPE_MOD) ? 31 : 1;
+
+	SampleEdit::ResetSamples(m_SndFile, SampleEdit::SmpResetInit);
+
+	m_SndFile.GetSample(1).Initialize(m_SndFile.GetType());
+
+	if(m_SndFile.GetType() == MOD_TYPE_XM)
+	{
+		if(ModInstrument *ins = m_SndFile.AllocateInstrument(1, 1))
+			InitializeInstrument(ins);
+	}
+
 	m_SndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
 }
 
