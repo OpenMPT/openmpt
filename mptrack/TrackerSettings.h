@@ -370,7 +370,7 @@ enum class MainToolBarItem : uint8
 	GlobalVolume = 0x10,
 	VUMeter = 0x20,
 
-	Default = Octave | Tempo | Speed | GlobalVolume | VUMeter
+	Default = Octave | Tempo | Speed | RowsPerBeat | GlobalVolume | VUMeter
 };
 DECLARE_FLAGSET(MainToolBarItem)
 
