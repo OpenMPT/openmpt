@@ -1395,9 +1395,10 @@ static constexpr struct
 	{2100, kcGotoParamColumn, _T("Go to effect parameter column")},
 	{2101, kcContextMenu, _T("Open Context Menu")},
 	{2102, kcOrderlistStreamExport, _T("Stream Export")},
-	{2103, kcToggleVisibilityInstrColumn, _T("Toggle instrument column visibility") },
-	{2104, kcToggleVisibilityVolumeColumn, _T("Toggle volume column visibility") },
-	{2105, kcToggleVisibilityEffectColumn, _T("Toggle effect column visibility") },
+	{2103, kcToggleVisibilityInstrColumn, _T("Toggle instrument column visibility")},
+	{2104, kcToggleVisibilityVolumeColumn, _T("Toggle volume column visibility")},
+	{2105, kcToggleVisibilityEffectColumn, _T("Toggle effect column visibility")},
+	{2106, kcFileOpenTemplate, _T("File/Open Template")},
 };
 // clang-format on
 

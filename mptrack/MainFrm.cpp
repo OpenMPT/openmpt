@@ -3095,7 +3095,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathStr
 		} else
 		{
 			AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
-			AppendMenu(hMenu, MF_STRING, idRangeBegin + maxCount, _T("Browse..."));
+			AppendMenu(hMenu, MF_STRING, idRangeBegin + maxCount, _T("&Browse..."));
 		}
 	}
 
