@@ -986,13 +986,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
-			const bool drawDefaultVolume = DrawDefaultVolume(m);
+			const bool drawDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) && DrawDefaultVolume(*m, sndFile);
 
 			DWORD dwSpeedUpMask = 0;
 			if(useSpeedUpMask && (m_chnState[col].selectedCols & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
-				const bool drawOldDefaultVolume = DrawDefaultVolume(mold);
+				const bool drawOldDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) && DrawDefaultVolume(*mold, sndFile);
 
 				if(m->note == mold->note || !m_visibleColumns[PatternCursor::noteColumn])
 					dwSpeedUpMask |= COLUMN_BITS_NOTE;
@@ -1216,6 +1216,27 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		if (ypaint >= rcClient.bottom) break;
 	}
 	*pypaint = ypaint;
+}
+
+
+bool CViewPattern::DrawDefaultVolume(const ModCommand &m, const CSoundFile &sndFile)
+{
+	if(m.instr == 0 || m.volcmd != VOLCMD_NONE || m.command == CMD_VOLUME || m.command == CMD_VOLUME8)
+		return false;
+	// In instrument mode, we'd need to know the played for note-less instrument numbers
+	const bool hasNote = m.IsNote();
+	if(sndFile.GetNumInstruments() && !hasNote)
+		return false;
+	const SAMPLEINDEX smp = sndFile.GetSampleIndex(m.note, m.instr);
+	if(smp != 0)
+	{
+		const ModSample &sample = sndFile.GetSample(smp);
+		if(sample.uFlags[SMP_NODEFAULTVOLUME])
+			return false;
+		if(sndFile.GetType() == MOD_TYPE_S3M && !sample.HasSampleData())
+			return false;
+	}
+	return smp != 0;
 }
 
 
