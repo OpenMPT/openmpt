@@ -1422,10 +1422,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	if(TrackerSettings::Instance().FirstRun)
 	{
-		// On high-DPI devices, automatically upscale pattern font
-		FontSetting font = TrackerSettings::Instance().patternFont;
-		font.size = Clamp(static_cast<int>(HighDPISupport::GetDpiForWindow(m_pMainWnd->m_hWnd)) / 96 - 1, 0, 9);
-		TrackerSettings::Instance().patternFont = font;
 		new WelcomeDlg(m_pMainWnd);
 	} else
 	{
