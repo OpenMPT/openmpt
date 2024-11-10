@@ -670,13 +670,12 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 	case ID_FILE_NEW:
 		{
 			auto *mainFrm = CMainFrame::GetMainFrame();
-			CMenu *newMenu = mainFrm->GetFileMenu()->GetSubMenu(0);
-			CMenu *templateMenu = mainFrm->GetFileMenu()->GetSubMenu(2);
-			const bool hasTemplates = templateMenu->GetMenuItemID(0) != 0;
-			if(hasTemplates)
+			auto [newMenu, newPos] = CMainFrame::FindMenuItemByCommand(*mainFrm->GetMenu(), ID_FILE_NEWIT);
+			auto [templateMenu, templatePos] = CMainFrame::FindMenuItemByCommand(*mainFrm->GetMenu(), ID_FILE_OPENTEMPLATE);
+			if(templateMenu)
 				newMenu->AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(templateMenu->m_hMenu), _T("&Templates"));
 			newMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, pToolBar->rcButton.left, pToolBar->rcButton.bottom, this);
-			if(hasTemplates)
+			if(templateMenu)
 				newMenu->RemoveMenu(newMenu->GetMenuItemCount() - 1, MF_BYPOSITION);
 		}
 		break;

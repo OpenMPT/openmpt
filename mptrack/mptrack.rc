@@ -2849,7 +2849,6 @@ BEGIN
         POPUP "&Toolbars"
         BEGIN
             MENUITEM "&Main",                       ID_VIEW_TOOLBAR
-            MENUITEM "&Tree",                       IDD_TREEVIEW
         END
         MENUITEM SEPARATOR
         MENUITEM "S&etup...",                   ID_VIEW_OPTIONS

@@ -249,6 +249,14 @@ void CMainFrame::Initialize()
 	CreateTemplateModulesMenu();
 	UpdateMRUList();
 
+	auto [toolbarMenu, toolbarMenuStartPos] = FindMenuItemByCommand(*GetMenu(), ID_VIEW_TOOLBAR);
+	MPT_ASSERT(toolbarMenu);
+	if(toolbarMenu)
+	{
+		toolbarMenu->DeleteMenu(toolbarMenuStartPos, MF_BYPOSITION);
+		AddToolBarMenuEntries(*toolbarMenu);
+	}
+
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	CMenu debugMenu;
 	debugMenu.CreatePopupMenu();
@@ -2517,23 +2525,30 @@ void CMainFrame::OnRButtonDown(UINT, CPoint pt)
 
 void CMainFrame::ShowToolbarMenu(CPoint screenPt)
 {
-	CMenu menu, subMenu;
-	if(!menu.CreatePopupMenu() || !subMenu.CreatePopupMenu())
+	CMenu menu;
+	if(!menu.CreatePopupMenu())
 		return;
+	AddToolBarMenuEntries(menu);
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, screenPt.x, screenPt.y, this);
+}
+
+
+void CMainFrame::AddToolBarMenuEntries(CMenu &menu)
+{
 	menu.AppendMenu(MF_STRING, ID_VIEW_TOOLBAR, m_InputHandler->GetMenuText(ID_VIEW_TOOLBAR));
 	menu.AppendMenu(MF_STRING, IDD_TREEVIEW, m_InputHandler->GetMenuText(IDD_TREEVIEW));
-	
+
 	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 
+	CMenu subMenu;
+	VERIFY(subMenu.CreatePopupMenu());
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Octave] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_OCTAVE, _T("Base &Octave"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Tempo] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_TEMPO, _T("&Tempo"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Speed] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_SPEED, _T("Ticks/&Row"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::RowsPerBeat] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_ROWSPERBEAT, _T("Rows Per &Beat"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::GlobalVolume] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_GLOBALVOLUME, _T("&Global Volume"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::VUMeter] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_VUMETER, _T("&VU Meters"));
-	menu.AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(subMenu.m_hMenu), _T("Main Toolbar &Items"));
-
-	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, screenPt.x, screenPt.y, this);
+	menu.AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(subMenu.Detach()), _T("Main Toolbar &Items"));
 }
 
 
@@ -3101,19 +3116,21 @@ void CMainFrame::CreateExampleModulesMenu()
 }
 
 
-// Hack-ish way to get the file menu (this is necessary because the MDI document icon next to the File menu is a sub menu, too).
-CMenu *CMainFrame::GetFileMenu() const
+std::pair<CMenu *, int> CMainFrame::FindMenuItemByCommand(CMenu &menu, UINT commandID)
 {
-	CMenu *mainMenu = GetMenu();
-	CMenu *fileMenu = mainMenu ? mainMenu->GetSubMenu(0) : nullptr;
-	if(fileMenu)
+	const int numItems = menu.GetMenuItemCount();
+	for(int item = 0; item < numItems; item++)
 	{
-		if(fileMenu->GetMenuItemID(1) != ID_FILE_OPEN)
-			fileMenu = mainMenu->GetSubMenu(1);
-		ASSERT(fileMenu->GetMenuItemID(1) == ID_FILE_OPEN);
+		if(menu.GetMenuItemID(item) == commandID)
+			return {&menu, item};
+		CMenu *subMenu = menu.GetSubMenu(item);
+		if(subMenu != nullptr)
+		{
+			if(auto result = FindMenuItemByCommand(*subMenu, commandID); result.first != nullptr)
+				return result;
+		}
 	}
-	ASSERT(fileMenu);
-	return fileMenu;
+	return {};
 }
 
 
@@ -3122,35 +3139,23 @@ void CMainFrame::CreateTemplateModulesMenu()
 	static_assert(nMaxItemsInTemplateModulesMenu == ID_FILE_OPENTEMPLATE_LASTINRANGE - ID_FILE_OPENTEMPLATE,
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, m_TemplateModulePaths, P_("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
-	CMenu *pFileMenu = GetFileMenu();
-	if (hMenu && pFileMenu && m_InputHandler)
+	auto [fileMenu, position] = FindMenuItemByCommand(*GetMenu(), ID_FILE_OPEN);
+	if(hMenu && fileMenu && m_InputHandler)
 	{
-		VERIFY(pFileMenu->RemoveMenu(2, MF_BYPOSITION));
-		VERIFY(pFileMenu->InsertMenu(2, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));
+		VERIFY(fileMenu->RemoveMenu(position + 1, MF_BYPOSITION));
+		VERIFY(fileMenu->InsertMenu(position + 1, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));
 	}
 	else
-		ASSERT(false);
+		MPT_ASSERT_NOTREACHED();
 }
 
 
 void CMainFrame::UpdateMRUList()
 {
-	CMenu *pMenu = GetFileMenu();
-	if(!pMenu) return;
-
-	static int firstMenu = -1;
-	if(firstMenu == -1)
-	{
-		int numMenus = pMenu->GetMenuItemCount();
-		for(int i = 0; i < numMenus; i++)
-		{
-			if(pMenu->GetMenuItemID(i) == ID_MRU_LIST_FIRST)
-			{
-				firstMenu = i;
-				break;
-			}
-		}
-	}
+	const auto [pMenu, firstMenu] = FindMenuItemByCommand(*GetMenu(), ID_MRU_LIST_FIRST);
+	MPT_ASSERT(pMenu);
+	if(!pMenu)
+		return;
 
 	for(int i = ID_MRU_LIST_FIRST; i <= ID_MRU_LIST_LAST; i++)
 	{

@@ -292,7 +292,7 @@ public:
 
 	void CreateExampleModulesMenu();
 	void CreateTemplateModulesMenu();
-	CMenu *GetFileMenu() const;
+	static std::pair<CMenu *, int> FindMenuItemByCommand(CMenu &menu, UINT commandID);
 
 	// Creates submenu whose items are filenames of files in both
 	// AppDirectory\folderName\ (usually C:\Program Files\OpenMPT\folderName\)
@@ -372,6 +372,7 @@ protected:
 	void OpenMenuItemFile(const UINT nId, const bool isTemplateFile);
 
 	void ShowToolbarMenu(CPoint screenPt);
+	static void AddToolBarMenuEntries(CMenu &menu);
 
 	void RecreateImageLists();
 
