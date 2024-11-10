@@ -90,6 +90,7 @@ protected:
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat, m_SpinGlobalVolume;
 	int m_currentSpeed = 0, m_currentOctave = -1, m_currentRowsPerBeat = 0, m_currentGlobalVolume = 0;
 	TEMPO m_currentTempo{1, 0};
+	bool m_updating = false;
 public:
 	CStereoVU m_VuMeter;
 
@@ -117,7 +118,7 @@ public:
 	void Init(CMainFrame *);
 	UINT GetBaseOctave() const;
 	BOOL SetBaseOctave(UINT nOctave);
-	BOOL SetCurrentSong(CSoundFile *pModDoc);
+	void SetCurrentSong(CSoundFile *pModDoc);
 
 	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight);
 	void RemoveUpdateInfo();

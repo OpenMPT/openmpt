@@ -255,7 +255,7 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	// Octave
 	m_EditOctave.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_CENTER, rect, this, IDC_EDIT_BASEOCTAVE);
-	m_SpinOctave.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS, rect, this, IDC_SPIN_BASEOCTAVE);
+	m_SpinOctave.Create(WS_CHILD | UDS_ALIGNRIGHT | UDS_AUTOBUDDY, rect, this, IDC_SPIN_BASEOCTAVE);
 	// Tempo
 	m_StaticTempo.Create(_T("Tempo:"), WS_CHILD | SS_CENTER | SS_CENTERIMAGE, rect, this, IDC_TEXT_CURRENTTEMPO);
 	m_EditTempo.Create(WS_CHILD | WS_BORDER | WS_TABSTOP | ES_READONLY | ES_AUTOHSCROLL | ES_NUMBER, rect, this, IDC_EDIT_CURRENTTEMPO);
@@ -503,9 +503,10 @@ void CMainToolBar::RemoveUpdateInfo()
 }
 
 
-BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
+void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 {
 	// Update Info
+	m_updating = true;
 	if(pSndFile)
 	{
 		// Update play/pause button
@@ -516,12 +517,6 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		const CWnd *focus = GetFocus();
 		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed)
 		{
-			if(CModDoc *modDoc = pSndFile->GetpModDoc(); modDoc != nullptr)
-			{
-				// Update envelope views if speed has changed
-				modDoc->UpdateAllViews(InstrumentHint().Envelope());
-			}
-
 			if(m_currentSpeed < 0)
 			{
 				m_EditSpeed.SetReadOnly(FALSE);
@@ -601,7 +596,7 @@ BOOL CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			m_SpinGlobalVolume.EnableWindow(FALSE);
 		}
 	}
-	return TRUE;
+	m_updating = false;
 }
 
 
@@ -680,7 +675,7 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 
 void CMainToolBar::OnSpeedChanged()
 {
-	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame(); mainFrm && !m_updating)
 	{
 		BOOL ok = FALSE;
 		uint32 newSpeed = GetDlgItemInt(IDC_EDIT_CURRENTSPEED, &ok, FALSE);
@@ -690,13 +685,14 @@ void CMainToolBar::OnSpeedChanged()
 			const auto &specs = sndFile->GetModSpecifications();
 			sndFile->m_PlayState.m_nMusicSpeed = Clamp(newSpeed, specs.speedMin, specs.speedMax);
 		}
+		m_currentSpeed = 0;  // Force display update once focus moves away from this input field
 	}
 }
 
 
 void CMainToolBar::OnTempoChanged()
 {
-	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame(); mainFrm && !m_updating)
 	{
 		TEMPO newTempo = m_EditTempo.GetTempoValue();
 		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
@@ -705,21 +701,23 @@ void CMainToolBar::OnTempoChanged()
 			const auto &specs = sndFile->GetModSpecifications();
 			sndFile->m_PlayState.m_nMusicTempo = Clamp(newTempo, specs.GetTempoMin(), specs.GetTempoMax());
 		}
+		m_currentTempo.Set(0, 1);  // Force display update once focus moves away from this input field
 	}
 }
 
 
 void CMainToolBar::OnRPBChanged()
 {
-	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame(); mainFrm && !m_updating)
 	{
 		BOOL ok = FALSE;
 		uint32 newRPB = GetDlgItemInt(IDC_EDIT_RPB, &ok, FALSE);
 		CSoundFile *sndFile = mainFrm->GetSoundFilePlaying();
-		if(sndFile && ok)
+		if(sndFile && ok && newRPB > 0)
 		{
 			SetRowsPerBeat(newRPB);
 		}
+		m_currentRowsPerBeat = -2;  // Force display update once focus moves away from this input field
 	}
 }
 
@@ -735,6 +733,7 @@ void CMainToolBar::OnGlobalVolChanged()
 		{
 			sndFile->m_PlayState.m_nGlobalVolume = Clamp(Util::muldivr_unsigned(newGlobalVol, MAX_GLOBAL_VOLUME, sndFile->GlobalVolumeRange()), uint32(0), MAX_GLOBAL_VOLUME);
 		}
+		m_currentGlobalVolume = -2;  // Force display update once focus moves away from this input field
 	}
 }
 

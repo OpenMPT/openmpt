@@ -2391,6 +2391,7 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 		if(pnotify->type[Notification::EOS])
 		{
 			PostMessage(WM_COMMAND, ID_PLAYER_STOP);
+			m_currentSpeed = 0;
 		}
 		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
 		if(CModDoc *modDoc = GetModPlaying(); modDoc != nullptr)
@@ -2406,6 +2407,12 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 						modDoc->PostMessageToAllViews(WM_MOD_PLUGINDRYWETRATIOCHANGED, i);
 				}
 				m_pSndFile->m_pluginDryWetRatioChanged.reset();
+			}
+			// Update envelope views if speed has changed
+			if(m_pSndFile->m_PlayState.m_nMusicSpeed != m_currentSpeed)
+			{
+				m_currentSpeed = m_pSndFile->m_PlayState.m_nMusicSpeed;
+				modDoc->UpdateAllViews(InstrumentHint().Envelope());
 			}
 		}
 		m_nMixChn = pnotify->mixedChannels;

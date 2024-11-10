@@ -186,6 +186,7 @@ protected:
 	samplecount_t m_dwTimeSec = 0;
 	UINT_PTR m_nTimer = 0;
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
+	uint32 m_currentSpeed = 0;
 	// Misc
 	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
 #if defined(MPT_ENABLE_UPDATE)
