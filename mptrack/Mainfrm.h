@@ -376,6 +376,7 @@ protected:
 	static void AddToolBarMenuEntries(CMenu &menu);
 
 	void RecreateImageLists();
+	void SetupStatusBarSizes();
 
 public:
 	void UpdateMRUList();

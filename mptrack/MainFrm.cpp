@@ -175,9 +175,9 @@ COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS * 2];
 
 CInputHandler *CMainFrame::m_InputHandler = nullptr;
 
-static UINT indicators[] =
+static constexpr UINT StatusBarIndicators[] =
 {
-	ID_SEPARATOR,			// status line indicator
+	ID_SEPARATOR,  // status line indicator
 	ID_INDICATOR_XINFO,
 	ID_INDICATOR_INFO,
 	ID_INDICATOR_USER,
@@ -301,8 +301,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!m_wndToolBar.Create(this)) return -1;
 	if (!m_wndStatusBar.Create(this)) return -1;
 	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
-	m_wndStatusBar.SetIndicators(indicators, mpt::saturate_cast<int>(std::size(indicators)));
-	m_wndStatusBar.SetPaneInfo(0, ID_SEPARATOR, SBPS_STRETCH, 256);
+	m_wndStatusBar.SetIndicators(StatusBarIndicators, static_cast<int>(std::size(StatusBarIndicators)));
+	SetupStatusBarSizes();
 	m_wndToolBar.Init(this);
 	m_wndTree.RecalcLayout();
 
@@ -338,6 +338,7 @@ LRESULT CMainFrame::OnDPIChanged(WPARAM, LPARAM suggestedRect)
 	auto result = Default();
 
 	RecreateImageLists();
+	SetupStatusBarSizes();
 	m_wndTree.RecalcLayout();
 	return result;
 }
@@ -360,6 +361,26 @@ void CMainFrame::RecreateImageLists()
 	ReleaseDC(dc);
 
 	HighDPISupport::CreateGUIFont(m_hGUIFont, m_hWnd);
+}
+
+
+void CMainFrame::SetupStatusBarSizes()
+{
+	m_wndStatusBar.SetPaneInfo(0, ID_SEPARATOR, SBPS_STRETCH, HighDPISupport::ScalePixels(256, m_hWnd));
+
+	CDC *dc = GetDC();
+	MPT_ASSERT(m_hGUIFont.m_hObject);
+	auto oldFont = dc->SelectObject(m_hGUIFont);  // GetFont() seem to give us the font for the previous DPI right after the DPI change
+	for(size_t i = 0; i < std::size(StatusBarIndicators); i++)
+	{
+		if(StatusBarIndicators[i] == ID_SEPARATOR)
+			continue;
+		CString text;
+		VERIFY(text.LoadString(StatusBarIndicators[i]));
+		m_wndStatusBar.SetPaneInfo(static_cast<int>(i), StatusBarIndicators[i], SBPS_NORMAL, dc->GetTextExtent(text).cx);
+	}
+	dc->SelectObject(oldFont);
+	ReleaseDC(dc);
 }
 
 
