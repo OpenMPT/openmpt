@@ -43,6 +43,11 @@ namespace HighDPISupport
 
 	void CreateGUIFont(CFont &font, HWND hwnd);
 
+	// Normalized to 96 DPI to avoid issues in mixed-DPI contexts
+	bool SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT &wpl);
+	// Normalized to 96 DPI to avoid issues in mixed-DPI contexts
+	bool GetWindowPlacement(HWND hwnd, WINDOWPLACEMENT &wpl);
+
 	// Applies DPI scaling factor to some given size
 	MPT_FORCEINLINE int ScalePixels(int pixels, HWND hwnd)
 	{
@@ -58,7 +63,7 @@ namespace HighDPISupport
 	class DPIAwarenessBypass
 	{
 	public:
-		DPIAwarenessBypass();
+		DPIAwarenessBypass(Mode forceMode = Mode::HighDpi);
 		~DPIAwarenessBypass();
 
 	private:

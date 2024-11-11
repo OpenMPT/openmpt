@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "TrackerSettings.h"
 #include "ExceptionHandler.h"
+#include "HighDPISupport.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Mpdlgs.h"
@@ -1304,10 +1305,8 @@ void TrackerSettings::FixupEQ(EQPreset &eqSettings)
 
 void TrackerSettings::SaveSettings()
 {
-
 	WINDOWPLACEMENT wpl;
-	wpl.length = sizeof(WINDOWPLACEMENT);
-	CMainFrame::GetMainFrame()->GetWindowPlacement(&wpl);
+	HighDPISupport::GetWindowPlacement(*CMainFrame::GetMainFrame(), wpl);
 	conf.Write<WINDOWPLACEMENT>(UL_("Display"), UL_("WindowPlacement"), wpl);
 
 	conf.Write<int32>(UL_("Pattern Editor"), UL_("NumClipboards"), mpt::saturate_cast<int32>(PatternClipboard::GetClipboardSize()));

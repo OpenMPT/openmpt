@@ -43,7 +43,7 @@ struct HighDPISupportData
 };
 
 
-enum MPT_DPI_AWARENESS_CONTEXT
+enum MPT_DPI_AWARENESS_CONTEXT : intptr_t
 {
 	MPT_DPI_AWARENESS_CONTEXT_UNAWARE = -1,
 	MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2,
@@ -164,10 +164,29 @@ void HighDPISupport::CreateGUIFont(CFont &font, HWND hwnd)
 }
 
 
-HighDPISupport::DPIAwarenessBypass::DPIAwarenessBypass()
+bool HighDPISupport::SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT &wpl)
+{
+	// https://blogs.windows.com/windowsdeveloper/2016/10/24/high-dpi-scaling-improvements-for-desktop-applications-and-mixed-mode-dpi-scaling-in-the-windows-10-anniversary-update/
+	// What is not mentioned there: The first SetWindowPlacement call will restore the window to the wrong dimensions if it's not on the main screen...
+	HighDPISupport::DPIAwarenessBypass bypass{HighDPISupport::Mode::LowDpi};
+	::SetWindowPlacement(hwnd, &wpl);
+	return ::SetWindowPlacement(hwnd, &wpl) != FALSE;
+}
+
+
+bool HighDPISupport::GetWindowPlacement(HWND hwnd, WINDOWPLACEMENT &wpl)
+{
+	// https://blogs.windows.com/windowsdeveloper/2016/10/24/high-dpi-scaling-improvements-for-desktop-applications-and-mixed-mode-dpi-scaling-in-the-windows-10-anniversary-update/
+	HighDPISupport::DPIAwarenessBypass bypass{HighDPISupport::Mode::LowDpi};
+	wpl.length = sizeof(WINDOWPLACEMENT);
+	return ::GetWindowPlacement(hwnd, &wpl) != FALSE;
+}
+
+
+HighDPISupport::DPIAwarenessBypass::DPIAwarenessBypass(Mode forceMode)
 {
 	if(auto instance = GetHighDPISupportData(); instance->m_SetThreadDpiAwarenessContext)
-		m_previous = instance->m_SetThreadDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE));
+		m_previous = instance->m_SetThreadDpiAwarenessContext(HANDLE((forceMode == Mode::HighDpi) ? MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE : MPT_DPI_AWARENESS_CONTEXT_UNAWARE));
 }
 
 

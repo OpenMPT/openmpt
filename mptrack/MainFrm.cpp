@@ -2725,13 +2725,13 @@ bool CMainFrame::UpdateEffectKeys(const CModDoc *modDoc)
 void CMainFrame::OnShowWindow(BOOL bShow, UINT /*nStatus*/)
 {
 	static bool firstShow = true;
-	if (bShow && !IsWindowVisible() && firstShow)
+	if(bShow && !IsWindowVisible() && firstShow)
 	{
 		firstShow = false;
 		WINDOWPLACEMENT wpl;
 		GetWindowPlacement(&wpl);
 		wpl = theApp.GetSettings().Read<WINDOWPLACEMENT>(U_("Display"), U_("WindowPlacement"), wpl);
-		SetWindowPlacement(&wpl);
+		HighDPISupport::SetWindowPlacement(m_hWnd, wpl);
 	}
 }
 
