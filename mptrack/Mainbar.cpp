@@ -609,7 +609,10 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 
 	CToolBarEx::OnVScroll(nCode, nPos, pScrollBar);
 	// Avoid auto-setting input focus to edit control
-	pScrollBar->SetFocus();
+	if(auto *activeView = CMainFrame::GetMainFrame()->GetActiveView(); activeView != nullptr)
+		activeView->SetFocus();
+	else
+		pScrollBar->SetFocus();
 
 	short int oct = (short int)m_SpinOctave.GetPos();
 	if((oct >= MIN_BASEOCTAVE) && ((int)oct != m_currentOctave))
