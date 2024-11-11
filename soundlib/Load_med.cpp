@@ -632,7 +632,11 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 			if(note >= NOTE_MIDDLEC + 2 * 12)
 				needInstruments = true;
 
-			if(note >= NOTE_MIN && note <= NOTE_MAX)
+			if(note > NOTE_MIN + 131)
+				note -= 108;
+			else if(note > NOTE_MAX)
+				note -= mpt::align_down(note - (NOTE_MAX - 11), 12);
+			if(note >= NOTE_MIN)
 				m->note = static_cast<ModCommand::NOTE>(note);
 
 			if(!cmd && !param1)
