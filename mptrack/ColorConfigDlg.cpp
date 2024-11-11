@@ -37,7 +37,7 @@ public:
 		HighDPISupport::DPIAwarenessBypass bypass;
 		HDC dc = ::GetDC(nullptr);
 		uint32 dpi = ::GetDeviceCaps(dc, LOGPIXELSX);
-		::ReleaseDC(m_hWnd, dc);
+		::ReleaseDC(nullptr, dc);
 		m_cf.lpLogFont->lfHeight = -MulDiv(m_cf.lpLogFont->lfHeight, dpi, 720);
 		return CFontDialog::DoModal();
 	}

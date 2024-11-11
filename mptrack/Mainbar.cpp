@@ -659,9 +659,6 @@ void CMainToolBar::OnVScroll(UINT nCode, UINT nPos, CScrollBar *pScrollBar)
 						SetRowsPerBeat(m_currentRowsPerBeat + 1);
 				}
 				m_SpinRowsPerBeat.SetPos(0);
-
-				// Update pattern editor
-				pMainFrm->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 			}
 			if((n = m_SpinGlobalVolume.GetPos32()) != 0)
 			{
@@ -798,7 +795,7 @@ void CMainToolBar::OnSelectMIDIDevice(UINT id)
 }
 
 
-void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
+void CMainToolBar::SetRowsPerBeat(ROWINDEX newRPB)
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	if(pMainFrm == nullptr)
@@ -808,29 +805,41 @@ void CMainToolBar::SetRowsPerBeat(ROWINDEX nNewRPB)
 	if(pModDoc == nullptr || pSndFile == nullptr)
 		return;
 
-	pSndFile->m_PlayState.m_nCurrentRowsPerBeat = nNewRPB;
-	PATTERNINDEX nPat = pSndFile->GetCurrentPattern();
-	if(pSndFile->Patterns[nPat].GetOverrideSignature())
+	CriticalSection cs;
+	PATTERNINDEX pat = pSndFile->GetCurrentPattern();
+	bool modified = false;
+	if(pSndFile->Patterns.IsValidPat(pat) && pSndFile->Patterns[pat].GetOverrideSignature())
 	{
-		if(nNewRPB <= pSndFile->Patterns[nPat].GetRowsPerMeasure())
+		CPattern &pattern = pSndFile->Patterns[pat];
+		if(newRPB <= pattern.GetRowsPerMeasure())
 		{
-			pSndFile->Patterns[nPat].SetSignature(nNewRPB, pSndFile->Patterns[nPat].GetRowsPerMeasure());
-			TempoSwing swing = pSndFile->Patterns[nPat].GetTempoSwing();
+			pattern.SetSignature(newRPB, pattern.GetRowsPerMeasure());
+			TempoSwing swing = pattern.GetTempoSwing();
 			if(!swing.empty())
 			{
-				swing.resize(nNewRPB);
-				pSndFile->Patterns[nPat].SetTempoSwing(swing);
+				swing.resize(newRPB);
+				pattern.SetTempoSwing(swing);
 			}
-			pModDoc->SetModified();
+			modified = true;
 		}
 	} else
 	{
-		if(nNewRPB <= pSndFile->m_nDefaultRowsPerMeasure)
+		if(newRPB <= pSndFile->m_nDefaultRowsPerMeasure)
 		{
-			pSndFile->m_nDefaultRowsPerBeat = nNewRPB;
-			if(!pSndFile->m_tempoSwing.empty()) pSndFile->m_tempoSwing.resize(nNewRPB);
-			pModDoc->SetModified();
+			pSndFile->m_nDefaultRowsPerBeat = newRPB;
+			if(!pSndFile->m_tempoSwing.empty())
+				pSndFile->m_tempoSwing.resize(newRPB);
+			modified = true;
 		}
+	}
+
+	// Update pattern editor
+	if(modified)
+	{
+		pSndFile->m_PlayState.m_nCurrentRowsPerBeat = newRPB;
+		cs.Leave();
+		pModDoc->SetModified();
+		pModDoc->UpdateAllViews(PatternHint().Data());
 	}
 }
 

@@ -264,10 +264,10 @@ void CSelectPluginDlg::SaveWindowPos() const
 	GetWindowPlacement(&wnd);
 	CRect rect = wnd.rcNormalPosition;
 	::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (CPoint *)&rect, 2);
-	TrackerSettings::Instance().gnPlugWindowX = HighDPISupport::ScalePixels(rect.left, m_hWnd);
-	TrackerSettings::Instance().gnPlugWindowY = HighDPISupport::ScalePixels(rect.top, m_hWnd);
-	TrackerSettings::Instance().gnPlugWindowWidth = HighDPISupport::ScalePixels(rect.Width(), m_hWnd);
-	TrackerSettings::Instance().gnPlugWindowHeight = HighDPISupport::ScalePixels(rect.Height(), m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowX = HighDPISupport::ScalePixelsInv(rect.left, m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowY = HighDPISupport::ScalePixelsInv(rect.top, m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowWidth = HighDPISupport::ScalePixelsInv(rect.Width(), m_hWnd);
+	TrackerSettings::Instance().gnPlugWindowHeight = HighDPISupport::ScalePixelsInv(rect.Height(), m_hWnd);
 }
 
 
