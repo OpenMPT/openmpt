@@ -392,6 +392,7 @@ CString CInputHandler::GetMenuText(UINT id) const
 		{ ID_FILE_OPEN,                     kcFileOpen,          _T("&Open...") },
 		{ ID_FILE_OPENTEMPLATE,             kcNull,              _T("Open &Template") },
 		{ ID_FILE_OPENTEMPLATE_LASTINRANGE, kcFileOpenTemplate,  _T("&Browse...") },
+		{ ID_FILE_OPENAUTOSAVES,            kcFileOpenAutoSaves, _T("Open A&uto Saves...") },
 		{ ID_FILE_CLOSE,                    kcFileClose,         _T("&Close") },
 		{ ID_FILE_CLOSEALL,                 kcFileCloseAll,      _T("C&lose All") },
 		{ ID_FILE_APPENDMODULE,             kcFileAppend,        _T("Appen&d Module...") },
@@ -476,6 +477,7 @@ void CInputHandler::UpdateMainMenu()
 	{
 		ID_FILE_OPEN,
 		ID_FILE_OPENTEMPLATE_LASTINRANGE,
+		ID_FILE_OPENAUTOSAVES,
 		ID_FILE_APPENDMODULE,
 		ID_FILE_CLOSE,
 		ID_FILE_CLOSEALL,

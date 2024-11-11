@@ -1315,6 +1315,7 @@
 #define ID_FILE_SAVEOPL                 44654
 #define ID_CONVERT_NORMAL_TO_SUSTAIN    44655
 #define ID_CONVERT_SUSTAIN_TO_NORMAL    44656
+#define ID_FILE_OPENAUTOSAVES           44657
 
 // Next default values for new objects
 // 
@@ -1322,7 +1323,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        543
-#define _APS_NEXT_COMMAND_VALUE         44657
+#define _APS_NEXT_COMMAND_VALUE         44658
 #define _APS_NEXT_CONTROL_VALUE         2518
 #define _APS_NEXT_SYMED_VALUE           901
 #endif

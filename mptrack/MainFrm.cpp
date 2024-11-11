@@ -2561,6 +2561,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNextOctave: OnNextOctave(); break;
 		case kcFileNew: theApp.OnFileNew(); break;
 		case kcFileOpen: theApp.OnFileOpen(); break;
+		case kcFileOpenAutoSaves: theApp.OnFileOpenAutoSaves(); break;
 		case kcMidiRecord: OnMidiRecord(); break;
 		case kcHelp: OnHelp(); break;
 		case kcViewAddPlugin: OnPluginManager(); break;

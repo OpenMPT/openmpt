@@ -259,6 +259,12 @@ void CTrackApp::OnFileCloseAll()
 }
 
 
+void CTrackApp::OnUpdateAutoSaveFolderSet(CCmdUI *cmd)
+{
+	cmd->Enable(!theApp.GetTrackerSettings().AutosaveUseOriginalPath);
+}
+
+
 void CTrackApp::OnUpdateAnyDocsOpen(CCmdUI *cmd)
 {
 	cmd->Enable(!GetModDocTemplate()->empty());
@@ -632,17 +638,19 @@ MODTYPE CTrackApp::m_nDefaultDocType = MOD_TYPE_IT;
 
 BEGIN_MESSAGE_MAP(CTrackApp, CWinApp)
 	//{{AFX_MSG_MAP(CTrackApp)
-	ON_COMMAND(ID_FILE_NEW,       &CTrackApp::OnFileNew)
-	ON_COMMAND(ID_FILE_NEWMOD,    &CTrackApp::OnFileNewMOD_Amiga)
-	ON_COMMAND(ID_FILE_NEWMOD_PC, &CTrackApp::OnFileNewMOD_PC)
-	ON_COMMAND(ID_FILE_NEWS3M,    &CTrackApp::OnFileNewS3M)
-	ON_COMMAND(ID_FILE_NEWXM,     &CTrackApp::OnFileNewXM)
-	ON_COMMAND(ID_FILE_NEWIT,     &CTrackApp::OnFileNewIT)
-	ON_COMMAND(ID_NEW_MPT,        &CTrackApp::OnFileNewMPT)
-	ON_COMMAND(ID_FILE_OPEN,      &CTrackApp::OnFileOpen)
-	ON_COMMAND(ID_FILE_CLOSEALL,  &CTrackApp::OnFileCloseAll)
-	ON_COMMAND(ID_APP_ABOUT,      &CTrackApp::OnAppAbout)
-	ON_UPDATE_COMMAND_UI(ID_FILE_CLOSEALL, &CTrackApp::OnUpdateAnyDocsOpen)
+	ON_COMMAND(ID_FILE_NEW,           &CTrackApp::OnFileNew)
+	ON_COMMAND(ID_FILE_NEWMOD,        &CTrackApp::OnFileNewMOD_Amiga)
+	ON_COMMAND(ID_FILE_NEWMOD_PC,     &CTrackApp::OnFileNewMOD_PC)
+	ON_COMMAND(ID_FILE_NEWS3M,        &CTrackApp::OnFileNewS3M)
+	ON_COMMAND(ID_FILE_NEWXM,         &CTrackApp::OnFileNewXM)
+	ON_COMMAND(ID_FILE_NEWIT,         &CTrackApp::OnFileNewIT)
+	ON_COMMAND(ID_NEW_MPT,            &CTrackApp::OnFileNewMPT)
+	ON_COMMAND(ID_FILE_OPEN,          &CTrackApp::OnFileOpen)
+	ON_COMMAND(ID_FILE_OPENAUTOSAVES, &CTrackApp::OnFileOpenAutoSaves)
+	ON_COMMAND(ID_FILE_CLOSEALL,      &CTrackApp::OnFileCloseAll)
+	ON_COMMAND(ID_APP_ABOUT,          &CTrackApp::OnAppAbout)
+	ON_UPDATE_COMMAND_UI(ID_FILE_OPENAUTOSAVES, &CTrackApp::OnUpdateAutoSaveFolderSet)
+	ON_UPDATE_COMMAND_UI(ID_FILE_CLOSEALL,      &CTrackApp::OnUpdateAnyDocsOpen)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -1726,14 +1734,26 @@ void CTrackApp::OpenModulesDialog(std::vector<mpt::PathString> &files, const mpt
 }
 
 
-void CTrackApp::OnFileOpen()
+static void OnFileOpen(const mpt::PathString &overridePath = mpt::PathString())
 {
 	FileDialog::PathList files;
-	OpenModulesDialog(files);
+	theApp.OpenModulesDialog(files, overridePath);
 	for(const auto &file : files)
 	{
-		OpenDocumentFile(file.ToCString());
+		theApp.OpenDocumentFile(file.ToCString());
 	}
+}
+
+
+void CTrackApp::OnFileOpen()
+{
+	::OnFileOpen();
+}
+
+
+void CTrackApp::OnFileOpenAutoSaves()
+{
+	::OnFileOpen(theApp.GetTrackerSettings().AutosavePath.GetDefaultDir());
 }
 
 

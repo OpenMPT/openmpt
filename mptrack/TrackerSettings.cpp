@@ -315,8 +315,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, AutosaveEnabled(conf, UL_("AutoSave"), UL_("Enabled"), true)
 	, AutosaveIntervalMinutes(conf, UL_("AutoSave"), UL_("IntervalMinutes"), 10)
 	, AutosaveHistoryDepth(conf, UL_("AutoSave"), UL_("BackupHistory"), 3)
-	, AutosaveUseOriginalPath(conf, UL_("AutoSave"), UL_("UseOriginalPath"), true)
-	, AutosavePath(conf, UL_("AutoSave"), UL_("Path"), mpt::common_directories::get_temp_directory())
+	, AutosaveUseOriginalPath(conf, UL_("AutoSave"), UL_("UseOriginalPath"), false)
+	, AutosavePath(conf, UL_("AutoSave"), UL_("Path"), mpt::common_directories::get_temp_directory() + P_("OpenMPT Auto Saves\\"))
 	// Paths
 	, PathSongs(conf, UL_("Paths"), UL_("Songs_Directory"), mpt::PathString())
 	, PathSamples(conf, UL_("Paths"), UL_("Samples_Directory"), mpt::PathString())
@@ -879,6 +879,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// Paths
 	m_szKbdFile = theApp.PathInstallRelativeToAbsolute(m_szKbdFile);
+	CreateDirectory(AutosavePath.GetDefaultDir().AsNative().c_str(), 0);
 
 	// Sample undo buffer size (used to be a hidden, absolute setting in MiB)
 	int64 oldUndoSize = m_SampleUndoBufferSize.Get().GetSizeInPercent();

@@ -339,9 +339,12 @@ protected:
 	afx_msg void OnFileNewMPT() { NewDocument(MOD_TYPE_MPT); }
 
 	afx_msg void OnFileOpen();
+	afx_msg void OnFileOpenAutoSaves();
 	afx_msg void OnAppAbout();
 
 	afx_msg void OnFileCloseAll();
+
+	afx_msg void OnUpdateAutoSaveFolderSet(CCmdUI *cmd);
 	afx_msg void OnUpdateAnyDocsOpen(CCmdUI *cmd);
 
 	//}}AFX_MSG
