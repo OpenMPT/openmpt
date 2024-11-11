@@ -356,7 +356,7 @@ void CTempoSwingDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar)
 
 
 // Scrollable container for the sliders
-BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, DialogBase)
+BEGIN_MESSAGE_MAP(CTempoSwingDlg::SliderContainer, CStatic)
 	//{{AFX_MSG_MAP(CTempoSwingDlg::SliderContainer)
 	ON_WM_HSCROLL()
 	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CTempoSwingDlg::SliderContainer::OnToolTipNotify)
