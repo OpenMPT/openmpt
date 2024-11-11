@@ -25,7 +25,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
 
-#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA) && defined(UNICODE)
 #include <afxtaskdialog.h>
 #endif
 
@@ -1581,7 +1581,7 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 	if((TrackerSettings::Instance().gnMsgBoxVisiblityFlags & msg.mask) == 0)
 		return;
 
-#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA) && defined(UNICODE)
 	if(CTaskDialog::IsSupported()
 	   && !(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(3, 13, 0))))
 	{
