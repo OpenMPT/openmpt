@@ -32,6 +32,7 @@ protected:
 
 		afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
 		afx_msg BOOL OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *);
+
 		DECLARE_MESSAGE_MAP()
 	};
 
@@ -65,6 +66,7 @@ public:
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
 	void OnOK() override;
 	void OnCancel() override;
 	void OnClose();
@@ -73,6 +75,7 @@ protected:
 	afx_msg void OnToggleGroup();
 	afx_msg void OnGroupChanged();
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
+
 	DECLARE_MESSAGE_MAP()
 };
 
