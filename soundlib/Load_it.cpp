@@ -1266,7 +1266,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 			} else if(fileHeader.cwtv == 0 && madeWithTracker.empty())
 			{
 				madeWithTracker = UL_("Unknown");
-			} else if(fileHeader.cwtv >= 0x0208 && fileHeader.cwtv <= 0x0214 && m_FileHistory.empty() && madeWithTracker.empty())
+			} else if(fileHeader.cwtv >= 0x0208 && fileHeader.cwtv <= 0x0214 && !fileHeader.reserved && m_FileHistory.empty() && madeWithTracker.empty())
 			{
 				// Any file made with IT starting from v2.07 onwards should have an edit history
 				madeWithTracker = UL_("Unknown");
