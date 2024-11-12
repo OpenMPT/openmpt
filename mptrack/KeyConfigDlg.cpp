@@ -542,9 +542,9 @@ void COptionsKeyboard::OnCommandKeySelChanged()
 	{
 		m_cmbKeyChoice.SetWindowText(_T(""));
 		m_eCustHotKey.SetWindowText(_T(""));
-		m_bKeyDown.SetCheck(0);
-		m_bKeyHold.SetCheck(0);
-		m_bKeyUp.SetCheck(0);
+		m_bKeyDown.SetCheck(BST_UNCHECKED);
+		m_bKeyHold.SetCheck(BST_UNCHECKED);
+		m_bKeyUp.SetCheck(BST_UNCHECKED);
 		m_curCommand = kcNull;
 	}
 
@@ -587,9 +587,9 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 		m_curKeyChoice = choice;
 		m_forceUpdate = true;
 		m_eCustHotKey.SetKey(ModNone, 0);
-		m_bKeyDown.SetCheck(0);
-		m_bKeyHold.SetCheck(0);
-		m_bKeyUp.SetCheck(0);
+		m_bKeyDown.SetCheck(BST_UNCHECKED);
+		m_bKeyHold.SetCheck(BST_UNCHECKED);
+		m_bKeyUp.SetCheck(BST_UNCHECKED);
 		return;
 	}
 
@@ -664,7 +664,7 @@ void COptionsKeyboard::OnLButtonDblClk(UINT flags, CPoint point)
 	ClientToScreen(&point);
 	CRect rect;
 	m_eCustHotKey.GetWindowRect(rect);
-	if(m_eCustHotKey.IsBypassed() && rect.PtInRect(point))
+	if(m_curCommand != kcNull && m_eCustHotKey.IsBypassed() && rect.PtInRect(point))
 		EnableKeyChoice(true);
 	else
 		CPropertyPage::OnLButtonDblClk(flags, point);
