@@ -293,6 +293,8 @@ BOOL CMainToolBar::Create(CWnd *parent)
 
 	m_EditTempo.AllowNegative(false);
 	m_EditTempo.SetLimitText(9);
+	static_assert(MAX_GLOBAL_VOLUME <= 999);
+	m_EditGlobalVolume.SetLimitText(3);
 
 	// Display everything
 	SetWindowText(_T("Main"));
@@ -513,6 +515,19 @@ void CMainToolBar::RemoveUpdateInfo()
 }
 
 
+static void EnableEdit(CEdit &edit, CSpinButtonCtrl &spin, bool enable)
+{
+	edit.SetRedraw(FALSE);
+	if(!enable)
+		edit.SetWindowText(_T("---"));
+	edit.EnableWindow(enable ? TRUE : FALSE);
+	edit.SetReadOnly(enable ? FALSE : TRUE);
+	edit.SetRedraw(TRUE);
+	edit.Invalidate(FALSE);
+	spin.EnableWindow(enable ? TRUE : FALSE);
+}
+
+
 void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 {
 	// Update Info
@@ -528,11 +543,8 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed)
 		{
 			if(m_currentSpeed < 0)
-			{
-				m_EditSpeed.SetReadOnly(FALSE);
-				m_EditSpeed.EnableWindow(TRUE);
-				m_SpinSpeed.EnableWindow(TRUE);
-			}
+				EnableEdit(m_EditSpeed, m_SpinSpeed, true);
+
 			m_currentSpeed = nSpeed;
 			SetDlgItemInt(IDC_EDIT_CURRENTSPEED, m_currentSpeed, FALSE);
 		}
@@ -540,11 +552,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(nTempo != m_currentTempo && focus != &m_EditTempo)
 		{
 			if(m_currentTempo <= TEMPO(0, 0))
-			{
-				m_EditTempo.SetReadOnly(FALSE);
-				m_EditTempo.EnableWindow(TRUE);
-				m_SpinTempo.EnableWindow(TRUE);
-			}
+				EnableEdit(m_EditTempo, m_SpinTempo, true);
 
 			m_currentTempo = nTempo;
 			m_EditTempo.SetTempoValue(m_currentTempo);
@@ -553,11 +561,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(nRowsPerBeat != m_currentRowsPerBeat && focus != &m_EditRowsPerBeat)
 		{
 			if(m_currentRowsPerBeat < 0)
-			{
-				m_EditRowsPerBeat.SetReadOnly(FALSE);
-				m_EditRowsPerBeat.EnableWindow(TRUE);
-				m_SpinRowsPerBeat.EnableWindow(TRUE);
-			}
+				EnableEdit(m_EditRowsPerBeat, m_SpinRowsPerBeat, true);
 
 			m_currentRowsPerBeat = nRowsPerBeat;
 			SetDlgItemInt(IDC_EDIT_RPB, m_currentRowsPerBeat, FALSE);
@@ -566,13 +570,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(globalVol != m_currentGlobalVolume && focus != &m_EditGlobalVolume)
 		{
 			if(m_currentGlobalVolume < 0)
-			{
-				static_assert(MAX_GLOBAL_VOLUME <= 999);
-				m_EditGlobalVolume.SetLimitText(3);
-				m_EditGlobalVolume.SetReadOnly(FALSE);
-				m_EditGlobalVolume.EnableWindow(TRUE);
-				m_SpinGlobalVolume.EnableWindow(TRUE);
-			}
+				EnableEdit(m_EditGlobalVolume, m_SpinGlobalVolume, true);
 
 			m_currentGlobalVolume = globalVol;
 			uint32 displayVolume = Util::muldivr_unsigned(m_currentGlobalVolume, pSndFile->GlobalVolumeRange(), MAX_GLOBAL_VOLUME);
@@ -582,37 +580,20 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	{
 		if(m_currentTempo > TEMPO(0, 0))
 		{
-			m_currentTempo.Set(0);
-			m_EditTempo.SetWindowText(_T("---"));
-			m_EditTempo.SetReadOnly();
-			m_EditTempo.EnableWindow(FALSE);
-			m_SpinTempo.EnableWindow(FALSE);
+			EnableEdit(m_EditTempo, m_SpinTempo, false);
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
 		if(m_currentSpeed != -1)
-		{
-			m_currentSpeed = -1;
-			m_EditSpeed.SetWindowText(_T("---"));
-			m_EditSpeed.SetReadOnly();
-			m_EditSpeed.EnableWindow(FALSE);
-			m_SpinSpeed.EnableWindow(FALSE);
-		}
+			EnableEdit(m_EditSpeed, m_SpinSpeed, false);
 		if(m_currentRowsPerBeat != -1)
-		{
-			m_currentRowsPerBeat = -1;
-			m_EditRowsPerBeat.SetWindowText(_T("---"));
-			m_EditRowsPerBeat.SetReadOnly();
-			m_EditRowsPerBeat.EnableWindow(FALSE);
-			m_SpinRowsPerBeat.EnableWindow(FALSE);
-		}
+			EnableEdit(m_EditRowsPerBeat, m_SpinRowsPerBeat, false);
 		if(m_currentGlobalVolume != -1)
-		{
-			m_currentGlobalVolume = -1;
-			m_EditGlobalVolume.SetWindowText(_T("---"));
-			m_EditGlobalVolume.SetReadOnly();
-			m_EditGlobalVolume.EnableWindow(FALSE);
-			m_SpinGlobalVolume.EnableWindow(FALSE);
-		}
+			EnableEdit(m_EditGlobalVolume, m_SpinGlobalVolume, false);
+
+		m_currentTempo.Set(0);
+		m_currentSpeed = -1;
+		m_currentRowsPerBeat = -1;
+		m_currentGlobalVolume = -1;
 	}
 	// If focus was on a now-disabled input field, move it somewhere else
 	if(focus && !focus->IsWindowEnabled() && focus->GetParent() == this)
