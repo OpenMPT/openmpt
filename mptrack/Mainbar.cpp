@@ -169,7 +169,8 @@ enum ToolbarItemIndex
 	EDITGLOBALVOL_INDEX = GLOBALVOLTEXT_INDEX + 1,  // Edit Speed
 	SPINGLOBALVOL_INDEX = EDITGLOBALVOL_INDEX + 1,  // Spin Speed
 	DIVGLOBALVOL_INDEX = SPINGLOBALVOL_INDEX + 1,   // Divider at end
-	VUMETER_INDEX = SPINGLOBALVOL_INDEX + 6,        // VU Meters
+	DIVVUMETER_INDEX = SPINGLOBALVOL_INDEX + 5,     // Divider before VU Meters
+	VUMETER_INDEX = DIVVUMETER_INDEX + 1,           // VU Meters
 };
 
 #define TOOLBAR_IMAGE_PAUSE 8
@@ -441,6 +442,7 @@ void CMainToolBar::UpdateControls()
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_SpinGlobalVolume, SPINGLOBALVOL_INDEX, IDC_SPIN_GLOBALVOL);
 	SetButtonVisibility(DIVGLOBALVOL_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
 
+	SetButtonVisibility(DIVVUMETER_INDEX, visibleItems[MainToolBarItem::VUMeter]);
 	m_VuMeter.SetOrientation(!m_bVertical);
 	if(m_bVertical)
 		m_VuMeter.SetWindowPos(nullptr, 0, 0, VUMETER_HEIGHT, VUMETER_HEIGHT, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
