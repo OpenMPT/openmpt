@@ -491,8 +491,11 @@ bool CMainToolBar::ShowUpdateInfo(const CString &newVersion, const CString &info
 	GetToolBarCtrl().GetRect(ID_UPDATE_AVAILABLE, &rect);
 	CPoint pt = rect.CenterPoint();
 	ClientToScreen(&pt);
-	CMainFrame::GetMainFrame()->GetWindowRect(rect);
-	LimitMax(pt.x, rect.right);
+	if(!IsFloating())
+	{
+		CMainFrame::GetMainFrame()->GetWindowRect(rect);
+		LimitMax(pt.x, rect.right);
+	}
 
 	return m_tooltip.ShowUpdate(*this, newVersion, infoURL, rect, pt, ID_UPDATE_AVAILABLE);
 }
