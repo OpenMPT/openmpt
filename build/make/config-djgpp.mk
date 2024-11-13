@@ -223,8 +223,7 @@ generic/486          := $(XX_) -march=i486        $(FPU_387)    -mtune=i486     
 
 generic/586          := $(XXX) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_UARCH_SCAL)       # Intel Pentium, AMD K5
 generic/586-mmx      := $(XX_) -march=pentium-mmx $(FPU_MMX)    -mtune=pentium-mmx $(OPT_UARCH_SCAL_64)    # Intel Pentium-MMX, AMD K6, IDT WinChip-C6, Rise mP6
-generic/586-3dnow    := $(XX_) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_UARCH_SCAL_64)    # AMD K6-2..K6-3, IDT WinChip-2, VIA-C3-Samuel..VIA C3-Ezra
-generic/586-3dnowa   := $(___) -march=k6-3        $(FPU_3DNOWA) -mtune=k6-3        $(OPT_UARCH_SCAL_64)    # AMD K6-2+..K6-3+
+generic/586-3dnow    := $(XX_) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_UARCH_SCAL_64)    # AMD K6-2..K6-3+, IDT WinChip-2, VIA-C3-Samuel..VIA C3-Ezra
 
 generic/686          := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_UARCH_OOOE)       # Intel Pentium-Pro
 generic/686-mmx      := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Cyrix 6x86MX.., Transmeta Crusoe.., NSC Geode-GX1..
@@ -284,8 +283,8 @@ amd/k5               := $(X__) -march=i586        $(FPU_387)    -mtune=i586     
 amd/k6               := $(XX_) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
 amd/k6-2             := $(XXX) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=$(CACHE_SS7)
 amd/k6-3             := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=256
-amd/k6-2+            := $(___) -march=k6-3        $(FPU_3DNOWA) -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=128
-amd/k6-3+            := $(___) -march=k6-3        $(FPU_3DNOWA) -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=256
+amd/k6-2+            := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=128
+amd/k6-3+            := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=256
 amd/athlon           := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)  --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON)
 amd/athlon-xp        := $(XXX) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLONXP)
 amd/athlon64         := $(X__) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON64)
