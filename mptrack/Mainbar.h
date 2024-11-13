@@ -59,7 +59,7 @@ struct Notification;
 class CToolBarEx: public CToolBar
 {
 protected:
-	bool m_bVertical = false, m_bFlatButtons = false;
+	bool m_bVertical = false;
 
 public:
 	CToolBarEx() {}
@@ -67,8 +67,8 @@ public:
 
 public:
 	void UpdateControl(bool show, CWnd &wnd, int index, int id, int height = 0);
-	void ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle);
-	void EnableFlatButtons(BOOL bFlat);
+	void EnableFlatButtons(bool flat);
+	void SetButtonVisibility(int index, bool visible);
 
 public:
 	//{{AFX_VIRTUAL(CToolBarEx)

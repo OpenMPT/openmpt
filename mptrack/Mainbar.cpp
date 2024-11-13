@@ -118,37 +118,29 @@ void CToolBarEx::UpdateControl(bool show, CWnd &wnd, int index, int id, int heig
 					rect.top = n;
 			}
 			wnd.SetWindowPos(nullptr, rect.left, rect.top, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
-			wnd.ShowWindow(SW_SHOW);
 		}
-	} else
-	{
-		SetButtonInfo(index, ID_SEPARATOR, TBBS_SEPARATOR, 1);
-		if(wnd.m_hWnd)
-			wnd.ShowWindow(SW_HIDE);
 	}
+	if(wnd.m_hWnd)
+		wnd.ShowWindow(show ? SW_SHOW : SW_HIDE);
+	SetButtonVisibility(index, show);
 }
 
 
-void CToolBarEx::ChangeCtrlStyle(LONG lStyle, BOOL bSetStyle)
+void CToolBarEx::EnableFlatButtons(bool flat)
 {
-	if(m_hWnd)
-	{
-		LONG lStyleOld = GetWindowLong(m_hWnd, GWL_STYLE);
-		if(bSetStyle)
-			lStyleOld |= lStyle;
-		else
-			lStyleOld &= ~lStyle;
-		SetWindowLong(m_hWnd, GWL_STYLE, lStyleOld);
-		SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOMOVE | SWP_NOSIZE);
-		Invalidate();
-	}
+	ModifyStyle(flat ? 0 : TBSTYLE_FLAT, flat ? TBSTYLE_FLAT : 0);
+	Invalidate();
 }
 
 
-void CToolBarEx::EnableFlatButtons(BOOL bFlat)
+void CToolBarEx::SetButtonVisibility(int index, bool visible)
 {
-	m_bFlatButtons = bFlat ? true : false;
-	ChangeCtrlStyle(TBSTYLE_FLAT, bFlat);
+	auto style = GetButtonStyle(index);
+	if(visible)
+		style &= ~TBBS_HIDDEN;
+	else
+		style |= TBBS_HIDDEN;
+	SetButtonStyle(index, style);
 }
 
 
@@ -160,18 +152,23 @@ enum ToolbarItemIndex
 	PLAYCMD_INDEX = 10,                             // Play / Pause
 	EDITOCTAVE_INDEX = 13,                          // Base Octave
 	SPINOCTAVE_INDEX = EDITOCTAVE_INDEX + 1,        // Spin Base Octave
-	TEMPOTEXT_INDEX = SPINOCTAVE_INDEX + 1,         // Static "Tempo:"
+	DIVOCTAVE_INDEX = SPINOCTAVE_INDEX + 1,         // Divider for vertical mode
+	TEMPOTEXT_INDEX = DIVOCTAVE_INDEX + 1,          // Static "Tempo:"
 	EDITTEMPO_INDEX = TEMPOTEXT_INDEX + 1,          // Edit Tempo
 	SPINTEMPO_INDEX = EDITTEMPO_INDEX + 1,          // Spin Tempo
-	SPEEDTEXT_INDEX = SPINTEMPO_INDEX + 1,          // Static "Speed:"
+	DIVTEMPO_INDEX = SPINTEMPO_INDEX + 1,           // Divider for vertical mode
+	SPEEDTEXT_INDEX = DIVTEMPO_INDEX + 1,           // Static "Speed:"
 	EDITSPEED_INDEX = SPEEDTEXT_INDEX + 1,          // Edit Speed
 	SPINSPEED_INDEX = EDITSPEED_INDEX + 1,          // Spin Speed
-	RPBTEXT_INDEX = SPINSPEED_INDEX + 1,            // Static "Rows/Beat:"
+	DIVSPEED_INDEX = SPINSPEED_INDEX + 1,           // Divider for vertical mode
+	RPBTEXT_INDEX = DIVSPEED_INDEX + 1,             // Static "Rows/Beat:"
 	EDITRPB_INDEX = RPBTEXT_INDEX + 1,              // Edit Speed
 	SPINRPB_INDEX = EDITRPB_INDEX + 1,              // Spin Speed
-	GLOBALVOLTEXT_INDEX = SPINRPB_INDEX + 1,        // Static "Rows/Beat:"
+	DIVRPB_INDEX = SPINRPB_INDEX + 1,               // Divider for vertical mode
+	GLOBALVOLTEXT_INDEX = DIVRPB_INDEX + 1,         // Static "Rows/Beat:"
 	EDITGLOBALVOL_INDEX = GLOBALVOLTEXT_INDEX + 1,  // Edit Speed
 	SPINGLOBALVOL_INDEX = EDITGLOBALVOL_INDEX + 1,  // Spin Speed
+	DIVGLOBALVOL_INDEX = SPINGLOBALVOL_INDEX + 1,   // Divider at end
 	VUMETER_INDEX = SPINGLOBALVOL_INDEX + 6,        // VU Meters
 };
 
@@ -204,15 +201,19 @@ static UINT MainButtons[] =
 		ID_SEPARATOR,
 	ID_SEPARATOR,  // Octave
 	ID_SEPARATOR,
+		ID_SEPARATOR,  // Divider for vertical mode
 	ID_SEPARATOR,  // Tempo
 	ID_SEPARATOR,
 	ID_SEPARATOR,
+		ID_SEPARATOR,  // Divider for vertical mode
 	ID_SEPARATOR,  // Speed
 	ID_SEPARATOR,
 	ID_SEPARATOR,
+		ID_SEPARATOR,  // Divider for vertical mode
 	ID_SEPARATOR,  // Rows Per Beat
 	ID_SEPARATOR,
 	ID_SEPARATOR,
+		ID_SEPARATOR,  // Divider for vertical mode
 	ID_SEPARATOR,  // Global Volume
 	ID_SEPARATOR,
 	ID_SEPARATOR,
@@ -330,7 +331,6 @@ void CMainToolBar::UpdateSizes()
 	CDC *dc = GetDC();
 	if(!m_font.m_hObject)
 		HighDPISupport::CreateGUIFont(m_font, m_hWnd);
-	const auto hFont = reinterpret_cast<WPARAM>(m_font.m_hObject);
 	const double scaling = HighDPISupport::GetDpiForWindow(m_hWnd) / 96.0;
 	const int imgSize = HighDPISupport::ScalePixels(16, m_hWnd), btnSizeX = HighDPISupport::ScalePixels(23, m_hWnd), btnSizeY = HighDPISupport::ScalePixels(22, m_hWnd);
 	m_ImageList.Create(IDB_MAINBAR, 16, 16, IMGLIST_NUMIMAGES, 1, dc, scaling, false);
@@ -359,19 +359,19 @@ void CMainToolBar::UpdateSizes()
 	const int textPaddingX = HighDPISupport::ScalePixels(10, m_hWnd), textPaddingY = HighDPISupport::ScalePixels(4, m_hWnd), textMinHeight = HighDPISupport::ScalePixels(20, m_hWnd);
 	for(auto &info : TextWnds)
 	{
+		info.wnd.SetFont(&m_font, FALSE);
 		const auto size = dc->GetTextExtent(info.measureText);
 		const int width = size.cx + textPaddingX;
 		const int height = std::max(static_cast<int>(size.cy) + textPaddingY, textMinHeight);
 		// For some reason, DeferWindowPos doesn't work here
-		info.wnd.SendMessage(WM_SETFONT, hFont, FALSE);
-		info.wnd.SetWindowPos(nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE);
+		info.wnd.SetWindowPos(nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE | SWP_NOCOPYBITS);
 	}
 	dc->SelectObject(oldFont);
 	ReleaseDC(dc);
 
 	GetToolBarCtrl().SetImageList(&m_ImageList);
 	GetToolBarCtrl().SetDisabledImageList(&m_ImageListDisabled);
-	SendMessage(WM_SETFONT, hFont, TRUE);
+	SetFont(&m_font);
 
 	SetSizes(CSize(btnSizeX, btnSizeY), CSize(imgSize, imgSize));
 
@@ -386,9 +386,6 @@ void CMainToolBar::UpdateSizes()
 	m_SpinSpeed.SetWindowPos(nullptr, 0, 0, spinnerWidth, spinnerHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE);
 	m_SpinRowsPerBeat.SetWindowPos(nullptr, 0, 0, spinnerWidth, spinnerHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE);
 	m_SpinGlobalVolume.SetWindowPos(nullptr, 0, 0, spinnerWidth, spinnerHeight, SWP_NOMOVE | SWP_NOZORDER | SWP_NOREPOSITION | SWP_NOACTIVATE);
-
-	// VU Meter
-	m_VuMeter.SetWindowPos(nullptr, 0, 0, VUMETER_WIDTH, VUMETER_HEIGHT, SWP_NOMOVE | SWP_NOZORDER);
 }
 
 
@@ -420,22 +417,27 @@ void CMainToolBar::UpdateControls()
 
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_EditOctave, EDITOCTAVE_INDEX, IDC_EDIT_BASEOCTAVE);
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_SpinOctave, SPINOCTAVE_INDEX, IDC_SPIN_BASEOCTAVE);
+	SetButtonVisibility(DIVOCTAVE_INDEX, m_bVertical && visibleItems[MainToolBarItem::Octave]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_StaticTempo, TEMPOTEXT_INDEX, IDC_TEXT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_EditTempo, EDITTEMPO_INDEX, IDC_EDIT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_SpinTempo, SPINTEMPO_INDEX, IDC_SPIN_CURRENTTEMPO);
+	SetButtonVisibility(DIVTEMPO_INDEX, m_bVertical && visibleItems[MainToolBarItem::Tempo]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_StaticSpeed, SPEEDTEXT_INDEX, IDC_TEXT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_EditSpeed, EDITSPEED_INDEX, IDC_EDIT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_SpinSpeed, SPINSPEED_INDEX, IDC_SPIN_CURRENTSPEED);
+	SetButtonVisibility(DIVSPEED_INDEX, m_bVertical && visibleItems[MainToolBarItem::Speed]);
 
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_StaticRowsPerBeat, RPBTEXT_INDEX, IDC_TEXT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_EditRowsPerBeat, EDITRPB_INDEX, IDC_EDIT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_SpinRowsPerBeat, SPINRPB_INDEX, IDC_SPIN_RPB);
+	SetButtonVisibility(DIVRPB_INDEX, m_bVertical && visibleItems[MainToolBarItem::RowsPerBeat]);
 
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_StaticGlobalVolume, GLOBALVOLTEXT_INDEX, IDC_TEXT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_EditGlobalVolume, EDITGLOBALVOL_INDEX, IDC_EDIT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_SpinGlobalVolume, SPINGLOBALVOL_INDEX, IDC_SPIN_GLOBALVOL);
+	SetButtonVisibility(DIVGLOBALVOL_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
 
 	m_VuMeter.SetOrientation(!m_bVertical);
 	if(m_bVertical)
