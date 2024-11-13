@@ -124,7 +124,7 @@ public:
 	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight);
 	void RemoveUpdateInfo();
 
-	void ToggleVisibility(MainToolBarItem item);
+	bool ToggleVisibility(MainToolBarItem item);
 
 protected:
 	void RefreshToolbar();
@@ -195,6 +195,9 @@ public:
 	bool SetTreeSoundfile(FileReader &file);
 
 	void StartTreeFilter(CModTree &source);
+
+	void SetBarOnLeft(const bool left);
+	bool BarOnLeft() { return (GetBarStyle() & CBRS_ALIGN_LEFT); }
 
 protected:
 	//{{AFX_VIRTUAL(CModTreeBar)

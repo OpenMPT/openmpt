@@ -448,12 +448,13 @@ void CMainToolBar::UpdateControls()
 }
 
 
-void CMainToolBar::ToggleVisibility(MainToolBarItem item)
+bool CMainToolBar::ToggleVisibility(MainToolBarItem item)
 {
 	FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 	visibleItems.flip(item);
 	TrackerSettings::Instance().mainToolBarVisibleItems = visibleItems.value().as_enum();
 	RefreshToolbar();
+	return visibleItems[item];
 }
 
 
@@ -1091,8 +1092,10 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 	CSize sz;
 	m_sizeDefault.cx = width;
 	m_sizeDefault.cy = 32767;
-	sz.cx = width + TREEVIEW_PADDING;
-	if(sz.cx < 4) sz.cx = 4;
+	const int padding = TREEVIEW_PADDING;
+	sz.cx = width + padding;
+	if(sz.cx < padding + 1)
+		sz.cx = padding + 1;
 	sz.cy = 32767;
 	return sz;
 }
@@ -1101,6 +1104,7 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 void CModTreeBar::DoMouseMove(CPoint pt)
 {
 	CRect rect;
+	GetClientRect(&rect);
 
 	if((m_dwStatus & (MTB_CAPTURE|MTB_DRAGGING)) && (::GetCapture() != m_hWnd))
 	{
@@ -1112,27 +1116,32 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 		{
 			if(m_pModTree)
 			{
-				m_pModTree->GetWindowRect(&rect);
-				pt.y += rect.Height();
+				CRect windowRect;
+				m_pModTree->GetWindowRect(&windowRect);
+				pt.y += windowRect.Height();
 			}
-			GetClientRect(&rect);
 			pt.y -= ptDragging.y;
-			if(pt.y < 0) pt.y = 0;
-			if(pt.y > rect.Height()) pt.y = rect.Height();
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.y != (int)m_nTrackPos))
+			pt.y = std::clamp(static_cast<int>(pt.y), 0, rect.Height());
+			if((!(m_dwStatus & MTB_TRACKER)) || (pt.y != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER) OnInvertTracker(m_nTrackPos);
+				if(m_dwStatus & MTB_TRACKER)
+					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.y;
 				OnInvertTracker(m_nTrackPos);
 				m_dwStatus |= MTB_TRACKER;
 			}
 		} else
 		{
-			pt.x -= ptDragging.x - m_cxOriginal + TREEVIEW_PADDING;
-			if(pt.x < 0) pt.x = 0;
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.x != (int)m_nTrackPos))
+			pt.x -= ptDragging.x;
+			if(BarOnLeft())
+				pt.x += (m_cxOriginal - TREEVIEW_PADDING);
+			else
+				pt.x = m_cxOriginal - pt.x;
+			pt.x = std::max(pt.x, LONG(0));
+			if((!(m_dwStatus & MTB_TRACKER)) || (pt.x != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER) OnInvertTracker(m_nTrackPos);
+				if(m_dwStatus & MTB_TRACKER)
+					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.x;
 				OnInvertTracker(m_nTrackPos);
 				m_dwStatus |= MTB_TRACKER;
@@ -1142,9 +1151,17 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 	{
 		UINT nCursor = 0;
 
-		GetClientRect(&rect);
-		rect.left = rect.right - 2;
-		rect.right = rect.left + 5;
+		const int padding = TREEVIEW_PADDING;
+		const int extraPadding = HighDPISupport::ScalePixels(2, m_hWnd);
+		if(BarOnLeft())
+		{
+			rect.left = rect.right - extraPadding;
+			rect.right = rect.left + padding + extraPadding;
+		} else
+		{
+			rect.left -= extraPadding;
+			rect.right = rect.left + padding + extraPadding;
+		}
 		if(rect.PtInRect(pt))
 		{
 			nCursor = AFX_IDC_HSPLITBAR;
@@ -1154,8 +1171,8 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 			m_pModTree->GetWindowRect(&rect);
 			rect.right = rect.Width();
 			rect.left = 0;
-			rect.top = rect.Height()-1;
-			rect.bottom = rect.top + 5;
+			rect.top = rect.Height() - extraPadding;
+			rect.bottom = rect.top + padding + extraPadding;
 			if(rect.PtInRect(pt))
 			{
 				nCursor = AFX_IDC_VSPLITBAR;
@@ -1164,19 +1181,21 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 		if(nCursor)
 		{
 			UINT nDir = (nCursor == AFX_IDC_VSPLITBAR) ? MTB_VERTICAL : 0;
-			BOOL bLoad = FALSE;
+			bool load = false;
 			if(!(m_dwStatus & MTB_CAPTURE))
 			{
 				m_dwStatus |= MTB_CAPTURE;
 				SetCapture();
-				bLoad = TRUE;
+				load = true;
 			} else
 			{
-				if(nDir != (m_dwStatus & MTB_VERTICAL)) bLoad = TRUE;
+				if(nDir != (m_dwStatus & MTB_VERTICAL))
+					load = true;
 			}
 			m_dwStatus &= ~MTB_VERTICAL;
 			m_dwStatus |= nDir;
-			if(bLoad) SetCursor(theApp.LoadCursor(nCursor));
+			if(load)
+				SetCursor(theApp.LoadCursor(nCursor));
 		} else
 		{
 			if(m_dwStatus & MTB_CAPTURE)
@@ -1222,10 +1241,9 @@ void CModTreeBar::DoLButtonUp()
 		{
 			GetClientRect(&rect);
 			int cyavail = rect.Height() - padding;
-			if(cyavail < 4) cyavail = 4;
-			int ratio = (m_nTrackPos << 8) / cyavail;
-			if(ratio < 0) ratio = 0;
-			if(ratio > 256) ratio = 256;
+			if(cyavail < padding + 1)
+				cyavail = padding + 1;
+			int ratio = std::clamp(static_cast<int>(m_nTrackPos * 256) / cyavail, 0, 256);
 			m_nTreeSplitRatio = ratio;
 			TrackerSettings::Instance().glTreeSplitRatio = ratio;
 			RecalcLayout();
@@ -1233,7 +1251,8 @@ void CModTreeBar::DoLButtonUp()
 		{
 			GetWindowRect(&rect);
 			m_nTrackPos += padding;
-			if(m_nTrackPos < 4) m_nTrackPos = 4;
+			if(m_nTrackPos < static_cast<UINT>(padding + 1))
+				m_nTrackPos = padding + 1;
 			CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 			if((m_nTrackPos != (UINT)rect.Width()) && (pMainFrm))
 			{
@@ -1272,14 +1291,18 @@ void CModTreeBar::OnInvertTracker(UINT x)
 		CRect rect;
 
 		GetClientRect(&rect);
+		const int padding = TREEVIEW_PADDING + 1;
 		if(m_dwStatus & MTB_VERTICAL)
 		{
 			rect.top = x;
-			rect.bottom = rect.top + 4;
+			rect.bottom = rect.top + padding;
 		} else
 		{
-			rect.left = x;
-			rect.right = rect.left + 4;
+			if(BarOnLeft())
+				rect.left = x;
+			else
+				rect.left = rect.right - x;
+			rect.right = rect.left + padding;
 		}
 		ClientToScreen(&rect);
 		pMainFrm->ScreenToClient(&rect);
@@ -1288,11 +1311,11 @@ void CModTreeBar::OnInvertTracker(UINT x)
 		CDC* pDC = pMainFrm->GetDC();
 		// invert the brush pattern (looks just like frame window sizing)
 		CBrush* pBrush = CDC::GetHalftoneBrush();
-		HBRUSH hOldBrush = NULL;
-		if(pBrush != NULL)
+		HBRUSH hOldBrush = nullptr;
+		if(pBrush != nullptr)
 			hOldBrush = (HBRUSH)SelectObject(pDC->m_hDC, pBrush->m_hObject);
 		pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATINVERT);
-		if(hOldBrush != NULL)
+		if(hOldBrush != nullptr)
 			SelectObject(pDC->m_hDC, hOldBrush);
 		ReleaseDC(pDC);
 	}
@@ -1323,6 +1346,13 @@ void CModTreeBar::UpdatePlayPos(CModDoc *pModDoc, Notification *pNotify)
 }
 
 
+void CModTreeBar::SetBarOnLeft(const bool left)
+{
+	SetBarStyle(left ? CBRS_LEFT : CBRS_RIGHT);
+	SetWindowPos(nullptr, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOSIZE | SWP_FRAMECHANGED | SWP_DRAWFRAME);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // CModTreeBar message handlers
 
@@ -1331,8 +1361,11 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 	CDialogBar::OnNcCalcSize(bCalcValidRects, lpncsp);
 	if(lpncsp)
 	{
-		lpncsp->rgrc[0].right -= TREEVIEW_PADDING;
-		if(lpncsp->rgrc[0].right < lpncsp->rgrc[0].left) lpncsp->rgrc[0].right = lpncsp->rgrc[0].left;
+		if(BarOnLeft())
+			lpncsp->rgrc[0].right -= TREEVIEW_PADDING;
+		else
+			lpncsp->rgrc[0].left += TREEVIEW_PADDING;
+		lpncsp->rgrc[0].right = std::max(lpncsp->rgrc[0].left, lpncsp->rgrc[0].right);
 	}
 }
 
@@ -1342,9 +1375,13 @@ LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 	CRect rect;
 
 	GetWindowRect(&rect);
-	rect.DeflateRect(1,1);
-	rect.right -= TREEVIEW_PADDING;
-	if(!rect.PtInRect(point)) return HTBORDER;
+	rect.DeflateRect(1, 1);
+	if(BarOnLeft())
+		rect.right -= TREEVIEW_PADDING;
+	else
+		rect.left += TREEVIEW_PADDING;
+	if(!rect.PtInRect(point))
+		return HTBORDER;
 	return CDialogBar::OnNcHitTest(point);
 }
 
@@ -1358,8 +1395,12 @@ void CModTreeBar::OnNcPaint()
 	// Assumes there is no other non-client items
 	rect.right -= rect.left;
 	rect.bottom -= rect.top;
+	rect.left = 0;
 	rect.top = 0;
-	rect.left = rect.right - TREEVIEW_PADDING;
+	if(BarOnLeft())
+		rect.left = rect.right - TREEVIEW_PADDING;
+	else
+		rect.right = rect.left + TREEVIEW_PADDING;
 	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();

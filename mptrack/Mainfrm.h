@@ -35,6 +35,7 @@ class CModDoc;
 struct UpdateCheckResult;
 struct UpdateHint;
 struct MODPLUGDIB;
+enum class MainToolBarItem : uint8;
 enum SoundDeviceStopMode : int;
 namespace SoundDevice {
 class Base;
@@ -253,7 +254,7 @@ public:
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
 	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
 
-	static int ApplyVolumeRelatedSettings(const DWORD &dwParam1, const BYTE midivolume);
+	static int ApplyVolumeRelatedSettings(const DWORD &dwParam1, const uint8 midivolume);
 
 // static functions
 public:
@@ -453,6 +454,8 @@ protected:
 	afx_msg void OnToggleMainBarShowRowsPerBeat();
 	afx_msg void OnToggleMainBarShowGlobalVolume();
 	afx_msg void OnToggleMainBarShowVUMeter();
+	afx_msg void OnToggleMainBarItem(MainToolBarItem item, UINT menuID);
+	afx_msg void OnToggleTreeViewOnLeft();
 
 	afx_msg void OnCreateMixerDump();
 	afx_msg void OnVerifyMixerDump();

@@ -209,6 +209,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, defaultRainbowChannelColors(conf, UL_("Display"), UL_("DefaultChannelColors"), DefaultChannelColors::Random)
 	, commentsFont(conf, UL_("Display"), UL_("Comments Font"), FontSetting(UL_("Courier New"), 120))
 	, mainToolBarVisibleItems(conf, UL_("Display"), UL_("MainToolBarVisibleItems"), MainToolBarItem::Default)
+	, treeViewOnLeft(conf, UL_("Display"), UL_("TreeViewOnLeft"), true)
 	// Misc
 	, defaultModType(conf, UL_("Misc"), UL_("DefaultModType"), MOD_TYPE_IT)
 	, defaultNewFileAction(conf, UL_("Misc"), UL_("DefaultNewFileAction"), nfDefaultFormat)

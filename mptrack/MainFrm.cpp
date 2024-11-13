@@ -138,6 +138,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_MAINBAR_SHOW_ROWSPERBEAT,  &CMainFrame::OnToggleMainBarShowRowsPerBeat)
 	ON_COMMAND(ID_MAINBAR_SHOW_GLOBALVOLUME, &CMainFrame::OnToggleMainBarShowGlobalVolume)
 	ON_COMMAND(ID_MAINBAR_SHOW_VUMETER,      &CMainFrame::OnToggleMainBarShowVUMeter)
+	ON_COMMAND(ID_TREEVIEW_ON_LEFT,          &CMainFrame::OnToggleTreeViewOnLeft)
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	ON_COMMAND(ID_CREATE_MIXERDUMP, &CMainFrame::OnCreateMixerDump)
@@ -300,7 +301,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	EnableDocking(CBRS_ALIGN_ANY);
 	if (!m_wndToolBar.Create(this)) return -1;
 	if (!m_wndStatusBar.Create(this)) return -1;
-	if (!m_wndTree.Create(this, IDD_TREEVIEW, CBRS_LEFT|CBRS_BORDER_RIGHT, IDD_TREEVIEW)) return -1;
+	if (!m_wndTree.Create(this, IDD_TREEVIEW, TrackerSettings::Instance().treeViewOnLeft ? CBRS_LEFT : CBRS_RIGHT, IDD_TREEVIEW)) return -1;
 	m_wndStatusBar.SetIndicators(StatusBarIndicators, static_cast<int>(std::size(StatusBarIndicators)));
 	SetupStatusBarSizes();
 	m_wndToolBar.Init(this);
@@ -2545,6 +2546,7 @@ void CMainFrame::AddToolBarMenuEntries(CMenu &menu)
 {
 	menu.AppendMenu(MF_STRING, ID_VIEW_TOOLBAR, m_InputHandler->GetMenuText(ID_VIEW_TOOLBAR));
 	menu.AppendMenu(MF_STRING, IDD_TREEVIEW, m_InputHandler->GetMenuText(IDD_TREEVIEW));
+	menu.AppendMenu(MF_STRING | (TrackerSettings::Instance().treeViewOnLeft ? MF_CHECKED : 0), ID_TREEVIEW_ON_LEFT, _T("Tree View on &Left"));
 
 	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 
@@ -2560,12 +2562,28 @@ void CMainFrame::AddToolBarMenuEntries(CMenu &menu)
 }
 
 
-void CMainFrame::OnToggleMainBarShowOctave() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Octave); }
-void CMainFrame::OnToggleMainBarShowTempo() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Tempo); }
-void CMainFrame::OnToggleMainBarShowSpeed() { m_wndToolBar.ToggleVisibility(MainToolBarItem::Speed); }
-void CMainFrame::OnToggleMainBarShowRowsPerBeat() { m_wndToolBar.ToggleVisibility(MainToolBarItem::RowsPerBeat); }
-void CMainFrame::OnToggleMainBarShowGlobalVolume() { m_wndToolBar.ToggleVisibility(MainToolBarItem::GlobalVolume); }
-void CMainFrame::OnToggleMainBarShowVUMeter() { m_wndToolBar.ToggleVisibility(MainToolBarItem::VUMeter); }
+void CMainFrame::OnToggleMainBarShowOctave() { OnToggleMainBarItem(MainToolBarItem::Octave, ID_MAINBAR_SHOW_OCTAVE); }
+void CMainFrame::OnToggleMainBarShowTempo() { OnToggleMainBarItem(MainToolBarItem::Tempo, ID_MAINBAR_SHOW_TEMPO); }
+void CMainFrame::OnToggleMainBarShowSpeed() { OnToggleMainBarItem(MainToolBarItem::Speed, ID_MAINBAR_SHOW_SPEED); }
+void CMainFrame::OnToggleMainBarShowRowsPerBeat() { OnToggleMainBarItem(MainToolBarItem::RowsPerBeat, ID_MAINBAR_SHOW_ROWSPERBEAT); }
+void CMainFrame::OnToggleMainBarShowGlobalVolume() { OnToggleMainBarItem(MainToolBarItem::GlobalVolume, ID_MAINBAR_SHOW_GLOBALVOLUME); }
+void CMainFrame::OnToggleMainBarShowVUMeter() { OnToggleMainBarItem(MainToolBarItem::VUMeter, ID_MAINBAR_SHOW_VUMETER); }
+
+void CMainFrame::OnToggleMainBarItem(MainToolBarItem item, UINT menuID)
+{
+	const bool visible = m_wndToolBar.ToggleVisibility(item);
+	GetMenu()->CheckMenuItem(menuID, MF_BYCOMMAND | (visible ? MF_CHECKED : 0));
+}
+
+
+void CMainFrame::OnToggleTreeViewOnLeft()
+{
+	const bool left = !TrackerSettings::Instance().treeViewOnLeft;
+	TrackerSettings::Instance().treeViewOnLeft = left;
+	m_wndTree.SetBarOnLeft(left);
+	RecalcLayout();
+	GetMenu()->CheckMenuItem(ID_TREEVIEW_ON_LEFT, MF_BYCOMMAND | (left ? MF_CHECKED : 0));
+}
 
 
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
@@ -2635,14 +2653,11 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSpeedIncrease:
 		case kcSpeedDecrease:
 		case kcViewToggle:
-			{
-				CModDoc *modDoc = GetActiveDoc();
-				if(modDoc)
-					return GetActiveDoc()->OnCustomKeyMsg(wParam, lParam);
-				else if(wParam == kcPlayPauseSong || wParam == kcPlayStopSong || wParam == kcStopSong)
-					StopPreview();
-				break;
-			}
+			if(CModDoc *modDoc = GetActiveDoc())
+				return modDoc->OnCustomKeyMsg(wParam, lParam);
+			else if(wParam == kcPlayPauseSong || wParam == kcPlayStopSong || wParam == kcStopSong)
+				StopPreview();
+			break;
 
 		case kcSwitchToInstrLibrary:
 			if(!m_wndTree.IsVisible())

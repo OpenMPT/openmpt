@@ -716,6 +716,7 @@ public:
 	Setting<FontSetting> commentsFont;
 
 	Setting<MainToolBarItem> mainToolBarVisibleItems;
+	Setting<bool> treeViewOnLeft;
 
 	// Misc
 
