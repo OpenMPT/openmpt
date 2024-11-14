@@ -535,6 +535,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	// Update Info
 	m_updating = true;
 	const CWnd *focus = GetFocus();
+	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 	if(pSndFile)
 	{
 		// Update play/pause button
@@ -542,7 +543,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
-		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed)
+		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed && visibleItems[MainToolBarItem::Speed])
 		{
 			if(m_currentSpeed < 0)
 				EnableEdit(m_EditSpeed, m_SpinSpeed, true);
@@ -551,7 +552,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			SetDlgItemInt(IDC_EDIT_CURRENTSPEED, m_currentSpeed, FALSE);
 		}
 		TEMPO nTempo = pSndFile->m_PlayState.m_nMusicTempo;
-		if(nTempo != m_currentTempo && focus != &m_EditTempo)
+		if(nTempo != m_currentTempo && focus != &m_EditTempo && visibleItems[MainToolBarItem::Tempo])
 		{
 			if(m_currentTempo <= TEMPO(0, 0))
 				EnableEdit(m_EditTempo, m_SpinTempo, true);
@@ -560,7 +561,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			m_EditTempo.SetTempoValue(m_currentTempo);
 		}
 		int nRowsPerBeat = pSndFile->m_PlayState.m_nCurrentRowsPerBeat;
-		if(nRowsPerBeat != m_currentRowsPerBeat && focus != &m_EditRowsPerBeat)
+		if(nRowsPerBeat != m_currentRowsPerBeat && focus != &m_EditRowsPerBeat && visibleItems[MainToolBarItem::RowsPerBeat])
 		{
 			if(m_currentRowsPerBeat < 0)
 				EnableEdit(m_EditRowsPerBeat, m_SpinRowsPerBeat, true);
@@ -569,7 +570,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 			SetDlgItemInt(IDC_EDIT_RPB, m_currentRowsPerBeat, FALSE);
 		}
 		int globalVol = pSndFile->m_PlayState.m_nGlobalVolume;
-		if(globalVol != m_currentGlobalVolume && focus != &m_EditGlobalVolume)
+		if(globalVol != m_currentGlobalVolume && focus != &m_EditGlobalVolume && visibleItems[MainToolBarItem::GlobalVolume])
 		{
 			if(m_currentGlobalVolume < 0)
 				EnableEdit(m_EditGlobalVolume, m_SpinGlobalVolume, true);
