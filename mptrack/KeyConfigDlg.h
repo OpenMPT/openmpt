@@ -28,6 +28,7 @@ public:
 	
 	struct Range
 	{
+		Range(CommandID f, CommandID l, const TCHAR *n) : first{f}, last{l}, name{n} {}
 		const CommandID first, last;
 		const CString name;
 	};
