@@ -698,7 +698,7 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 void COptionsKeyboard::OnListenForKeysFromList(NMHDR *pNMHDR, LRESULT *)
 {
 	auto hdr = reinterpret_cast<const NMLISTVIEW *>(pNMHDR);
-	if(hdr->iSubItem == 1)
+	if(m_curCommand != kcNull && hdr->iSubItem == 1)
 		OnListenForKeys();
 }
 
