@@ -2467,6 +2467,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		//D'oh!! moddoc isn't a CWnd so we have to handle its messages and pass them on.
 
+		case kcFileAppend:
 		case kcFileSaveAs:
 		case kcFileSaveCopy:
 		case kcFileSaveAsWave:
