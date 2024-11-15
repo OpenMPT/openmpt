@@ -72,7 +72,9 @@
   }
   
   filter {}
-  filter { "action:vs*" }
-		linkoptions { "wsetargv.obj" }
-  filter {}
+	if _OPTIONS["windows-family"] ~= "uwp" then
+		filter { "action:vs*" }
+			linkoptions { "wsetargv.obj" }
+		filter {}
+	end
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

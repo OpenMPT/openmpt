@@ -108,8 +108,10 @@ start cmd /c ^( ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
+%PREMAKE% --file=build/premake/premake.lua --group=libopenmpt_test  vs2022 --windows-version=win10 --windows-family=uwp ^&^& ^
 %PREMAKE% --file=build/premake/premake.lua --group=libopenmpt-small vs2022 --windows-version=win10 --windows-family=uwp ^&^& ^
 %PREMAKE% --file=build/premake/premake.lua --group=libopenmpt       vs2022 --windows-version=win10 --windows-family=uwp ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --group=openmpt123       vs2022 --windows-version=win10 --windows-family=uwp ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
