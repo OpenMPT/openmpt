@@ -57,7 +57,10 @@ ifneq ($(SSE),0)
 	FPU_MMX    := -m80387 -mmmx -mfpmath=387
 	FPU_3DNOW  := -m80387 -mmmx -m3dnow -mfpmath=387
 	FPU_3DNOWA := -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
-	FPU_3DASSE := -m80387 -mmmx -m3dnow -m3dnowa -mfxsr -msse -mfpmath=sse,387
+	FPU_3DSSE  := -m80387 -mmmx -m3dnow -m3dnowa -mfxsr -msse -mfpmath=sse,387
+	FPU_3DSSE2 := -m80387 -mmmx -m3dnow -m3dnowa -mfxsr -msse -msse2 -mfpmath=sse
+	FPU_3DSSE3 := -m80387 -mmmx -m3dnow -m3dnowa -mfxsr -msse -msse2 -msse3 -mfpmath=sse
+	FPU_3DSSE4 := -m80387 -mmmx -m3dnow -m3dnowa -mfxsr -msse -msse2 -msse3 -msse4a -mfpmath=sse
 	FPU_SSE    := -m80387 -mmmx -mfxsr -msse -mfpmath=sse,387
 	FPU_SSE2   := -m80387 -mmmx -mfxsr -msse -msse2 -mfpmath=sse
 	FPU_SSE3   := -m80387 -mmmx -mfxsr -msse -msse2 -msse3 -mfpmath=sse
@@ -73,7 +76,10 @@ else
 	FPU_MMX    := -m80387 -mmmx -mfpmath=387
 	FPU_3DNOW  := -m80387 -mmmx -m3dnow -mfpmath=387
 	FPU_3DNOWA := -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
-	FPU_3DASSE := -mno-sse -mno-fxsr -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
+	FPU_3DSSE  := -mno-sse -mno-fxsr -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
+	FPU_3DSSE2 := -mno-sse2 -mno-sse -mno-fxsr -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
+	FPU_3DSSE3 := -mno-sse3 -mno-sse2 -mno-sse -mno-fxsr -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
+	FPU_3DSSE4 := -mno-sse4a -mno-sse3 -mno-sse2 -mno-sse -mno-fxsr -m80387 -mmmx -m3dnow -m3dnowa -mfpmath=387
 	FPU_SSE    := -mno-sse -mno-fxsr -m80387 -mmmx -mfpmath=387
 	FPU_SSE2   := -mno-sse2 -mno-sse -mno-fxsr -m80387 -mmmx -mfpmath=387
 	FPU_SSE3   := -mno-sse3 -mno-sse2 -mno-sse -mno-fxsr -m80387 -mmmx -mfpmath=387
@@ -288,18 +294,18 @@ amd/k6-3             := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3     
 amd/k6-2+            := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=128
 amd/k6-3+            := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=256
 amd/athlon           := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)  --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON)
-amd/athlon-xp        := $(XXX) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLONXP)
-amd/athlon64         := $(X__) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON64)
-amd/athlon64-sse3    := $(___) -march=k8-sse3     $(FPU_SSE3)   -mtune=k8-sse3     $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON64)
-amd/k10              := $(___) -march=amdfam10    $(FPU_SSE4A)  -mtune=amdfam10    $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=512
+amd/athlon-xp        := $(XXX) -march=athlon-xp   $(FPU_3DSSE)  -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLONXP)
+amd/athlon64         := $(X__) -march=k8          $(FPU_3DSSE2) -mtune=k8          $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON64)
+amd/athlon64-sse3    := $(___) -march=k8-sse3     $(FPU_3DSSE3) -mtune=k8-sse3     $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_ATHLON64)
+amd/k10              := $(___) -march=amdfam10    $(FPU_3DSSE4) -mtune=amdfam10    $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=512
 
 amd/duron            := $(X__) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)  --param l1-cache-size=64 --param l2-cache-size=$(CACHE_DURON)
-amd/duron-xp         := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_DURONXP)
-amd/sempron64        := $(___) -march=k8          $(FPU_SSE2)   -mtune=k8          $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_SEMPRON64)
+amd/duron-xp         := $(___) -march=athlon-xp   $(FPU_3DSSE)  -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_DURONXP)
+amd/sempron64        := $(___) -march=k8          $(FPU_3DSSE2) -mtune=k8          $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=$(CACHE_SEMPRON64)
 
 amd/geode-gx         := $(___) -march=geode       $(FPU_3DNOWA) -mtune=geode       $(OPT_UARCH_OOOE_64)  --param l1-cache-size=16 --param l2-cache-size=0
 amd/geode-lx         := $(___) -march=geode       $(FPU_3DNOWA) -mtune=geode       $(OPT_UARCH_OOOE_64)  --param l1-cache-size=64 --param l2-cache-size=128
-amd/geode-nx         := $(___) -march=athlon-xp   $(FPU_3DASSE) -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=256
+amd/geode-nx         := $(___) -march=athlon-xp   $(FPU_3DSSE)  -mtune=athlon-xp   $(OPT_UARCH_OOOE_128) --param l1-cache-size=64 --param l2-cache-size=256
 amd/bobcat           := $(X__) -march=btver1      $(FPU_SSSE4A) -mtune=btver1      $(OPT_UARCH_OOOE_128) --param l1-cache-size=32 --param l2-cache-size=512
 amd/jaguar           := $(___) -march=btver2      $(FPU_SSSE4A) -mtune=btver2      $(OPT_UARCH_OOOE_128) --param l1-cache-size=32 --param l2-cache-size=1024
 
