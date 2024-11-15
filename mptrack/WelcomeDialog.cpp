@@ -121,7 +121,7 @@ BOOL WelcomeDlg::OnInitDialog()
 			// As this is presented as the default, load it right now, even if the user closes the dialog through the close button
 			auto cmdSet = std::make_unique<CCommandSet>();
 			cmdSet->LoadFile(GetFullKeyPath(keyFile));
-			CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
+			CMainFrame::GetInputHandler()->SetNewCommandSet(*cmdSet);
 		}
 	}
 	combo->SetItemDataPtr(combo->AddString(_T("Impulse Tracker")), (void*)("US_mpt-it2_classic"));
@@ -185,7 +185,7 @@ void WelcomeDlg::OnOK()
 		cmdSet->LoadFile(GetFullKeyPath(keyFile));
 	else
 		cmdSet->LoadDefaultKeymap();
-	CMainFrame::GetInputHandler()->SetNewCommandSet(cmdSet.get());
+	CMainFrame::GetInputHandler()->SetNewCommandSet(*cmdSet);
 
 #if defined(MPT_ENABLE_UPDATE)
 	if(runUpdates)

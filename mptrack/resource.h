@@ -658,8 +658,8 @@
 #define IDC_SAVE                        2102
 #define IDC_LOAD                        2103
 #define IDC_KEYREPORT                   2105
-#define IDC_BROWSEKEYCONF               2107
-#define IDC_CLEARLOG                    2107
+#define IDC_GROUPBOX_KEYSETUP           2106
+#define IDC_FINDHOTKEY_LABEL            2107
 #define IDC_NOTESREPEAT                 2108
 #define IDC_REMCHANSLIST                2108
 #define IDC_NOTESREPEAT2                2109

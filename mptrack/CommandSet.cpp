@@ -28,6 +28,11 @@ OPENMPT_NAMESPACE_BEGIN
 namespace
 {
 
+constexpr CommandID ModifierCommands[] =
+{
+	kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing
+};
+
 constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 {
 	{kCtxViewPatternsNote, kcVPStartNotes, kcVPStartNoteStops},
@@ -1465,42 +1470,39 @@ CString CCommandSet::Add(KeyCombination kc, CommandID cmd, bool overwrite, int p
 
 	// Avoid duplicate
 	if(mpt::contains(kcList, kc))
-	{
-		return CString();
-	}
+		return CString{};
 
 	// Check that this keycombination isn't already assigned (in this context), except for dummy keys
 	CString report;
 	if(auto conflictCmd = IsConflicting(kc, cmd, checkEventConflict); conflictCmd.first != kcNull)
 	{
-		if (!overwrite)
+		if(!overwrite)
 		{
-			return CString();
+			return CString{};
 		} else
 		{
-			if (IsCrossContextConflict(kc, conflictCmd.second))
-			{
-				report += _T("The following commands may conflict:\r\n   >") + GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T("\r\n   >") + GetCommandText(cmd) + _T(" in ") + kc.GetContextText() + _T("\r\n\r\n");
-				LOG_COMMANDSET(mpt::ToUnicode(report));
-			} else
-			{
-				//if(!TrackerSettings::Instance().MiscAllowMultipleCommandsPerKey)
-				//	Remove(conflictCmd.second, conflictCmd.first);
-				report += _T("The following commands in same context share the same key combination:\r\n   >") + GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T("\r\n\r\n");
-				LOG_COMMANDSET(mpt::ToUnicode(report));
-			}
+			report = FormatConflict(kc, conflictCmd.first, conflictCmd.second);
+			LOG_COMMANDSET(mpt::ToUnicode(report));
 		}
 	}
 
 	kcList.insert((pos < 0) ? kcList.end() : (kcList.begin() + pos), kc);
 
 	//enfore rules on CommandSet
-	report += EnforceAll(kc, cmd, true);
+	EnforceAll(kc, cmd, true);
 	return report;
 }
 
 
-std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict) const
+CString CCommandSet::FormatConflict(KeyCombination kc, CommandID conflictCommand, KeyCombination conflictCombination) const
+{
+	if(IsCrossContextConflict(kc, conflictCombination))
+		return _T("May conflict with ") + GetCommandText(conflictCommand) + _T(" in ") + conflictCombination.GetContextText();
+	else
+		return _T("Conflicts with ") + GetCommandText(conflictCommand) + _T(" in same context");
+}
+
+std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict, bool checkSameCommand) const
 {
 	if(m_commands[cmd].IsDummy())  // no need to search if we are adding a dummy key
 		return {kcNull, KeyCombination()};
@@ -1511,7 +1513,7 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 		// such conflicts are errors. Cross-context conflicts only emit warnings.
 		for(int curCmd = kcFirst; curCmd < kcNumCommands; curCmd++)
 		{
-			if(m_commands[curCmd].IsDummy())
+			if(m_commands[curCmd].IsDummy() || (!checkSameCommand && cmd == curCmd))
 				continue;
 
 			for(auto &curKc : m_commands[curCmd].kcList)
@@ -1531,19 +1533,18 @@ std::pair<CommandID, KeyCombination> CCommandSet::IsConflicting(KeyCombination k
 }
 
 
-CString CCommandSet::Remove(int pos, CommandID cmd)
+void CCommandSet::Remove(int pos, CommandID cmd)
 {
-	if (pos>=0 && (size_t)pos<m_commands[cmd].kcList.size())
+	if(pos >= 0 && static_cast<size_t>(pos) < m_commands[cmd].kcList.size())
 	{
-		return Remove(m_commands[cmd].kcList[pos], cmd);
+		Remove(m_commands[cmd].kcList[pos], cmd);
 	}
 
 	LOG_COMMANDSET(U_("Failed to remove a key: keychoice out of range."));
-	return _T("");
 }
 
 
-CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
+void CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 {
 	auto &kcList = m_commands[cmd].kcList;
 	auto index = std::find(kcList.begin(), kcList.end(), kc);
@@ -1551,23 +1552,20 @@ CString CCommandSet::Remove(KeyCombination kc, CommandID cmd)
 	{
 		kcList.erase(index);
 		LOG_COMMANDSET(U_("Removed a key"));
-		return EnforceAll(kc, cmd, false);
+		EnforceAll(kc, cmd, false);
 	} else
 	{
 		LOG_COMMANDSET(U_("Failed to remove a key as it was not found"));
-		return CString();
 	}
-
 }
 
 
-CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool adding)
+void CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool adding)
 {
 	//World's biggest, most confusing method. :)
 	//Needs refactoring. Maybe make lots of Rule subclasses, each with their own Enforce() method?
 	KeyCombination curKc;	// for looping through key combinations
 	KeyCombination newKc;	// for adding new key combinations
-	CString report;
 
 	if(m_enforceRule[krAllowNavigationWithSelection])
 	{
@@ -1996,15 +1994,13 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 	if (m_enforceRule[krCheckModifiers])
 	{
 		// for all commands that must be modifiers
-		for (auto curCmd : { kcSelect, kcCopySelect, kcChordModifier, kcSetSpacing })
+		for (auto curCmd : ModifierCommands)
 		{
 			//for all of this command's key combinations
 			for (auto &kc : m_commands[curCmd].kcList)
 			{
-				if ((!kc.Modifier()) || (kc.KeyCode()!=VK_SHIFT && kc.KeyCode()!=VK_CONTROL && kc.KeyCode()!=VK_MENU && kc.KeyCode()!=0 &&
-					kc.KeyCode()!=VK_LWIN && kc.KeyCode()!=VK_RWIN )) // Feature: use Windows keys as modifier keys
+				if(!kc.IsModifierCombination())
 				{
-					report += _T("Error! ") + GetCommandText((CommandID)curCmd) + _T(" must be a modifier (shift/ctrl/alt), but is currently ") + inKc.GetKeyText() + _T("\r\n");
 					//replace with dummy
 					kc.Modifier(ModShift);
 					kc.KeyCode(0);
@@ -2057,7 +2053,6 @@ CString CCommandSet::EnforceAll(KeyCombination inKc, CommandID inCmd, bool addin
 		}
 	}
 */
-	return report;
 }
 
 
@@ -2117,10 +2112,10 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 }
 
 
-void CCommandSet::Copy(const CCommandSet *source)
+void CCommandSet::Copy(const CCommandSet &source)
 {
-	m_oldSpecs = source->m_oldSpecs;
-	std::copy(std::begin(source->m_commands), std::end(source->m_commands), std::begin(m_commands));
+	m_oldSpecs = source.m_oldSpecs;
+	std::copy(std::begin(source.m_commands), std::end(source.m_commands), std::begin(m_commands));
 }
 
 
@@ -2517,12 +2512,32 @@ CString KeyCombination::GetKeyText(FlagSet<Modifiers> mod, UINT code)
 }
 
 
+bool KeyCombination::IsModifierCombination() const
+{
+	return Modifier() &&
+		(KeyCode() == VK_SHIFT || KeyCode() == VK_CONTROL || KeyCode() == VK_MENU || KeyCode() == 0
+		|| KeyCode() == VK_LWIN || KeyCode() == VK_RWIN);  // Feature: use Windows keys as modifier keys
+
+}
+
+
 CString CCommandSet::GetKeyTextFromCommand(CommandID c, UINT key) const
 {
-	if (key < m_commands[c].kcList.size())
+	if(key < m_commands[c].kcList.size())
 		return m_commands[c].kcList[0].GetKeyText();
-	else
+	if(key != uint32_max)
 		return CString();
+	CString keys;
+	bool addSeparator = false;
+	for(auto &item : m_commands[c].kcList)
+	{
+		if(addSeparator)
+			keys += _T("; ");
+		else
+			addSeparator = true;
+		keys += item.GetKeyText();
+	}
+	return keys;
 }
 
 
@@ -2686,5 +2701,12 @@ bool CCommandSet::IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2)
 {
 	return m_isParentContext[kc1.Context()][kc2.Context()] || m_isParentContext[kc2.Context()][kc1.Context()];
 }
+
+
+bool CCommandSet::MustBeModifierKey(CommandID id)
+{
+	return mpt::contains(ModifierCommands, id);
+}
+
 
 OPENMPT_NAMESPACE_END

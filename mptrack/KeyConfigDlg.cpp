@@ -51,16 +51,14 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(byte2 != 0)
 		{
 			SetKey(ModMidi, byte1);
-			if(!m_isDummy)
-				m_pOptKeyDlg->OnSetKeyChoice();
+			m_pOptKeyDlg->OnSetKeyChoice(this);
 		}
 		break;
 
 	case MIDIEvents::evNoteOn:
 	case MIDIEvents::evNoteOff:
 		SetKey(ModMidi, byte1 | 0x80);
-		if(!m_isDummy)
-			m_pOptKeyDlg->OnSetKeyChoice();
+		m_pOptKeyDlg->OnSetKeyChoice(this);
 		break;
 
 	default:
@@ -83,8 +81,8 @@ BOOL CCustEdit::PreTranslateMessage(MSG *pMsg)
 		{
 			//if a key has been released but custom edit box is empty, we have probably just
 			//navigated into the box with TAB or SHIFT-TAB. No need to set keychoice.
-			if(code != 0 && !m_isDummy)
-				m_pOptKeyDlg->OnSetKeyChoice();
+			if(code != 0)
+				m_pOptKeyDlg->OnSetKeyChoice(this);
 		}
 	}
 	return CEdit::PreTranslateMessage(pMsg);
@@ -118,6 +116,7 @@ void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 	//unlock the input handler
 	CMainFrame::GetInputHandler()->Bypass(false);
 	m_isFocussed = false;
+	m_pOptKeyDlg->OnCancelKeyChoice(this);
 }
 
 
@@ -126,14 +125,21 @@ void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 //
 //***************************************************************************************//
 
-// Initialisation
+static constexpr CListCtrlEx::Header KeyListHeaders[] =
+{
+	{_T("Shortcut"),      276, LVCFMT_LEFT},
+	{_T("Assigned Keys"), 116, LVCFMT_LEFT},
+};
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
-	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COMMAND_LIST, &COptionsKeyboard::OnCommandKeySelChanged)
-
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_DESTROY()
+	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &COptionsKeyboard::OnDPIChangedAfterParent)
 	ON_LBN_SELCHANGE(IDC_CHOICECOMBO,     &COptionsKeyboard::OnKeyChoiceSelect)
 	ON_LBN_SELCHANGE(IDC_KEYCATEGORY,     &COptionsKeyboard::OnCategorySelChanged)
 	ON_EN_UPDATE(IDC_CHORDDETECTWAITTIME, &COptionsKeyboard::OnChordWaitTimeChanged)
+	ON_COMMAND(IDC_BUTTON3,               &COptionsKeyboard::OnClearSearch)
+	ON_COMMAND(IDC_BUTTON2,               &COptionsKeyboard::OnEnableFindHotKey)
 	ON_COMMAND(IDC_BUTTON1,               &COptionsKeyboard::OnListenForKeys)
 	ON_COMMAND(IDC_DELETE,                &COptionsKeyboard::OnDeleteKeyChoice)
 	ON_COMMAND(IDC_RESTORE,               &COptionsKeyboard::OnRestoreKeyChoice)
@@ -144,14 +150,13 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_CHECKKEYUP,            &COptionsKeyboard::OnCheck)
 	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnNotesRepeat)
 	ON_COMMAND(IDC_NONOTESREPEAT,         &COptionsKeyboard::OnNoNotesRepeat)
-	ON_COMMAND(IDC_CLEARLOG,              &COptionsKeyboard::OnClearLog)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,        &COptionsKeyboard::OnRestoreDefaultKeymap)
 	ON_EN_CHANGE(IDC_FIND,                &COptionsKeyboard::OnSearchTermChanged)
-	ON_EN_CHANGE(IDC_FINDHOTKEY,          &COptionsKeyboard::OnFindHotKey)
 	ON_EN_SETFOCUS(IDC_FINDHOTKEY,        &COptionsKeyboard::OnClearHotKey)
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_DESTROY()
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COMMAND_LIST, &COptionsKeyboard::OnCommandKeySelChanged)
+	ON_NOTIFY(NM_DBLCLK,       IDC_COMMAND_LIST, &COptionsKeyboard::OnListenForKeysFromList)
 END_MESSAGE_MAP()
+
 
 void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 {
@@ -160,13 +165,14 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_COMMAND_LIST, m_lbnCommandKeys);
 	DDX_Control(pDX, IDC_CHOICECOMBO, m_cmbKeyChoice);
 	DDX_Control(pDX, IDC_CHORDDETECTWAITTIME, m_eChordWaitTime);
-	DDX_Control(pDX, IDC_KEYREPORT, m_eReport);
 	DDX_Control(pDX, IDC_CUSTHOTKEY, m_eCustHotKey);
 	DDX_Control(pDX, IDC_FINDHOTKEY, m_eFindHotKey);
 	DDX_Control(pDX, IDC_CHECKKEYDOWN, m_bKeyDown);
 	DDX_Control(pDX, IDC_CHECKKEYHOLD, m_bKeyHold);
 	DDX_Control(pDX, IDC_CHECKKEYUP, m_bKeyUp);
 	DDX_Control(pDX, IDC_FIND, m_eFind);
+	DDX_Control(pDX, IDC_STATIC1, m_warnIconCtl);
+	DDX_Control(pDX, IDC_KEYREPORT, m_warnText);
 }
 
 
@@ -180,32 +186,30 @@ BOOL COptionsKeyboard::OnSetActive()
 }
 
 
-
 BOOL COptionsKeyboard::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	m_fullPathName = TrackerSettings::Instance().m_szKbdFile;
 
 	m_localCmdSet = std::make_unique<CCommandSet>();
-	m_localCmdSet->Copy(CMainFrame::GetInputHandler()->m_activeCommandSet.get());
+	m_localCmdSet->Copy(*CMainFrame::GetInputHandler()->m_activeCommandSet);
 
 	m_lbnCommandKeys.SetExtendedStyle(m_lbnCommandKeys.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 	m_listGrouped = CListCtrlEx::EnableGroupView(m_lbnCommandKeys);
+	m_lbnCommandKeys.SetHeaders(KeyListHeaders);
 
 	//Fill category combo and automatically selects first category
 	DefineCommandCategories();
 	for(size_t c = 0; c < commandCategories.size(); c++)
 	{
-		if(commandCategories[c].name && !commandCategories[c].commands.empty())
+		if(commandCategories[c].name && !commandCategories[c].commandRanges.empty())
 			m_cmbCategory.SetItemData(m_cmbCategory.AddString(commandCategories[c].name), c);
 	}
 	m_cmbCategory.SetCurSel(0);
 	UpdateDialog();
 
-	m_eCustHotKey.SetParent(m_hWnd, IDC_CUSTHOTKEY, this);
-	m_eFindHotKey.SetParent(m_hWnd, IDC_FINDHOTKEY, this);
-	m_eReport.FmtLines(TRUE);
-	m_eReport.SetWindowText(_T(""));
+	m_eCustHotKey.SetOwner(*this);
+	m_eFindHotKey.SetOwner(*this);
 
 	EnableKeyChoice(false);
 
@@ -214,31 +218,38 @@ BOOL COptionsKeyboard::OnInitDialog()
 }
 
 
-void CommandCategory::AddCommands(CommandID first, CommandID last, bool addSeparatorAtEnd)
+LRESULT COptionsKeyboard::OnDPIChangedAfterParent(WPARAM, LPARAM)
 {
-	int count = last - first + 1, val = first;
-	commands.insert(commands.end(), count, kcNull);
-	std::generate(commands.end() - count, commands.end(), [&val] { return static_cast<CommandID>(val++); });
-	if(addSeparatorAtEnd)
-		separators.push_back(last);
+	auto result = Default();
+
+	m_lbnCommandKeys.SetColumnWidths(KeyListHeaders);
+
+	if(m_warnIcon)
+	{
+		DestroyIcon(m_warnIcon);
+		m_warnIcon = nullptr;
+	}
+	if(m_infoIcon)
+	{
+		DestroyIcon(m_infoIcon);
+		m_infoIcon = nullptr;
+	}
+	UpdateWarning(m_lastWarning);
+
+	return result;
 }
 
 
-// Filter commands: We only need user to see a select set off commands
-// for each category
 void COptionsKeyboard::DefineCommandCategories()
 {
 	{
-		CommandCategory newCat(_T("Global keys"), kCtxAllContexts);
-
-		newCat.AddCommands(kcStartFile, kcEndFile, true);
-		newCat.AddCommands(kcStartPlayCommands, kcEndPlayCommands, true);
-		newCat.AddCommands(kcStartEditCommands, kcEndEditCommands, true);
-		newCat.AddCommands(kcStartView, kcEndView, true);
-		newCat.AddCommands(kcStartMisc, kcEndMisc, true);
-		newCat.commands.push_back(kcDummyShortcut);
-
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("Global"), kCtxAllContexts).commandRanges;
+		commands.emplace_back(kcStartFile, kcEndFile, _T("File"));
+		commands.emplace_back(kcStartPlayCommands, kcEndPlayCommands, _T("Player"));
+		commands.emplace_back(kcStartEditCommands, kcEndEditCommands, _T("Edit"));
+		commands.emplace_back(kcStartView, kcEndView, _T("View"));
+		commands.emplace_back(kcStartMisc, kcEndMisc, _T("Miscellaneous"));
+		commands.emplace_back(kcDummyShortcut, kcDummyShortcut, _T(""));
 	}
 
 	commandCategories.emplace_back(_T("  General [Top]"), kCtxCtrlGeneral);
@@ -246,121 +257,97 @@ void COptionsKeyboard::DefineCommandCategories()
 	commandCategories.emplace_back(_T("  Pattern Editor [Top]"), kCtxCtrlPatterns);
 
 	{
-		CommandCategory newCat(_T("  Pattern Editor - Order List"), kCtxCtrlOrderlist);
-
-		newCat.AddCommands(kcStartOrderlistCommands, kcEndOrderlistCommands);
-		newCat.separators.push_back(kcEndOrderlistNavigation);
-		newCat.separators.push_back(kcEndOrderlistEdit);
-		newCat.separators.push_back(kcEndOrderlistNum);
-
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Pattern Editor - Order List"), kCtxCtrlOrderlist).commandRanges;
+		commands.emplace_back(kcStartOrderlistEdit, kcEndOrderlistEdit, _T("Edit"));
+		commands.emplace_back(kcStartOrderlistNavigation, kcEndOrderlistNavigation, _T("Navigation"));
+		commands.emplace_back(kcStartOrderlistNum, kcEndOrderlistNum, _T("Pattern Entry"));
+		commands.emplace_back(kcStartOrderlistMisc, kcEndOrderlistMisc, _T("Miscellaneous"));
 	}
 
 	{
-		CommandCategory newCat(_T("  Pattern Editor - Quick Channel Settings"), kCtxChannelSettings);
-		newCat.AddCommands(kcStartChnSettingsCommands, kcEndChnSettingsCommands);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Pattern Editor - Quick Channel Settings"), kCtxChannelSettings).commandRanges;
+		commands.emplace_back(kcStartChnSettingsCommands, kcEndChnSettingsCommands, _T(""));
 	}
 
 	{
-		CommandCategory newCat(_T("    Pattern Editor - General"), kCtxViewPatterns);
-
-		newCat.AddCommands(kcStartPlainNavigate, kcEndPlainNavigate, true);
-		newCat.AddCommands(kcStartJumpSnap, kcEndJumpSnap, true);
-		newCat.AddCommands(kcStartHomeEnd, kcEndHomeEnd, true);
-		newCat.AddCommands(kcStartGotoColumn, kcEndGotoColumn, true);
-		newCat.AddCommands(kcPrevPattern, kcNextSequence, true);
-		newCat.AddCommands(kcStartPatternScrolling, kcEndPatternScrolling, true);
-		newCat.AddCommands(kcStartSelect, kcEndSelect, true);
-		newCat.AddCommands(kcStartPatternClipboard, kcEndPatternClipboard, true);
-		newCat.AddCommands(kcClearRow, kcInsertWholeRowGlobal, true);
-		newCat.AddCommands(kcStartChannelKeys, kcEndChannelKeys, true);
-		newCat.AddCommands(kcBeginTranspose, kcEndTranspose, true);
-		newCat.AddCommands(kcStartPatternEditMisc, kcEndPatternEditMisc, true);
-		newCat.AddCommands(kcStartPatternMisc, kcEndPatternMisc, true);
-
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("    Pattern Editor - General"), kCtxViewPatterns).commandRanges;
+		commands.emplace_back(kcStartPlainNavigate, kcEndPlainNavigate, _T("Navigation"));
+		commands.emplace_back(kcStartJumpSnap, kcEndJumpSnap, _T("Jump"));
+		commands.emplace_back(kcStartHomeEnd, kcEndHomeEnd, _T("Go To"));
+		commands.emplace_back(kcStartGotoColumn, kcEndGotoColumn, _T("Go To Column"));
+		commands.emplace_back(kcPrevPattern, kcNextSequence, _T("Order List Navigation"));
+		commands.emplace_back(kcStartPatternScrolling, kcEndPatternScrolling, _T("Scrolling"));
+		commands.emplace_back(kcStartSelect, kcEndSelect, _T("Selection"));
+		commands.emplace_back(kcStartPatternClipboard, kcEndPatternClipboard, _T("Clipboard"));
+		commands.emplace_back(kcClearRow, kcInsertWholeRowGlobal, _T("Clear / Insert"));
+		commands.emplace_back(kcStartChannelKeys, kcEndChannelKeys, _T("Channels"));
+		commands.emplace_back(kcBeginTranspose, kcEndTranspose, _T("Transpose"));
+		commands.emplace_back(kcStartPatternEditMisc, kcEndPatternEditMisc, _T("Edit"));
+		commands.emplace_back(kcStartPatternMisc, kcEndPatternMisc, _T("Miscellaneous"));
 	}
 
 	{
-		CommandCategory newCat(_T("        Pattern Editor - Note Column"), kCtxViewPatternsNote);
-
-		newCat.AddCommands(kcVPStartNotes, kcVPEndNotes, true);
-		newCat.AddCommands(kcSetOctave0, kcSetOctave9, true);
-		newCat.AddCommands(kcStartNoteMisc, kcEndNoteMisc);
-
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("        Pattern Editor - Note Column"), kCtxViewPatternsNote).commandRanges;
+		commands.emplace_back(kcVPStartNotes, kcVPEndNotes, _T("Note Entry"));
+		commands.emplace_back(kcSetOctave0, kcSetOctave9, _T("Octave Entry"));
+		commands.emplace_back(kcStartNoteMisc, kcEndNoteMisc, _T("Miscellaneous"));
 	}
 
 	{
-		CommandCategory newCat(_T("        Pattern Editor - Instrument Column"), kCtxViewPatternsIns);
-		newCat.AddCommands(kcSetIns0, kcSetIns9);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("        Pattern Editor - Instrument Column"), kCtxViewPatternsIns).commandRanges;
+		commands.emplace_back(kcSetIns0, kcSetIns9, _T("Instrument Entry"));
 	}
 
 	{
-		CommandCategory newCat(_T("        Pattern Editor - Volume Column"), kCtxViewPatternsVol);
-		newCat.AddCommands(kcSetVolumeStart, kcSetVolumeEnd);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("        Pattern Editor - Volume Column"), kCtxViewPatternsVol).commandRanges;
+		commands.emplace_back(kcStartVolumeDigits, kcEndVolumeDigits, _T("Volume Entry"));
+		commands.emplace_back(kcStartVolumeCommands, kcEndVolumeCommands, _T("Volume Command Entry"));
 	}
 
 	{
-		CommandCategory newCat(_T("        Pattern Editor - Effect Column"), kCtxViewPatternsFX);
-		newCat.AddCommands(kcSetFXStart, kcSetFXEnd);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("        Pattern Editor - Effect Column"), kCtxViewPatternsFX).commandRanges;
+		commands.emplace_back(kcSetFXStart, kcSetFXEnd, _T("Effect Command Entry"));
 	}
 
 	{
-		CommandCategory newCat(_T("        Pattern Editor - Effect Parameter Column"), kCtxViewPatternsFXparam);
-		newCat.AddCommands(kcSetFXParam0, kcSetFXParamF);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("        Pattern Editor - Effect Parameter Column"), kCtxViewPatternsFXparam).commandRanges;
+		commands.emplace_back(kcSetFXParam0, kcSetFXParamF, _T("Parameter Digit Entry"));
+	}
+
+	commandCategories.emplace_back(_T("  Sample [Top]"), kCtxCtrlSamples);
+
+	{
+		auto &commands = commandCategories.emplace_back(_T("    Sample Editor"), kCtxViewSamples).commandRanges;
+		commands.emplace_back(kcStartSampleEditing, kcEndSampleEditing, _T("Edit"));
+		commands.emplace_back(kcStartSampleMisc, kcEndSampleMisc, _T("Miscellaneous"));
+		commands.emplace_back(kcStartSampleCues, kcEndSampleCueGroup, _T("Sample Cues"));
 	}
 
 	{
-		CommandCategory newCat(_T("  Sample [Top]"), kCtxCtrlSamples);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Instrument Editor"), kCtxCtrlInstruments).commandRanges;
+		commands.emplace_back(kcStartInstrumentCtrlMisc, kcEndInstrumentCtrlMisc, _T(""));
 	}
 
 	{
-		CommandCategory newCat(_T("    Sample Editor"), kCtxViewSamples);
-
-		newCat.AddCommands(kcStartSampleEditing, kcEndSampleEditing, true);
-		newCat.AddCommands(kcStartSampleMisc, kcEndSampleMisc, true);
-		newCat.AddCommands(kcStartSampleCues, kcEndSampleCueGroup);
-
-		commandCategories.push_back(newCat);
-	}
-
-	{
-		CommandCategory newCat(_T("  Instrument Editor"), kCtxCtrlInstruments);
-		newCat.AddCommands(kcStartInstrumentCtrlMisc, kcEndInstrumentCtrlMisc);
-		commandCategories.push_back(newCat);
-	}
-
-	{
-		CommandCategory newCat(_T("    Envelope Editor"), kCtxViewInstruments);
-		newCat.AddCommands(kcStartInstrumentMisc, kcEndInstrumentMisc);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("    Envelope Editor"), kCtxViewInstruments).commandRanges;
+		commands.emplace_back(kcStartInstrumentMisc, kcEndInstrumentMisc, _T(""));
 	}
 
 	commandCategories.emplace_back(_T("  Comments [Top]"), kCtxCtrlComments);
 
 	{
-		CommandCategory newCat(_T("  Comments [Bottom]"), kCtxViewComments);
-		newCat.AddCommands(kcStartCommentsCommands, kcEndCommentsCommands);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Comments [Bottom]"), kCtxViewComments).commandRanges;
+		commands.emplace_back(kcStartCommentsCommands, kcEndCommentsCommands, _T(""));
 	}
 
 	{
-		CommandCategory newCat(_T("  Plugin Editor"), kCtxVSTGUI);
-		newCat.AddCommands(kcStartVSTGUICommands, kcEndVSTGUICommands);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Plugin Editor"), kCtxVSTGUI).commandRanges;
+		commands.emplace_back(kcStartVSTGUICommands, kcEndVSTGUICommands, _T(""));
 	}
 
 	{
-		CommandCategory newCat(_T("  Tree View"), kCtxViewTree);
-		newCat.AddCommands(kcStartTreeViewCommands, kcEndTreeViewCommands);
-		commandCategories.push_back(newCat);
+		auto &commands = commandCategories.emplace_back(_T("  Tree View"), kCtxViewTree).commandRanges;
+		commands.emplace_back(kcStartTreeViewCommands, kcEndTreeViewCommands, _T(""));
 	}
 }
 
@@ -429,16 +416,33 @@ void COptionsKeyboard::OnSearchTermChanged()
 }
 
 
+void COptionsKeyboard::OnClearSearch()
+{
+	m_eFindHotKey.SetKey(ModNone, 0);
+	m_eFind.SetWindowText(_T(""));
+}
+
+
+void COptionsKeyboard::OnEnableFindHotKey()
+{
+	OnClearHotKey();
+	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_FINDHOTKEY_LABEL)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_FINDHOTKEY)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_FINDHOTKEY)->SetFocus();
+}
+
+
 void COptionsKeyboard::OnFindHotKey()
 {
-	if(IsLocked())
-		return;
-	
-	if(m_eFindHotKey.code == 0)
-	{
+	GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW);
+	GetDlgItem(IDC_FINDHOTKEY_LABEL)->ShowWindow(SW_HIDE);
+	GetDlgItem(IDC_FINDHOTKEY)->ShowWindow(SW_HIDE);
+	const bool hasKey = m_eFindHotKey.HasKey();
+	if(!hasKey)
 		UpdateCategory();
-	}
-	UpdateShortcutList(m_eFindHotKey.code == 0 ? m_curCategory : -1);
+	UpdateShortcutList(hasKey ? - 1: m_curCategory);
+	m_lbnCommandKeys.SetFocus();
 }
 
 
@@ -483,7 +487,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	m_eFind.GetWindowText(findString);
 	findString.MakeLower();
 
-	const bool searchByName = !findString.IsEmpty(), searchByKey = (m_eFindHotKey.code != 0);
+	const bool searchByName = !findString.IsEmpty(), searchByKey = m_eFindHotKey.HasKey();
 	const bool doSearch = (searchByName || searchByKey);
 
 	int firstCat = category, lastCat = category;
@@ -497,11 +501,9 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	const auto curSelection = m_lbnCommandKeys.GetSelectionMark();
 	CommandID curCommand = (curSelection >= 0) ? static_cast<CommandID>(m_lbnCommandKeys.GetItemData(curSelection)) : kcNull;
 	m_lbnCommandKeys.SetRedraw(FALSE);
-	m_lbnCommandKeys.DeleteColumn(0);
+	m_lbnCommandKeys.DeleteAllItems();
 	if(m_listGrouped)
 		ListView_RemoveAllGroups(m_lbnCommandKeys);
-	m_lbnCommandKeys.InsertColumn(0, _T(""));
-	m_lbnCommandKeys.DeleteAllItems();
 
 	int currentGroup = -1;
 	int itemID = -1;
@@ -511,34 +513,35 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 		// When searching, we also add the category names to the list.
 		bool addCategoryName = (firstCat != lastCat);
 
-		for(size_t cmd = 0; cmd < commandCategories[cat].commands.size(); cmd++)
+		for(const auto &range : commandCategories[cat].commandRanges)
 		{
-			CommandID com = (CommandID)commandCategories[cat].commands[cmd];
-
-			CString cmdText = m_localCmdSet->GetCommandText(com);
-			bool addKey = true;
-
-			if(searchByKey)
+			for(CommandID com = range.first; com <= range.last; com = static_cast<CommandID>(com + 1))
 			{
-				addKey = false;
-				int numChoices = m_localCmdSet->GetKeyListSize(com);
-				for(int choice = 0; choice < numChoices; choice++)
+				CString cmdText = m_localCmdSet->GetCommandText(com);
+				bool addKey = true;
+
+				if(searchByKey)
 				{
-					const KeyCombination &kc = m_localCmdSet->GetKey(com, choice);
-					if(kc.KeyCode() == m_eFindHotKey.code && kc.Modifier() == m_eFindHotKey.mod)
+					addKey = false;
+					int numChoices = m_localCmdSet->GetKeyListSize(com);
+					for(int choice = 0; choice < numChoices; choice++)
 					{
-						addKey = true;
-						break;
+						const KeyCombination &kc = m_localCmdSet->GetKey(com, choice);
+						if(kc.KeyCode() == m_eFindHotKey.code && kc.Modifier() == m_eFindHotKey.mod)
+						{
+							addKey = true;
+							break;
+						}
 					}
 				}
-			}
-			if(searchByName && addKey)
-			{
-				addKey = (cmdText.MakeLower().Find(findString) >= 0);
-			}
+				if(searchByName && addKey)
+				{
+					addKey = (cmdText.MakeLower().Find(findString) >= 0);
+				}
 
-			if(addKey)
-			{
+				if(!addKey)
+					continue;
+
 				m_curCategory = cat;
 
 				LVITEM lvi;
@@ -553,16 +556,35 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 				lvi.iIndent = 0;
 				lvi.iGroupId = 0;
 
-				if(!m_localCmdSet->isHidden(com))
+				if(com == range.first && !doSearch)
+				{
+					if(m_listGrouped)
+					{
+						InsertGroup(range.name, ++currentGroup);
+					} else
+					{
+						lvi.iItem = ++itemID;
+						lvi.lParam = kcNull;
+						CString catName;
+						if(range.name.IsEmpty())
+							catName = const_cast<TCHAR *>(_T("------------------------------------------------------"));
+						else
+							catName = _T("------ ") + range.name + _T(" ------");
+						lvi.pszText = const_cast<TCHAR *>(catName.GetString());
+						m_lbnCommandKeys.InsertItem(&lvi);
+					}
+				}
+
+				if(!m_localCmdSet->IsHidden(com))
 				{
 					if(doSearch && addCategoryName)
 					{
 						if(m_listGrouped)
 						{
-							InsertGroup(commandCategories[cat].name.Trim(), ++currentGroup);
+							InsertGroup(CString{commandCategories[cat].name}.TrimLeft(), ++currentGroup);
 						} else
 						{
-							const CString catName = _T("------ ") + commandCategories[cat].name.Trim() + _T(" ------");
+							const CString catName = _T("------ ") + CString{commandCategories[cat].name}.TrimLeft() + _T(" ------");
 							lvi.iItem = ++itemID;
 							lvi.lParam = LPARAM(-1);
 							lvi.pszText = const_cast<TCHAR *>(catName.GetString());
@@ -580,26 +602,12 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 					lvi.pszText = const_cast<TCHAR *>(text.GetString());
 					lvi.iGroupId = currentGroup;
 					m_lbnCommandKeys.InsertItem(&lvi);
+					m_lbnCommandKeys.SetItemText(itemID, 1, m_localCmdSet->GetKeyTextFromCommand(com));
 
 					if(curCommand == com)
 					{
 						// Keep selection on previously selected string
 						m_lbnCommandKeys.SetSelectionMark(itemID);
-					}
-				}
-
-				if(commandCategories[cat].SeparatorAt(com))
-				{
-					if(m_listGrouped)
-					{
-						InsertGroup(_T(""), ++currentGroup);
-
-					} else
-					{
-						lvi.iItem = ++itemID;
-						lvi.lParam = LPARAM(-1);
-						lvi.pszText = const_cast<TCHAR *>(_T("------------------------------------------------------"));
-						m_lbnCommandKeys.InsertItem(&lvi);
 					}
 				}
 			}
@@ -610,7 +618,6 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	{
 		m_lbnCommandKeys.SetSelectionMark(0);
 	}
-	m_lbnCommandKeys.SetColumnWidth(0, LVSCW_AUTOSIZE);
 	m_lbnCommandKeys.SetRedraw(TRUE);
 	OnCommandKeySelChanged();
 }
@@ -636,14 +643,15 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 
 	EnableKeyChoice(false);
 
-	BOOL enableButton = (cmd == kcNull) ? FALSE : TRUE;
+	BOOL enableButton = (cmd != kcNull) ? TRUE : FALSE;
+	BOOL enableCheckBoxes = (cmd != kcNull && m_localCmdSet->GetKeyListSize(cmd) > 0) ? TRUE : FALSE;
 	GetDlgItem(IDC_BUTTON1)->EnableWindow(enableButton);
 	GetDlgItem(IDC_DELETE)->EnableWindow(enableButton);
 	GetDlgItem(IDC_RESTORE)->EnableWindow(enableButton);
 	m_cmbKeyChoice.EnableWindow(enableButton);
-	m_bKeyDown.EnableWindow(enableButton);
-	m_bKeyHold.EnableWindow(enableButton);
-	m_bKeyUp.EnableWindow(enableButton);
+	m_bKeyDown.EnableWindow(enableCheckBoxes);
+	m_bKeyHold.EnableWindow(enableCheckBoxes);
+	m_bKeyUp.EnableWindow(enableCheckBoxes);
 
 	//Separator
 	if(cmd == kcNull)
@@ -654,11 +662,16 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 		m_bKeyHold.SetCheck(BST_UNCHECKED);
 		m_bKeyUp.SetCheck(BST_UNCHECKED);
 		m_curCommand = kcNull;
+
+		GetDlgItem(IDC_GROUPBOX_KEYSETUP)->SetWindowText(_T("&Key setup for selected command"));
+		UpdateWarning();
 	}
 
 	//Fill "choice" list
 	else if((cmd >= kcFirst && cmd != m_curCommand) || m_forceUpdate)  // Have we changed command?
 	{
+		GetDlgItem(IDC_GROUPBOX_KEYSETUP)->SetWindowText(_T("&Key setup for ") + m_localCmdSet->GetCommandText(cmd));
+
 		m_forceUpdate = false;
 
 		m_curCommand = cmd;
@@ -681,6 +694,15 @@ void COptionsKeyboard::OnCommandKeySelChanged(NMHDR *pNMHDR, LRESULT *)
 	}
 }
 
+
+void COptionsKeyboard::OnListenForKeysFromList(NMHDR *pNMHDR, LRESULT *)
+{
+	auto hdr = reinterpret_cast<const NMLISTVIEW *>(pNMHDR);
+	if(hdr->iSubItem == 1)
+		OnListenForKeys();
+}
+
+
 //Fills or clears key choice info
 void COptionsKeyboard::OnKeyChoiceSelect()
 {
@@ -692,6 +714,7 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 	//If nothing there, clear
 	if(cmd == kcNull || choice >= m_localCmdSet->GetKeyListSize(cmd) || choice < 0)
 	{
+		UpdateWarning();
 		m_curKeyChoice = choice;
 		m_forceUpdate = true;
 		m_eCustHotKey.SetKey(ModNone, 0);
@@ -712,6 +735,15 @@ void COptionsKeyboard::OnKeyChoiceSelect()
 		m_bKeyDown.SetCheck((kc.EventType() & kKeyEventDown) ? BST_CHECKED : BST_UNCHECKED);
 		m_bKeyHold.SetCheck((kc.EventType() & kKeyEventRepeat) ? BST_CHECKED : BST_UNCHECKED);
 		m_bKeyUp.SetCheck((kc.EventType() & kKeyEventUp) ? BST_CHECKED : BST_UNCHECKED);
+
+		if(auto conflictCmd = m_localCmdSet->IsConflicting(kc, cmd, true, false); conflictCmd.first != kcNull
+		   && conflictCmd.first != cmd)
+		{
+			UpdateWarning(m_localCmdSet->FormatConflict(kc, conflictCmd.first, conflictCmd.second));
+		} else
+		{
+			UpdateWarning();
+		}
 	}
 }
 
@@ -759,7 +791,7 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 		// Restore current key combination choice for currently selected command.
 		kc = ih->m_activeCommandSet->GetKey(cmd, m_curKeyChoice);
 		m_localCmdSet->Remove(m_curKeyChoice, cmd);
-		m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice);
+		UpdateWarning(m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice));
 	}
 
 	ForceUpdateGUI();
@@ -811,12 +843,32 @@ void COptionsKeyboard::OnDeleteKeyChoice()
 	m_localCmdSet->Remove(m_curKeyChoice, cmd);
 
 	ForceUpdateGUI();
-	return;
+	UpdateWarning();
 }
 
 
-void COptionsKeyboard::OnSetKeyChoice()
+void COptionsKeyboard::OnCancelKeyChoice(const CWnd *source)
 {
+	if(source == &m_eFindHotKey)
+	{
+		GetDlgItem(IDC_BUTTON2)->ShowWindow(SW_SHOW);
+		GetDlgItem(IDC_FINDHOTKEY_LABEL)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_FINDHOTKEY)->ShowWindow(SW_HIDE);
+	} else
+	{
+		EnableKeyChoice(false);
+	}
+}
+
+
+void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
+{
+	if(source == &m_eFindHotKey)
+	{
+		OnFindHotKey();
+		return;
+	}
+
 	EnableKeyChoice(false);
 
 	CommandID cmd = m_curCommand;
@@ -849,9 +901,13 @@ void COptionsKeyboard::OnSetKeyChoice()
 
 	bool add = true;
 	std::pair<CommandID, KeyCombination> conflictCmd;
-	if((conflictCmd = m_localCmdSet->IsConflicting(kc, cmd)).first != kcNull
-	   && conflictCmd.first != cmd
-	   && !m_localCmdSet->IsCrossContextConflict(kc, conflictCmd.second))
+	if(CCommandSet::MustBeModifierKey(cmd) && !kc.IsModifierCombination())
+	{
+		KeyCombination origKc = m_localCmdSet->GetKey(cmd, m_curKeyChoice);
+		m_eCustHotKey.SetKey(origKc.Modifier(), origKc.KeyCode());
+		UpdateWarning(m_localCmdSet->GetCommandText(cmd) + _T(" must be a modifier (Shift/Ctrl/Alt), but you chose ") + kc.GetKeyText(), true);
+		add = false;
+	} else if((conflictCmd = m_localCmdSet->IsConflicting(kc, cmd)).first != kcNull && conflictCmd.first != cmd && !m_localCmdSet->IsCrossContextConflict(kc, conflictCmd.second))
 	{
 		ConfirmAnswer delOld = Reporting::Confirm(_T("New shortcut (") + kc.GetKeyText() + _T(") has the same key combination as ") + m_localCmdSet->GetCommandText(conflictCmd.first) + _T(" in ") + conflictCmd.second.GetContextText() + _T(".\nDo you want to delete the other shortcut, only keeping the new one?"), _T("Shortcut Conflict"), true, false, this);
 		if(delOld == cnfYes)
@@ -871,25 +927,63 @@ void COptionsKeyboard::OnSetKeyChoice()
 			}
 		}
 	}
-
+	
 	if(add)
 	{
-		CString report, reportHistory;
 		//process valid input
 		m_localCmdSet->Remove(m_curKeyChoice, cmd);
-		report = m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice);
-
-		//Update log
-		m_eReport.GetWindowText(reportHistory);
-		m_eReport.SetWindowText(report + reportHistory);
+		UpdateWarning(m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice), true);
 		ForceUpdateGUI();
 	}
 }
 
 
+static HICON LoadScaledIcon(const TCHAR *resourceName, int iconSize)
+{
+	mpt::Library comctl32(mpt::LibraryPath::System(P_("Comctl32")));
+	if(comctl32.IsValid())
+	{
+		using PLOADICONWITHSCALEDOWN = HRESULT(WINAPI *)(HINSTANCE, PCWSTR, int, int, HICON *);
+		PLOADICONWITHSCALEDOWN LoadIconWithScaleDown = nullptr;
+		HICON icon = nullptr;
+		if(comctl32.Bind(LoadIconWithScaleDown, "LoadIconWithScaleDown"))
+			LoadIconWithScaleDown(NULL, MAKEINTRESOURCEW(reinterpret_cast<uintptr_t>(resourceName)), iconSize, iconSize, &icon);
+		if(icon)
+			return icon;
+	}
+	return static_cast<HICON>(::LoadImage(nullptr, resourceName, IMAGE_ICON, iconSize, iconSize, LR_SHARED));
+}
+
+
+void COptionsKeyboard::UpdateWarning(CString text, bool notify)
+{
+	const int iconSize = HighDPISupport::ScalePixels(16, m_hWnd);
+	HICON icon = nullptr;
+	if(text.IsEmpty())
+	{
+		m_warnText.SetWindowText(_T("No conflicts found."));
+		if(!m_infoIcon)
+			m_infoIcon = LoadScaledIcon(IDI_INFORMATION, iconSize);
+		icon = m_infoIcon;
+	} else
+	{
+		if(notify)
+			::MessageBeep(MB_ICONWARNING);
+
+		m_warnText.SetWindowText(text);
+		if(!m_warnIcon)
+			m_warnIcon = LoadScaledIcon(IDI_EXCLAMATION, iconSize);
+		icon = m_warnIcon;
+	}
+	m_warnIconCtl.SetWindowPos(nullptr, 0, 0, iconSize, iconSize, SWP_SHOWWINDOW | SWP_NOZORDER | SWP_NOREDRAW | SWP_NOMOVE | SWP_NOACTIVATE);
+	m_warnIconCtl.SetIcon(icon);
+	m_lastWarning = std::move(text);
+}
+
+
 void COptionsKeyboard::OnOK()
 {
-	CMainFrame::GetInputHandler()->SetNewCommandSet(m_localCmdSet.get());
+	CMainFrame::GetInputHandler()->SetNewCommandSet(*m_localCmdSet);
 
 	CString cs;
 	m_eChordWaitTime.GetWindowText(cs);
@@ -901,8 +995,18 @@ void COptionsKeyboard::OnOK()
 
 void COptionsKeyboard::OnDestroy()
 {
+	if(m_warnIcon)
+	{
+		DestroyIcon(m_warnIcon);
+		m_warnIcon = nullptr;
+	}
+	if(m_infoIcon)
+	{
+		DestroyIcon(m_infoIcon);
+		m_infoIcon = nullptr;
+	}
 	CPropertyPage::OnDestroy();
-	m_localCmdSet = nullptr;
+	m_localCmdSet.reset();
 }
 
 
@@ -919,7 +1023,8 @@ void COptionsKeyboard::OnLoad()
 
 	m_fullPathName = dlg.GetFirstFile();
 	m_localCmdSet->LoadFile(m_fullPathName);
-	ForceUpdateGUI();
+	ForceUpdateGUI(true);
+	UpdateWarning();
 }
 
 
@@ -952,7 +1057,7 @@ void COptionsKeyboard::OnNoNotesRepeat()
 }
 
 
-void COptionsKeyboard::ForceUpdateGUI()
+void COptionsKeyboard::ForceUpdateGUI(bool updateAllKeys)
 {
 	m_forceUpdate = true;                 // m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
 	int ntmpChoice = m_curKeyChoice;      // next call will overwrite m_nCurKeyChoice
@@ -960,13 +1065,19 @@ void COptionsKeyboard::ForceUpdateGUI()
 	m_cmbKeyChoice.SetCurSel(ntmpChoice);  // select fresh keychoice (thus restoring m_nCurKeyChoice)
 	OnKeyChoiceSelect();                   // update key data
 	OnSettingsChanged();                   // Enable "apply" button
-}
 
-
-void COptionsKeyboard::OnClearLog()
-{
-	m_eReport.SetWindowText(_T(""));
-	ForceUpdateGUI();
+	if(updateAllKeys)
+	{
+		const int numItems = m_lbnCommandKeys.GetItemCount();
+		for(int i = 0; i < numItems; i++)
+		{
+			if(const auto cmd = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(i)); cmd != kcNull)
+				m_lbnCommandKeys.SetItemText(i, 1, m_localCmdSet->GetKeyTextFromCommand(cmd));
+		}
+	} else if(m_curCommand != kcNull)
+	{
+		m_lbnCommandKeys.SetItemText(m_lbnCommandKeys.GetSelectionMark(), 1, m_localCmdSet->GetKeyTextFromCommand(m_curCommand));
+	}
 }
 
 
@@ -975,7 +1086,7 @@ void COptionsKeyboard::OnRestoreDefaultKeymap()
 	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?", false, true, this) == cnfYes)
 	{
 		m_localCmdSet->LoadDefaultKeymap();
-		ForceUpdateGUI();
+		ForceUpdateGUI(true);
 	}
 }
 
@@ -984,9 +1095,11 @@ int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
 {
 	for(size_t cat = 0; cat < commandCategories.size(); cat++)
 	{
-		const auto &cmds = commandCategories[cat].commands;
-		if(mpt::contains(cmds, command))
-			return static_cast<int>(cat);
+		for(const auto &range : commandCategories[cat].commandRanges)
+		{
+			if(mpt::is_in_range(command, range.first, range.last))
+				return static_cast<int>(cat);
+		}
 	}
 	return -1;
 }

@@ -11,31 +11,27 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "CListCtrl.h"
 #include "InputHandler.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
 class COptionsKeyboard;
 
-// Might promote to class so we can add rules
-// (eg automatically do note off stuff, generate chord keybindings from notes based just on modifier.
-// Would need GUI rules too as options would be different for each category
 class CommandCategory
 {
 public:
-	CommandCategory(const TCHAR *n, InputTargetContext d) : name(n), id(d) { }
+	CommandCategory(const TCHAR *n, InputTargetContext ctx) : name{n}, id{ctx} {}
 
-	bool SeparatorAt(CommandID c) const
+	const CString name;
+	const InputTargetContext id;
+	
+	struct Range
 	{
-		return mpt::contains(separators, c);
-	}
-
-	void AddCommands(CommandID first, CommandID last, bool addSeparatorAtEnd = false);
-
-	CString name;
-	InputTargetContext id;
-	std::vector<CommandID> separators;
-	std::vector<CommandID> commands;
+		const CommandID first, last;
+		const CString name;
+	};
+	std::vector<Range> commandRanges;
 };
 
 
@@ -43,23 +39,16 @@ class CCustEdit: public CEdit
 {
 protected:
 	COptionsKeyboard *m_pOptKeyDlg = nullptr;
-	HWND m_hParent = nullptr;
-	UINT m_nCtrlId = 0;
-	bool m_isFocussed = false, m_isDummy = false;
+	bool m_isFocussed = false;
 	bool m_bypassed = false;
 
 public:
 	FlagSet<Modifiers> mod = ModNone;
 	UINT code = 0;
 
-	explicit CCustEdit(bool dummyField) : m_isDummy(dummyField) { }
-	void SetParent(HWND h, UINT nID, COptionsKeyboard *pOKD)
-	{
-		m_hParent = h;
-		m_nCtrlId = nID;
-		m_pOptKeyDlg = pOKD;
-	}
+	void SetOwner(COptionsKeyboard &dlg) { m_pOptKeyDlg = &dlg; }
 	void SetKey(FlagSet<Modifiers> mod, UINT code);
+	bool HasKey() const noexcept { return mod || code; }
 
 	void Bypass(bool bypass) { m_bypassed = bypass; EnableWindow(bypass ? FALSE : TRUE); }
 	bool IsBypassed() const { return m_bypassed; }
@@ -80,15 +69,18 @@ class COptionsKeyboard: public CPropertyPage
 
 protected:
 	CListBox m_lbnHotKeys;
-	CListCtrl m_lbnCommandKeys;
+	CListCtrlEx m_lbnCommandKeys;
 	CComboBox m_cmbKeyChoice;
 	CComboBox m_cmbCategory;
 	CButton m_bKeyDown, m_bKeyHold, m_bKeyUp;
 	CButton m_bnReset;
-	CCustEdit m_eCustHotKey{false}, m_eFindHotKey{true};
+	CCustEdit m_eCustHotKey, m_eFindHotKey;
+	CStatic m_warnIconCtl, m_warnText;
 	CEdit m_eFind;
-	CEdit m_eReport, m_eChordWaitTime;
+	CEdit m_eChordWaitTime;
+	HICON m_infoIcon = nullptr, m_warnIcon = nullptr;
 	
+	CString m_lastWarning;
 	std::vector<CommandCategory> commandCategories;
 	std::unique_ptr<CCommandSet> m_localCmdSet;
 	mpt::PathString m_fullPathName;
@@ -108,12 +100,13 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 
 	void DefineCommandCategories();
-	void ForceUpdateGUI();
+	void ForceUpdateGUI(bool updateAllKeys = false);
 	void InsertGroup(const TCHAR *title, int groupId);
 	void UpdateShortcutList(int category = -1);
 	void UpdateCategory();
 	int GetCategoryFromCommandID(CommandID command) const;
-	void OnSetKeyChoice();
+	void OnCancelKeyChoice(const CWnd *source);
+	void OnSetKeyChoice(const CWnd *source);
 
 	void LockControls() { m_lockCount++; }
 	void UnlockControls() { m_lockCount--; MPT_ASSERT(m_lockCount >= 0); }
@@ -121,15 +114,19 @@ protected:
 
 	void EnableKeyChoice(bool enable);
 
+	void UpdateWarning(CString text = {}, bool notify = false);
+
+	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void UpdateDialog();
 	afx_msg void OnKeyboardChanged();
 	afx_msg void OnKeyChoiceSelect();
 	afx_msg void OnCommandKeySelChanged(NMHDR *pNMHDR = nullptr, LRESULT *pResult = nullptr);
+	afx_msg void OnListenForKeysFromList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCategorySelChanged();
 	afx_msg void OnSearchTermChanged();
 	afx_msg void OnChordWaitTimeChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
-	afx_msg void OnCheck() { OnSetKeyChoice(); };
+	afx_msg void OnCheck() { OnSetKeyChoice(&m_eCustHotKey); };
 	afx_msg void OnNotesRepeat();
 	afx_msg void OnNoNotesRepeat();
 	afx_msg void OnListenForKeys();
@@ -137,9 +134,10 @@ protected:
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();
 	afx_msg void OnSave();
-	afx_msg void OnClearLog();
 	afx_msg void OnRestoreDefaultKeymap();
 	afx_msg void OnClearHotKey();
+	afx_msg void OnClearSearch();
+	afx_msg void OnEnableFindHotKey();
 	afx_msg void OnFindHotKey();
 	afx_msg void OnLButtonDblClk(UINT flags, CPoint point);
 	afx_msg void OnDestroy();

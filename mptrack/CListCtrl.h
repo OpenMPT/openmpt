@@ -25,6 +25,7 @@ public:
 		int width = 0;
 		UINT mask = 0;
 	};
+
 	void SetHeaders(const mpt::span<const Header> &header)
 	{
 		for(int i = 0; i < static_cast<int>(header.size()); i++)
@@ -33,6 +34,15 @@ public:
 			InsertColumn(i, header[i].text, header[i].mask, width >= 0 ? HighDPISupport::ScalePixels(width, m_hWnd) : 16);
 			if(width < 0)
 				SetColumnWidth(i, width);
+		}
+	}
+
+	void SetColumnWidths(const mpt::span<const Header> &header)
+	{
+		for(int i = 0; i < static_cast<int>(header.size()); i++)
+		{
+			if(int width = header[i].width; width > 0)
+				SetColumnWidth(i, HighDPISupport::ScalePixels(width, m_hWnd));
 		}
 	}
 

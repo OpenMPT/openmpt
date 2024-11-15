@@ -68,7 +68,7 @@ public:
 	CString GetKeyTextFromCommand(CommandID c, const TCHAR *prependText = nullptr) const;
 	CString GetMenuText(UINT id) const;
 	void UpdateMainMenu();
-	void SetNewCommandSet(const CCommandSet *newSet);
+	void SetNewCommandSet(const CCommandSet &newSet);
 	bool SetEffectLetters(const CModSpecifications &modSpecs);
 };
 

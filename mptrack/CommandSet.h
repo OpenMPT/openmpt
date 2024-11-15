@@ -1158,6 +1158,9 @@ public:
 	}
 	LPARAM AsLPARAM() const { return AsUint32(); }
 
+	// True if key combination only consists of modifier keys
+	bool IsModifierCombination() const;
+
 	// Key combination to string
 	static CString GetContextText(InputTargetContext ctx);
 	CString GetContextText() const { return GetContextText(Context()); }
@@ -1233,7 +1236,7 @@ protected:
 	//util
 	void SetupCommands();
 	void SetupContextHierarchy();
-	CString EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
+	void EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
 
 	CommandID FindCmd(uint32 uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
@@ -1245,10 +1248,10 @@ public:
 
 	// Population
 	CString Add(KeyCombination kc, CommandID cmd, bool overwrite, int pos = -1, bool checkEventConflict = true);
-	CString Remove(KeyCombination kc, CommandID cmd);
-	CString Remove(int pos, CommandID cmd);
+	void Remove(KeyCombination kc, CommandID cmd);
+	void Remove(int pos, CommandID cmd);
 
-	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict = true) const;
+	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict = true, bool checkSameCommand = true) const;
 	bool IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const;
 
 	// Tranformation
@@ -1257,18 +1260,21 @@ public:
 
 	// Communication
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
-	bool isHidden(UINT c) const { return m_commands[c].IsHidden(); }
+	bool IsHidden(UINT c) const { return m_commands[c].IsHidden(); }
 	int GetKeyListSize(CommandID cmd) const { return (cmd != kcNull) ? static_cast<int>(m_commands[cmd].kcList.size()) : 0; }
 	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
-	CString GetKeyTextFromCommand(CommandID c, UINT key) const;
+	CString GetKeyTextFromCommand(CommandID c, UINT key = uint32_max) const;
+	CString FormatConflict(KeyCombination kc, CommandID conflictCommand, KeyCombination conflictCombination) const;
 
 	// Pululation ;)
-	void Copy(const CCommandSet *source);  // Copy the contents of a commandset into this command set
+	void Copy(const CCommandSet &source);  // Copy the contents of a commandset into this command set
 	void GenKeyMap(KeyMap &km);            // Generate a keymap from this command set
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
 	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription);
 	void LoadDefaultKeymap();
+
+	static bool MustBeModifierKey(CommandID id);
 
 protected:
 	const CModSpecifications *m_oldSpecs = nullptr;
