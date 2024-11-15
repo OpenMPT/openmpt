@@ -88,11 +88,11 @@ enum CommandID
 	kcFileSaveMidi,
 	kcFileSaveOPL,
 	kcFileExportCompat,
-	kcPrevDocument,
-	kcNextDocument,
 	kcFileImportMidiLib,
 	kcFileAddSoundBank,
-	kcEndFile = kcFileAddSoundBank,
+	kcPrevDocument,
+	kcNextDocument,
+	kcEndFile = kcNextDocument,
 
 	kcStartPlayCommands,
 	kcPlayPauseSong = kcStartPlayCommands,
@@ -286,7 +286,9 @@ enum CommandID
 	kcEndSelect = kcCopyAndLoseSelection,
 
 	kcStartPatternClipboard,
-	kcCutPatternChannel = kcStartPatternClipboard,
+	kcCursorCopy = kcStartPatternClipboard,
+	kcCursorPaste,
+	kcCutPatternChannel,
 	kcCutPattern,
 	kcCopyPatternChannel,
 	kcCopyPattern,
@@ -297,13 +299,13 @@ enum CommandID
 	kcClipboardNext,
 	kcEndPatternClipboard = kcClipboardNext,
 
-	kcStartPatternEditMisc,
-	kcToggleFollowSong = kcStartPatternEditMisc,
-	kcCursorCopy,
-	kcCursorPaste,
+	kcStartPatternMisc,
+	kcToggleFollowSong = kcStartPatternMisc,
+	kcChangeLoopStatus,
+	kcPatternPlayRow,
+	kcPatternGoto,
 	kcFindInstrument,
 	kcPatternRecord,
-	kcPatternPlayRow,
 	kcSetSpacing,
 	kcSetSpacing0,
 	kcSetSpacing1,
@@ -318,16 +320,14 @@ enum CommandID
 	kcIncreaseSpacing,
 	kcDecreaseSpacing,
 	kcSwitchToOrderList,
-	kcNewPattern,
-	kcDuplicatePattern,
-	kcSplitPattern,
 	kcPatternEditPCNotePlugin,
 	kcTogglePluginEditor,
 	kcShowNoteProperties,
 	kcShowPatternProperties,
 	kcShowSplitKeyboardSettings,
+	kcPatternVisualizeEffect,
+	kcPatternOpenRandomizer,
 	kcChordEditor,
-	kcChangeLoopStatus,
 	kcShowEditMenu,
 	kcShowChannelCtxMenu,
 	kcShowChannelPluginCtxMenu,
@@ -341,7 +341,7 @@ enum CommandID
 	kcToggleVisibilityInstrColumn,
 	kcToggleVisibilityVolumeColumn,
 	kcToggleVisibilityEffectColumn,
-	kcEndPatternEditMisc = kcToggleVisibilityEffectColumn,
+	kcEndPatternMisc = kcToggleVisibilityEffectColumn,
 
 	kcStartChannelKeys,
 	kcChannelMute = kcStartChannelKeys,
@@ -362,6 +362,7 @@ enum CommandID
 	kcChannelMoveRight,
 	kcChannelSettings,
 	kcEndChannelKeys = kcChannelSettings,
+
 	kcBeginTranspose,
 	kcTransposeUp = kcBeginTranspose,
 	kcTransposeDown,
@@ -386,18 +387,22 @@ enum CommandID
 	kcDataEntryUpCoarseStop,
 	kcDataEntryDownCoarseStop,
 	kcEndTransposeStop = kcDataEntryDownCoarseStop,
+
+	kcStartPatternEditMisc,
+	kcNewPattern = kcStartPatternEditMisc,
+	kcDuplicatePattern,
+	kcSplitPattern,
 	kcPatternAmplify,
 	kcPatternInterpolateNote,
 	kcPatternInterpolateInstr,
 	kcPatternInterpolateVol,
 	kcPatternInterpolateEffect,
-	kcPatternVisualizeEffect,
-	kcPatternOpenRandomizer,
-	kcPatternGoto,
 	kcPatternSetInstrument,
 	kcPatternSetInstrumentNotEmpty,
 	kcPatternGrowSelection,
 	kcPatternShrinkSelection,
+	kcEndPatternEditMisc = kcPatternShrinkSelection,
+
 	//	kcClearSelection,
 	kcClearRow,
 	kcClearField,
@@ -727,7 +732,8 @@ enum CommandID
 
 	//Volume stuff
 	kcSetVolumeStart,
-	kcSetVolume0 = kcSetVolumeStart,
+	kcStartVolumeDigits = kcSetVolumeStart,
+	kcSetVolume0 = kcStartVolumeDigits,
 	kcSetVolume1,
 	kcSetVolume2,
 	kcSetVolume3,
@@ -737,22 +743,25 @@ enum CommandID
 	kcSetVolume7,
 	kcSetVolume8,
 	kcSetVolume9,
-	kcSetVolumeVol,           //v
-	kcSetVolumePan,           //p
-	kcSetVolumeVolSlideUp,    //c
-	kcSetVolumeVolSlideDown,  //d
-	kcSetVolumeFineVolUp,     //a
-	kcSetVolumeFineVolDown,   //b
-	kcSetVolumeVibratoSpd,    //u
-	kcSetVolumeVibrato,       //h
-	kcSetVolumeXMPanLeft,     //l
-	kcSetVolumeXMPanRight,    //r
-	kcSetVolumePortamento,    //g
-	kcSetVolumeITPortaUp,     //f
-	kcSetVolumeITPortaDown,   //e
-	kcSetVolumeITUnused,      //:
-	kcSetVolumeITOffset,      //o
-	kcSetVolumeEnd = kcSetVolumeITOffset,
+	kcEndVolumeDigits = kcSetVolume9,
+	kcStartVolumeCommands,
+	kcSetVolumeVol = kcStartVolumeCommands,  //v
+	kcSetVolumePan,                          //p
+	kcSetVolumeVolSlideUp,                   //c
+	kcSetVolumeVolSlideDown,                 //d
+	kcSetVolumeFineVolUp,                    //a
+	kcSetVolumeFineVolDown,                  //b
+	kcSetVolumeVibratoSpd,                   //u
+	kcSetVolumeVibrato,                      //h
+	kcSetVolumeXMPanLeft,                    //l
+	kcSetVolumeXMPanRight,                   //r
+	kcSetVolumePortamento,                   //g
+	kcSetVolumeITPortaUp,                    //f
+	kcSetVolumeITPortaDown,                  //e
+	kcSetVolumeITUnused,                     //:
+	kcSetVolumeITOffset,                     //o
+	kcEndVolumeCommands = kcSetVolumeITOffset,
+	kcSetVolumeEnd = kcEndVolumeCommands,
 
 	//Effect params
 	kcSetFXParam0,
@@ -1039,11 +1048,10 @@ enum CommandID
 	kcOrderlistPatIgnore,
 	kcOrderlistPatInvalid,
 	kcEndOrderlistNum = kcOrderlistPatInvalid,
+	kcStartOrderlistMisc,
 	// Playback lock
-	kcStartOrderlistLock,
-	kcOrderlistLockPlayback = kcStartOrderlistLock,
+	kcOrderlistLockPlayback = kcStartOrderlistMisc,
 	kcOrderlistUnlockPlayback,
-	kcEndOrderlistLock = kcOrderlistUnlockPlayback,
 	kcStartOrderlistQueue,
 	kcOrderlistQueueAtPatternEnd = kcStartOrderlistQueue,
 	kcOrderlistQueueAtMeasureEnd,
@@ -1051,7 +1059,8 @@ enum CommandID
 	kcOrderlistQueueAtRowEnd,
 	kcEndOrderlistQueue = kcOrderlistQueueAtRowEnd,
 	kcOrderlistStreamExport,
-	kcEndOrderlistCommands = kcOrderlistStreamExport,
+	kcEndOrderlistMisc = kcOrderlistStreamExport,
+	kcEndOrderlistCommands = kcEndOrderlistMisc,
 
 	kcStartChnSettingsCommands,
 	kcChnSettingsPrev = kcStartChnSettingsCommands,
