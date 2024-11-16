@@ -295,7 +295,7 @@ public:
 #endif
 	void DrawNote(int x, int y, UINT note, CTuning *pTuning = nullptr);
 	void DrawInstrument(int x, int y, UINT instr);
-	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume);
+	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume, bool hex);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
 	void UpdateAllVUMeters(Notification *pnotify);
 	void DrawDragSel(HDC hdc);

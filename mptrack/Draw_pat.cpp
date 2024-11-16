@@ -476,7 +476,7 @@ void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 }
 
 
-void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume)
+void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume, bool hex)
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 
@@ -508,10 +508,12 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 		{
 			m_Dib.TextBlt(x, y, pfnt->nVolCmdWidth, pfnt->spacingY,
 							pfnt->nVolX, pfnt->nVolY + volcmd * pfnt->spacingY, pfnt->dib);
+			const int digit1 = vol / (hex ? 16 : 10);
+			const int digit2 = vol % (hex ? 16 : 10);
 			m_Dib.TextBlt(x+pfnt->nVolCmdWidth, y, pfnt->nVolHiWidth, pfnt->spacingY,
-							pfnt->nNumX, pfnt->nNumY + (vol / 10) * pfnt->spacingY, pfnt->dib);
+							pfnt->nNumX, pfnt->nNumY + digit1 * pfnt->spacingY, pfnt->dib);
 			m_Dib.TextBlt(x+pfnt->nVolCmdWidth + pfnt->nVolHiWidth, y, pfnt->nEltWidths[2] - (pfnt->nVolCmdWidth + pfnt->nVolHiWidth), pfnt->spacingY,
-							pfnt->nNumX, pfnt->nNumY + (vol % 10) * pfnt->spacingY, pfnt->dib);
+							pfnt->nNumX, pfnt->nNumY + digit2 * pfnt->spacingY, pfnt->dib);
 		} else
 		{
 			int srcx = pfnt->nEltWidths[0];
@@ -828,6 +830,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		return;
 	const CPattern &pattern = sndFile.Patterns[nPattern];
 	const auto patternSetupFlags = TrackerSettings::Instance().m_dwPatternSetup.Get();
+	const bool volumeColumnIsHex = TrackerSettings::Instance().patternVolColHex;
 
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 	CRect rect;
@@ -1121,7 +1124,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					}
 					// Drawing Volume
 					m_Dib.SetTextColor(tx_col, bk_col);
-					DrawVolumeCommand(xbmp + x, 0, *m, drawDefaultVolume);
+					DrawVolumeCommand(xbmp + x, 0, *m, drawDefaultVolume, volumeColumnIsHex);
 				}
 				x += pfnt->nEltWidths[2];
 			}

@@ -4956,7 +4956,8 @@ void CViewPattern::TempEnterVol(int v)
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand m = target;  // This is the command we are about to overwrite
-	const bool isDigit = (v >= 0) && (v <= 9);
+	const bool isHex = TrackerSettings::Instance().patternVolColHex;
+	const bool isDigit = (v >= 0x00) && (v <= 0x0F);
 
 	if(m.IsPcNote())
 	{
@@ -4968,7 +4969,10 @@ void CViewPattern::TempEnterVol(int v)
 		uint16 vol = m.vol;
 		if(isDigit)
 		{
-			vol = ((vol * 10) + v) % 100;
+			if(isHex)
+				vol = ((vol * 16) + v) % 256;
+			else
+				vol = ((vol * 10) + v) % 100;
 			if(!volcmd)
 				volcmd = VOLCMD_VOLUME;
 		} else
@@ -5009,7 +5013,10 @@ void CViewPattern::TempEnterVol(int v)
 		}
 
 		if(vol > max)
-			vol %= 10;
+		{
+			vol %= (isHex ? 16 : 10);
+			LimitMax(vol, max);
+		}
 		if(pSndFile->GetModSpecifications().HasVolCommand(volcmd))
 		{
 			m_cmdOld.volcmd = m.volcmd = volcmd;

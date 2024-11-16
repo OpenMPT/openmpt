@@ -810,6 +810,7 @@ public:
 	CachedSetting<bool> gbPatternRecord;
 	CachedSetting<bool> patternNoEditPopup;
 	CachedSetting<bool> patternStepCommands;
+	CachedSetting<bool> patternVolColHex;
 	CachedSetting<uint32> m_dwPatternSetup;
 	CachedSetting<uint32> m_nRowHighlightMeasures; // primary (measures) and secondary (beats) highlight
 	CachedSetting<uint32> m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight

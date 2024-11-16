@@ -743,7 +743,13 @@ enum CommandID
 	kcSetVolume7,
 	kcSetVolume8,
 	kcSetVolume9,
-	kcEndVolumeDigits = kcSetVolume9,
+	kcSetVolumeA,
+	kcSetVolumeB,
+	kcSetVolumeC,
+	kcSetVolumeD,
+	kcSetVolumeE,
+	kcSetVolumeF,
+	kcEndVolumeDigits = kcSetVolumeF,
 	kcStartVolumeCommands,
 	kcSetVolumeVol = kcStartVolumeCommands,  //v
 	kcSetVolumePan,                          //p

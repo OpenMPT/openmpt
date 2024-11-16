@@ -1562,6 +1562,12 @@ static constexpr struct
 	{2104, kcToggleVisibilityVolumeColumn, _T("Toggle Volume Column Visibility")},
 	{2105, kcToggleVisibilityEffectColumn, _T("Toggle Effect Column Visibility")},
 	{2106, kcFileOpenTemplate, _T("File/Open Template")},
+	{2107, kcSetVolumeA, _T("Set volume digit A")},
+	{2108, kcSetVolumeB, _T("Set volume digit B")},
+	{2109, kcSetVolumeC, _T("Set volume digit C")},
+	{2110, kcSetVolumeD, _T("Set volume digit D")},
+	{2111, kcSetVolumeE, _T("Set volume digit E")},
+	{2112, kcSetVolumeF, _T("Set volume digit F")},
 };
 // clang-format on
 
