@@ -1209,6 +1209,14 @@ public:
 };
 
 
+enum class KeyboardPreset
+{
+	MPT,
+	IT,
+	FT2,
+};
+
+
 enum RuleID
 {
 	krPreventDuplicate,
@@ -1241,7 +1249,7 @@ protected:
 	CommandID FindCmd(uint32 uid) const;
 	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
 
-	void ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion = {});
+	void ApplyDefaultKeybindings(KeyboardPreset preset, const Version onlyCommandsAfterVersion = {});
 
 public:
 	CCommandSet();
@@ -1272,12 +1280,12 @@ public:
 	bool SaveFile(const mpt::PathString &filename);
 	bool LoadFile(const mpt::PathString &filename);
 	bool LoadFile(std::istream &iStrm, const mpt::ustring &filenameDescription);
-	void LoadDefaultKeymap();
+	void LoadDefaultKeymap(KeyboardPreset preset = KeyboardPreset::MPT);
 
 	static bool MustBeModifierKey(CommandID id);
 
 protected:
-	const CModSpecifications *m_oldSpecs = nullptr;
+	const CModSpecifications *m_currentModSpecs = nullptr;
 	KeyCommand m_commands[kcNumCommands];
 	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
 	std::bitset<kNumRules> m_enforceRule;

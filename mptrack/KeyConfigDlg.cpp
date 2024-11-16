@@ -151,6 +151,8 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnNotesRepeat)
 	ON_COMMAND(IDC_NONOTESREPEAT,         &COptionsKeyboard::OnNoNotesRepeat)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,        &COptionsKeyboard::OnRestoreDefaultKeymap)
+	ON_COMMAND(ID_KEYPRESET_IT,           &COptionsKeyboard::OnRestoreITKeymap)
+	ON_COMMAND(ID_KEYPRESET_FT2,          &COptionsKeyboard::OnRestoreFT2Keymap)
 	ON_EN_CHANGE(IDC_FIND,                &COptionsKeyboard::OnSearchTermChanged)
 	ON_EN_SETFOCUS(IDC_FINDHOTKEY,        &COptionsKeyboard::OnClearHotKey)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COMMAND_LIST, &COptionsKeyboard::OnCommandKeySelChanged)
@@ -173,6 +175,7 @@ void COptionsKeyboard::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_FIND, m_eFind);
 	DDX_Control(pDX, IDC_STATIC1, m_warnIconCtl);
 	DDX_Control(pDX, IDC_KEYREPORT, m_warnText);
+	DDX_Control(pDX, IDC_RESTORE_KEYMAP, m_restoreDefaultButton);
 }
 
 
@@ -207,6 +210,14 @@ BOOL COptionsKeyboard::OnInitDialog()
 	}
 	m_cmbCategory.SetCurSel(0);
 	UpdateDialog();
+
+	CMenu *splitButtonMenu = new CMenu{};
+	if(splitButtonMenu->CreatePopupMenu())
+	{
+		splitButtonMenu->AppendMenu(MF_STRING, ID_KEYPRESET_IT, _T("&Impulse Tracker style"));
+		splitButtonMenu->AppendMenu(MF_STRING, ID_KEYPRESET_FT2, _T("&Fast Tracker style"));
+		m_restoreDefaultButton.SetDropDownMenu(splitButtonMenu);  // takes ownership of menu pointer
+	}
 
 	m_eCustHotKey.SetOwner(*this);
 	m_eFindHotKey.SetOwner(*this);
@@ -1059,10 +1070,10 @@ void COptionsKeyboard::OnNoNotesRepeat()
 
 void COptionsKeyboard::ForceUpdateGUI(bool updateAllKeys)
 {
-	m_forceUpdate = true;                 // m_nCurKeyChoice and m_nCurHotKey haven't changed, yet we still want to update.
-	int ntmpChoice = m_curKeyChoice;      // next call will overwrite m_nCurKeyChoice
+	m_forceUpdate = true;                  // m_curKeyChoice and m_curCommand haven't changed, yet we still want to update.
+	int curChoice = m_curKeyChoice;        // next call will overwrite m_curKeyChoice
 	OnCommandKeySelChanged();              // update keychoice list
-	m_cmbKeyChoice.SetCurSel(ntmpChoice);  // select fresh keychoice (thus restoring m_nCurKeyChoice)
+	m_cmbKeyChoice.SetCurSel(curChoice);   // select fresh keychoice (thus restoring m_curKeyChoice)
 	OnKeyChoiceSelect();                   // update key data
 	OnSettingsChanged();                   // Enable "apply" button
 
@@ -1081,11 +1092,11 @@ void COptionsKeyboard::ForceUpdateGUI(bool updateAllKeys)
 }
 
 
-void COptionsKeyboard::OnRestoreDefaultKeymap()
+void COptionsKeyboard::RestoreKeymap(KeyboardPreset preset)
 {
 	if(Reporting::Confirm("Discard all custom changes and restore default key configuration?", false, true, this) == cnfYes)
 	{
-		m_localCmdSet->LoadDefaultKeymap();
+		m_localCmdSet->LoadDefaultKeymap(preset);
 		ForceUpdateGUI(true);
 	}
 }

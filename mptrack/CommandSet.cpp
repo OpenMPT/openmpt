@@ -44,7 +44,7 @@ constexpr std::tuple<InputTargetContext, CommandID, CommandID> NoteContexts[] =
 	{kCtxViewComments, kcCommentsStartNotes, kcCommentsStartNoteStops},
 };
 
-constexpr struct
+struct DefaultKeybinding
 {
 	CommandID cmd;
 	uint16 key;  // Virtual key code, or scan code if high bit is set
@@ -52,7 +52,9 @@ constexpr struct
 	FlagSet<KeyEventType> events;
 	InputTargetContext ctx;
 	Version addedInVersion;
-} DefaultKeybindings[] =
+};
+
+constexpr DefaultKeybinding DefaultKeybindings[] =
 // clang-format off
 {
 	{kcFileNew,                                'N',                ModCtrl,            kKeyEventDown,                   kCtxAllContexts,         MPT_V("1.31")},
@@ -255,7 +257,7 @@ constexpr struct
 	{kcSetOctave9,                             VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
 	{kcChordModifier,                          VK_SHIFT,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
 	{kcNoteCut,                                VK_OEM_3,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31")},
-	{kcNoteCut,                                41 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31.12.02") },
+	{kcNoteCut,                                41 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31.12.02")},
 	{kcNoteOff,                                VK_OEM_PLUS,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31.12.02")},
 	{kcNoteOff,                                13 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31.12.02")},
 	{kcNoteFade,                               VK_OEM_MINUS,       ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.31.12.02")},
@@ -520,6 +522,157 @@ constexpr struct
 	{kcChnColorFromPrev,                       VK_LEFT,            ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnColorFromNext,                       VK_RIGHT,           ModShift | ModAlt,  kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
 	{kcChnSettingsClose,                       VK_RETURN,          ModNone,            kKeyEventDown,                   kCtxChannelSettings,     MPT_V("1.31")},
+};
+// clang-format on
+
+constexpr DefaultKeybinding DefaultKeybindingsIT[] =
+// clang-format off
+{
+	{kcClearFieldStepITStyle,                  52 | 0x8000,        ModNone,            kKeyEventDown | kKeyEventRepeat, kCtxViewPatterns,        MPT_V("1.32")},
+	{kcVPNoteC_0,                              44 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS0,                              31 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_0,                              45 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS0,                              32 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_0,                              46 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_0,                              47 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS0,                              34 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_0,                              48 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteGS0,                              35 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteA_1,                              49 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteAS1,                              36 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteB_1,                              50 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	
+	{kcVPNoteC_1,                              16 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS1,                              3  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_1,                              17 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS1,                              4  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_1,                              18 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_1,                              19 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS1,                              6  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_1,                              20 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteGS1,                              7  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteA_2,                              21 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteAS2,                              8  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteB_2,                              22 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteC_2,                              23 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS2,                              10 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_2,                              24 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS2,                              11 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_2,                              25 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_2,                              26 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS2,                              13 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_2,                              27 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	
+	{kcSetOctave0,                             '0',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave0,                             VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave1,                             '1',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave1,                             VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave2,                             '2',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave2,                             VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave3,                             '3',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave3,                             VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave4,                             '4',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave4,                             VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave5,                             '5',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave5,                             VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave6,                             '6',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave6,                             VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave7,                             '7',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave7,                             VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave8,                             '8',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave8,                             VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave9,                             '9',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave9,                             VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcChordModifier,                          VK_SHIFT,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteCut,                                '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                VK_OEM_3,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                41 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteFade,                               VK_OEM_3,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteFade,                               41 | 0x8000,        ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteFade,                               VK_OEM_5,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteFade,                               43 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePC,                                 VK_OEM_102,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePC,                                 86 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePCS,                                VK_OEM_102,         ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePCS,                                86 | 0x8000,        ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+};
+// clang-format on
+
+constexpr DefaultKeybinding DefaultKeybindingsFT2[] =
+// clang-format off
+{
+	{kcVPNoteC_1,                              44 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS1,                              31 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_1,                              45 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS1,                              32 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_1,                              46 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_1,                              47 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS1,                              34 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_1,                              48 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteGS1,                              35 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteA_2,                              49 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteAS2,                              36 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteB_2,                              50 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteC_2,                              51 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS2,                              38 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_2,                              52 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS2,                              39 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_2,                              53 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS2,                              43 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+
+	{kcVPNoteC_2,                              16 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS2,                              3  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_2,                              17 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS2,                              4  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_2,                              18 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_2,                              19 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS2,                              6  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_2,                              20 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteGS2,                              7  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteA_3,                              21 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteAS3,                              8  | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteB_3,                              22 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteC_3,                              23 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteCS3,                              10 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteD_3,                              24 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteDS3,                              11 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteE_3,                              25 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteF_3,                              26 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteFS3,                              13 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcVPNoteG_3,                              27 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	
+	{kcSetOctave0,                             '0',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave0,                             VK_NUMPAD0,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave1,                             '1',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave1,                             VK_NUMPAD1,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave2,                             '2',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave2,                             VK_NUMPAD2,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave3,                             '3',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave3,                             VK_NUMPAD3,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave4,                             '4',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave4,                             VK_NUMPAD4,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave5,                             '5',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave5,                             VK_NUMPAD5,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave6,                             '6',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave6,                             VK_NUMPAD6,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave7,                             '7',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave7,                             VK_NUMPAD7,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave8,                             '8',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave8,                             VK_NUMPAD8,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave9,                             '9',                ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcSetOctave9,                             VK_NUMPAD9,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcChordModifier,                          VK_SHIFT,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteCut,                                VK_OEM_3,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteCut,                                41 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                VK_CAPITAL,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                58 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                VK_OEM_102,         ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteOff,                                86 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNoteFade,                               '1',                ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePC,                                 VK_OEM_7,           ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePC,                                 40 | 0x8000,        ModNone,            kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePCS,                                VK_OEM_7,           ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
+	{kcNotePCS,                                40 | 0x8000,        ModShift,           kKeyEventDown,                   kCtxViewPatternsNote,    MPT_V("1.32")},
 };
 // clang-format on
 
@@ -2119,7 +2272,7 @@ void CCommandSet::GenKeyMap(KeyMap &km)
 
 void CCommandSet::Copy(const CCommandSet &source)
 {
-	m_oldSpecs = source.m_oldSpecs;
+	m_currentModSpecs = source.m_currentModSpecs;
 	std::copy(std::begin(source.m_commands), std::end(source.m_commands), std::begin(m_commands));
 }
 
@@ -2297,7 +2450,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 		}
 	}
 
-	ApplyDefaultKeybindings(keymapVersion);
+	ApplyDefaultKeybindings(KeyboardPreset::MPT, keymapVersion);
 
 	// Fix up old keymaps containing legacy commands that have been merged into other commands
 	static constexpr std::pair<CommandID, CommandID> MergeCommands[] =
@@ -2337,28 +2490,60 @@ bool CCommandSet::LoadFile(const mpt::PathString &filename)
 }
 
 
-void CCommandSet::LoadDefaultKeymap()
+void CCommandSet::LoadDefaultKeymap(KeyboardPreset preset)
 {
 	for(auto &cmd : m_commands)
 		cmd.kcList.clear();
-	ApplyDefaultKeybindings();
+	ApplyDefaultKeybindings(KeyboardPreset::MPT);
+
+	if(preset == KeyboardPreset::MPT)
+		return;
+
+	const auto defaults = (preset == KeyboardPreset::IT) ? mpt::as_span(DefaultKeybindingsIT) : mpt::as_span(DefaultKeybindingsFT2);
+	// Remove all pre-populated notes
+	for(CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes; cmd = static_cast<CommandID>(cmd + 1))
+	{
+		for(const auto &kc : m_commands[cmd].kcList)
+		{
+			EnforceAll(kc, cmd, false);
+		}
+		m_commands[cmd].kcList.clear();
+	}
+	// Also remove any other keys that are going to be overwritten
+	for (const auto &key : defaults)
+	{
+		for(const auto &kc : m_commands[key.cmd].kcList)
+		{
+			EnforceAll(kc, key.cmd, false);
+		}
+		m_commands[key.cmd].kcList.clear();
+	}
+	ApplyDefaultKeybindings(preset);
 }
 
 
-void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion)
+void CCommandSet::ApplyDefaultKeybindings(KeyboardPreset preset, const Version onlyCommandsAfterVersion)
 {
-	if(m_oldSpecs)
+	if(m_currentModSpecs)
 	{
-		const auto specs = m_oldSpecs;
-		m_oldSpecs = nullptr;
+		const auto specs = m_currentModSpecs;
+		m_currentModSpecs = nullptr;
 		QuickChange_SetEffects(*specs);
 	}
 
 	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
 	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
 
+	mpt::span<const DefaultKeybinding> defaults;
+	switch(preset)
+	{
+	case KeyboardPreset::MPT: defaults = DefaultKeybindings; break;
+	case KeyboardPreset::IT: defaults = DefaultKeybindingsIT; break;
+	case KeyboardPreset::FT2: defaults = DefaultKeybindingsFT2; break;
+	}
+
 	CommandID lastAdded = kcNull;
-	for(const auto &kb : DefaultKeybindings)
+	for(const auto &kb : defaults)
 	{
 		if(onlyCommandsAfterVersion != Version{})
 		{
@@ -2567,11 +2752,11 @@ bool CCommandSet::QuickChange_NotesRepeat(bool repeat)
 bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 {
 	// Is this already the active key configuration?
-	if(&modSpecs == m_oldSpecs)
+	if(&modSpecs == m_currentModSpecs)
 	{
 		return false;
 	}
-	m_oldSpecs = &modSpecs;
+	m_currentModSpecs = &modSpecs;
 
 	KeyCombination kc(kCtxViewPatternsFX, ModNone, 0, kKeyEventDown | kKeyEventRepeat);
 
