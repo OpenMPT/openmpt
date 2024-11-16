@@ -105,6 +105,7 @@ void COptionsAdvanced::ReInit()
 	if(m_listGrouped)
 	{
 		ListView_RemoveAllGroups(m_List.m_hWnd);
+		m_List.EnableGroupView();
 	}
 	m_List.SetItemCount(static_cast<int>(theApp.GetSettings().size()));
 
