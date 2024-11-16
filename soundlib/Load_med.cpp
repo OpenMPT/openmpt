@@ -406,6 +406,7 @@ struct TranslateMEDPatternContext
 	const bool softwareMixing : 1;
 	const bool bpmMode : 1;
 	const bool volHex : 1;
+	const bool vol7bit : 1;
 };
 
 
@@ -426,7 +427,7 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	case 0x0C:  // Set Volume (note: parameters >= 0x80 (only in hex mode?) should set the default instrument volume, which we don't support)
 		if(!ctx.volHex && param < 0x99)
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>((param >> 4) * 10 + (param & 0x0F)));
-		else if(ctx.volHex && ctx.version < 3)
+		else if(ctx.volHex && !ctx.vol7bit)
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(std::min(param & 0x7F, 64)));
 		else if(ctx.volHex)
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(((param & 0x7F) + 1) / 2));
@@ -1389,6 +1390,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			int16 transpose = NOTE_MIN + 47 + songHeader.playTranspose;
 			uint16 numPages = 0;
 			FileReader cmdExt, commandPages;
+			bool vol7bit = false;
 
 			if(version < 1)
 			{
@@ -1406,6 +1408,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				numRows = patHeader.numRows + 1;
 				if(patHeader.blockInfoOffset)
 				{
+					vol7bit = true;
 					auto offset = file.GetPosition();
 					file.Seek(patHeader.blockInfoOffset);
 					MMDBlockInfo blockInfo;
@@ -1444,7 +1447,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			pattern.SetName(patName);
 			LimitMax(numTracks, m_nChannels);
 
-			TranslateMEDPatternContext context{transpose, numTracks, version, rowsPerBeat, is8Ch, softwareMixing, bpmMode, volHex};
+			TranslateMEDPatternContext context{transpose, numTracks, version, rowsPerBeat, is8Ch, softwareMixing, bpmMode, volHex, vol7bit};
 			needInstruments |= TranslateMEDPattern(file, cmdExt, pattern, context, false);
 
 			for(uint16 page = 0; page < numPages; page++)
