@@ -1179,8 +1179,9 @@
 #define ID_MAINBAR_SHOW_GLOBALVOLUME    36041
 #define ID_MAINBAR_SHOW_VUMETER         36042
 #define ID_TREEVIEW_ON_LEFT             36043
-#define ID_KEYPRESET_IT                 36044
-#define ID_KEYPRESET_FT2                36045
+#define ID_KEYPRESET_MPT                36044
+#define ID_KEYPRESET_IT                 36045
+#define ID_KEYPRESET_FT2                36046
 #define ID_SELECTINST                   36100
 // From here: Command range [ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS]
 #define ID_PLUG_RECORDAUTOMATION        37003

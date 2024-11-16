@@ -79,7 +79,7 @@ protected:
 	CStatic m_warnIconCtl, m_warnText;
 	CEdit m_eFind;
 	CEdit m_eChordWaitTime;
-	CSplitButton m_restoreDefaultButton;
+	CButton m_restoreDefaultButton;
 	HICON m_infoIcon = nullptr, m_warnIcon = nullptr;
 	
 	CString m_lastWarning;
@@ -117,6 +117,7 @@ protected:
 	void EnableKeyChoice(bool enable);
 
 	void UpdateWarning(CString text = {}, bool notify = false);
+	void ShowRestoreKeymapMenu();
 	void RestoreKeymap(KeyboardPreset preset);
 
 	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
@@ -137,7 +138,9 @@ protected:
 	afx_msg void OnRestoreKeyChoice();
 	afx_msg void OnLoad();
 	afx_msg void OnSave();
-	afx_msg void OnRestoreDefaultKeymap() { RestoreKeymap(KeyboardPreset::MPT); }
+	afx_msg void OnRestoreDefaultKeymap();
+	afx_msg void OnRestoreKeymapDropdown(NMHDR *, LRESULT *result);
+	afx_msg void OnRestoreMPTKeymap() { RestoreKeymap(KeyboardPreset::MPT); }
 	afx_msg void OnRestoreITKeymap() { RestoreKeymap(KeyboardPreset::IT); }
 	afx_msg void OnRestoreFT2Keymap() { RestoreKeymap(KeyboardPreset::FT2); }
 	afx_msg void OnClearHotKey();

@@ -151,12 +151,16 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnNotesRepeat)
 	ON_COMMAND(IDC_NONOTESREPEAT,         &COptionsKeyboard::OnNoNotesRepeat)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,        &COptionsKeyboard::OnRestoreDefaultKeymap)
+	ON_COMMAND(ID_KEYPRESET_MPT,          &COptionsKeyboard::OnRestoreMPTKeymap)
 	ON_COMMAND(ID_KEYPRESET_IT,           &COptionsKeyboard::OnRestoreITKeymap)
 	ON_COMMAND(ID_KEYPRESET_FT2,          &COptionsKeyboard::OnRestoreFT2Keymap)
 	ON_EN_CHANGE(IDC_FIND,                &COptionsKeyboard::OnSearchTermChanged)
 	ON_EN_SETFOCUS(IDC_FINDHOTKEY,        &COptionsKeyboard::OnClearHotKey)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COMMAND_LIST, &COptionsKeyboard::OnCommandKeySelChanged)
 	ON_NOTIFY(NM_DBLCLK,       IDC_COMMAND_LIST, &COptionsKeyboard::OnListenForKeysFromList)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	ON_NOTIFY(BCN_DROPDOWN, IDC_RESTORE_KEYMAP, &COptionsKeyboard::OnRestoreKeymapDropdown)
+#endif
 END_MESSAGE_MAP()
 
 
@@ -211,13 +215,9 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_cmbCategory.SetCurSel(0);
 	UpdateDialog();
 
-	CMenu *splitButtonMenu = new CMenu{};
-	if(splitButtonMenu->CreatePopupMenu())
-	{
-		splitButtonMenu->AppendMenu(MF_STRING, ID_KEYPRESET_IT, _T("&Impulse Tracker style"));
-		splitButtonMenu->AppendMenu(MF_STRING, ID_KEYPRESET_FT2, _T("&Fast Tracker style"));
-		m_restoreDefaultButton.SetDropDownMenu(splitButtonMenu);  // takes ownership of menu pointer
-	}
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	m_restoreDefaultButton.ModifyStyle(0, BS_SPLITBUTTON);
+#endif
 
 	m_eCustHotKey.SetOwner(*this);
 	m_eFindHotKey.SetOwner(*this);
@@ -1089,6 +1089,44 @@ void COptionsKeyboard::ForceUpdateGUI(bool updateAllKeys)
 	{
 		m_lbnCommandKeys.SetItemText(m_lbnCommandKeys.GetSelectionMark(), 1, m_localCmdSet->GetKeyTextFromCommand(m_curCommand));
 	}
+}
+
+
+void COptionsKeyboard::OnRestoreKeymapDropdown(NMHDR *, LRESULT *result)
+{
+	ShowRestoreKeymapMenu();
+	*result = 0;
+}
+
+void COptionsKeyboard::OnRestoreDefaultKeymap()
+{
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	if((m_restoreDefaultButton.GetStyle() & BS_SPLITBUTTON) == BS_SPLITBUTTON)
+	{
+		OnRestoreMPTKeymap();
+		return;
+	}
+#endif
+	ShowRestoreKeymapMenu();
+}
+
+
+void COptionsKeyboard::ShowRestoreKeymapMenu()
+{
+	CRect rect;
+	m_restoreDefaultButton.GetWindowRect(rect);
+
+	TPMPARAMS tpmParams{};
+	tpmParams.cbSize = sizeof(TPMPARAMS);
+	tpmParams.rcExclude = rect;
+
+	CMenu menu;
+	if(!menu.CreatePopupMenu())
+		return;
+	menu.AppendMenu(MF_STRING, ID_KEYPRESET_MPT, _T("&OpenMPT style"));
+	menu.AppendMenu(MF_STRING, ID_KEYPRESET_IT, _T("&Impulse Tracker style"));
+	menu.AppendMenu(MF_STRING, ID_KEYPRESET_FT2, _T("&Fast Tracker style"));
+	menu.TrackPopupMenuEx(TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON, rect.left, rect.bottom, this, &tpmParams);
 }
 
 
