@@ -202,7 +202,7 @@ BOOL COptionsKeyboard::OnInitDialog()
 	m_localCmdSet->Copy(*CMainFrame::GetInputHandler()->m_activeCommandSet);
 
 	m_lbnCommandKeys.SetExtendedStyle(m_lbnCommandKeys.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-	m_listGrouped = CListCtrlEx::EnableGroupView(m_lbnCommandKeys);
+	m_listGrouped = m_lbnCommandKeys.EnableGroupView();
 	m_lbnCommandKeys.SetHeaders(KeyListHeaders);
 
 	//Fill category combo and automatically selects first category
@@ -514,7 +514,10 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 	m_lbnCommandKeys.SetRedraw(FALSE);
 	m_lbnCommandKeys.DeleteAllItems();
 	if(m_listGrouped)
+	{
 		ListView_RemoveAllGroups(m_lbnCommandKeys);
+		m_lbnCommandKeys.EnableGroupView();
+	}
 
 	int currentGroup = -1;
 	int itemID = -1;
