@@ -597,7 +597,7 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 						{
 							const CString catName = _T("------ ") + CString{commandCategories[cat].name}.TrimLeft() + _T(" ------");
 							lvi.iItem = ++itemID;
-							lvi.lParam = LPARAM(-1);
+							lvi.lParam = kcNull;
 							lvi.pszText = const_cast<TCHAR *>(catName.GetString());
 							m_lbnCommandKeys.InsertItem(&lvi);
 						}
