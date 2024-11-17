@@ -20,6 +20,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 enum class MainToolBarItem : uint8;
+class CMainToolBar;
 
 class CStereoVU: public CStatic
 {
@@ -45,6 +46,19 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	DECLARE_MESSAGE_MAP();
+};
+
+class COctaveEdit : public CEdit
+{
+public:
+	COctaveEdit(CMainToolBar &owner) : m_owner{owner} { }
+
+protected:
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
+
+	DECLARE_MESSAGE_MAP()
+
+	CMainToolBar &m_owner;
 };
 
 #define MIN_BASEOCTAVE		0
@@ -85,8 +99,9 @@ protected:
 	UpdateToolTip m_tooltip;
 	CImageListEx m_ImageList, m_ImageListDisabled;
 	CFont m_font;
+	COctaveEdit m_EditOctave;
 	CNumberEdit m_EditTempo;
-	CEdit m_EditSpeed, m_EditOctave, m_EditRowsPerBeat, m_EditGlobalVolume;
+	CEdit m_EditSpeed, m_EditRowsPerBeat, m_EditGlobalVolume;
 	CStatic m_StaticTempo, m_StaticSpeed, m_StaticRowsPerBeat, m_StaticGlobalVolume;
 	CSpinButtonCtrl m_SpinTempo, m_SpinSpeed, m_SpinOctave, m_SpinRowsPerBeat, m_SpinGlobalVolume;
 	int m_currentSpeed = 0, m_currentOctave = -1, m_currentRowsPerBeat = 0, m_currentGlobalVolume = 0;
@@ -96,7 +111,7 @@ public:
 	CStereoVU m_VuMeter;
 
 public:
-	CMainToolBar() = default;
+	CMainToolBar() : m_EditOctave{*this} { }
 
 protected:
 	void SetRowsPerBeat(ROWINDEX nNewRPB);

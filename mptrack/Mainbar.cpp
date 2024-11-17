@@ -27,6 +27,20 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+BEGIN_MESSAGE_MAP(COctaveEdit, CEdit)
+	ON_WM_CHAR()
+END_MESSAGE_MAP()
+
+void COctaveEdit::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
+{
+	if(nChar >= '0' + MIN_BASEOCTAVE && nChar <= '0' + MAX_BASEOCTAVE)
+		m_owner.SetBaseOctave(nChar - '0');
+	else if(nChar == '+' && m_owner.GetBaseOctave() < MAX_BASEOCTAVE)
+		m_owner.SetBaseOctave(m_owner.GetBaseOctave() + 1);
+	else if(nChar == '-' && m_owner.GetBaseOctave() > MIN_BASEOCTAVE)
+		m_owner.SetBaseOctave(m_owner.GetBaseOctave() - 1);
+}
+
 /////////////////////////////////////////////////////////////////////
 // CToolBarEx: custom toolbar base class
 
