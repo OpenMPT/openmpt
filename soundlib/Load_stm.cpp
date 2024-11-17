@@ -49,7 +49,7 @@ struct STMSampleHeader
 			&& mptSmp.nLoopEnd != 0xFFFF)
 		{
 			mptSmp.uFlags = CHN_LOOP;
-			mptSmp.nLength = std::max(mptSmp.nLoopEnd, mptSmp.nLength);
+			mptSmp.nLength = std::max(mptSmp.nLoopEnd, mptSmp.nLength);  // ST2 does not sanitize loop end, allow it to overflow into the next sample's data
 		}
 	}
 };
