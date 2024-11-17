@@ -438,8 +438,28 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 	const uint8 nibbleLo = std::min(param, uint8(0x0F));
 	switch(command)
 	{
+	case 0x01:  // Portamento Up (avoid effect memory when importing as XM)
+		if(param)
+			m.SetEffectCommand(CMD_PORTAMENTOUP, param);
+		break;
+	case 0x02:  // Portamento Down (avoid effect memory when importing as XM)
+		if(param)
+			m.SetEffectCommand(CMD_PORTAMENTODOWN, param);
+		break;
 	case 0x04:  // Vibrato (twice as deep as in ProTracker)
 		m.SetEffectCommand(CMD_VIBRATO, (param & 0xF0) | std::min<uint8>((param & 0x0F) * 2, 0x0F));
+		break;
+	case 0x05:  // Tone Porta + Volume Slide (avoid effect memory when importing as XM)
+		if(param)
+			m.SetEffectCommand(CMD_TONEPORTAVOL, param);
+		else
+			m.SetEffectCommand(CMD_TONEPORTAMENTO, 0);
+		break;
+	case 0x06:  // Vibrato + Volume Slide (avoid effect memory when importing as XM)
+		if(param)
+			m.SetEffectCommand(CMD_VIBRATOVOL, param);
+		else
+			m.SetEffectCommand(CMD_VIBRATO, 0);
 		break;
 	case 0x08:  // Hold and decay
 		break;
@@ -456,7 +476,8 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 			m.SetEffectCommand(CMD_VOLUME, static_cast<ModCommand::PARAM>(((param & 0x7F) + 1) / 2));
 		break;
 	case 0x0D:
-		m.SetEffectCommand(CMD_VOLUMESLIDE, param);
+		if(param)
+			m.SetEffectCommand(CMD_VOLUMESLIDE, param);
 		break;
 	case 0x0E:  // Synth jump / MIDI panning
 		m.SetEffectCommand(CMD_MED_SYNTH_JUMP, param);
