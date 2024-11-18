@@ -688,7 +688,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 
 static void TranslateMEDSynthScript(std::array<uint8, 128> &arr, size_t numEntries, uint8 speed, uint8 hold, uint8 decay, InstrumentSynth::Events &events, bool isVolume)
 {
-	events.push_back(InstrumentSynth::Event::SetStepSpeed(speed, false));
+	events.push_back(InstrumentSynth::Event::SetStepSpeed(speed, true));
 	if(hold && isVolume)
 		events.push_back(InstrumentSynth::Event::MED_HoldDecay(hold, decay));
 
@@ -1494,6 +1494,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 		m_SongFlags.set(SONG_FASTVOLSLIDES, !(songHeader.flags & MMDSong::FLAG_STSLIDE));
 		m_SongFlags.set(SONG_FASTPORTAS, !(songHeader.flags& MMDSong::FLAG_STSLIDE));
+		m_playBehaviour.set(kST3OffsetWithoutInstrument);
 
 		if(expData.songNameOffset && file.Seek(expData.songNameOffset))
 		{
