@@ -103,6 +103,7 @@ protected:
 
 	void DefineCommandCategories();
 	void ForceUpdateGUI(bool updateAllKeys = false);
+	void UpdateNoteRepeatCheckbox();
 	void InsertGroup(const TCHAR *title, int groupId);
 	void UpdateShortcutList(int category = -1);
 	void UpdateCategory();
@@ -131,8 +132,7 @@ protected:
 	afx_msg void OnChordWaitTimeChanged();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	afx_msg void OnCheck() { OnSetKeyChoice(&m_eCustHotKey); };
-	afx_msg void OnNotesRepeat();
-	afx_msg void OnNoNotesRepeat();
+	afx_msg void OnToggleNotesRepeat();
 	afx_msg void OnListenForKeys();
 	afx_msg void OnDeleteKeyChoice();
 	afx_msg void OnRestoreKeyChoice();

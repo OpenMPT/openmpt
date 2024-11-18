@@ -148,8 +148,7 @@ BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)
 	ON_COMMAND(IDC_CHECKKEYDOWN,          &COptionsKeyboard::OnCheck)
 	ON_COMMAND(IDC_CHECKKEYHOLD,          &COptionsKeyboard::OnCheck)
 	ON_COMMAND(IDC_CHECKKEYUP,            &COptionsKeyboard::OnCheck)
-	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnNotesRepeat)
-	ON_COMMAND(IDC_NONOTESREPEAT,         &COptionsKeyboard::OnNoNotesRepeat)
+	ON_COMMAND(IDC_NOTESREPEAT,           &COptionsKeyboard::OnToggleNotesRepeat)
 	ON_COMMAND(IDC_RESTORE_KEYMAP,        &COptionsKeyboard::OnRestoreDefaultKeymap)
 	ON_COMMAND(ID_KEYPRESET_MPT,          &COptionsKeyboard::OnRestoreMPTKeymap)
 	ON_COMMAND(ID_KEYPRESET_IT,           &COptionsKeyboard::OnRestoreITKeymap)
@@ -537,10 +536,8 @@ void COptionsKeyboard::UpdateShortcutList(int category)
 				if(searchByKey)
 				{
 					addKey = false;
-					int numChoices = m_localCmdSet->GetKeyListSize(com);
-					for(int choice = 0; choice < numChoices; choice++)
+					for(const KeyCombination &kc : m_localCmdSet->GetKeyChoices(com))
 					{
-						const KeyCombination &kc = m_localCmdSet->GetKey(com, choice);
 						if(kc.KeyCode() == m_eFindHotKey.code && kc.Modifier() == m_eFindHotKey.mod)
 						{
 							addKey = true;
@@ -779,7 +776,6 @@ void COptionsKeyboard::OnChordWaitTimeChanged()
 
 void COptionsKeyboard::OnRestoreKeyChoice()
 {
-	KeyCombination kc;
 	CommandID cmd = m_curCommand;
 
 	CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -796,14 +792,14 @@ void COptionsKeyboard::OnRestoreKeyChoice()
 		// Restore the defaults for this key
 		mpt::heap_value<CCommandSet> defaultSet;
 		defaultSet->LoadDefaultKeymap();
-		for(int i = 0; i < defaultSet->GetKeyListSize(cmd); i++)
+		for(const KeyCombination &kc : defaultSet->GetKeyChoices(cmd))
 		{
-			m_localCmdSet->Add(defaultSet->GetKey(cmd, i), cmd, true, m_curKeyChoice);
+			m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice);
 		}
 	} else
 	{
 		// Restore current key combination choice for currently selected command.
-		kc = ih->m_activeCommandSet->GetKey(cmd, m_curKeyChoice);
+		KeyCombination kc = ih->m_activeCommandSet->GetKey(cmd, m_curKeyChoice);
 		m_localCmdSet->Remove(m_curKeyChoice, cmd);
 		UpdateWarning(m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice));
 	}
@@ -1057,17 +1053,10 @@ void COptionsKeyboard::OnSave()
 }
 
 
-void COptionsKeyboard::OnNotesRepeat()
+void COptionsKeyboard::OnToggleNotesRepeat()
 {
-	m_localCmdSet->QuickChange_NotesRepeat(true);
-	ForceUpdateGUI();
-}
-
-
-void COptionsKeyboard::OnNoNotesRepeat()
-{
-	m_localCmdSet->QuickChange_NotesRepeat(false);
-	ForceUpdateGUI();
+	m_localCmdSet->QuickChange_NotesRepeat(IsDlgButtonChecked(IDC_NOTESREPEAT) != BST_CHECKED);
+	ForceUpdateGUI(true);
 }
 
 
@@ -1088,10 +1077,33 @@ void COptionsKeyboard::ForceUpdateGUI(bool updateAllKeys)
 			if(const auto cmd = static_cast<CommandID>(m_lbnCommandKeys.GetItemData(i)); cmd != kcNull)
 				m_lbnCommandKeys.SetItemText(i, 1, m_localCmdSet->GetKeyTextFromCommand(cmd));
 		}
+		UpdateNoteRepeatCheckbox();
 	} else if(m_curCommand != kcNull)
 	{
 		m_lbnCommandKeys.SetItemText(m_lbnCommandKeys.GetSelectionMark(), 1, m_localCmdSet->GetKeyTextFromCommand(m_curCommand));
+		if(mpt::is_in_range(m_curCommand, kcVPStartNotes, kcVPEndNotes))
+			UpdateNoteRepeatCheckbox();
 	}
+}
+
+
+void COptionsKeyboard::UpdateNoteRepeatCheckbox()
+{
+	UINT state = uint32_max;
+	for(CommandID cmd = kcVPStartNotes; cmd <= kcVPEndNotes && state != BST_INDETERMINATE; cmd = static_cast<CommandID>(cmd + 1))
+	{
+		for(auto &kc : m_localCmdSet->GetKeyChoices(cmd))
+		{
+			const bool repeat = (kc.EventType() & kKeyEventRepeat);
+			if(repeat && (state == uint32_max || state == BST_CHECKED))
+				state = BST_CHECKED;
+			else if(!repeat && (state == uint32_max || state == BST_UNCHECKED))
+				state = BST_UNCHECKED;
+			else
+				state = BST_INDETERMINATE;
+		}
+	}
+	CheckDlgButton(IDC_NOTESREPEAT, state);
 }
 
 

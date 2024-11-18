@@ -662,8 +662,6 @@
 #define IDC_FINDHOTKEY_LABEL            2107
 #define IDC_NOTESREPEAT                 2108
 #define IDC_REMCHANSLIST                2108
-#define IDC_NOTESREPEAT2                2109
-#define IDC_NONOTESREPEAT               2109
 #define IDC_EFFECTLETTERSIT             2110
 #define IDC_INSVIEWPLG                  2110
 #define IDC_EFFECTLETTERSXM             2111
