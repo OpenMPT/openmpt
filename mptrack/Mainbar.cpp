@@ -33,11 +33,11 @@ END_MESSAGE_MAP()
 
 void COctaveEdit::OnChar(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 {
-	if(nChar >= '0' + MIN_BASEOCTAVE && nChar <= '0' + MAX_BASEOCTAVE)
-		m_owner.SetBaseOctave(nChar - '0');
-	else if(nChar == '+' && m_owner.GetBaseOctave() < MAX_BASEOCTAVE)
+	if(nChar >= _T('0') + MIN_BASEOCTAVE && nChar <= _T('0') + MAX_BASEOCTAVE)
+		m_owner.SetBaseOctave(nChar - _T('0'));
+	else if(nChar == _T('+') && m_owner.GetBaseOctave() < MAX_BASEOCTAVE)
 		m_owner.SetBaseOctave(m_owner.GetBaseOctave() + 1);
-	else if(nChar == '-' && m_owner.GetBaseOctave() > MIN_BASEOCTAVE)
+	else if(nChar == _T('-') && m_owner.GetBaseOctave() > MIN_BASEOCTAVE)
 		m_owner.SetBaseOctave(m_owner.GetBaseOctave() - 1);
 }
 
@@ -483,19 +483,16 @@ UINT CMainToolBar::GetBaseOctave() const
 }
 
 
-BOOL CMainToolBar::SetBaseOctave(UINT nOctave)
+void CMainToolBar::SetBaseOctave(UINT octave)
 {
-	TCHAR s[64];
+	if(octave == static_cast<UINT>(m_currentOctave) || octave < MIN_BASEOCTAVE || octave > MAX_BASEOCTAVE)
+		return;
 
-	if((nOctave < MIN_BASEOCTAVE) || (nOctave > MAX_BASEOCTAVE)) return FALSE;
-	if(nOctave != (UINT)m_currentOctave)
-	{
-		m_currentOctave = nOctave;
-		wsprintf(s, _T("Octave %d"), nOctave);
-		m_EditOctave.SetWindowText(s);
-		m_SpinOctave.SetPos(nOctave);
-	}
-	return TRUE;
+	m_currentOctave = octave;
+	TCHAR s[32];
+	wsprintf(s, _T("Octave %d"), octave);
+	m_EditOctave.SetWindowText(s);
+	m_SpinOctave.SetPos(octave);
 }
 
 
@@ -533,6 +530,7 @@ void CMainToolBar::RemoveUpdateInfo()
 
 static void EnableEdit(CEdit &edit, CSpinButtonCtrl &spin, bool enable)
 {
+	// Avoid flicker when enabling / disabling controls
 	edit.SetRedraw(FALSE);
 	if(!enable)
 		edit.SetWindowText(_T("---"));

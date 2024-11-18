@@ -133,7 +133,7 @@ public:
 #endif // MPT_COMPILER_CLANG
 	void Init(CMainFrame *);
 	UINT GetBaseOctave() const;
-	BOOL SetBaseOctave(UINT nOctave);
+	void SetBaseOctave(UINT nOctave);
 	void SetCurrentSong(CSoundFile *pModDoc);
 
 	bool ShowUpdateInfo(const CString &newVersion, const CString &infoURL, bool showHighLight);
