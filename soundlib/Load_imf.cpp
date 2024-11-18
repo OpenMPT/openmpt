@@ -437,12 +437,12 @@ bool CSoundFile::ReadIMF(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Read channel configuration
 	std::bitset<32> ignoreChannels;  // bit set for each channel that's completely disabled
-	uint64 channelMuteStatus = 0xAAAA'AAAA << (GetNumChannels() * 2);
+	uint64 channelMuteStatus = static_cast<uint64>(0xAAAA'AAAA) << (GetNumChannels() * 2);
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)
 	{
 		ChnSettings[chn].nPan = static_cast<uint16>(fileHeader.channels[chn].panning * 256 / 255);
 		ChnSettings[chn].szName = mpt::String::ReadBuf(mpt::String::nullTerminated, fileHeader.channels[chn].name);
-		channelMuteStatus |= fileHeader.channels[chn].status << (chn * 2);
+		channelMuteStatus |= static_cast<uint64>(fileHeader.channels[chn].status) << (chn * 2);
 		// TODO: reverb/chorus?
 		switch(fileHeader.channels[chn].status)
 		{
