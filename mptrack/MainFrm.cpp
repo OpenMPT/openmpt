@@ -502,6 +502,9 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 {
 	const UINT nFiles = ::DragQueryFileW(hDropInfo, (UINT)-1, NULL, 0);
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
+#ifdef MPT_BUILD_DEBUG
+	const bool scanAll = CInputHandler::GetModifierMask().test_all(ModCtrl | ModShift | ModAlt);
+#endif
 	for(UINT f = 0; f < nFiles; f++)
 	{
 		UINT size = ::DragQueryFile(hDropInfo, f, nullptr, 0) + 1;
@@ -511,7 +514,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 			const mpt::PathString file = mpt::PathString::FromNative(fileName.data());
 #ifdef MPT_BUILD_DEBUG
 			// Debug Hack: Quickly scan a folder containing module files (without running out of window handles ;)
-			if(CInputHandler::GetModifierMask().test_all(ModCtrl | ModShift | ModAlt) && mpt::native_fs{}.is_directory(file))
+			if(scanAll && mpt::native_fs{}.is_directory(file))
 			{
 				FolderScanner scanner(file, FolderScanner::kOnlyFiles | FolderScanner::kFindInSubDirectories);
 				mpt::PathString scanName;
@@ -521,6 +524,7 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 					mpt::IO::InputFile inputFile(scanName, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
 					if(!inputFile.IsValid())
 						continue;
+					SetHelpText(scanName.GetFilename().ToCString());
 					auto sndFile = std::make_unique<CSoundFile>();
 					MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + scanName.ToUnicode());
 					if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
@@ -530,8 +534,21 @@ void CMainFrame::OnDropFiles(HDROP hDropInfo)
 					}
 					total++;
 				}
+				SetHelpText(_T(""));
 				Reporting::Information(MPT_UFORMAT("Scanned {} files, {} failed")(total, failed));
-				break;
+				continue;
+			} else if(scanAll)
+			{
+				mpt::IO::InputFile inputFile(file, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+				if(!inputFile.IsValid())
+					continue;
+				auto sndFile = std::make_unique<CSoundFile>();
+				SetHelpText(file.GetFilename().ToCString());
+				MPT_LOG_GLOBAL(LogDebug, "info", U_("Loading ") + file.ToUnicode());
+				if(!sndFile->Create(GetFileReader(inputFile), CSoundFile::loadCompleteModule, nullptr))
+					MPT_LOG_GLOBAL(LogDebug, "info", U_("FAILED: ") + file.ToUnicode());
+				SetHelpText(_T(""));
+				continue;
 			}
 #endif
 			theApp.OpenDocumentFile(file.ToCString());
