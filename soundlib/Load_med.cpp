@@ -1388,9 +1388,9 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			if((header.mixEchoType == 1 || header.mixEchoType == 2) && numPlugins < MAX_MIXPLUGINS)
 			{
 				// Emulating MED echo using the DMO echo requires to compensate for the differences in initial feedback in the latter.
-				const float feedback = 1.0f / (1 << std::max(header.mixEchoDepth, uint8(1)));  // The feedback we want
-				const float initialFeedback = std::sqrt(1.0f - (feedback * feedback));         // Actual strength of first delay's feedback
-				const float wetFactor = feedback / initialFeedback;                            // Factor to compensate for this
+				const float feedback = 1.0f / (1 << std::clamp(header.mixEchoDepth, uint8(1), uint8(9)));  // The feedback we want
+				const float initialFeedback = std::sqrt(1.0f - (feedback * feedback));                     // Actual strength of first delay's feedback
+				const float wetFactor = feedback / initialFeedback;                                        // Factor to compensate for this
 				const float delay = (std::max(header.mixEchoLength.get(), uint16(1)) - 1) / 1999.0f;
 				SNDMIXPLUGIN &mixPlug = m_MixPlugins[numPlugins];
 				mpt::reconstruct(mixPlug);
