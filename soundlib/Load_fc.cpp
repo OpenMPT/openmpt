@@ -311,7 +311,7 @@ bool CSoundFile::ReadFC(FileReader &file, ModLoadingFlags loadFlags)
 	SetupMODPanning(true);
 	m_SongFlags.set(SONG_IMPORTED | SONG_ISAMIGA);
 	m_nSamples = isFC14 ? 90 : 57;
-	m_nInstruments = static_cast<INSTRUMENTINDEX>(fileHeader.volSequenceSize / 64u + 1);
+	m_nInstruments = std::min(static_cast<INSTRUMENTINDEX>(fileHeader.volSequenceSize / 64u + 1), static_cast<SAMPLEINDEX>(MAX_INSTRUMENTS - 1));
 	m_playBehaviour.set(kMODSampleSwap);
 	m_playBehaviour.set(kApplyUpperPeriodLimit);
 	m_nMinPeriod = 113 * 4;
