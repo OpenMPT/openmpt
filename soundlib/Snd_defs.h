@@ -333,8 +333,8 @@ DECLARE_FLAGSET(SongFlags)
 #define SNDMIX_MUTECHNMODE    0x100000 // Notes are not played on muted channels
 
 
-static constexpr uint32 MAX_GLOBAL_VOLUME = 256;
-static constexpr uint32 MAX_PREAMP = 2000;
+inline constexpr uint32 MAX_GLOBAL_VOLUME = 256;
+inline constexpr uint32 MAX_PREAMP = 2000;
 
 // When to execute a position override event
 enum class OrderTransitionMode : uint8
