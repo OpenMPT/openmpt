@@ -786,7 +786,7 @@ UINT CViewInstrument::GetNcButtonAtPoint(CPoint point, CRect *outRect) const
 	GetWindowRect(&rcWnd);
 	for(UINT i = 0; i < ENV_LEFTBAR_BUTTONS; i++)
 	{
-		if(!(m_NcButtonState[i] & NCBTNS_DISABLED) && GetNcButtonRect(i, rect))
+		if(GetNcButtonRect(i, rect))
 		{
 			rect.OffsetRect(rcWnd.left, rcWnd.top);
 			if(rect.PtInRect(point))
@@ -836,7 +836,7 @@ void CViewInstrument::UpdateNcButtonState()
 		case ID_ENVELOPE_LOAD:
 		case ID_ENVELOPE_SAVE:     if(GetInstrumentPtr() == nullptr) dwStyle |= NCBTNS_DISABLED; break;
 		}
-		if (m_nBtnMouseOver == i)
+		if (m_nBtnMouseOver == i && !(m_NcButtonState[i] & NCBTNS_DISABLED))
 		{
 			dwStyle |= NCBTNS_MOUSEOVER;
 			if (m_dwStatus & INSSTATUS_NCLBTNDOWN) dwStyle |= NCBTNS_PUSHED;
@@ -1400,7 +1400,7 @@ void CViewInstrument::OnNcMouseMove(UINT nHitTest, CPoint point)
 
 void CViewInstrument::OnNcLButtonDown(UINT uFlags, CPoint point)
 {
-	if(m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS)
+	if(m_nBtnMouseOver < ENV_LEFTBAR_BUTTONS && !(m_NcButtonState[m_nBtnMouseOver] & NCBTNS_DISABLED))
 	{
 		m_dwStatus |= INSSTATUS_NCLBTNDOWN;
 		if(cLeftBarButtons[m_nBtnMouseOver] != ID_SEPARATOR)
@@ -2857,7 +2857,11 @@ INT_PTR CViewInstrument::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	pTI->hwnd = m_hWnd;
 	pTI->uId = buttonID;
 	pTI->rect = ncRect;
-	CString text = LoadResourceString(buttonID);
+	CString text;
+	if(m_NcButtonState[ncButton] & NCBTNS_DISABLED)
+		text = MPT_CFORMAT("Feature is not available in the {} format.")(mpt::ToCString(GetDocument()->GetSoundFile().GetModSpecifications().GetFileExtensionUpper()));
+	else
+		text = LoadResourceString(buttonID);
 
 	CommandID cmd = kcNull;
 	switch(buttonID)
@@ -2878,7 +2882,7 @@ INT_PTR CViewInstrument::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 	case ID_ENVELOPE_LOAD: cmd = kcInstrumentEnvelopeLoad; break;
 	case ID_ENVELOPE_SAVE: cmd = kcInstrumentEnvelopeSave; break;
 	}
-	if(cmd != kcNull)
+	if(cmd != kcNull && !(m_NcButtonState[ncButton] & NCBTNS_DISABLED))
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
