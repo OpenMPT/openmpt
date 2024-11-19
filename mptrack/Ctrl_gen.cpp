@@ -575,8 +575,8 @@ void CCtrlGeneral::OnVSTiVolChanged()
 		m_EditVSTiVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = mpt::parse<UINT>(s);
-			Limit(n, 0u, 2000u);
+			uint32 n = mpt::parse<uint32>(s);
+			Limit(n, uint32(0), MAX_PREAMP);
 			if (n != m_sndFile.m_nVSTiVolume)
 			{
 				m_editsLocked = true;
@@ -599,8 +599,8 @@ void CCtrlGeneral::OnSamplePAChanged()
 		m_EditSamplePA.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
 		{
-			UINT n = mpt::parse<UINT>(s);
-			Limit(n, 0u, 2000u);
+			uint32 n = mpt::parse<uint32>(s);
+			Limit(n, uint32(0), MAX_PREAMP);
 			if (n != m_sndFile.m_nSamplePreAmp)
 			{
 				m_editsLocked = true;
