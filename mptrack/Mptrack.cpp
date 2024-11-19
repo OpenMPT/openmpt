@@ -2441,7 +2441,7 @@ bool CTrackApp::OpenURL(const mpt::ustring &url)
 	return OpenURL(mpt::PathString::FromUnicode(url));
 }
 
-bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
+bool CTrackApp::OpenURL(const mpt::PathString &lpszURL, const mpt::tstring &param)
 {
 	if(!lpszURL.empty() && theApp.m_pMainWnd)
 	{
@@ -2449,14 +2449,22 @@ bool CTrackApp::OpenURL(const mpt::PathString &lpszURL)
 			theApp.m_pMainWnd->m_hWnd,
 			_T("open"),
 			lpszURL.AsNative().c_str(),
-			NULL,
-			NULL,
+			param.empty() ? nullptr : param.c_str(),
+			nullptr,
 			SW_SHOW)) >= 32)
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+bool CTrackApp::OpenDirectory(const mpt::PathString &directory)
+{
+	if(mpt::native_fs{}.is_file(directory))
+		return OpenURL(P_("explorer.exe"), MPT_TFORMAT("/select,\"{}\"")(directory.AsNative()));
+	else
+		return OpenURL(directory);
 }
 
 
