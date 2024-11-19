@@ -673,8 +673,8 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 	LimitMax(m_nDefaultRowsPerBeat, MAX_ROWS_PER_BEAT);
 	LimitMax(m_nDefaultRowsPerMeasure, MAX_ROWS_PER_BEAT);
 	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
-	LimitMax(m_nSamplePreAmp, 2000);
-	LimitMax(m_nVSTiVolume, 2000);
+	LimitMax(m_nSamplePreAmp, MAX_PREAMP);
+	LimitMax(m_nVSTiVolume, MAX_PREAMP);
 	if(!m_tempoSwing.empty())
 		m_tempoSwing.resize(m_nDefaultRowsPerBeat);
 
