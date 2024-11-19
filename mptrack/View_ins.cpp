@@ -171,9 +171,9 @@ void CViewInstrument::UpdateScrollSize()
 	if(pModDoc)
 	{
 		SIZE sizeTotal, sizePage, sizeLine;
-		uint32 maxTick = EnvGetTick(EnvGetLastPoint());
+		uint32 maxTick = std::max(EnvGetTick(EnvGetLastPoint()), m_maxTickDrag);
 
-		sizeTotal.cx = mpt::saturate_round<int>((maxTick + 2) * m_zoom);
+		sizeTotal.cx = mpt::saturate_round<int>((maxTick + 8) * m_zoom);
 		sizeTotal.cy = 1;
 		sizeLine.cx = mpt::saturate_round<int>(m_zoom);
 		sizeLine.cy = 2;
@@ -1480,6 +1480,7 @@ void CViewInstrument::OnMouseMove(UINT, CPoint pt)
 		{
 			// Ctrl pressed -> move tail of envelope
 			changed = EnvSetValue(m_nDragItem - 1, nTick, nVal, CInputHandler::CtrlPressed());
+			m_maxTickDrag = std::max(m_maxTickDrag, EnvGetTick(EnvGetLastPoint()));
 		} else
 		{
 			int nPoint = ScreenToPoint(pt.x, pt.y);
@@ -1659,6 +1660,7 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 			if(rect.PtInRect(pt))
 			{
 				m_nDragItem = i + 1;
+				m_maxTickDrag = EnvGetTick(EnvGetLastPoint());
 				break;
 			}
 		}
@@ -1727,6 +1729,11 @@ void CViewInstrument::OnLButtonDown(UINT, CPoint pt)
 void CViewInstrument::OnLButtonUp(UINT, CPoint)
 {
 	m_mouseMoveModified = false;
+	if(m_maxTickDrag)
+	{
+		m_maxTickDrag = 0;
+		UpdateScrollSize();
+	}
 	if(m_dwStatus & INSSTATUS_SPLITCURSOR)
 	{
 		m_dwStatus &= ~INSSTATUS_SPLITCURSOR;
