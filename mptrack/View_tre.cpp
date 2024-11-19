@@ -1791,13 +1791,18 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 
 	switch(modItem.type)
 	{
+	case MODITEM_HDR_SONG:
+		CTrackApp::OpenDirectory(GetDocumentFromItem(hItem)->GetPathNameMpt());
+		break;
 	case MODITEM_INSLIB_SONG:
 		theApp.OpenDocumentFile(InsLibGetFullPath(hItem).ToCString());
 		break;
 	case MODITEM_HDR_INSTRUMENTLIB:
-		CTrackApp::OpenDirectory(m_InstrLibPath);
+		CTrackApp::OpenDirectory(m_InstrLibPath + m_SongFileName);
 		break;
 	case MODITEM_INSLIB_FOLDER:
+	case MODITEM_INSLIB_INSTRUMENT:
+	case MODITEM_INSLIB_SAMPLE:
 		// Open path in Explorer
 		CTrackApp::OpenDirectory(InsLibGetFullPath(hItem));
 		break;
@@ -3001,6 +3006,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, defaultID, ih->GetKeyTextFromCommand(kcTreeViewOpen, _T("&View")));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, _T("&Close"));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, ih->GetKeyTextFromCommand(kcTreeViewRename, _T("Re&name")));
+			AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 			break;
 
 		case MODITEM_COMMENTS:
@@ -3068,7 +3074,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, ih->GetKeyTextFromCommand(kcTreeViewRename, _T("Re&name Sample")));
 			if(modDoc && !modDoc->GetNumInstruments())
 			{
-				AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 				AppendMenu(hMenu, (modDoc->IsSampleMuted((SAMPLEINDEX)modItemID) ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, _T("&Mute Sample"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, _T("S&olo Sample"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, _T("&Unmute all"));
@@ -3100,7 +3106,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 
 				if(menuForThisSample || anyPath || anyModified)
 				{
-					AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+					AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 					if(menuForThisSample) AppendMenu(hMenu, MF_STRING | ((sndFile->GetType() == MOD_TYPE_MPT || hasPath) ? 0 : MF_GRAYED), ID_MODTREE_SETPATH, _T("Set P&ath"));
 					if(menuForThisSample) AppendMenu(hMenu, MF_STRING | ((hasPath && sample.HasSampleData() && sample.uFlags[SMP_MODIFIED]) ? 0 : MF_GRAYED), ID_MODTREE_SAVEITEM, _T("&Save"));
 					if(anyModified) AppendMenu(hMenu, MF_STRING, ID_MODTREE_SAVEALL, _T("&Save All"));
@@ -3121,7 +3127,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, ih->GetKeyTextFromCommand(kcTreeViewRename, _T("Re&name Instrument")));
 			if(modDoc)
 			{
-				AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 				AppendMenu(hMenu, (modDoc->IsInstrumentMuted((INSTRUMENTINDEX)modItemID) ? MF_CHECKED : 0) | MF_STRING, ID_MODTREE_MUTE, _T("&Mute Instrument"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_SOLO, _T("S&olo Instrument"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_UNMUTEALL, _T("&Unmute all"));
@@ -3154,7 +3160,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, defaultID, ih->GetKeyTextFromCommand(kcTreeViewOpen, _T("&Map Instrument")));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, ih->GetKeyTextFromCommand(kcTreeViewPlay, _T("&Play Instrument")));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, _T("&Unmap Instrument"));
-			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+			AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			[[fallthrough]];
 		case MODITEM_HDR_MIDILIB:
 		case MODITEM_HDR_MIDIGROUP:
@@ -3194,7 +3200,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, defaultID, ih->GetKeyTextFromCommand(kcTreeViewOpen, _T("&Browse Song...")));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Edit Song"));
 			hSubMenu = AddLibraryFindAndSortMenus(hMenu);
-			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+			AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, ih->GetKeyTextFromCommand(kcTreeViewDelete, _T("&Delete")));
 			break;
 
@@ -3207,6 +3213,8 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			} else
 			{
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_PLAY, ih->GetKeyTextFromCommand(kcTreeViewPlay, _T("&Play File")));
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
+				AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 				AppendMenu(hMenu, MF_STRING, ID_MODTREE_REMOVE, ih->GetKeyTextFromCommand(kcTreeViewDelete, _T("&Delete")));
 			}
 			hSubMenu = AddLibraryFindAndSortMenus(hMenu);
@@ -3236,7 +3244,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			|| (modItem.type == MODITEM_HDR_INSTRUMENTLIB))
 		{
 			if(addSeparator || defaultID)
-				AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+				AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			AppendMenu(hMenu, TrackerSettings::Instance().showDirsInSampleBrowser ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWDIRS, _T("Show &Directories in Sample Browser"));
 			AppendMenu(hMenu, (m_showAllFiles) ? (MF_STRING|MF_CHECKED) : MF_STRING, ID_MODTREE_SHOWALLFILES, _T("Show &All Files"));
 			AppendMenu(hMenu, (m_showAllFiles) ? MF_STRING : (MF_STRING|MF_CHECKED), ID_MODTREE_SOUNDFILESONLY, _T("Show &Sound Files"));
@@ -3244,7 +3252,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 		}
 
 		if(addSeparator || defaultID)
-			AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
+			AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 		AppendMenu(hMenu, MF_STRING, ID_MODTREE_REFRESH, _T("&Refresh"));
 
 		TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x + 4, pt.y, 0, m_hWnd, NULL);
@@ -3779,7 +3787,7 @@ void CModTree::InsertOrDupItem(bool insert)
 			std::vector<INSTRUMENTINDEX> newOrder = GenerateInsertVector<INSTRUMENTINDEX>(sndFile.GetNumInstruments(), modItemID, static_cast<INSTRUMENTINDEX>(insert ? 0 : modItemID), 1);
 			if(modDoc.ReArrangeInstruments(newOrder) != INSTRUMENTINDEX_INVALID)
 			{
-				modDoc.UpdateAllViews(NULL, InstrumentHint().Info().Envelope().Names());
+				modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
 				modDoc.UpdateAllViews(nullptr, PatternHint().Data());
 				modDoc.SetModified();
 			} else
@@ -3848,7 +3856,7 @@ void CModTree::OnSaveItem()
 		SAMPLEINDEX smpID = static_cast<SAMPLEINDEX>(modItem.val1);
 		pModDoc->SaveSample(smpID);
 		if(pModDoc)
-			pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info());
+			pModDoc->UpdateAllViews(nullptr, SampleHint(smpID).Info());
 		OnRefreshTree();
 	}
 }
@@ -3889,7 +3897,7 @@ void CModTree::OnReloadItem()
 			{
 				pModDoc->SetModified();
 			}
-			pModDoc->UpdateAllViews(NULL, SampleHint(smpID).Info().Data().Names());
+			pModDoc->UpdateAllViews(nullptr, SampleHint(smpID).Info().Data().Names());
 		}
 
 		OnRefreshTree();
@@ -4028,7 +4036,7 @@ BOOL CModTree::OnDrop(COleDataObject *pDataObject, DROPEFFECT, CPoint)
 	if(stgm.hGlobal == NULL)
 		return FALSE;
 	hDropInfo = (HDROP)stgm.hGlobal;
-	nFiles = DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	nFiles = DragQueryFile(hDropInfo, (UINT)-1, nullptr, 0);
 	if(nFiles)
 	{
 		UINT size = ::DragQueryFile(hDropInfo, 0, nullptr, 0) + 1;
@@ -4601,7 +4609,7 @@ void CModTree::OnEndLabelEdit(NMHDR *nmhdr, LRESULT *result)
 void CModTree::OnDropFiles(HDROP hDropInfo)
 {
 	bool refreshDLS = false;
-	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, NULL, 0);
+	const UINT nFiles = ::DragQueryFile(hDropInfo, (UINT)-1, nullptr, 0);
 	CMainFrame::GetMainFrame()->SetForegroundWindow();
 	for(UINT f = 0; f < nFiles; f++)
 	{

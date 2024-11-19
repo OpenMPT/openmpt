@@ -205,9 +205,9 @@ public:
 	static bool OpenURL(const std::string &url);  // UTF8
 	static bool OpenURL(const CString &url);
 	static bool OpenURL(const mpt::ustring &url);
-	static bool OpenURL(const mpt::PathString &lpszURL);
+	static bool OpenURL(const mpt::PathString &lpszURL, const mpt::tstring &param = {});
 	static bool OpenFile(const mpt::PathString &file) { return OpenURL(file); };
-	static bool OpenDirectory(const mpt::PathString &directory) { return OpenURL(directory); };
+	static bool OpenDirectory(const mpt::PathString &directory);
 
 	// Retrieve the user-supplied MIDI port name for a MIDI input or output port.
 	mpt::ustring GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName = true);
