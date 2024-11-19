@@ -58,6 +58,7 @@ protected:
 
 	float m_zoom = 4;
 	int m_envPointSize = 4;
+	uint32 m_maxTickDrag = 0;  // Maximum tick for scroll size during envelope node dragging
 
 	bool m_bGrid = true;
 	bool m_bGridForceRedraw = false;
