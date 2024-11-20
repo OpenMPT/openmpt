@@ -88,8 +88,7 @@ public:
 	virtual void OnActivatePage(LPARAM) {}
 	virtual void OnDeactivatePage() {}
 	BOOL OnInitDialog() override;
-	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
-	virtual BOOL GetToolTipText(UINT, LPTSTR) { return FALSE; }
+	virtual CString GetToolTipText(UINT) { return {}; }
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModControlDlg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -179,7 +178,6 @@ protected:
 	afx_msg void OnSwitchToView();
 	afx_msg LRESULT OnActivateModView(WPARAM, LPARAM);
 	afx_msg LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnGetToolTipText(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -215,6 +213,7 @@ public:
 public:
 	//{{AFX_VIRTUAL(CModScrollView)
 	void OnInitialUpdate() override;
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnDraw(CDC *) override {}
 	void OnPrepareDC(CDC *, CPrintInfo *) override {}
 	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
@@ -223,7 +222,6 @@ public:
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
 	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
-	BOOL PreTranslateMessage(MSG *pMsg) override;
 	//}}AFX_VIRTUAL
 
 	CModControlDlg *GetControlDlg() { return static_cast<CModControlView *>(CWnd::FromHandle(m_hWndCtrl))->GetCurrentControlDlg(); }

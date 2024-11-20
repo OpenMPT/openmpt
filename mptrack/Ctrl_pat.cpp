@@ -85,7 +85,6 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_EN_CHANGE(IDC_EDIT_SEQNUM,             &CCtrlPatterns::OnSequenceNumChanged)
 	ON_NOTIFY(TBN_DROPDOWN, IDC_TOOLBAR1,     &CCtrlPatterns::OnTbnDropDownToolBar)
 	ON_UPDATE_COMMAND_UI(IDC_PATTERN_RECORD,  &CCtrlPatterns::OnUpdateRecord)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,             &CCtrlPatterns::OnToolTipText)
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
@@ -1331,30 +1330,9 @@ void CCtrlPatterns::OnXButtonUp(UINT nFlags, UINT nButton, CPoint point)
 }
 
 
-BOOL CCtrlPatterns::OnToolTip(UINT /*id*/, NMHDR *pNMHDR, LRESULT * /*pResult*/)
+CString CCtrlPatterns::GetToolTipText(UINT id)
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-	UINT_PTR nID = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = ::GetDlgCtrlID((HWND)nID);
-		if(nID)
-		{
-			pTTT->lpszText = MAKEINTRESOURCE(nID);
-			pTTT->hinst = AfxGetResourceHandle();
-			return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
-
-BOOL CCtrlPatterns::GetToolTipText(UINT id, LPTSTR str)
-{
-	CString fmt;
-	const TCHAR *s = nullptr;
+	CString s;
 	CommandID cmd = kcNull;
 	switch(id)
 	{
@@ -1370,9 +1348,9 @@ BOOL CCtrlPatterns::GetToolTipText(UINT id, LPTSTR str)
 	case ID_PATTERN_MIDIMACRO: s = _T("Zxx Macro Configuration"); cmd = kcShowMacroConfig; break;
 	case ID_PATTERN_CHORDEDIT: s = _T("Chord Editor"); cmd = kcChordEditor; break;
 	case ID_EDIT_UNDO:
-		fmt = _T("Undo");
+		s = _T("Undo");
 		if(m_modDoc.GetPatternUndo().CanUndo())
-			fmt += _T(" ") + m_modDoc.GetPatternUndo().GetUndoName();
+			s += _T(" ") + m_modDoc.GetPatternUndo().GetUndoName();
 		cmd = kcEditUndo;
 		break;
 	case ID_PATTERN_PROPERTIES: s = _T("Pattern Properties"); cmd = kcShowPatternProperties; break;
@@ -1381,20 +1359,15 @@ BOOL CCtrlPatterns::GetToolTipText(UINT id, LPTSTR str)
 	case ID_OVERFLOWPASTE: s = _T("Toggle Overflow Paste"); cmd = kcToggleOverflowPaste; break;
 	case IDC_PATTERN_LOOP: s = _T("Toggle Loop Pattern"); cmd = kcChangeLoopStatus; break;
 	case IDC_PATTERN_FOLLOWSONG: s = _T("Toggle Follow Song"); cmd = kcToggleFollowSong; break;
-	default:
-		return FALSE;
 	}
 
-	if(s != nullptr)
-		fmt = s;
 	if(cmd != kcNull)
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			fmt += MPT_CFORMAT(" ({})")(keyText);
+			s += MPT_CFORMAT(" ({})")(keyText);
 	}
-	_tcscpy(str, fmt.GetString());
-	return TRUE;
+	return s;
 }
 
 

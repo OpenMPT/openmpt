@@ -1757,27 +1757,24 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 }
 
 
-BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
+CString CCtrlInstruments::GetToolTipText(UINT uId)
 {
-	//Note: pszText points to a TCHAR array of length 256 (see CChildFrame::OnToolTipText).
-	//Note2: If there's problems in getting tooltips showing for certain tools,
-	//		 setting the tab order may have effect.
-	if ((pszText) && (uId))
+	CString s;
+	if(uId)
 	{
 		CWnd *wnd = GetDlgItem(uId);
 		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
 		if(!isEnabled && !m_sndFile.GetNumInstruments())
 		{
-			_tcscpy(pszText, _T("Create a new instrument to enable instrument mode."));
-			return TRUE;
+			s = _T("Create a new instrument to enable instrument mode.");
+			return s;
 		}
 
 		ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
 		if(pIns == nullptr)
-			return FALSE;
+			return s;
 
 		const auto plusMinus = mpt::ToWin(mpt::Charset::UTF8, "\xC2\xB1");
-		const TCHAR *s = nullptr;
 		CommandID cmd = kcNull;
 		switch(uId)
 		{
@@ -1792,36 +1789,33 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 			if(isEnabled)
 			{
 				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
-				wsprintf(pszText, _T("Tempo Range: %u - %u"), specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
+				s = MPT_CFORMAT("Tempo Range: {} - {}")(specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
 			} else
 			{
-				_tcscpy(pszText, _T("Only available in MPTM format"));
+				s = _T("Only available in MPTM format");
 			}
-			return TRUE;
-
+			break;
 		case IDC_EDIT7:
 			// Fade Out
 			if(!pIns->nFadeOut)
-				_tcscpy(pszText, _T("Fade disabled"));
+				s =_T("Fade disabled");
 			else
-				wsprintf(pszText, _T("%u ticks (Higher value <-> Faster fade out)"), 0x8000 / pIns->nFadeOut);
-			return TRUE;
-
+				s = MPT_CFORMAT("{} ticks (Higher value <-> Faster fade out)")(0x8000 / pIns->nFadeOut);
+			break;
 		case IDC_EDIT8:
 			// Global volume
 			if(isEnabled)
-				_tcscpy(pszText, CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0));
+				s = CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0);
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in IT / MPTM format");
+			break;
 		case IDC_EDIT9:
 			// Panning
 			if(isEnabled)
-				_tcscpy(pszText, CModDoc::PanningToString(pIns->nPan, 128));
+				s = CModDoc::PanningToString(pIns->nPan, 128);
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
+				s = _T("Only available in IT / MPTM format");
+			break;
 
 #ifndef NO_PLUGINS
 		case IDC_EDIT10:
@@ -1834,79 +1828,68 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 				{
 					int32 prog = pIns->nMidiProgram - 1;
 					if(pIns->wMidiBank > 1) prog += 128 * (pIns->wMidiBank - 1);
-					_tcscpy(pszText, plugin.pMixPlugin->GetFormattedProgramName(prog));
+					s = plugin.pMixPlugin->GetFormattedProgramName(prog);
 				}
 			}
-			return TRUE;
+			break;
 #endif // NO_PLUGINS
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
 			// Plugin volume handling
-			if(pIns->nMixPlug < 1) return FALSE;
+			if(pIns->nMixPlug < 1)
+				return s;
 			if(m_sndFile.m_playBehaviour[kMIDICCBugEmulation])
 			{
 				velocityStyle.EnableWindow(FALSE);
 				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
-				_tcscpy(pszText, _T("To enable, clear Plugin volume command bug emulation flag from Song Properties"));
-				return TRUE;
+				s = _T("To enable, clear Plugin volume command bug emulation flag from Song Properties");
 			} else
 			{
 				if(uId == IDC_PLUGIN_VELOCITYSTYLE)
-				{
-					_tcscpy(pszText, _T("Volume commands (vxx) next to a note are sent as note velocity instead."));
-					return TRUE;
-				}
-				return FALSE;
+					s = _T("Volume commands (vxx) next to a note are sent as note velocity instead.");
 			}
-
+			break;
 		case IDC_COMBO5:
 			// MIDI Channel
 			s = _T("Mapped: MIDI channel corresponds to pattern channel modulo 16");
 			break;
-
 		case IDC_SLIDER1:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d%% volume variation"), plusMinus.c_str(), pIns->nVolSwing);
+				s = MPT_CFORMAT("{}{}% volume variation")(plusMinus, pIns->nVolSwing);
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in IT / MPTM format");
+			break;
 		case IDC_SLIDER2:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d panning variation"), plusMinus.c_str(), pIns->nPanSwing);
+				s = MPT_CFORMAT("{}{} panning variation")(plusMinus, pIns->nPanSwing);
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in IT / MPTM format");
+			break;
 		case IDC_SLIDER3:
 			if(isEnabled)
-				wsprintf(pszText, _T("%u"), pIns->GetCutoff());
+				s = mpt::cfmt::val(pIns->GetCutoff());
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in IT / MPTM format");
+			break;
 		case IDC_SLIDER4:
 			if(isEnabled)
-				wsprintf(pszText, _T("%u (%i dB)"), pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
+				s = MPT_CFORMAT("{} ({} dB)")(pIns->GetResonance(), Util::muldivr(pIns->GetResonance(), 24, 128));
 			else
-				_tcscpy(pszText, _T("Only available in IT / MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in IT / MPTM format");
+			break;
 		case IDC_SLIDER6:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d cutoff variation"), plusMinus.c_str(), pIns->nCutSwing);
+				s = MPT_CFORMAT("{}{} cutoff variation")(plusMinus, pIns->nCutSwing);
 			else
-				_tcscpy(pszText, _T("Only available in MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in MPTM format");
+			break;
 		case IDC_SLIDER7:
 			if(isEnabled)
-				wsprintf(pszText, _T("%s%d resonance variation"), plusMinus.c_str(), pIns->nResSwing);
+				s = MPT_CFORMAT("{}{} resonance variation")(plusMinus, pIns->nResSwing);
 			else
-				_tcscpy(pszText, _T("Only available in MPTM format"));
-			return TRUE;
-
+				s = _T("Only available in MPTM format");
+			break;
 		case IDC_PITCHWHEELDEPTH:
 			s = _T("Set this to the actual Pitch Wheel Depth used in your plugin on this channel.");
 			break;
@@ -1939,19 +1922,14 @@ BOOL CCtrlInstruments::GetToolTipText(UINT uId, LPTSTR pszText)
 
 		}
 
-		if(s != nullptr)
+		if(cmd != kcNull)
 		{
-			_tcscpy(pszText, s);
-			if(cmd != kcNull)
-			{
-				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
-				if (!keyText.IsEmpty())
-					_tcscat(pszText, MPT_TFORMAT(" ({})")(keyText).c_str());
-			}
-			return TRUE;
+			auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+			if (!keyText.IsEmpty())
+				s += MPT_CFORMAT(" ({})")(keyText);
 		}
 	}
-	return FALSE;
+	return s;
 }
 
 

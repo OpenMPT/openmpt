@@ -159,7 +159,6 @@ protected:
 	afx_msg void OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeactivateWnd);
 	afx_msg LRESULT OnChangeViewClass(WPARAM, LPARAM lParam);
 	afx_msg LRESULT OnInstrumentSelected(WPARAM, LPARAM lParam);
-	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

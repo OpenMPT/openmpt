@@ -530,12 +530,12 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
+CString CCtrlSamples::GetToolTipText(UINT uId)
 {
-	if ((pszText) && (uId))
+	CString s;
+	if(uId)
 	{
 		UINT val = GetDlgItemInt(uId);
-		const TCHAR *s = nullptr;
 		CommandID cmd = kcNull;
 		switch(uId)
 		{
@@ -559,19 +559,19 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_EDIT8:
 			// Volume to dB
 			if(IsOPLInstrument())
-				_tcscpy(pszText, (mpt::tfmt::fix((static_cast<int32>(val) - 64) * 0.75, 2) + _T(" dB")).c_str());
+				s = mpt::cfmt::fix((static_cast<int32>(val) - 64) * 0.75, 2) + _T(" dB");
 			else
-				_tcscpy(pszText, CModDoc::LinearToDecibels(val, 64.0));
-			return TRUE;
+				s = CModDoc::LinearToDecibels(val, 64.0);
+			break;
 
 		case IDC_EDIT9:
 			// Panning
 			if(m_nSample)
 			{
 				const ModSample &sample = m_sndFile.GetSample(m_nSample);
-				_tcscpy(pszText, CModDoc::PanningToString(sample.nPan, 128));
+				s = CModDoc::PanningToString(sample.nPan, 128);
 			}
-			return TRUE;
+			break;
 
 		case IDC_EDIT5:
 		case IDC_SPIN5:
@@ -583,14 +583,12 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 				if(sample.uFlags[CHN_ADLIB])
 				{
 					// Translate to actual note frequency
-					_tcscpy(pszText, MPT_TFORMAT("{}Hz")(mpt::tfmt::flt(freqHz * (261.625 / 8363.0), 6)).c_str());
-					return TRUE;
+					s = MPT_CFORMAT("{}Hz")(mpt::tfmt::flt(freqHz * (261.625 / 8363.0), 6));
 				}
 				if(m_sndFile.UseFinetuneAndTranspose())
 				{
 					// Transpose + Finetune to Frequency
-					_tcscpy(pszText, MPT_TFORMAT("{}Hz")(freqHz).c_str());
-					return TRUE;
+					s = MPT_CFORMAT("{}Hz")(freqHz);
 				}
 			}
 			break;
@@ -618,35 +616,33 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 					ticks = val;
 				}
 				if(ticks >= 0)
-					_stprintf(pszText, _T("%d ticks"), ticks);
+					s = MPT_CFORMAT("{} ticks")(ticks);
 				else
-					_tcscpy(pszText, _T("No Vibrato"));
+					s = _T("No Vibrato");
 			}
-			return TRUE;
+			break;
 		case IDC_EDIT15:
 			// Vibrato Depth
 			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
-				_tcscpy(pszText, _T("Only available in IT / MPTM / XM format"));
+				s = _T("Only available in IT / MPTM / XM format");
 			else
-				_stprintf(pszText, _T("%u cents"), Util::muldivr_unsigned(val, 100, 64));
-			return TRUE;
+				s = MPT_CFORMAT("{} cents")(Util::muldivr_unsigned(val, 100, 64));
+			break;
 		case IDC_EDIT16:
 			// Vibrato Rate
 			if(!(m_sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 			{
 				s = _T("Only available in IT / MPTM / XM format");
-				break;
 			} else if(val == 0)
 			{
 				s = _T("Stopped");
-				break;
 			} else
 			{
 				const double ticksPerCycle = 256.0 / val;
 				const uint32 ticksPerBeat = std::max(1u, m_sndFile.m_PlayState.m_nCurrentRowsPerBeat * m_sndFile.m_PlayState.m_nMusicSpeed);
-				_stprintf(pszText, _T("%.2f beats per cycle (%.2f ticks)"), ticksPerCycle / ticksPerBeat, ticksPerCycle);
+				s = MPT_CFORMAT("{} beats per cycle ({} ticks)")(mpt::cfmt::flt(ticksPerCycle / ticksPerBeat, 3), mpt::cfmt::flt(ticksPerCycle, 3));
 			}
-			return TRUE;
+			break;
 
 		case IDC_CHECK1:
 		case IDC_EDIT3:
@@ -665,19 +661,14 @@ BOOL CCtrlSamples::GetToolTipText(UINT uId, LPTSTR pszText)
 			s = _T("Keep a reference to the original waveform instead of saving it in the module.");
 			break;
 		}
-		if(s != nullptr)
+		if(cmd != kcNull)
 		{
-			_tcscpy(pszText, s);
-			if(cmd != kcNull)
-			{
-				auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
-				if (!keyText.IsEmpty())
-					_tcscat(pszText, MPT_TFORMAT(" ({})")(keyText).c_str());
-			}
-			return TRUE;
+			auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
+			if (!keyText.IsEmpty())
+				s += MPT_CFORMAT(" ({})")(keyText);
 		}
 	}
-	return FALSE;
+	return s;
 }
 
 

@@ -79,4 +79,25 @@ void DialogBase::UpdateDPI()
 }
 
 
+INT_PTR DialogBase::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
+{
+	INT_PTR nHit = CDialog::OnToolHitTest(point, pTI);
+	if(nHit >= 0 && pTI && (pTI->uFlags & TTF_IDISHWND))
+	{
+		// Workaround to get tooltips even for disabled controls inside group boxes that are positioned in the "correct" tab order position.
+		// For some reason doesn't work for enabled controls (probably because pTI->hwnd then doesn't point at the active control under the cursor),
+		// so we use the default code path there, which works just fine.
+		HWND child = reinterpret_cast<HWND>(pTI->uId);
+		if(!::IsWindowEnabled(child))
+		{
+			pTI->uId = nHit;
+			pTI->uFlags &= ~TTF_IDISHWND;
+			::GetWindowRect(child, &pTI->rect);
+			ScreenToClient(&pTI->rect);
+		}
+	}
+	return nHit;
+}
+
+
 OPENMPT_NAMESPACE_END

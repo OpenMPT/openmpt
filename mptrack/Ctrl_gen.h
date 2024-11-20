@@ -75,7 +75,7 @@ private:
 	CRuntimeClass *GetAssociatedViewClass() override;
 	void OnActivatePage(LPARAM) override;
 	void OnDeactivatePage() override;
-	BOOL GetToolTipText(UINT uId, LPTSTR pszText) override;
+	CString GetToolTipText(UINT uId) override;
 	//}}AFX_VIRTUAL
 
 protected:

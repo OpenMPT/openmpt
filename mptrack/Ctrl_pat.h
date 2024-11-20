@@ -223,7 +223,7 @@ public:
 	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
 	void OnActivatePage(LPARAM) override;
 	void OnDeactivatePage() override;
-	BOOL GetToolTipText(UINT, LPTSTR) override;
+	CString GetToolTipText(UINT id) override;
 	void OnDPIChanged() override;
 	//}}AFX_VIRTUAL
 protected:
@@ -281,7 +281,6 @@ private:
 public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
-	afx_msg BOOL OnToolTip(UINT id, NMHDR *pTTTStruct, LRESULT *pResult);
 };
 
 OPENMPT_NAMESPACE_END

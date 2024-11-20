@@ -695,49 +695,50 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
-BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
+CString CCtrlGeneral::GetToolTipText(UINT uId)
 {
-	const TCHAR moreRecentMixModeNote[] = _T("Use a more recent mixmode to see dB offsets.");
-	if ((pszText) && (uId))
+	CString s;
+	if(uId)
 	{
+		const TCHAR moreRecentMixModeNote[] = _T("Use a more recent mixmode to see dB offsets.");
 		const bool displayDBValues = m_sndFile.GetPlayConfig().getDisplayDBValues();
 		const CWnd *wnd = GetDlgItem(uId);
 		const bool isEnabled = wnd ? (wnd->IsWindowEnabled() != FALSE) : true;  // nullptr check is for a Wine bug workaround (https://bugs.openmpt.org/view.php?id=1553)
-		mpt::tstring notAvailable;
+		CString notAvailable;
 		if(!isEnabled)
-			notAvailable = MPT_TFORMAT("Feature is not available in the {} format.")(mpt::ToWin(m_sndFile.GetModSpecifications().GetFileExtensionUpper()));
+			notAvailable = MPT_CFORMAT("Feature is not available in the {} format.")(mpt::ToWin(m_sndFile.GetModSpecifications().GetFileExtensionUpper()));
 
 		switch(uId)
 		{
 		case IDC_BUTTON_MODTYPE:
-			_tcscpy(pszText, _T("Song Properties"));
+			s = _T("Song Properties");
 			{
 				const auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(kcViewSongProperties, 0);
 				if (!keyText.IsEmpty())
-					_tcscat(pszText, MPT_TFORMAT(" ({})")(keyText).c_str());
+					s +=  MPT_CFORMAT(" ({})")(keyText);
 			}
-			return TRUE;
+			break;
 		case IDC_BUTTON1:
 			if(isEnabled)
-				_tcscpy(pszText, _T("Click button multiple times to tap in the desired tempo."));
+				s = _T("Click button multiple times to tap in the desired tempo.");
 			else
-				_tcscpy(pszText, notAvailable.c_str());
-			return TRUE;
+				s = notAvailable;
+			break;
 		case IDC_SLIDER_SAMPLEPREAMP:
-			_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote);
-			return TRUE;
+			s = displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote;
+			break;
 		case IDC_SLIDER_VSTIVOL:
 			if(isEnabled)
-				_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote);
+				s = displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote;
 			else
-				_tcscpy(pszText, notAvailable.c_str());
-			return TRUE;
+				s = notAvailable;
+			break;
 		case IDC_SLIDER_GLOBALVOL:
 			if(isEnabled)
-				_tcscpy(pszText, displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote);
+				s = displayDBValues ? CModDoc::LinearToDecibels(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote;
 			else
-				_tcscpy(pszText, notAvailable.c_str());
-			return TRUE;
+				s = notAvailable;
+			break;
 		case IDC_SLIDER_SONGTEMPO:
 		case IDC_EDIT_ARTIST:
 		case IDC_EDIT_TEMPO:
@@ -747,11 +748,11 @@ BOOL CCtrlGeneral::GetToolTipText(UINT uId, LPTSTR pszText)
 		case IDC_EDIT_VSTIVOL:
 			if(isEnabled)
 				break;
-			_tcscpy(pszText, notAvailable.c_str());
-			return TRUE;
+			s = notAvailable;
+			break;
 		}
 	}
-	return FALSE;
+	return s;
 	
 }
 

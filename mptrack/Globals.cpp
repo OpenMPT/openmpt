@@ -27,6 +27,8 @@
 #include "TrackerSettings.h"
 #include "../soundlib/mod_specifications.h"
 
+#include <afxpriv.h>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -151,29 +153,41 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 }
 
 
-INT_PTR CModControlDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
+BOOL CModControlDlg::OnToolTipText(UINT /*nID*/, NMHDR *pNMHDR, LRESULT *pResult)
 {
-	INT_PTR nHit = DialogBase::OnToolHitTest(point, pTI);
-	if ((nHit >= 0) && (pTI))
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	CString strTipText;
+
+	UINT_PTR nID = pNMHDR->idFrom;
+	if(pTTT->uFlags & TTF_IDISHWND)
 	{
-		if ((pTI->lpszText == LPSTR_TEXTCALLBACK) && (pTI->hwnd == m_hWnd))
+		// idFrom is actually the HWND of the tool
+		nID = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(nID)));
+	}
+
+	if(nID >= 1000 && nID < 65536)
+	{
+		strTipText = GetToolTipText(static_cast<UINT>(nID));
+	} else
+	{
+		// allow top level routing frame to handle the message
+		if(GetRoutingFrame() != nullptr)
+			return FALSE;
+		if(nID != 0)  // will be zero on a separator
 		{
-			CFrameWnd *pMDIParent = GetParentFrame();
-			if (pMDIParent) pTI->hwnd = pMDIParent->m_hWnd;
+			TCHAR szFullText[256] = _T("");
+			AfxLoadString(static_cast<UINT>(nID), szFullText, static_cast<UINT>(std::size(szFullText)));
+			// this is the command id, not the button index
+			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
 		}
 	}
-	return nHit;
-}
+	mpt::String::WriteCStringBuf(pTTT->szText) = strTipText;
+	*pResult = 0;
 
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
 
-BOOL CModControlDlg::OnToolTipText(UINT nID, NMHDR *pNMHDR, LRESULT *pResult)
-{
-	CChildFrame *pChildFrm = (CChildFrame *)GetParentFrame();
-	if(pChildFrm)
-		return pChildFrm->OnToolTipText(nID, pNMHDR, pResult);
-	if(pResult)
-		*pResult = 0;
-	return FALSE;
+	return TRUE;  // message was handled
 }
 
 
@@ -233,7 +247,6 @@ BEGIN_MESSAGE_MAP(CModControlView, CView)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1, &CModControlView::OnTabSelchange)
 	ON_MESSAGE(WM_MOD_ACTIVATEVIEW,        &CModControlView::OnActivateModView)
 	ON_MESSAGE(WM_MOD_CTRLMSG,             &CModControlView::OnModCtrlMsg)
-	ON_MESSAGE(WM_MOD_GETTOOLTIPTEXT,      &CModControlView::OnGetToolTipText)
 	ON_COMMAND(ID_EDIT_CUT,                &CModControlView::OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,               &CModControlView::OnEditCopy)
 	ON_COMMAND(ID_EDIT_PASTE,              &CModControlView::OnEditPaste)
@@ -558,15 +571,6 @@ LRESULT CModControlView::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return pActiveDlg->OnModCtrlMsg(wParam, lParam);
-}
-
-
-LRESULT CModControlView::OnGetToolTipText(WPARAM uId, LPARAM pszText)
-{
-	CModControlDlg *pActiveDlg = GetCurrentControlDlg();
-	if(!pActiveDlg)
-		return 0;
-	return static_cast<LRESULT>(pActiveDlg->GetToolTipText(static_cast<UINT>(uId), reinterpret_cast<LPTSTR>(pszText)));
 }
 
 

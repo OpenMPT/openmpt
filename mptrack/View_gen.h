@@ -74,6 +74,7 @@ public:
 	void OnInitialUpdate() override;
 	void DoDataExchange(CDataExchange *pDX) override;
 	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	LRESULT OnModViewMsg(WPARAM, LPARAM);

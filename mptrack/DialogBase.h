@@ -22,6 +22,7 @@ public:
 
 	BOOL OnInitDialog() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 
 	static bool HandleGlobalKeyMessage(const MSG &msg);
 

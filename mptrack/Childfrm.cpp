@@ -49,8 +49,6 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CChildFrame::OnDPIChangedAfterParent)
 	ON_MESSAGE(WM_MOD_CHANGEVIEWCLASS,    &CChildFrame::OnChangeViewClass)
 	ON_MESSAGE(WM_MOD_INSTRSELECTED,      &CChildFrame::OnInstrumentSelected)
-	// toolbar "tooltip" notification
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CChildFrame::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -372,44 +370,6 @@ void CChildFrame::OnDestroy()
 	if(m_lastActiveFrame == this)
 		m_lastActiveFrame = nullptr;
 	CMDIChildWnd::OnDestroy();
-}
-
-
-BOOL CChildFrame::OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult)
-{
-	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	TCHAR szFullText[256] = _T("");
-	CString strTipText;
-
-	UINT_PTR nID = pNMHDR->idFrom;
-	if (pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(nID)));
-	}
-
-	if ((nID >= 1000) && (nID < 65536) && (m_hWndCtrl) && (::SendMessage(m_hWndCtrl, WM_MOD_GETTOOLTIPTEXT, nID, (LPARAM)szFullText)))
-	{
-		strTipText = szFullText;
-	} else
-	{
-		// allow top level routing frame to handle the message
-		if (GetRoutingFrame() != NULL) return FALSE;
-		if (nID != 0) // will be zero on a separator
-		{
-			AfxLoadString((UINT)nID, szFullText);
-			// this is the command id, not the button index
-			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
-		}
-	}
-	mpt::String::WriteCStringBuf(pTTT->szText) = strTipText;
-	*pResult = 0;
-
-	// bring the tooltip window above other popup windows
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0,
-		SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-
-	return TRUE;    // message was handled
 }
 
 
