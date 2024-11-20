@@ -155,7 +155,16 @@ void ModSample::Initialize(MODTYPE type)
 	rootNote = 0;
 	filename = "";
 
-	RemoveAllCuePoints();
+	if(type & (MOD_TYPE_DBM | MOD_TYPE_IMF | MOD_TYPE_MED))
+	{
+		for(SmpLength i = 1; i < 10; i++)
+		{
+			cues[i - 1] = Util::muldiv_unsigned(i, 255 * 256, 9);
+		}
+	} else
+	{
+		RemoveAllCuePoints();
+	}
 }
 
 
