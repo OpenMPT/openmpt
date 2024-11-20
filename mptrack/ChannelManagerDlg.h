@@ -98,9 +98,11 @@ protected:
 
 	//{{AFX_VIRTUAL(CChannelManagerDlg)
 	BOOL OnInitDialog() override;
+	void OnDPIChanged() override;
+	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CChannelManagerDlg)
-	void OnDPIChanged() override;
+	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *);
 	afx_msg void OnApply();
 	afx_msg void OnClose();
 	afx_msg void OnSelectAll();
