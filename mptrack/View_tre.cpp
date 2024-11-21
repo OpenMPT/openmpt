@@ -3006,7 +3006,7 @@ void CModTree::OnItemRightClick(HTREEITEM hItem, CPoint pt)
 			AppendMenu(hMenu, MF_STRING, defaultID, ih->GetKeyTextFromCommand(kcTreeViewOpen, _T("&View")));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_CLOSE, _T("&Close"));
 			AppendMenu(hMenu, MF_STRING, ID_MODTREE_RENAME, ih->GetKeyTextFromCommand(kcTreeViewRename, _T("Re&name")));
-			AppendMenu(hMenu, MF_STRING, ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
+			AppendMenu(hMenu, MF_STRING | ((!modDoc || modDoc->GetPathNameMpt().empty()) ? MF_GRAYED : 0), ID_MODTREE_OPENITEM, _T("&Open in Explorer"));
 			break;
 
 		case MODITEM_COMMENTS:
