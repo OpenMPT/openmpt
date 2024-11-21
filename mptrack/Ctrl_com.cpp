@@ -87,7 +87,7 @@ BOOL CCtrlComments::OnInitDialog()
 	UpdateView(CommentHint().ModType());
 	m_EditComments.SetFocus();
 	m_EditComments.FmtLines(FALSE);
-	m_bInitialized = TRUE;
+	m_initialized = true;
 	return FALSE;
 }
 
@@ -333,7 +333,8 @@ void CCtrlComments::OnCommentsChanged()
 {
 	if(m_nLockCount)
 		return;
-	if ((!m_bInitialized) || (!m_EditComments.m_hWnd) || (!m_EditComments.GetModify())) return;
+	if(!m_initialized || !m_EditComments.m_hWnd || !m_EditComments.GetModify())
+		return;
 	CString text;
 	m_EditComments.GetWindowText(text);
 	m_EditComments.SetModify(FALSE);

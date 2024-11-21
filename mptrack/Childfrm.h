@@ -13,7 +13,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "PatternCursor.h"
-#include "WindowMessages.h"
 
 #include "../common/FileReaderFwd.h"
 #include "../soundlib/plugins/PluginStructs.h"
@@ -120,7 +119,7 @@ public:
 	const char *GetCurrentViewClassName() const;
 	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam = 0) const;
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam = 0) const;
-	LRESULT ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
+	LRESULT ActivateView(UINT nId, LPARAM lParam);
 	HWND GetHwndCtrl() const { return m_hWndCtrl; }
 	HWND GetHwndView() const { return m_hWndView; }
 	GeneralViewState &GetGeneralViewState() { return m_ViewGeneral; }

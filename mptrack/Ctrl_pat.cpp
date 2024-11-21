@@ -191,7 +191,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	UpdateView(PatternHint().Names().ModType(), NULL);
 	RecalcLayout();
 
-	m_bInitialized = TRUE;
+	m_initialized = true;
 	UnlockControls();
 
 	SetRedraw(TRUE);

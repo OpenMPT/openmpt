@@ -208,7 +208,7 @@ void CCtrlSamples::OnEditFocus()
 BOOL CCtrlSamples::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
-	m_bInitialized = FALSE;
+	m_initialized = false;
 	SetRedraw(FALSE);
 
 	// Zoom Selection
@@ -405,8 +405,10 @@ void CCtrlSamples::OnActivatePage(LPARAM lParam)
 	SetCurrentSample((lParam > 0) ? ((SAMPLEINDEX)lParam) : m_nSample);
 
 	// Initial Update
-	if (!m_bInitialized) UpdateView(SampleHint(m_nSample).Info().ModType(), NULL);
-	if (m_hWndView) PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&sampleState);
+	if(!m_initialized)
+		UpdateView(SampleHint(m_nSample).Info().ModType(), nullptr);
+	if(m_hWndView)
+		PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&sampleState);
 	SwitchToView();
 
 	// Combo boxes randomly disappear without this... why?
@@ -683,7 +685,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 
 	const SampleHint sampleHint = hint.ToType<SampleHint>();
 	FlagSet<HintType> hintType = sampleHint.GetType();
-	if (!m_bInitialized) hintType.set(HINT_MODTYPE);
+	if(!m_initialized)
+		hintType.set(HINT_MODTYPE);
 	if(!hintType[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_MODTYPE]) return;
 
 	const SAMPLEINDEX updateSmp = sampleHint.GetSample();
@@ -914,10 +917,10 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		GetDlgItem(IDC_CHECK2)->EnableWindow((m_sndFile.SampleHasPath(m_nSample) && m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 	}
 
-	if (!m_bInitialized)
+	if(!m_initialized)
 	{
 		// First update
-		m_bInitialized = TRUE;
+		m_initialized = true;
 		UnlockControls();
 	}
 

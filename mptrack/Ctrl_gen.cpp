@@ -122,7 +122,7 @@ BOOL CCtrlGeneral::OnInitDialog()
 	m_editsLocked = false;
 	UpdateView(GeneralHint().ModType());
 	OnActivatePage(0);
-	m_bInitialized = TRUE;
+	m_initialized = true;
 	
 	return FALSE;
 }
@@ -403,7 +403,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 {
 	CModControlDlg::OnVScroll(code, pos, pscroll);
 
-	if (m_bInitialized)
+	if (m_initialized)
 	{
 		CSliderCtrl* pSlider = (CSliderCtrl*) pscroll;
 
@@ -521,7 +521,7 @@ void CCtrlGeneral::OnArtistChanged()
 
 void CCtrlGeneral::OnTempoChanged()
 {
-	if (m_bInitialized && m_EditTempo.GetWindowTextLength() > 0 && !IsLocked())
+	if (m_initialized && m_EditTempo.GetWindowTextLength() > 0 && !IsLocked())
 	{
 		TEMPO tempo = m_EditTempo.GetTempoValue();
 		Limit(tempo, m_tempoMin, m_tempoMax);
@@ -543,7 +543,7 @@ void CCtrlGeneral::OnTempoChanged()
 void CCtrlGeneral::OnSpeedChanged()
 {
 	TCHAR s[16];
-	if(m_bInitialized)
+	if(m_initialized)
 	{
 		m_EditSpeed.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
@@ -570,7 +570,7 @@ void CCtrlGeneral::OnSpeedChanged()
 void CCtrlGeneral::OnVSTiVolChanged()
 {
 	TCHAR s[16];
-	if (m_bInitialized)
+	if (m_initialized)
 	{
 		m_EditVSTiVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
@@ -594,7 +594,7 @@ void CCtrlGeneral::OnVSTiVolChanged()
 void CCtrlGeneral::OnSamplePAChanged()
 {
 	TCHAR s[16];
-	if(m_bInitialized)
+	if(m_initialized)
 	{
 		m_EditSamplePA.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
@@ -617,7 +617,7 @@ void CCtrlGeneral::OnSamplePAChanged()
 void CCtrlGeneral::OnGlobalVolChanged()
 {
 	TCHAR s[16];
-	if(m_bInitialized)
+	if(m_initialized)
 	{
 		m_EditGlobalVol.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
 		if (s[0])
@@ -642,7 +642,7 @@ void CCtrlGeneral::OnGlobalVolChanged()
 
 void CCtrlGeneral::OnRestartPosChanged()
 {
-	if(!m_bInitialized)
+	if(!m_initialized)
 		return;
 	TCHAR s[32];
 	m_EditRestartPos.GetWindowText(s, mpt::saturate_cast<int>(std::size(s)));
@@ -666,7 +666,7 @@ void CCtrlGeneral::OnRestartPosChanged()
 
 void CCtrlGeneral::OnRestartPosDone()
 {
-	if(m_bInitialized)
+	if(m_initialized)
 		SetDlgItemInt(IDC_EDIT_RESTARTPOS, m_sndFile.Order().GetRestartPos());
 }
 

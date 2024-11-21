@@ -25,6 +25,7 @@
 #include "Mptrack.h"
 #include "resource.h"
 #include "TrackerSettings.h"
+#include "WindowMessages.h"
 #include "../soundlib/mod_specifications.h"
 
 #include <afxpriv.h>
@@ -151,6 +152,9 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 		return ::PostMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return FALSE;
 }
+
+LRESULT CModControlDlg::SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
+void CModControlDlg::UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 
 
 BOOL CModControlDlg::OnToolTipText(UINT /*nID*/, NMHDR *pNMHDR, LRESULT *pResult)

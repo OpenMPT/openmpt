@@ -21,6 +21,7 @@
 #include "resource.h"
 #include "VstPresets.h"
 #include "Vstplug.h"
+#include "WindowMessages.h"
 #include "../common/FileReader.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/Sndfile.h"

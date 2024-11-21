@@ -16,7 +16,6 @@
 #include "ColorPickerButton.h"
 #include "PluginComboBox.h"
 #include "UpdateHints.h"
-#include "WindowMessages.h"
 #include "../soundlib/plugins/PluginStructs.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -64,7 +63,7 @@ public:
 	CModDoc* GetDocument() const;
 	void RecalcLayout();
 	void LockControls() { m_nLockCount++; }
-	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
+	void UnlockControls();
 	bool IsLocked() const noexcept { return (m_nLockCount > 0); }
 	int GetDlgItemIntEx(UINT nID);
 	void PopulateChannelPlugins(UpdateHint hint, const CObject *pObj = nullptr);

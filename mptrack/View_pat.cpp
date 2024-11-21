@@ -28,7 +28,6 @@
 #include "resource.h"
 #include "SampleEditorDialogs.h"  // For amplification dialog (which is re-used from sample editor)
 #include "WindowMessages.h"
-#include "WindowMessages.h"
 #include "../common/misc_util.h"
 #include "../soundlib/MIDIEvents.h"
 #include "../soundlib/mod_specifications.h"
@@ -3302,6 +3301,24 @@ void CViewPattern::OnRunScript()
 void CViewPattern::OnSwitchToOrderList()
 {
 	PostCtrlMessage(CTRLMSG_PAT_SETORDERLISTFOCUS);
+}
+
+
+void CViewPattern::OnPrevInstrument()
+{
+	PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT);
+}
+
+
+void CViewPattern::OnNextInstrument()
+{
+	PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT);
+}
+
+
+void CViewPattern::OnPatternRecord()
+{
+	PostCtrlMessage(CTRLMSG_SETRECORD, -1);
 }
 
 

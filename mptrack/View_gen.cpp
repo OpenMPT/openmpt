@@ -23,6 +23,7 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "SelectPluginDialog.h"
+#include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/plugins/PlugInterface.h"
@@ -295,6 +296,9 @@ void CViewGlobals::RecalcLayout()
 		m_TabCtrl.SetWindowPos(&CWnd::wndBottom, 0,0, rect.right, rect.bottom, SWP_NOMOVE);
 	}
 }
+
+
+void CViewGlobals::UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
 
 
 int CViewGlobals::GetDlgItemIntEx(UINT nID)

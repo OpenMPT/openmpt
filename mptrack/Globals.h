@@ -14,7 +14,6 @@
 #include "DialogBase.h"
 #include "Settings.h"
 #include "UpdateHints.h"
-#include "WindowMessages.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -45,7 +44,7 @@ protected:
 	HWND m_hWndView = nullptr;
 	HWND m_lastFocusItem = nullptr;
 	LONG m_nLockCount = 0;
-	BOOL m_bInitialized = FALSE;
+	bool m_initialized = false;
 
 public:
 	CModControlDlg(CModControlView &parent, CModDoc &document);
@@ -56,9 +55,9 @@ public:
 	HWND GetViewWnd() const { return m_hWndView; }
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam = 0) const;
 	BOOL PostViewMessage(UINT uMsg, LPARAM lParam = 0) const;
-	LRESULT SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
+	LRESULT SwitchToView() const;
 	void LockControls() { m_nLockCount++; }
-	void UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
+	void UnlockControls();
 	bool IsLocked() const { return (m_nLockCount > 0); }
 	virtual Setting<LONG> &GetSplitPosRef() = 0;
 

@@ -25,6 +25,7 @@
 #include "View_ins.h"
 #include "View_pat.h"
 #include "View_smp.h"
+#include "WindowMessages.h"
 #include "../common/FileReader.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -336,6 +337,9 @@ LRESULT CChildFrame::SendViewMessage(UINT uMsg, LPARAM lParam) const
 		return ::SendMessage(m_hWndView, WM_MOD_VIEWMSG, uMsg, lParam);
 	return 0;
 }
+
+
+LRESULT CChildFrame::ActivateView(UINT nId, LPARAM lParam) { return ::SendMessage(m_hWndCtrl, WM_MOD_ACTIVATEVIEW, nId, lParam); }
 
 
 LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)

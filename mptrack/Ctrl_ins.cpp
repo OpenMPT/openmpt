@@ -1031,7 +1031,7 @@ void CCtrlInstruments::OnEditFocus()
 BOOL CCtrlInstruments::OnInitDialog()
 {
 	CModControlDlg::OnInitDialog();
-	m_bInitialized = FALSE;
+	m_initialized = false;
 	SetRedraw(FALSE);
 
 	m_ToolBar.SetExtendedStyle(m_ToolBar.GetExtendedStyle() | TBSTYLE_EX_DRAWDDARROWS);
@@ -1189,7 +1189,7 @@ BOOL CCtrlInstruments::SetCurrentInstrument(UINT nIns, BOOL bUpdNum)
 	if (m_sndFile.m_nInstruments < 1) return FALSE;
 	if ((nIns < 1) || (nIns > m_sndFile.m_nInstruments)) return FALSE;
 	LockControls();
-	if ((m_nInstrument != nIns) || (!m_bInitialized))
+	if (m_nInstrument != nIns || !m_initialized)
 	{
 		m_nInstrument = static_cast<INSTRUMENTINDEX>(nIns);
 		m_NoteMap.SetCurrentInstrument(m_nInstrument);
@@ -1242,7 +1242,8 @@ void CCtrlInstruments::OnActivatePage(LPARAM lParam)
 	SetCurrentInstrument(static_cast<INSTRUMENTINDEX>((lParam > 0) ? lParam : m_nInstrument));
 
 	// Initial Update
-	if (!m_bInitialized) UpdateView(InstrumentHint(m_nInstrument).Info().Envelope().ModType(), NULL);
+	if(!m_initialized)
+		UpdateView(InstrumentHint(m_nInstrument).Info().Envelope().ModType(), NULL);
 
 	PostViewMessage(VIEWMSG_LOADSTATE, (LPARAM)&instrumentState);
 	SwitchToView();
@@ -1341,7 +1342,7 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 
 	const InstrumentHint instrHint = hint.ToType<InstrumentHint>();
 	FlagSet<HintType> hintType = instrHint.GetType();
-	if(!m_bInitialized)
+	if(!m_initialized)
 		hintType.set(HINT_MODTYPE);
 	if(!hintType[HINT_MODTYPE | HINT_INSTRUMENT | HINT_ENVELOPE | HINT_INSNAMES])
 		return;
@@ -1586,10 +1587,10 @@ void CCtrlInstruments::UpdateView(UpdateHint hint, CObject *pObj)
 		m_ComboTuning.Invalidate(FALSE);
 	}
 
-	if (!m_bInitialized)
+	if(!m_initialized)
 	{
 		// First update
-		m_bInitialized = TRUE;
+		m_initialized = true;
 		UnlockControls();
 	}
 

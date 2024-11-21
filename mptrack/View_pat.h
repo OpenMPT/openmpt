@@ -420,9 +420,9 @@ protected:
 	afx_msg void OnSplitPattern();
 	afx_msg void OnPatternStep();
 	afx_msg void OnSwitchToOrderList();
-	afx_msg void OnPrevInstrument() { PostCtrlMessage(CTRLMSG_PAT_PREVINSTRUMENT); }
-	afx_msg void OnNextInstrument() { PostCtrlMessage(CTRLMSG_PAT_NEXTINSTRUMENT); }
-	afx_msg void OnPatternRecord() { PostCtrlMessage(CTRLMSG_SETRECORD, -1); }
+	afx_msg void OnPrevInstrument();
+	afx_msg void OnNextInstrument();
+	afx_msg void OnPatternRecord();
 	afx_msg void OnInterpolateVolume() { Interpolate(PatternCursor::volumeColumn); }
 	afx_msg void OnInterpolateEffect() { Interpolate(PatternCursor::effectColumn); }
 	afx_msg void OnInterpolateNote() { Interpolate(PatternCursor::noteColumn); }
