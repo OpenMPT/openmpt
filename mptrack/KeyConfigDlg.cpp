@@ -726,7 +726,7 @@ void COptionsKeyboard::OnSetKeyChoice()
 	if(m_bKeyUp.GetCheck() != BST_UNCHECKED)
 		event |= kKeyEventUp;
 
-	KeyCombination kc((commandCategories[m_curCategory]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
+	KeyCombination kc((commandCategories[GetCategoryFromCommandID(cmd)]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
 	//detect invalid input
 	if(!kc.KeyCode())
 	{
