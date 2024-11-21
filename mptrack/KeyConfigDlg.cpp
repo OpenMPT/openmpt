@@ -451,7 +451,7 @@ void COptionsKeyboard::OnFindHotKey()
 	const bool hasKey = m_eFindHotKey.HasKey();
 	if(!hasKey)
 		UpdateCategory();
-	UpdateShortcutList(hasKey ? - 1: m_curCategory);
+	UpdateShortcutList(hasKey ? -1 : m_curCategory);
 	m_lbnCommandKeys.SetFocus();
 }
 
@@ -896,7 +896,7 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 	if(m_bKeyUp.GetCheck() != BST_UNCHECKED)
 		event |= kKeyEventUp;
 
-	KeyCombination kc((commandCategories[m_curCategory]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
+	KeyCombination kc((commandCategories[GetCategoryFromCommandID(cmd)]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
 	//detect invalid input
 	if(!kc.KeyCode())
 	{
@@ -909,7 +909,7 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 		kc.EventType(kKeyEventDown);
 	}
 
-	bool add = true;
+	bool add = true, updateAll = false;
 	std::pair<CommandID, KeyCombination> conflictCmd;
 	if(CCommandSet::MustBeModifierKey(cmd) && !kc.IsModifierCombination())
 	{
@@ -923,6 +923,7 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 		if(delOld == cnfYes)
 		{
 			m_localCmdSet->Remove(conflictCmd.second, conflictCmd.first);
+			updateAll = true;
 		} else if(delOld == cnfCancel)
 		{
 			// Cancel altogther; restore original choice
@@ -943,7 +944,7 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 		//process valid input
 		m_localCmdSet->Remove(m_curKeyChoice, cmd);
 		UpdateWarning(m_localCmdSet->Add(kc, cmd, true, m_curKeyChoice), true);
-		ForceUpdateGUI();
+		ForceUpdateGUI(updateAll);
 	}
 }
 
