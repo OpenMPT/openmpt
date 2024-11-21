@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "AccessibleButton.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -20,6 +21,7 @@ protected:
 	CEdit m_defaultArtist;
 	CComboBox m_defaultTemplate, m_defaultFormat;
 	CCheckListBox m_CheckList;
+	AccessibleButton m_templateBrowseButton;
 
 public:
 	COptionsGeneral();

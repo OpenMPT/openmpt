@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "AccessibleButton.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -45,6 +46,8 @@ protected:
 	mpt::PathString GetPath(int id);
 
 	DECLARE_MESSAGE_MAP()
+
+	std::array<AccessibleButton, 6> m_browseButtons;
 };
 
 OPENMPT_NAMESPACE_END

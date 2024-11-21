@@ -941,6 +941,10 @@ IDB_SPLASHNOFOLDFIN     PNG                     "res\\Splash.png"
 
 IDB_MPTRACK             PNG                     "res\\About.png"
 
+IDB_NEW_BIG             PNG                     "res\\New32.png"
+
+IDB_OPEN_BIG            PNG                     "res\\Open32.png"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2300,6 +2304,17 @@ BEGIN
     LTEXT           "Warning: Only samples are affected by these settings! Modifying them will change the balance between samples and plugins in songs with mix levels set to 1.17RC2 or earlier in the Song Properties! ",IDC_STATIC,12,222,252,30
 END
 
+IDD_QUICKSTART DIALOGEX 0, 0, 332, 185
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD | WS_CLIPSIBLINGS
+EXSTYLE WS_EX_CONTROLPARENT | WS_EX_NOACTIVATE
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "    &New Module",IDC_BUTTON1,6,6,90,30
+    PUSHBUTTON      "    &Open Module",IDC_BUTTON2,108,6,90,30
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,48,315,126
+    PUSHBUTTON      "r",IDCANCEL,308,6,13,12,BS_VCENTER
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2563,6 +2578,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 274
     END
+
+    IDD_QUICKSTART, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 321
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 174
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -2717,6 +2740,15 @@ END
 IDD_MODDOC_MODTYPE AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+IDD_QUICKSTART AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    100, 0, 0, 0
 END
 
 

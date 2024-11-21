@@ -166,11 +166,17 @@ void CViewGlobals::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN8,		m_spinPan[3]);
 	DDX_Control(pDX, IDC_BUTTON1,	m_BtnSelect);
 	DDX_Control(pDX, IDC_BUTTON2,	m_BtnEdit);
+	DDX_Control(pDX, IDC_BUTTON4, m_nextPluginButton);
+	DDX_Control(pDX, IDC_BUTTON5, m_prevPluginButton);
 	//}}AFX_DATA_MAP
 }
 
 
-CViewGlobals::CViewGlobals() : CFormView{IDD_VIEW_GLOBALS} { }
+CViewGlobals::CViewGlobals() : CFormView{IDD_VIEW_GLOBALS}
+{
+	m_prevPluginButton.SetAccessibleText(_T("Previous Plugin"));
+	m_nextPluginButton.SetAccessibleText(_T("Next Plugin"));
+}
 
 
 CModDoc* CViewGlobals::GetDocument() const { return static_cast<CModDoc *>(m_pDocument); }

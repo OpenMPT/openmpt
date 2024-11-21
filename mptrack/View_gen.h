@@ -12,6 +12,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "AccessibleButton.h"
 #include "ColorPickerButton.h"
 #include "PluginComboBox.h"
 #include "UpdateHints.h"
@@ -51,6 +52,7 @@ protected:
 
 	CComboBox m_CbnSpecialMixProcessing;
 	CSpinButtonCtrl m_SpinMixGain;
+	AccessibleButton m_prevPluginButton, m_nextPluginButton;
 
 	enum {AdjustPattern = true, NoPatternAdjust = false};
 

@@ -785,6 +785,12 @@ CDataRecoveryHandler *CTrackApp::GetDataRecoveryHandler()
 }
 
 
+CDocument *CTrackApp::OpenTemplateFile(const mpt::PathString &file) const
+{
+	return GetModDocTemplate()->OpenTemplateFile(file);
+}
+
+
 void CTrackApp::AddToRecentFileList(LPCTSTR lpszPathName)
 {
 	AddToRecentFileList(mpt::PathString::FromCString(lpszPathName));
@@ -1413,6 +1419,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		return FALSE;
 	}
 
+	pMainFrame->UpdateDocumentCount();
 	pMainFrame->ShowWindow(m_nCmdShow);
 	pMainFrame->UpdateWindow();
 

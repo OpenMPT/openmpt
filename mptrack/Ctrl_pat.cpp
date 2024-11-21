@@ -114,6 +114,8 @@ ModSequence &CCtrlPatterns::Order() { return m_sndFile.Order(); }
 CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document)
     : CModControlDlg(parent, document), m_OrderList(*this, document)
 {
+	m_BtnPrev.SetAccessibleText(_T("Select Previous Order"));
+	m_BtnNext.SetAccessibleText(_T("Select Next Order"));
 	m_bVUMeters = TrackerSettings::Instance().gbPatternVUMeters;
 	m_bPluginNames = TrackerSettings::Instance().gbPatternPluginNames;
 	m_bRecord = TrackerSettings::Instance().gbPatternRecord;

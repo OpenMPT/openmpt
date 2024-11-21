@@ -176,11 +176,17 @@ public:
 	~CTrackApp();
 
 	CDataRecoveryHandler *GetDataRecoveryHandler() override;
+
+	CModDoc *NewDocument(MODTYPE newType = MOD_TYPE_NONE);
+	CDocument *OpenTemplateFile(const mpt::PathString &file) const;
 	void AddToRecentFileList(LPCTSTR lpszPathName) override;
 	void AddToRecentFileList(const mpt::PathString &path);
 	/// Removes item from MRU-list; most recent item has index zero.
 	void RemoveMruItem(const size_t item);
 	void RemoveMruItem(const mpt::PathString &path);
+
+	int GetOpenDocumentCount() const;
+	std::vector<CModDoc *> GetOpenDocuments() const;
 
 public:
 	bool IsMultiArchInstall() const { return m_InstallPath == m_InstallBinArchPath; }
@@ -211,9 +217,6 @@ public:
 	// Retrieve the user-supplied MIDI port name for a MIDI input or output port.
 	mpt::ustring GetFriendlyMIDIPortName(const mpt::ustring &deviceName, bool isInputPort, bool addDeviceName = true);
 	CString GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort, bool addDeviceName = true);
-
-	int GetOpenDocumentCount() const;
-	std::vector<CModDoc *> GetOpenDocuments() const;
 
 	void UpdateAllViews(UpdateHint hint, CObject *pHint = nullptr);
 
@@ -328,8 +331,6 @@ protected:
 	// Implementation
 
 	//{{AFX_MSG(CTrackApp)
-	CModDoc *NewDocument(MODTYPE newType = MOD_TYPE_NONE);
-
 	afx_msg void OnFileNew() { NewDocument(); }
 	afx_msg void OnFileNewMOD_Amiga() { NewDocument(MOD_TYPE_MOD); }
 	afx_msg void OnFileNewMOD_PC() { NewDocument(MOD_TYPE_MOD_PC); }

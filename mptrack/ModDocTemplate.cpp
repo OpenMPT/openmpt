@@ -98,6 +98,7 @@ void CModDocTemplate::AddDocument(CDocument *doc)
 {
 	CMultiDocTemplate::AddDocument(doc);
 	m_documents.insert(static_cast<CModDoc *>(doc));
+	// At this point we don't know yet if opening the document is going to be successful, so don't call UpdateDocumentCount()
 }
 
 
@@ -105,6 +106,7 @@ void CModDocTemplate::RemoveDocument(CDocument *doc)
 {
 	CMultiDocTemplate::RemoveDocument(doc);
 	m_documents.erase(static_cast<CModDoc *>(doc));
+	CMainFrame::GetMainFrame()->UpdateDocumentCount();
 }
 
 

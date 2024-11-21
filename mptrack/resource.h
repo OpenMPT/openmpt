@@ -56,6 +56,8 @@
 #define IDB_SPLASHSCREEN                307
 #define IDB_ENVTOOLBAR                  308
 #define IDB_SMPTOOLBAR                  309
+#define IDB_NEW_BIG                     310
+#define IDB_OPEN_BIG                    311
 #define IDC_DRAGGING                    350
 #define IDC_NODROP                      351
 #define IDC_NODRAG                      352
@@ -89,6 +91,7 @@
 #define IDD_FIND_RANGE                  503
 #define IDD_MIDI_IO_PLUGIN              504
 #define IDD_CONTROL_GRAPH               507
+#define IDD_QUICKSTART                  508
 #define IDD_SCALE_ENV_POINTS            510
 #define IDD_TUNING                      511
 #define IDD_UPDATE                      512
@@ -1103,6 +1106,8 @@
 #define ID_PATTERN_VISUALIZE_EFFECT     32900
 #define ID_PATTERN_PLAYNOLOOP           32901
 #define ID_MODTREE_MUTE_ONLY_EFFECTS    32902
+#define ID_REMOVE                       32903
+#define ID_REMOVE_ALL                   32904
 #define ID_PATTERN_OPEN_RANDOMIZER      32905
 #define ID_PATTERN_INTERPOLATE_NOTE     32906
 #define ID_PATTERN_CHNRESET             32907

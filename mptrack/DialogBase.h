@@ -26,10 +26,11 @@ public:
 
 	static bool HandleGlobalKeyMessage(const MSG &msg);
 
+	int GetDPI() const { return m_dpi; }
+
 protected:
 	virtual void OnDPIChanged() {}
 	void UpdateDPI();
-	int GetDPI() const { return m_dpi; }
 
 	afx_msg LRESULT OnDPIChanged(WPARAM, LPARAM);
 

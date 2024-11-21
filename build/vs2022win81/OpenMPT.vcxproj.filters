@@ -387,6 +387,9 @@
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\AccessibleButton.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -586,6 +589,9 @@
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\ProgressDialog.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\QuickStartDialog.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\Reporting.h">
@@ -1922,6 +1928,9 @@
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\QuickStartDialog.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\Reporting.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -2592,6 +2601,12 @@
       <Filter>mptrack\res</Filter>
     </Image>
     <Image Include="..\..\mptrack\res\COLORS.BMP">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\New32.png">
+      <Filter>mptrack\res</Filter>
+    </Image>
+    <Image Include="..\..\mptrack\res\Open32.png">
       <Filter>mptrack\res</Filter>
     </Image>
     <Image Include="..\..\mptrack\res\Splash.png">

@@ -359,7 +359,7 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CModDoc)
-	public:
+public:
 	BOOL OnNewDocument() override;
 	BOOL OnOpenDocument(LPCTSTR lpszPathName) override;
 	BOOL OnSaveDocument(LPCTSTR lpszPathName) override

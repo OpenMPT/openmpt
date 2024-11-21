@@ -36,7 +36,10 @@ BEGIN_MESSAGE_MAP(COptionsGeneral, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-COptionsGeneral::COptionsGeneral() : CPropertyPage(IDD_OPTIONS_GENERAL) {}
+COptionsGeneral::COptionsGeneral() : CPropertyPage{IDD_OPTIONS_GENERAL}
+{
+	m_templateBrowseButton.SetAccessibleText(_T("Browse for template file..."));
+}
 
 
 static constexpr struct GeneralOptionsDescriptions
@@ -81,10 +84,11 @@ void COptionsGeneral::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsGeneral)
-	DDX_Control(pDX, IDC_LIST1,		m_CheckList);
-	DDX_Control(pDX, IDC_EDIT1,		m_defaultArtist);
-	DDX_Control(pDX, IDC_COMBO2,	m_defaultTemplate);
-	DDX_Control(pDX, IDC_COMBO1,	m_defaultFormat);
+	DDX_Control(pDX, IDC_LIST1,   m_CheckList);
+	DDX_Control(pDX, IDC_EDIT1,   m_defaultArtist);
+	DDX_Control(pDX, IDC_COMBO2,  m_defaultTemplate);
+	DDX_Control(pDX, IDC_COMBO1,  m_defaultFormat);
+	DDX_Control(pDX, IDC_BUTTON1, m_templateBrowseButton);
 	//}}AFX_DATA_MAP
 }
 

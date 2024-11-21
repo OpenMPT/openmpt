@@ -833,6 +833,7 @@
     <ClInclude Include="..\..\misc\mptWine.h" />
     <ClInclude Include="..\..\mptrack\AboutDialog.h" />
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h" />
+    <ClInclude Include="..\..\mptrack\AccessibleButton.h" />
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\AutoSaver.h" />
     <ClInclude Include="..\..\mptrack\Autotune.h" />
@@ -900,6 +901,7 @@
     <ClInclude Include="..\..\mptrack\PlugNotFoundDlg.h" />
     <ClInclude Include="..\..\mptrack\PluginComboBox.h" />
     <ClInclude Include="..\..\mptrack\ProgressDialog.h" />
+    <ClInclude Include="..\..\mptrack\QuickStartDialog.h" />
     <ClInclude Include="..\..\mptrack\Reporting.h" />
     <ClInclude Include="..\..\mptrack\ResizableDialog.h" />
     <ClInclude Include="..\..\mptrack\SampleConfigDlg.h" />
@@ -1346,6 +1348,7 @@
     <ClCompile Include="..\..\mptrack\PlugNotFoundDlg.cpp" />
     <ClCompile Include="..\..\mptrack\PluginComboBox.cpp" />
     <ClCompile Include="..\..\mptrack\ProgressDialog.cpp" />
+    <ClCompile Include="..\..\mptrack\QuickStartDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Reporting.cpp" />
     <ClCompile Include="..\..\mptrack\ResizableDialog.cpp" />
     <ClCompile Include="..\..\mptrack\SampleConfigDlg.cpp" />
@@ -1576,6 +1579,8 @@
   <ItemGroup>
     <Image Include="..\..\mptrack\res\About.png" />
     <Image Include="..\..\mptrack\res\COLORS.BMP" />
+    <Image Include="..\..\mptrack\res\New32.png" />
+    <Image Include="..\..\mptrack\res\Open32.png" />
     <Image Include="..\..\mptrack\res\Splash.png" />
     <Image Include="..\..\mptrack\res\envelope_toolbar.png" />
     <Image Include="..\..\mptrack\res\icons.png" />

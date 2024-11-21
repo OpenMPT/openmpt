@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "AccessibleButton.h"
 #include "Globals.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -192,7 +193,7 @@ class CCtrlPatterns: public CModControlDlg
 	friend class COrderList;
 protected:
 	COrderList m_OrderList;
-	CButton m_BtnPrev, m_BtnNext;
+	AccessibleButton m_BtnPrev, m_BtnNext;
 	CComboBox m_CbnInstrument;
 	CEdit m_EditSpacing, m_EditPatName, m_EditSequence;
 	CSpinButtonCtrl m_SpinInstrument, m_SpinSpacing, m_SpinSequence;

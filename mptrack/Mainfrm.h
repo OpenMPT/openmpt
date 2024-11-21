@@ -32,6 +32,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CDLSBank;
 class CInputHandler;
 class CModDoc;
+class QuickStartDlg;
 struct UpdateCheckResult;
 struct UpdateHint;
 struct MODPLUGDIB;
@@ -360,6 +361,8 @@ public:
 	// Notify accessbility software that it should read out updated UI elements
 	void NotifyAccessibilityUpdate(CWnd &source);
 
+	void UpdateDocumentCount();
+
 // Overrides
 protected:
 	// ClassWizard generated virtual function overrides
@@ -385,6 +388,7 @@ public:
 // Implementation
 public:
 	~CMainFrame() override;
+	void RecalcLayout(BOOL notify = TRUE) override;
 #ifdef _DEBUG
 	void AssertValid() const override;
 	void Dump(CDumpContext& dc) const override;
@@ -476,6 +480,8 @@ private:
 	std::vector<mpt::PathString> m_ExampleModulePaths;
 	/// Array of paths of template modules that are available from file menu.
 	std::vector<mpt::PathString> m_TemplateModulePaths;
+
+	std::unique_ptr<QuickStartDlg> m_quickStartDlg;
 };
 
 

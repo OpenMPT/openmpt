@@ -33,14 +33,24 @@ static constexpr std::pair<ConfigurableDirectory TrackerSettings::*, int> PathSe
 IMPLEMENT_DYNAMIC(PathConfigDlg, CPropertyPage)
 
 PathConfigDlg::PathConfigDlg()
-	: CPropertyPage(IDD_OPTIONS_AUTOSAVE)
+	: CPropertyPage{IDD_OPTIONS_AUTOSAVE}
 {
+	for(AccessibleButton &button : m_browseButtons)
+	{
+		button.SetAccessibleText(_T("Browse for folder..."));
+	}
 }
 
 
 void PathConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON_CHANGE_MODDIR, m_browseButtons[0]);
+	DDX_Control(pDX, IDC_BUTTON_CHANGE_SAMPDIR, m_browseButtons[1]);
+	DDX_Control(pDX, IDC_BUTTON_CHANGE_INSTRDIR, m_browseButtons[2]);
+	DDX_Control(pDX, IDC_BUTTON_CHANGE_VSTDIR, m_browseButtons[3]);
+	DDX_Control(pDX, IDC_BUTTON_CHANGE_VSTPRESETSDIR, m_browseButtons[4]);
+	DDX_Control(pDX, IDC_AUTOSAVE_BROWSE, m_browseButtons[5]);
 }
 
 BEGIN_MESSAGE_MAP(PathConfigDlg, CPropertyPage)

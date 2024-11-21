@@ -35,6 +35,7 @@
 #include "PatternClipboard.h"
 #include "PatternFont.h"
 #include "ProgressDialog.h"
+#include "QuickStartDialog.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "SampleConfigDlg.h"
@@ -674,6 +675,17 @@ void CMainFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
 				lpstrTitle = strTitle;
 		}
 		UpdateFrameTitleForDocument(lpstrTitle);
+	}
+}
+
+
+void CMainFrame::RecalcLayout(BOOL notify)
+{
+	CMDIFrameWnd::RecalcLayout(notify);
+	if(m_quickStartDlg && m_quickStartDlg->m_hWnd)
+	{
+		m_quickStartDlg->UpdateHeight();
+		m_quickStartDlg->CenterWindow();
 	}
 }
 
@@ -1978,6 +1990,7 @@ void CMainFrame::OnDocumentCreated(CModDoc *pModDoc)
 {
 	m_wndTree.OnDocumentCreated(pModDoc);
 	UpdateMRUList();
+	UpdateDocumentCount();
 }
 
 
@@ -1986,6 +1999,7 @@ void CMainFrame::OnDocumentClosed(CModDoc *pModDoc)
 	if (pModDoc == GetModPlaying()) PauseMod();
 
 	m_wndTree.OnDocumentClosed(pModDoc);
+	// We don't do UpdateDocumentCount() here because the document still exists at this point in time - the document template informs us instead.
 }
 
 
@@ -3265,6 +3279,22 @@ BOOL CMainFrame::OnQueryEndSession()
 	}
 #endif
 	return modifiedCount ? FALSE : TRUE;
+}
+
+
+void CMainFrame::UpdateDocumentCount()
+{
+	const bool isLoaded = m_quickStartDlg != nullptr;
+	const bool shouldLoad = !theApp.GetOpenDocumentCount();
+	if(shouldLoad && !isLoaded)
+	{
+		m_quickStartDlg = std::make_unique<QuickStartDlg>(m_TemplateModulePaths, m_ExampleModulePaths, CWnd::FromHandle(m_hWndMDIClient));
+		m_quickStartDlg->CenterWindow();
+		m_quickStartDlg->ShowWindow(SW_SHOW);
+	} else if(isLoaded && !shouldLoad)
+	{
+		m_quickStartDlg.reset();
+	}
 }
 
 
