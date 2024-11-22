@@ -451,6 +451,7 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnActivateApp(BOOL active, DWORD threadID);
+	afx_msg void OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized);
 
 	afx_msg void OnToggleMainBarShowOctave();
 	afx_msg void OnToggleMainBarShowTempo();

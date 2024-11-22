@@ -89,42 +89,42 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_WM_DEVICECHANGE()
 	ON_WM_DROPFILES()
 	ON_WM_QUERYENDSESSION()
-	ON_COMMAND(ID_VIEW_OPTIONS,				&CMainFrame::OnViewOptions)
+	ON_WM_MOUSEWHEEL()
+	ON_WM_SHOWWINDOW()
+	ON_WM_ACTIVATEAPP()
+	ON_WM_ACTIVATE()
 
-	ON_COMMAND(ID_PLUGIN_SETUP,				&CMainFrame::OnPluginManager)
-	ON_COMMAND(ID_CLIPBOARD_MANAGER,		&CMainFrame::OnClipboardManager)
-	//ON_COMMAND(ID_HELP,					CMDIFrameWnd::OnHelp)
-	ON_COMMAND(ID_REPORT_BUG,				&CMainFrame::OnReportBug)
-	ON_COMMAND(ID_NEXTOCTAVE,				&CMainFrame::OnNextOctave)
-	ON_COMMAND(ID_PREVOCTAVE,				&CMainFrame::OnPrevOctave)
-	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, &CMainFrame::OnOpenTemplateModule)
-	ON_COMMAND(ID_ADD_SOUNDBANK,			&CMainFrame::OnAddDlsBank)
-	ON_COMMAND(ID_IMPORT_MIDILIB,			&CMainFrame::OnImportMidiLib)
-	ON_COMMAND(ID_MIDI_RECORD,				&CMainFrame::OnMidiRecord)
-	ON_COMMAND(ID_PANIC,					&CMainFrame::OnPanic)
-	ON_COMMAND(ID_PLAYER_PAUSE,				&CMainFrame::OnPlayerPause)
-	ON_COMMAND_RANGE(ID_EXAMPLE_MODULES, ID_EXAMPLE_MODULES_LASTINRANGE, &CMainFrame::OnExampleSong)
-	ON_COMMAND_EX(IDD_TREEVIEW,				&CMainFrame::OnBarCheck)
-	ON_COMMAND_EX(ID_NETLINK_MODPLUG,		&CMainFrame::OnInternetLink)
-	ON_COMMAND_EX(ID_NETLINK_TOP_PICKS,		&CMainFrame::OnInternetLink)
-	ON_UPDATE_COMMAND_UI(ID_MIDI_RECORD,	&CMainFrame::OnUpdateMidiRecord)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,	&CMainFrame::OnUpdateTime)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,	&CMainFrame::OnUpdateUser)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,	&CMainFrame::OnUpdateInfo)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO,&CMainFrame::OnUpdateXInfo)
-	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,		&CMainFrame::OnUpdateControlBarMenu)
-	ON_MESSAGE(WM_MOD_UPDATEPOSITION,		&CMainFrame::OnUpdatePosition)
-	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS,	&CMainFrame::OnInvalidatePatterns)
-	ON_MESSAGE(WM_MOD_KEYCOMMAND,			&CMainFrame::OnCustomKeyMsg)
-	ON_MESSAGE(WM_MOD_MIDIMAPPING,			&CMainFrame::OnViewMIDIMapping)
-	ON_MESSAGE(WM_MOD_UPDATEVIEWS,			&CMainFrame::OnUpdateViews)
-	ON_MESSAGE(WM_MOD_SETMODIFIED,			&CMainFrame::OnSetModified)
+	ON_MESSAGE(WM_DPICHANGED, &CMainFrame::OnDPIChanged)
+
+	ON_COMMAND(ID_VIEW_OPTIONS,      &CMainFrame::OnViewOptions)
+	ON_COMMAND(ID_PLUGIN_SETUP,      &CMainFrame::OnPluginManager)
+	ON_COMMAND(ID_CLIPBOARD_MANAGER, &CMainFrame::OnClipboardManager)
+	//ON_COMMAND(ID_HELP,              &CMDIFrameWnd::OnHelp)
+
+	ON_COMMAND(ID_REPORT_BUG,     &CMainFrame::OnReportBug)
+	ON_COMMAND(ID_NEXTOCTAVE,     &CMainFrame::OnNextOctave)
+	ON_COMMAND(ID_PREVOCTAVE,     &CMainFrame::OnPrevOctave)
+	ON_COMMAND(ID_ADD_SOUNDBANK,  &CMainFrame::OnAddDlsBank)
+	ON_COMMAND(ID_IMPORT_MIDILIB, &CMainFrame::OnImportMidiLib)
+	ON_COMMAND(ID_MIDI_RECORD,    &CMainFrame::OnMidiRecord)
+	ON_COMMAND(ID_PANIC,          &CMainFrame::OnPanic)
+	ON_COMMAND(ID_PLAYER_PAUSE,   &CMainFrame::OnPlayerPause)
+
+	ON_COMMAND_EX(IDD_TREEVIEW,         &CMainFrame::OnBarCheck)
+	ON_COMMAND_EX(ID_NETLINK_MODPLUG,   &CMainFrame::OnInternetLink)
+	ON_COMMAND_EX(ID_NETLINK_TOP_PICKS, &CMainFrame::OnInternetLink)
+
+	ON_MESSAGE(WM_MOD_UPDATEPOSITION,     &CMainFrame::OnUpdatePosition)
+	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS, &CMainFrame::OnInvalidatePatterns)
+	ON_MESSAGE(WM_MOD_KEYCOMMAND,         &CMainFrame::OnCustomKeyMsg)
+	ON_MESSAGE(WM_MOD_MIDIMAPPING,        &CMainFrame::OnViewMIDIMapping)
+	ON_MESSAGE(WM_MOD_UPDATEVIEWS,        &CMainFrame::OnUpdateViews)
+	ON_MESSAGE(WM_MOD_SETMODIFIED,        &CMainFrame::OnSetModified)
 #if defined(MPT_ENABLE_UPDATE)
-	ON_MESSAGE(WM_MOD_UPDATENOTIFY,			&CMainFrame::OnToolbarUpdateIndicatorClick)
+	ON_MESSAGE(WM_MOD_UPDATENOTIFY, &CMainFrame::OnToolbarUpdateIndicatorClick)
 #endif // MPT_ENABLE_UPDATE
-	ON_COMMAND(ID_INTERNETUPDATE,			&CMainFrame::OnInternetUpdate)
-	ON_COMMAND(ID_UPDATE_AVAILABLE,			&CMainFrame::OnUpdateAvailable)
-	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,	&CMainFrame::OnShowSettingsFolder)
+	ON_COMMAND(ID_INTERNETUPDATE,   &CMainFrame::OnInternetUpdate)
+	ON_COMMAND(ID_UPDATE_AVAILABLE, &CMainFrame::OnUpdateAvailable)
 #if defined(MPT_ENABLE_UPDATE)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_START,    &CMainFrame::OnUpdateCheckStart)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_PROGRESS, &CMainFrame::OnUpdateCheckProgress)
@@ -132,6 +132,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_FAILURE,  &CMainFrame::OnUpdateCheckFailure)
 	ON_MESSAGE(MPT_WM_APP_UPDATECHECK_SUCCESS,  &CMainFrame::OnUpdateCheckSuccess)
 #endif // MPT_ENABLE_UPDATE
+	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,   &CMainFrame::OnShowSettingsFolder)
 	ON_COMMAND(ID_HELPSHOW,                  &CMainFrame::OnHelp)
 	ON_COMMAND(ID_MAINBAR_SHOW_OCTAVE,       &CMainFrame::OnToggleMainBarShowOctave)
 	ON_COMMAND(ID_MAINBAR_SHOW_TEMPO,        &CMainFrame::OnToggleMainBarShowTempo)
@@ -142,18 +143,23 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 	ON_COMMAND(ID_TREEVIEW_ON_LEFT,          &CMainFrame::OnToggleTreeViewOnLeft)
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
-	ON_COMMAND(ID_CREATE_MIXERDUMP, &CMainFrame::OnCreateMixerDump)
-	ON_COMMAND(ID_VERIFY_MIXERDUMP, &CMainFrame::OnVerifyMixerDump)
+	ON_COMMAND(ID_CREATE_MIXERDUMP,  &CMainFrame::OnCreateMixerDump)
+	ON_COMMAND(ID_VERIFY_MIXERDUMP,  &CMainFrame::OnVerifyMixerDump)
 	ON_COMMAND(ID_CONVERT_MIXERDUMP, &CMainFrame::OnConvertMixerDumpToText)
 #endif // ENABLE_PLAYBACK_TEST_MENU
 
+	ON_COMMAND_RANGE(ID_FILE_OPENTEMPLATE, ID_FILE_OPENTEMPLATE_LASTINRANGE, &CMainFrame::OnOpenTemplateModule)
+	ON_COMMAND_RANGE(ID_EXAMPLE_MODULES, ID_EXAMPLE_MODULES_LASTINRANGE, &CMainFrame::OnExampleSong)
 	ON_COMMAND_RANGE(ID_MRU_LIST_FIRST, ID_MRU_LIST_LAST, &CMainFrame::OnOpenMRUItem)
-	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,	&CMainFrame::OnUpdateMRUItem)
+	
+	ON_UPDATE_COMMAND_UI(ID_MRU_LIST_FIRST,  &CMainFrame::OnUpdateMRUItem)
+	ON_UPDATE_COMMAND_UI(ID_MIDI_RECORD,     &CMainFrame::OnUpdateMidiRecord)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TIME,  &CMainFrame::OnUpdateTime)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_USER,  &CMainFrame::OnUpdateUser)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_INFO,  &CMainFrame::OnUpdateInfo)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_XINFO, &CMainFrame::OnUpdateXInfo)
+	ON_UPDATE_COMMAND_UI(IDD_TREEVIEW,       &CMainFrame::OnUpdateControlBarMenu)
 	//}}AFX_MSG_MAP
-	ON_WM_MOUSEWHEEL()
-	ON_WM_SHOWWINDOW()
-	ON_WM_ACTIVATEAPP()
-	ON_MESSAGE(WM_DPICHANGED, &CMainFrame::OnDPIChanged)
 END_MESSAGE_MAP()
 
 // Globals
@@ -564,6 +570,15 @@ void CMainFrame::OnActivateApp(BOOL active, DWORD threadID)
 	if(active)
 		IPCWindow::UpdateLastUsed();
 	CMDIFrameWnd::OnActivateApp(active, threadID);
+}
+
+
+void CMainFrame::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
+{
+	CMDIFrameWnd::OnActivate(nState, pWndOther, bMinimized);
+	// Avoid keyboard focus being trapped on MDI client area
+	if(m_quickStartDlg && m_quickStartDlg->m_hWnd && nState != WA_INACTIVE && ::GetFocus() == m_hWndMDIClient)
+		m_quickStartDlg->SetFocus();
 }
 
 
@@ -3132,7 +3147,7 @@ HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathStr
 		mpt::PathString fileName;
 		while(scanner.Next(fileName))
 		{
-			paths.push_back(fileName);
+			paths.push_back(std::move(fileName));
 		}
 	}
 	DWORD stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;
