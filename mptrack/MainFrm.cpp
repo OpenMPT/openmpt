@@ -618,7 +618,7 @@ LRESULT CALLBACK CMainFrame::FocusChangeProc(int code, WPARAM wParam, LPARAM lPa
 }
 
 
-BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
+BOOL CMainFrame::PreTranslateMessage(MSG *pMsg)
 {
 	// Right-click menu to disable/enable tree view and main toolbar when right-clicking on either the menu strip or main toolbar
 	if((pMsg->message == WM_RBUTTONUP) || (pMsg->message == WM_NCRBUTTONUP))
@@ -3115,43 +3115,60 @@ LRESULT CMainFrame::OnViewMIDIMapping(WPARAM wParam, LPARAM lParam)
 HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString>& paths, const mpt::PathString &folderName, const uint16 idRangeBegin)
 {
 	paths.clear();
-	HMENU hMenu = ::CreatePopupMenu();
-	ASSERT(hMenu != NULL);
-	if (hMenu != NULL)
+
+	for(size_t i = 0; i < 2; i++)  // 0: app items, 1: user items
 	{
-		UINT_PTR filesAdded = 0;
-		for(size_t i = 0; i < 2; i++) // 0: app items, 1: user items
+		// To avoid duplicates, check whether app path and config path are the same.
+		if(i == 1 && mpt::PathCompareNoCase(theApp.GetInstallPath(), theApp.GetConfigPath()) == 0)
+			break;
+
+		mpt::PathString basePath;
+		basePath = (i == 0) ? theApp.GetInstallPath() : theApp.GetConfigPath();
+		basePath += folderName;
+		if(!mpt::native_fs{}.is_directory(basePath))
+			continue;
+
+		FolderScanner scanner(basePath, FolderScanner::kOnlyFiles);
+		mpt::PathString fileName;
+		while(scanner.Next(fileName))
 		{
-			// To avoid duplicates, check whether app path and config path are the same.
-			if (i == 1 && mpt::PathCompareNoCase(theApp.GetInstallPath(), theApp.GetConfigPath()) == 0)
-				break;
-
-			mpt::PathString basePath;
-			basePath = (i == 0) ? theApp.GetInstallPath() : theApp.GetConfigPath();
-			basePath += folderName;
-			if(!mpt::native_fs{}.is_directory(basePath))
-				continue;
-
-			FolderScanner scanner(basePath, FolderScanner::kOnlyFiles);
-			mpt::PathString fileName;
-			while(filesAdded < maxCount && scanner.Next(fileName))
-			{
-				paths.push_back(fileName);
-				CString file = fileName.GetFilename().ToCString();
-				file.Replace(_T("&"), _T("&&"));
-				AppendMenu(hMenu, MF_STRING, idRangeBegin + filesAdded, file);
-				filesAdded++;
-			}
+			paths.push_back(fileName);
 		}
+	}
+	DWORD stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;
+#if MPT_WINNT_AT_LEAST(MPT_WIN_7)
+	// Wine does not support natural sorting with SORT_DIGITSASNUMBERS, fall back to normal sorting
+	if(::CompareString(LOCALE_USER_DEFAULT, stringCompareFlags | SORT_DIGITSASNUMBERS, _T(""), -1, _T(""), -1) == CSTR_EQUAL)
+		stringCompareFlags |= SORT_DIGITSASNUMBERS;
+#endif
+	std::sort(paths.begin(), paths.end(), [stringCompareFlags](const mpt::PathString &left, const mpt::PathString &right)
+	{
+		return ::CompareString(LOCALE_USER_DEFAULT, stringCompareFlags, left.AsNative().c_str(), -1, right.AsNative().c_str(), -1) == CSTR_LESS_THAN;
+	});
 
-		if(filesAdded == 0)
-		{
-			AppendMenu(hMenu, MF_STRING | MF_GRAYED | MF_DISABLED, 0, _T("No items found"));
-		} else
-		{
-			AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
-			AppendMenu(hMenu, MF_STRING, idRangeBegin + maxCount, _T("&Browse..."));
-		}
+	HMENU hMenu = ::CreatePopupMenu();
+	MPT_ASSERT(hMenu != nullptr);
+	if(hMenu == nullptr)
+		return hMenu;
+
+	UINT_PTR filesAdded = 0;
+	for(const auto &fileName : paths)
+	{
+		CString file = fileName.GetFilename().ToCString();
+		file.Replace(_T("&"), _T("&&"));
+		AppendMenu(hMenu, MF_STRING, idRangeBegin + filesAdded, file);
+		filesAdded++;
+		if(filesAdded >= maxCount)
+			break;
+	}
+
+	if(filesAdded == 0)
+	{
+		AppendMenu(hMenu, MF_STRING | MF_GRAYED | MF_DISABLED, 0, _T("No items found"));
+	} else
+	{
+		AppendMenu(hMenu, MF_SEPARATOR, 0, 0);
+		AppendMenu(hMenu, MF_STRING, idRangeBegin + maxCount, _T("&Browse..."));
 	}
 
 	return hMenu;

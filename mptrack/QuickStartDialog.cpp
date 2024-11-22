@@ -1,7 +1,7 @@
 /*
  * QuickStartDialog.cpp
  * --------------------
- * Purpose: Dialog to show inside the MDI area when no modules are loaded.
+ * Purpose: Dialog to show inside the MDI client area when no modules are loaded.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -28,6 +28,8 @@ BEGIN_MESSAGE_MAP(QuickStartDlg, ResizableDialog)
 	ON_COMMAND(IDC_BUTTON2,   &QuickStartDlg::OnOpen)
 	ON_COMMAND(ID_REMOVE,     &QuickStartDlg::OnRemoveMRUItem)
 	ON_COMMAND(ID_REMOVE_ALL, &QuickStartDlg::OnRemoveAllMRUItems)
+
+	ON_EN_CHANGE(IDC_EDIT1, &QuickStartDlg::OnUpdateFilter)
 	
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &QuickStartDlg::OnOpenFile)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST1, &QuickStartDlg::OnRightClickFile)
@@ -41,6 +43,7 @@ void QuickStartDlg::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_BUTTON2, m_openButton);
 	DDX_Control(pDX, IDCANCEL, m_closeButton);
 	DDX_Control(pDX, IDC_LIST1, m_list);
+	DDX_Control(pDX, IDC_EDIT1, m_find);
 }
 
 
@@ -51,7 +54,7 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 	m_closeButton.SetAccessibleText(_T("Close"));
 	Create(IDD_QUICKSTART, parent);
 
-	const bool groupsEnabled = m_list.EnableGroupView();
+	m_groupsEnabled = m_list.EnableGroupView();
 	m_list.SetRedraw(FALSE);
 	m_list.SetExtendedStyle(m_list.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 	m_list.InsertColumn(0, _T("File"), LVCFMT_LEFT);
@@ -64,11 +67,9 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 		{examples, _T("Example Modules")},
 	};
 	static_assert(mpt::array_size<decltype(PathGroups)>::size == mpt::array_size<decltype(m_paths)>::size);
-	int groupId = -1, itemId = -1;
-	for(const auto &pathGroup : PathGroups)
+	for(size_t groupId = 0; groupId < std::size(PathGroups); groupId++)
 	{
-		++groupId;
-		if(groupsEnabled)
+		if(m_groupsEnabled)
 		{
 			LVGROUP group{};
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
@@ -78,15 +79,15 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 #endif
 			group.mask = LVGF_HEADER | LVGF_GROUPID;
 #if defined(UNICODE)
-			group.pszHeader = const_cast<TCHAR *>(pathGroup.second);
+			group.pszHeader = const_cast<TCHAR *>(PathGroups[groupId].second);
 #else
-			std::wstring titlew = mpt::ToWide(mpt::winstring(pathGroup.second));
+			std::wstring titlew = mpt::ToWide(mpt::winstring(PathGroups[groupId].second));
 			group.pszHeader = const_cast<WCHAR *>(titlew.c_str());
 #endif
 			group.cchHeader = 0;
 			group.pszFooter = nullptr;
 			group.cchFooter = 0;
-			group.iGroupId = groupId;
+			group.iGroupId = static_cast<int>(groupId);
 			group.stateMask = 0;
 			group.state = 0;
 			group.uAlign = LVGA_HEADER_LEFT;
@@ -94,29 +95,9 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 			ListView_SetGroupState(m_list.m_hWnd, group.iGroupId, LVGS_COLLAPSIBLE, LVGS_COLLAPSIBLE);
 		}
 
-		LVITEM lvi;
-		lvi.mask = LVIF_TEXT | LVIF_PARAM | LVIF_IMAGE;
-		if(groupsEnabled)
-			lvi.mask |= LVIF_GROUPID;
-		lvi.iSubItem = 0;
-		lvi.state = 0;
-		lvi.stateMask = 0;
-		lvi.cchTextMax = 0;
-		lvi.iImage = TIMAGE_MODULE_FILE;
-		lvi.iIndent = 0;
-
-		for(const auto &path : pathGroup.first)
-		{
-			const auto filename = path.GetFilename().AsNative();
-			lvi.iGroupId = groupId;
-			lvi.iItem = ++itemId;
-			lvi.lParam = static_cast<LPARAM>(m_paths[groupId].size() | (groupId << 24));
-			lvi.pszText = const_cast<TCHAR *>(filename.c_str());
-			m_list.InsertItem(&lvi);
-			m_list.SetItemText(itemId, 1, path.GetDirectoryWithDrive().AsNative().c_str());
-			m_paths[groupId].push_back(path);
-		}
+		m_paths[groupId] = PathGroups[groupId].first;
 	}
+	UpdateFileList();
 	m_list.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 	m_list.SetColumnWidth(0, LVSCW_AUTOSIZE);
 	m_list.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
@@ -192,8 +173,25 @@ INT_PTR QuickStartDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 }
 
 
+BOOL QuickStartDlg::PreTranslateMessage(MSG *pMsg)
+{
+	// Use up/down keys to navigate in list, even if search field is focussed. This also skips the group headers during navigation
+	if(pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN) && GetFocus() == &m_find)
+	{
+		m_list.ModifyStyle(0, LVS_SHOWSELALWAYS);
+		int selItem = std::clamp(m_list.GetSelectionMark() + (pMsg->wParam == VK_UP ? -1 : 1), 0, m_list.GetItemCount() - 1);
+		m_list.SetItemState(selItem, LVIS_SELECTED, LVIS_SELECTED);
+		m_list.SetSelectionMark(selItem);
+		return TRUE;
+	}
+
+	return ResizableDialog::PreTranslateMessage(pMsg);
+}
+
+
 void QuickStartDlg::UpdateHeight()
 {
+	// Try to make the view tall enough to view the entire list contents, but only up to 90% of the MDI client area
 	CRect listRect, viewRect;
 	m_list.GetClientRect(listRect);
 	m_list.GetViewRect(viewRect);
@@ -202,7 +200,7 @@ void QuickStartDlg::UpdateHeight()
 	GetClientRect(windowRect);
 	GetParent()->GetClientRect(parentRect);
 	m_list.GetItemRect(0, itemRect, LVIR_BOUNDS);
-	viewRect.bottom += itemRect.Height() * 2;
+	viewRect.bottom += itemRect.Height() * 2;  // View height calculation seems to be a bit off and would still cause a vertical scrollbar to appear without this adjustment
 	if(viewRect.bottom > listRect.bottom)
 		windowRect.bottom += viewRect.bottom - listRect.bottom;
 	const int maxHeight = Util::muldiv(parentRect.bottom, 9, 10);
@@ -234,7 +232,7 @@ void QuickStartDlg::OnOpen()
 
 void QuickStartDlg::OnOK()
 {
-	if(GetFocus() == &m_list)
+	if(const CWnd *focus = GetFocus(); focus == &m_list || focus == &m_find)
 		OnOpenFile(nullptr, nullptr);
 }
 
@@ -249,6 +247,7 @@ void QuickStartDlg::OnRemoveMRUItem()
 		return;
 	mruFiles.erase(mruFiles.begin() + index);
 	m_list.DeleteItem(index);
+	m_paths[GetItemGroup(index)][GetItemIndex(index)] = {};
 	CMainFrame::GetMainFrame()->UpdateMRUList();
 }
 
@@ -266,13 +265,61 @@ void QuickStartDlg::OnRemoveAllMRUItems()
 }
 
 
+void QuickStartDlg::OnUpdateFilter()
+{
+	m_list.SetRedraw(FALSE);
+	m_list.DeleteAllItems();
+	CString filter;
+	m_find.GetWindowText(filter);
+	UpdateFileList(filter);
+	m_list.SetRedraw(TRUE);
+}
+
+
+void QuickStartDlg::UpdateFileList(CString filter)
+{
+	const bool applyFilter = !filter.IsEmpty();
+	if(applyFilter)
+		filter = _T("*") + filter + _T("*");
+
+	LVITEM lvi;
+	lvi.mask = LVIF_TEXT | LVIF_PARAM | LVIF_IMAGE;
+	if(m_groupsEnabled)
+		lvi.mask |= LVIF_GROUPID;
+	lvi.iSubItem = 0;
+	lvi.state = 0;
+	lvi.stateMask = 0;
+	lvi.cchTextMax = 0;
+	lvi.iImage = TIMAGE_MODULE_FILE;
+	lvi.iIndent = 0;
+
+	int itemId = -1;
+	for(size_t groupId = 0; groupId < m_paths.size(); groupId++)
+	{
+		lvi.iGroupId = static_cast<int>(groupId);
+		for(size_t i = 0; i < m_paths[groupId].size(); i++)
+		{
+			if(m_paths[groupId][i].empty() || (applyFilter && !PathMatchSpec(m_paths[groupId][i].AsNative().c_str(), filter)))
+				continue;
+			const auto filename = m_paths[groupId][i].GetFilename().AsNative();
+			lvi.iItem = ++itemId;
+			lvi.lParam = static_cast<LPARAM>(i | (groupId << 24));
+			lvi.pszText = const_cast<TCHAR *>(filename.c_str());
+			m_list.InsertItem(&lvi);
+			m_list.SetItemText(itemId, 1, m_paths[groupId][i].GetDirectoryWithDrive().AsNative().c_str());
+		}
+	}
+}
+
+
 void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 {
 	const int i = m_list.GetSelectionMark();
 	if(i < 0)
 		return;
+	const size_t index = GetItemIndex(i);
 	const int group = GetItemGroup(i);
-	const auto &path = m_paths[group][GetItemIndex(i)];
+	const auto &path = m_paths[group][index];
 	CDocument *doc = nullptr;
 	if(group != 1)
 		doc = theApp.OpenDocumentFile(path.ToCString());
@@ -280,7 +327,10 @@ void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 		doc = theApp.OpenTemplateFile(path);
 
 	if(!doc)
+	{
 		m_list.DeleteItem(i);
+		m_paths[group][i] = {};
+	}
 }
 
 

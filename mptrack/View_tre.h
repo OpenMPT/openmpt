@@ -182,11 +182,7 @@ protected:
 	std::unique_ptr<CDLSBank> m_cachedBank;
 	mpt::PathString m_cachedBankName;
 
-#if MPT_WINNT_AT_LEAST(MPT_WIN_7)
-	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH | SORT_DIGITSASNUMBERS;
-#else
 	DWORD m_stringCompareFlags = NORM_IGNORECASE | NORM_IGNOREWIDTH;
-#endif
 
 	// Instrument library
 	mpt::PathString m_InstrLibPath;           // Current path to be explored

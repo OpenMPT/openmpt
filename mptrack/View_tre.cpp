@@ -179,8 +179,8 @@ CModTree::CModTree(CModTree *pDataTree)
 
 #if MPT_WINNT_AT_LEAST(MPT_WIN_7)
 	// Wine does not support natural sorting with SORT_DIGITSASNUMBERS, fall back to normal sorting
-	if(!::CompareString(LOCALE_USER_DEFAULT, m_stringCompareFlags, _T(""), -1, _T(""), -1))
-		m_stringCompareFlags &= ~SORT_DIGITSASNUMBERS;
+	if(::CompareString(LOCALE_USER_DEFAULT, m_stringCompareFlags | SORT_DIGITSASNUMBERS, _T(""), -1, _T(""), -1) == CSTR_EQUAL)
+		m_stringCompareFlags |= SORT_DIGITSASNUMBERS;
 #endif
 }
 
