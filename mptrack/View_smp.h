@@ -187,7 +187,7 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT, CPoint);
+	afx_msg void OnRButtonUp(UINT, CPoint);
 	afx_msg void OnMouseMove(UINT, CPoint);
 	afx_msg BOOL OnSetCursor(CWnd *pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnEditSelectAll();

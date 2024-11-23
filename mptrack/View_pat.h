@@ -465,10 +465,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-
-public:
-	afx_msg void OnInitMenu(CMenu *pMenu);
-
 private:
 	// Copy&Paste
 	bool CopyPattern(PATTERNINDEX nPattern, const PatternRect &selection);
@@ -534,9 +530,6 @@ private:
 	void AddChannel(CHANNELINDEX parent, bool afterCurrent);
 
 	void DragChannel(CHANNELINDEX source, CHANNELINDEX target, CHANNELINDEX numChannels, bool duplicate);
-
-public:
-	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 
 private:
 	void TogglePendingMute(CHANNELINDEX nChn);

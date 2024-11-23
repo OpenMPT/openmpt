@@ -43,7 +43,7 @@ protected:
 	CModControlView &m_parent;
 	HWND m_hWndView = nullptr;
 	HWND m_lastFocusItem = nullptr;
-	LONG m_nLockCount = 0;
+	int m_nLockCount = 0;
 	bool m_initialized = false;
 
 public:

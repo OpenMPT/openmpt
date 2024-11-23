@@ -69,7 +69,7 @@ protected:
 	//{{AFX_MSG(CNoteMapWnd)
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnMButtonDown(UINT flags, CPoint pt) { OnLButtonDown(flags, pt); }
-	afx_msg void OnRButtonDown(UINT, CPoint);
+	afx_msg void OnRButtonUp(UINT, CPoint);
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);

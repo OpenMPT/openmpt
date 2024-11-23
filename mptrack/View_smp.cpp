@@ -104,7 +104,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_NCLBUTTONUP()
 	ON_WM_NCLBUTTONDBLCLK()
-	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 	ON_WM_CHAR()
 	ON_WM_DROPFILES()
 	ON_WM_MOUSEWHEEL()
@@ -2158,7 +2158,7 @@ void CViewSample::OnLButtonDblClk(UINT, CPoint pt)
 }
 
 
-void CViewSample::OnRButtonDown(UINT, CPoint pt)
+void CViewSample::OnRButtonUp(UINT, CPoint pt)
 {
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
@@ -3676,7 +3676,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
-		case kcContextMenu: OnRButtonDown(0, CPoint(0, TimelineHeight(m_hWnd))); return wParam;
+		case kcContextMenu: OnRButtonUp(0, CPoint(0, TimelineHeight(m_hWnd))); return wParam;
 
 		case kcSampleTrim:			TrimSample(false); return wParam;
 		case kcSampleTrimToLoopEnd:	TrimSample(true); return wParam;

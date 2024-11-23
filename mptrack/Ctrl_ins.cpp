@@ -54,7 +54,7 @@ BEGIN_MESSAGE_MAP(CNoteMapWnd, CStatic)
 	ON_WM_KILLFOCUS()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MBUTTONDOWN()
-	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_NOTEMAP_TRANS_UP,          &CNoteMapWnd::OnMapTransposeUp)
@@ -322,7 +322,7 @@ void CNoteMapWnd::OnLButtonDblClk(UINT, CPoint)
 }
 
 
-void CNoteMapWnd::OnRButtonDown(UINT, CPoint pt)
+void CNoteMapWnd::OnRButtonUp(UINT, CPoint pt)
 {
 	CInputHandler* ih = CMainFrame::GetInputHandler();
 
@@ -623,7 +623,7 @@ LRESULT CNoteMapWnd::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			CRect clientRect;
 			GetClientRect(clientRect);
 			clientRect.bottom = clientRect.top + mpt::align_up(clientRect.Height(), m_cyFont);
-			OnRButtonDown(0, clientRect.CenterPoint());
+			OnRButtonUp(0, clientRect.CenterPoint());
 		}
 		return wParam;
 	case kcInsNoteMapTransposeDown:		MapTranspose(-1); return wParam;

@@ -1298,7 +1298,7 @@ void CEQSlider::Init(UINT nID, UINT n, CWnd *parent)
 
 BOOL CEQSlider::PreTranslateMessage(MSG *pMsg)
 {
-	if ((pMsg) && (pMsg->message == WM_RBUTTONDOWN) && (m_pParent))
+	if ((pMsg) && (pMsg->message == WM_RBUTTONUP) && (m_pParent))
 	{
 		m_x = LOWORD(pMsg->lParam);
 		m_y = HIWORD(pMsg->lParam);

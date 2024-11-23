@@ -148,7 +148,7 @@ protected:
 	afx_msg void OnKillFocus(CWnd *);
 	afx_msg void OnLButtonDown(UINT, CPoint);
 	afx_msg void OnLButtonDblClk(UINT, CPoint);
-	afx_msg void OnRButtonDown(UINT, CPoint);
+	afx_msg void OnRButtonUp(UINT, CPoint);
 	afx_msg void OnLButtonUp(UINT, CPoint);
 	afx_msg void OnMButtonDown(UINT, CPoint);
 	afx_msg void OnMouseMove(UINT, CPoint);

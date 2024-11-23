@@ -57,9 +57,9 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
-	ON_WM_SYSKEYDOWN()
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&CViewPattern::OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,		&CViewPattern::OnMidiMsg)
@@ -136,12 +136,7 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,			&CViewPattern::OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,			&CViewPattern::OnUpdateRedo)
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT+MAX_MIXPLUGINS, &CViewPattern::OnSelectPlugin)
-
-
 	//}}AFX_MSG_MAP
-	ON_WM_INITMENU()
-	ON_WM_RBUTTONDBLCLK()
-	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
 static_assert(ModCommand::maxColumnValue <= 999, "Command range for ID_CHANGE_PCNOTE_PARAM is designed for 999");
@@ -1422,16 +1417,7 @@ void CViewPattern::ShowPatternProperties(PATTERNINDEX pat)
 
 void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 {
-	CModDoc *modDoc = GetDocument();
-	HMENU hMenu;
-
-	// Too far left to get a ctx menu:
-	if(!modDoc || pt.x < m_szHeader.cx)
-	{
-		return;
-	}
-
-	// Handle drag n drop
+	// Abort drag n drop
 	if(m_Status[psDragnDropEdit])
 	{
 		if(m_Status[psDragnDropping])
@@ -1450,10 +1436,46 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		return;
 	}
 
-	if((hMenu = ::CreatePopupMenu()) == NULL)
+	const bool inChannelHeader = (pt.y < m_szHeader.cy);
+	if(/*(flags & MK_SHIFT) &&*/ inChannelHeader)
 	{
-		return;
+		// Drag-select record channels
+		StartRecordGroupDragging(GetDragItem(pt, m_rcDragItem));
+		m_Status.set(psShiftDragging, (flags & MK_SHIFT) != 0);
 	}
+}
+
+
+void CViewPattern::OnRButtonUp(UINT flags, CPoint pt)
+{
+	CModDoc *modDoc = GetDocument();
+
+	// Too far left to get a ctx menu:
+	if(!modDoc || pt.x < m_szHeader.cx)
+		return;
+
+	ResetRecordGroupDragging();
+	const CHANNELINDEX sourceChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
+	const CHANNELINDEX targetChn = m_nDropItem.IsValid() ? static_cast<CHANNELINDEX>(m_nDropItem.Value()) : CHANNELINDEX_INVALID;
+	switch(m_nDragItem.Type())
+	{
+	case DragItem::ChannelHeader:
+		if(m_Status[psShiftDragging])
+		{
+			if(sourceChn < modDoc->GetNumChannels() && sourceChn == targetChn)
+			{
+				modDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
+				InvalidateChannelsHeaders(sourceChn);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	
+	HMENU hMenu = ::CreatePopupMenu();
+	if(hMenu == nullptr)
+		return;
 
 	CSoundFile &sndFile = modDoc->GetSoundFile();
 	m_MenuCursor = GetPositionFromPoint(pt);
@@ -1477,10 +1499,6 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		// Ctrl+Right-Click: Open quick channel properties.
 		ClientToScreen(&pt);
 		m_quickChannelProperties.Show(GetDocument(), nChn, pt);
-	} else if((flags & MK_SHIFT) && inChannelHeader)
-	{
-		// Drag-select record channels
-		StartRecordGroupDragging(GetDragItem(pt, m_rcDragItem));
 	} else if(nChn < sndFile.GetNumChannels() && sndFile.Patterns.IsValidPat(m_nPattern) && !(flags & (MK_CONTROL | MK_SHIFT)))
 	{
 		CInputHandler *ih = CMainFrame::GetInputHandler();
@@ -1556,34 +1574,6 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 	}
 	::DestroyMenu(hMenu);
-}
-
-void CViewPattern::OnRButtonUp(UINT nFlags, CPoint point)
-{
-	CModDoc *pModDoc = GetDocument();
-	if(!pModDoc)
-		return;
-
-	ResetRecordGroupDragging();
-	const CHANNELINDEX sourceChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
-	const CHANNELINDEX targetChn = m_nDropItem.IsValid() ? static_cast<CHANNELINDEX>(m_nDropItem.Value()) : CHANNELINDEX_INVALID;
-	switch(m_nDragItem.Type())
-	{
-	case DragItem::ChannelHeader:
-		if(nFlags & MK_SHIFT)
-		{
-			if(sourceChn < pModDoc->GetNumChannels() && sourceChn == targetChn)
-			{
-				pModDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
-				InvalidateChannelsHeaders(sourceChn);
-			}
-		}
-		break;
-	default:
-		break;
-	}
-
-	CModScrollView::OnRButtonUp(nFlags, point);
 }
 
 
@@ -4373,7 +4363,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	switch(wParam)
 	{
-		case kcContextMenu: OnRButtonDown(0, GetPointFromPosition(m_Cursor)); return wParam;
+		case kcContextMenu: OnRButtonUp(0, GetPointFromPosition(m_Cursor)); return wParam;
 
 		case kcPrevInstrument:        OnPrevInstrument(); return wParam;
 		case kcNextInstrument:        OnNextInstrument(); return wParam;
@@ -4676,7 +4666,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				CPoint pt = GetPointFromPosition(m_Cursor);
 				pt.x += GetChannelWidth() / 2;
 				pt.y += GetRowHeight() / 2;
-				OnRButtonDown(0, pt);
+				OnRButtonUp(0, pt);
 			}
 			return wParam;
 		case kcShowChannelCtxMenu:
@@ -4684,7 +4674,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				CPoint pt = GetPointFromPosition(m_Cursor);
 				pt.x += GetChannelWidth() / 2;
 				pt.y = (m_szHeader.cy - m_szPluginHeader.cy) / 2;
-				OnRButtonDown(0, pt);
+				OnRButtonUp(0, pt);
 			}
 			return wParam;
 		case kcShowChannelPluginCtxMenu:
@@ -4692,7 +4682,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				CPoint pt = GetPointFromPosition(m_Cursor);
 				pt.x += GetChannelWidth() / 2;
 				pt.y = m_szHeader.cy - m_szPluginHeader.cy / 2;
-				OnRButtonDown(0, pt);
+				OnRButtonUp(0, pt);
 			}
 			return wParam;
 		case kcPatternGoto: OnEditGoto(); return wParam;
@@ -6408,12 +6398,6 @@ void CViewPattern::OnClearField(const std::bitset<PatternCursor::numColumns> mas
 }
 
 
-
-void CViewPattern::OnInitMenu(CMenu *pMenu)
-{
-	CModScrollView::OnInitMenu(pMenu);
-}
-
 void CViewPattern::TogglePluginEditor(int chan)
 {
 	CModDoc *modDoc = GetDocument();
@@ -7076,13 +7060,6 @@ bool CViewPattern::IsInterpolationPossible(ROWINDEX startRow, ROWINDEX endRow, C
 		result = false;
 	}
 	return result;
-}
-
-
-void CViewPattern::OnRButtonDblClk(UINT nFlags, CPoint point)
-{
-	OnRButtonDown(nFlags, point);
-	CModScrollView::OnRButtonDblClk(nFlags, point);
 }
 
 

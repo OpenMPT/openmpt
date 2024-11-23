@@ -92,9 +92,10 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDBLCLK()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_MBUTTONDOWN()
+	ON_WM_RBUTTONUP()
+	ON_WM_MBUTTONUP()
 	ON_WM_XBUTTONUP()
+	ON_WM_MOUSEWHEEL()
 	ON_WM_NCLBUTTONDOWN()
 	ON_WM_NCLBUTTONUP()
 	ON_WM_NCLBUTTONDBLCLK()
@@ -133,7 +134,6 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		&CViewInstrument::OnUpdateRedo)
 
 	//}}AFX_MSG_MAP
-	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 
@@ -1747,7 +1747,7 @@ void CViewInstrument::OnLButtonUp(UINT, CPoint)
 }
 
 
-void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
+void CViewInstrument::OnRButtonUp(UINT flags, CPoint pt)
 {
 	const CModDoc *pModDoc = GetDocument();
 	if(!pModDoc)
@@ -1760,7 +1760,7 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 	// Ctrl + Right-Click = Delete point
 	if(flags & MK_CONTROL)
 	{
-		OnMButtonDown(flags, pt);
+		OnMButtonUp(flags, pt);
 		return;
 	}
 
@@ -1789,7 +1789,7 @@ void CViewInstrument::OnRButtonDown(UINT flags, CPoint pt)
 	}
 }
 
-void CViewInstrument::OnMButtonDown(UINT, CPoint pt)
+void CViewInstrument::OnMButtonUp(UINT, CPoint pt)
 {
 	// Middle mouse button: Remove envelope point
 	int point = ScreenToPoint(pt.x, pt.y);
@@ -2289,7 +2289,7 @@ LRESULT CViewInstrument::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 					uint32 point = DragItemToEnvPoint();
 					pt.SetPoint(PointToScreen(point), ValueToScreen(EnvGetValue(point)));
 				}
-				OnRButtonDown(0, pt);
+				OnRButtonUp(0, pt);
 			}
 			return wParam;
 		case kcPrevInstrument:	OnPrevInstrument(); return wParam;

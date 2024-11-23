@@ -52,7 +52,7 @@ BEGIN_MESSAGE_MAP(COrderList, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
@@ -478,7 +478,7 @@ LRESULT COrderList::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			GetClientRect(clientRect);
 			if(!clientRect.PtInRect(pt))
 				pt = clientRect.CenterPoint();
-			OnRButtonDown(0, pt);
+			OnRButtonUp(0, pt);
 		}
 		return wParam;
 
@@ -1073,7 +1073,7 @@ void COrderList::OnSelectSequence(UINT nid)
 }
 
 
-void COrderList::OnRButtonDown(UINT nFlags, CPoint pt)
+void COrderList::OnRButtonUp(UINT nFlags, CPoint pt)
 {
 	CRect rect;
 	GetClientRect(&rect);
