@@ -94,12 +94,12 @@ CommandID CInputHandler::SendCommands(CWnd *wnd, const KeyMapRange &cmd)
 
 CommandID CInputHandler::KeyEvent(const InputTargetContext context, const KeyboardEvent &event, CWnd *pSourceWnd)
 {
-	if(InterceptSpecialKeys(event.key, event.flags, false))
-		return kcDummyShortcut;
 	if(IsKeyPressHandledByTextBox(event.key, ::GetFocus()))
 		return kcNull;
 
 	KeyMapRange cmd = m_keyMap.equal_range(KeyCombination(context, GetModifierMask(), event.key, event.keyEventType));
+	if(cmd.first != cmd.second && InterceptSpecialKeys(event))
+		return kcDummyShortcut;
 
 	if(pSourceWnd == nullptr)
 		pSourceWnd = m_pMainFrm;	// By default, send command message to main frame.
@@ -108,17 +108,16 @@ CommandID CInputHandler::KeyEvent(const InputTargetContext context, const Keyboa
 
 
 // Feature: use Windows keys as modifier keys, intercept special keys
-bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateMsg)
+bool CInputHandler::InterceptSpecialKeys(const KeyboardEvent &event)
 {
-	KeyEventType keyEventType = GetKeyEventType(HIWORD(nFlags));
 	enum { VK_NonExistentKey = VK_F24+1 };
 
-	if(nChar == VK_NonExistentKey)
+	if(event.key == VK_NonExistentKey)
 	{
 		return true;
-	} else if(m_bInterceptWindowsKeys && (nChar == VK_LWIN || nChar == VK_RWIN))
+	} else if(m_bInterceptWindowsKeys && (event.key == VK_LWIN || event.key == VK_RWIN))
 	{
-		if(keyEventType == kKeyEventDown)
+		if(event.keyEventType == kKeyEventDown)
 		{
 			INPUT inp[2];
 			inp[0].type = inp[1].type = INPUT_KEYBOARD;
@@ -132,22 +131,22 @@ bool CInputHandler::InterceptSpecialKeys(UINT nChar, UINT nFlags, bool generateM
 		}
 	}
 
-	if((nChar == VK_NUMLOCK && m_bInterceptNumLock)
-		|| (nChar == VK_CAPITAL && m_bInterceptCapsLock)
-		|| (nChar == VK_SCROLL && m_bInterceptScrollLock))
+	if((event.key == VK_NUMLOCK && m_bInterceptNumLock)
+		|| (event.key == VK_CAPITAL && m_bInterceptCapsLock)
+		|| (event.key == VK_SCROLL && m_bInterceptScrollLock))
 	{
 		if(GetMessageExtraInfo() == 0xC0FFEE)
 		{
 			SetMessageExtraInfo(0);
 			return true;
-		} else if(keyEventType == kKeyEventDown && generateMsg)
+		} else if(event.keyEventType == kKeyEventDown)
 		{
 			// Prevent keys from lighting up by simulating a second press.
 			INPUT inp[2];
 			inp[0].type = inp[1].type = INPUT_KEYBOARD;
 			inp[0].ki.time = inp[1].ki.time = 0;
 			inp[0].ki.dwExtraInfo = inp[1].ki.dwExtraInfo = 0xC0FFEE;
-			inp[0].ki.wVk = inp[1].ki.wVk = static_cast<WORD>(nChar);
+			inp[0].ki.wVk = inp[1].ki.wVk = static_cast<WORD>(event.key);
 			inp[0].ki.wScan = inp[1].ki.wScan = 0;
 			inp[0].ki.dwFlags = KEYEVENTF_KEYUP;
 			inp[1].ki.dwFlags = 0;

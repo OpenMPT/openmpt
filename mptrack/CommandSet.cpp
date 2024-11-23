@@ -2548,10 +2548,11 @@ void CCommandSet::ApplyDefaultKeybindings(KeyboardPreset preset, const Version o
 	case KeyboardPreset::FT2: defaults = DefaultKeybindingsFT2; break;
 	}
 
+	const bool onlyNewShortcuts = onlyCommandsAfterVersion != Version{};
 	CommandID lastAdded = kcNull;
 	for(const auto &kb : defaults)
 	{
-		if(onlyCommandsAfterVersion != Version{})
+		if(onlyNewShortcuts)
 		{
 			if(kb.addedInVersion <= onlyCommandsAfterVersion)
 				continue;
@@ -2587,10 +2588,14 @@ void CCommandSet::ApplyDefaultKeybindings(KeyboardPreset preset, const Version o
 
 		if(auto conflictCmd = IsConflicting(kc, kb.cmd, false); conflictCmd.first != kcNull)
 		{
+			if(!onlyNewShortcuts && conflictCmd.second.Context() == kc.Context())
+				continue;
 			// Allow cross-context conflicts in case the newly added shortcut is in a more generic context
 			// - unless the conflicting shortcut is the reserved dummy shortcut (which was used to prevent
 			// default shortcuts from being added back before default key binding versioning was added).
-			if(conflictCmd.first == kcDummyShortcut || !m_isParentContext[kb.ctx][conflictCmd.second.Context()])
+			if(conflictCmd.first == kcDummyShortcut)
+				continue;
+			if(onlyNewShortcuts && !m_isParentContext[kb.ctx][conflictCmd.second.Context()])
 				continue;
 		}
 
