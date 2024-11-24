@@ -1437,11 +1437,12 @@ void CViewPattern::OnRButtonDown(UINT flags, CPoint pt)
 	}
 
 	const bool inChannelHeader = (pt.y < m_szHeader.cy);
-	if(/*(flags & MK_SHIFT) &&*/ inChannelHeader)
+	if(inChannelHeader)
 	{
 		// Drag-select record channels
 		StartRecordGroupDragging(GetDragItem(pt, m_rcDragItem));
 		m_Status.set(psShiftDragging, (flags & MK_SHIFT) != 0);
+		m_bInItemRect = true;
 	}
 }
 
@@ -1467,6 +1468,8 @@ void CViewPattern::OnRButtonUp(UINT flags, CPoint pt)
 				modDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
 				InvalidateChannelsHeaders(sourceChn);
 			}
+			m_Status.reset(psShiftDragging);
+			return;
 		}
 		break;
 	default:
@@ -1643,7 +1646,7 @@ void CViewPattern::OnMouseMove(UINT nFlags, CPoint point)
 			InvalidateRect(&m_rcDragItem, FALSE);
 
 			// Drag-select record channels
-			if(isDraggingRecordGroup && m_nDropItem.Type() == DragItem::ChannelHeader)
+			if(isDraggingRecordGroup && m_nDropItem.Type() == DragItem::ChannelHeader && m_Status[psShiftDragging])
 			{
 				auto modDoc = GetDocument();
 				auto startChn = static_cast<CHANNELINDEX>(m_nDragItem.Value());
