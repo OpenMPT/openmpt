@@ -119,8 +119,8 @@ void CToolBarEx::UpdateControl(bool show, CWnd &wnd, int index, int id, int heig
 	if(show)
 	{
 		CRect rect;
-		wnd.GetClientRect(rect);
-		SetButtonInfo(index, id, TBBS_SEPARATOR, rect.right);
+		wnd.GetWindowRect(rect);
+		SetButtonInfo(index, id, TBBS_SEPARATOR, rect.Width());
 
 		if(wnd.m_hWnd)
 		{
