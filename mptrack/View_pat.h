@@ -295,13 +295,13 @@ public:
 #endif
 	void DrawNote(int x, int y, UINT note, CTuning *pTuning = nullptr);
 	void DrawInstrument(int x, int y, UINT instr);
-	void DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume, bool hex);
+	void DrawVolumeCommand(int x, int y, const ModCommand &mc, std::optional<int> defaultVolume, bool hex);
 	void DrawChannelVUMeter(HDC hdc, int x, int y, UINT nChn);
 	void UpdateAllVUMeters(Notification *pnotify);
 	void DrawDragSel(HDC hdc);
 	void OnDrawDragSel();
-	// True if default volume should be drawn for a given cell.
-	static bool DrawDefaultVolume(const ModCommand &m, const CSoundFile &sndFile);
+	// Returns result of GetDefaultVolume if default volume should be drawn, std::nullopt otherwise
+	std::optional<int> DrawDefaultVolume(const ModCommand &m) const;
 
 	void CursorJump(int distance, bool snap);
 
@@ -317,7 +317,7 @@ public:
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(ModCommand::NOTE note, int atValue);
 
-	int GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
+	std::optional<int> GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr = 0) const;
 	int GetBaseNote() const;
 	ModCommand::NOTE GetNoteWithBaseOctave(int note) const;
 

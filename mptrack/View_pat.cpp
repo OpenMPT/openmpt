@@ -2606,13 +2606,13 @@ void CViewPattern::Interpolate(PatternCursor::Columns type)
 			{
 				vcmd = destCmd.volcmd;
 				if(vcmd == VOLCMD_VOLUME && srcCmd.IsNote() && srcCmd.instr)
-					vsrc = GetDefaultVolume(srcCmd);
+					vsrc = GetDefaultVolume(srcCmd).value_or(64);
 				else
 					vsrc = vdest;
 			} else if(destCmd.volcmd == VOLCMD_NONE)
 			{
 				if(vcmd == VOLCMD_VOLUME && destCmd.IsNote() && destCmd.instr)
-					vdest = GetDefaultVolume(srcCmd);
+					vdest = GetDefaultVolume(srcCmd).value_or(64);
 				else
 					vdest = vsrc;
 			}
@@ -2994,7 +2994,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 				if(m.volcmd == VOLCMD_NONE && m.IsNote() && m.instr && modSpecs.HasVolCommand(VOLCMD_VOLUME))
 				{
 					m.volcmd = VOLCMD_VOLUME;
-					m.vol = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
+					m.vol = static_cast<ModCommand::VOL>(GetDefaultVolume(m).value_or(64));
 				}
 				int vol = m.vol + offset * (coarse ? 10 : 1);
 				ModCommand::VOL minValue = 0, maxValue = 64;
@@ -3041,16 +3041,29 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 
 // Get the velocity at which a given note would be played
-int CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr) const
+std::optional<int> CViewPattern::GetDefaultVolume(const ModCommand &m, ModCommand::INSTR lastInstr) const
 {
 	const CSoundFile &sndFile = *GetSoundFile();
-	SAMPLEINDEX sample = GetDocument()->GetSampleIndex(m, lastInstr);
-	if(sample)
-		return std::min(sndFile.GetSample(sample).nVolume, uint16(256)) / 4u;
-	else if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr && sndFile.Instruments[m.instr]->HasValidMIDIChannel())
+	// In instrument mode, we'd need to know the last played note for note-less instrument numbers
+	const bool hasNote = m.IsNote();
+	if(sndFile.GetNumInstruments() && !hasNote)
+		return std::nullopt;
+
+	SAMPLEINDEX smp = GetDocument()->GetSampleIndex(m, lastInstr);
+	if(smp != 0)
+	{
+		const ModSample &sample = sndFile.GetSample(smp);
+		if(sample.uFlags[SMP_NODEFAULTVOLUME])
+			return std::nullopt;
+		if(sndFile.GetType() == MOD_TYPE_S3M && !sample.HasSampleData())
+			return std::nullopt;
+		else
+			return std::min(sample.nVolume, uint16(256)) / 4u;
+	} else if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr && sndFile.Instruments[m.instr]->HasValidMIDIChannel())
+	{
 		return std::min(sndFile.Instruments[m.instr]->nGlobalVol, uint32(64));  // For instrument plugins
-	else
-		return 64;
+	}
+	return std::nullopt;
 }
 
 
@@ -3521,7 +3534,7 @@ void CViewPattern::OnPatternAmplify()
 		else if(m.volcmd == VOLCMD_VOLUME)
 			chvol[chn] = m.vol;
 		else if(m.instr != 0)
-			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
+			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m).value_or(64));
 	});
 
 	Fade::Func fadeFunc = GetFadeFunc(settings.fadeLaw);
@@ -3540,7 +3553,7 @@ void CViewPattern::OnPatternAmplify()
 		else if(m.volcmd == VOLCMD_VOLUME)
 			chvol[chn] = m.vol;
 		else if(m.instr != 0)
-			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m));
+			chvol[chn] = static_cast<ModCommand::VOL>(GetDefaultVolume(m).value_or(64));
 
 		if(settings.fadeIn || settings.fadeOut || (m.IsNote() && m.instr != 0))
 		{

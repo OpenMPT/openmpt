@@ -476,7 +476,7 @@ void CViewPattern::DrawInstrument(int x, int y, UINT instr)
 }
 
 
-void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool drawDefaultVolume, bool hex)
+void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, std::optional<int> defaultVolume, bool hex)
 {
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
 
@@ -497,11 +497,11 @@ void CViewPattern::DrawVolumeCommand(int x, int y, const ModCommand &mc, bool dr
 		ModCommand::VOLCMD volcmd = mc.volcmd;
 		int vol = (mc.vol & 0x7F);
 
-		if(drawDefaultVolume)
+		if(defaultVolume)
 		{
 			// Displaying sample default volume if there is no volume command.
 			volcmd = VOLCMD_VOLUME;
-			vol = GetDefaultVolume(mc);
+			vol = *defaultVolume;
 		}
 
 		if(volcmd != VOLCMD_NONE && volcmd < MAX_VOLCMDS)
@@ -989,13 +989,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
-			const bool drawDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) && DrawDefaultVolume(*m, sndFile);
+			const auto defaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) ? DrawDefaultVolume(*m) : std::nullopt;
 
 			DWORD dwSpeedUpMask = 0;
 			if(useSpeedUpMask && (m_chnState[col].selectedCols & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
-				const bool drawOldDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) && DrawDefaultVolume(*mold, sndFile);
+				const auto oldDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) ? DrawDefaultVolume(*mold) : std::nullopt;
 
 				if(m->note == mold->note || !m_visibleColumns[PatternCursor::noteColumn])
 					dwSpeedUpMask |= COLUMN_BITS_NOTE;
@@ -1013,7 +1013,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					}
 				} else
 				{
-					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !drawDefaultVolume && !drawOldDefaultVolume) || !m_visibleColumns[PatternCursor::volumeColumn])
+					if ((m->volcmd == mold->volcmd && (m->volcmd == VOLCMD_NONE || m->vol == mold->vol) && !defaultVolume && !oldDefaultVolume) || !m_visibleColumns[PatternCursor::volumeColumn])
 						dwSpeedUpMask |= COLUMN_BITS_VOLUME;
 					if ((m->command == mold->command) || !m_visibleColumns[PatternCursor::effectColumn])
 						dwSpeedUpMask |= (m->command != CMD_NONE) ? COLUMN_BITS_FXCMD : COLUMN_BITS_FXCMDANDPARAM;
@@ -1117,14 +1117,14 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && fxColor != 0)
 						{
 							tx_col = fxColor;
-						} else if(drawDefaultVolume)
+						} else if(defaultVolume)
 						{
 							tx_col = MODCOLOR_DEFAULTVOLUME;
 						}
 					}
 					// Drawing Volume
 					m_Dib.SetTextColor(tx_col, bk_col);
-					DrawVolumeCommand(xbmp + x, 0, *m, drawDefaultVolume, volumeColumnIsHex);
+					DrawVolumeCommand(xbmp + x, 0, *m, defaultVolume, volumeColumnIsHex);
 				}
 				x += pfnt->nEltWidths[2];
 			}
@@ -1222,24 +1222,11 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 }
 
 
-bool CViewPattern::DrawDefaultVolume(const ModCommand &m, const CSoundFile &sndFile)
+std::optional<int> CViewPattern::DrawDefaultVolume(const ModCommand &m) const
 {
 	if(m.instr == 0 || m.volcmd != VOLCMD_NONE || m.command == CMD_VOLUME || m.command == CMD_VOLUME8)
-		return false;
-	// In instrument mode, we'd need to know the played for note-less instrument numbers
-	const bool hasNote = m.IsNote();
-	if(sndFile.GetNumInstruments() && !hasNote)
-		return false;
-	const SAMPLEINDEX smp = sndFile.GetSampleIndex(m.note, m.instr);
-	if(smp != 0)
-	{
-		const ModSample &sample = sndFile.GetSample(smp);
-		if(sample.uFlags[SMP_NODEFAULTVOLUME])
-			return false;
-		if(sndFile.GetType() == MOD_TYPE_S3M && !sample.HasSampleData())
-			return false;
-	}
-	return smp != 0;
+		return std::nullopt;
+	return GetDefaultVolume(m, 0);
 }
 
 
