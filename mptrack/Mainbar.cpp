@@ -742,7 +742,7 @@ void CMainToolBar::OnRPBChanged()
 
 void CMainToolBar::OnGlobalVolChanged()
 {
-	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame(); mainFrm && !m_updating)
 	{
 		BOOL ok = FALSE;
 		uint32 newGlobalVol = GetDlgItemInt(IDC_EDIT_GLOBALVOL, &ok, FALSE);
