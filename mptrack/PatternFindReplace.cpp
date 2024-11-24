@@ -353,7 +353,7 @@ void CViewPattern::OnEditFindNext()
 						if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative || FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceMultiply)
 						{
 							if(!hadVolume && m->volcmd == VOLCMD_VOLUME)
-								vol = GetDefaultVolume(*m, lastInstr[chn]);
+								vol = GetDefaultVolume(*m, lastInstr[chn]).value_or(64);
 
 							if(FindReplace::instance.replaceVolumeAction == FindReplace::ReplaceRelative)
 								vol += volReplace;
@@ -394,7 +394,7 @@ void CViewPattern::OnEditFindNext()
 								param &= 0x0F;
 
 							if(!hadVolume && m->command == CMD_VOLUME)
-								param = GetDefaultVolume(*m, lastInstr[chn]);
+								param = GetDefaultVolume(*m, lastInstr[chn]).value_or(64);
 
 							if(FindReplace::instance.replaceParamAction == FindReplace::ReplaceRelative)
 								param += paramReplace;
