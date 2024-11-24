@@ -641,7 +641,7 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 			if(oldCmd.first != CMD_NONE && m->command != oldCmd.first)
 			{
 				if(!ModCommand::CombineEffects(m->command, m->param, oldCmd.first, oldCmd.second) && m->volcmd == VOLCMD_NONE)
-					m->FillInTwoCommands(m->command, m->param, oldCmd.first, oldCmd.second);
+					m->FillInTwoCommands(m->command, m->param, oldCmd.first, oldCmd.second, true);
 				// Reset X-Param to 8-bit value if this cell was overwritten with a "useful" effect
 				if(row > 0 && oldCmd.first == CMD_XPARAM && m->command != CMD_XPARAM)
 					pattern.GetpModCommand(row - 1, chn)->param = Util::MaxValueOfType(m->param);
