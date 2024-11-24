@@ -493,6 +493,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	for(SAMPLEINDEX nSmp = 1; nSmp <= m_nSamples; nSmp++)
 	{
 		ModSample &sample = Samples[nSmp];
+		LimitMax(sample.nLength, MAX_SAMPLE_LENGTH);
+		sample.SanitizeLoops();
 
 #ifdef MPT_EXTERNAL_SAMPLES
 		if(SampleHasPath(nSmp))
@@ -559,6 +561,8 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags)
 	LimitMax(m_nDefaultRowsPerBeat, MAX_ROWS_PER_BEAT);
 	LimitMax(m_nDefaultRowsPerMeasure, MAX_ROWS_PER_BEAT);
 	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
+	LimitMax(m_nSamplePreAmp, 2000);
+	LimitMax(m_nVSTiVolume, 2000);
 	if(!m_tempoSwing.empty())
 		m_tempoSwing.resize(m_nDefaultRowsPerBeat);
 
