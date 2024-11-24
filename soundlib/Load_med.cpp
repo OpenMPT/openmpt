@@ -1495,6 +1495,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		m_SongFlags.set(SONG_FASTVOLSLIDES, !(songHeader.flags & MMDSong::FLAG_STSLIDE));
 		m_SongFlags.set(SONG_FASTPORTAS, !(songHeader.flags& MMDSong::FLAG_STSLIDE));
 		m_playBehaviour.set(kST3OffsetWithoutInstrument);
+		m_playBehaviour.set(kST3PortaSampleChange);
+		m_playBehaviour.set(kFT2PortaNoNote);
 
 		if(expData.songNameOffset && file.Seek(expData.songNameOffset))
 		{
