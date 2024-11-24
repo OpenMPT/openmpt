@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.35-pre
 
+ *  [**Bug**] Fixed various undefined behaviour found with ubsan.
+
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.5.34 (2024-10-26)
