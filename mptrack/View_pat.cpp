@@ -1468,14 +1468,22 @@ void CViewPattern::OnRButtonUp(UINT flags, CPoint pt)
 				modDoc->ToggleChannelRecordGroup(sourceChn, RecordGroup::Group2);
 				InvalidateChannelsHeaders(sourceChn);
 			}
-			m_Status.reset(psShiftDragging);
-			return;
 		}
 		break;
 	default:
 		break;
 	}
-	
+	if(m_nDragItem.IsValid())
+	{
+		m_nDragItem = {};
+		InvalidateRect(&m_rcDragItem, FALSE);
+	}
+	if(m_Status[psShiftDragging])
+	{
+		m_Status.reset(psShiftDragging);
+		return;
+	}
+
 	HMENU hMenu = ::CreatePopupMenu();
 	if(hMenu == nullptr)
 		return;
