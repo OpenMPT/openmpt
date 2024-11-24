@@ -1391,7 +1391,7 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 
 		if(pIns->NoteMap[note - NOTE_MIN] > NOTE_MAX) return;
 		uint32 n = pIns->Keyboard[note - NOTE_MIN];
-		pSmp = ((n) && (n < MAX_SAMPLES)) ? &Samples[n] : nullptr;
+		pSmp = (n <= GetNumSamples()) ? &Samples[n] : &Samples[0];
 	} else if(GetNumInstruments())
 	{
 		// No valid instrument, or not a valid note.
@@ -1751,9 +1751,9 @@ void CSoundFile::NoteChange(ModChannel &chn, int note, bool bPorta, bool bResetE
 	if((pIns) && (note - NOTE_MIN < (int)std::size(pIns->Keyboard)))
 	{
 		uint32 n = pIns->Keyboard[note - NOTE_MIN];
-		if((n) && (n < MAX_SAMPLES))
+		if(n > 0)
 		{
-			pSmp = &Samples[n];
+			pSmp = &Samples[(n <= GetNumSamples()) ? n : 0];
 		} else if(m_playBehaviour[kITEmptyNoteMapSlot] && !chn.HasMIDIOutput())
 		{
 			// Impulse Tracker ignores empty slots.
@@ -2229,9 +2229,9 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		// Test case: dct_smp_note_test.it
 		if(!m_playBehaviour[kITDCTBehaviour] || !m_playBehaviour[kITRealNoteMapping])
 			dnaNote = pIns->NoteMap[note - NOTE_MIN];
-		if(smp > 0 && smp < MAX_SAMPLES)
+		if(smp > 0)
 		{
-			pSample = &Samples[smp];
+			pSample = &Samples[(smp <= GetNumSamples()) ? smp : 0];
 		} else if(m_playBehaviour[kITEmptyNoteMapSlot] && !pIns->HasValidMIDIChannel())
 		{
 			// Impulse Tracker ignores empty slots.
