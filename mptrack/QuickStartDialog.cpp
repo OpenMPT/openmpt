@@ -246,8 +246,8 @@ void QuickStartDlg::OnRemoveMRUItem()
 	if(static_cast<size_t>(index) >= mruFiles.size())
 		return;
 	mruFiles.erase(mruFiles.begin() + index);
-	m_list.DeleteItem(index);
 	m_paths[GetItemGroup(index)][GetItemIndex(index)] = {};
+	m_list.DeleteItem(index);
 	CMainFrame::GetMainFrame()->UpdateMRUList();
 }
 
