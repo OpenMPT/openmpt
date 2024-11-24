@@ -2458,14 +2458,6 @@ void CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 	if(m_nMixLevels >= mixLevelsMax) m_nMixLevels = mixLevelsOriginal;
 	//m_dwCreatedWithVersion
 	//m_dwLastSavedWithVersion
-	//m_nSamplePreAmp
-	//m_nVSTiVolume
-	//m_nDefaultGlobalVolume
-	LimitMax(m_nDefaultGlobalVolume, MAX_GLOBAL_VOLUME);
-	//m_nRestartPos
-	//m_ModFlags
-	LimitMax(m_nDefaultRowsPerBeat, MAX_ROWS_PER_BEAT);
-	LimitMax(m_nDefaultRowsPerMeasure, MAX_ROWS_PER_BEAT);
 }
 
 
