@@ -1432,7 +1432,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				numRows = patHeader.numRows + 1;
 				if(patHeader.blockInfoOffset)
 				{
-					vol7bit = true;
 					auto offset = file.GetPosition();
 					file.Seek(patHeader.blockInfoOffset);
 					MMDBlockInfo blockInfo;
@@ -1457,6 +1456,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 					   && file.Seek(blockInfo.cmdExtTableOffset)
 					   && file.Seek(file.ReadUint32BE()))
 					{
+						vol7bit = true;
 						cmdExt = file.ReadChunk(numTracks * numRows * (1 + numPages));
 					}
 
