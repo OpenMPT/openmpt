@@ -1188,6 +1188,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 		// For MED, this affects both volume and pitch slides
 		m_SongFlags.set(SONG_FASTVOLSLIDES, !(songHeader.flags & MMDSong::FLAG_STSLIDE));
+		m_playBehaviour.set(kST3PortaSampleChange);
+		m_playBehaviour.set(kFT2PortaNoNote);
 
 		if(expData.songNameOffset && file.Seek(expData.songNameOffset))
 		{
