@@ -25,6 +25,7 @@ struct HighDPISupportData
 		m_user32.Bind(m_GetDpiForWindow, "GetDpiForWindow");
 		m_user32.Bind(m_GetSystemMetricsForDpi, "GetSystemMetricsForDpi");
 		m_user32.Bind(m_SystemParametersInfoForDpi, "SystemParametersInfoForDpi");
+		m_user32.Bind(m_AdjustWindowRectExForDpi, "AdjustWindowRectExForDpi");
 	}
 
 	mpt::Library m_user32;
@@ -40,6 +41,9 @@ struct HighDPISupportData
 
 	using PSYSTEMPARAMETERSINFOFORPDI = BOOL(WINAPI *)(UINT, UINT, void *, UINT, UINT);
 	PSYSTEMPARAMETERSINFOFORPDI m_SystemParametersInfoForDpi = nullptr;
+
+	using PADJUSTWINDOWRECTEXFORDPI = BOOL(WINAPI *)(LPRECT, DWORD, BOOL, DWORD, UINT);
+	PADJUSTWINDOWRECTEXFORDPI m_AdjustWindowRectExForDpi = nullptr;
 };
 
 
@@ -151,6 +155,15 @@ BOOL HighDPISupport::SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvP
 		return instance->m_SystemParametersInfoForDpi(uiAction, uiParam, pvParam, fWinIni, HighDPISupport::GetDpiForWindow(hwnd));
 	else
 		return ::SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
+}
+
+
+BOOL HighDPISupport::AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, uint32 dpi)
+{
+	if(auto instance = GetHighDPISupportData(); instance->m_AdjustWindowRectExForDpi)
+		return instance->m_AdjustWindowRectExForDpi(lpRect, dwStyle, bMenu, dwExStyle, dpi);
+	else
+		return ::AdjustWindowRectEx(lpRect, dwStyle, bMenu, dwExStyle);
 }
 
 

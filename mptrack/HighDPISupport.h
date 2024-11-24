@@ -40,6 +40,7 @@ namespace HighDPISupport
 	int GetSystemMetrics(int index, HWND hwnd);
 	BOOL SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvParam, UINT fWinIni, uint32 dpi);
 	BOOL SystemParametersInfo(UINT uiAction, UINT uiParam, void *pvParam, UINT fWinIni, HWND hwnd);
+	BOOL AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, uint32 dpi);
 
 	void CreateGUIFont(CFont &font, HWND hwnd);
 

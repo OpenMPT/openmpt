@@ -125,7 +125,7 @@ void QuickStartDlg::OnDPIChanged()
 		CRect windowRect{CPoint{}, m_prevSize};
 		windowRect.right = Util::muldiv(windowRect.right, GetDPI(), m_prevDPI);
 		windowRect.bottom = Util::muldiv(windowRect.bottom, GetDPI(), m_prevDPI);
-		AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle());
+		HighDPISupport::AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle(), GetDPI());
 		SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
 	}
 
@@ -205,7 +205,7 @@ void QuickStartDlg::UpdateHeight()
 		windowRect.bottom += viewRect.bottom - listRect.bottom;
 	const int maxHeight = Util::muldiv(parentRect.bottom, 9, 10);
 	LimitMax(windowRect.bottom, maxHeight);
-	AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle());
+	HighDPISupport::AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle(), GetDPI());
 	SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
 }
 
