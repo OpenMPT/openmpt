@@ -1428,6 +1428,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 			{
 				m_MixPlugins[plug].fDryRatio = dryWetRatio;
 			}
+
+			UpdatePluginPositions();
 #endif // NO_PLUGINS
 		} else if(adjustMode != eAdjustOnSuccess)
 		{

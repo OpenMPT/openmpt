@@ -966,6 +966,7 @@ public:
 	// Real-time sound functions
 	void SuspendPlugins();
 	void ResumePlugins();
+	void UpdatePluginPositions();
 	void StopAllVsti();
 	void RecalculateGainForAllPlugs();
 	void ResetChannels();

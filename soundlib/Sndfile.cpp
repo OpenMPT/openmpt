@@ -1019,6 +1019,25 @@ void CSoundFile::ResumePlugins()
 }
 
 
+void CSoundFile::UpdatePluginPositions()
+{
+#ifndef NO_PLUGINS
+	float out = 0.0f;
+	for(auto &plugin : m_MixPlugins)
+	{
+		IMixPlugin *pPlugin = plugin.pMixPlugin;
+		if(pPlugin != nullptr && !pPlugin->IsResumed())
+		{
+			pPlugin->PositionChanged();
+			pPlugin->Resume();
+			pPlugin->Process(&out, &out, 0);
+			pPlugin->Suspend();
+		}
+	}
+#endif  // NO_PLUGINS
+}
+
+
 void CSoundFile::StopAllVsti()
 {
 #ifndef NO_PLUGINS
