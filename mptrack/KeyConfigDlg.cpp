@@ -335,12 +335,12 @@ void COptionsKeyboard::DefineCommandCategories()
 
 	{
 		auto &commands = commandCategories.emplace_back(_T("  Instrument Editor"), kCtxCtrlInstruments).commandRanges;
-		commands.emplace_back(kcStartInstrumentCtrlMisc, kcEndInstrumentCtrlMisc, _T(""));
+		commands.emplace_back(kcStartInstrumentCtrl, kcEndInstrumentCtrl, _T(""));
 	}
 
 	{
 		auto &commands = commandCategories.emplace_back(_T("    Envelope Editor"), kCtxViewInstruments).commandRanges;
-		commands.emplace_back(kcStartInstrumentMisc, kcEndInstrumentMisc, _T(""));
+		commands.emplace_back(kcStartInsEnvelopeEdit, kcEndInsEnvelopeEdit, _T(""));
 	}
 
 	commandCategories.emplace_back(_T("  Comments [Top]"), kCtxCtrlComments);
@@ -896,7 +896,7 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 	if(m_bKeyUp.GetCheck() != BST_UNCHECKED)
 		event |= kKeyEventUp;
 
-	KeyCombination kc((commandCategories[GetCategoryFromCommandID(cmd)]).id, m_eCustHotKey.mod, m_eCustHotKey.code, event);
+	KeyCombination kc(CCommandSet::ContextFromCommand(cmd), m_eCustHotKey.mod, m_eCustHotKey.code, event);
 	//detect invalid input
 	if(!kc.KeyCode())
 	{
@@ -1158,13 +1158,11 @@ void COptionsKeyboard::RestoreKeymap(KeyboardPreset preset)
 
 int COptionsKeyboard::GetCategoryFromCommandID(CommandID command) const
 {
+	const InputTargetContext context = CCommandSet::ContextFromCommand(command);
 	for(size_t cat = 0; cat < commandCategories.size(); cat++)
 	{
-		for(const auto &range : commandCategories[cat].commandRanges)
-		{
-			if(mpt::is_in_range(command, range.first, range.last))
-				return static_cast<int>(cat);
-		}
+		if(commandCategories[cat].id == context)
+			return static_cast<int>(cat);
 	}
 	return -1;
 }

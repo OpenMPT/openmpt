@@ -2634,7 +2634,8 @@ void CMainFrame::OnToggleTreeViewOnLeft()
 
 LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 {
-	switch(wParam)
+	CommandID cmd = static_cast<CommandID>(wParam);
+	switch(cmd)
 	{
 		case kcViewTree: OnBarCheck(IDD_TREEVIEW); break;
 		case kcViewOptions: OnViewOptions(); break;
@@ -2702,7 +2703,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcViewToggle:
 			if(CModDoc *modDoc = GetActiveDoc())
 				return modDoc->OnCustomKeyMsg(wParam, lParam);
-			else if(wParam == kcPlayPauseSong || wParam == kcPlayStopSong || wParam == kcStopSong)
+			else if(cmd == kcPlayPauseSong || cmd == kcPlayStopSong || cmd == kcStopSong)
 				StopPreview();
 			else
 				return kcNull;
@@ -2732,7 +2733,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 
 			// Backup solution for order navigation if the currently active view is not a pattern view, but a module is playing
-			if((wParam >= kcPrevNextOrderStart && wParam <= kcPrevNextOrderEnd)
+			if(mpt::is_in_range(cmd, kcPrevNextOrderStart, kcPrevNextOrderEnd)
 				&& m_pSndFile && m_pSndFile->GetpModDoc()
 				&& wnd != nullptr
 				&& strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CViewPattern"))
@@ -2741,7 +2742,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				CriticalSection cs;
 
 				ORDERINDEX order = m_pSndFile->m_PlayState.m_nCurrentOrder;
-				if(wParam == kcPrevNextOrderStart || wParam == kcPrevOrderAtMeasureEnd || wParam == kcPrevOrderAtBeatEnd || wParam == kcPrevOrderAtRowEnd)
+				if(cmd == kcPrevOrder || cmd == kcPrevOrderAtMeasureEnd || cmd == kcPrevOrderAtBeatEnd || cmd == kcPrevOrderAtRowEnd)
 					order = m_pSndFile->Order().GetPreviousOrderIgnoringSkips(order);
 				else
 					order = m_pSndFile->Order().GetNextOrderIgnoringSkips(order);

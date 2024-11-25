@@ -18,10 +18,13 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#define HOTKEYF_MIDI 0x10      // modifier mask for MIDI CCs
-#define HOTKEYF_RSHIFT 0x20    // modifier mask for right Shift key
-#define HOTKEYF_RCONTROL 0x40  // modifier mask for right Ctrl key
-#define HOTKEYF_RALT 0x80      // modifier mask for right Alt key
+enum
+{
+	HOTKEYF_MIDI     = 0x10,  // Modifier mask for MIDI CCs
+	HOTKEYF_RSHIFT   = 0x20,  // Modifier mask for right Shift key
+	HOTKEYF_RCONTROL = 0x40,  // Modifier mask for right Ctrl key
+	HOTKEYF_RALT     = 0x80,  // Modifier mask for right Alt key
+};
 
 enum InputTargetContext : int8
 {
@@ -182,8 +185,9 @@ enum CommandID
 	kcDummyShortcut,
 	kcGlobalEnd = kcDummyShortcut,
 
+	kcStartPatternGeneral,
 	//Pattern Navigation
-	kcStartPatNavigation,
+	kcStartPatNavigation = kcStartPatternGeneral,
 	kcStartJumpSnap = kcStartPatNavigation,
 	kcPatternJumpDownh1 = kcStartJumpSnap,
 	kcPatternJumpUph1,
@@ -423,9 +427,11 @@ enum CommandID
 	kcPrevSequence,
 	kcNextSequence,
 	kcEndPatternEditing = kcNextSequence,
+	kcEndPatternGeneral = kcEndPatternEditing,
 
 	//Notes
-	kcVPStartNotes,
+	kcStartNoteColumn,
+	kcVPStartNotes = kcStartNoteColumn,
 	kcVPNoteC_0 = kcVPStartNotes,
 	kcVPNoteCS0,
 	kcVPNoteD_0,
@@ -716,7 +722,7 @@ enum CommandID
 	kcNotePC,
 	kcNotePCS,
 	kcEndNoteMisc = kcNotePCS,
-
+	kcEndNoteColumn = kcEndNoteMisc,
 
 	//Set instruments
 	kcSetIns0,
@@ -830,8 +836,8 @@ enum CommandID
 	kcSetFXDummy,           //W, 
 	kcSetFXEnd = kcSetFXDummy,
 
-	kcStartInstrumentMisc,
-	kcInstrumentLoad = kcStartInstrumentMisc,
+	kcStartInsEnvelopeEdit,
+	kcInstrumentLoad = kcStartInsEnvelopeEdit,
 	kcInstrumentSave,
 	kcInstrumentNew,
 	kcInstrumentEnvelopeLoad,
@@ -870,14 +876,22 @@ enum CommandID
 	kcInstrumentEnvelopeSetSustainLoopStart,
 	kcInstrumentEnvelopeSetSustainLoopEnd,
 	kcInstrumentEnvelopeToggleReleaseNode,
-	kcEndInstrumentMisc = kcInstrumentEnvelopeToggleReleaseNode,
 
-	kcStartInstrumentCtrlMisc,
-	kcInstrumentCtrlLoad = kcStartInstrumentCtrlMisc,
+	kcInstrumentStartNotes,
+	kcInstrumentEndNotes = kcInstrumentStartNotes + kcCommandSetNumNotes,
+	kcInstrumentStartNoteStops,
+	kcInstrumentEndNoteStops = kcInstrumentStartNoteStops + kcCommandSetNumNotes,
+	kcEndInsEnvelopeEdit = kcInstrumentEndNoteStops,
+
+	kcStartInstrumentCtrl,
+	kcInstrumentCtrlLoad = kcStartInstrumentCtrl,
 	kcInstrumentCtrlSave,
 	kcInstrumentCtrlNew,
 	kcInstrumentCtrlDuplicate,
-	kcInsNoteMapEditSampleMap,
+	kcEndInstrumentCtrl = kcInstrumentCtrlDuplicate,
+
+	kcStartInsNoteMap,
+	kcInsNoteMapEditSampleMap = kcStartInsNoteMap,
 	kcInsNoteMapEditSample,
 	kcInsNoteMapCopyCurrentNote,
 	kcInsNoteMapCopyCurrentSample,
@@ -888,9 +902,15 @@ enum CommandID
 	kcInsNoteMapTransposeDown,
 	kcInsNoteMapTransposeOctUp,
 	kcInsNoteMapTransposeOctDown,
-	kcEndInstrumentCtrlMisc = kcInsNoteMapTransposeOctDown,
 
-	kcStartSampleMisc,
+	kcInsNoteMapStartNotes,
+	kcInsNoteMapEndNotes = kcInsNoteMapStartNotes + kcCommandSetNumNotes,
+	kcInsNoteMapStartNoteStops,
+	kcInsNoteMapEndNoteStops = kcInsNoteMapStartNoteStops + kcCommandSetNumNotes,
+	kcEndInsNoteMap = kcInsNoteMapEndNoteStops,
+
+	kcStartSampleView,
+	kcStartSampleMisc = kcStartSampleView,
 	kcSampleNew = kcStartSampleMisc,
 	kcSampleLoad,
 	kcSampleLoadRaw,
@@ -956,31 +976,7 @@ enum CommandID
 	kcSampEndNotes = kcSampStartNotes + kcCommandSetNumNotes,
 	kcSampStartNoteStops,
 	kcSampEndNoteStops = kcSampStartNoteStops + kcCommandSetNumNotes,
-
-	kcInstrumentStartNotes,
-	kcInstrumentEndNotes = kcInstrumentStartNotes + kcCommandSetNumNotes,
-	kcInstrumentStartNoteStops,
-	kcInstrumentEndNoteStops = kcInstrumentStartNoteStops + kcCommandSetNumNotes,
-
-	kcTreeViewStartNotes,
-	kcTreeViewEndNotes = kcTreeViewStartNotes + kcCommandSetNumNotes,
-	kcTreeViewStartNoteStops,
-	kcTreeViewEndNoteStops = kcTreeViewStartNoteStops + kcCommandSetNumNotes,
-
-	kcInsNoteMapStartNotes,
-	kcInsNoteMapEndNotes = kcInsNoteMapStartNotes + kcCommandSetNumNotes,
-	kcInsNoteMapStartNoteStops,
-	kcInsNoteMapEndNoteStops = kcInsNoteMapStartNoteStops + kcCommandSetNumNotes,
-
-	kcVSTGUIStartNotes,
-	kcVSTGUIEndNotes = kcVSTGUIStartNotes + kcCommandSetNumNotes,
-	kcVSTGUIStartNoteStops,
-	kcVSTGUIEndNoteStops = kcVSTGUIStartNoteStops + kcCommandSetNumNotes,
-
-	kcCommentsStartNotes,
-	kcCommentsEndNotes = kcCommentsStartNotes + kcCommandSetNumNotes,
-	kcCommentsStartNoteStops,
-	kcCommentsEndNoteStops = kcCommentsStartNoteStops + kcCommandSetNumNotes,
+	kcEndSampleView = kcSampEndNoteStops,
 
 	kcStartTreeViewCommands,
 	kcTreeViewStopPreview = kcStartTreeViewCommands,
@@ -998,7 +994,12 @@ enum CommandID
 	kcTreeViewSortByName,
 	kcTreeViewSortByDate,
 	kcTreeViewSortBySize,
-	kcEndTreeViewCommands = kcTreeViewSortBySize,
+
+	kcTreeViewStartNotes,
+	kcTreeViewEndNotes = kcTreeViewStartNotes + kcCommandSetNumNotes,
+	kcTreeViewStartNoteStops,
+	kcTreeViewEndNoteStops = kcTreeViewStartNoteStops + kcCommandSetNumNotes,
+	kcEndTreeViewCommands = kcTreeViewEndNoteStops,
 
 	kcStartVSTGUICommands,
 	kcVSTGUIPrevPreset = kcStartVSTGUICommands,
@@ -1010,7 +1011,12 @@ enum CommandID
 	kcVSTGUIToggleRecordMIDIOut,
 	kcVSTGUIToggleSendKeysToPlug,
 	kcVSTGUIBypassPlug,
-	kcEndVSTGUICommands = kcVSTGUIBypassPlug,
+
+	kcVSTGUIStartNotes,
+	kcVSTGUIEndNotes = kcVSTGUIStartNotes + kcCommandSetNumNotes,
+	kcVSTGUIStartNoteStops,
+	kcVSTGUIEndNoteStops = kcVSTGUIStartNoteStops + kcCommandSetNumNotes,
+	kcEndVSTGUICommands = kcVSTGUIEndNoteStops,
 
 	kcStartOrderlistCommands,
 	// Orderlist edit
@@ -1080,7 +1086,12 @@ enum CommandID
 	kcToggleSmpInsList = kcStartCommentsCommands,
 	kcExecuteSmpInsListItem,
 	kcRenameSmpInsListItem,
-	kcEndCommentsCommands = kcRenameSmpInsListItem,
+
+	kcCommentsStartNotes,
+	kcCommentsEndNotes = kcCommentsStartNotes + kcCommandSetNumNotes,
+	kcCommentsStartNoteStops,
+	kcCommentsEndNoteStops = kcCommentsStartNoteStops + kcCommandSetNumNotes,
+	kcEndCommentsCommands = kcCommentsEndNoteStops,
 
 	kcNumCommands,
 };
@@ -1267,6 +1278,8 @@ public:
 
 	std::pair<CommandID, KeyCombination> IsConflicting(KeyCombination kc, CommandID cmd, bool checkEventConflict = true, bool checkSameCommand = true) const;
 	bool IsCrossContextConflict(KeyCombination kc1, KeyCombination kc2) const;
+
+	static InputTargetContext ContextFromCommand(CommandID cmd);
 
 	// Tranformation
 	bool QuickChange_SetEffects(const CModSpecifications &modSpecs);
