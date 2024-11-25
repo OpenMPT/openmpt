@@ -1243,6 +1243,7 @@
     <ClInclude Include="..\..\mptrack\Ctrl_ins.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_pat.h" />
     <ClInclude Include="..\..\mptrack\Ctrl_smp.h" />
+    <ClInclude Include="..\..\mptrack\DefaultKeyBindings.h" />
     <ClInclude Include="..\..\mptrack\DefaultVstEditor.h" />
     <ClInclude Include="..\..\mptrack\DialogBase.h" />
     <ClInclude Include="..\..\mptrack\EffectInfo.h" />

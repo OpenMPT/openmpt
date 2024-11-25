@@ -411,6 +411,9 @@
     <ClInclude Include="..\..\mptrack\Ctrl_smp.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\DefaultKeyBindings.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\DefaultVstEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
