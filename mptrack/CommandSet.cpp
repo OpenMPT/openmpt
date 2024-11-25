@@ -83,9 +83,9 @@ CCommandSet::CCommandSet()
 
 // Setup
 
-KeyCommand::KeyCommand(uint32 uid, const TCHAR *message, std::vector<KeyCombination> keys)
+KeyCommand::KeyCommand(uint32 uid, const TCHAR *commandName, std::vector<KeyCombination> keys)
     : kcList{std::move(keys)}
-    , Message{message}
+    , name{commandName}
     , UID{uid}
 {
 }
@@ -964,11 +964,11 @@ void CCommandSet::SetupCommands()
 
 		for(int i = kcVPStartNotes; i <= kcVPEndNotes; i++)
 		{
-			m_commands[i - kcVPStartNotes + contextStartNotes] = {KeyCommand::Hidden, m_commands[i].Message};
+			m_commands[i - kcVPStartNotes + contextStartNotes] = {KeyCommand::Hidden, m_commands[i].name};
 		}
 		for(int i = kcVPStartNoteStops; i <= kcVPEndNoteStops; i++)
 		{
-			m_commands[i - kcVPStartNoteStops + contextStopNotes] = {KeyCommand::Hidden, m_commands[i].Message};
+			m_commands[i - kcVPStartNoteStops + contextStopNotes] = {KeyCommand::Hidden, m_commands[i].name};
 		}
 	}
 

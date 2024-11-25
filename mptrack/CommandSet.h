@@ -14,7 +14,6 @@
 #include "openmpt/base/FlagSet.hpp"
 #include <bitset>
 #include <map>
-#include <string>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1197,8 +1196,6 @@ public:
 using KeyMap = std::multimap<KeyCombination, CommandID>;
 using KeyMapRange = std::pair<KeyMap::const_iterator, KeyMap::const_iterator>;
 
-//KeyMap
-
 struct KeyCommand
 {
 	static constexpr uint32 Dummy = 1u << 31;
@@ -1206,14 +1203,14 @@ struct KeyCommand
 	static constexpr uint32 UIDMask = Hidden - 1u;
 
 	std::vector<KeyCombination> kcList;
-	CString Message;
+	CString name;
 
 protected:
 	uint32 UID = 0;
 
 public:
 	KeyCommand() = default;
-	KeyCommand(uint32 uid, const TCHAR *message = _T(""), std::vector<KeyCombination> keys = {});
+	KeyCommand(uint32 uid, const TCHAR *commandName = _T(""), std::vector<KeyCombination> keys = {});
 
 	// Unique ID for on-disk keymap format.
 	// Note that hidden commands do not have a unique ID, because they are never written to keymap files.
@@ -1234,40 +1231,10 @@ enum class KeyboardPreset
 };
 
 
-enum RuleID
-{
-	krPreventDuplicate,
-	krDeleteOldOnConflict,
-
-	krAllowNavigationWithSelection,
-	krAllowSelectionWithNavigation,
-	krAutoSelectOff,
-	krAllowSelectCopySelectCombos,
-	krLockNotesToChords,
-	krNoteOffOnKeyRelease,
-	krPropagateNotes,
-	krReassignDigitsToOctaves,
-	krAutoSpacing,
-	krCheckModifiers,
-	krPropagateSampleManipulation,
-	kNumRules
-};
-
 struct CModSpecifications;
 
 class CCommandSet
 {
-protected:
-	//util
-	void SetupCommands();
-	void SetupContextHierarchy();
-	void EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
-
-	CommandID FindCmd(uint32 uid) const;
-	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
-
-	void ApplyDefaultKeybindings(KeyboardPreset preset, const Version onlyCommandsAfterVersion = {});
-
 public:
 	CCommandSet();
 
@@ -1290,7 +1257,7 @@ public:
 	mpt::span<const KeyCombination> GetKeyChoices(CommandID cmd) const { return mpt::as_span(m_commands[cmd].kcList); }
 	bool IsHidden(UINT c) const { return m_commands[c].IsHidden(); }
 	int GetKeyListSize(CommandID cmd) const { return (cmd != kcNull) ? static_cast<int>(m_commands[cmd].kcList.size()) : 0; }
-	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].Message; }
+	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].name; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key = uint32_max) const;
 	CString FormatConflict(KeyCombination kc, CommandID conflictCommand, KeyCombination conflictCombination) const;
 
@@ -1305,8 +1272,36 @@ public:
 	static bool MustBeModifierKey(CommandID id);
 
 protected:
+	void SetupCommands();
+	void SetupContextHierarchy();
+	void EnforceAll(KeyCombination kc, CommandID cmd, bool adding);
+
+	CommandID FindCmd(uint32 uid) const;
+	bool KeyCombinationConflict(KeyCombination kc1, KeyCombination kc2, bool checkEventConflict = true) const;
+
+	void ApplyDefaultKeybindings(KeyboardPreset preset, const Version onlyCommandsAfterVersion = {});
+
+	enum RuleID
+	{
+		krPreventDuplicate,
+		krDeleteOldOnConflict,
+
+		krAllowNavigationWithSelection,
+		krAllowSelectionWithNavigation,
+		krAutoSelectOff,
+		krAllowSelectCopySelectCombos,
+		krLockNotesToChords,
+		krNoteOffOnKeyRelease,
+		krPropagateNotes,
+		krReassignDigitsToOctaves,
+		krAutoSpacing,
+		krCheckModifiers,
+		krPropagateSampleManipulation,
+		kNumRules
+	};
+
 	const CModSpecifications *m_currentModSpecs = nullptr;
-	KeyCommand m_commands[kcNumCommands];
+	std::array<KeyCommand, kcNumCommands> m_commands;
 	std::bitset<kCtxMaxInputContexts> m_isParentContext[kCtxMaxInputContexts];
 	std::bitset<kNumRules> m_enforceRule;
 };
