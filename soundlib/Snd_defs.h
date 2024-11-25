@@ -278,14 +278,13 @@ enum PlayFlags : uint16
 	SONG_FIRSTTICK       =  0x20,  // Is set when the current tick is the first tick of the row
 	SONG_MPTFILTERMODE   =  0x40,  // Local filter mode (reset filter on each note)
 	SONG_SURROUNDPAN     =  0x80,  // Pan in the rear channels
-	SONG_POSJUMP         = 0x100,  // Position jump encountered (internal flag, do not touch)
-	SONG_BREAKTOROW      = 0x200,  // Break to row command encountered (internal flag, do not touch)
+	SONG_POSJUMP         = 0x100,  // Position jump encountered
+	SONG_BREAKTOROW      = 0x200,  // Break to row command encountered
 	SONG_POSITIONCHANGED = 0x400,  // Report to plugins that we jumped around in the module
 };
 DECLARE_FLAGSET(PlayFlags)
 
 
-// Module flags - contains both song configuration and playback state... Use SONG_FILE_FLAGS and SONG_PLAY_FLAGS distinguish between the two.
 enum SongFlags
 {
 	SONG_FASTPORTAS          =     0x01,  // Portamentos are executed on every tick

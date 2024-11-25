@@ -288,8 +288,8 @@ SmpLength MODSampleHeader::ConvertToMOD(const ModSample &mptSmp)
 uint32 MODSampleHeader::GetInvalidByteScore() const
 {
 	return ((volume > 64) ? 1 : 0)
-		    + ((finetune > 15) ? 1 : 0)
-		    + ((loopStart > length * 2) ? 1 : 0);
+	    + ((finetune > 15) ? 1 : 0)
+	    + ((loopStart > length * 2) ? 1 : 0);
 }
 
 
@@ -330,7 +330,7 @@ uint32 CountInvalidChars(const mpt::span<const char> name) noexcept
 }
 
 
-// Check if a name is a valid null - terminated ASCII string with no garbage after the null terminator, or if it's empty
+// Check if a name is a valid null-terminated ASCII string with no garbage after the null terminator, or if it's empty
 NameClassification ClassifyName(const mpt::span<const char> name) noexcept
 {
 	bool foundNull = false, foundNormal = false;
