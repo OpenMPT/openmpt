@@ -2304,17 +2304,18 @@ BEGIN
     LTEXT           "Warning: Only samples are affected by these settings! Modifying them will change the balance between samples and plugins in songs with mix levels set to 1.17RC2 or earlier in the Song Properties! ",IDC_STATIC,12,222,252,30
 END
 
-IDD_QUICKSTART DIALOGEX 0, 0, 332, 185
+IDD_QUICKSTART DIALOGEX 0, 0, 332, 211
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CHILD | WS_CLIPSIBLINGS
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_NOACTIVATE
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    PUSHBUTTON      "    &New Module",IDC_BUTTON1,6,6,90,30
-    PUSHBUTTON      "    &Open Module",IDC_BUTTON2,108,6,90,30
-    LTEXT           "F&ind:",IDC_STATIC,6,45,30,8
-    EDITTEXT        IDC_EDIT1,36,42,285,14,ES_AUTOHSCROLL
-    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,6,60,315,114
-    PUSHBUTTON      "r",IDCANCEL,308,6,13,12,BS_VCENTER
+    PUSHBUTTON      "    &New Module",IDC_BUTTON1,10,9,90,30
+    PUSHBUTTON      "    &Open Module",IDC_BUTTON2,108,9,90,30
+    LTEXT           "F&ind:",IDC_STATIC,10,48,30,8
+    EDITTEXT        IDC_EDIT1,36,45,285,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,10,65,311,109
+    PUSHBUTTON      "&Close",IDCANCEL,261,184,60,18,BS_VCENTER
+    DEFPUSHBUTTON   "Open &Selected",IDOK,195,184,60,18
 END
 
 
@@ -2583,10 +2584,10 @@ BEGIN
 
     IDD_QUICKSTART, DIALOG
     BEGIN
-        LEFTMARGIN, 6
+        LEFTMARGIN, 10
         RIGHTMARGIN, 321
-        TOPMARGIN, 6
-        BOTTOMMARGIN, 174
+        TOPMARGIN, 9
+        BOTTOMMARGIN, 202
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2752,7 +2753,8 @@ BEGIN
     0, 0, 0, 0,
     0, 0, 100, 0,
     0, 0, 100, 100,
-    100, 0, 0, 0
+    100, 100, 0, 0,
+    100, 100, 0, 0
 END
 
 

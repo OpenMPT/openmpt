@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(QuickStartDlg, ResizableDialog)
 	
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &QuickStartDlg::OnOpenFile)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST1, &QuickStartDlg::OnRightClickFile)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &QuickStartDlg::OnItemChanged)
 END_MESSAGE_MAP()
 
 
@@ -41,7 +42,6 @@ void QuickStartDlg::DoDataExchange(CDataExchange *pDX)
 	ResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_BUTTON1, m_newButton);
 	DDX_Control(pDX, IDC_BUTTON2, m_openButton);
-	DDX_Control(pDX, IDCANCEL, m_closeButton);
 	DDX_Control(pDX, IDC_LIST1, m_list);
 	DDX_Control(pDX, IDC_EDIT1, m_find);
 }
@@ -51,7 +51,6 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 {
 	m_newButton.SetAccessibleText(_T("New Module"));
 	m_openButton.SetAccessibleText(_T("Open Module"));
-	m_closeButton.SetAccessibleText(_T("Close"));
 	Create(IDD_QUICKSTART, parent);
 
 	m_groupsEnabled = m_list.EnableGroupView();
@@ -98,11 +97,11 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 		m_paths[groupId] = PathGroups[groupId].first;
 	}
 	UpdateFileList();
-	m_list.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 	m_list.SetColumnWidth(0, LVSCW_AUTOSIZE);
 	m_list.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
 	m_list.SetRedraw(TRUE);
 	m_list.Invalidate(FALSE);
+	OnItemChanged(nullptr, nullptr);
 	UpdateHeight();
 }
 
@@ -133,10 +132,6 @@ void QuickStartDlg::OnDPIChanged()
 	m_list.SetColumnWidth(0, LVSCW_AUTOSIZE);
 	m_list.SetColumnWidth(1, LVSCW_AUTOSIZE_USEHEADER);
 
-	m_buttonFont.DeleteObject();
-	m_buttonFont.CreateFont(mpt::saturate_round<int>(14 * scaling), 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, _T("Marlett"));
-	m_closeButton.SetFont(&m_buttonFont);
-
 	m_bmpNew.DeleteObject();
 	m_bmpOpen.DeleteObject();
 
@@ -158,30 +153,20 @@ void QuickStartDlg::OnDPIChanged()
 }
 
 
-INT_PTR QuickStartDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
-{
-	auto result = ResizableDialog::OnToolHitTest(point, pTI);
-	if(result == IDCANCEL)
-	{
-		// MFC will free() the text
-		mpt::tstring text = _T("Close");
-		TCHAR *textP = static_cast<TCHAR *>(calloc(text.size() + 1, sizeof(TCHAR)));
-		std::copy(text.begin(), text.end(), textP);
-		pTI->lpszText = textP;
-	}
-	return result;
-}
-
-
 BOOL QuickStartDlg::PreTranslateMessage(MSG *pMsg)
 {
 	// Use up/down keys to navigate in list, even if search field is focussed. This also skips the group headers during navigation
 	if(pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN) && GetFocus() == &m_find)
 	{
-		m_list.ModifyStyle(0, LVS_SHOWSELALWAYS);
-		int selItem = std::clamp(m_list.GetSelectionMark() + (pMsg->wParam == VK_UP ? -1 : 1), 0, m_list.GetItemCount() - 1);
-		m_list.SetItemState(selItem, LVIS_SELECTED, LVIS_SELECTED);
-		m_list.SetSelectionMark(selItem);
+		const int curSel = m_list.GetSelectionMark();
+		const int selItem = std::clamp(curSel + (pMsg->wParam == VK_UP ? -1 : 1), 0, m_list.GetItemCount() - 1);
+		if(curSel != selItem)
+		{
+			if(curSel != -1)
+				m_list.SetItemState(curSel, 0, LVIS_SELECTED);
+			m_list.SetItemState(selItem, LVIS_SELECTED, LVIS_SELECTED);
+			m_list.SetSelectionMark(selItem);
+		}
 		return TRUE;
 	}
 
@@ -203,7 +188,7 @@ void QuickStartDlg::UpdateHeight()
 	viewRect.bottom += itemRect.Height() * 2;  // View height calculation seems to be a bit off and would still cause a vertical scrollbar to appear without this adjustment
 	if(viewRect.bottom > listRect.bottom)
 		windowRect.bottom += viewRect.bottom - listRect.bottom;
-	const int maxHeight = Util::muldiv(parentRect.bottom, 9, 10);
+	const int maxHeight = std::max(HighDPISupport::ScalePixels(154, m_hWnd), Util::muldiv(parentRect.bottom, 9, 10));
 	LimitMax(windowRect.bottom, maxHeight);
 	HighDPISupport::AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle(), GetDPI());
 	SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
@@ -232,22 +217,23 @@ void QuickStartDlg::OnOpen()
 
 void QuickStartDlg::OnOK()
 {
-	if(const CWnd *focus = GetFocus(); focus == &m_list || focus == &m_find)
-		OnOpenFile(nullptr, nullptr);
+	OnOpenFile(nullptr, nullptr);
 }
 
 
 void QuickStartDlg::OnRemoveMRUItem()
 {
-	const int index = m_list.GetSelectionMark();
-	if(index < 0)
-		return;
-	auto &mruFiles= TrackerSettings::Instance().mruFiles;
-	if(static_cast<size_t>(index) >= mruFiles.size())
-		return;
-	mruFiles.erase(mruFiles.begin() + index);
-	m_paths[GetItemGroup(index)][GetItemIndex(index)] = {};
-	m_list.DeleteItem(index);
+	auto &mruFiles = TrackerSettings::Instance().mruFiles;
+	int i = -1;
+	while((i = m_list.GetNextItem(i, LVNI_SELECTED | LVNI_ALL)) != -1)
+	{
+		if(GetItemGroup(i) != 0)
+			continue;
+		mruFiles.erase(mruFiles.begin() + i);
+		m_paths[0][GetItemIndex(i)] = {};
+		m_list.DeleteItem(i);
+		i--;
+	}
 	CMainFrame::GetMainFrame()->UpdateMRUList();
 }
 
@@ -268,15 +254,18 @@ void QuickStartDlg::OnRemoveAllMRUItems()
 void QuickStartDlg::OnUpdateFilter()
 {
 	m_list.SetRedraw(FALSE);
+	LPARAM highlight = LPARAM(-1);
+	if(int sel = m_list.GetSelectionMark(); sel != -1)
+		highlight = m_list.GetItemData(sel);
 	m_list.DeleteAllItems();
 	CString filter;
 	m_find.GetWindowText(filter);
-	UpdateFileList(filter);
+	UpdateFileList(highlight, filter);
 	m_list.SetRedraw(TRUE);
 }
 
 
-void QuickStartDlg::UpdateFileList(CString filter)
+void QuickStartDlg::UpdateFileList(LPARAM highlight, CString filter)
 {
 	const bool applyFilter = !filter.IsEmpty();
 	if(applyFilter)
@@ -293,6 +282,7 @@ void QuickStartDlg::UpdateFileList(CString filter)
 	lvi.iImage = TIMAGE_MODULE_FILE;
 	lvi.iIndent = 0;
 
+	bool highlightFound = false;
 	int itemId = -1;
 	for(size_t groupId = 0; groupId < m_paths.size(); groupId++)
 	{
@@ -307,29 +297,57 @@ void QuickStartDlg::UpdateFileList(CString filter)
 			lvi.pszText = const_cast<TCHAR *>(filename.c_str());
 			m_list.InsertItem(&lvi);
 			m_list.SetItemText(itemId, 1, m_paths[groupId][i].GetDirectoryWithDrive().AsNative().c_str());
+			if(lvi.lParam == highlight)
+			{
+				m_list.SetItemState(itemId, LVIS_SELECTED, LVIS_SELECTED);
+				m_list.SetSelectionMark(itemId);
+				highlightFound = true;
+			}
 		}
+	}
+	if(!highlightFound)
+	{
+		m_list.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
+		m_list.SetSelectionMark(0);
 	}
 }
 
 
 void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 {
-	const int i = m_list.GetSelectionMark();
-	if(i < 0)
-		return;
-	const size_t index = GetItemIndex(i);
-	const int group = GetItemGroup(i);
-	const auto &path = m_paths[group][index];
-	CDocument *doc = nullptr;
-	if(group != 1)
-		doc = theApp.OpenDocumentFile(path.ToCString());
-	else
-		doc = theApp.OpenTemplateFile(path);
-
-	if(!doc)
+	struct OpenItem
 	{
-		m_list.DeleteItem(i);
-		m_paths[group][i] = {};
+		const mpt::PathString path;  // Must create copy because dialog will get destroyed after successfully loading the first file
+		const int item;
+		const int group;
+		const size_t index;
+	};
+	std::vector<OpenItem> files;
+	int i = -1;
+	while((i = m_list.GetNextItem(i, LVNI_SELECTED | LVNI_ALL)) != -1)
+	{
+		const int group = GetItemGroup(i);
+		const size_t index = GetItemIndex(i);
+		const auto &path = m_paths[group][index];
+		files.push_back({path, i, group, index});
+	}
+	bool success = false;
+	for(const auto &item : files)
+	{
+		if(item.group != 1)
+			success |= (theApp.OpenDocumentFile(item.path.ToCString()) != nullptr);
+		else
+			success |= (theApp.OpenTemplateFile(item.path) != nullptr);
+	}
+
+	if(!success)
+	{
+		// If at least one item managed to load, the dialog will now be destroyed, and there are no items to delete from the list
+		for(auto it = files.rbegin(); it != files.rend(); it++)
+		{
+			m_paths[it->group][it->index] = {};
+			m_list.DeleteItem(it->item);
+		}
 	}
 }
 
@@ -350,6 +368,12 @@ void QuickStartDlg::OnRightClickFile(NMHDR *nmhdr, LRESULT *)
 	menu.AppendMenu(MF_STRING, ID_REMOVE_ALL, _T("&Clear Recent File List"));
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 	menu.DestroyMenu();
+}
+
+
+void QuickStartDlg::OnItemChanged(NMHDR *, LRESULT *)
+{
+	GetDlgItem(IDOK)->EnableWindow(m_list.GetSelectedCount() != 0 ? TRUE : FALSE);
 }
 
 OPENMPT_NAMESPACE_END

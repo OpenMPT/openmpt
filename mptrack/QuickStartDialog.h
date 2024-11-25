@@ -30,12 +30,11 @@ protected:
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnDPIChanged() override;
-	INT_PTR OnToolHitTest(CPoint point, TOOLINFO* pTI) const override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnOK() override;
 	void OnCancel() override { DestroyWindow(); }
 
-	void UpdateFileList(CString filter = {});
+	void UpdateFileList(LPARAM highlight = LPARAM(-1), CString filter = {});
 	size_t GetItemIndex(int index) const { return static_cast<size_t>(m_list.GetItemData(index) & 0x00FF'FFFF); }
 	int GetItemGroup(int index) const { return static_cast<int>(m_list.GetItemData(index) >> 24); }
 
@@ -47,13 +46,13 @@ protected:
 	afx_msg void OnUpdateFilter();
 	afx_msg void OnOpenFile(NMHDR *, LRESULT *);
 	afx_msg void OnRightClickFile(NMHDR *, LRESULT *);
+	afx_msg void OnItemChanged(NMHDR *, LRESULT *);
 
 	DECLARE_MESSAGE_MAP()
 
 	CListCtrlEx m_list;
 	CEdit m_find;
-	AccessibleButton m_newButton, m_openButton, m_closeButton;
-	CFont m_buttonFont;
+	AccessibleButton m_newButton, m_openButton;
 	CBitmap m_bmpNew, m_bmpOpen;
 	std::array<std::vector<mpt::PathString>, 3> m_paths;
 	CSize m_prevSize;
