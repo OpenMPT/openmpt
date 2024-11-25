@@ -119,7 +119,7 @@ OPT_UARCH_EMUL_64 := -Os   # interpreter
 OPT_UARCH_CISC_64 := -Os   # non-pipelined, scalar,       in-order,     optimize for size
 OPT_UARCH_PIPE_64 := -Os   # pipelined,     scalar,       in-order,     optimize for size
 OPT_UARCH_SCAL_64 := -O2   # pipelined,     super-scalar, in-order,     optimize for speed pentium-mmx
-OPT_UARCH_OOOE_64 := -O2   # pipelined,     super-scalar, out-of-order, optimize for speed pentium2    k6-2 m2
+OPT_UARCH_OOOE_64 := -O2   # pipelined,     super-scalar, out-of-order, optimize for speed pentium2    k6 m2
 OPT_UARCH_COMP_64 := -O2   # recompiler
 
 # vectorize for SSE (128bit wide)
@@ -282,12 +282,6 @@ amd/am486dx          := $(XX_) -march=i486        $(FPU_387)    -mtune=i486     
 amd/am486dxe         := $(XX_) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_UARCH_PIPE)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
 amd/am5x86           := $(___) -march=i486        $(FPU_387)    -mtune=i486        $(OPT_UARCH_PIPE)     --param l1-cache-size=12 --param l2-cache-size=$(CACHE_486)
 amd/k5               := $(X__) -march=i586        $(FPU_387)    -mtune=i586        $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-i586        := $(X__) -march=i586        $(FPU_387)    -mtune=i586        $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-pentium     := $(X__) -march=i586        $(FPU_387)    -mtune=pentium     $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-pentiummmx  := $(X__) -march=i586        $(FPU_387)    -mtune=pentium-mmx $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-pentiumpro  := $(X__) -march=i586        $(FPU_387)    -mtune=pentiumpro  $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-pentium2    := $(X__) -march=i586        $(FPU_387)    -mtune=pentium2    $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
-# amd/k5-k6          := $(X__) -march=i586        $(FPU_387)    -mtune=k6          $(OPT_UARCH_OOOE)     --param l1-cache-size=8  --param l2-cache-size=$(CACHE_S7)
 amd/k6               := $(XX_) -march=k6          $(FPU_MMX)    -mtune=k6          $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=$(CACHE_S7)
 amd/k6-2             := $(XXX) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=$(CACHE_SS7)
 amd/k6-3             := $(___) -march=k6-3        $(FPU_3DNOW)  -mtune=k6-3        $(OPT_UARCH_OOOE_64)  --param l1-cache-size=32 --param l2-cache-size=256
