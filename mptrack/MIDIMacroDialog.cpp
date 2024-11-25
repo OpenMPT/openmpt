@@ -73,41 +73,51 @@ BOOL CMidiMacroSetup::OnInitDialog()
 	m_EditZxx.SetLimitText(kMacroLength - 1);
 
 	// Parametered macro selection
+	m_CbnSFx.SetRedraw(FALSE);
 	for(int i = 0; i < 16; i++)
 	{
 		s.Format(_T("%d (SF%X)"), i, i);
 		m_CbnSFx.AddString(s);
 	}
+	m_CbnSFx.SetRedraw(TRUE);
+	m_CbnSFx.SetCurSel(0);
 
 	// Parametered macro presets
-	m_CbnSFx.SetCurSel(0);
+	m_CbnSFxPreset.SetRedraw(FALSE);
 	for(int i = 0; i < kSFxMax; i++)
 	{
 		m_CbnSFxPreset.SetItemData(m_CbnSFxPreset.AddString(m_MidiCfg.GetParameteredMacroName(static_cast<ParameteredMacro>(i))), i);
 	}
+	m_CbnSFxPreset.SetRedraw(TRUE);
 	OnSFxChanged();
 
 	// MIDI CC selection box
+	m_CbnMacroCC.SetRedraw(FALSE);
 	for (int cc = MIDIEvents::MIDICC_start; cc <= MIDIEvents::MIDICC_end; cc++)
 	{
 		s.Format(_T("CC %02d "), cc);
 		s += mpt::ToCString(mpt::Charset::UTF8, MIDIEvents::MidiCCNames[cc]);
 		m_CbnMacroCC.SetItemData(m_CbnMacroCC.AddString(s), cc);
 	}
+	m_CbnMacroCC.SetRedraw(TRUE);
 
 	// Z80...ZFF box
+	m_CbnZxx.SetRedraw(FALSE);
 	for(int zxx = 0x80; zxx <= 0xFF; zxx++)
 	{
 		s.Format(_T("Z%02X"), zxx);
 		m_CbnZxx.AddString(s);
 	}
+	m_CbnZxx.SetRedraw(TRUE);
+	m_CbnZxx.SetCurSel(0);
 
 	// Fixed macro presets
-	m_CbnZxx.SetCurSel(0);
+	m_CbnZxxPreset.SetRedraw(FALSE);
 	for(int i = 0; i < kZxxMax; i++)
 	{
 		m_CbnZxxPreset.SetItemData(m_CbnZxxPreset.AddString(m_MidiCfg.GetFixedMacroName(static_cast<FixedMacro>(i))), i);
 	}
+	m_CbnZxxPreset.SetRedraw(TRUE);
 	m_CbnZxxPreset.SetCurSel(m_MidiCfg.GetFixedMacroType());
 
 	UpdateDialog();
