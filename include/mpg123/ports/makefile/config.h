@@ -29,7 +29,19 @@
 
 /* yeah, POSIX ... */
 
-#if defined(__DJGPP__)
+#if (defined(__MINGW32__) || defined(__MINGW64__))
+#if defined(_FILE_OFFSET_BITS)
+#if (_FILE_OFFSET_BITS == 64)
+#define SIZEOF_OFF_T 8
+#elif (_FILE_OFFSET_BITS == 32)
+#define SIZEOF_OFF_T 4
+#else
+#define SIZEOF_OFF_T 4
+#endif
+#else
+#define SIZEOF_OFF_T 4
+#endif
+#elif defined(__DJGPP__)
 #define SIZEOF_OFF_T 4
 #else
 #define SIZEOF_OFF_T 8
