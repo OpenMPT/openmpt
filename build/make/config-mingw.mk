@@ -74,6 +74,8 @@ CXXFLAGS += -ffunction-sections -fdata-sections
 CFLAGS   += -ffunction-sections -fdata-sections
 LDFLAGS  += -Wl,--gc-sections
 
+MPT_COMPILER_NOALLOCAH=1
+
 CXXFLAGS += -march=i586 -m80387 -mtune=pentium
 CFLAGS   += -march=i586 -m80387 -mtune=pentium
 
