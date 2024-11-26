@@ -2720,6 +2720,7 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 		default:
 			// If handled neither by MainFrame nor by ModDoc, send it to the active view
+			// Note: MDIGetActive() will return a valid view even if we are currently in a modal dialog!
 			CMDIChildWnd *pMDIActive = MDIGetActive();
 			CWnd *wnd = nullptr;
 			if(pMDIActive)
@@ -2733,12 +2734,12 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 			}
 
 			// Backup solution for order navigation if the currently active view is not a pattern view, but a module is playing
+			// Note: This should also work if the currently active window is not a CMDIChildWnd, hence it happens before the GetActiveWindow() check.
 			if(mpt::is_in_range(cmd, kcPrevNextOrderStart, kcPrevNextOrderEnd)
 				&& m_pSndFile && m_pSndFile->GetpModDoc()
 				&& wnd != nullptr
 				&& strcmp(wnd->GetRuntimeClass()->m_lpszClassName, "CViewPattern"))
 			{
-				ResetNotificationBuffer();
 				CriticalSection cs;
 
 				ORDERINDEX order = m_pSndFile->m_PlayState.m_nCurrentOrder;
@@ -2747,6 +2748,10 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 				else
 					order = m_pSndFile->Order().GetNextOrderIgnoringSkips(order);
 				
+				if(order == m_pSndFile->m_PlayState.m_nCurrentOrder)
+					return wParam;
+
+				ResetNotificationBuffer();
 				switch(wParam)
 				{
 				case kcPrevOrder:
@@ -2769,9 +2774,10 @@ LRESULT CMainFrame::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 					m_pSndFile->m_PlayState.m_nSeqOverride = order;
 					break;
 				}
+				return wParam;
 			}
 
-			if(wnd)
+			if(wnd && GetActiveWindow() == this)
 				return wnd->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
 			return kcNull;
 	}
