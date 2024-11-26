@@ -617,8 +617,12 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 	const size_t patternStartOffset = file.GetPosition();
 	const size_t sizeWithoutPatterns = totalSampleLen + patternStartOffset;
 	const size_t sizeWithOfficialPatterns = sizeWithoutPatterns + officialPatterns * numChannels * 256;
+	// There are some WOW files with an extra byte at the end, and also a MOD file (idntmind.mod, MD5 a3af5c3e1af269e32dfb6677c41c8453, SHA1 4884717c298575f9884b2211c762bb1725f73743)
+	// where only the "official" patterns should be counted but the file also has an extra byte at the end.
+	// Since MOD files can technically not have an odd file size, we just always round the actual file size down.
+	const auto fileSize = file.GetLength() & ~1;
 
-	if(wowSampleLen && (wowSampleLen + patternStartOffset) + numPatterns * 8 * 256 == (file.GetLength() & ~1))
+	if(wowSampleLen && (wowSampleLen + patternStartOffset) + numPatterns * 8 * 256 == fileSize)
 	{
 		// Check if this is a Mod's Grave WOW file... WOW files use the M.K. magic but are actually 8CHN files.
 		// We do a simple pattern validation as well for regular MOD files that have non-module data attached at the end
@@ -627,7 +631,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		if(ValidateMODPatternData(file, 16, true))
 			numChannels = 8;
 		file.Seek(patternStartOffset);
-	} else if(numPatterns != officialPatterns && (validateHiddenPatterns || sizeWithOfficialPatterns == file.GetLength()))
+	} else if(numPatterns != officialPatterns && (validateHiddenPatterns || sizeWithOfficialPatterns == fileSize))
 	{
 		// 15-sample SoundTracker specifics:
 		// Fix SoundTracker modules where "hidden" patterns should be ignored.
@@ -657,7 +661,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 		file.Seek(patternStartOffset);
 	}
 
-	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == file.GetLength())
+	if(numPatternsIllegal > numPatterns && sizeWithoutPatterns + numPatternsIllegal * numChannels * 256 == fileSize)
 	{
 		// Even those illegal pattern indexes (> 128) appear to be valid... What a weird file!
 		// e.g. NIETNU.MOD, where the end of the order list is filled with FF rather than 00, and the file actually contains 256 patterns.
