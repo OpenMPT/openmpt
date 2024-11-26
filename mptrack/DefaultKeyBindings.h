@@ -8,7 +8,8 @@
  */
 
 
-#include "stdafx.h"
+#include "openmpt/all/BuildSettings.hpp"
+
 #include "CommandSet.h"
 
 
