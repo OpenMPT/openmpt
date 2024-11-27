@@ -620,7 +620,7 @@ static PATTERNINDEX GetNumPatterns(FileReader &file, ModSequence &Order, ORDERIN
 	// There are some WOW files with an extra byte at the end, and also a MOD file (idntmind.mod, MD5 a3af5c3e1af269e32dfb6677c41c8453, SHA1 4884717c298575f9884b2211c762bb1725f73743)
 	// where only the "official" patterns should be counted but the file also has an extra byte at the end.
 	// Since MOD files can technically not have an odd file size, we just always round the actual file size down.
-	const auto fileSize = file.GetLength() & ~FileReader::pos_type{1};
+	const auto fileSize = mpt::align_down(file.GetLength(), FileReader::pos_type{2});
 
 	if(wowSampleLen && (wowSampleLen + patternStartOffset) + numPatterns * 8 * 256 == fileSize)
 	{
