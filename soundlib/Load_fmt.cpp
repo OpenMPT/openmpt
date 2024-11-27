@@ -89,7 +89,7 @@ bool CSoundFile::ReadFMT(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = 8;
 	Order().SetDefaultTempo(TEMPO(45.5));  // 18.2 Hz timer
 	m_playBehaviour.set(kOPLNoteStopWith0Hz);
-	m_SongFlags.set(SONG_IMPORTED);
+	m_SongFlags.set(SONG_IMPORTED | SONG_FORMAT_NO_VOLCOL);
 	m_songName = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, fileHeader.songName);
 
 	for(CHANNELINDEX chn = 0; chn < 8; chn++)

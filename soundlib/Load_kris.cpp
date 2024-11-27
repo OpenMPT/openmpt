@@ -98,7 +98,7 @@ bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.set(SONG_PT_MODE | SONG_IMPORTED);
+	m_SongFlags.set(SONG_PT_MODE | SONG_IMPORTED | SONG_FORMAT_NO_VOLCOL);
 	m_playBehaviour.set(kMODIgnorePanning);
 	m_playBehaviour.set(kMODSampleSwap);
 	

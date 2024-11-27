@@ -198,7 +198,7 @@ void CViewPattern::OnInitialUpdate()
 
 	m_visibleColumns.set();
 	CModDoc *modDoc = GetDocument();
-	if(modDoc->GetModType() == MOD_TYPE_MOD && !modDoc->GetSoundFile().m_SongFlags[SONG_IMPORTED] && TrackerSettings::Instance().autoHideVolumeColumnForMOD)
+	if(modDoc->GetSoundFile().m_SongFlags[SONG_FORMAT_NO_VOLCOL] && TrackerSettings::Instance().autoHideVolumeColumnForMOD)
 		m_visibleColumns.reset(PatternCursor::volumeColumn);
 }
 

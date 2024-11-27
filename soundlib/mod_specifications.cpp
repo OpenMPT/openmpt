@@ -97,7 +97,7 @@ constexpr CModSpecifications mod_ =
 	31,											// SamplesMax
 	0,											// instrumentMax
 	MixLevels::Compatible,						// defaultMixLevels
-	SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA,	// Supported song flags
+	SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA | SONG_FORMAT_NO_VOLCOL,  // Supported song flags
 	0,											// Max MIDI mapping directives
 	0,											// No instrument envelopes
 	false,										// No notecut.

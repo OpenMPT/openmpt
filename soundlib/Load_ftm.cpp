@@ -108,7 +108,7 @@ bool CSoundFile::ReadFTM(FileReader &file, ModLoadingFlags loadFlags)
 		ChnSettings[chn].nPan = (chn < 2 || chn > 5) ? 64 : 192;
 		ChnSettings[chn].dwFlags.set(CHN_MUTE, !(fileHeader.muteStatus & (1 << chn)));
 	}
-	m_SongFlags.set(SONG_LINEARSLIDES | SONG_ISAMIGA | SONG_IMPORTED);
+	m_SongFlags.set(SONG_LINEARSLIDES | SONG_ISAMIGA | SONG_IMPORTED | SONG_FORMAT_NO_VOLCOL);
 	m_playBehaviour.set(kContinueSampleWithoutInstr);
 	m_playBehaviour.set(kST3NoMutedChannels);
 	m_playBehaviour.set(kApplyUpperPeriodLimit);

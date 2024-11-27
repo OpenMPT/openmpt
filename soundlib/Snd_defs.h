@@ -305,6 +305,7 @@ enum SongFlags
 	SONG_AUTO_VIBRATO        =   0x8000,  // Vibrato command is continued automatically
 	SONG_AUTO_TREMOLO        = 0x1'8000,  // Tremolo command is continued automatically
 	SONG_AUTO_VOLSLIDE_STK   = 0x2'0000,  // Automatic volume slide command is interpreted like in STK files (rather than like in STP files)
+	SONG_FORMAT_NO_VOLCOL    = 0x4'0000,  // The original (imported) format has no volume column, so it can be hidden in the pattern editor.
 };
 DECLARE_FLAGSET(SongFlags)
 

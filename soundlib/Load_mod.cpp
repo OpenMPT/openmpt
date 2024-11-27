@@ -298,6 +298,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_MOD, modMagicResult.numChannels);
+	m_SongFlags.set(SONG_FORMAT_NO_VOLCOL);
 
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
 	bool isStartrekker = modMagicResult.isStartrekker;

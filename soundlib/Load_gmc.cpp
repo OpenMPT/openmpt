@@ -115,7 +115,7 @@ bool CSoundFile::ReadGMC(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.set(SONG_FASTPORTAS);
+	m_SongFlags.set(SONG_FASTPORTAS | SONG_IMPORTED | SONG_FORMAT_NO_VOLCOL);
 	Order().SetDefaultTempoInt(125);
 	Order().SetDefaultSpeed(6);
 

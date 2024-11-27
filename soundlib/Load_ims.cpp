@@ -90,7 +90,7 @@ bool CSoundFile::ReadIMS(FileReader &file, ModLoadingFlags loadFlags)
 		return true;
 
 	InitializeGlobals(MOD_TYPE_MOD, 4);
-	m_SongFlags.set(SONG_IMPORTED);
+	m_SongFlags.set(SONG_IMPORTED | SONG_FORMAT_NO_VOLCOL);
 	Order().SetDefaultTempoInt(125);
 	Order().SetDefaultSpeed(6);
 	Order().SetRestartPos(fileHeader.order.restartPos);

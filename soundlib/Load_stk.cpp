@@ -227,7 +227,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 	m_nMinPeriod = 113 * 4;
 	m_nMaxPeriod = 856 * 4;
 	m_nSamplePreAmp = 64;
-	m_SongFlags.set(SONG_PT_MODE | SONG_AUTO_VOLSLIDE_STK);
+	m_SongFlags.set(SONG_PT_MODE | SONG_FORMAT_NO_VOLCOL | SONG_AUTO_VOLSLIDE_STK);
 	m_songName = mpt::String::ReadBuf(mpt::String::spacePadded, fileHeaders.songname);
 
 	// Setup channel pan positions and volume

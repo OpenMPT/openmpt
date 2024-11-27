@@ -926,6 +926,8 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 		m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(128)) * 2;
 	else if(m_nType == MOD_TYPE_S3M)
 		m_nDefaultGlobalVolume = std::min(fileHeader.globalVol.get(), uint8(64)) * 4;
+	else if(m_nType == MOD_TYPE_MOD)
+		m_SongFlags.set(SONG_FORMAT_NO_VOLCOL);
 
 	if(fileHeader.sampleVolume < 0)
 		m_nSamplePreAmp = fileHeader.sampleVolume + 52;

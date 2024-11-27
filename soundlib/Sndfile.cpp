@@ -225,9 +225,9 @@ void CSoundFile::InitializeGlobals(MODTYPE type, CHANNELINDEX numChannels)
 
 	// Note: we do not use the Amiga resampler for DBM as it's a multichannel format and can make use of higher-quality Amiga soundcards instead of Paula.
 	if(GetType() & (/*MOD_TYPE_DBM | */MOD_TYPE_DIGI | MOD_TYPE_MED | MOD_TYPE_MOD | MOD_TYPE_OKT | MOD_TYPE_SFX | MOD_TYPE_STP))
-	{
 		m_SongFlags.set(SONG_ISAMIGA);
-	}
+	if(GetType() & (MOD_TYPE_AMF0 | MOD_TYPE_DIGI | MOD_TYPE_MTM))
+		m_SongFlags.set(SONG_FORMAT_NO_VOLCOL);
 
 	ChnSettings.assign(numChannels, {});
 }
