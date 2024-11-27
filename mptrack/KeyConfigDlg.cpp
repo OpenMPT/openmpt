@@ -127,8 +127,8 @@ void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 
 static constexpr CListCtrlEx::Header KeyListHeaders[] =
 {
-	{_T("Shortcut"),      276, LVCFMT_LEFT},
-	{_T("Assigned Keys"), 116, LVCFMT_LEFT},
+	{_T("Shortcut"),      274, LVCFMT_LEFT},
+	{_T("Assigned Keys"), 174, LVCFMT_LEFT},
 };
 
 BEGIN_MESSAGE_MAP(COptionsKeyboard, CPropertyPage)

@@ -70,20 +70,20 @@ BOOL COptionsAdvanced::OnInitDialog()
 	{
 		static constexpr ListCtrl::Header headers[] =
 		{
-			{ _T("Setting"), 150, LVCFMT_LEFT },
+			{ _T("Setting"), 170, LVCFMT_LEFT },
 			{ _T("Type"),    40,  LVCFMT_LEFT },
-			{ _T("Value"),   140, LVCFMT_LEFT },
-			{ _T("Default"), 62,  LVCFMT_LEFT },
+			{ _T("Value"),   160, LVCFMT_LEFT },
+			{ _T("Default"), 76,  LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
 	} else
 	{
 		static constexpr ListCtrl::Header headers[] =
 		{
-			{ _T("Setting"), 200, LVCFMT_LEFT },
+			{ _T("Setting"), 220, LVCFMT_LEFT },
 			{ _T("Type"),    40,  LVCFMT_LEFT },
-			{ _T("Value"),   100, LVCFMT_LEFT },
-			{ _T("Default"), 52,  LVCFMT_LEFT },
+			{ _T("Value"),   120, LVCFMT_LEFT },
+			{ _T("Default"), 66,  LVCFMT_LEFT },
 		};
 		m_List.SetHeaders(headers);
 	}
