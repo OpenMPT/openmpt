@@ -108,7 +108,7 @@ jobs:
       run: brew pin unxip
     - name: fixup GitHub Homebrew python breakage
       if: ${{ matrix.host == 'macos-13' }}
-      run: brew unlink python@3.11 && brew unlink python@3.12 && brew link --overwrite python@3.11 && brew link --overwrite python@3.12
+      run: brew unlink python@3.12 && brew link --overwrite python@3.12
     - name: upgrade packages
       run: brew upgrade
     - name: install dependencies
