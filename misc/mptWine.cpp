@@ -675,9 +675,8 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 						try
 						{
 							mpt::IO::FileRef f(filename);
-							std::vector<char> buf = f;
 							mpt::PathString treeFilename = mpt::PathString::FromNative(filename.AsNative().substr(basePath.AsNative().length()));
-							result.filetree[treeFilename.ToUTF8()] = buf;
+							result.filetree[treeFilename.ToUTF8()] = f;
 						} catch (std::exception &)
 						{
 							// nothing?!
