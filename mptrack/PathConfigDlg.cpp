@@ -74,14 +74,17 @@ BEGIN_MESSAGE_MAP(PathConfigDlg, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON_CHANGE_VSTPRESETSDIR, &PathConfigDlg::OnBrowsePresets)
 
 	// Autosave
-	ON_COMMAND(IDC_CHECK1,						&PathConfigDlg::OnSettingsChanged)
-	ON_BN_CLICKED(IDC_AUTOSAVE_BROWSE,			&PathConfigDlg::OnBrowseAutosavePath)
-	ON_BN_CLICKED(IDC_AUTOSAVE_ENABLE,			&PathConfigDlg::OnAutosaveEnable)
-	ON_BN_CLICKED(IDC_AUTOSAVE_USEORIGDIR,		&PathConfigDlg::OnAutosaveUseOrigDir)
-	ON_BN_CLICKED(IDC_AUTOSAVE_USECUSTOMDIR,	&PathConfigDlg::OnAutosaveUseOrigDir)
-	ON_EN_UPDATE(IDC_AUTOSAVE_PATH,				&PathConfigDlg::OnSettingsChanged)
-	ON_EN_UPDATE(IDC_AUTOSAVE_HISTORY,			&PathConfigDlg::OnSettingsChanged)
-	ON_EN_UPDATE(IDC_AUTOSAVE_INTERVAL,			&PathConfigDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,                &PathConfigDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,                &PathConfigDlg::OnAutosaveRetention)
+	ON_COMMAND(IDC_CHECK3,                &PathConfigDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_AUTOSAVE_BROWSE,       &PathConfigDlg::OnBrowseAutosavePath)
+	ON_COMMAND(IDC_AUTOSAVE_ENABLE,       &PathConfigDlg::OnAutosaveEnable)
+	ON_COMMAND(IDC_AUTOSAVE_USEORIGDIR,   &PathConfigDlg::OnAutosaveUseOrigDir)
+	ON_COMMAND(IDC_AUTOSAVE_USECUSTOMDIR, &PathConfigDlg::OnAutosaveUseOrigDir)
+	ON_EN_UPDATE(IDC_AUTOSAVE_PATH,       &PathConfigDlg::OnSettingsChanged)
+	ON_EN_UPDATE(IDC_AUTOSAVE_HISTORY,    &PathConfigDlg::OnSettingsChanged)
+	ON_EN_UPDATE(IDC_AUTOSAVE_INTERVAL,   &PathConfigDlg::OnSettingsChanged)
+	ON_EN_UPDATE(IDC_EDIT1,               &PathConfigDlg::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -101,14 +104,19 @@ BOOL PathConfigDlg::OnInitDialog()
 
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, int32_max);
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, int32_max);
+	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN3))->SetRange32(1, int32_max);
 	CheckDlgButton(IDC_AUTOSAVE_ENABLE, settings.AutosaveEnabled ? BST_CHECKED : BST_UNCHECKED);
 	SetDlgItemInt(IDC_AUTOSAVE_HISTORY, settings.AutosaveHistoryDepth);
 	SetDlgItemInt(IDC_AUTOSAVE_INTERVAL, settings.AutosaveIntervalMinutes);
+	SetDlgItemInt(IDC_EDIT1, settings.AutosaveRetentionTimeDays ? settings.AutosaveRetentionTimeDays : 30);
+	CheckDlgButton(IDC_CHECK2, settings.AutosaveRetentionTimeDays > 0);
 	CheckDlgButton(IDC_AUTOSAVE_USEORIGDIR, settings.AutosaveUseOriginalPath ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_AUTOSAVE_USECUSTOMDIR, settings.AutosaveUseOriginalPath ? BST_UNCHECKED : BST_CHECKED);
+	CheckDlgButton(IDC_CHECK3, settings.AutosaveDeletePermanently ? BST_CHECKED : BST_UNCHECKED);
 	//enable/disable stuff as appropriate
 	OnAutosaveEnable();
 	OnAutosaveUseOrigDir();
+	OnAutosaveRetention();
 
 	return TRUE;
 }
@@ -132,10 +140,15 @@ void PathConfigDlg::OnOK()
 	// Autosave
 	settings.CreateBackupFiles = IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED;
 
-	settings.AutosaveEnabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED);
-	settings.AutosaveHistoryDepth = (GetDlgItemInt(IDC_AUTOSAVE_HISTORY));
-	settings.AutosaveIntervalMinutes = (GetDlgItemInt(IDC_AUTOSAVE_INTERVAL));
-	settings.AutosaveUseOriginalPath = (IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) == BST_CHECKED);
+	settings.AutosaveEnabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) != BST_UNCHECKED;
+	settings.AutosaveHistoryDepth = GetDlgItemInt(IDC_AUTOSAVE_HISTORY);
+	settings.AutosaveIntervalMinutes = GetDlgItemInt(IDC_AUTOSAVE_INTERVAL);
+	if(IsDlgButtonChecked(IDC_CHECK2))
+		settings.AutosaveRetentionTimeDays = std::max(GetDlgItemInt(IDC_EDIT1), UINT(1));
+	else
+		settings.AutosaveRetentionTimeDays = 0;
+	settings.AutosaveUseOriginalPath = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) != BST_UNCHECKED;
+	settings.AutosaveDeletePermanently = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 
 	CPropertyPage::OnOK();
 }
@@ -157,15 +170,16 @@ void PathConfigDlg::BrowseFolder(UINT nID)
 
 void PathConfigDlg::OnAutosaveEnable()
 {
-	BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
-	GetDlgItem(IDC_AUTOSAVE_INTERVAL)->EnableWindow(enabled);
-	GetDlgItem(IDC_SPIN1)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_HISTORY)->EnableWindow(enabled);
-	GetDlgItem(IDC_SPIN2)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_USEORIGDIR)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_USECUSTOMDIR)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(enabled);
-	GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(enabled);
+	const BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE);
+	static constexpr UINT AutoSaveDlgItems[] =
+	{
+		IDC_AUTOSAVE_INTERVAL, IDC_AUTOSAVE_HISTORY, IDC_AUTOSAVE_USEORIGDIR, IDC_AUTOSAVE_USECUSTOMDIR,
+		IDC_AUTOSAVE_PATH, IDC_AUTOSAVE_BROWSE, IDC_CHECK2, IDC_CHECK3, IDC_EDIT1, IDC_SPIN1, IDC_SPIN2, IDC_SPIN3
+	};
+	for(UINT id : AutoSaveDlgItems)
+	{
+		GetDlgItem(id)->EnableWindow(enabled);
+	}
 	OnSettingsChanged();
 	return;
 }
@@ -173,14 +187,25 @@ void PathConfigDlg::OnAutosaveEnable()
 
 void PathConfigDlg::OnAutosaveUseOrigDir()
 {
-	if (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
+	if(IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE))
 	{
-		BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR);
-		GetDlgItem(IDC_AUTOSAVE_PATH)->EnableWindow(!enabled);
-		GetDlgItem(IDC_AUTOSAVE_BROWSE)->EnableWindow(!enabled);
+		const BOOL enabled = IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR) ? FALSE : TRUE;
+		static constexpr UINT AutoSaveDirDlgItems[] = {IDC_AUTOSAVE_PATH, IDC_AUTOSAVE_BROWSE, IDC_CHECK2, IDC_EDIT1, IDC_SPIN3};
+		for(UINT id : AutoSaveDirDlgItems)
+		{
+			GetDlgItem(id)->EnableWindow(enabled);
+		}
 		OnSettingsChanged();
 	}
 	return;
+}
+
+
+void PathConfigDlg::OnAutosaveRetention()
+{
+	const BOOL enabled = IsDlgButtonChecked(IDC_CHECK2) ? TRUE : FALSE;
+	GetDlgItem(IDC_EDIT1)->EnableWindow(enabled);
+	GetDlgItem(IDC_SPIN3)->EnableWindow(enabled);
 }
 
 

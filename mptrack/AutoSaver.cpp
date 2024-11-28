@@ -28,7 +28,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 CAutoSaver::CAutoSaver()
-	: m_lastSave(timeGetTime())
+	: m_lastSave{timeGetTime()}
 {
 }
 
@@ -53,32 +53,38 @@ uint32 CAutoSaver::GetHistoryDepth() const
 	return TrackerSettings::Instance().AutosaveHistoryDepth;
 }
 
-uint32 CAutoSaver::GetSaveInterval() const
+std::chrono::minutes CAutoSaver::GetSaveInterval() const
 {
-	return TrackerSettings::Instance().AutosaveIntervalMinutes;
+	return std::chrono::minutes{TrackerSettings::Instance().AutosaveIntervalMinutes.Get()};
 }
 
 
-bool CAutoSaver::DoSave(DWORD curTime)
+std::chrono::days CAutoSaver::GetRetentionTime() const
+{
+	return std::chrono::days{TrackerSettings::Instance().AutosaveRetentionTimeDays.Get()};
+}
+
+
+bool CAutoSaver::DoSave()
 {
 	// Do nothing if we are already saving, or if time to save has not been reached yet.
-	if(m_saveInProgress || !CheckTimer(curTime))
+	if(m_saveInProgress || !CheckTimer(timeGetTime()))
 		return true;
 		
 	bool success = true, clearStatus = false;
 	m_saveInProgress = true;
 
-	theApp.BeginWaitCursor(); // Display hour glass
+	theApp.BeginWaitCursor();  // Display hour glass
 
 	for(auto &modDoc : theApp.GetOpenDocuments())
 	{
 		if(modDoc->ModifiedSinceLastAutosave())
 		{
 			clearStatus = true;
-			static_cast<CMainFrame *>(theApp.GetMainWnd())->SetHelpText(MPT_CFORMAT("Auto-saving {}...")(modDoc->GetPathNameMpt().GetFilename()));
+			CMainFrame::GetMainFrame()->SetHelpText(MPT_CFORMAT("Auto-saving {}...")(modDoc->GetPathNameMpt().GetFilename()));
 			if(SaveSingleFile(*modDoc))
 			{
-				CleanUpBackups(*modDoc);
+				CleanUpAutosaves(*modDoc);
 			} else
 			{
 				TrackerSettings::Instance().AutosaveEnabled = false;
@@ -87,13 +93,14 @@ bool CAutoSaver::DoSave(DWORD curTime)
 			}
 		}
 	}
+	CleanUpAutosaves();
 
 	m_lastSave = timeGetTime();
 	theApp.EndWaitCursor();  // End display hour glass
 	m_saveInProgress = false;
 
 	if(clearStatus)
-		static_cast<CMainFrame *>(theApp.GetMainWnd())->SetHelpText(_T(""));
+		CMainFrame::GetMainFrame()->SetHelpText(_T(""));
 	
 	return success;
 }
@@ -101,7 +108,7 @@ bool CAutoSaver::DoSave(DWORD curTime)
 
 bool CAutoSaver::CheckTimer(DWORD curTime) const
 {
-	return (curTime - m_lastSave) >= GetSaveIntervalMilliseconds();
+	return std::chrono::milliseconds{curTime - m_lastSave} >= GetSaveInterval();
 }
 
 
@@ -149,41 +156,19 @@ mpt::PathString CAutoSaver::BuildFileName(const CModDoc &modDoc) const
 
 bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 {
-	// We do not call CModDoc::DoSave as this populates the Recent Files
-	// list with backups... hence we have duplicated code.. :(
-	CSoundFile &sndFile = modDoc.GetSoundFile();
-	
 	mpt::PathString fileName = BuildFileName(modDoc);
 
 	// We are actually not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, _T(""), nullptr, false);
-
-	bool success = false;
-	mpt::ofstream f(fileName, std::ios::binary);
-	if(f)
-	{
-		switch(modDoc.GetSoundFile().GetBestSaveFormat())
-		{
-		case MOD_TYPE_MOD: success = sndFile.SaveMod(f); break;
-		case MOD_TYPE_S3M: success = sndFile.SaveS3M(f); break;
-		case MOD_TYPE_XM:  success = sndFile.SaveXM(f); break;
-		case MOD_TYPE_IT:  success = sndFile.SaveIT(f, GetUseOriginalPath() ? fileName : mpt::PathString{}); break;
-		case MOD_TYPE_MPT: success = sndFile.SaveIT(f, GetUseOriginalPath() ? fileName : mpt::PathString{}); break;
-		default:
-			// nothing
-			break;
-		}
-	}
-
-	return success;
+	return modDoc.SaveFile(BuildFileName(modDoc), GetUseOriginalPath());
 }
 
 
-void CAutoSaver::CleanUpBackups(const CModDoc &modDoc) const
+void CAutoSaver::CleanUpAutosaves(const CModDoc &modDoc) const
 {
 	// Find all autosave files for this document, and delete the oldest ones if there are more than the user wants.
 	std::vector<mpt::PathString> foundfiles;
-	FolderScanner scanner(GetBasePath(modDoc, false), FolderScanner::kOnlyFiles, GetBaseName(modDoc) + P_(".AutoSave.*"));
+	FolderScanner scanner(GetBasePath(modDoc, false), FolderScanner::kOnlyFiles, GetBaseName(modDoc) + P_(".AutoSave.*.*.*"));
 	mpt::PathString fileName;
 	while(scanner.Next(fileName))
 	{
@@ -191,11 +176,53 @@ void CAutoSaver::CleanUpBackups(const CModDoc &modDoc) const
 	}
 	std::sort(foundfiles.begin(), foundfiles.end());
 	size_t filesToDelete = std::max(static_cast<size_t>(GetHistoryDepth()), foundfiles.size()) - GetHistoryDepth();
+	const bool deletePermanently = TrackerSettings::Instance().AutosaveDeletePermanently;
 	for(size_t i = 0; i < filesToDelete; i++)
 	{
-		DeleteFile(foundfiles[i].AsNative().c_str());
+		DeleteAutosave(foundfiles[i], deletePermanently);
 	}
 }
 
+
+// Find all autosave files in the autosave folder and delete all of those older than X days
+void CAutoSaver::CleanUpAutosaves() const
+{
+	if(GetUseOriginalPath() || !GetRetentionTime().count())
+		return;
+	auto path = GetPath();
+	if(!mpt::native_fs{}.is_directory(path))
+		return;
+	const std::chrono::seconds maxAge = GetRetentionTime();
+	const bool deletePermanently = TrackerSettings::Instance().AutosaveDeletePermanently;
+	FILETIME sysFileTime;
+	GetSystemTimeAsFileTime(&sysFileTime);
+	const int64 currentTime = static_cast<int64>(mpt::bit_cast<ULARGE_INTEGER>(sysFileTime).QuadPart);
+	FolderScanner scanner(std::move(path), FolderScanner::kOnlyFiles, P_("*.AutoSave.*.*.*"));
+	mpt::PathString fileName;
+	WIN32_FIND_DATA fileInfo;
+	while(scanner.Next(fileName, &fileInfo))
+	{
+		const auto fileTime = static_cast<int64>(mpt::bit_cast<ULARGE_INTEGER>(fileInfo.ftLastWriteTime).QuadPart);
+		const auto timeDiff = std::chrono::seconds{(currentTime - fileTime) / 10000000};
+		if(timeDiff >= maxAge)
+			DeleteAutosave(fileName, deletePermanently);
+	}
+}
+
+
+void CAutoSaver::DeleteAutosave(const mpt::PathString &fileName, bool deletePermanently)
+{
+	// Create double-null-terminated path list
+	// Note: We could supply multiple filenames here. However, if the files in total are too big for the recycling bin,
+	// this will cause all of them to be deleted permanently. If we supply them one by one, at least some of them
+	// will go to the recycling bin until it is full.
+	mpt::winstring path = fileName.AsNative() + _T('\0');
+	SHFILEOPSTRUCT fos{};
+	fos.hwnd = CMainFrame::GetMainFrame()->m_hWnd;
+	fos.wFunc = FO_DELETE;
+	fos.pFrom = path.c_str();
+	fos.fFlags = (deletePermanently ? 0 : FOF_ALLOWUNDO) | FOF_NO_UI;
+	SHFileOperation(&fos);
+}
 
 OPENMPT_NAMESPACE_END

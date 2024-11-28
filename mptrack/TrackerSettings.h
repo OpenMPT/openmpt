@@ -886,7 +886,9 @@ public:
 	CachedSetting<bool> AutosaveEnabled;
 	CachedSetting<uint32> AutosaveIntervalMinutes;
 	CachedSetting<uint32> AutosaveHistoryDepth;
+	CachedSetting<uint32> AutosaveRetentionTimeDays;
 	CachedSetting<bool> AutosaveUseOriginalPath;
+	CachedSetting<bool> AutosaveDeletePermanently;
 	ConfigurableDirectory AutosavePath;
 	
 	// Paths

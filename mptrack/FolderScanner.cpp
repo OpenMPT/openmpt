@@ -14,19 +14,18 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-FolderScanner::FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type, mpt::PathString filter)
-	: m_paths(1, path)
-	, m_filter(std::move(filter))
-	, m_hFind(INVALID_HANDLE_VALUE)
-	, m_type(type)
+FolderScanner::FolderScanner(mpt::PathString path, FlagSet<ScanType> type, mpt::PathString filter)
+	: m_paths{1, std::move(path)}
+	, m_filter{std::move(filter)}
+	, m_type{type}
 {
-	MemsetZero(m_wfd);
 }
 
 
 FolderScanner::~FolderScanner()
 {
-	FindClose(m_hFind);
+	if(m_hFind != INVALID_HANDLE_VALUE)
+		FindClose(m_hFind);
 }
 
 #if MPT_COMPILER_MSVC
@@ -34,7 +33,7 @@ FolderScanner::~FolderScanner()
 #pragma warning(push)
 #pragma warning(disable:6387) // 'HANDLE' could be '0'
 #endif // MPT_COMPILER_MSVC
-bool FolderScanner::Next(mpt::PathString &file)
+bool FolderScanner::Next(mpt::PathString &file, WIN32_FIND_DATA *fileInfo)
 {
 	bool found = false;
 	do
@@ -42,13 +41,10 @@ bool FolderScanner::Next(mpt::PathString &file)
 		if(m_hFind == INVALID_HANDLE_VALUE)
 		{
 			if(m_paths.empty())
-			{
 				return false;
-			}
 
-			m_currentPath = m_paths.back();
+			m_currentPath = m_paths.back().WithTrailingSlash();
 			m_paths.pop_back();
-			m_currentPath = m_currentPath.WithTrailingSlash();
 			m_hFind = FindFirstFile(mpt::support_long_path((m_currentPath + m_filter).AsNative()).c_str(), &m_wfd);
 		}
 
@@ -62,29 +58,25 @@ bool FolderScanner::Next(mpt::PathString &file)
 				{
 					if(_tcscmp(m_wfd.cFileName, _T("..")) && _tcscmp(m_wfd.cFileName, _T(".")))
 					{
+						// Add sub directory
 						if(m_type[kFindInSubDirectories])
-						{
-							// Add sub directory
 							m_paths.push_back(file);
-						}
 						if(m_type[kOnlyDirectories])
-						{
 							found = true;
-						}
 					}
 				} else if(m_type[kOnlyFiles])
 				{
 					found = true;
 				}
+				if(found && fileInfo)
+					*fileInfo = m_wfd;
 			} while((nextFile = FindNextFile(m_hFind, &m_wfd)) != FALSE && !found);
 		}
 		if(nextFile == FALSE)
 		{
 			// Done with this directory, advance to next
 			if(m_hFind != INVALID_HANDLE_VALUE)
-			{
 				FindClose(m_hFind);
-			}
 			m_hFind = INVALID_HANDLE_VALUE;
 		}
 	} while(!found);

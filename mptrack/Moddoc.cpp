@@ -318,65 +318,41 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 	if(filename.empty())
 		return false;
 
-	bool ok = false;
 	BeginWaitCursor();
-	m_SndFile.m_dwLastSavedWithVersion = Version::Current();
-	try
+	const bool ok = SaveFile(filename, true);
+	if(ok && m_SndFile.m_SongFlags[SONG_IMPORTED])
 	{
-		mpt::IO::SafeOutputFile sf(filename, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
-		mpt::IO::ofstream &f = sf;
-		if(f)
+		const auto formatName = m_SndFile.GetModSpecifications().GetFileExtensionUpper();
+		if(!(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 		{
-			if(m_SndFile.m_SongFlags[SONG_IMPORTED])
+			// Check if any non-supported playback behaviours are enabled due to being imported from a different format
+			// File saving code will omit those flags automatically, so it's okay if we check and reset them after a successful save only
+			const auto supportedBehaviours = m_SndFile.GetSupportedPlaybackBehaviour(GetModType());
+			bool showWarning = true;
+			for(size_t i = 0; i < kMaxPlayBehaviours; i++)
 			{
-				const auto formatName = m_SndFile.GetModSpecifications().GetFileExtensionUpper();
-				if(!(GetModType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
+				if(m_SndFile.m_playBehaviour[i] && !supportedBehaviours[i])
 				{
-					// Check if any non-supported playback behaviours are enabled due to being imported from a different format
-					const auto supportedBehaviours = m_SndFile.GetSupportedPlaybackBehaviour(GetModType());
-					bool showWarning = true;
-					for(size_t i = 0; i < kMaxPlayBehaviours; i++)
+					if(showWarning)
 					{
-						if(m_SndFile.m_playBehaviour[i] && !supportedBehaviours[i])
-						{
-							if(showWarning)
-							{
-								AddToLog(LogWarning, MPT_UFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")
-									(formatName));
-								showWarning = false;
-							}
-							m_SndFile.m_playBehaviour.reset(i);
-						}
+						AddToLog(LogWarning, MPT_UFORMAT("Some imported Compatibility Settings that are not supported by the {} format have been disabled. Verify that the module still sounds as intended.")(formatName));
+						showWarning = false;
 					}
+					m_SndFile.m_playBehaviour.reset(i);
 				}
-
-				for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-				{
-					if(m_SndFile.Instruments[i] && m_SndFile.Instruments[i]->synth.HasScripts())
-					{
-						AddToLog(LogWarning, MPT_UFORMAT("Scripted instruments are not supported by the {} format and will not be exported.")(formatName));
-						break;
-					}
-				}
-				if(!m_SndFile.m_globalScript.empty())
-					AddToLog(LogWarning, MPT_UFORMAT("Global instrument scripts are not supported by the {} format and will not be exported.")(formatName));
-			}
-
-			f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
-			FixNullStrings();
-			switch(m_SndFile.GetType())
-			{
-			case MOD_TYPE_MOD: ok = m_SndFile.SaveMod(f); break;
-			case MOD_TYPE_S3M: ok = m_SndFile.SaveS3M(f); break;
-			case MOD_TYPE_XM:  ok = m_SndFile.SaveXM(f); break;
-			case MOD_TYPE_IT:  ok = m_SndFile.SaveIT(f, filename); break;
-			case MOD_TYPE_MPT: ok = m_SndFile.SaveIT(f, filename); break;
-			default:           MPT_ASSERT_NOTREACHED();
 			}
 		}
-	} catch(const std::exception &)
-	{
-		ok = false;
+
+		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
+		{
+			if(m_SndFile.Instruments[i] && m_SndFile.Instruments[i]->synth.HasScripts())
+			{
+				AddToLog(LogWarning, MPT_UFORMAT("Scripted instruments are not supported by the {} format and will not be exported.")(formatName));
+				break;
+			}
+		}
+		if(!m_SndFile.m_globalScript.empty())
+			AddToLog(LogWarning, MPT_UFORMAT("Global instrument scripts are not supported by the {} format and will not be exported.")(formatName));
 	}
 	EndWaitCursor();
 
@@ -395,6 +371,33 @@ bool CModDoc::OnSaveDocument(const mpt::PathString &filename, const bool setPath
 		ErrorBox(IDS_ERR_SAVESONG, CMainFrame::GetMainFrame());
 	}
 	return ok;
+}
+
+
+bool CModDoc::SaveFile(const mpt::PathString &filename, bool allowRelativeSamplePaths)
+{
+	try
+	{
+		mpt::IO::SafeOutputFile sf(filename, std::ios::binary, mpt::IO::FlushModeFromBool(TrackerSettings::Instance().MiscFlushFileBuffersOnSave));
+		mpt::IO::ofstream &f = sf;
+		if(!f)
+			return false;
+
+		f.exceptions(f.exceptions() | std::ios::badbit | std::ios::failbit);
+		FixNullStrings();
+		switch(m_SndFile.GetBestSaveFormat())
+		{
+		case MOD_TYPE_MOD: return m_SndFile.SaveMod(f);
+		case MOD_TYPE_S3M: return m_SndFile.SaveS3M(f);
+		case MOD_TYPE_XM:  return m_SndFile.SaveXM(f);
+		case MOD_TYPE_IT:  return m_SndFile.SaveIT(f, allowRelativeSamplePaths ? filename : mpt::PathString{});
+		case MOD_TYPE_MPT: return m_SndFile.SaveIT(f, allowRelativeSamplePaths ? filename : mpt::PathString{});
+		default: MPT_ASSERT_NOTREACHED();
+		}
+	} catch(const std::exception &)
+	{
+	}
+	return false;
 }
 
 

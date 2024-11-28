@@ -21,28 +21,27 @@ class CAutoSaver
 public:
 	CAutoSaver();
 	
-	bool DoSave(DWORD curTime);
+	bool DoSave();
 
 	bool IsEnabled() const;
 	bool GetUseOriginalPath() const;
 	mpt::PathString GetPath() const;
 	uint32 GetHistoryDepth() const;
-	uint32 GetSaveInterval() const;
-	uint32 GetSaveIntervalMilliseconds() const
-	{
-		return Clamp(GetSaveInterval(), 0u, (1u << 30) / 60u / 1000u) * 60 * 1000;
-	}
+	std::chrono::minutes GetSaveInterval() const;
+	std::chrono::days GetRetentionTime() const;
 
 private:
 	bool SaveSingleFile(CModDoc &modDoc);
 	mpt::PathString GetBasePath(const CModDoc &modDoc, bool createPath) const;
 	mpt::PathString GetBaseName(const CModDoc &modDoc) const;
 	mpt::PathString BuildFileName(const CModDoc &modDoc) const;
-	void CleanUpBackups(const CModDoc &modDoc) const;
+	void CleanUpAutosaves(const CModDoc &modDoc) const;
+	void CleanUpAutosaves() const;
 	bool CheckTimer(DWORD curTime) const;
+	static void DeleteAutosave(const mpt::PathString &fileName, bool deletePermanently);
 	
 	DWORD m_lastSave = 0;
-	//Flag to prevent autosave from starting new saving if previous is still in progress.
+	// Flag to prevent autosave from starting new saving if previous is still in progress.
 	bool m_saveInProgress = false;
 
 };

@@ -27,20 +27,19 @@ public:
 		kFindInSubDirectories = 0x04,
 	};
 
-protected:
-	std::vector<mpt::PathString> m_paths;
-	mpt::PathString m_currentPath;
-	mpt::PathString m_filter;
-	HANDLE m_hFind;
-	WIN32_FIND_DATA m_wfd;
-	FlagSet<ScanType> m_type;
-
-public:
-	FolderScanner(const mpt::PathString &path, FlagSet<ScanType> type, mpt::PathString filter = MPT_PATHSTRING("*.*"));
+	FolderScanner(mpt::PathString path, FlagSet<ScanType> type, mpt::PathString filter = P_("*.*"));
 	~FolderScanner();
 
 	// Return one file or directory at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found (file parameter is not touched).
-	bool Next(mpt::PathString &file);
+	bool Next(mpt::PathString &file, WIN32_FIND_DATA *fileInfo = nullptr);
+
+protected:
+	std::vector<mpt::PathString> m_paths;
+	mpt::PathString m_currentPath;
+	const mpt::PathString m_filter;
+	HANDLE m_hFind = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA m_wfd{};
+	const FlagSet<ScanType> m_type;
 };
 
 MPT_DECLARE_ENUM(FolderScanner::ScanType)

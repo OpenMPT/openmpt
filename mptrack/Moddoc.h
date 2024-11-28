@@ -369,6 +369,7 @@ public:
 	void OnCloseDocument() override;
 	void SafeFileClose();
 	bool OnSaveDocument(const mpt::PathString &filename, const bool setPath = true);
+	bool SaveFile(const mpt::PathString &filename, bool allowRelativeSamplePaths);
 
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push

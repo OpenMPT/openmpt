@@ -31,6 +31,7 @@ protected:
 
 	afx_msg void OnAutosaveEnable();
 	afx_msg void OnAutosaveUseOrigDir();
+	afx_msg void OnAutosaveRetention();
 	afx_msg void OnBrowseAutosavePath();
 	afx_msg void OnBrowseSongs();
 	afx_msg void OnBrowseSamples();

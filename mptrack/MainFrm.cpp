@@ -2216,17 +2216,14 @@ void CMainFrame::OnTimerGUI()
 		{
 			m_dwTimeSec = time;
 			m_nAvgMixChn = m_nMixChn;
-			OnUpdateTime(NULL);
+			OnUpdateTime(nullptr);
 		}
 	}
 
-	// Idle Time Check
-	DWORD curTime = timeGetTime();
-
 	if(m_AutoSaver.IsEnabled())
 	{
-		bool success = m_AutoSaver.DoSave(curTime);
-		if (!success)		// autosave failure; bring up options.
+		bool success = m_AutoSaver.DoSave();
+		if(!success)  // autosave failure; bring up options.
 		{
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
 			OnViewOptions();
