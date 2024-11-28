@@ -1041,7 +1041,7 @@ void CTrackApp::CreatePaths()
 			const mpt::PathString searchPattern = oldTunings + P_("*.*");
 			WIN32_FIND_DATA FindFileData;
 			HANDLE hFind;
-			hFind = FindFirstFile(searchPattern.AsNative().c_str(), &FindFileData);
+			hFind = FindFirstFile(mpt::support_long_path(searchPattern.AsNative()).c_str(), &FindFileData);
 			if(hFind != INVALID_HANDLE_VALUE)
 			{
 				do
