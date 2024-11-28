@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include <chrono>
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CModDoc;
