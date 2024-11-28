@@ -105,22 +105,26 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsColors)
-	DDX_Control(pDX, IDC_COMBO1,		m_ComboItem);
-	DDX_Control(pDX, IDC_COMBO2,		m_ComboFont);
-	DDX_Control(pDX, IDC_COMBO3,		m_ComboPreset);
-	DDX_Control(pDX, IDC_BUTTON4,		m_BtnPreview);
-	DDX_Control(pDX, IDC_TEXT1,			m_TxtColor[0]);
-	DDX_Control(pDX, IDC_TEXT2,			m_TxtColor[1]);
-	DDX_Control(pDX, IDC_TEXT3,			m_TxtColor[2]);
-	DDX_Control(pDX, IDC_SPIN1,			m_ColorSpin);
+	DDX_Control(pDX, IDC_COMBO1,          m_ComboItem);
+	DDX_Control(pDX, IDC_COMBO2,          m_ComboFont);
+	DDX_Control(pDX, IDC_COMBO3,          m_ComboPreset);
+	DDX_Control(pDX, IDC_BUTTON4,         m_BtnPreview);
+	DDX_Control(pDX, IDC_TEXT1,           m_TxtColor[0]);
+	DDX_Control(pDX, IDC_TEXT2,           m_TxtColor[1]);
+	DDX_Control(pDX, IDC_TEXT3,           m_TxtColor[2]);
+	DDX_Control(pDX, IDC_SPIN1,           m_ColorSpin);
+	DDX_Control(pDX, IDC_PRIMARYHILITE,   m_rpmEdit);
+	DDX_Control(pDX, IDC_SECONDARYHILITE, m_rpbEdit);
 	//}}AFX_DATA_MAP
 }
 
 
 COptionsColors::COptionsColors()
-    : CPropertyPage(IDD_OPTIONS_COLORS)
-    , CustomColors(TrackerSettings::Instance().rgbCustomColors)
+    : CPropertyPage{IDD_OPTIONS_COLORS}
+    , CustomColors{TrackerSettings::Instance().rgbCustomColors}
 {
+	m_rpbEdit.SetAccessibleSuffix(_T("rows per beat"));
+	m_rpmEdit.SetAccessibleSuffix(_T("rows per measure"));
 }
 
 

@@ -387,7 +387,7 @@
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h">
       <Filter>mptrack</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\mptrack\AccessibleButton.h">
+    <ClInclude Include="..\..\mptrack\AccessibleControls.h">
       <Filter>mptrack</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h">

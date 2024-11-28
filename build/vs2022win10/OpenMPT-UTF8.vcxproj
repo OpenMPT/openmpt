@@ -2015,7 +2015,7 @@
     <ClInclude Include="..\..\misc\mptWine.h" />
     <ClInclude Include="..\..\mptrack\AboutDialog.h" />
     <ClInclude Include="..\..\mptrack\AbstractVstEditor.h" />
-    <ClInclude Include="..\..\mptrack\AccessibleButton.h" />
+    <ClInclude Include="..\..\mptrack\AccessibleControls.h" />
     <ClInclude Include="..\..\mptrack\AdvancedConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\AutoSaver.h" />
     <ClInclude Include="..\..\mptrack\Autotune.h" />

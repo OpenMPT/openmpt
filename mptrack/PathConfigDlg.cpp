@@ -35,16 +35,24 @@ IMPLEMENT_DYNAMIC(PathConfigDlg, CPropertyPage)
 PathConfigDlg::PathConfigDlg()
 	: CPropertyPage{IDD_OPTIONS_AUTOSAVE}
 {
-	for(AccessibleButton &button : m_browseButtons)
-	{
-		button.SetAccessibleText(_T("Browse for folder..."));
-	}
+	m_accessibleEdits[0].SetAccessibleSuffix(_T("minutes"));
+	m_accessibleEdits[1].SetAccessibleSuffix(_T("backups"));
+	m_accessibleEdits[2].SetAccessibleSuffix(_T("days"));
+	m_browseButtons[0].SetAccessibleText(_T("Browse for song folder..."));
+	m_browseButtons[1].SetAccessibleText(_T("Browse for sample folder..."));
+	m_browseButtons[2].SetAccessibleText(_T("Browse for instrument folder..."));
+	m_browseButtons[3].SetAccessibleText(_T("Browse for VST plugin folder..."));
+	m_browseButtons[4].SetAccessibleText(_T("Browse for VST preset folder..."));
+	m_browseButtons[5].SetAccessibleText(_T("Browse for auto save folder..."));
 }
 
 
 void PathConfigDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_AUTOSAVE_INTERVAL, m_accessibleEdits[0]);
+	DDX_Control(pDX, IDC_AUTOSAVE_HISTORY, m_accessibleEdits[1]);
+	DDX_Control(pDX, IDC_EDIT1, m_accessibleEdits[2]);
 	DDX_Control(pDX, IDC_BUTTON_CHANGE_MODDIR, m_browseButtons[0]);
 	DDX_Control(pDX, IDC_BUTTON_CHANGE_SAMPDIR, m_browseButtons[1]);
 	DDX_Control(pDX, IDC_BUTTON_CHANGE_INSTRDIR, m_browseButtons[2]);

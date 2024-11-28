@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "AccessibleButton.h"
+#include "AccessibleControls.h"
 #include "CListCtrl.h"
 #include "ResizableDialog.h"
 #include "../common/mptPathString.h"

@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "AccessibleControls.h"
 #include "TrackerSettings.h"
 #include "../sounddsp/EQ.h"
 #include "openmpt/sounddevice/SoundDevice.hpp"
@@ -97,8 +98,8 @@ protected:
 
 	CComboBox m_CbnResampling, m_CbnAmigaType;
 
-	CEdit m_CEditRampUp;
-	CEdit m_CEditRampDown;
+	AccessibleEdit m_CEditRampUp;
+	AccessibleEdit m_CEditRampDown;
 	CEdit m_CInfoRampUp;
 	CEdit m_CInfoRampDown;
 
@@ -202,10 +203,6 @@ public:
 	DWORD m_dwMidiSetup;
 	UINT m_nMidiDevice;
 
-protected:
-	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
-	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize;
-
 public:
 	CMidiSetupDlg(DWORD flags, UINT device);
 
@@ -218,6 +215,11 @@ protected:
 	afx_msg void OnRenameDevice();
 	afx_msg void OnSettingsChanged() { SetModified(TRUE); }
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
+	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize;
+	AccessibleEdit m_editAmp;
 };
 
 

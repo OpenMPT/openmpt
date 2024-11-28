@@ -12,7 +12,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "AccessibleButton.h"
+#include "AccessibleControls.h"
 #include "ColorPickerButton.h"
 #include "PluginComboBox.h"
 #include "UpdateHints.h"

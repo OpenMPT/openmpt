@@ -12,7 +12,8 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "Snd_defs.h"
+#include "AccessibleControls.h"
+#include "../soundlib/Snd_defs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -375,7 +376,7 @@ public:
 };
 
 
-class CNumberEdit : public CEdit, public CDecimalSupport<CNumberEdit>
+class CNumberEdit : public AccessibleEdit, public CDecimalSupport<CNumberEdit>
 {
 public:
 	void SetTempoValue(const TEMPO &t);

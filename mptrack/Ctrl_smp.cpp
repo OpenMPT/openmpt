@@ -183,6 +183,7 @@ CCtrlSamples::CCtrlSamples(CModControlView &parent, CModDoc &document)
 	: CModControlDlg(parent, document)
 {
 	m_nLockCount = 1;
+	m_EditTimeStretchRatio.SetAccessibleSuffix(_T("%"));
 }
 
 

@@ -11,6 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "AccessibleControls.h"
 #include "ColorPickerButton.h"
 #include "TrackerSettings.h"
 
@@ -26,6 +27,7 @@ protected:
 	ColorPickerButton m_BtnColor[3];
 	CButton m_BtnPreview;
 	CSpinButtonCtrl m_ColorSpin;
+	AccessibleEdit m_rpbEdit, m_rpmEdit;
 	CStatic m_TxtColor[3];
 	MODPLUGDIB *m_pPreviewDib = nullptr;
 	FontSetting patternFont, commentFont;

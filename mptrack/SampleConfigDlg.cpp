@@ -45,11 +45,17 @@ void COptionsSampleEditor::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(COptionsSampleEditor)
 	DDX_Control(pDX, IDC_DEFAULT_FORMAT, m_cbnDefaultSampleFormat);
 	DDX_Control(pDX, IDC_VOLUME_HANDLING, m_cbnDefaultVolumeHandling);
+	DDX_Control(pDX, IDC_EDIT_UNDOSIZE, m_undoBufferEdit);
+	DDX_Control(pDX, IDC_EDIT_FINETUNE, m_finetuneEdit);
 	//}}AFX_DATA_MAP
 }
 
 
-COptionsSampleEditor::COptionsSampleEditor() : CPropertyPage{IDD_OPTIONS_SAMPLEEDITOR} {}
+COptionsSampleEditor::COptionsSampleEditor() : CPropertyPage{IDD_OPTIONS_SAMPLEEDITOR}
+{
+	m_undoBufferEdit.SetAccessibleSuffix(_T("%"));
+	m_finetuneEdit.SetAccessibleSuffix(_T("cents"));
+}
 
 
 BOOL COptionsSampleEditor::OnInitDialog()

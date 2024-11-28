@@ -1020,13 +1020,17 @@ void COptionsMixer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_UP, m_CInfoRampUp);
 	DDX_Control(pDX, IDC_EDIT_VOLRAMP_SAMPLES_DOWN, m_CInfoRampDown);
 	DDX_Control(pDX, IDC_SLIDER_STEREOSEP, m_SliderStereoSep);
-	// check box soft pan
 	DDX_Control(pDX, IDC_SLIDER_PREAMP, m_SliderPreAmp);
 	//}}AFX_DATA_MAP
 }
 
 
-COptionsMixer::COptionsMixer() : CPropertyPage{IDD_OPTIONS_MIXER} {}
+COptionsMixer::COptionsMixer()
+	: CPropertyPage{IDD_OPTIONS_MIXER}
+{
+	m_CEditRampUp.SetAccessibleSuffix(_T("microseconds up"));
+	m_CEditRampDown.SetAccessibleSuffix(_T("microseconds down"));
+}
 
 
 
@@ -1728,12 +1732,13 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(COptionsSoundcard)
-	DDX_Control(pDX, IDC_SPIN1,		m_SpinSpd);
-	DDX_Control(pDX, IDC_SPIN2,		m_SpinPat);
-	DDX_Control(pDX, IDC_SPIN3,		m_SpinAmp);
-	DDX_Control(pDX, IDC_COMBO1,	m_InputDevice);
-	DDX_Control(pDX, IDC_COMBO2,	m_ATBehaviour);
-	DDX_Control(pDX, IDC_COMBO3,	m_Quantize);
+	DDX_Control(pDX, IDC_SPIN1,  m_SpinSpd);
+	DDX_Control(pDX, IDC_SPIN2,  m_SpinPat);
+	DDX_Control(pDX, IDC_SPIN3,  m_SpinAmp);
+	DDX_Control(pDX, IDC_COMBO1, m_InputDevice);
+	DDX_Control(pDX, IDC_COMBO2, m_ATBehaviour);
+	DDX_Control(pDX, IDC_COMBO3, m_Quantize);
+	DDX_Control(pDX, IDC_EDIT3,  m_editAmp);
 	//}}AFX_DATA_MAP
 }
 
@@ -1743,6 +1748,7 @@ CMidiSetupDlg::CMidiSetupDlg(DWORD flags, UINT device)
 	, m_dwMidiSetup{flags}
 	, m_nMidiDevice{device}
 {
+	m_editAmp.SetAccessibleSuffix(_T("%"));
 }
 
 

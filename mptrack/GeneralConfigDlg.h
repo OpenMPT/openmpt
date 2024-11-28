@@ -11,7 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "AccessibleButton.h"
+#include "AccessibleControls.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

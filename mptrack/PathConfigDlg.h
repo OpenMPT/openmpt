@@ -11,7 +11,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "AccessibleButton.h"
+#include "AccessibleControls.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -47,6 +47,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	std::array<AccessibleEdit, 3> m_accessibleEdits;
 	std::array<AccessibleButton, 6> m_browseButtons;
 };
 

@@ -13,7 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "AccessibleButton.h"
+#include "AccessibleControls.h"
 #include "Globals.h"
 
 OPENMPT_NAMESPACE_BEGIN

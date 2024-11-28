@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "AccessibleControls.h"
 #include "CDecimalSupport.h"
 #include "Globals.h"
 #include "Undo.h"
