@@ -2020,9 +2020,8 @@ void CModTree::FillInstrumentLibrary(const TCHAR *selectedItem)
 
 		LinkResolver linkResolver;
 		HANDLE hFind;
-		WIN32_FIND_DATA wfd;
-		MemsetZero(wfd);
-		if((hFind = FindFirstFile(path.AsNative().c_str(), &wfd)) != INVALID_HANDLE_VALUE)
+		WIN32_FIND_DATA wfd{};
+		if((hFind = FindFirstFile(mpt::support_long_path(path.AsNative()).c_str(), &wfd)) != INVALID_HANDLE_VALUE)
 		{
 			do
 			{
