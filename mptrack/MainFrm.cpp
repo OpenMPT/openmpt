@@ -202,6 +202,7 @@ CMainFrame::CMainFrame()
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;
 
+	InitCommonControls();
 	MemsetZero(gcolrefVuMeter);
 }
 
@@ -259,6 +260,8 @@ void CMainFrame::Initialize()
 		toolbarMenu->DeleteMenu(toolbarMenuStartPos, MF_BYPOSITION);
 		AddToolBarMenuEntries(*toolbarMenu);
 	}
+
+	m_InputHandler->UpdateMainMenu();
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	CMenu debugMenu;

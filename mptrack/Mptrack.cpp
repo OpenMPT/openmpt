@@ -1384,8 +1384,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
-	InitCommonControls();
-	pMainFrame->GetInputHandler()->UpdateMainMenu();
 
 	// Dispatch commands specified on the command line
 	if(cmdInfo.m_nShellCommand == CCommandLineInfo::FileNew)
