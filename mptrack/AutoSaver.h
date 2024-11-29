@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include <chrono>
+#include "../common/mptTime.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -30,7 +30,7 @@ public:
 	mpt::PathString GetPath() const;
 	uint32 GetHistoryDepth() const;
 	std::chrono::minutes GetSaveInterval() const;
-	std::chrono::days GetRetentionTime() const;
+	mpt::chrono::days GetRetentionTime() const;
 
 private:
 	bool SaveSingleFile(CModDoc &modDoc);

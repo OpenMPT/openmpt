@@ -59,9 +59,9 @@ std::chrono::minutes CAutoSaver::GetSaveInterval() const
 }
 
 
-std::chrono::days CAutoSaver::GetRetentionTime() const
+mpt::chrono::days CAutoSaver::GetRetentionTime() const
 {
-	return std::chrono::days{TrackerSettings::Instance().AutosaveRetentionTimeDays.Get()};
+	return mpt::chrono::days{TrackerSettings::Instance().AutosaveRetentionTimeDays.Get()};
 }
 
 

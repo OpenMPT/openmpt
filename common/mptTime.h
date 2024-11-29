@@ -15,6 +15,8 @@
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <chrono>
 #include <exception>
+#elif MPT_CXX_AT_LEAST(17) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && defined(MODPLUG_TRACKER)
+#include <chrono>
 #endif
 #include <string>
 
@@ -34,6 +36,28 @@
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+
+#if defined(MODPLUG_TRACKER) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
+
+namespace mpt {
+namespace chrono {
+#if MPT_CXX_AT_LEAST(20)
+using days = std::chrono::days;
+using weeks = std::chrono::weeks;
+using years = std::chrono::years;
+using months = std::chrono::months;
+#else
+using days = std::chrono::duration<int, std::ratio_multiply<std::ratio<24>, std::chrono::hours::period>>;
+using weeks = std::chrono::duration<int, std::ratio_multiply<std::ratio<7>, mpt::chrono::days::period>>;
+using years = std::chrono::duration<int, std::ratio_multiply<std::ratio<146097, 400>, mpt::chrono::days::period>>;
+using months = std::chrono::duration<int, std::ratio_divide<mpt::chrono::years::period, std::ratio<12>>>;
+#endif
+}
+}
+
+#endif // !MPT_LIBCXX_QUIRK_NO_CHRONO
 
 
 
