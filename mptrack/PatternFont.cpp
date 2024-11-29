@@ -99,7 +99,7 @@ static void DrawChar(HDC hDC, CHAR ch, int x, int y, int w, int h)
 	::DrawTextA(hDC, &ch, 1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && MPT_USTRING_MODE_UTF8
 static void DrawChar(HDC hDC, char8_t ch8, int x, int y, int w, int h)
 {
 	CRect rect(x, y, x + w, y + h);
