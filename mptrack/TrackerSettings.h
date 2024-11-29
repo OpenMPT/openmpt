@@ -995,6 +995,8 @@ public:
 	void SetMIDIDevice(UINT id);
 	UINT GetCurrentMIDIDevice();
 
+	static mpt::PathString GetDefaultAutosavePath();
+
 protected:
 
 	static std::vector<uint32> GetDefaultSampleRates();

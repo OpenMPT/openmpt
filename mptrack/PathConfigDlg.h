@@ -27,7 +27,6 @@ protected:
 
 	void OnOK() override;
 	BOOL OnInitDialog() override;
-	BOOL OnKillActive() override;
 
 	afx_msg void OnAutosaveEnable();
 	afx_msg void OnAutosaveUseOrigDir();

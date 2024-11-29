@@ -22,6 +22,7 @@
 #include "mpt/fs/fs.hpp"
 
 #include <algorithm>
+#include <filesystem>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -123,17 +124,19 @@ mpt::PathString CAutoSaver::GetBasePath(const CModDoc &modDoc, bool createPath) 
 			path = path.GetDirectoryWithDrive();
 		} else
 		{
-			// if it doesn't, put it in settings dir
-			path = theApp.GetConfigPath() + P_("Autosave\\");
-			if(createPath && !CreateDirectory(path.AsNative().c_str(), nullptr) && GetLastError() == ERROR_PATH_NOT_FOUND)
-				path = theApp.GetConfigPath();
-			else if(!createPath && !mpt::native_fs{}.is_directory(path))
-				path = theApp.GetConfigPath();
+			// If it doesn't, fall back to default
+			path = TrackerSettings::GetDefaultAutosavePath();
 		}
 	} else
 	{
 		path = GetPath();
 	}
+	std::error_code ec;
+	if(createPath)
+		std::filesystem::create_directories(mpt::support_long_path(path.AsNative()), ec);
+	if(!mpt::native_fs{}.is_directory(path))
+		path = theApp.GetConfigPath();
+
 	return path.WithTrailingSlash();
 }
 
@@ -160,7 +163,7 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 
 	// We are actually not going to show the log for autosaved files.
 	ScopedLogCapturer logcapturer(modDoc, _T(""), nullptr, false);
-	return modDoc.SaveFile(BuildFileName(modDoc), GetUseOriginalPath());
+	return modDoc.SaveFile(fileName, GetUseOriginalPath());
 }
 
 

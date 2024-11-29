@@ -222,20 +222,6 @@ BOOL PathConfigDlg::OnSetActive()
 }
 
 
-BOOL PathConfigDlg::OnKillActive()
-{
-	mpt::PathString path = GetPath(IDC_AUTOSAVE_PATH);
-
-	if (!mpt::native_fs{}.is_directory(path) && IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && !IsDlgButtonChecked(IDC_AUTOSAVE_USEORIGDIR))
-	{
-		Reporting::Error("Backup path does not exist.");
-		GetDlgItem(IDC_AUTOSAVE_PATH)->SetFocus();
-		return 0;
-	}
-
-	return CPropertyPage::OnKillActive();
-}
-
 void PathConfigDlg::OnBrowseAutosavePath() { BrowseFolder(IDC_AUTOSAVE_PATH); }
 void PathConfigDlg::OnBrowseSongs() { BrowseFolder(IDC_OPTIONS_DIR_MODS); }
 void PathConfigDlg::OnBrowseSamples() { BrowseFolder(IDC_OPTIONS_DIR_SAMPS); }

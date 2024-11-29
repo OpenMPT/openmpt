@@ -319,9 +319,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, AutosaveIntervalMinutes(conf, UL_("AutoSave"), UL_("IntervalMinutes"), 10)
 	, AutosaveHistoryDepth(conf, UL_("AutoSave"), UL_("BackupHistory"), 3)
 	, AutosaveRetentionTimeDays(conf, UL_("AutoSave"), UL_("RetentionTimeDays"), 30)
-	, AutosaveUseOriginalPath(conf, UL_("AutoSave"), UL_("UseOriginalPath"), true)
+	, AutosaveUseOriginalPath(conf, UL_("AutoSave"), UL_("UseOriginalPath"), false)
 	, AutosaveDeletePermanently(conf, UL_("AutoSave"), UL_("DeletePermanently"), false)
-	, AutosavePath(conf, UL_("AutoSave"), UL_("Path"), mpt::common_directories::get_temp_directory())
+	, AutosavePath(conf, UL_("AutoSave"), UL_("Path"), GetDefaultAutosavePath())
 	// Paths
 	, PathSongs(conf, UL_("Paths"), UL_("Songs_Directory"), mpt::PathString())
 	, PathSamples(conf, UL_("Paths"), UL_("Samples_Directory"), mpt::PathString())
@@ -1414,6 +1414,31 @@ std::vector<uint32> TrackerSettings::GetDefaultSampleRates()
 		11025,
 		8000
 	};
+}
+
+
+mpt::PathString TrackerSettings::GetDefaultAutosavePath()
+{
+	mpt::PathString path;
+	if(theApp.IsPortableMode())
+	{
+		return theApp.GetInstallPath().WithTrailingSlash();
+	} else
+	{
+		// Try to find non-roaming (local) app data first, fall back to other directory
+		TCHAR dir[MAX_PATH] = {0};
+		if((SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+		   || (SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK)
+		   || (SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, dir) == S_OK))
+		{
+			path = mpt::PathString::FromNative(dir);
+		} else
+		{
+			path = mpt::common_directories::get_temp_directory();
+		}
+		path = path.WithTrailingSlash() + P_("OpenMPT\\");
+	}
+	return path + P_("Autosave");
 }
 
 
