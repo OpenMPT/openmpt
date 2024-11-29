@@ -59,6 +59,7 @@ auto TryFilterHandleThrow(const Tfn &fn, const Tfilter &filter, const Thandler &
 	static_assert(std::is_trivially_copy_constructible<decltype(fn())>::value);
 	static_assert(std::is_trivially_move_assignable<decltype(fn())>::value);
 	static_assert(std::is_trivially_move_constructible<decltype(fn())>::value);
+	MPT_UNUSED(handler);
 	DWORD code = 0;
 	__try
 	{
