@@ -454,7 +454,7 @@ void PatternFont::UpdateFont(HWND hwnd)
 
 		for(uint32 c = 32; c < 128; ++c)
 		{
-			DrawChar(hDC, (char)(unsigned char)c, charWidth * c, 0, charWidth, charHeight);
+			DrawChar(hDC, mpt::unsafe_char_convert<char>(static_cast<char32_t>(c)), charWidth * c, 0, charWidth, charHeight);
 		}
 		::GdiFlush();
 
