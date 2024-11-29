@@ -537,7 +537,9 @@ BOOL CModDoc::DoSave(const mpt::PathString &filename, bool setPath)
 	}
 	if(OnSaveDocument(saveFileName, setPath))
 	{
-		SetModified(false);
+		// Don't clear modified flag when saving as copy
+		if(setPath)
+			SetModified(false);
 		m_SndFile.m_SongFlags.reset(SONG_IMPORTED);
 		m_bHasValidPath = true;
 		m_ShowSavedialog = false;
