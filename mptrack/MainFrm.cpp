@@ -181,8 +181,6 @@ HCURSOR CMainFrame::curVSplit = nullptr;
 MODPLUGDIB *CMainFrame::bmpNotes = nullptr;
 COLORREF CMainFrame::gcolrefVuMeter[NUM_VUMETER_PENS * 2];
 
-CInputHandler *CMainFrame::m_InputHandler = nullptr;
-
 static constexpr UINT StatusBarIndicators[] =
 {
 	ID_SEPARATOR,  // status line indicator
@@ -198,15 +196,13 @@ static constexpr UINT StatusBarIndicators[] =
 CMainFrame::CMainFrame()
 	: SoundDevice::CallbackBufferHandler<DithersOpenMPT>(theApp.PRNG())
 	, m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
+	, m_InputHandler{this}
 {
 	m_szUserText[0] = 0;
 	m_szInfoText[0] = 0;
 	m_szXInfoText[0]= 0;
 
 	MemsetZero(gcolrefVuMeter);
-
-	m_InputHandler = new CInputHandler(this);
-
 }
 
 
@@ -277,7 +273,6 @@ void CMainFrame::Initialize()
 
 CMainFrame::~CMainFrame()
 {
-	delete m_InputHandler;
 	CChannelManagerDlg::DestroySharedInstance();
 }
 
@@ -329,7 +324,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #pragma warning(push)
 #pragma warning(disable:6387) // '_Param_(2)' could be '0':  this does not adhere to the specification for the function 'HtmlHelpW'
 #endif
-	::HtmlHelp(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelp(m_hWnd, nullptr, HH_INITIALIZE, reinterpret_cast<DWORD_PTR>(&m_helpCookie));
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -404,7 +399,7 @@ BOOL CMainFrame::DestroyWindow()
 #pragma warning(push)
 #pragma warning(disable:6387) // '_Param_(2)' could be '0':  this does not adhere to the specification for the function 'HtmlHelpW'
 #endif
-	::HtmlHelp(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&helpCookie));
+	::HtmlHelp(m_hWnd, nullptr, HH_UNINITIALIZE, reinterpret_cast<DWORD_PTR>(&m_helpCookie));
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif
@@ -477,7 +472,7 @@ void CMainFrame::OnClose()
 	AddControlBar(&m_wndStatusBar); // Restore statusbar to mainframe.
 	TrackerSettings::Instance().SaveSettings();
 
-	if(m_InputHandler && m_InputHandler->m_activeCommandSet)
+	if(m_InputHandler->m_activeCommandSet)
 	{
 		m_InputHandler->m_activeCommandSet->SaveFile(TrackerSettings::Instance().m_szKbdFile);
 	}
@@ -1451,7 +1446,7 @@ bool CMainFrame::PausePlayback()
 void CMainFrame::GenerateStopNotification()
 {
 	Notification mn(Notification::Stop);
-	SendMessage(WM_MOD_UPDATEPOSITION, 0, (LPARAM)&mn);
+	SendMessage(WM_MOD_UPDATEPOSITION, 0, reinterpret_cast<LPARAM>(&mn));
 }
 
 
@@ -2220,9 +2215,9 @@ void CMainFrame::OnTimerGUI()
 		}
 	}
 
-	if(m_AutoSaver.IsEnabled())
+	if(m_AutoSaver->IsEnabled())
 	{
-		bool success = m_AutoSaver.DoSave();
+		bool success = m_AutoSaver->DoSave();
 		if(!success)  // autosave failure; bring up options.
 		{
 			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_PATHS;
@@ -2585,7 +2580,7 @@ void CMainFrame::ShowToolbarMenu(CPoint screenPt)
 }
 
 
-void CMainFrame::AddToolBarMenuEntries(CMenu &menu)
+void CMainFrame::AddToolBarMenuEntries(CMenu &menu) const
 {
 	menu.AppendMenu(MF_STRING, ID_VIEW_TOOLBAR, m_InputHandler->GetMenuText(ID_VIEW_TOOLBAR));
 	menu.AppendMenu(MF_STRING, IDD_TREEVIEW, m_InputHandler->GetMenuText(IDD_TREEVIEW));
@@ -2797,6 +2792,14 @@ void CMainFrame::StopRenderer(CSoundFile *pSndFile)
 	CriticalSection cs;
 	pSndFile->SuspendPlugins();
 	pSndFile->m_bIsRendering = false;
+}
+
+
+CInputHandler *CMainFrame::GetInputHandler()
+{
+	if(CMainFrame *mainFrm = GetMainFrame())
+		return GetMainFrame()->m_InputHandler.get();
+	return nullptr;
 }
 
 
@@ -3202,7 +3205,7 @@ void CMainFrame::CreateExampleModulesMenu()
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInExampleModulesMenu, m_ExampleModulePaths, P_("ExampleSongs\\"), ID_EXAMPLE_MODULES);
 	CMenu* const pMainMenu = GetMenu();
-	if (hMenu && pMainMenu && m_InputHandler)
+	if (hMenu && pMainMenu)
 		VERIFY(pMainMenu->ModifyMenu(ID_EXAMPLE_MODULES, MF_BYCOMMAND | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_EXAMPLE_MODULES)));
 	else
 		ASSERT(false);
@@ -3233,7 +3236,7 @@ void CMainFrame::CreateTemplateModulesMenu()
 				  "Make sure that there's a proper range for menu commands in resources.");
 	HMENU hMenu = CreateFileMenu(nMaxItemsInTemplateModulesMenu, m_TemplateModulePaths, P_("TemplateModules\\"), ID_FILE_OPENTEMPLATE);
 	auto [fileMenu, position] = FindMenuItemByCommand(*GetMenu(), ID_FILE_OPEN);
-	if(hMenu && fileMenu && m_InputHandler)
+	if(hMenu && fileMenu)
 	{
 		VERIFY(fileMenu->RemoveMenu(position + 1, MF_BYPOSITION));
 		VERIFY(fileMenu->InsertMenu(position + 1, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hMenu, m_InputHandler->GetMenuText(ID_FILE_OPENTEMPLATE)));

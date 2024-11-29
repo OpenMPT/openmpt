@@ -11,7 +11,6 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
-#include "AutoSaver.h"
 #include "CImageListEx.h"
 #include "Mainbar.h"
 #include "Notification.h"
@@ -29,6 +28,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CAutoSaver;
 class CDLSBank;
 class CInputHandler;
 class CModDoc;
@@ -197,25 +197,26 @@ protected:
 	std::unique_ptr<UpdateCheckResult> m_updateCheckResult;
 	bool m_cancelUpdateCheck = false;
 #endif // MPT_ENABLE_UPDATE
-	DWORD helpCookie = 0;
+	DWORD m_helpCookie = 0;
 	bool m_bOptionsLocked = false;
 
 	// Notification Buffer
 	mpt::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
-	Util::fixed_size_queue<Notification,MAX_UPDATE_HISTORY> m_NotifyBuffer;
+	Util::fixed_size_queue<Notification, MAX_UPDATE_HISTORY> m_NotifyBuffer;
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
 
 	TCHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
 
-	CAutoSaver m_AutoSaver;
+	mpt::heap_value<CAutoSaver> m_AutoSaver;
+	mpt::heap_value<CInputHandler> m_InputHandler;
 
 public:
 	bool m_bModTreeHasFocus = false;
 
 public:
-	CMainFrame(/*CString regKeyExtension*/);
+	CMainFrame();
 	void Initialize();
 
 
@@ -264,7 +265,6 @@ public:
 	static HICON GetModIcon() { return m_hIcon; }
 	static HFONT GetGUIFont() { return m_hGUIFont; }
 	static LRESULT CALLBACK FocusChangeProc(int code, WPARAM wParam, LPARAM lParam);
-	static CInputHandler *m_InputHandler;
 
 	// Misc functions
 public:
@@ -282,7 +282,7 @@ public:
 	void OnDocumentClosed(CModDoc *pModDoc);
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	void RefreshDlsBanks();
-	static CInputHandler* GetInputHandler() { return m_InputHandler; }
+	static CInputHandler *GetInputHandler();
 	void SetElapsedTime(double t) { m_dwTimeSec = mpt::saturate_cast<samplecount_t>(t * 10.0); }
 
 #if defined(MPT_ENABLE_UPDATE)
@@ -305,7 +305,7 @@ public:
 	// [out] paths: Receives the full paths of the files added to the menu.
 	// [in] folderName: Name of the folder
 	// [in] idRangeBegin: First ID for the menu item.
-	static HMENU CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString>& paths, const mpt::PathString &folderName, const uint16 idRangeBegin);
+	static HMENU CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString> &paths, const mpt::PathString &folderName, const uint16 idRangeBegin);
 
 // Player functions
 public:
@@ -316,7 +316,7 @@ public:
 	void StopPlayback();
 	bool RestartPlayback();
 	bool PausePlayback();
-	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() ? true : false; }
+	static bool IsValidSoundFile(CSoundFile &sndFile) { return sndFile.GetType() != MOD_TYPE_NONE; }
 	static bool IsValidSoundFile(CSoundFile *pSndFile) { return pSndFile && pSndFile->GetType(); }
 	void SetPlaybackSoundFile(CSoundFile *pSndFile);
 	void UnsetPlaybackSoundFile();
@@ -367,7 +367,7 @@ public:
 protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMainFrame)
-	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	BOOL PreCreateWindow(CREATESTRUCT &cs) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL DestroyWindow() override;
 	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
@@ -377,7 +377,7 @@ protected:
 	void OpenMenuItemFile(const UINT nId, const bool isTemplateFile);
 
 	void ShowToolbarMenu(CPoint screenPt);
-	static void AddToolBarMenuEntries(CMenu &menu);
+	void AddToolBarMenuEntries(CMenu &menu) const;
 
 	void RecreateImageLists();
 	void SetupStatusBarSizes();
