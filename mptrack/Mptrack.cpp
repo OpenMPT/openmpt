@@ -17,6 +17,7 @@
 #include "DialogBase.h"
 #include "ExceptionHandler.h"
 #include "FileDialog.h"
+#include "FolderScanner.h"
 #include "Globals.h"
 #include "Image.h"
 #include "InputHandler.h"
@@ -1038,18 +1039,12 @@ void CTrackApp::CreatePaths()
 
 		if(mpt::native_fs{}.is_directory(oldTunings))
 		{
-			const mpt::PathString searchPattern = oldTunings + P_("*.*");
-			WIN32_FIND_DATA FindFileData;
-			HANDLE hFind;
-			hFind = FindFirstFile(mpt::support_long_path(searchPattern.AsNative()).c_str(), &FindFileData);
-			if(hFind != INVALID_HANDLE_VALUE)
+			FolderScanner scanner{oldTunings, FolderScanner::kOnlyFiles};
+			mpt::PathString fileName;
+			while(scanner.Next(fileName))
 			{
-				do
-				{
-					MoveConfigFile(mpt::PathString::FromNative(FindFileData.cFileName), P_("tunings\\"));
-				} while(FindNextFile(hFind, &FindFileData) != 0);
+				MoveConfigFile(fileName.GetFilename(), P_("tunings\\"));
 			}
-			FindClose(hFind);
 			RemoveDirectory(oldTunings.AsNative().c_str());
 		}
 	}
