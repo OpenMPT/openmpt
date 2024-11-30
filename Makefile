@@ -851,6 +851,61 @@ ifeq ($(SHARED_SONAME),1)
 	$(SILENT)ln -sf $(MPG123_SONAME) bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX)
 endif
 
+else ifeq ($(ENABLE_DLL),1)
+
+CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
+LDFLAGS_MPG123  :=
+LDLIBS_MPG123   :=
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/
+MPG123_SOURCES :=
+MPG123_SOURCES += include/mpg123/src/compat/compat.c
+MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/dct64.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/equalizer.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/feature.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/format.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/frame.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/icy.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/icy2utf8.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/id3.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/index.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer1.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer2.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/layer3.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/lfs_wrap.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/libmpg123.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/ntom.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/optimize.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/parse.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/readers.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/stringbuf.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_8bit.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_real.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/synth_s32.c
+MPG123_SOURCES += include/mpg123/src/libmpg123/tabinit.c
+MPG123_OBJECTS += $(MPG123_SOURCES:.c=.mpg123$(FLAVOUR_O).o)
+MPG123_DEPENDS = $(MPG123_OBJECTS:$(FLAVOUR_O).o=$(FLAVOUR_O).d)
+ALL_OBJECTS += $(MPG123_OBJECTS)
+ALL_DEPENDS += $(MPG123_DEPENDS)
+include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
+include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+LIBS_MPG123 = bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX)
+
+bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX): $(MPG123_OBJECTS)
+	$(INFO) [LD] $@
+ifeq ($(NO_SHARED_LINKER_FLAG),1)
+	$(SILENT)$(LINK.cc) -shared $(MPG123_LDFLAGS) $(SO_LDFLAGS) $^ -o $@
+else
+	$(SILENT)$(LINK.cc) -shared $(MPG123_LDFLAGS) $(SO_LDFLAGS) $^ -o $@
+endif
+ifeq ($(SHARED_SONAME),1)
+	$(SILENT)mv bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX) bin/$(FLAVOUR_DIR)$(MPG123_SONAME)
+	$(SILENT)ln -sf $(MPG123_SONAME) bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX)
+endif
+
 else
 
 CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
