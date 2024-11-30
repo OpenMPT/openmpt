@@ -4946,16 +4946,16 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 			// Velocity
 			// This is "almost" how IT does it - apparently, IT seems to lag one row behind on global volume or channel volume changes.
 			const int swing = (m_playBehaviour[kITSwingBehaviour] || m_playBehaviour[kMPTOldSwingBehaviour]) ? chn.nVolSwing : 0;
-			const int vol = Util::muldiv((chn.nVolume + swing) * m_PlayState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 20);
+			const int vol = Util::muldiv((chn.nVolume + swing) * playState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 20);
 			data = static_cast<uint8>(Clamp(vol / 2, 1, 127));
-			//data = (unsigned char)std::min((chn.nVolume * chn.nGlobalVol * m_nGlobalVolume) >> (1 + 6 + 8), 127);
+			//data = (unsigned char)std::min((chn.nVolume * chn.nGlobalVol * playState.m_nGlobalVolume) >> (1 + 6 + 8), 127);
 		} else if(macro[pos] == 'u')
 		{
 			// Calculated volume
 			// Same note as with velocity applies here, but apparently also for instrument / sample volumes?
-			const int vol = Util::muldiv(chn.nCalcVolume * m_PlayState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 26);
+			const int vol = Util::muldiv(chn.nCalcVolume * playState.m_nGlobalVolume, chn.nGlobalVol * chn.nInsVol, 1 << 26);
 			data = static_cast<uint8>(Clamp(vol / 2, 1, 127));
-			//data = (unsigned char)std::min((chn.nCalcVolume * chn.nGlobalVol * m_nGlobalVolume) >> (7 + 6 + 8), 127);
+			//data = (unsigned char)std::min((chn.nCalcVolume * chn.nGlobalVol * playState.m_nGlobalVolume) >> (7 + 6 + 8), 127);
 		} else if(macro[pos] == 'x')
 		{
 			// Pan set
