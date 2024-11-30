@@ -1271,12 +1271,12 @@ public:
 	void ProcessStereoSeparation(samplecount_t countChunk);
 
 private:
-	PLUGINDEX GetChannelPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
+	PLUGINDEX GetChannelPlugin(const ModChannel &channel, CHANNELINDEX nChn, PluginMutePriority respectMutes) const;
 	static PLUGINDEX GetActiveInstrumentPlugin(const ModChannel &chn, PluginMutePriority respectMutes);
 	IMixPlugin *GetChannelInstrumentPlugin(const ModChannel &chn) const;
 
 public:
-	PLUGINDEX GetBestPlugin(const PlayState &playState, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
+	PLUGINDEX GetBestPlugin(const ModChannel &channel, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
 	PlaybackTest CreatePlaybackTest(PlaybackTestSettings settings);
 };

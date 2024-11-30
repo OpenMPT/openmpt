@@ -1329,25 +1329,24 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 {
 	const ChannelFlags muteType = CSoundFile::GetChannelMuteFlag();
 
-	if (nChn >= m_SndFile.GetNumChannels())
-	{
+	if(nChn >= m_SndFile.GetNumChannels())
 		return false;
-	}
 
+	ModChannel &chn = m_SndFile.m_PlayState.Chn[nChn];
 	const bool doMute = m_SndFile.ChnSettings[nChn].dwFlags[CHN_MUTE];
-
-	// Mute pattern channel
-	if (doMute)
+	if(doMute)
 	{
-		m_SndFile.m_PlayState.Chn[nChn].dwFlags.set(muteType);
-		if(m_SndFile.m_opl) m_SndFile.m_opl->NoteCut(nChn);
+		// Mute pattern channel
+		chn.dwFlags.set(muteType);
+		if(m_SndFile.m_opl)
+			m_SndFile.m_opl->NoteCut(nChn);
 		// Kill VSTi notes on muted channel.
-		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(m_SndFile.m_PlayState, nChn, PrioritiseInstrument, EvenIfMuted);
-		if ((nPlug) && (nPlug<=MAX_MIXPLUGINS))
+		PLUGINDEX nPlug = m_SndFile.GetBestPlugin(chn, nChn, PrioritiseInstrument, EvenIfMuted);
+		if(nPlug > 0 && nPlug <= MAX_MIXPLUGINS)
 		{
 			IMixPlugin *pPlug = m_SndFile.m_MixPlugins[nPlug - 1].pMixPlugin;
-			const ModInstrument* pIns = m_SndFile.m_PlayState.Chn[nChn].pModInstrument;
-			if (pPlug && pIns)
+			const ModInstrument* pIns = chn.pModInstrument;
+			if(pPlug && pIns)
 			{
 				pPlug->MidiCommand(*pIns, NOTE_KEYOFF, 0, nChn);
 			}
@@ -1355,7 +1354,7 @@ bool CModDoc::UpdateChannelMuteStatus(CHANNELINDEX nChn)
 	} else
 	{
 		// On unmute alway cater for both mute types - this way there's no probs if user changes mute mode.
-		m_SndFile.m_PlayState.Chn[nChn].dwFlags.reset(CHN_SYNCMUTE | CHN_MUTE);
+		chn.dwFlags.reset(CHN_SYNCMUTE | CHN_MUTE);
 	}
 
 	// Mute any NNA'd channels
