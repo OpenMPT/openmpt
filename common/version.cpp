@@ -621,6 +621,7 @@ mpt::ustring GetFullCreditsString()
 		"Revenant (https://revenant1.net/)\n"
 		"SYRiNX\n"
 		"xaimus (http://xaimus.com/)\n"
+		"zersal\n"
 		"\n"
 		"Thanks to:\n"
 		"\n"
