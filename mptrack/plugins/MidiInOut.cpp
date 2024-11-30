@@ -339,22 +339,20 @@ void MidiInOut::InputCallback(double /*deltatime*/, std::vector<unsigned char> &
 		{
 			// End of message found!
 			if(!isBypassed)
-				ReceiveSysex(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(m_bufferedInput)));
+				ReceiveMidi(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(m_bufferedInput)));
 			m_bufferedInput.clear();
 		}
 	} else if(message.front() == 0xF0)
 	{
 		// Start of SysEx message...
 		if(message.back() != 0xF7)
-			m_bufferedInput.insert(m_bufferedInput.end(), message.begin(), message.end());	// ...but not the end!
+			m_bufferedInput.insert(m_bufferedInput.end(), message.begin(), message.end());  // ...but not the end!
 		else if(!isBypassed)
-			ReceiveSysex(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(message)));
+			ReceiveMidi(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(message)));
 	} else if(!isBypassed)
 	{
 		// Regular message
-		uint32 msg = 0;
-		memcpy(&msg, message.data(), std::min(message.size(), sizeof(msg)));
-		ReceiveMidi(msg);
+		ReceiveMidi(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(message)));
 	}
 }
 
@@ -438,7 +436,7 @@ void MidiInOut::Bypass(bool bypass)
 }
 
 
-bool MidiInOut::MidiSend(uint32 midiCode)
+bool MidiInOut::MidiSend(mpt::const_byte_span midiData)
 {
 	if(!m_midiOut.isPortOpen() || IsBypassed())
 	{
@@ -447,21 +445,7 @@ bool MidiInOut::MidiSend(uint32 midiCode)
 	}
 
 	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), &midiCode, MIDIEvents::GetEventLength(static_cast<uint8>(midiCode))));
-	return true;
-}
-
-
-bool MidiInOut::MidiSysexSend(mpt::const_byte_span sysex)
-{
-	if(!m_midiOut.isPortOpen() || IsBypassed())
-	{
-		// We need an output device to send MIDI messages to.
-		return true;
-	}
-
-	mpt::lock_guard<mpt::mutex> lock(m_mutex);
-	m_outQueue.push_back(Message(GetOutputTimestamp(), sysex.data(), sysex.size()));
+	m_outQueue.push_back(Message(GetOutputTimestamp(), midiData.data(), midiData.size()));
 	return true;
 }
 

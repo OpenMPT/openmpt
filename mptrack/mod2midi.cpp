@@ -71,7 +71,7 @@ namespace MidiExport
 		std::shared_ptr<MidiChannelState> m_channelState;
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
-		std::vector<std::array<char, 4>> m_queuedEvents;
+		std::vector<std::array<uint8, 4>> m_queuedEvents;
 
 		std::ostringstream f;
 		double m_tempo = 0.0;
@@ -229,11 +229,11 @@ namespace MidiExport
 			{
 				if(m_channelState->lastModChannel[midiCh] == CHANNELINDEX_INVALID)
 					continue;
-				char newPanning = static_cast<char>(std::clamp(m_sndFile.m_PlayState.Chn[m_channelState->lastModChannel[midiCh]].nRealPan / 2, 0, 127));
+				uint8 newPanning = static_cast<uint8>(std::clamp(m_sndFile.m_PlayState.Chn[m_channelState->lastModChannel[midiCh]].nRealPan / 2, 0, 127));
 				if(m_channelState->panning[midiCh] == newPanning)
 					continue;
 				m_channelState->panning[midiCh] = newPanning;
-				std::array<char, 4> midiData = {static_cast<char>(0xB0 | midiCh), 0x0A, newPanning, 0};
+				std::array<uint8, 4> midiData = {static_cast<uint8>(0xB0 | midiCh), 0x0A, newPanning, 0};
 				m_queuedEvents.push_back(midiData);
 			}
 
@@ -298,32 +298,34 @@ namespace MidiExport
 
 		float RenderSilence(uint32) override { return 0.0f; }
 
-		bool MidiSend(uint32 midiCode) override
+		using IMixPlugin::MidiSend;
+		bool MidiSend(mpt::const_byte_span midiData) override
 		{
-			std::array<char, 4> midiData;
-			memcpy(midiData.data(), &midiCode, 4);
-
-			// Note-On events go last to prevent early note-off in a situation like this:
-			// ... ..|C-5 01
-			// C-5 01|=== ..
-			if(MIDIEvents::GetTypeFromEvent(midiCode) == MIDIEvents::evNoteOn)
+			if(midiData.empty())
+				return false;
+			const uint8 type = mpt::byte_cast<uint8>(midiData[0]);
+			if(type == 0xF0)
 			{
-				m_queuedEvents.push_back(midiData);
-				return true;
-			}
-			WriteTicks();
-			mpt::IO::WriteRaw(f, midiData.data(), MIDIEvents::GetEventLength(midiData[0]));
-			return true;
-		}
-
-		bool MidiSysexSend(mpt::const_byte_span sysex) override
-		{
-			if(sysex.size() > 1)
-			{
+				// SysEx
 				WriteTicks();
 				mpt::IO::WriteIntBE<uint8>(f, 0xF0);
-				mpt::IO::WriteVarInt(f, mpt::saturate_cast<uint32>(sysex.size() - 1));
-				mpt::IO::WriteRaw(f, sysex.data() + 1, sysex.size() - 1);
+				mpt::IO::WriteVarInt(f, mpt::saturate_cast<uint32>(midiData.size() - 1));
+				mpt::IO::WriteRaw(f, midiData.data() + 1, midiData.size() - 1);
+			} else
+			{
+				// Note-On events go last to prevent early note-off in a situation like this:
+				// ... ..|C-5 01
+				// C-5 01|=== ..
+				if(MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOn)
+				{
+					std::array<uint8, 4> midiDataArray;
+					MPT_ASSERT(midiData.size() <= sizeof(midiDataArray) && midiData.size() == MIDIEvents::GetEventLength(type));
+					memcpy(midiDataArray.data(), midiData.data(), std::min(sizeof(midiDataArray), midiData.size()));
+					m_queuedEvents.push_back(midiDataArray);
+					return true;
+				}
+				WriteTicks();
+				mpt::IO::WriteRaw(f, midiData.data(), midiData.size());
 			}
 			return true;
 		}

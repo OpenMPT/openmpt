@@ -158,8 +158,8 @@ public:
 	void SaveAllParameters() override;
 	void RestoreAllParameters(int32 program) override;
 	void Process(float *pOutL, float *pOutR, uint32 numFrames) override;
-	bool MidiSend(uint32 dwMidiCode) override;
-	bool MidiSysexSend(mpt::const_byte_span sysex) override;
+	using IMixPlugin::MidiSend;
+	bool MidiSend(mpt::const_byte_span midiData) override;
 	void HardAllNotesOff() override;
 	void NotifySongPlaying(bool playing) override;
 

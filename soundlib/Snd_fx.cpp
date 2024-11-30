@@ -5817,16 +5817,7 @@ void CSoundFile::SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSm
 			{
 				if(IMixPlugin *pPlugin = m_MixPlugins[plug - 1].pMixPlugin; pPlugin != nullptr)
 				{
-					if(macro[0] == 0xF0)
-					{
-						pPlugin->MidiSysexSend(mpt::byte_cast<mpt::const_byte_span>(macro));
-					} else
-					{
-						size_t len = std::min(static_cast<size_t>(MIDIEvents::GetEventLength(macro[0])), macro.size());
-						uint32 curData = 0;
-						memcpy(&curData, macro.data(), len);
-						pPlugin->MidiSend(curData);
-					}
+					pPlugin->MidiSend(mpt::byte_cast<mpt::const_byte_span>(macro));
 				}
 			}
 		}

@@ -378,6 +378,14 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 }
 
 
+bool IMixPlugin::MidiSend(uint32 midiCode)
+{
+	std::array<std::byte, 4> midiData;
+	memcpy(midiData.data(), &midiCode, 4);
+	return MidiSend(mpt::as_span(midiData.data(), std::min(midiData.size(), MIDIEvents::GetEventLength(mpt::byte_cast<uint8>(midiData[0])))));
+}
+
+
 // Get list of plugins to which output is sent. A nullptr indicates master output.
 size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
 {
@@ -995,8 +1003,11 @@ bool IMidiPlugin::IsNotePlaying(uint8 note, CHANNELINDEX trackerChn)
 }
 
 
-void IMidiPlugin::ReceiveMidi(uint32 midiCode)
+void IMidiPlugin::ReceiveMidi(mpt::const_byte_span midiData)
 {
+	if(midiData.empty())
+		return;
+
 	ResetSilence();
 
 	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
@@ -1006,32 +1017,18 @@ void IMidiPlugin::ReceiveMidi(uint32 midiCode)
 	{
 		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
 		// Add all events to the plugin's queue.
-		plugin->MidiSend(midiCode);
+		plugin->MidiSend(midiData);
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(m_recordMIDIOut)
+	if(m_recordMIDIOut && midiData[0] != std::byte{0xF0})
 	{
 		// Spam MIDI data to all views
+		uint32 midiCode = 0;
+		memcpy(&midiCode, midiData.data(), std::min(sizeof(midiCode), midiData.size()));
 		::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, midiCode, reinterpret_cast<LPARAM>(this));
 	}
-#endif // MODPLUG_TRACKER
-}
-
-
-void IMidiPlugin::ReceiveSysex(mpt::const_byte_span sysex)
-{
-	ResetSilence();
-
-	// I think we should only route events to plugins that are explicitely specified as output plugins of the current plugin.
-	// This should probably use GetOutputPlugList here if we ever get to support multiple output plugins.
-	PLUGINDEX receiver;
-	if(m_pMixStruct != nullptr && (receiver = m_pMixStruct->GetOutputPlugin()) != PLUGINDEX_INVALID)
-	{
-		IMixPlugin *plugin = m_SndFile.m_MixPlugins[receiver].pMixPlugin;
-		// Add all events to the plugin's queue.
-		plugin->MidiSysexSend(sysex);
-	}
+#endif  // MODPLUG_TRACKER
 }
 
 

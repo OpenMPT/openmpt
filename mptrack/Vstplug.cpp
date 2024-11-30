@@ -1485,7 +1485,7 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 				} else if(ev->type == kVstSysExType)
 				{
 					auto event = static_cast<const VstMidiSysexEvent *>(ev);
-					plugin->MidiSysexSend(mpt::as_span(mpt::byte_cast<const std::byte *>(event->sysexDump), event->dumpBytes));
+					plugin->MidiSend(mpt::as_span(mpt::byte_cast<const std::byte *>(event->sysexDump), event->dumpBytes));
 				}
 			}
 		}
@@ -1596,40 +1596,39 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 }
 
 
-bool CVstPlugin::MidiSend(uint32 dwMidiCode)
-{
-	if(IsBypassed())
-		return true;
-	// Note-Offs go at the start of the queue (since OpenMPT 1.17). Needed for situations like this:
-	// ... ..|C-5 01
-	// C-5 01|=== ..
-	// TODO: Should not be used with real-time notes! Letting the key go too quickly
-	// (e.g. while output device is being initialized) will cause the note to be stuck!
-	bool insertAtFront = (MIDIEvents::GetTypeFromEvent(dwMidiCode) == MIDIEvents::evNoteOff);
-
-	VstMidiEvent event{};
-	event.type = kVstMidiType;
-	event.byteSize = sizeof(event);
-	event.midiData = dwMidiCode;
-
-	ResetSilence();
-	return vstEvents.Enqueue(&event, insertAtFront);
-}
-
-
-bool CVstPlugin::MidiSysexSend(mpt::const_byte_span sysex)
+bool CVstPlugin::MidiSend(mpt::const_byte_span midiData)
 {
 	if(IsBypassed())
 		return true;
 
-	VstMidiSysexEvent event{};
-	event.type = kVstSysExType;
-	event.byteSize = sizeof(event);
-	event.dumpBytes = mpt::saturate_cast<int32>(sysex.size());
-	event.sysexDump = sysex.data();	// We will make our own copy in VstEventQueue::Enqueue
-
 	ResetSilence();
-	return vstEvents.Enqueue(&event);
+	const uint8 type = mpt::byte_cast<uint8>(midiData[0]);
+	if(type == 0xF0)
+	{
+		VstMidiSysexEvent event{};
+		event.type = kVstSysExType;
+		event.byteSize = sizeof(event);
+		event.dumpBytes = mpt::saturate_cast<int32>(midiData.size());
+		event.sysexDump = midiData.data();  // We will make our own copy in VstEventQueue::Enqueue
+
+		return vstEvents.Enqueue(&event);
+	} else
+	{
+		// Note-Offs go at the start of the queue (since OpenMPT 1.17). Needed for situations like this:
+		// ... ..|C-5 01
+		// C-5 01|=== ..
+		// TODO: Should not be used with real-time notes! Letting the key go too quickly
+		// (e.g. while output device is being initialized) will cause the note to be stuck!
+		bool insertAtFront = (MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOff);
+
+		VstMidiEvent event{};
+		event.type = kVstMidiType;
+		event.byteSize = sizeof(event);
+		MPT_ASSERT(midiData.size() <= sizeof(event.midiData) && midiData.size() == MIDIEvents::GetEventLength(type));
+		memcpy(&event.midiData, midiData.data(), std::min(sizeof(event.midiData), midiData.size()));
+
+		return vstEvents.Enqueue(&event, insertAtFront);
+	}
 }
 
 

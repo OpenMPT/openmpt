@@ -178,8 +178,8 @@ public:
 	void Process(float *pOutL, float *pOutR, uint32 numFrames) final;
 	// Render silence and return the highest resulting output level
 	float RenderSilence(uint32) final{ return 0; }
-	bool MidiSend(uint32 midiCode) final;
-	bool MidiSysexSend(mpt::const_byte_span sysex) final;
+	using IMixPlugin::MidiSend;
+	bool MidiSend(mpt::const_byte_span midiData) final;
 	void HardAllNotesOff() final;
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	void Resume() final;

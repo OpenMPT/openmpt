@@ -196,19 +196,10 @@ void LFOPlugin::PositionChanged()
 }
 
 
-bool LFOPlugin::MidiSend(uint32 midiCode)
+bool LFOPlugin::MidiSend(mpt::const_byte_span midiData)
 {
 	if(IMixPlugin *plugin = GetOutputPlugin())
-		return plugin->MidiSend(midiCode);
-	else
-		return true;
-}
-
-
-bool LFOPlugin::MidiSysexSend(mpt::const_byte_span sysex)
-{
-	if(IMixPlugin *plugin = GetOutputPlugin())
-		return plugin->MidiSysexSend(sysex);
+		return plugin->MidiSend(midiData);
 	else
 		return true;
 }
