@@ -382,7 +382,7 @@ bool IMixPlugin::MidiSend(uint32 midiCode)
 {
 	std::array<std::byte, 4> midiData;
 	memcpy(midiData.data(), &midiCode, 4);
-	return MidiSend(mpt::as_span(midiData.data(), std::min(midiData.size(), MIDIEvents::GetEventLength(mpt::byte_cast<uint8>(midiData[0])))));
+	return MidiSend(mpt::as_span(midiData.data(), std::min(static_cast<uint8>(midiData.size()), MIDIEvents::GetEventLength(mpt::byte_cast<uint8>(midiData[0])))));
 }
 
 
