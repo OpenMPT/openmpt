@@ -743,7 +743,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 				PatternCursor::Columns firstCol = PatternCursor::lastColumn, lastCol = PatternCursor::firstColumn;
 
 				// Note
-				if(data[pos] != ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note == NOTE_NONE) || 
+				if(data[pos] != ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.note == NOTE_NONE) ||
 					(doITStyleMix && origModCmd.note == NOTE_NONE && origModCmd.instr == 0 && origModCmd.volcmd == VOLCMD_NONE))))
 				{
 					firstCol = PatternCursor::noteColumn;
@@ -760,7 +760,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 							m.note = NOTE_PCS;
 						else
 							m.note = NOTE_PC;
-					} else if (data[pos] != '.')
+					} else if(data[pos] != '.')
 					{
 						// Check note names
 						for(uint8 i = 0; i < 12; i++)
@@ -791,9 +791,9 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					firstCol = std::min(firstCol, PatternCursor::instrColumn);
 					lastCol = std::max(lastCol, PatternCursor::instrColumn);
 					if(data[pos + 3] >= '0' && data[pos + 3] <= ('0' + (MAX_INSTRUMENTS / 10)))
-					{
 						m.instr = (data[pos + 3] - '0') * 10 + (data[pos + 4] - '0');
-					} else m.instr = 0;
+					else
+						m.instr = 0;
 				}
 
 				// Volume
@@ -846,7 +846,10 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					}
 				} else
 				{
-					if(data[pos + 8] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.command == CMD_NONE) || 
+					if(origModCmd.IsPcNote())
+						m.SetEffectCommand(CMD_NONE, 0);
+					
+					if(data[pos + 8] > ' ' && (!doMixPaste || ((!doITStyleMix && origModCmd.command == CMD_NONE) ||
 						(doITStyleMix && origModCmd.command == CMD_NONE && origModCmd.param == 0))))
 					{
 						firstCol = std::min(firstCol, PatternCursor::effectColumn);
@@ -867,7 +870,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 					}
 
 					// Effect value
-					if(data[pos + 9] > ' ' && (!doMixPaste || ((!doITStyleMix && (origModCmd.command == CMD_NONE || origModCmd.param == 0)) || 
+					if(data[pos + 9] > ' ' && (!doMixPaste || ((!doITStyleMix && (origModCmd.command == CMD_NONE || origModCmd.param == 0)) ||
 						(doITStyleMix && origModCmd.command == CMD_NONE && origModCmd.param == 0))))
 					{
 						firstCol = std::min(firstCol, PatternCursor::paramColumn);
