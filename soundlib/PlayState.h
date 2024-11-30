@@ -12,7 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "ModChannel.h"
-#include "plugins/PluginStructs.h"
 #include "Snd_defs.h"
 
 #include <map>

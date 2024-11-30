@@ -60,6 +60,9 @@ enum { FREQ_FRACBITS = 4 }; // Number of fractional bits in return value of CSou
 
 using samplecount_t = uint32;  // Number of rendered samples
 
+using PlugParamIndex = uint32;
+using PlugParamValue = float;
+
 // String lengths (including trailing null char)
 enum
 {

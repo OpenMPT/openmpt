@@ -14,7 +14,6 @@
 
 #include "../common/FileReaderFwd.h"
 #include "../soundlib/Snd_defs.h"
-#include "../soundlib/plugins/PluginStructs.h"
 
 #include <vector>
 #include <algorithm>

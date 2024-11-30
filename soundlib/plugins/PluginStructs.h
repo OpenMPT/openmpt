@@ -22,9 +22,6 @@ OPENMPT_NAMESPACE_BEGIN
 ////////////////////////////////////////////////////////////////////
 // Mix Plugins
 
-using PlugParamIndex = uint32;
-using PlugParamValue = float;
-
 struct SNDMIXPLUGINSTATE;
 struct SNDMIXPLUGIN;
 class IMixPlugin;

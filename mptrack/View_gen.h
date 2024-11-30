@@ -16,7 +16,6 @@
 #include "ColorPickerButton.h"
 #include "PluginComboBox.h"
 #include "UpdateHints.h"
-#include "../soundlib/plugins/PluginStructs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 

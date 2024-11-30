@@ -15,7 +15,6 @@
 #include "PatternCursor.h"
 
 #include "../common/FileReaderFwd.h"
-#include "../soundlib/plugins/PluginStructs.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
