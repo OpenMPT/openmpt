@@ -4844,6 +4844,7 @@ void CSoundFile::ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool 
 			} else
 			{
 				// SysEx message, find end of message
+				sendLen = outSize - sendPos;
 				for(uint32 i = sendPos + 1; i < outSize; i++)
 				{
 					if(out[i] == 0xF7)
@@ -4852,12 +4853,6 @@ void CSoundFile::ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool 
 						sendLen = i - sendPos + 1;
 						break;
 					}
-				}
-				if(sendLen == 0)
-				{
-					// Didn't find end, so "invent" end of SysEx message
-					out[outSize++] = 0xF7;
-					sendLen = outSize - sendPos;
 				}
 			}
 		} else if(!(out[sendPos] & 0x80))
@@ -5060,13 +5055,31 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 			firstNibble = true;
 		}
 	}
+	// Finish current byte
 	if(!firstNibble)
-	{
-		// Finish current byte
 		outPos++;
-	}
 	if(updateZxxParam < 0x80)
 		chn.lastZxxParam = updateZxxParam;
+
+	// Add end of SysEx byte if necessary
+	for(size_t i = 0; i < outPos; i++)
+	{
+		if(out[i] != 0xF0)
+			continue;
+		if(outPos - i >= 4 && (out[i + 1] == 0xF0 || out[i + 1] == 0xF1))
+		{
+			// Internal message
+			i += 3;
+		} else
+		{
+			// Real SysEx
+			while(i < outPos && out[i] != 0xF7)
+				i++;
+			if(i == outPos && outPos < out.size())
+				out[outPos++] = 0xF7;
+		}
+		
+	}
 
 	out = out.first(outPos);
 }
