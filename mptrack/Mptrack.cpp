@@ -1295,12 +1295,24 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 #endif
 
 	// Dynamic DPI-awareness. Some users might want to disable DPI-awareness because of their DPI-unaware VST plugins.
-	if(TrackerSettings::Instance().highResUI)
-		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpi);
-	else if(TrackerSettings::Instance().useGDIUpcaling)
-		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::LowDpiUpscaled);
-	else
+	switch(TrackerSettings::Instance().dpiAwareness)
+	{
+	case DPIAwarenessMode::NoDPIAwareness:
 		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::LowDpi);
+		break;
+	case DPIAwarenessMode::NoDPIAwarenessGDIUpscaled:
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::LowDpiUpscaled);
+		break;
+	case DPIAwarenessMode::SystemDPIAware:
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpiSystem);
+		break;
+	case DPIAwarenessMode::PerMonitorDPIAware:
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpiPerMonitor);
+		break;
+	default:
+		MPT_ASSERT_NOTREACHED();
+		break;
+	}
 
 	// create main MDI Frame window
 	CMainFrame *pMainFrame = new CMainFrame();

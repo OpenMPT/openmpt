@@ -23,7 +23,7 @@ class COptionsColors : public CPropertyPage
 {
 protected:
 	std::array<COLORREF, MAX_MODCOLORS> CustomColors;
-	CComboBox m_ComboItem, m_ComboFont, m_ComboPreset;
+	CComboBox m_ComboDPIAwareness, m_ComboItem, m_ComboFont, m_ComboPreset;
 	ColorPickerButton m_BtnColor[3];
 	CButton m_BtnPreview;
 	CSpinButtonCtrl m_ColorSpin;

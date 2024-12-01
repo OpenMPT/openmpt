@@ -1308,29 +1308,31 @@ CAPTION "Display"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "",IDC_STATIC,6,6,312,192
-    LTEXT           "Pattern &Font:",IDC_STATIC,18,20,54,8
-    COMBOBOX        IDC_COMBO2,72,18,180,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Custom...",IDC_BUTTON9,258,18,50,12
-    LTEXT           "Comments f&ont:",IDC_STATIC,18,38,52,8
-    PUSHBUTTON      "Font",IDC_BUTTON10,72,36,180,12
-    LTEXT           "Display accidentals as:",IDC_STATIC,18,53,78,12,SS_CENTERIMAGE
-    CONTROL         "&Sharps (#)",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,102,54,66,12
-    CONTROL         "Flats (&b)",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,168,54,108,12
-    LTEXT           "Default channel colours:",IDC_STATIC,18,67,78,12,SS_CENTERIMAGE
-    CONTROL         "&No Colours",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,102,67,66,12
-    CONTROL         "&Rainbow",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,168,67,60,12
-    CONTROL         "Ran&dom",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,228,67,48,12
-    CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,114,10
+    LTEXT           "DPI Awareness:",IDC_STATIC,18,20,54,8
+    COMBOBOX        IDC_COMBO4,78,18,174,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Pattern &Font:",IDC_STATIC,18,39,54,8
+    COMBOBOX        IDC_COMBO2,78,36,174,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Custom...",IDC_BUTTON9,258,36,50,12
+    LTEXT           "Comments f&ont:",IDC_STATIC,18,57,54,8
+    PUSHBUTTON      "Font",IDC_BUTTON10,78,55,174,12
+    LTEXT           "Display accidentals as:",IDC_STATIC,18,71,84,12,SS_CENTERIMAGE
+    CONTROL         "&Sharps (#)",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,108,72,66,12
+    CONTROL         "Flats (&b)",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,174,72,108,12
+    LTEXT           "Default channel colours:",IDC_STATIC,18,86,84,12,SS_CENTERIMAGE
+    CONTROL         "&No Colours",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,108,85,66,12
+    CONTROL         "&Rainbow",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,174,85,60,12
+    CONTROL         "Ran&dom",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,234,85,48,12
+    CONTROL         "&Enable effect highlighting",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,103,114,10
     CONTROL         "Remember each song's &window positions",IDC_CHECK5,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,102,168,10
-    PUSHBUTTON      "Clear Song Cac&he",IDC_BUTTON11,186,100,78,12
-    CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,118,84,10
-    EDITTEXT        IDC_PRIMARYHILITE,102,118,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per measure (default)",IDC_STATIC,132,121,144,8
-    CONTROL         "Secondar&y highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,137,80,10
-    EDITTEXT        IDC_SECONDARYHILITE,102,137,24,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Rows per beat (default)",IDC_STATIC,132,140,144,8
-    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,153,258,8
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,121,168,10
+    PUSHBUTTON      "Clear Song Cac&he",IDC_BUTTON11,186,119,78,12
+    CONTROL         "&Primary highlight",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,137,84,10
+    EDITTEXT        IDC_PRIMARYHILITE,102,137,24,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Rows per measure (default)",IDC_STATIC,132,140,144,8
+    CONTROL         "Secondar&y highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,156,80,10
+    EDITTEXT        IDC_SECONDARYHILITE,102,156,24,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Rows per beat (default)",IDC_STATIC,132,159,144,8
+    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,172,258,8
     GROUPBOX        "Colours",IDC_STATIC,6,204,312,102
     LTEXT           "Select colo&ur for:",IDC_STATIC,18,218,63,8
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,84,216,11,12

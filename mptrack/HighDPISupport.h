@@ -30,7 +30,8 @@ namespace HighDPISupport
 	{
 		LowDpi,
 		LowDpiUpscaled,
-		HighDpi,
+		HighDpiSystem,
+		HighDpiPerMonitor,
 	};
 
 	void SetDPIAwareness(Mode mode);
@@ -64,7 +65,7 @@ namespace HighDPISupport
 	class DPIAwarenessBypass
 	{
 	public:
-		DPIAwarenessBypass(Mode forceMode = Mode::HighDpi);
+		DPIAwarenessBypass(Mode forceMode = Mode::HighDpiSystem);
 		~DPIAwarenessBypass();
 
 	private:

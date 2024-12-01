@@ -57,6 +57,20 @@ enum MPT_DPI_AWARENESS_CONTEXT : intptr_t
 };
 
 
+static HANDLE DPIModeToContext(HighDPISupport::Mode mode)
+{
+	switch (mode)
+	{
+	case HighDPISupport::Mode::LowDpi: return HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE);
+	case HighDPISupport::Mode::LowDpiUpscaled: return HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED);
+	case HighDPISupport::Mode::HighDpiSystem: return HANDLE(MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+	case HighDPISupport::Mode::HighDpiPerMonitor: return HANDLE(MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	}
+	MPT_ASSERT_NOTREACHED();
+	return HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE);
+}
+
+
 static HighDPISupportData *GetHighDPISupportData()
 {
 	static std::unique_ptr<HighDPISupportData> highDPISupportData;
@@ -70,7 +84,6 @@ static HighDPISupportData *GetHighDPISupportData()
 void HighDPISupport::SetDPIAwareness(Mode mode)
 {
 	auto instance = GetHighDPISupportData();
-	bool setDPI = false;
 	// For Windows 10, Creators Update (1703) and newer
 	if(instance->m_user32.IsValid())
 	{
@@ -78,29 +91,27 @@ void HighDPISupport::SetDPIAwareness(Mode mode)
 		PSETPROCESSDPIAWARENESSCONTEXT SetProcessDpiAwarenessContext = nullptr;
 		if(instance->m_user32.Bind(SetProcessDpiAwarenessContext, "SetProcessDpiAwarenessContext"))
 		{
-			if(mode == Mode::HighDpi)
-				setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)) == TRUE);
-			else if(mode == Mode::LowDpiUpscaled && SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED)) == TRUE)
-				setDPI = true;
-			else
-				setDPI = (SetProcessDpiAwarenessContext(HANDLE(MPT_DPI_AWARENESS_CONTEXT_UNAWARE)) == TRUE);
+			if(SetProcessDpiAwarenessContext(DPIModeToContext(mode)) == TRUE)
+				return;
 		}
 	}
 
 	// For Windows 8.1 and newer
-	if(!setDPI)
+	const bool highDPI = (mode == Mode::HighDpiSystem || mode == Mode::HighDpiPerMonitor);
+	mpt::Library shcore(mpt::LibraryPath::System(P_("SHCore")));
+	if(shcore.IsValid())
 	{
-		mpt::Library shcore(mpt::LibraryPath::System(P_("SHCore")));
-		if(shcore.IsValid())
+		using PSETPROCESSDPIAWARENESS = HRESULT(WINAPI *)(int);
+		PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = nullptr;
+		if(shcore.Bind(SetProcessDPIAwareness, "SetProcessDpiAwareness"))
 		{
-			using PSETPROCESSDPIAWARENESS = HRESULT(WINAPI *)(int);
-			PSETPROCESSDPIAWARENESS SetProcessDPIAwareness = nullptr;
-			if(shcore.Bind(SetProcessDPIAwareness, "SetProcessDpiAwareness"))
-				setDPI = (SetProcessDPIAwareness(mode == Mode::HighDpi ? 2 : 0) == S_OK);
+			if(SetProcessDPIAwareness(highDPI ? 2 : 0) == S_OK)
+				return;
 		}
 	}
+	
 	// For Vista and newer
-	if(!setDPI && mode == Mode::HighDpi && instance->m_user32.IsValid())
+	if(highDPI && instance->m_user32.IsValid())
 	{
 		using PSETPROCESSDPIAWARE = BOOL(WINAPI *)();
 		PSETPROCESSDPIAWARE SetProcessDPIAware = nullptr;
@@ -199,7 +210,7 @@ bool HighDPISupport::GetWindowPlacement(HWND hwnd, WINDOWPLACEMENT &wpl)
 HighDPISupport::DPIAwarenessBypass::DPIAwarenessBypass(Mode forceMode)
 {
 	if(auto instance = GetHighDPISupportData(); instance->m_SetThreadDpiAwarenessContext)
-		m_previous = instance->m_SetThreadDpiAwarenessContext(HANDLE((forceMode == Mode::HighDpi) ? MPT_DPI_AWARENESS_CONTEXT_SYSTEM_AWARE : MPT_DPI_AWARENESS_CONTEXT_UNAWARE));
+		m_previous = instance->m_SetThreadDpiAwarenessContext(DPIModeToContext(forceMode));
 }
 
 

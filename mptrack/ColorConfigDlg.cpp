@@ -108,6 +108,7 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1,          m_ComboItem);
 	DDX_Control(pDX, IDC_COMBO2,          m_ComboFont);
 	DDX_Control(pDX, IDC_COMBO3,          m_ComboPreset);
+	DDX_Control(pDX, IDC_COMBO4,          m_ComboDPIAwareness);
 	DDX_Control(pDX, IDC_BUTTON4,         m_BtnPreview);
 	DDX_Control(pDX, IDC_TEXT1,           m_TxtColor[0]);
 	DDX_Control(pDX, IDC_TEXT2,           m_TxtColor[1]);
@@ -143,11 +144,33 @@ static CString FormatFontName(const FontSetting &font)
 BOOL COptionsColors::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
+	
 	m_pPreviewDib = LoadDib(MAKEINTRESOURCE(IDB_COLORSETUP));
+	
+	m_ComboDPIAwareness.SetRedraw(FALSE);
+	static constexpr std::pair<const TCHAR *, DPIAwarenessMode> DPIModes[] =
+	{
+		{_T("Not DPI-Aware"),                DPIAwarenessMode::NoDPIAwareness           },
+		{_T("Not DPI-Aware; GDI upscaling"), DPIAwarenessMode::NoDPIAwarenessGDIUpscaled},
+		{_T("System DPI-Aware"),             DPIAwarenessMode::SystemDPIAware           },
+		{_T("Per-Monitor DPI-Aware"),        DPIAwarenessMode::PerMonitorDPIAware       },
+	};
+	const DPIAwarenessMode currentDPIMode = TrackerSettings::Instance().dpiAwareness;
+	for(const auto dpiMode : DPIModes)
+	{
+		int item = m_ComboDPIAwareness.AddString(dpiMode.first);
+		m_ComboDPIAwareness.SetItemData(item, static_cast<DWORD_PTR>(dpiMode.second));
+		if(currentDPIMode == dpiMode.second)
+			m_ComboDPIAwareness.SetCurSel(item);
+	}
+	m_ComboDPIAwareness.SetRedraw(TRUE);
+	
+	m_ComboItem.SetRedraw(FALSE);
 	for (size_t i = 0; i < std::size(colorDefs); i++)
 	{
 		m_ComboItem.SetItemData(m_ComboItem.AddString(colorDefs[i].name), i);
 	}
+	m_ComboItem.SetRedraw(TRUE);
 	m_ComboItem.SetCurSel(0);
 
 	m_BtnColor[0].SubclassDlgItem(IDC_BUTTON1, this);
@@ -168,6 +191,7 @@ BOOL COptionsColors::OnInitDialog()
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO5, IDC_RADIO3 + static_cast<int>(TrackerSettings::Instance().defaultRainbowChannelColors.Get()));
 
 	patternFont = TrackerSettings::Instance().patternFont;
+	m_ComboFont.SetRedraw(FALSE);
 	m_ComboFont.AddString(_T("Built-in (small)"));
 	m_ComboFont.AddString(_T("Built-in (large)"));
 	m_ComboFont.AddString(_T("Built-in (small, x2)"));
@@ -186,6 +210,7 @@ BOOL COptionsColors::OnInitDialog()
 		m_ComboFont.AddString(FormatFontName(patternFont));
 		sel = 6;
 	}
+	m_ComboFont.SetRedraw(TRUE);
 	m_ComboFont.SetCurSel(sel);
 
 	commentFont = TrackerSettings::Instance().commentsFont;
@@ -227,6 +252,17 @@ BOOL COptionsColors::OnKillActive()
 
 void COptionsColors::OnOK()
 {
+	if(m_ComboDPIAwareness.GetCurSel() >= 0)
+	{
+		const DPIAwarenessMode currentDPIMode = TrackerSettings::Instance().dpiAwareness;
+		const DPIAwarenessMode newDPIMode = static_cast<DPIAwarenessMode>(m_ComboDPIAwareness.GetItemData(m_ComboDPIAwareness.GetCurSel()));
+		if(newDPIMode != currentDPIMode)
+		{
+			TrackerSettings::Instance().dpiAwareness = newDPIMode;
+			Reporting::Information(_T("You need to restart OpenMPT for the new DPI-awareness setting to take effect."));
+		}
+	}
+
 	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT);
 	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
 	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;

@@ -266,6 +266,13 @@ enum class DefaultChannelColors
 	Random,
 };
 
+enum class DPIAwarenessMode
+{
+	NoDPIAwareness = 0,
+	NoDPIAwarenessGDIUpscaled,
+	SystemDPIAware,
+	PerMonitorDPIAware,
+};
 
 class SampleUndoBufferSize
 {
@@ -322,6 +329,9 @@ template<> inline TimelineFormat FromSettingValue(const SettingValue &val) { ret
 
 template<> inline SettingValue ToSettingValue(const DefaultChannelColors & val) { return SettingValue(int32(val)); }
 template<> inline DefaultChannelColors FromSettingValue(const SettingValue& val) { return DefaultChannelColors(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const DPIAwarenessMode &val) { return SettingValue(int32(val)); }
+template<> inline DPIAwarenessMode FromSettingValue(const SettingValue &val) { return DPIAwarenessMode(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
@@ -684,8 +694,7 @@ public:
 
 	Setting<bool> m_ShowSplashScreen;
 	Setting<bool> gbMdiMaximize;
-	Setting<bool> highResUI;
-	Setting<bool> useGDIUpcaling;
+	Setting<DPIAwarenessMode> dpiAwareness;
 	Setting<LONG> glTreeSplitRatio;
 	Setting<LONG> glTreeWindowWidth;
 	Setting<LONG> glGeneralWindowHeight;
