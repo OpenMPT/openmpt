@@ -771,30 +771,34 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			// This extra padding is probably present to have identical block sizes for AM and FM instruments.
 			amData.Skip(120 - sizeof(AMInstrument));
 		}
+	}
+#endif  // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
 
-		if(!m_nInstruments)
+	if((loadFlags & loadSampleData) && isStartrekker && !m_nInstruments)
+	{
+		uint8 emptySampleReferences = 0;
+		for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
 		{
-			uint8 emptySampleReferences = 0;
-			for(SAMPLEINDEX smp = 1; smp <= 31; smp++)
+			if(referencedSamples[smp] && !Samples[smp].nLength)
 			{
-				if(referencedSamples[smp] && !Samples[smp].nLength)
+				if(++emptySampleReferences > 1)
 				{
-					if(++emptySampleReferences > 1)
+					mpt::ustring filenameHint;
+					if(file.GetOptionalFileName())
 					{
-						mpt::ustring filenameHint;
-						if(file.GetOptionalFileName())
-						{
-							const auto filename = file.GetOptionalFileName()->GetFilename().ToUnicode();
-							filenameHint = MPT_UFORMAT(" ({}.nt or {}.as)")(filename, filename);
-						}
-						AddToLog(LogWarning, MPT_UFORMAT("This Startrekker AM file is most likely missing its companion file{}. Synthesized instruments will not play.")(filenameHint));
-						break;
+						const auto filename = file.GetOptionalFileName()->GetFilename().ToUnicode();
+						filenameHint = MPT_UFORMAT(" ({}.nt or {}.as)")(filename, filename);
 					}
+#ifdef MPT_EXTERNAL_SAMPLES
+					AddToLog(LogWarning, MPT_UFORMAT("This Startrekker AM file is most likely missing its companion file{}. Synthesized instruments will not play.")(filenameHint));
+#else
+					AddToLog(LogWarning, U_("This appears to be a Startrekker AM file with external synthesizes instruments. External instruments are currently not supported."));
+#endif  // MPT_EXTERNAL_SAMPLES
+					break;
 				}
 			}
 		}
 	}
-#endif  // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
 
 	// His Master's Noise "Mupp" instrument extensions
 	if((loadFlags & loadSampleData) && isHMNT)
