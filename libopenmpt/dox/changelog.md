@@ -9,6 +9,27 @@ is just a high-level summary.
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
 
+ *  IT: Ignore sample data in slots that don't have the "sample data present"
+    flag set, if the file vaguely looks IT-made to avoid playing garbage caused
+    by an Impulse Tracker bug that should not be audible.
+ *  MOD: Also enable ProTracker-compatible tremolo ramp waveform for
+    M!K! modules.
+ *  MOD: In ProTracker 1/2 mode, retrigger with instrument-less notes now keeps
+    using the previous sample offset.
+ *  Warn when a Startrekker AM file most likely requires an (currently
+    unsupported) external instrument definition file. 
+ *  MED: Don't enable Amiga resampler if any stereo samples are found, as it
+    does not support stereo samples.
+ *  MED: Retrigger with instrument-less note now keeps using the previous sample
+    offset.
+ *  MED: Disable sample swapping on notes with portamento, and don't resume
+    stopped notes with portamento.
+ *  STM: Do not sanitize sample loop data. Scream Tracker 2 reads into the next
+    sample's data when loops exceed the sample length.
+ *  When evaluating MIDI macros containing letters "u" or "v" during seeking,
+    the initial global volume was applied to them, rather than the global volume
+    that would be reached at that pattern position.
+
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.6.20 (2024-10-26)
