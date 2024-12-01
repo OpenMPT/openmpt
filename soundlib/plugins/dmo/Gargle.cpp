@@ -116,7 +116,7 @@ PlugParamValue Gargle::GetParameter(PlugParamIndex index)
 }
 
 
-void Gargle::SetParameter(PlugParamIndex index, PlugParamValue value)
+void Gargle::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kGargleNumParameters)
 	{

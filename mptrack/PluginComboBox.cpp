@@ -191,7 +191,7 @@ void AddPluginParameternamesToCombobox(CComboBox &CBox, SNDMIXPLUGIN &plug)
 void AddPluginParameternamesToCombobox(CComboBox &CBox, IMixPlugin &plug)
 {
 #ifndef NO_PLUGINS
-	const PlugParamIndex numParams = plug.GetNumParameters();
+	const PlugParamIndex numParams = plug.GetNumVisibleParameters();
 	plug.CacheParameterNames(0, numParams);
 	for(PlugParamIndex i = 0; i < numParams; i++)
 	{

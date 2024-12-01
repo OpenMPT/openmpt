@@ -465,7 +465,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 		CheckDlgButton(IDC_CHECK11, plugin.IsDryMix() ? BST_CHECKED : BST_UNCHECKED);
 		CheckDlgButton(IDC_CHECK13, plugin.IsAutoSuspendable() ? BST_CHECKED : BST_UNCHECKED);
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
-		m_BtnEdit.EnableWindow((pPlugin != nullptr && (pPlugin->HasEditor() || pPlugin->GetNumParameters())) ? TRUE : FALSE);
+		m_BtnEdit.EnableWindow((pPlugin != nullptr && (pPlugin->HasEditor() || pPlugin->GetNumVisibleParameters())) ? TRUE : FALSE);
 		GetDlgItem(IDC_MOVEFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_INSERTFXSLOT)->EnableWindow((pPlugin) ? TRUE : FALSE);
 		GetDlgItem(IDC_CLONEPLUG)->EnableWindow((pPlugin) ? TRUE : FALSE);
@@ -483,7 +483,7 @@ void CViewGlobals::UpdateView(UpdateHint hint, CObject *pObject)
 
 		if (pPlugin)
 		{
-			const PlugParamIndex nParams = pPlugin->GetNumParameters();
+			const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 			m_CbnParam.SetRedraw(FALSE);
 			m_CbnParam.ResetContent();
 			if (m_nCurrentParam >= nParams) m_nCurrentParam = 0;
@@ -883,7 +883,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				IMixPlugin *pPlugin = GetCurrentPlugin();
 				if(pPlugin != nullptr)
 				{
-					const PlugParamIndex nParams = pPlugin->GetNumParameters();
+					const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 					if(m_nCurrentParam < nParams)
 					{
 						if (nSBCode == SB_THUMBPOSITION || nSBCode == SB_THUMBTRACK || nSBCode == SB_ENDSCROLL)
@@ -1121,7 +1121,7 @@ void CViewGlobals::OnParamChanged()
 
 	if(pPlugin != nullptr && cursel != static_cast<PlugParamIndex>(CB_ERR))
 	{
-		const PlugParamIndex nParams = pPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 		if(cursel < nParams) m_nCurrentParam = cursel;
 		if(m_nCurrentParam < nParams)
 		{
@@ -1153,7 +1153,7 @@ void CViewGlobals::OnFocusParam()
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin != nullptr)
 	{
-		const PlugParamIndex nParams = pPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 		if(m_nCurrentParam < nParams)
 		{
 			TCHAR s[32];
@@ -1226,7 +1226,7 @@ void CViewGlobals::OnSetParameter()
 
 	if(pPlugin != nullptr)
 	{
-		const PlugParamIndex nParams = pPlugin->GetNumParameters();
+		const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 		TCHAR s[32];
 		GetDlgItemText(IDC_EDIT14, s, mpt::saturate_cast<int>(std::size(s)));
 		if ((m_nCurrentParam < nParams) && (s[0]))
@@ -1720,7 +1720,7 @@ void CViewGlobals::OnFillParamCombo()
 	IMixPlugin *pPlugin = GetCurrentPlugin();
 	if(pPlugin == nullptr) return;
 
-	const PlugParamIndex nParams = pPlugin->GetNumParameters();
+	const PlugParamIndex nParams = pPlugin->GetNumVisibleParameters();
 	m_CbnParam.SetRedraw(FALSE);
 	m_CbnParam.ResetContent();
 

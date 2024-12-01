@@ -23,9 +23,11 @@ OPENMPT_NAMESPACE_BEGIN
 class MidiInOutEditor : public CAbstractVstEditor
 {
 protected:
-	CComboBox m_inputCombo, m_outputCombo;
+	CComboBox m_inputCombo, m_outputCombo, m_paramCombo;
 	CNumberEdit m_latencyEdit;
+	CEdit m_dumpEdit, m_paramEdit;
 	CSpinButtonCtrl m_latencySpin;
+	std::string m_formattedDump;
 	bool m_locked = true;
 
 public:
@@ -50,12 +52,20 @@ protected:
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
 
-	void DoDataExchange(CDataExchange* pDX) override;
+	void UpdateMidiDump();
+
+	void DoDataExchange(CDataExchange *pDX) override;
 
 	afx_msg void OnInputChanged();
 	afx_msg void OnOutputChanged();
 	afx_msg void OnLatencyChanged();
+	afx_msg void OnMidiDumpChanged();
 	afx_msg void OnTimingMessagesChanged();
+	afx_msg void OnAlwaysSendDumpChanged();
+	afx_msg void OnLoadMidiDump();
+	afx_msg void OnSendDumpNow();
+	afx_msg void OnParamChanged();
+	afx_msg void OnMacroChanged();
 
 	DECLARE_MESSAGE_MAP()
 };

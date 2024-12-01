@@ -26,6 +26,7 @@ struct VSTPluginLib;
 struct SNDMIXPLUGIN;
 struct ModInstrument;
 struct ModChannel;
+struct PlayState;
 class CSoundFile;
 class CModDoc;
 class CAbstractVstEditor;
@@ -135,8 +136,9 @@ public:
 	virtual void SetCurrentProgram(int32 nIndex) = 0;
 
 	virtual PlugParamIndex GetNumParameters() const = 0;
-	virtual void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) = 0;
+	virtual PlugParamIndex GetNumVisibleParameters() const { return GetNumParameters(); }
 	virtual PlugParamValue GetParameter(PlugParamIndex nIndex) = 0;
+	virtual void SetParameter(PlugParamIndex paramIndex, PlugParamValue paramValue, PlayState *playState = nullptr, CHANNELINDEX chn = CHANNELINDEX_INVALID) = 0;
 
 	// Save parameters for storing them in a module file
 	virtual void SaveAllParameters();
@@ -160,7 +162,7 @@ public:
 	virtual bool IsNotePlaying(uint8 /*note*/, CHANNELINDEX /*trackerChn*/) { return false; }
 
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
-	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff);
+	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff, PlayState &playState, CHANNELINDEX chn);
 	virtual void NotifySongPlaying(bool playing) { m_isSongPlaying = playing; }
 	virtual bool IsSongPlaying() const { return m_isSongPlaying; }
 	virtual bool IsResumed() const { return m_isResumed; }
@@ -240,11 +242,11 @@ public:
 };
 
 
-inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff)
+inline void IMixPlugin::ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff, PlayState &playState, CHANNELINDEX chn)
 {
 	PlugParamValue val = GetParameter(nIndex) + diff;
 	Limit(val, PlugParamValue(0), PlugParamValue(1));
-	SetParameter(nIndex, val);
+	SetParameter(nIndex, val, &playState, chn);
 }
 
 

@@ -114,7 +114,7 @@ PlugParamValue Compressor::GetParameter(PlugParamIndex index)
 }
 
 
-void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value)
+void Compressor::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kCompNumParameters)
 	{

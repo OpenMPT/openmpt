@@ -141,7 +141,7 @@ PlugParamValue SymMODEcho::GetParameter(PlugParamIndex index)
 }
 
 
-void SymMODEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
+void SymMODEcho::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kEchoNumParameters)
 	{

@@ -117,7 +117,7 @@ PlugParamValue DigiBoosterEcho::GetParameter(PlugParamIndex index)
 }
 
 
-void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value)
+void DigiBoosterEcho::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kEchoNumParameters)
 	{

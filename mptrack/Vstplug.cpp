@@ -1343,7 +1343,7 @@ PlugParamValue CVstPlugin::GetParameter(PlugParamIndex nIndex)
 }
 
 
-void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue)
+void CVstPlugin::SetParameter(PlugParamIndex nIndex, PlugParamValue fValue, PlayState *, CHANNELINDEX)
 {
 	DWORD exception = 0;
 	if(nIndex < m_Effect.numParams && m_Effect.setParameter)

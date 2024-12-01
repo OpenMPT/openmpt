@@ -228,7 +228,7 @@ PlugParamValue DMOPlugin::GetParameter(PlugParamIndex index)
 }
 
 
-void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
+void DMOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < GetNumParameters() && m_pParamInfo != nullptr && m_pMediaParams != nullptr)
 	{

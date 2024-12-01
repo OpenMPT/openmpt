@@ -14,7 +14,7 @@
 
 #ifndef NO_PLUGINS
 
-#include "DialogBase.h"
+#include "ResizableDialog.h"
 #include "Moddoc.h"
 #include "../soundlib/Snd_defs.h"
 
@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 class IMixPlugin;
 struct UpdateHint;
 
-class CAbstractVstEditor : public DialogBase
+class CAbstractVstEditor : public ResizableDialog
 {
 protected:
 	CMenu m_Menu;

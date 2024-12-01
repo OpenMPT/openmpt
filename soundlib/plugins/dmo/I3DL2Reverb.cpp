@@ -342,7 +342,7 @@ PlugParamValue I3DL2Reverb::GetParameter(PlugParamIndex index)
 }
 
 
-void I3DL2Reverb::SetParameter(PlugParamIndex index, PlugParamValue value)
+void I3DL2Reverb::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kI3DL2ReverbNumParameters)
 	{

@@ -24,6 +24,7 @@
 		1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F52A05ED3A145D015C87E9E /* Profiler.cpp */; };
 		1E48E6EB2E2E131D1AA19D2B /* Gargle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78BD15B31AA6B1A511CDC3F3 /* Gargle.cpp */; };
 		1F7082161F13654859681856 /* mptFileType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074C76BE5EB1E9B010C004FE /* mptFileType.cpp */; };
+		212E136BD4241D1D254679AB /* MIDIMacroParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C61BC533BA1B0EA53F062373 /* MIDIMacroParser.cpp */; };
 		247D3937039A5369DFA3AF77 /* Load_plm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E4D213FE0DAEB3149B38F7F /* Load_plm.cpp */; };
 		281FA911C06C8EC3EEB38F51 /* Sndfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BAF08779FF3F2CEB416665B9 /* Sndfile.cpp */; };
 		2AE422F10A013D23E60A9931 /* Load_cba.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF8E6598086B04BE95F5499 /* Load_cba.cpp */; };
@@ -546,6 +547,7 @@
 		C3E634155673FE07BF4CA255 /* macros.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = macros.hpp; path = ../../src/mpt/base/macros.hpp; sourceTree = "<group>"; };
 		C3FAC67D5688906FBF6134BD /* detect.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = detect.hpp; path = ../../src/mpt/base/detect.hpp; sourceTree = "<group>"; };
 		C510221C396A670EB74DF05C /* mptStringBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptStringBuffer.cpp; path = ../../common/mptStringBuffer.cpp; sourceTree = "<group>"; };
+		C61BC533BA1B0EA53F062373 /* MIDIMacroParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MIDIMacroParser.cpp; path = ../../soundlib/MIDIMacroParser.cpp; sourceTree = "<group>"; };
 		C6F2110A1E5783FCD0659F4A /* FileReaderFwd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FileReaderFwd.h; path = ../../common/FileReaderFwd.h; sourceTree = "<group>"; };
 		C7851FA55A12E997C2EB8DE5 /* UMXTools.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UMXTools.cpp; path = ../../soundlib/UMXTools.cpp; sourceTree = "<group>"; };
 		C875E7BBB96D55AD2570D5FB /* floatingpoint.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = floatingpoint.hpp; path = ../../src/mpt/endian/floatingpoint.hpp; sourceTree = "<group>"; };
@@ -603,6 +605,7 @@
 		E64FF33AA9BBB4ECE85F597A /* openmpt-ogg.lib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ogg.xcodeproj"; path = ext/ogg.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E6905433791E1E25E1F6C273 /* SampleCopy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SampleCopy.h; path = ../../soundlib/SampleCopy.h; sourceTree = "<group>"; };
 		E7811C8A7A0EE67CE2E78ACA /* class.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = class.hpp; path = ../../src/mpt/osinfo/class.hpp; sourceTree = "<group>"; };
+		E7ACD57DAA6D35EF07A213BD /* MIDIMacroParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MIDIMacroParser.h; path = ../../soundlib/MIDIMacroParser.h; sourceTree = "<group>"; };
 		E898D5ABAF26CD1D1D28F3EB /* ModInstrument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ModInstrument.h; path = ../../soundlib/ModInstrument.h; sourceTree = "<group>"; };
 		EABA2F1F4147999119C0AD5F /* AGC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AGC.h; path = ../../sounddsp/AGC.h; sourceTree = "<group>"; };
 		EC1456C17EA220B3E77AC501 /* Load_mid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_mid.cpp; path = ../../soundlib/Load_mid.cpp; sourceTree = "<group>"; };
@@ -1362,6 +1365,8 @@
 				E59C6F4DDF5E2BBF195D2D8D /* Loaders.h */,
 				A78B5E5FFEF0D151B0FEEC9F /* MIDIEvents.cpp */,
 				F42AAB0986B874FBEF911949 /* MIDIEvents.h */,
+				C61BC533BA1B0EA53F062373 /* MIDIMacroParser.cpp */,
+				E7ACD57DAA6D35EF07A213BD /* MIDIMacroParser.h */,
 				50FB747FA860E7715A6F02BF /* MIDIMacros.cpp */,
 				D37D7529660B3F1BCEE3E369 /* MIDIMacros.h */,
 				99E1AAB12C6F74A3954818F1 /* MODTools.cpp */,
@@ -1705,6 +1710,7 @@
 				00BB926F99087821C74F78AF /* Load_xm.cpp in Sources */,
 				F57A8B7BD497A5ADB0A101BB /* Load_xmf.cpp in Sources */,
 				CCEFFE57CC92E18906E79497 /* MIDIEvents.cpp in Sources */,
+				212E136BD4241D1D254679AB /* MIDIMacroParser.cpp in Sources */,
 				80EEA677809189A9BAE63CB7 /* MIDIMacros.cpp in Sources */,
 				978580C976A29AFB52ABF709 /* MODTools.cpp in Sources */,
 				393D72CF5409E18157DA790F /* MPEGFrame.cpp in Sources */,

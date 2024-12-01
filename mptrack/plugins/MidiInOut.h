@@ -53,9 +53,12 @@ protected:
 	{
 		kInputParameter  = 0,
 		kOutputParameter = 1,
+		kMacroParamMin = 100,
+		kMacroParamMax = 999,
 
 		kNumPrograms = 1,
-		kNumParams   = 2,
+		kNumParams = kMacroParamMax + 1,
+		kNumVisibleParams   = 2,
 
 		kNoDevice   = MidiDevice::NO_MIDI_DEVICE,
 		kMaxDevices = 65536,  // Should be a power of 2 to avoid rounding errors.
@@ -122,6 +125,11 @@ protected:
 	std::string m_chunkData;                     // Storage for GetChunk
 	std::deque<Message> m_outQueue;              // Latency-compensated output
 	std::vector<unsigned char> m_bufferedInput;  // For receiving long SysEx messages
+
+	std::vector<uint8> m_initialMidiDump;                          // MIDI dump to send at song start
+	std::vector<std::pair<std::string, float>> m_parameterMacros;  // Macros to automate via plugin parameter mechanism
+	std::vector<uint8> m_parameterMacroScratchSpace;
+
 	mpt::mutex m_mutex;
 	double m_nextClock = 0.0;  // Remaining samples until next MIDI clock tick should be sent
 	double m_latency = 0.0;    // User-adjusted latency in seconds
@@ -134,6 +142,8 @@ protected:
 	MidiDevice m_outputDevice;
 	bool m_sendTimingInfo = true;
 	bool m_positionChanged = false;
+	bool m_alwaysSendInitialDump = false;
+	bool m_initialDumpSent = false;
 
 #ifdef MODPLUG_TRACKER
 	CString m_programName;
@@ -168,7 +178,8 @@ public:
 	void SetCurrentProgram(int32) final { }
 
 	PlugParamIndex GetNumParameters() const final { return kNumParams; }
-	void SetParameter(PlugParamIndex paramindex, PlugParamValue paramvalue) final;
+	PlugParamIndex GetNumVisibleParameters() const final { return kNumVisibleParams; }
+	void SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *playState = nullptr, CHANNELINDEX chn = CHANNELINDEX_INVALID) final;
 	PlugParamValue GetParameter(PlugParamIndex nIndex) final;
 
 	// Save parameters for storing them in a module file
@@ -215,6 +226,11 @@ public:
 	bool ProgramsAreChunks() const final { return true; }
 	ChunkData GetChunk(bool isBank) final;
 	void SetChunk(const ChunkData &chunk, bool isBank) final;
+
+	void SetInitialMidiDump(std::vector<uint8> dump);
+	std::vector<uint8> GetInitialMidiDump() const { return m_initialMidiDump; }
+	void SetMacro(size_t index, std::string macro);
+	std::string GetMacro(size_t index) const;
 
 protected:
 	// Open a device for input or output.

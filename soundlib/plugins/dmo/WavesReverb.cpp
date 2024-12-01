@@ -129,7 +129,7 @@ PlugParamValue WavesReverb::GetParameter(PlugParamIndex index)
 }
 
 
-void WavesReverb::SetParameter(PlugParamIndex index, PlugParamValue value)
+void WavesReverb::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kRvbNumParameters)
 	{

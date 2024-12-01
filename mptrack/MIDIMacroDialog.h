@@ -51,8 +51,6 @@ protected:
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;
 
-	bool ValidateMacroString(CEdit &wnd, const MIDIMacroConfig::Macro &prevMacro, bool isParametric);
-
 	void UpdateMacroList(int macro=-1);
 	void ToggleBoxes(UINT preset, UINT sfx);
 	afx_msg void UpdateDialog();

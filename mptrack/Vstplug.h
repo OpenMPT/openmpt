@@ -128,7 +128,7 @@ public:
 
 	PlugParamIndex GetNumParameters() const override;
 	PlugParamValue GetParameter(PlugParamIndex nIndex) override;
-	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue) override;
+	void SetParameter(PlugParamIndex nIndex, PlugParamValue fValue, PlayState * = nullptr, CHANNELINDEX = CHANNELINDEX_INVALID) override;
 
 	CString GetCurrentProgramName() override;
 	void SetCurrentProgramName(const CString &name) override;

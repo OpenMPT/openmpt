@@ -50,7 +50,7 @@ Flanger::Flanger(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixSt
 }
 
 
-void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value)
+void Flanger::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kFlangerNumParameters)
 	{

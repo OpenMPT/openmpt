@@ -205,6 +205,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_xmf.cpp \
 	soundlib/Message.cpp \
 	soundlib/MIDIEvents.cpp \
+	soundlib/MIDIMacroParser.cpp \
 	soundlib/MIDIMacros.cpp \
 	soundlib/MixerLoops.cpp \
 	soundlib/MixerSettings.cpp \

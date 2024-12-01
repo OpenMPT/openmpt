@@ -18,8 +18,10 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
+#include "plugins/MidiInOut.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptStringBuffer.h"
+#include "../soundlib/MIDIMacroParser.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/plugins/PluginManager.h"
 #include "mpt/io/io.hpp"
@@ -72,6 +74,7 @@ namespace MidiExport
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
 		std::vector<std::array<uint8, 4>> m_queuedEvents;
+		const MidiInOut *m_originalPlugin = nullptr;
 
 		std::ostringstream f;
 		double m_tempo = 0.0;
@@ -123,14 +126,15 @@ namespace MidiExport
 
 		operator ModInstrument& () { return m_instr; }
 
-		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, const SubSong &subsongInfo, SNDMIXPLUGIN &mixStruct, MidiTrack *tempoTrack, const mpt::ustring &name, const ModInstrument *oldInstr, bool overlappingInstruments)
-			: IMidiPlugin(factory, sndFile, mixStruct)
-			, m_oldInstr(oldInstr)
-			, m_sndFile(sndFile)
-			, m_subsongInfo(subsongInfo)
-			, m_tempoTrack(tempoTrack)
-			, m_sampleRate(sndFile.GetSampleRate())
-			, m_overlappingInstruments(overlappingInstruments)
+		MidiTrack(VSTPluginLib &factory, CSoundFile &sndFile, const SubSong &subsongInfo, SNDMIXPLUGIN &mixStruct, MidiTrack *tempoTrack, const mpt::ustring &name, const ModInstrument *oldInstr, bool overlappingInstruments, const MidiInOut *originalPlugin)
+			: IMidiPlugin{factory, sndFile, mixStruct}
+			, m_oldInstr{oldInstr}
+			, m_sndFile{sndFile}
+			, m_subsongInfo{subsongInfo}
+			, m_tempoTrack{tempoTrack}
+			, m_sampleRate{sndFile.GetSampleRate()}
+			, m_overlappingInstruments{overlappingInstruments}
+			, m_originalPlugin{originalPlugin}
 		{
 			// Write instrument / song name
 			WriteString(kTrackName, name);
@@ -294,12 +298,22 @@ namespace MidiExport
 
 		PlugParamIndex GetNumParameters() const override { return 0; }
 		PlugParamValue GetParameter(PlugParamIndex) override { return 0; }
-		void SetParameter(PlugParamIndex, PlugParamValue) override { }
+		void SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *playState, CHANNELINDEX chn) override
+		{
+			// This is in terms of the original plugin index!
+			if(!m_originalPlugin)
+				return;
+			const auto macro = m_originalPlugin->GetMacro(index);
+			std::vector<uint8> macroScratchSpace(macro.size() + 1);
+			MIDIMacroParser parser{GetSoundFile(), playState, chn, false, mpt::as_span(macro), mpt::as_span(macroScratchSpace), mpt::saturate_round<uint8>(value * 127.0f)};
+			Send(parser);
+		}
 
 		float RenderSilence(uint32) override { return 0.0f; }
 
 		using IMixPlugin::MidiSend;
-		bool MidiSend(mpt::const_byte_span midiData) override
+		bool MidiSend(mpt::const_byte_span midiData) override { return MidiSend(midiData, true); }
+		bool MidiSend(mpt::const_byte_span midiData, bool allowQueue)
 		{
 			if(midiData.empty())
 				return false;
@@ -316,7 +330,7 @@ namespace MidiExport
 				// Note-On events go last to prevent early note-off in a situation like this:
 				// ... ..|C-5 01
 				// C-5 01|=== ..
-				if(MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOn)
+				if(allowQueue && MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOn)
 				{
 					std::array<uint8, 4> midiDataArray;
 					MPT_ASSERT(midiData.size() <= sizeof(midiDataArray) && midiData.size() == MIDIEvents::GetEventLength(type));
@@ -428,6 +442,15 @@ namespace MidiExport
 #endif // MODPLUG_TRACKER
 		int GetNumInputChannels() const override { return 0; }
 		int GetNumOutputChannels() const override { return 0; }
+
+		void Send(MIDIMacroParser &parser)
+		{
+			mpt::span<uint8> midiMsg;
+			while(parser.NextMessage(midiMsg))
+			{
+				MidiSend(mpt::byte_cast<mpt::const_byte_span>(midiMsg), false);
+			}
+		}
 	};
 
 
@@ -464,7 +487,7 @@ namespace MidiExport
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
-			MidiTrack &tempoTrack = *(new MidiTrack(m_plugFactory, m_sndFile, m_subsongInfo, tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments));
+			MidiTrack &tempoTrack = *(new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments, nullptr});
 			tempoTrackPlugin.pMixPlugin = &tempoTrack;
 			tempoTrack.WriteString(kText, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage.GetString()));
 			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
@@ -478,10 +501,11 @@ namespace MidiExport
 					continue;
 
 				// FIXME: Having > MAX_MIXPLUGINS used instruments won't work! So in MPTM, you can only use 250 out of 255 instruments...
+				const MidiInOut *originalPlugin = dynamic_cast<const MidiInOut *>(m_oldPlugins[nextPlug].pMixPlugin);
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug++];
 
 				ModInstrument *oldInstr = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
-				MidiTrack &midiInstr = *(new MidiTrack(m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, &tempoTrack, m_wasInstrumentMode ? mpt::ToUnicode(m_sndFile.GetCharsetInternal(), oldInstr->name) : mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(i)), oldInstr, overlappingInstruments));
+				MidiTrack &midiInstr = *(new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, &tempoTrack, m_wasInstrumentMode ? mpt::ToUnicode(m_sndFile.GetCharsetInternal(), oldInstr->name) : mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(i)), oldInstr, overlappingInstruments, originalPlugin});
 				ModInstrument &instr = midiInstr;
 				mixPlugin.pMixPlugin = &midiInstr;
 				
@@ -514,6 +538,27 @@ namespace MidiExport
 					}
 				}
 				midiInstr.WritePitchWheelDepth();
+			}
+
+			for(size_t plug = 0; plug < m_oldPlugins.size(); plug++)
+			{
+				if(MidiInOut *midiPlugin = dynamic_cast<MidiInOut *>(m_oldPlugins[plug].pMixPlugin))
+				{
+					MidiTrack *track = &tempoTrack;
+					// This plugin slot is not covered by an instrument - create a placeholder plugin in case PC events are sent to this plugin
+					SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[plug];
+					if(!mixPlugin.IsValidPlugin())
+					{
+						track = new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, &tempoTrack, MPT_UFORMAT("Automation For MIDI Plugin FX{}")(mpt::ufmt::dec0<2>(plug + 1)), nullptr, overlappingInstruments, midiPlugin};
+						mixPlugin.pMixPlugin = track;
+						m_tracks.push_back(track);
+					}
+					if(auto dump = midiPlugin->GetInitialMidiDump(); !dump.empty())
+					{
+						MIDIMacroParser parser{mpt::as_span(dump)};
+						track->Send(parser);
+					}
+				}
 			}
 
 			mpt::IO::WriteRaw(m_file, "MThd", 4);

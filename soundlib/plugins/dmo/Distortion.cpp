@@ -92,7 +92,7 @@ PlugParamValue Distortion::GetParameter(PlugParamIndex index)
 }
 
 
-void Distortion::SetParameter(PlugParamIndex index, PlugParamValue value)
+void Distortion::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kDistNumParameters)
 	{

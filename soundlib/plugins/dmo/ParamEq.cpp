@@ -86,7 +86,7 @@ PlugParamValue ParamEq::GetParameter(PlugParamIndex index)
 }
 
 
-void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value)
+void ParamEq::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kEqNumParameters)
 	{

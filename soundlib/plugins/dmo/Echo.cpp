@@ -96,7 +96,7 @@ PlugParamValue Echo::GetParameter(PlugParamIndex index)
 }
 
 
-void Echo::SetParameter(PlugParamIndex index, PlugParamValue value)
+void Echo::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	if(index < kEchoNumParameters)
 	{

@@ -16,4 +16,4 @@
 #define VER_MAJORMAJOR  1
 #define VER_MAJOR      32
 #define VER_MINOR      00
-#define VER_MINORMINOR 33
+#define VER_MINORMINOR 34

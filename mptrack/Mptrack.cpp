@@ -2522,4 +2522,86 @@ CString CTrackApp::GetFriendlyMIDIPortName(const CString &deviceName, bool isInp
 }
 
 
+bool ValidateMacroString(CEdit &wnd, const std::string_view prevMacro, bool isParametric, bool allowVariables, bool allowMultiline)
+{
+	CString macroStrT;
+	wnd.GetWindowText(macroStrT);
+	std::string macroStr = mpt::ToCharset(mpt::Charset::ASCII, macroStrT);
+
+	bool allowed = true, caseChange = false;
+	for(char &c : macroStr)
+	{
+		if(c >= 'G' && c <= 'Z')  // Potentially an allowed variable; lowercase it
+		{
+			caseChange = true;
+			c = c - 'A' + 'a';
+		}
+
+		if(c == 'k')  // Previously, 'K' was used for MIDI channel
+		{
+			caseChange = true;
+			c = 'c';
+		} else if(c >= 'a' && c <= 'c' && !allowVariables)
+		{
+			caseChange = true;
+			c = c - 'a' + 'A';
+		} else if(c >= 'd' && c <= 'f')  // abc can be variables, but def can be fixed
+		{
+			caseChange = true;
+			c = c - 'a' + 'A';
+		} else if((c >= 'a' && c <= 'c') || c == 'h' || c == 'm' || c == 'n' || c == 'o' || c == 'p' || c == 's' || c == 'u' || c == 'v' || c == 'x' || c == 'y')
+		{
+			if(!allowVariables)
+			{
+				allowed = false;
+				break;
+			}
+		} else if(c == 'z')
+		{
+			if(!isParametric || !allowVariables)
+			{
+				allowed = false;
+				break;
+			}
+		} else if(c == '\r' || c == '\n')
+		{
+			if(!allowMultiline)
+			{
+				allowed = false;
+				break;
+			}
+		} else if(!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || c == ' '))
+		{
+			allowed = false;
+			break;
+		}
+	}
+
+	if(!allowed)
+	{
+		// Replace text and keep cursor position if we just typed in an invalid character
+		if(prevMacro != std::string_view{macroStr})
+		{
+			int start, end;
+			wnd.GetSel(start, end);
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(prevMacro)));
+			wnd.SetSel(start - 1, end - 1, true);
+			MessageBeep(MB_OK);
+		}
+		return false;
+	} else
+	{
+		if(caseChange)
+		{
+			// Replace text and keep cursor position if there was a case conversion
+			int start, end;
+			wnd.GetSel(start, end);
+			wnd.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, static_cast<std::string>(macroStr)));
+			wnd.SetSel(start, end, true);
+		}
+		return true;
+	}
+}
+
+
 OPENMPT_NAMESPACE_END

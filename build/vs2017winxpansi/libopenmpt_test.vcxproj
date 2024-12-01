@@ -733,6 +733,7 @@
     <ClInclude Include="..\..\soundlib\IntMixer.h" />
     <ClInclude Include="..\..\soundlib\Loaders.h" />
     <ClInclude Include="..\..\soundlib\MIDIEvents.h" />
+    <ClInclude Include="..\..\soundlib\MIDIMacroParser.h" />
     <ClInclude Include="..\..\soundlib\MIDIMacros.h" />
     <ClInclude Include="..\..\soundlib\MODTools.h" />
     <ClInclude Include="..\..\soundlib\MPEGFrame.h" />
@@ -1080,6 +1081,7 @@
     <ClCompile Include="..\..\soundlib\Load_xm.cpp" />
     <ClCompile Include="..\..\soundlib\Load_xmf.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp" />
+    <ClCompile Include="..\..\soundlib\MIDIMacroParser.cpp" />
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp" />
     <ClCompile Include="..\..\soundlib\MODTools.cpp" />
     <ClCompile Include="..\..\soundlib\MPEGFrame.cpp" />

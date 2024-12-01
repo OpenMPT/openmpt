@@ -6938,7 +6938,7 @@ bool CViewPattern::BuildPCNoteCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			HMENU paramChangeMenu = ::CreatePopupMenu();
 			AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(paramChangeMenu), _T("Change Plugin Parameter\t"));
 
-			const PlugParamIndex curParam = selStart.GetValueVolCol(), nParams = plug.pMixPlugin->GetNumParameters();
+			const PlugParamIndex curParam = selStart.GetValueVolCol(), nParams = plug.pMixPlugin->GetNumVisibleParameters();
 
 			for(PlugParamIndex i = 0; i < nParams; i++)
 			{

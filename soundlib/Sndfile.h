@@ -403,6 +403,7 @@ struct PlaybackTestSettings
 class CSoundFile
 {
 	friend class GetLengthMemory;
+	friend class MIDIMacroParser;
 
 public:
 #ifdef MODPLUG_TRACKER
@@ -1128,8 +1129,6 @@ protected:
 
 	void ProcessMacroOnChannel(CHANNELINDEX nChn);
 	void ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const MIDIMacroConfigData::Macro &macro, uint8 param = 0, PLUGINDEX plugin = 0);
-	void ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> &out, uint8 param = 0, PLUGINDEX plugin = 0) const;
-	static float CalculateSmoothParamChange(const PlayState &playState, float currentValue, float param);
 	void SendMIDIData(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const uint8> macro, PLUGINDEX plugin);
 	void SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume, IMixPlugin *plugin = nullptr);
 
@@ -1137,6 +1136,8 @@ protected:
 	int HandleNoteChangeFilter(ModChannel &chn) const;
 
 public:
+	static float CalculateSmoothParamChange(const PlayState &playState, float currentValue, float param);
+
 	void DoFreqSlide(ModChannel &chn, int32 &period, int32 amount, bool isTonePorta = false) const;
 
 	// Convert frequency to IT cutoff (0...127)

@@ -726,6 +726,9 @@
     <ClInclude Include="..\..\soundlib\MIDIEvents.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\MIDIMacroParser.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\MIDIMacros.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -2199,6 +2202,9 @@
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MIDIEvents.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\soundlib\MIDIMacroParser.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\soundlib\MIDIMacros.cpp">

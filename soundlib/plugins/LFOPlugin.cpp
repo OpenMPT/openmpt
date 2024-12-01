@@ -136,7 +136,7 @@ PlugParamValue LFOPlugin::GetParameter(PlugParamIndex index)
 }
 
 
-void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value)
+void LFOPlugin::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *, CHANNELINDEX)
 {
 	ResetSilence();
 	value = mpt::safe_clamp(value, 0.0f, 1.0f);

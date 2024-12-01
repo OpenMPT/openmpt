@@ -25,7 +25,7 @@ enum
 	NUM_PLUGINEDITOR_PARAMETERS = 8,	// Parameters on screen
 };
 
-struct Measurements;
+struct PluginEditorMeasurements;
 
 class ParamControlSet
 {
@@ -37,7 +37,7 @@ protected:
 	CStatic perMilLabel;
 
 public:
-	ParamControlSet(CWnd *parent, const CRect &rect, int setID, const Measurements &m);
+	ParamControlSet(CWnd *parent, const CRect &rect, int setID, const PluginEditorMeasurements &m);
 	~ParamControlSet();
 
 	void EnableControls(bool enable = true);

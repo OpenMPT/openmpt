@@ -23,7 +23,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Window proportions
-struct Measurements
+struct PluginEditorMeasurements
 {
 	enum
 	{
@@ -42,7 +42,7 @@ struct Measurements
 	const int rightWidth;
 	const int totalHeight;
 
-	Measurements(HWND hWnd)
+	PluginEditorMeasurements(HWND hWnd)
 		: spacing(HighDPISupport::ScalePixels(edSpacing, hWnd))
 		, lineHeight(HighDPISupport::ScalePixels(edLineHeight, hWnd))
 		, editWidth(HighDPISupport::ScalePixels(edEditWidth, hWnd))
@@ -54,7 +54,7 @@ struct Measurements
 
 
 // Create a set of parameter controls
-ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, const Measurements &m)
+ParamControlSet::ParamControlSet(CWnd *parent, const CRect &rect, int setID, const PluginEditorMeasurements &m)
 {
 	// Offset of components on the right side
 	const int horizSplit = rect.left + rect.Width() - m.rightWidth;
@@ -194,7 +194,7 @@ void CDefaultVstEditor::CreateControls()
 	{
 		return;
 	}
-	Measurements m(m_hWnd);
+	PluginEditorMeasurements m(m_hWnd);
 
 	CRect window;
 	GetWindowRect(&window);
@@ -253,7 +253,7 @@ void CDefaultVstEditor::CreateControls()
 
 void CDefaultVstEditor::UpdateControls(bool updateParamNames)
 {
-	const PlugParamIndex numParams = m_VstPlugin.GetNumParameters();
+	const PlugParamIndex numParams = m_VstPlugin.GetNumVisibleParameters();
 	const PlugParamIndex scrollMax = numParams - std::min(numParams, static_cast<PlugParamIndex>(NUM_PLUGINEDITOR_PARAMETERS));
 	LimitMax(paramOffset, scrollMax);
 
@@ -455,7 +455,7 @@ void CDefaultVstEditor::OnParamSliderChanged(UINT id)
 // Update a given parameter to a given value and notify plugin
 void CDefaultVstEditor::SetParam(PlugParamIndex param, int value)
 {
-	if(param >= m_VstPlugin.GetNumParameters())
+	if(param >= m_VstPlugin.GetNumVisibleParameters())
 	{
 		return;
 	}
