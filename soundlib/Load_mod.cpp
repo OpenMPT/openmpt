@@ -1311,9 +1311,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 					if(file.GetOptionalFileName())
 					{
 						const auto filename = file.GetOptionalFileName()->GetFilename().ToUnicode();
-						filenameHint = MPT_UFORMAT(" ({}.nt or {}.as)")(filename, filename);
+						filenameHint = mpt::format(U_(" ({}.nt or {}.as)"))(filename, filename);
 					}
-					AddToLog(LogWarning, MPT_UFORMAT("This Startrekker AM file is most likely missing its companion file{}. Synthesized instruments will not play.")(filenameHint));
+					AddToLog(LogWarning, mpt::format(U_("This Startrekker AM file is most likely missing its companion file{}. Synthesized instruments will not play."))(filenameHint));
 #else
 					AddToLog(LogWarning, U_("This appears to be a Startrekker AM file with external synthesizes instruments. External instruments are currently not supported."));
 #endif  // MPT_EXTERNAL_SAMPLES
