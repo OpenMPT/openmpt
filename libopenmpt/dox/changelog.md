@@ -9,6 +9,15 @@ is just a high-level summary.
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
 
+ *  Warn when a Startrekker AM file most likely requires an (currently
+    unsupported) external instrument definition file. 
+ *  MED: Don't enable Amiga resampler if any stereo samples are found, as it
+    does not support stereo samples.
+ *  MED: Disable sample swapping on notes with portamento, and don't resume
+    stopped notes with portamento.
+ *  STM: Do not sanitize sample loop data. Scream Tracker 2 reads into the next
+    sample's data when loops exceed the sample length.
+
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.5.34 (2024-10-26)
