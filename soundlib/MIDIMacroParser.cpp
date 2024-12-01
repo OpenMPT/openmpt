@@ -60,6 +60,7 @@ bool MIDIMacroParser::NextMessage(mpt::span<uint8> &message, bool outputRunningS
 					m_runningstatusOldData = m_data[m_sendPos];
 					m_data[m_sendPos] = m_runningStatus;
 					m_runningStatusPos = m_sendPos;
+					continue;
 				} else
 				{
 					sendLen = std::min(static_cast<uint32>(MIDIEvents::GetEventLength(m_runningStatus) - 1), outSize - m_sendPos);
@@ -68,8 +69,8 @@ bool MIDIMacroParser::NextMessage(mpt::span<uint8> &message, bool outputRunningS
 			{
 				// No running status to re-use; skip this byte
 				m_sendPos++;
+				continue;
 			}
-			continue;
 		} else
 		{
 			// Other MIDI messages
