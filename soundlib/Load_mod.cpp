@@ -1308,9 +1308,9 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				{
 #ifdef MPT_EXTERNAL_SAMPLES
 					mpt::ustring filenameHint;
-					if(file.GetOptionalFileName())
+					if(!file.GetFileName().empty())
 					{
-						const auto filename = file.GetOptionalFileName()->GetFilename().ToUnicode();
+						const auto filename = file.GetFileName().GetFilename().ToUnicode();
 						filenameHint = mpt::format(U_(" ({}.nt or {}.as)"))(filename, filename);
 					}
 					AddToLog(LogWarning, mpt::format(U_("This Startrekker AM file is most likely missing its companion file{}. Synthesized instruments will not play."))(filenameHint));
