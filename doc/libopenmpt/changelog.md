@@ -9,6 +9,39 @@ is just a high-level summary.
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
 
+ *  IT: Don't report files claiming to be made with Impulse Tracker 2.08+ as
+    IT-made if they have no edit timer.
+ *  IT: Ignore sample data in slots that don't have the "sample data present"
+    flag set, if the file vaguely looks IT-made to avoid playing garbage caused
+    by an Impulse Tracker bug that should not be audible.
+ *  S3M: Detect early Schism Tracker versions.
+ *  MOD: When trying to detect MOD files with broken order lists, the file size
+    is now rounded down to an even number. This helps identifying some malformed
+    files (MOD files can technically not have an odd size).
+ *  MOD: Also enable ProTracker-compatible tremolo ramp waveform for
+    M!K! modules.
+ *  MOD: In ProTracker 1/2 mode, retrigger with instrument-less notes now keeps
+    using the previous sample offset.
+ *  Warn when a Startrekker AM file most likely requires an (currently
+    unsupported) external instrument definition file. 
+ *  DBM / IMF / MED: When merging pattern commands, allow to move offset to
+    volume column at the expense of a lower offset resolution.
+ *  MED: Fix correct octave transposition in some MED files that have hardware
+    mixing disabled but sample transpose enabled.
+ *  MED: Don't enable Amiga resampler if any stereo samples are found, as it
+    does not support stereo samples.
+ *  MED: Fix tempo in some files using oftware mixing mode and legacy tempo
+    values.
+ *  MED: Avoid importing effect memory for some commands.
+ *  MED: Retrigger with instrument-less note now keeps using the previous sample
+    offset.
+ *  MED: Disable sample swapping on notes with portamento, and don't resume
+    stopped notes with portamento.
+ *  MED: Only use 7-bit volume commands in MMD3 files made with a new enough
+    version of MED Soundstudio.
+ *  STM: Do not sanitize sample loop data. Scream Tracker 2 reads into the next
+    sample's data when loops exceed the sample length.
+
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.7.11 (2024-10-26)
