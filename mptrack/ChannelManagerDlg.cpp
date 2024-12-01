@@ -177,7 +177,9 @@ INT_PTR CChannelManagerDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 {
 	CRect rect;
 	pTI->hwnd = m_hWnd;
-	pTI->uId = ButtonHit(point, &rect);
+	CHANNELINDEX chn = CHANNELINDEX_INVALID;
+	ButtonHit(point, &chn, &rect);
+	pTI->uId = chn;
 	pTI->rect = rect;
 	pTI->lpszText = LPSTR_TEXTCALLBACK;
 	if(pTI->uId == CHANNELINDEX_INVALID)
@@ -189,11 +191,11 @@ INT_PTR CChannelManagerDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 BOOL CChannelManagerDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 {
 	TOOLTIPTEXT *pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	if((pTTT->uFlags & TTF_IDISHWND) || !m_ModDoc || pNMHDR->idFrom >= m_states.size())
+	if((pTTT->uFlags & TTF_IDISHWND) || !m_ModDoc || pNMHDR->idFrom >= MAX_BASECHANNELS)
 		return FALSE;
 
 	CString text;
-	const CHANNELINDEX chn = m_states[pNMHDR->idFrom].sourceChn;
+	const CHANNELINDEX chn = pattern[pNMHDR->idFrom];
 	const auto &chnSettings = m_ModDoc->GetSoundFile().ChnSettings[chn];
 	if(!chnSettings.szName.empty())
 		text = MPT_CFORMAT("{}: {}")(chn + 1, mpt::ToWin(m_ModDoc->GetSoundFile().GetCharsetInternal(), chnSettings.szName));
@@ -217,11 +219,8 @@ BOOL CChannelManagerDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 		text += chnSettings.dwFlags[CHN_NOFX] ? _T(" (Plugins Bypassed)") : _T(" (Plugins Enabled)");
 		break;
 	case kReorderRemove:
-		if(m_states[pNMHDR->idFrom].removed)
+		if(removed[chn])
 			text += _T(" (Marked for Removal)");
-		break;
-	case kNumTabs:
-		MPT_ASSERT_NOTREACHED();
 		break;
 	}
 	mpt::String::WriteCStringBuf(pTTT->szText) = text;
