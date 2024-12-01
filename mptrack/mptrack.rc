@@ -1295,7 +1295,7 @@ BEGIN
     ICON            "",IDC_STATIC1,12,247,20,20,SS_CENTERIMAGE | SS_REALSIZEIMAGE | NOT WS_VISIBLE
     LTEXT           "No conflicts found.",IDC_KEYREPORT,26,248,286,13
     CONTROL         "Repeat Note Keys on Hold",IDC_NOTESREPEAT,"Button",BS_3STATE | WS_TABSTOP,6,270,144,12
-    LTEXT           "Chord detect interval (ms):",IDC_STATIC,156,272,126,8
+    LTEXT           "Chord detect interval (ms):",IDC_STATIC,186,272,96,8
     EDITTEXT        IDC_CHORDDETECTWAITTIME,288,270,30,12,ES_AUTOHSCROLL | ES_NUMBER
     PUSHBUTTON      "&Import Key Map...",IDC_LOAD,6,288,84,16
     PUSHBUTTON      "&Export Key Map...",IDC_SAVE,96,288,84,16
@@ -1308,7 +1308,7 @@ CAPTION "Display"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "",IDC_STATIC,6,6,312,192
-    LTEXT           "DPI Awareness:",IDC_STATIC,18,20,54,8
+    LTEXT           "DP&I Awareness:",IDC_STATIC,18,20,54,8
     COMBOBOX        IDC_COMBO4,78,18,174,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Pattern &Font:",IDC_STATIC,18,39,54,8
     COMBOBOX        IDC_COMBO2,78,36,174,66,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
@@ -1332,7 +1332,7 @@ BEGIN
     CONTROL         "Secondar&y highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,156,80,10
     EDITTEXT        IDC_SECONDARYHILITE,102,156,24,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Rows per beat (default)",IDC_STATIC,132,159,144,8
-    CONTROL         "Always use default highlight values instead of songs' time signatures",IDC_CHECK3,
+    CONTROL         "Always use default highlight &values instead of songs' time signatures",IDC_CHECK3,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,174,258,10
     GROUPBOX        "Colours",IDC_STATIC,6,204,312,102
     LTEXT           "Select colo&ur for:",IDC_STATIC,18,218,63,8
