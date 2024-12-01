@@ -57,6 +57,7 @@
 #include "openmpt/soundbase/SampleFormat.hpp"
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/SampleNormalize.h"
+#include "../soundlib/MIDIMacroParser.h"
 #include "../soundlib/ModSampleCopy.h"
 #include "../soundlib/ITCompression.h"
 #include "../soundlib/tuningcollection.h"
@@ -146,6 +147,7 @@ static MPT_NOINLINE void TestITCompression();
 static MPT_NOINLINE void TestPCnoteSerialization();
 static MPT_NOINLINE void TestLoadSaveFile();
 static MPT_NOINLINE void TestEditing();
+static MPT_NOINLINE void TestMIDIMacroParser();
 
 
 
@@ -440,6 +442,7 @@ void DoTests()
 	DO_TEST(TestMIDIEvents);
 	DO_TEST(TestSampleConversion);
 	DO_TEST(TestITCompression);
+	DO_TEST(TestMIDIMacroParser);
 
 	// slower tests, require opening a CModDoc
 	DO_TEST(TestPCnoteSerialization);
@@ -4819,6 +4822,75 @@ static MPT_NOINLINE void TestSampleConversion()
 			VERIFY_EQUAL_QUIET_NONCONT(buffer[i], expected[i]);
 		}
 	}
+}
+
+
+template<size_t N>
+static bool operator==(const mpt::span<uint8> &l, const std::array<uint8, N> &r)
+{
+	return std::equal(l.begin(), l.end(), r.begin(), r.end());
+};
+
+static void TestMIDIMacroParser()
+{
+	uint8 rawData[] = {0x90, 0x40, 0x70, 0x50, 0x70, 0xF5, 0xF6, 0x60, 0x70, 0xF0};
+	MIDIMacroParser rawParser{mpt::as_span(rawData)};
+	mpt::span<uint8> midiMsg;
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x40, 0x70}));
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x50, 0x70}));
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF5}));
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF6}));
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x60, 0x70}));
+	rawParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF0}));
+	VERIFY_EQUAL_NONCONT(rawParser.NextMessage(midiMsg), false);
+
+	mpt::heap_value<CSoundFile> sndFile;
+	mpt::heap_value<PlayState> playState;
+	mpt::heap_value<ModInstrument> instr;
+	sndFile->Create(MOD_TYPE_MPT, 2);
+	playState->m_nGlobalVolume = MAX_GLOBAL_VOLUME / 2;
+	playState->Chn[3].nMasterChn = 2;
+	playState->Chn[3].nLastNote = NOTE_MIN + 0x60;
+	playState->Chn[3].nVolume = 193;
+	playState->Chn[3].nVolSwing = 32;
+	playState->Chn[3].nCalcVolume = 8192;
+	playState->Chn[3].nGlobalVol = 32;
+	playState->Chn[3].nInsVol = 32;
+	playState->Chn[3].nPan = 32;
+	playState->Chn[3].nRealPan = 192;
+	playState->Chn[3].oldOffset = 0x123456;
+	playState->Chn[3].pModInstrument = instr.get();
+	instr->nMidiChannel = MidiLastChannel;
+	instr->nMidiProgram = 1 + 9;
+	instr->wMidiBank = 1 + 130;
+	const char macro[] = "r42 9c z v 50 h F5 F6 n u Bc a b xyop F0 41 10 00 10 12 10 00 04 00 2 s";
+	std::vector<uint8> out(std::size(macro) + 1);
+	MIDIMacroParser macroParser{*sndFile, playState.get(), 3, false, mpt::as_span(macro), mpt::as_span(out), 64, 0};
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x40, 0x0E}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x50, 0x01}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF5}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF6}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x60, 0x08}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x01, 0x02}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x10, 0x60}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x34, 0x09}));
+	macroParser.NextMessage(midiMsg);
+	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 13>{0xF0, 0x41, 0x10, 0x00, 0x10, 0x12, 0x10, 0x00, 0x04, 0x00, 0x02, 0x6A, 0xF7}));
+	VERIFY_EQUAL_NONCONT(macroParser.NextMessage(midiMsg), false);
 }
 
 
