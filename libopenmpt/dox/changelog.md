@@ -9,6 +9,11 @@ is just a high-level summary.
 
  *  [**Bug**] Fixed various undefined behaviour found with ubsan.
 
+ *  Warn when a Startrekker AM file most likely requires an (currently
+    unsupported) external instrument definition file. 
+ *  STM: Do not sanitize sample loop data. Scream Tracker 2 reads into the next
+    sample's data when loops exceed the sample length.
+
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.4.46 (2024-10-26)
