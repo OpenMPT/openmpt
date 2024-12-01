@@ -5165,6 +5165,12 @@ void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool is
 		} else if(macro[pos] == 's')
 		{
 			// SysEx Checksum (not an original Impulse Tracker macro variable, but added for convenience)
+			if(!firstNibble)  // From MIDI.TXT: '9n' is exactly the same as '09 n' or '9 n' -- so finish current byte first
+			{
+				outPos++;
+				firstNibble = true;
+			}
+
 			auto startPos = outPos;
 			while(startPos > 0 && out[--startPos] != 0xF0)
 				;
