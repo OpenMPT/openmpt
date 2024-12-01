@@ -4831,17 +4831,17 @@ static void TestMIDIMacroParser()
 	MIDIMacroParser rawParser{mpt::as_span(rawData)};
 	mpt::span<uint8> midiMsg;
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x40, 0x70}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x90, 0x40, 0x70}), true);
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x50, 0x70}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x90, 0x50, 0x70}), true);
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF5}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 1>{0xF5}), true);
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF6}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 1>{0xF6}), true);
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x60, 0x70}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x90, 0x60, 0x70}), true);
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF0}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 1>{0xF0}), true);
 	VERIFY_EQUAL_NONCONT(rawParser.NextMessage(midiMsg), false);
 
 	mpt::heap_value<CSoundFile> sndFile;
@@ -4867,23 +4867,23 @@ static void TestMIDIMacroParser()
 	std::vector<uint8> out(std::size(macro) + 1);
 	MIDIMacroParser macroParser{*sndFile, playState.get(), 3, false, mpt::as_span(macro), mpt::as_span(out), 64, 0};
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x40, 0x0E}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x9F, 0x40, 0x0E}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x50, 0x01}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x9F, 0x50, 0x01}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF5}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 1>{0xF5}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF6}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 1>{0xF6}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x60, 0x08}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0x9F, 0x60, 0x08}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x01, 0x02}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0xBF, 0x01, 0x02}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x10, 0x60}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0xBF, 0x10, 0x60}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x34, 0x09}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 3>{0xBF, 0x34, 0x09}), true);
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF0, 0x41, 0x10, 0x00, 0x10, 0x12, 0x10, 0x00, 0x04, 0x00, 0x02, 0x6A, 0xF7}));
+	VERIFY_EQUAL_NONCONT(mpt::span_elements_equal(midiMsg, std::array<uint8, 13>{0xF0, 0x41, 0x10, 0x00, 0x10, 0x12, 0x10, 0x00, 0x04, 0x00, 0x02, 0x6A, 0xF7}), true);
 	VERIFY_EQUAL_NONCONT(macroParser.NextMessage(midiMsg), false);
 }
 
