@@ -3029,6 +3029,7 @@ bool CViewPattern::DataEntry(bool up, bool coarse)
 
 	SetModified(false);
 	InvalidatePattern();
+	UpdateIndicator();
 
 	if(column == PatternCursor::noteColumn && m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_PLAYTRANSPOSE))
 	{
