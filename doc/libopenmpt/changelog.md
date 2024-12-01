@@ -32,7 +32,7 @@ is just a high-level summary.
     mixing disabled but sample transpose enabled.
  *  MED: Don't enable Amiga resampler if any stereo samples are found, as it
     does not support stereo samples.
- *  MED: Fix tempo in some files using oftware mixing mode and legacy tempo
+ *  MED: Fix tempo in some files using software mixing mode and legacy tempo
     values.
  *  MED: Avoid importing effect memory for some commands.
  *  MED: Retrigger with instrument-less note now keeps using the previous sample
