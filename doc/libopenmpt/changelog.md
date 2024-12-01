@@ -41,7 +41,9 @@ is just a high-level summary.
     version of MED Soundstudio.
  *  STM: Do not sanitize sample loop data. Scream Tracker 2 reads into the next
     sample's data when loops exceed the sample length.
-
+ *  When evaluating MIDI macros containing letters "u" or "v" during seeking,
+    the initial global volume was applied to them, rather than the global volume
+	that would be reached at that pattern position.
  *  mpg123: Update to v1.32.9 (2024-11-02).
 
 ### libopenmpt 0.7.11 (2024-10-26)
