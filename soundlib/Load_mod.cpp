@@ -1263,7 +1263,6 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-#endif // MPT_EXTERNAL_SAMPLES || MPT_BUILD_FUZZER
 
 	// Fix VBlank MODs. Arbitrary threshold: 8 minutes (enough for "frame of mind" by Dascon...).
 	// Basically, this just converts all tempo commands into speed commands
