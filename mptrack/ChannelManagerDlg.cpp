@@ -29,23 +29,25 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, CDialog)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONUP()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONDBLCLK()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_CLOSE()
 
-	ON_COMMAND(IDC_BUTTON1,	&CChannelManagerDlg::OnApply)
-	ON_COMMAND(IDC_BUTTON2,	&CChannelManagerDlg::OnClose)
-	ON_COMMAND(IDC_BUTTON3,	&CChannelManagerDlg::OnSelectAll)
-	ON_COMMAND(IDC_BUTTON4,	&CChannelManagerDlg::OnInvert)
-	ON_COMMAND(IDC_BUTTON5,	&CChannelManagerDlg::OnAction1)
-	ON_COMMAND(IDC_BUTTON6,	&CChannelManagerDlg::OnAction2)
-	ON_COMMAND(IDC_BUTTON7,	&CChannelManagerDlg::OnStore)
-	ON_COMMAND(IDC_BUTTON8,	&CChannelManagerDlg::OnRestore)
-	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1,	&CChannelManagerDlg::OnTabSelchange)
-	
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_RBUTTONDBLCLK()
+	ON_COMMAND(IDC_BUTTON1, &CChannelManagerDlg::OnApply)
+	ON_COMMAND(IDC_BUTTON2, &CChannelManagerDlg::OnClose)
+	ON_COMMAND(IDC_BUTTON3, &CChannelManagerDlg::OnSelectAll)
+	ON_COMMAND(IDC_BUTTON4, &CChannelManagerDlg::OnInvert)
+	ON_COMMAND(IDC_BUTTON5, &CChannelManagerDlg::OnAction1)
+	ON_COMMAND(IDC_BUTTON6, &CChannelManagerDlg::OnAction2)
+	ON_COMMAND(IDC_BUTTON7, &CChannelManagerDlg::OnStore)
+	ON_COMMAND(IDC_BUTTON8, &CChannelManagerDlg::OnRestore)
+
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CChannelManagerDlg::OnTabSelchange)
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CChannelManagerDlg::OnToolTipText)
+
 END_MESSAGE_MAP()
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
@@ -166,9 +168,66 @@ BOOL CChannelManagerDlg::OnInitDialog()
 
 	m_buttonHeight = MulDiv(CM_BT_HEIGHT, Util::GetDPIy(m_hWnd), 96);
 	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), SW_HIDE);
+	EnableToolTips();
 
 	return TRUE;
 }
+
+INT_PTR CChannelManagerDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
+{
+	CRect rect;
+	pTI->hwnd = m_hWnd;
+	pTI->uId = ButtonHit(point, &rect);
+	pTI->rect = rect;
+	pTI->lpszText = LPSTR_TEXTCALLBACK;
+	if(pTI->uId == CHANNELINDEX_INVALID)
+		return -1;
+	return pTI->uId;
+}
+
+
+BOOL CChannelManagerDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
+{
+	TOOLTIPTEXT *pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	if((pTTT->uFlags & TTF_IDISHWND) || !m_ModDoc || pNMHDR->idFrom >= m_states.size())
+		return FALSE;
+
+	CString text;
+	const CHANNELINDEX chn = m_states[pNMHDR->idFrom].sourceChn;
+	const auto &chnSettings = m_ModDoc->GetSoundFile().ChnSettings[chn];
+	if(!chnSettings.szName.empty())
+		text = MPT_CFORMAT("{}: {}")(chn + 1, mpt::ToWin(m_ModDoc->GetSoundFile().GetCharsetInternal(), chnSettings.szName));
+	else
+		text = MPT_CFORMAT("Channel {}")(chn + 1);
+
+	switch(m_currentTab)
+	{
+	case kSoloMute:
+		text += chnSettings.dwFlags[CHN_MUTE] ? _T(" (Muted)") : _T(" (Unmuted)");
+		break;
+	case kRecordSelect:
+		switch(m_ModDoc->GetChannelRecordGroup(chn))
+		{
+		case RecordGroup::NoGroup: text += _T(" (No Record Group)"); break;
+		case RecordGroup::Group1: text += _T(" (Record Group 1)"); break;
+		case RecordGroup::Group2: text += _T(" (Record Group 2)"); break;
+		}
+		break;
+	case kPluginState:
+		text += chnSettings.dwFlags[CHN_NOFX] ? _T(" (Plugins Bypassed)") : _T(" (Plugins Enabled)");
+		break;
+	case kReorderRemove:
+		if(m_states[pNMHDR->idFrom].removed)
+			text += _T(" (Marked for Removal)");
+		break;
+	case kNumTabs:
+		MPT_ASSERT_NOTREACHED();
+		break;
+	}
+	mpt::String::WriteCStringBuf(pTTT->szText) = text;
+	return TRUE;
+}
+
 
 void CChannelManagerDlg::OnApply()
 {

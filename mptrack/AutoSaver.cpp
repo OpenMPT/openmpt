@@ -141,7 +141,7 @@ mpt::PathString CAutoSaver::BuildFileName(const CModDoc &modDoc) const
 {
 	mpt::PathString name = GetBasePath(modDoc, true) + GetBaseName(modDoc);
 	const CString timeStamp = CTime::GetCurrentTime().Format(_T(".AutoSave.%Y%m%d.%H%M%S."));
-	name += mpt::PathString::FromCString(timeStamp);  //append backtup tag + timestamp
+	name += mpt::PathString::FromCString(timeStamp);  // Append backtup tag + timestamp
 	name += mpt::PathString::FromUnicode(modDoc.GetSoundFile().GetModSpecifications().GetFileExtension());
 	return name;
 }
@@ -167,8 +167,8 @@ bool CAutoSaver::SaveSingleFile(CModDoc &modDoc)
 		case MOD_TYPE_MOD: success = sndFile.SaveMod(f); break;
 		case MOD_TYPE_S3M: success = sndFile.SaveS3M(f); break;
 		case MOD_TYPE_XM:  success = sndFile.SaveXM(f); break;
-		case MOD_TYPE_IT:  success = sndFile.SaveIT(f, fileName); break;
-		case MOD_TYPE_MPT: success = sndFile.SaveIT(f, fileName); break;
+		case MOD_TYPE_IT:  success = sndFile.SaveIT(f, GetUseOriginalPath() ? fileName : mpt::PathString{}); break;
+		case MOD_TYPE_MPT: success = sndFile.SaveIT(f, GetUseOriginalPath() ? fileName : mpt::PathString{}); break;
 		}
 	}
 

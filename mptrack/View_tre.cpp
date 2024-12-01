@@ -1792,7 +1792,8 @@ BOOL CModTree::OpenTreeItem(HTREEITEM hItem)
 	switch(modItem.type)
 	{
 	case MODITEM_HDR_SONG:
-		CTrackApp::OpenDirectory(GetDocumentFromItem(hItem)->GetPathNameMpt());
+		if(const auto pathName = GetDocumentFromItem(hItem)->GetPathNameMpt(); !pathName.empty())
+			CTrackApp::OpenDirectory(pathName);
 		break;
 	case MODITEM_INSLIB_SONG:
 		theApp.OpenDocumentFile(InsLibGetFullPath(hItem).ToCString());
