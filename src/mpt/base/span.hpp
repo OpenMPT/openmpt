@@ -179,6 +179,11 @@ inline span<const T> as_span(const std::array<T, N> & cont) {
 	return span<const T>(cont);
 }
 
+template <typename Ca, typename Cb>
+bool span_elements_equal(const Ca & a, const Cb & b) {
+	return a.size() == b.size() && (a.data() == b.data() || std::equal(a.begin(), a.end(), b.begin()));
+}
+
 
 } // namespace MPT_INLINE_NS
 } // namespace mpt
