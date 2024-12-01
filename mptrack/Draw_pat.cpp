@@ -1776,7 +1776,7 @@ CString CViewPattern::GetCursorDescription() const
 			effectInfo.GetVolCmdInfo(effectInfo.GetIndexFromVolCmd(m->volcmd), &s);
 			s += _T(": ");
 			CString tmp;
-			effectInfo.GetVolCmdParamInfo(*m, &tmp);
+			effectInfo.GetVolCmdParamInfo(*m, &tmp, TrackerSettings::Instance().patternVolColHex);
 			s += tmp;
 		}
 		break;

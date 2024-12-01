@@ -829,7 +829,7 @@ void CEditCommand::UpdateVolCmdValue()
 	} else
 	{
 		// process as effect
-		effectInfo.GetVolCmdParamInfo(*m, &s);
+		effectInfo.GetVolCmdParamInfo(*m, &s, TrackerSettings::Instance().patternVolColHex);
 	}
 	SetDlgItemText(IDC_TEXT2, s);
 }

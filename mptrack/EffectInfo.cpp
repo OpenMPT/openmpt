@@ -1026,10 +1026,17 @@ bool EffectInfo::GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin,
 }
 
 
-bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
+bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s, bool hex) const
 {
-	if(s == nullptr) return false;
+	if(s == nullptr)
+		return false;
 	s->Empty();
+
+	CString volume;
+	if(hex)
+		volume = mpt::cfmt::HEX(m.vol);
+	else
+		volume = mpt::cfmt::dec(m.vol);
 
 	switch(m.volcmd)
 	{
@@ -1043,9 +1050,8 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 	case VOLCMD_FINEVOLDOWN:
 		if(m.vol > 0 || sndFile.GetType() == MOD_TYPE_XM)
 		{
-			s->Format(_T("%c%u"),
-				(m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? _T('+') : _T('-'),
-				m.vol);
+			*s = (m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? _T('+') : _T('-')
+				+ volume;
 		} else
 		{
 			*s = _T("continue");
@@ -1068,8 +1074,8 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 				if(sndFile.GetType() != MOD_TYPE_XM) param = ImpulseTrackerPortaVolCmd[m.vol & 0x0F];
 				else param = m.vol << 4;
 			}
-			s->Format(_T("%u (%c%02X)"),
-				m.vol,
+			*s = volume;
+			s->AppendFormat(_T(" (%c%02X)"),
 				sndFile.GetModSpecifications().GetEffectLetter(cmd),
 				param);
 		} else
@@ -1113,7 +1119,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s) const
 		break;
 
 	default:
-		s->Format(_T("%u"), m.vol);
+		*s = volume;
 		break;
 	}
 	return true;

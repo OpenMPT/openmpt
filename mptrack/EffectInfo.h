@@ -61,7 +61,7 @@ public:
 	// Get range information, effect name, etc... from a given effect.
 	bool GetVolCmdInfo(UINT ndx, CString *s, ModCommand::VOL *prangeMin = nullptr, ModCommand::VOL *prangeMax = nullptr) const;
 	// Get effect name and parameter description
-	bool GetVolCmdParamInfo(const ModCommand &m, CString *s) const;
+	bool GetVolCmdParamInfo(const ModCommand &m, CString *s, bool hex) const;
 	// Map an effect value to slider position
 	UINT MapVolumeToPos(VolumeCommand cmd, ModCommand::VOL param) const;
 	// Map slider position to an effect value
