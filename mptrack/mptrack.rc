@@ -1332,7 +1332,8 @@ BEGIN
     CONTROL         "Secondar&y highlight",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,156,80,10
     EDITTEXT        IDC_SECONDARYHILITE,102,156,24,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Rows per beat (default)",IDC_STATIC,132,159,144,8
-    LTEXT           "Note: Songs' time signatures will override the default highlight values",IDC_STATIC,18,172,258,8
+    CONTROL         "Always use default highlight values instead of songs' time signatures",IDC_CHECK3,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,174,258,10
     GROUPBOX        "Colours",IDC_STATIC,6,204,312,102
     LTEXT           "Select colo&ur for:",IDC_STATIC,18,218,63,8
     CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,84,216,11,12
