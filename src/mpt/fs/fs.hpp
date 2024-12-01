@@ -8,6 +8,7 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/path/native_path.hpp"
+#include "mpt/path/os_path_long.hpp"
 
 #if MPT_OS_WINDOWS
 #include <vector>
@@ -42,37 +43,38 @@ public:
 
 	// Verify if this path represents a valid directory on the file system.
 	bool is_directory(const mpt::native_path & path) {
-		// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll.
+		// Using PathIsDirectoryW here instead would increase libopenmpt dependencies by shlwapi.dll (and it would only work with paths up to MAX_PATH).
 		// GetFileAttributesW also does the job just fine.
-#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0) {
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-#else  // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-#endif // MPT_OS_WINDOWS_WINRT
+		DWORD dwAttrib = get_file_attributes(path);
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 	}
 
 	// Verify if this path exists and is a file on the file system.
 	bool is_file(const mpt::native_path & path) {
-#if MPT_OS_WINDOWS_WINRT
-		WIN32_FILE_ATTRIBUTE_DATA data = {};
-		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0) {
-			return false;
-		}
-		DWORD dwAttrib = data.dwFileAttributes;
-#else  // !MPT_OS_WINDOWS_WINRT
-		DWORD dwAttrib = ::GetFileAttributes(path.AsNative().c_str());
-#endif // MPT_OS_WINDOWS_WINRT
+		DWORD dwAttrib = get_file_attributes(path);
 		return ((dwAttrib != INVALID_FILE_ATTRIBUTES) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 	}
 
 	// Verify that a path exists (no matter what type)
 	bool exists(const mpt::native_path & path) {
-		return ::PathFileExists(path.AsNative().c_str()) != FALSE;
+		DWORD dwAttrib = get_file_attributes(path);
+		return (dwAttrib != INVALID_FILE_ATTRIBUTES);
+	}
+
+
+
+private:
+
+	DWORD get_file_attributes(const mpt::native_path & path) {
+#if MPT_OS_WINDOWS_WINRT
+		WIN32_FILE_ATTRIBUTE_DATA data = {};
+		if (::GetFileAttributesExW(path.AsNative().c_str(), GetFileExInfoStandard, &data) == 0) {
+			return INVALID_FILE_ATTRIBUTES;
+		}
+		return data.dwFileAttributes;
+#else  // !MPT_OS_WINDOWS_WINRT
+		return ::GetFileAttributes(path.AsNative().c_str());
+#endif // MPT_OS_WINDOWS_WINRT
 	}
 
 
@@ -81,12 +83,13 @@ public:
 
 #if !(MPT_WINRT_BEFORE(MPT_WIN_10))
 	mpt::native_path absolute(const mpt::native_path & path) {
-		DWORD size = ::GetFullPathName(path.AsNative().c_str(), 0, nullptr, nullptr);
+		const auto long_path = mpt::support_long_path(path.AsNative());
+		DWORD size = ::GetFullPathName(long_path.c_str(), 0, nullptr, nullptr);
 		if (size == 0) {
 			return path;
 		}
 		std::vector<TCHAR> fullPathName(size, TEXT('\0'));
-		if (::GetFullPathName(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0) {
+		if (::GetFullPathName(long_path.c_str(), size, fullPathName.data(), nullptr) == 0) {
 			return path;
 		}
 		return mpt::native_path::FromNative(fullPathName.data());
@@ -116,7 +119,7 @@ public:
 		path = path.WithTrailingSlash();
 		HANDLE hFind = NULL;
 		WIN32_FIND_DATA wfd = {};
-		hFind = ::FindFirstFile((path + MPT_NATIVE_PATH("*.*")).AsNative().c_str(), &wfd);
+		hFind = ::FindFirstFile(mpt::support_long_path((path + MPT_NATIVE_PATH("*.*")).AsNative()).c_str(), &wfd);
 		if (hFind != NULL && hFind != INVALID_HANDLE_VALUE) {
 			do {
 				mpt::native_path filename = mpt::native_path::FromNative(wfd.cFileName);
