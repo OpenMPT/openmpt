@@ -23,7 +23,7 @@ class MIDIMacroParser
 {
 public:
 	// Parse the given MIDI macro into the out span. out needs to be at least one byte longer than the input string to support the longest possible macro translation.
-	MIDIMacroParser(const CSoundFile &sndFile, PlayState *playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, const mpt::span<uint8> out, uint8 param = 0, PLUGINDEX plugin = 0);
+	MIDIMacroParser(const CSoundFile &sndFile, PlayState *playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> out, uint8 param = 0, PLUGINDEX plugin = 0);
 	// Split a raw MIDI dump into multiple messages. Note that in order to support running status, NextMessage() may temporarily alter the provided data.
 	// When the MIDIMacroParser destructor has run, the data will be back in its original state.
 	MIDIMacroParser(mpt::span<uint8> data) : m_data{data} {}

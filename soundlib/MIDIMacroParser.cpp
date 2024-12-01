@@ -91,7 +91,7 @@ bool MIDIMacroParser::NextMessage(mpt::span<uint8> &message, bool outputRunningS
 }
 
 
-MIDIMacroParser::MIDIMacroParser(const CSoundFile &sndFile, PlayState *playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, const mpt::span<uint8> out, uint8 param, PLUGINDEX plugin)
+MIDIMacroParser::MIDIMacroParser(const CSoundFile &sndFile, PlayState *playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> out, uint8 param, PLUGINDEX plugin)
 	: m_data{out}
 {
 	// Need to be able to add potentially missing F7 (End Of SysEx)
