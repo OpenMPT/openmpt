@@ -4825,29 +4825,23 @@ static MPT_NOINLINE void TestSampleConversion()
 }
 
 
-template<size_t N>
-static bool operator==(const mpt::span<uint8> &l, const std::array<uint8, N> &r)
-{
-	return std::equal(l.begin(), l.end(), r.begin(), r.end());
-};
-
 static void TestMIDIMacroParser()
 {
 	uint8 rawData[] = {0x90, 0x40, 0x70, 0x50, 0x70, 0xF5, 0xF6, 0x60, 0x70, 0xF0};
 	MIDIMacroParser rawParser{mpt::as_span(rawData)};
 	mpt::span<uint8> midiMsg;
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x40, 0x70}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x40, 0x70}));
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x50, 0x70}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x50, 0x70}));
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF5}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF5}));
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF6}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF6}));
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x90, 0x60, 0x70}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x90, 0x60, 0x70}));
 	rawParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF0}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF0}));
 	VERIFY_EQUAL_NONCONT(rawParser.NextMessage(midiMsg), false);
 
 	mpt::heap_value<CSoundFile> sndFile;
@@ -4873,23 +4867,23 @@ static void TestMIDIMacroParser()
 	std::vector<uint8> out(std::size(macro) + 1);
 	MIDIMacroParser macroParser{*sndFile, playState.get(), 3, false, mpt::as_span(macro), mpt::as_span(out), 64, 0};
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x40, 0x0E}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x40, 0x0E}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x50, 0x01}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x50, 0x01}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF5}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF5}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 1>{0xF6}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF6}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0x9F, 0x60, 0x08}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0x9F, 0x60, 0x08}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x01, 0x02}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x01, 0x02}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x10, 0x60}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x10, 0x60}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 3>{0xBF, 0x34, 0x09}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xBF, 0x34, 0x09}));
 	macroParser.NextMessage(midiMsg);
-	VERIFY_EQUAL_NONCONT(midiMsg, (std::array<uint8, 13>{0xF0, 0x41, 0x10, 0x00, 0x10, 0x12, 0x10, 0x00, 0x04, 0x00, 0x02, 0x6A, 0xF7}));
+	VERIFY_EQUAL_NONCONT(std::vector(midiMsg.begin(), midiMsg.end()), (std::vector<uint8>{0xF0, 0x41, 0x10, 0x00, 0x10, 0x12, 0x10, 0x00, 0x04, 0x00, 0x02, 0x6A, 0xF7}));
 	VERIFY_EQUAL_NONCONT(macroParser.NextMessage(midiMsg), false);
 }
 
