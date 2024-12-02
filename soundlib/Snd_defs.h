@@ -42,8 +42,12 @@ typedef uint32 SmpLength;
 
 const SmpLength MAX_SAMPLE_LENGTH = 0x10000000; // Sample length in frames. Sample size in bytes can be more than this (= 256 MB).
 
+inline constexpr ROWINDEX MAX_ROWS_PER_MEASURE     = 65536;
+inline constexpr ROWINDEX MAX_ROWS_PER_BEAT        = 65536;
+inline constexpr ROWINDEX DEFAULT_ROWS_PER_BEAT    = 4;
+inline constexpr ROWINDEX DEFAULT_ROWS_PER_MEASURE = 16;
+
 const ROWINDEX MAX_PATTERN_ROWS       = 1024;
-const ROWINDEX MAX_ROWS_PER_BEAT      = 65536;
 const ORDERINDEX MAX_ORDERS           = ORDERINDEX_MAX + 1;
 const PATTERNINDEX MAX_PATTERNS       = 4000;
 const SAMPLEINDEX MAX_SAMPLES         = 4000;

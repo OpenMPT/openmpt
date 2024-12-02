@@ -87,11 +87,11 @@ CSoundFile::CSoundFile() :
 #ifdef MODPLUG_TRACKER
 	m_bChannelMuteTogglePending.reset();
 
-	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : 4;
+	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = (TrackerSettings::Instance().m_nRowHighlightBeats) ? TrackerSettings::Instance().m_nRowHighlightBeats : DEFAULT_ROWS_PER_BEAT;
 	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = (TrackerSettings::Instance().m_nRowHighlightMeasures >= m_nDefaultRowsPerBeat) ? TrackerSettings::Instance().m_nRowHighlightMeasures : m_nDefaultRowsPerBeat * 4;
 #else
-	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = 4;
-	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = 16;
+	m_nDefaultRowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat = DEFAULT_ROWS_PER_BEAT;
+	m_nDefaultRowsPerMeasure = m_PlayState.m_nCurrentRowsPerMeasure = DEFAULT_ROWS_PER_MEASURE;
 #endif // MODPLUG_TRACKER
 
 	MemsetZero(Instruments);
@@ -760,11 +760,12 @@ double CSoundFile::GetCurrentBPM() const
 		bpm = m_PlayState.m_nMusicTempo.ToDouble();
 	} else
 	{
-		//with other modes, we calculate it:
-		double ticksPerBeat = m_PlayState.m_nMusicSpeed * m_PlayState.m_nCurrentRowsPerBeat; //ticks/beat = ticks/row * rows/beat
-		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;                //samps/beat = samps/tick * ticks/beat
-		bpm =  m_MixerSettings.gdwMixingFreq / samplesPerBeat * 60;                          //beats/sec  = samps/sec  / samps/beat
-	}	                                                                                     //beats/min  =  beats/sec * 60
+		// With other modes, we calculate it:
+		ROWINDEX rowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat ? m_PlayState.m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
+		double ticksPerBeat = m_PlayState.m_nMusicSpeed * rowsPerBeat;         // Ticks/beat = ticks/row * rows/beat
+		double samplesPerBeat = m_PlayState.m_nSamplesPerTick * ticksPerBeat;  // Samps/beat = samps/tick * ticks/beat
+		bpm =  m_MixerSettings.gdwMixingFreq / samplesPerBeat * 60;            // Beats/sec  = samps/sec  / samps/beat
+	}	                                                                       // Beats/min  =  beats/sec * 60
 
 	return bpm;
 }
