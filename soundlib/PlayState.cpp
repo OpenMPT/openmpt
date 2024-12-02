@@ -50,8 +50,8 @@ void PlayState::UpdateTimeSignature(const CSoundFile &sndFile) noexcept
 
 void PlayState::UpdatePPQ(bool patternTransition) noexcept
 {
-	ROWINDEX rpm = m_nCurrentRowsPerMeasure ? m_nCurrentRowsPerMeasure : 4;
-	ROWINDEX rpb = m_nCurrentRowsPerBeat ? m_nCurrentRowsPerBeat : 1;
+	ROWINDEX rpm = m_nCurrentRowsPerMeasure ? m_nCurrentRowsPerMeasure : DEFAULT_ROWS_PER_MEASURE;
+	ROWINDEX rpb = m_nCurrentRowsPerBeat ? m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
 	if(m_lTotalSampleCount > 0 && (patternTransition || !(m_nRow % rpm)))
 	{
 		// Pattern end = end of measure, so round up PPQ to the next full measure

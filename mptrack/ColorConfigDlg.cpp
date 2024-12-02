@@ -193,8 +193,8 @@ BOOL COptionsColors::OnInitDialog()
 
 	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
 	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
-	m_spinRowsPerMeasure.SetRange32(0, int32_max);
-	m_spinRowsPerBeat.SetRange32(0, int32_max);
+	m_spinRowsPerMeasure.SetRange32(0, MAX_ROWS_PER_MEASURE);
+	m_spinRowsPerBeat.SetRange32(0, MAX_ROWS_PER_BEAT);
 
 	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.SetRedraw(FALSE);

@@ -1072,7 +1072,8 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 		const uint32 rowDuration = tickDuration * numTicks;
 		memory.elapsedTime += static_cast<double>(rowDuration) / static_cast<double>(m_MixerSettings.gdwMixingFreq);
 		playState.m_lTotalSampleCount += rowDuration;
-		playState.m_ppqPosFract += 1.0 / playState.m_nCurrentRowsPerBeat;
+		const ROWINDEX rowsPerBeat = playState.m_nCurrentRowsPerBeat ? playState.m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
+		playState.m_ppqPosFract += 1.0 / rowsPerBeat;
 
 		if(adjustSamplePos)
 		{
