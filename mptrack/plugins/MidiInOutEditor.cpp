@@ -161,24 +161,17 @@ void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
 }
 
 
-static void IOChanged(MidiInOut &plugin, CComboBox &combo, PlugParamIndex param)
-{
-	// Update device ID and notify plugin.
-	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(combo.GetItemData(combo.GetCurSel()));
-	plugin.SetParameter(param, MidiInOut::DeviceIDToParameter(newDevice));
-	plugin.AutomateParameter(param);
-}
-
-
 void MidiInOutEditor::OnInputChanged()
 {
-	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_inputCombo, MidiInOut::kInputParameter);
+	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(m_inputCombo.GetItemData(m_inputCombo.GetCurSel()));
+	static_cast<MidiInOut &>(m_VstPlugin).OpenDevice(newDevice, true);
 }
 
 
 void MidiInOutEditor::OnOutputChanged()
 {
-	IOChanged(static_cast<MidiInOut &>(m_VstPlugin), m_outputCombo, MidiInOut::kOutputParameter);
+	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(m_outputCombo.GetItemData(m_outputCombo.GetCurSel()));
+	static_cast<MidiInOut &>(m_VstPlugin).OpenDevice(newDevice, false);
 }
 
 

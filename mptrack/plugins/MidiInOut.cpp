@@ -74,10 +74,32 @@ void MidiInOut::SaveAllParameters()
 }
 
 
-void MidiInOut::RestoreAllParameters(int32 program)
+void MidiInOut::RestoreAllParameters(int32 /*program*/)
 {
-	IMixPlugin::RestoreAllParameters(program);	// First plugin version didn't use chunks.
-	SetChunk(mpt::as_span(m_pMixStruct->pluginData), false);
+	if(!m_pMixStruct)
+		return;
+	if(m_pMixStruct->pluginData.size() == sizeof(uint32) * 3)
+	{
+		// Very old plugin versions
+		FileReader memFile(mpt::as_span(m_pMixStruct->pluginData));
+		uint32 type = memFile.ReadUint32LE();
+		if(type != 0)
+			return;
+		m_inputDevice.index = ParameterToDeviceID(memFile.ReadFloatLE());
+		m_outputDevice.index = ParameterToDeviceID(memFile.ReadFloatLE());
+	} else
+	{
+		SetChunk(mpt::as_span(m_pMixStruct->pluginData), false);
+	}
+	OpenDevice(m_inputDevice.index, true);
+	OpenDevice(m_outputDevice.index, false);
+	// Update selection in editor
+	MidiInOutEditor *editor = dynamic_cast<MidiInOutEditor *>(GetEditor());
+	if(editor != nullptr)
+	{
+		editor->SetCurrentDevice(true, m_inputDevice.index);
+		editor->SetCurrentDevice(false, m_outputDevice.index);
+	}
 }
 
 
@@ -175,7 +197,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 
 
 // Try to match a port name against stored name or friendly name (preferred)
-static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::string &name, const mpt::ustring &friendlyName, MidiDevice &midiDevice, bool isInput)
+static MidiDevice::ID FindPort(MidiDevice::ID id, unsigned int numPorts, const std::string &name, const mpt::ustring &friendlyName, MidiDevice &midiDevice, bool isInput)
 {
 	bool foundFriendly = false;
 	for(unsigned int i = 0; i < numPorts; i++)
@@ -192,7 +214,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 				foundFriendly = true;
 				if(deviceNameMatches)
 				{
-					return;
+					return id;
 				}
 			}
 #else
@@ -206,6 +228,7 @@ static void FindPort(MidiDevice::ID &id, unsigned int numPorts, const std::strin
 		{
 		}
 	}
+	return id;
 }
 
 
@@ -275,11 +298,8 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 	// Try to match an input port name against stored name or friendly name (preferred)
 	m_inputDevice.friendlyName = mpt::ToUnicode(mpt::Charset::UTF8, inFriendlyName);
 	m_outputDevice.friendlyName = mpt::ToUnicode(mpt::Charset::UTF8, outFriendlyName);
-	FindPort(inID, m_midiIn.getPortCount(), inName, m_inputDevice.friendlyName, m_inputDevice, true);
-	FindPort(outID, m_midiOut.getPortCount(), outName, m_outputDevice.friendlyName, m_outputDevice, false);
-
-	SetParameter(MidiInOut::kInputParameter, DeviceIDToParameter(inID));
-	SetParameter(MidiInOut::kOutputParameter, DeviceIDToParameter(outID));
+	m_inputDevice.index = FindPort(inID, m_midiIn.getPortCount(), inName, m_inputDevice.friendlyName, m_inputDevice, true);
+	m_outputDevice.index = FindPort(outID, m_midiOut.getPortCount(), outName, m_outputDevice.friendlyName, m_outputDevice, false);
 }
 
 
@@ -315,17 +335,7 @@ std::string MidiInOut::GetMacro(size_t index) const
 
 void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value, PlayState *playState, CHANNELINDEX chn)
 {
-	value = mpt::safe_clamp(value, 0.0f, 1.0f);
-	if(index < kNumVisibleParams)
-	{
-		MidiDevice::ID newDevice = ParameterToDeviceID(value);
-		OpenDevice(newDevice, (index == kInputParameter));
-
-		// Update selection in editor
-		MidiInOutEditor *editor = dynamic_cast<MidiInOutEditor *>(GetEditor());
-		if(editor != nullptr)
-			editor->SetCurrentDevice((index == kInputParameter), newDevice);
-	} else if(index >= kMacroParamMin && (index - kMacroParamMin) < m_parameterMacros.size())
+	if(index >= kMacroParamMin && (index - kMacroParamMin) < m_parameterMacros.size())
 	{
 		// Enough memory should have already been allocated when the macro string was set
 		m_parameterMacroScratchSpace.resize(m_parameterMacros[index - kMacroParamMin].first.size() + 1);
@@ -342,14 +352,8 @@ void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value, PlaySta
 
 float MidiInOut::GetParameter(PlugParamIndex index)
 {
-	if(index < kNumVisibleParams)
-	{
-		const MidiDevice &device = (index == kInputParameter) ? m_inputDevice : m_outputDevice;
-		return DeviceIDToParameter(device.index);
-	} else if(index >= kMacroParamMin && (index - kMacroParamMin) < m_parameterMacros.size())
-	{
+	if(index >= kMacroParamMin && (index - kMacroParamMin) < m_parameterMacros.size())
 		return m_parameterMacros[index - kMacroParamMin].second;
-	}
 	return 0.0f;
 }
 
@@ -358,11 +362,7 @@ float MidiInOut::GetParameter(PlugParamIndex index)
 
 CString MidiInOut::GetParamName(PlugParamIndex param)
 {
-	if(param == kInputParameter)
-		return _T("MIDI In");
-	else if(param == kOutputParameter)
-		return _T("MIDI Out");
-	else if(param >= kMacroParamMin && (param - kMacroParamMin) < m_parameterMacros.size())
+	if(param >= kMacroParamMin && (param - kMacroParamMin) < m_parameterMacros.size())
 		return mpt::ToCString(mpt::Charset::ASCII, m_parameterMacros[param - kMacroParamMin].first);
 	return {};
 }
@@ -371,8 +371,9 @@ CString MidiInOut::GetParamName(PlugParamIndex param)
 // Parameter value as text
 CString MidiInOut::GetParamDisplay(PlugParamIndex param)
 {
-	const MidiDevice &device = (param == kInputParameter) ? m_inputDevice : m_outputDevice;
-	return mpt::ToCString(mpt::Charset::UTF8, device.name);
+	if(param >= kMacroParamMin && (param - kMacroParamMin) < m_parameterMacros.size())
+		return mpt::cfmt::dec(mpt::saturate_round<uint8>(m_parameterMacros[param - kMacroParamMin].second * 127.0f));
+	return {};
 }
 
 
@@ -627,7 +628,7 @@ void MidiInOut::HardAllNotesOff()
 // Open a device for input or output.
 void MidiInOut::OpenDevice(MidiDevice newDevice, bool asInputDevice)
 {
-	FindPort(newDevice.index, asInputDevice ? m_midiIn.getPortCount() : m_midiOut.getPortCount(), newDevice.name, newDevice.friendlyName, newDevice, asInputDevice);
+	newDevice.index = FindPort(newDevice.index, asInputDevice ? m_midiIn.getPortCount() : m_midiOut.getPortCount(), newDevice.name, newDevice.friendlyName, newDevice, asInputDevice);
 	OpenDevice(newDevice.index, asInputDevice, false);
 }
 

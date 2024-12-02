@@ -51,16 +51,15 @@ class MidiInOut final : public IMidiPlugin
 protected:
 	enum : unsigned int
 	{
-		kInputParameter  = 0,
-		kOutputParameter = 1,
-		kMacroParamMin = 100,
+		kMacroParamMin = 0,
 		kMacroParamMax = 999,
 
 		kNumPrograms = 1,
 		kNumParams = kMacroParamMax + 1,
-		kNumVisibleParams   = 2,
+		kNumVisibleParams   = 0,
 
 		kNoDevice   = MidiDevice::NO_MIDI_DEVICE,
+		//kDeviceInternal, 
 		kMaxDevices = 65536,  // Should be a power of 2 to avoid rounding errors.
 	};
 
@@ -154,16 +153,10 @@ public:
 	MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 	~MidiInOut();
 
-	// Translate a VST parameter to an RtMidi device ID
+	// Translate a VST parameter to an RtMidi device ID (for restoring old plugin version chunks)
 	static MidiDevice::ID ParameterToDeviceID(float value)
 	{
 		return static_cast<MidiDevice::ID>(value * static_cast<float>(kMaxDevices)) - 1;
-	}
-
-	// Translate a RtMidi device ID to a VST parameter
-	static float DeviceIDToParameter(MidiDevice::ID index)
-	{
-		return static_cast<float>(index + 1) / static_cast<float>(kMaxDevices);
 	}
 
 	/////////////////////////////////////////////////
