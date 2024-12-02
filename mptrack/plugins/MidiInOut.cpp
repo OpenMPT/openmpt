@@ -59,7 +59,7 @@ MidiInOut::~MidiInOut()
 uint32 MidiInOut::GetLatency() const
 {
 	// There is only a latency if the user-provided latency value is greater than the negative output latency.
-	return mpt::saturate_round<uint32>(std::min(0.0, m_latency + GetOutputLatency()) * m_SndFile.GetSampleRate());
+	return mpt::saturate_round<uint32>(std::min(0.0, m_latency + (m_outputDevice.index == kInternalDevice ? 0.0 : GetOutputLatency())) * m_SndFile.GetSampleRate());
 }
 
 
@@ -85,6 +85,11 @@ void MidiInOut::RestoreAllParameters(int32 /*program*/)
 		uint32 type = memFile.ReadUint32LE();
 		if(type != 0)
 			return;
+
+		constexpr auto ParameterToDeviceID = [](float value)
+		{
+			return static_cast<MidiDevice::ID>(value * 65536.0f) - 1;
+		};
 		m_inputDevice.index = ParameterToDeviceID(memFile.ReadFloatLE());
 		m_outputDevice.index = ParameterToDeviceID(memFile.ReadFloatLE());
 	} else
@@ -150,7 +155,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 	std::ostringstream s;
 	mpt::IO::WriteRaw(s, "fEvN", 4);  // VST program chunk magic
 	mpt::IO::WriteIntLE< int32>(s, GetVersion());
-	mpt::IO::WriteIntLE<uint32>(s, 1);	// Number of programs
+	mpt::IO::WriteIntLE<uint32>(s, 1);  // Number of programs
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(programName8.size()));
 	mpt::IO::WriteIntLE<uint32>(s, m_inputDevice.index);
 	mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_inputDevice.name.size()));
@@ -199,6 +204,8 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 // Try to match a port name against stored name or friendly name (preferred)
 static MidiDevice::ID FindPort(MidiDevice::ID id, unsigned int numPorts, const std::string &name, const mpt::ustring &friendlyName, MidiDevice &midiDevice, bool isInput)
 {
+	if(id == MidiDevice::NO_MIDI_DEVICE || id == MidiDevice::INTERNAL_MIDI_DEVICE)
+		return id;
 	bool foundFriendly = false;
 	for(unsigned int i = 0; i < numPorts; i++)
 	{
@@ -395,7 +402,7 @@ CAbstractVstEditor *MidiInOut::OpenEditor()
 // Processing (we don't process any audio, only MIDI messages)
 void MidiInOut::Process(float *, float *, uint32 numFrames)
 {
-	if(m_midiOut.isPortOpen())
+	if(m_outputDevice.index == kInternalDevice || m_midiOut.isPortOpen())
 	{
 		mpt::lock_guard<mpt::mutex> lock(m_mutex);
 
@@ -407,7 +414,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 				mpt::span<uint8> midiMsg;
 				while(parser.NextMessage(midiMsg))
 				{
-					m_midiOut.sendMessage(mpt::byte_cast<unsigned char *>(midiMsg.data()), midiMsg.size());
+					SendMessage(midiMsg);
 				}
 			} catch(const RtMidiError &)
 			{
@@ -448,7 +455,7 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		{
 			try
 			{
-				m_midiOut.sendMessage(message->m_message, message->m_size);
+				SendMessage(*message);
 			} catch(const RtMidiError &)
 			{
 			}
@@ -457,6 +464,15 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		m_outQueue.erase(m_outQueue.begin(), message);
 	}
 	m_positionChanged = false;
+}
+
+
+void MidiInOut::SendMessage(mpt::span<const unsigned char> midiMsg)
+{
+	if(m_outputDevice.index == kInternalDevice)
+		ReceiveMidi(mpt::byte_cast<mpt::const_byte_span>(midiMsg));
+	else
+		m_midiOut.sendMessage(midiMsg.data(), midiMsg.size());
 }
 
 
@@ -520,7 +536,7 @@ void MidiInOut::Resume()
 void MidiInOut::Suspend()
 {
 	// Suspend MIDI I/O
-	if(m_midiOut.isPortOpen())
+	if(m_outputDevice.index == kInternalDevice || m_midiOut.isPortOpen())
 	{
 		try
 		{
@@ -529,13 +545,13 @@ void MidiInOut::Suspend()
 			// Need to flush remaining events from HardAllNotesOff
 			for(const auto &message : m_outQueue)
 			{
-				m_midiOut.sendMessage(message.m_message, message.m_size);
+				SendMessage(message);
 			}
 			m_outQueue.clear();
 			if(m_sendTimingInfo)
 			{
 				unsigned char message[1] = { 0xFC };  // Stop
-				m_midiOut.sendMessage(message, 1);
+				SendMessage(message);
 			}
 		} catch(const RtMidiError &)
 		{
@@ -577,7 +593,7 @@ void MidiInOut::Bypass(bool bypass)
 
 bool MidiInOut::MidiSend(mpt::const_byte_span midiData)
 {
-	if(!m_midiOut.isPortOpen() || IsBypassed())
+	if((m_outputDevice.index != kInternalDevice && !m_midiOut.isPortOpen()) || IsBypassed())
 	{
 		// We need an output device to send MIDI messages to.
 		return true;
@@ -653,7 +669,18 @@ void MidiInOut::OpenDevice(MidiDevice::ID newDevice, bool asInputDevice, bool up
 	{
 		// Dummy device
 		if(updateName)
+		{
 			device.name = "<none>";
+			device.friendlyName.clear();
+		}
+		return;
+	} else if(device.index == kInternalDevice)
+	{
+		if(updateName)
+		{
+			device.name = "<internal>";
+			device.friendlyName.clear();
+		}
 		return;
 	}
 
@@ -703,7 +730,7 @@ void MidiInOut::CloseDevice(MidiDevice &device)
 // Calculate the current output timestamp
 double MidiInOut::GetOutputTimestamp() const
 {
-	return m_clock.Now() * (1.0 / 1000.0) + GetOutputLatency() + m_latency;
+	return m_clock.Now() * (1.0 / 1000.0) + (m_outputDevice.index == kInternalDevice ? 0.0 : GetOutputLatency()) + m_latency;
 }
 
 

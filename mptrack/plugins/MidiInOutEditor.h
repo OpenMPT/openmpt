@@ -42,6 +42,7 @@ public:
 	}
 
 	bool OpenEditor(CWnd *parent) override;
+	void UpdateView(UpdateHint hint) override;
 	bool IsResizable() const override { return false; }
 	bool SetSize(int, int) override { return false; }
 
@@ -49,6 +50,7 @@ protected:
 
 	// Update lists of available input / output devices
 	static void PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput);
+	void UpdateOutputPlugin();
 	// Refresh current input / output device in GUI
 	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
 

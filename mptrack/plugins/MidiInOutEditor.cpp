@@ -15,6 +15,7 @@
 #include "../FileDialog.h"
 #include "../Mptrack.h"
 #include "../resource.h"
+#include "../UpdateHints.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/MIDIMacroParser.h"
 #include <rtmidi/RtMidi.h>
@@ -71,6 +72,7 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 	m_latencySpin.SetRange32(mpt::saturate_round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
 	PopulateList(m_inputCombo, plugin.m_midiIn,  plugin.m_inputDevice, true);
 	PopulateList(m_outputCombo, plugin.m_midiOut, plugin.m_outputDevice, false);
+	UpdateOutputPlugin();
 	CheckDlgButton(IDC_CHECK1, plugin.m_sendTimingInfo ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK2, plugin.m_alwaysSendInitialDump ? BST_UNCHECKED : BST_CHECKED);
 	UpdateMidiDump();
@@ -85,6 +87,15 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 		m_paramEdit.SetWindowText(mpt::ToCString(mpt::Charset::ASCII, plugin.m_parameterMacros[0].first));
 	m_locked = false;
 	return CAbstractVstEditor::OpenEditor(parent);
+}
+
+
+void MidiInOutEditor::UpdateView(UpdateHint hint)
+{
+	CAbstractVstEditor::UpdateView(hint);
+	PluginHint pluginHint = hint.ToType<PluginHint>();
+	if(pluginHint.GetType()[HINT_MODTYPE | HINT_PLUGINNAMES] || pluginHint.GetPlugin() == (m_VstPlugin.GetSlot() + 1))
+		UpdateOutputPlugin();
 }
 
 
@@ -121,6 +132,10 @@ void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevic
 
 	// Add dummy device
 	combo.SetItemData(combo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
+	if(!isInput)
+	{
+		combo.SetItemData(combo.AddString(_T("Internal OpenMPT Output")), static_cast<DWORD_PTR>(MidiInOut::kInternalDevice));
+	}
 
 	// Go through all RtMidi devices
 	auto ports = rtDevice.getPortCount();
@@ -143,6 +158,21 @@ void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevic
 
 	combo.SetCurSel(selectedItem);
 	combo.SetRedraw(TRUE);
+}
+
+
+void MidiInOutEditor::UpdateOutputPlugin()
+{
+	MPT_ASSERT(m_outputCombo.GetItemData(1) == MidiInOut::kInternalDevice);
+	const int sel = m_outputCombo.GetCurSel();
+	CString outputPlugin;
+	if(std::vector<IMixPlugin *> plug; m_VstPlugin.GetOutputPlugList(plug) && plug.front() != nullptr)
+		outputPlugin = MPT_CFORMAT("FX{}: {}")(mpt::cfmt::dec0<2>(plug.front()->GetSlot() + 1), mpt::ToCString(m_VstPlugin.GetSoundFile().m_MixPlugins[plug.front()->GetSlot()].GetName()));
+	else
+		outputPlugin = _T("No Plugin");
+	m_outputCombo.DeleteString(1);
+	m_outputCombo.SetItemData(m_outputCombo.InsertString(1, MPT_CFORMAT("Internal OpenMPT Output ({})")(outputPlugin)), static_cast<DWORD_PTR>(MidiInOut::kInternalDevice));
+	m_outputCombo.SetCurSel(sel);
 }
 
 

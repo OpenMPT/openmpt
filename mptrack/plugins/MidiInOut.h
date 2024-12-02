@@ -28,6 +28,7 @@ class MidiDevice
 public:
 	using ID = decltype(RtMidiIn().getPortCount());
 	static constexpr ID NO_MIDI_DEVICE = ID(-1);
+	static constexpr ID INTERNAL_MIDI_DEVICE = ID(-2);
 
 	RtMidi &stream;
 	std::string name;  // Charset::UTF8
@@ -58,9 +59,8 @@ protected:
 		kNumParams = kMacroParamMax + 1,
 		kNumVisibleParams   = 0,
 
-		kNoDevice   = MidiDevice::NO_MIDI_DEVICE,
-		//kDeviceInternal, 
-		kMaxDevices = 65536,  // Should be a power of 2 to avoid rounding errors.
+		kNoDevice = MidiDevice::NO_MIDI_DEVICE,
+		kInternalDevice = MidiDevice::INTERNAL_MIDI_DEVICE,
 	};
 
 	// MIDI queue entry with small storage optimiziation.
@@ -91,6 +91,8 @@ protected:
 		Message & operator=(const Message &) = delete;
 
 		Message(double time, unsigned char msg) noexcept : Message(time, &msg, 1) { }
+
+		operator mpt::span<const unsigned char>() const { return mpt::as_span(m_message, m_size); }
 
 		Message(Message &&other) noexcept
 			: m_time(other.m_time)
@@ -152,12 +154,6 @@ public:
 	static IMixPlugin* Create(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 	MidiInOut(VSTPluginLib &factory, CSoundFile &sndFile, SNDMIXPLUGIN &mixStruct);
 	~MidiInOut();
-
-	// Translate a VST parameter to an RtMidi device ID (for restoring old plugin version chunks)
-	static MidiDevice::ID ParameterToDeviceID(float value)
-	{
-		return static_cast<MidiDevice::ID>(value * static_cast<float>(kMaxDevices)) - 1;
-	}
 
 	/////////////////////////////////////////////////
 	// Destroy the plugin
@@ -237,6 +233,8 @@ protected:
 
 	// Calculate the current output timestamp
 	double GetOutputTimestamp() const;
+
+	void SendMessage(mpt::span<const unsigned char> midiMsg);
 };
 
 
