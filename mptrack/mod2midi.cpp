@@ -132,9 +132,9 @@ namespace MidiExport
 			, m_sndFile{sndFile}
 			, m_subsongInfo{subsongInfo}
 			, m_tempoTrack{tempoTrack}
+			, m_originalPlugin{originalPlugin}
 			, m_sampleRate{sndFile.GetSampleRate()}
 			, m_overlappingInstruments{overlappingInstruments}
-			, m_originalPlugin{originalPlugin}
 		{
 			// Write instrument / song name
 			WriteString(kTrackName, name);
