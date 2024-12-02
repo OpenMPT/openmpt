@@ -229,8 +229,10 @@ void QuickStartDlg::OnRemoveMRUItem()
 	{
 		if(GetItemGroup(i) != 0)
 			continue;
-		mruFiles.erase(mruFiles.begin() + i);
-		m_paths[0][GetItemIndex(i)] = {};
+		auto &path = m_paths[0][GetItemIndex(i)];
+		if(auto it = std::find(mruFiles.begin(), mruFiles.end(), path); it != mruFiles.end())
+			mruFiles.erase(it);
+		path = {};
 		m_list.DeleteItem(i);
 		i--;
 	}
