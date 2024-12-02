@@ -3987,11 +3987,21 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 static MPT_NOINLINE void TestITCompression()
 {
 	// Test loading / saving of IT-compressed samples
-	const int sampleDataSize = 65536;
+	constexpr int sampleDataSize = 131072;
 	std::vector<int8> sampleData(sampleDataSize, 0);
 	for(int i = 0; i < sampleDataSize; i++)
 	{
 		sampleData[i] = mpt::random<int8>(*s_PRNG);
+	}
+	// Fade in the first half of the sample so that we test lower bit widths as well
+	for(int i = 0; i < sampleDataSize / 2; i++)
+	{
+		sampleData[i] = static_cast<int8>(Util::muldivr(sampleData[i], i, sampleDataSize / 2));
+	}
+	// Add a few irregularities to the signal to provoke temporary switches to higher bit width
+	for(int i = 99; i < sampleDataSize / 2; i += 100)
+	{
+		sampleData[i] ^= 99;
 	}
 
 	// Run each compression test with IT215 compression and without.
