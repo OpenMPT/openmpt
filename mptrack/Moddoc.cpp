@@ -2253,13 +2253,14 @@ void CModDoc::OnApproximateBPM()
 	}
 	m_SndFile.RecalculateSamplesPerTick();
 	const double bpm = m_SndFile.GetCurrentBPM();
+	const ROWINDEX rowsPerBeat = m_SndFile.m_PlayState.m_nCurrentRowsPerBeat ? m_SndFile.m_PlayState.m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
 
 	CString s;
 	switch(m_SndFile.m_nTempoMode)
 	{
 		case tempoModeAlternative:
 			s.Format(_T("Using alternative tempo interpretation.\n\nAssuming:\n. %.8g ticks per second\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
-			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
+			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, rowsPerBeat, bpm);
 			break;
 
 		case tempoModeModern:
@@ -2269,7 +2270,7 @@ void CModDoc::OnApproximateBPM()
 		case tempoModeClassic:
 		default:
 			s.Format(_T("Using standard tempo interpretation.\n\nAssuming:\n. A mod tempo (tick duration factor) of %.8g\n. %u ticks per row\n. %u rows per beat\nthe tempo is approximately: %.8g BPM"),
-			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, m_SndFile.m_PlayState.m_nCurrentRowsPerBeat, bpm);
+			m_SndFile.m_PlayState.m_nMusicTempo.ToDouble(), m_SndFile.m_PlayState.m_nMusicSpeed, rowsPerBeat, bpm);
 			break;
 	}
 
