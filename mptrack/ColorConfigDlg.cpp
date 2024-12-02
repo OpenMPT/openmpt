@@ -88,10 +88,10 @@ BEGIN_MESSAGE_MAP(COptionsColors, CPropertyPage)
 	ON_COMMAND(IDC_BUTTON11,			&COptionsColors::OnClearWindowCache)
 	ON_COMMAND(IDC_LOAD_COLORSCHEME,	&COptionsColors::OnLoadColorScheme)
 	ON_COMMAND(IDC_SAVE_COLORSCHEME,	&COptionsColors::OnSaveColorScheme)
-	ON_COMMAND(IDC_CHECK1,				&COptionsColors::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK1,				&COptionsColors::OnHighlightsChanged)
 	ON_COMMAND(IDC_CHECK2,				&COptionsColors::OnPreviewChanged)
 	ON_COMMAND(IDC_CHECK3,				&COptionsColors::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,				&COptionsColors::OnPreviewChanged)
+	ON_COMMAND(IDC_CHECK4,				&COptionsColors::OnHighlightsChanged)
 	ON_COMMAND(IDC_CHECK5,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO1,				&COptionsColors::OnSettingsChanged)
 	ON_COMMAND(IDC_RADIO2,				&COptionsColors::OnSettingsChanged)
@@ -109,11 +109,16 @@ void COptionsColors::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2,          m_ComboFont);
 	DDX_Control(pDX, IDC_COMBO3,          m_ComboPreset);
 	DDX_Control(pDX, IDC_COMBO4,          m_ComboDPIAwareness);
+	DDX_Control(pDX, IDC_BUTTON1,         m_BtnColor[0]);
+	DDX_Control(pDX, IDC_BUTTON2,         m_BtnColor[1]);
+	DDX_Control(pDX, IDC_BUTTON3,         m_BtnColor[2]);
 	DDX_Control(pDX, IDC_BUTTON4,         m_BtnPreview);
 	DDX_Control(pDX, IDC_TEXT1,           m_TxtColor[0]);
 	DDX_Control(pDX, IDC_TEXT2,           m_TxtColor[1]);
 	DDX_Control(pDX, IDC_TEXT3,           m_TxtColor[2]);
 	DDX_Control(pDX, IDC_SPIN1,           m_ColorSpin);
+	DDX_Control(pDX, IDC_SPIN2,           m_spinRowsPerMeasure);
+	DDX_Control(pDX, IDC_SPIN3,           m_spinRowsPerBeat);
 	DDX_Control(pDX, IDC_PRIMARYHILITE,   m_rpmEdit);
 	DDX_Control(pDX, IDC_SECONDARYHILITE, m_rpbEdit);
 	//}}AFX_DATA_MAP
@@ -173,10 +178,6 @@ BOOL COptionsColors::OnInitDialog()
 	m_ComboItem.SetRedraw(TRUE);
 	m_ComboItem.SetCurSel(0);
 
-	m_BtnColor[0].SubclassDlgItem(IDC_BUTTON1, this);
-	m_BtnColor[1].SubclassDlgItem(IDC_BUTTON2, this);
-	m_BtnColor[2].SubclassDlgItem(IDC_BUTTON3, this);
-
 	m_BtnPreview.SetWindowPos(nullptr,
 		0, 0,
 		HighDPISupport::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, HighDPISupport::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
@@ -186,10 +187,14 @@ BOOL COptionsColors::OnInitDialog()
 	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK3, TrackerSettings::Instance().patternIgnoreSongTimeSignature ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, TrackerSettings::Instance().rememberSongWindows ? BST_CHECKED : BST_UNCHECKED);
-	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
-	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
 	CheckRadioButton(IDC_RADIO3, IDC_RADIO5, IDC_RADIO3 + static_cast<int>(TrackerSettings::Instance().defaultRainbowChannelColors.Get()));
+	GetDlgItem(IDC_CHECK3)->EnableWindow((IsDlgButtonChecked(IDC_CHECK1) || IsDlgButtonChecked(IDC_CHECK4)) ? TRUE : FALSE);
+
+	SetDlgItemInt(IDC_PRIMARYHILITE, TrackerSettings::Instance().m_nRowHighlightMeasures);
+	SetDlgItemInt(IDC_SECONDARYHILITE, TrackerSettings::Instance().m_nRowHighlightBeats);
+	m_spinRowsPerMeasure.SetRange32(0, int32_max);
+	m_spinRowsPerBeat.SetRange32(0, int32_max);
 
 	patternFont = TrackerSettings::Instance().patternFont;
 	m_ComboFont.SetRedraw(FALSE);
@@ -530,6 +535,14 @@ void COptionsColors::OnColorSelChanged()
 		OnUpdateDialog();
 	}
 }
+
+
+void COptionsColors::OnHighlightsChanged()
+{
+	GetDlgItem(IDC_CHECK3)->EnableWindow((IsDlgButtonChecked(IDC_CHECK1) || IsDlgButtonChecked(IDC_CHECK4)) ? TRUE : FALSE);
+	OnSettingsChanged();
+}
+
 
 void COptionsColors::OnSettingsChanged()
 {

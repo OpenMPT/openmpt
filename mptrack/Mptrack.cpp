@@ -1310,7 +1310,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpiPerMonitor);
 		break;
 	default:
-		MPT_ASSERT_NOTREACHED();
+		// Malformed entry in INI file
+		TrackerSettings::Instance().dpiAwareness = DPIAwarenessMode::PerMonitorDPIAware;
+		HighDPISupport::SetDPIAwareness(HighDPISupport::Mode::HighDpiPerMonitor);
 		break;
 	}
 
