@@ -3989,7 +3989,6 @@ static MPT_NOINLINE void TestITCompression()
 	// Test loading / saving of IT-compressed samples
 	const int sampleDataSize = 65536;
 	std::vector<int8> sampleData(sampleDataSize, 0);
-	std::srand(0);
 	for(int i = 0; i < sampleDataSize; i++)
 	{
 		sampleData[i] = mpt::random<int8>(*s_PRNG);
