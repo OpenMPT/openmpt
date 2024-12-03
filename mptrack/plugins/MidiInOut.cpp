@@ -180,9 +180,12 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 #endif
 	if(flags & kMacrosPresent)
 	{
-		mpt::IO::WriteIntLE<uint32>(s, 0);  // Initial dump ID
-		mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_initialMidiDump.size()));
-		mpt::IO::Write(s, m_initialMidiDump);
+		if(!m_initialMidiDump.empty())
+		{
+			mpt::IO::WriteIntLE<uint32>(s, uint32_max);  // Initial dump ID
+			mpt::IO::WriteIntLE<uint32>(s, static_cast<uint32>(m_initialMidiDump.size()));
+			mpt::IO::Write(s, m_initialMidiDump);
+		}
 		for(size_t i = 0; i < m_parameterMacros.size(); i++)
 		{
 			if(!m_parameterMacros[i].first.empty())
@@ -283,7 +286,7 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 			const auto [dumpID, dumpSize] = file.ReadArray<uint32le, 2>();
 			if((!dumpID && !dumpSize) || !file.CanRead(dumpSize))
 				break;
-			if(dumpID == 0)
+			if(dumpID == uint32_max)
 			{
 				file.ReadVector(m_initialMidiDump, dumpSize);
 				m_alwaysSendInitialDump = (flags & kAlwaysSendDump) != 0;
