@@ -1,4 +1,4 @@
-name: FreeBSD 14.1 Makefile
+name: FreeBSD 14.2 Makefile
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.1'
+        version: '14.2'
         shell: bash
         sync_files: runner-to-vm
         shutdown_vm: false
@@ -33,7 +33,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.1'
+        version: '14.2'
         shell: bash
         sync_files: false
         shutdown_vm: false
@@ -46,7 +46,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.1'
+        version: '14.2'
         shell: bash
         sync_files: false
         shutdown_vm: false
@@ -58,7 +58,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.1'
+        version: '14.2'
         shell: bash
         sync_files: false
         shutdown_vm: false
@@ -70,7 +70,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.1'
+        version: '14.2'
         shell: bash
         sync_files: false
         shutdown_vm: true
