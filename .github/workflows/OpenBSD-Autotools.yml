@@ -27,7 +27,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@595d543e5d1aeb6d48c0a176965028afe56c7018
+      uses: cross-platform-actions/action@v0.26.0
       with:
         architecture: x86_64
         memory: 4G
@@ -38,7 +38,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@595d543e5d1aeb6d48c0a176965028afe56c7018
+      uses: cross-platform-actions/action@v0.26.0
       with:
         architecture: x86_64
         memory: 4G
@@ -53,7 +53,7 @@ jobs:
           sudo pkg_add -I ${{ (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
           sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
     - name: Build
-      uses: cross-platform-actions/action@595d543e5d1aeb6d48c0a176965028afe56c7018
+      uses: cross-platform-actions/action@v0.26.0
       with:
         architecture: x86_64
         memory: 4G
@@ -65,7 +65,7 @@ jobs:
         run: |
           export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
-      uses: cross-platform-actions/action@595d543e5d1aeb6d48c0a176965028afe56c7018
+      uses: cross-platform-actions/action@v0.26.0
       with:
         architecture: x86_64
         memory: 4G
