@@ -6481,6 +6481,8 @@ uint32 CSoundFile::GetFreqFromPeriod(uint32 period, uint32 c5speed, int32 nPerio
 				octave = ((14 - div) & 0x1F);
 			} else
 			{
+				if(period > 29 * 768)
+					return 0;
 				octave = (period / 768) + 2;
 			}
 			return (XMLinearTable[period % 768] << (FREQ_FRACBITS + 2)) >> octave;
