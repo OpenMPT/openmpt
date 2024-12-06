@@ -395,6 +395,10 @@ static TEMPO MMDTempoToBPM(uint32 tempo, bool is8Ch, bool softwareMixing, bool b
 {
 	if(bpmMode && !is8Ch)
 	{
+		// Observed in OctaMED 5 and MED SoundStudio 1.03 (bug?)
+		if(tempo < 7)
+			return TEMPO(111.5);
+
 		// You would have thought that we could use modern tempo mode here.
 		// Alas, the number of ticks per row still influences the tempo. :(
 		return TEMPO((tempo * rowsPerBeat) / 4.0);
@@ -654,7 +658,8 @@ static bool TranslateMEDPattern(FileReader &file, FileReader &cmdExt, CPattern &
 			if(note >= NOTE_MIDDLEC + 2 * 12)
 				needInstruments = true;
 
-			if(note > NOTE_MIN + 131)
+			// This doesn't happen in MED SoundStudio for Windows... closest we have to be able to identify it is the usage of 7-bit volume
+			if(note > NOTE_MIN + 131 && !ctx.vol7bit)
 				note -= 108;
 			else if(note > NOTE_MAX)
 				note -= mpt::align_down(note - (NOTE_MAX - 11), 12);
@@ -1085,15 +1090,6 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			needInstruments = true;
 			instr.Transpose(-24);
-		} else if(!isSynth && (hardwareMixSamples || sampleHeader.sampleTranspose))
-		{
-			int offset = NOTE_MIDDLEC + (hardwareMixSamples ? 24 : 36);
-			for(auto &note : instr.NoteMap)
-			{
-				int realNote = note + sampleHeader.sampleTranspose;
-				if(realNote >= offset)
-					note -= static_cast<uint8>(mpt::align_down(realNote - offset + 12, 12));
-			}
 		}
 
 		// midiChannel = 0xFF == midi instrument but with invalid channel, midiChannel = 0x00 == sample-based instrument?
@@ -1123,6 +1119,17 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 		if(sampleHeader.midiPreset > 0 && sampleHeader.midiPreset <= 128)
 		{
 			instr.nMidiProgram = sampleHeader.midiPreset;
+		}
+
+		if(!instr.nMidiChannel != MidiNoChannel)
+		{
+			int offset = NOTE_MIDDLEC + (hardwareMixSamples ? 24 : 36);
+			for(auto &note : instr.NoteMap)
+			{
+				int realNote = note + sampleHeader.sampleTranspose;
+				if(realNote >= offset)
+					note -= static_cast<uint8>(mpt::align_down(realNote - offset + 12, 12));
+			}
 		}
 
 		for(SAMPLEINDEX i = 0; i < numSamples; i++)
