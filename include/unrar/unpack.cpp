@@ -53,7 +53,7 @@ Unpack::~Unpack()
   InitFilters30(false);
 #endif
 
-  free(Window);
+  Alloc.delete_l<byte>(Window); // delete Window;
 #ifdef RAR_SMP
   delete UnpThreadPool;
   delete[] ReadBufMT;
@@ -123,11 +123,19 @@ void Unpack::Init(uint64 WinSize,bool Solid)
   if (Solid && (Window!=NULL || Fragmented && WinSize>FragWindow.GetWinSize()))
     throw std::bad_alloc();
 
-  free(Window);
+  Alloc.delete_l<byte>(Window); // delete Window;
+  Window=nullptr;
   
-  Window=Fragmented ? NULL : (byte *)malloc((size_t)WinSize);
+  try
+  {
+    if (!Fragmented)
+      Window=Alloc.new_l<byte>((size_t)WinSize,false); // Window=new byte[(size_t)WinSize];
+  }
+  catch (std::bad_alloc) // Use the fragmented window in this case.
+  {
+  }
 
-  if (Window==NULL)
+  if (Window==nullptr)
     if (WinSize<0x1000000 || sizeof(size_t)>4)
       throw std::bad_alloc(); // Exclude RAR4, small dictionaries and 64-bit.
     else

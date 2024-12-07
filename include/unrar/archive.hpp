@@ -58,7 +58,7 @@ class Archive:public File
     bool ProhibitQOpen;
 #endif
   public:
-    Archive(CommandData *InitCmd=NULL);
+    Archive(CommandData *InitCmd=nullptr);
     ~Archive();
     static RARFORMAT IsSignature(const byte *D,size_t Size);
     bool IsArchive(bool EnableBroken);
@@ -147,6 +147,9 @@ class Archive:public File
     bool NewArchive;
 
     std::wstring FirstVolumeName;
+#ifdef PROPAGATE_MOTW
+    MarkOfTheWeb Motw;
+#endif
 };
 
 
