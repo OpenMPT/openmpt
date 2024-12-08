@@ -10,6 +10,7 @@ class LargePageAlloc
     bool delete_large(void *Addr);
 #ifdef _WIN_ALL
     std::vector<void*> LargeAlloc;
+    [[maybe_unused]]  // OPENMPT ADDITION
     SIZE_T PageSize;
 #endif
     bool UseLargePages;
