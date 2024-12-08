@@ -263,6 +263,8 @@ void ModChannel::PlayControl(uint8 param)
 	case 2: dwFlags.set(CHN_PINGPONGFLAG, false); break;
 	case 3: dwFlags.set(CHN_PINGPONGFLAG, true); break;
 	case 4: dwFlags.flip(CHN_PINGPONGFLAG); break;
+	case 5: if(isFirstTick) oldOffset = position.GetUInt(); break;
+	case 6: if(isFirstTick) position.Set(oldOffset); break;
 	}
 }
 

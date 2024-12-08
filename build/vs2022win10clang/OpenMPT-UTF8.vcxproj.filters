@@ -2183,6 +2183,9 @@
     <ClCompile Include="..\..\soundlib\Load_symmod.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_tcb.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_uax.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

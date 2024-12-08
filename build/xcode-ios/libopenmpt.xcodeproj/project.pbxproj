@@ -20,6 +20,7 @@
 		1553F71F02BB89D19FB57D5F /* WavesReverb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A11A78A94C41905798FE7 /* WavesReverb.cpp */; };
 		168C3C51AED92203DD202291 /* Message.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 681E06B9AC6CAC2BEE93E4F9 /* Message.cpp */; };
 		18C62C9BF7E346CDD3ECA2DB /* SampleIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78CAB4630B587E55743122A3 /* SampleIO.cpp */; };
+		19C908D7F8E62309D4EF7F17 /* Load_tcb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A166DF062F30D16F07D51F /* Load_tcb.cpp */; };
 		1CD4D902FBF1F334D7FB4F42 /* mptFileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */; };
 		1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F52A05ED3A145D015C87E9E /* Profiler.cpp */; };
 		1E48E6EB2E2E131D1AA19D2B /* Gargle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78BD15B31AA6B1A511CDC3F3 /* Gargle.cpp */; };
@@ -411,6 +412,7 @@
 		73262ABB150FC6AD0C36D8FB /* DMOUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DMOUtils.h; path = ../../soundlib/plugins/dmo/DMOUtils.h; sourceTree = "<group>"; };
 		7355A89F850CE891FA7AD6DF /* libopenmpt_ext_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = libopenmpt_ext_impl.cpp; path = ../../libopenmpt/libopenmpt_ext_impl.cpp; sourceTree = "<group>"; };
 		73781183B7C6B6F5F9EDEFC3 /* Snd_flt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Snd_flt.cpp; path = ../../soundlib/Snd_flt.cpp; sourceTree = "<group>"; };
+		73A166DF062F30D16F07D51F /* Load_tcb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_tcb.cpp; path = ../../soundlib/Load_tcb.cpp; sourceTree = "<group>"; };
 		73A52C155E915207A6771A55 /* EQ.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EQ.h; path = ../../sounddsp/EQ.h; sourceTree = "<group>"; };
 		746376CDCBC8E9BF7DD7050D /* modcommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = modcommand.cpp; path = ../../soundlib/modcommand.cpp; sourceTree = "<group>"; };
 		74D7DB33E5FA7C259BC12973 /* Snd_fx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Snd_fx.cpp; path = ../../soundlib/Snd_fx.cpp; sourceTree = "<group>"; };
@@ -1356,6 +1358,7 @@
 				0735F17599C3BB67029C5FB5 /* Load_stm.cpp */,
 				666A8F1BF8F8590D61D0FD5B /* Load_stp.cpp */,
 				7D070D1F43950491B1972B5F /* Load_symmod.cpp */,
+				73A166DF062F30D16F07D51F /* Load_tcb.cpp */,
 				54393E69E6C7085B4F9FACA9 /* Load_uax.cpp */,
 				7FD19A57125F64497B380897 /* Load_ult.cpp */,
 				9EEAF28B0C1300FD0DA5F0CB /* Load_unic.cpp */,
@@ -1703,6 +1706,7 @@
 				97AC91CD76C9ABFF52D3080D /* Load_stm.cpp in Sources */,
 				FE6ED6D3DD8BF105B9954D13 /* Load_stp.cpp in Sources */,
 				CF116C1742F9E3C965479257 /* Load_symmod.cpp in Sources */,
+				19C908D7F8E62309D4EF7F17 /* Load_tcb.cpp in Sources */,
 				4174F40120920E33FC9B6A41 /* Load_uax.cpp in Sources */,
 				F4EF37CFD40C5201B015AE0F /* Load_ult.cpp in Sources */,
 				84F9B8439FC626F5A396BE83 /* Load_unic.cpp in Sources */,

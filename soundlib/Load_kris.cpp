@@ -46,7 +46,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderKRIS(MemoryFileReader file, c
 
 bool CSoundFile::ReadKRIS(FileReader &file, ModLoadingFlags loadFlags)
 {
-	if (!file.Seek(952) || !file.ReadMagic("KRIS"))
+	if(!file.Seek(952) || !file.ReadMagic("KRIS"))
 		return false;
 
 	const auto [numOrders, restartPos] = file.ReadArray<uint8, 2>();

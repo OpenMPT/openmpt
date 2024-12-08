@@ -252,6 +252,9 @@ stp="STP3\x02"
 
 symmod="SymM\x00\x00\x00\x01\xFF\xFF\xFF\xFF\x00\x00\x00"
 
+tcb="AN COOL.\x01\x00\x00\x00\0x0D\x00"
+#tcb="AN COOL!"
+
 ult="MAS_UTrack_V004"
 
 #unic="UNIC"
