@@ -3220,8 +3220,7 @@ bool CSoundFile::ProcessEffects()
 						// no memory here.
 						volcmd = VOLCMD_NONE;
 					}
-
-				} else if(!m_playBehaviour[kITVolColMemory])
+				} else if(!m_playBehaviour[kITVolColMemory] && volcmd != VOLCMD_PLAYCONTROL)
 				{
 					// IT Compatibility: Effects in the volume column don't have an unified memory.
 					// Test case: VolColMemory.it
