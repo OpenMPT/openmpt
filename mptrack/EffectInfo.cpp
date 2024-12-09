@@ -1112,12 +1112,18 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s, bool hex) c
 		break;
 
 	case VOLCMD_PLAYCONTROL:
-		if(m.vol == 0)
-			*s = _T("Pause Playback");
-		else if(m.vol == 1)
-			*s = _T("Continue Playback");
+		switch(m.vol)
+		{
+		case 0: *s = _T("Pause Playback"); break;
+		case 1: *s = _T("Continue Playback"); break;
+		case 2: *s = _T("Play Forward"); break;
+		case 3: *s = _T("Play Backward"); break;
+		case 4: *s = _T("Switch Play Direction"); break;
+		case 5: *s = _T("Store Offset"); break;
+		case 6: *s = _T("Play From Offset"); break;
+		default: *s = _T("unused"); break;
+		}
 		break;
-
 	default:
 		*s = volume;
 		break;
