@@ -3310,7 +3310,8 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_PLAYCONTROL:
-					chn.PlayControl(vol);
+					if(chn.isFirstTick)
+						chn.PlayControl(vol);
 					break;
 
 				default:
