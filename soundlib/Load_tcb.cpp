@@ -36,6 +36,11 @@ struct TCBFileHeader
 			return false;
 		if(tempo > 15 || unused1 || lastOrder > 127 || unused2 || numPatterns > 128)
 			return false;
+		for(uint8 ord : order)
+		{
+			if(ord >= 128)
+				return false;
+		}
 		return true;
 	}
 
