@@ -133,7 +133,7 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 				break;
 			case 0x0B:  // Interrupt sample
 			case 0x0C:  // Continue sample after interrupt
-				m.SetVolumeCommand(VOLCMD_PLAYCONTROL, ((specialValues[0x0B] == 2) ? 5 : 0) + ((instrEffect & 0x0F) - 0x0B));
+				m.SetVolumeCommand(VOLCMD_PLAYCONTROL, static_cast<ModCommand::VOL>(((specialValues[0x0B] == 2) ? 5 : 0) + ((instrEffect & 0x0F) - 0x0B)));
 				break;
 			case 0x0D:
 				m.SetEffectCommand(CMD_PATTERNBREAK, 0);
