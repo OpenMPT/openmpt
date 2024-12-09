@@ -1,7 +1,7 @@
 /*
  * Load_tcb.cpp
  * ------------
- * Purpose: TCB Tracker loader
+ * Purpose: TCB Tracker module loader
  * Notes  : Based on the manual scan available at https://files.scene.org/view/resources/gotpapers/manuals/tcb_tracker_1.0_manual_1990.pdf
  *          and a bit of messing about in TCB Tracker 1.0 and 1.1.
  * Authors: OpenMPT Devs
@@ -135,10 +135,10 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 			case 0x0C:  // Continue sample after interrupt
 				m.SetVolumeCommand(VOLCMD_PLAYCONTROL, static_cast<ModCommand::VOL>(((specialValues[0x0B] == 2) ? 5 : 0) + ((instrEffect & 0x0F) - 0x0B)));
 				break;
-			case 0x0D:
+			case 0x0D:  // End Pattern
 				m.SetEffectCommand(CMD_PATTERNBREAK, 0);
 				break;
-			default:
+			default:  // Pitch Bend
 				if(int value = specialValues[(instrEffect & 0x0F)]; value > 0)
 					m.SetEffectCommand(CMD_PORTAMENTODOWN, mpt::saturate_cast<ModCommand::PARAM>((value + 16) / 32));
 				else if(value < 0)
