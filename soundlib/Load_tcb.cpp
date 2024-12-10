@@ -22,7 +22,7 @@ struct TCBFileHeader
 	uint8    tempo;
 	uint8    unused1;
 	uint8    order[128];
-	uint8    lastOrder;
+	uint8    restartOrder;
 	uint8    unused2;  // Supposed to be part of lastOrder but then it would have to be a little-endian word
 
 	bool IsNewFormat() const
@@ -34,7 +34,7 @@ struct TCBFileHeader
 	{
 		if(memcmp(magic, "AN COOL.", 8) && memcmp(magic, "AN COOL!", 8))
 			return false;
-		if(tempo > 15 || unused1 || lastOrder > 127 || unused2 || numPatterns > 128)
+		if(tempo > 15 || unused1 || restartOrder > 127 || unused2 || numPatterns > 128)
 			return false;
 		for(uint8 ord : order)
 		{
@@ -85,7 +85,7 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 	SetupMODPanning(true);
 	Order().SetDefaultSpeed(16 - fileHeader.tempo);
 	Order().SetDefaultTempoInt(125);
-	ReadOrderFromArray(Order(), fileHeader.order, fileHeader.lastOrder + 1);
+	ReadOrderFromArray(Order(), fileHeader.order, std::max(uint8(1), fileHeader.restartOrder));
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_IMPORTED);
 	m_playBehaviour.set(kApplyUpperPeriodLimit);
