@@ -22,8 +22,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(QuickStartDlg, ResizableDialog)
-	ON_WM_SIZE()
-
 	ON_COMMAND(IDC_BUTTON1,   &QuickStartDlg::OnNew)
 	ON_COMMAND(IDC_BUTTON2,   &QuickStartDlg::OnOpen)
 	ON_COMMAND(ID_REMOVE,     &QuickStartDlg::OnRemoveMRUItem)
@@ -121,12 +119,15 @@ void QuickStartDlg::OnDPIChanged()
 
 	if(m_prevDPI)
 	{
-		CRect windowRect{CPoint{}, m_prevSize};
+		// We don't use this as a stand-alone dialog but rather embed it in the MDI child area, and it is not resized automatically.
+		CRect windowRect;
+		GetClientRect(windowRect);
 		windowRect.right = Util::muldiv(windowRect.right, GetDPI(), m_prevDPI);
 		windowRect.bottom = Util::muldiv(windowRect.bottom, GetDPI(), m_prevDPI);
 		HighDPISupport::AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle(), GetDPI());
 		SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
 	}
+	m_prevDPI = GetDPI();
 
 	m_list.SetImageList(&CMainFrame::GetMainFrame()->m_PatternIcons, LVSIL_SMALL);
 	m_list.SetColumnWidth(0, LVSCW_AUTOSIZE);
@@ -192,14 +193,6 @@ void QuickStartDlg::UpdateHeight()
 	LimitMax(windowRect.bottom, maxHeight);
 	HighDPISupport::AdjustWindowRectEx(windowRect, GetStyle(), FALSE, GetExStyle(), GetDPI());
 	SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOMOVE);
-}
-
-
-void QuickStartDlg::OnSize(UINT nType, int cx, int cy)
-{
-	ResizableDialog::OnSize(nType, cx, cy);
-	m_prevSize.SetSize(cx, cy);
-	m_prevDPI = GetDPI();
 }
 
 

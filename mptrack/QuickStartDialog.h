@@ -38,7 +38,6 @@ protected:
 	size_t GetItemIndex(int index) const { return static_cast<size_t>(m_list.GetItemData(index) & 0x00FF'FFFF); }
 	int GetItemGroup(int index) const { return static_cast<int>(m_list.GetItemData(index) >> 24); }
 
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNew();
 	afx_msg void OnOpen();
 	afx_msg void OnRemoveMRUItem();
@@ -55,8 +54,7 @@ protected:
 	AccessibleButton m_newButton, m_openButton;
 	CBitmap m_bmpNew, m_bmpOpen;
 	std::array<std::vector<mpt::PathString>, 3> m_paths;
-	CSize m_prevSize;
-	int m_prevDPI = 96;
+	int m_prevDPI = 0;
 	bool m_groupsEnabled = false;
 };
 
