@@ -92,8 +92,6 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 
 	const bool newFormat = fileHeader.IsNewFormat();
 	bool useAmigaFreqs = false;
-	std::array<char[8], 16> instrNames{};
-	std::array<int16be, 16> specialValues{};
 	if(newFormat)
 	{
 		uint16 amigaFreqs = file.ReadUint16BE();
@@ -101,9 +99,17 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 			return false;
 		useAmigaFreqs = amigaFreqs != 0;
 	}
-	file.ReadStruct(instrNames);
+	const auto instrNames = file.ReadArray<char[8], 16>();
+	std::array<int16be, 16> specialValues{};
 	if(newFormat)
+	{
 		file.ReadStruct(specialValues);
+	} else
+	{
+		// A pure guess, the only old-format file I found doesn't even use these...
+		static constexpr std::array<int16, 16> defaultSpecialValues{0, 10, 30, 50, 70, 90, -10, -30, -50, -70, -90, 0, 0, 0, 0, 0};
+		std::copy(defaultSpecialValues.begin(), defaultSpecialValues.end(), specialValues.begin());
+	}
 
 	m_nMinPeriod = useAmigaFreqs ? 113 * 4 : 92 * 4;
 	m_nMaxPeriod = useAmigaFreqs ? 856 * 4 : 694 * 4;
@@ -161,24 +167,24 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 	m_nSamples = 16;
 	for(SAMPLEINDEX smp = 1; smp <= 16; smp++)
 	{
-		ModSample &mptSample = Samples[smp];
-		mptSample.Initialize(MOD_TYPE_MOD);
-		mptSample.nVolume = std::min(sampleHeaders1.ReadUint8(), uint8(127)) * 2;
+		ModSample &mptSmp = Samples[smp];
+		mptSmp.Initialize(MOD_TYPE_MOD);
+		mptSmp.nVolume = std::min(sampleHeaders1.ReadUint8(), uint8(127)) * 2;
 		sampleHeaders1.Skip(1);  // Empty value according to docs
-		mptSample.nLoopStart = sampleHeaders1.ReadUint16BE();
+		mptSmp.nLoopStart = sampleHeaders1.ReadUint16BE();
 		uint32 offset = sampleHeaders2.ReadUint32BE();
-		mptSample.nLength = sampleHeaders2.ReadUint32BE();
-		if(mptSample.nLoopStart && mptSample.nLoopStart < mptSample.nLength)
+		mptSmp.nLength = sampleHeaders2.ReadUint32BE();
+		if(mptSmp.nLoopStart && mptSmp.nLoopStart < mptSmp.nLength)
 		{
-			mptSample.nLoopEnd = mptSample.nLength;
-			mptSample.nLoopStart = mptSample.nLength - mptSample.nLoopStart;
-			mptSample.uFlags.set(CHN_LOOP);
+			mptSmp.nLoopEnd = mptSmp.nLength;
+			mptSmp.nLoopStart = mptSmp.nLength - mptSmp.nLoopStart;
+			mptSmp.uFlags.set(CHN_LOOP);
 		}
 		if(!useAmigaFreqs)
-			mptSample.nFineTune = 5 * 16;
+			mptSmp.nFineTune = 5 * 16;
 
-		if((loadFlags & loadSampleData) && file.Seek(sampleStart + offset))
-			sampleIO.ReadSample(mptSample, file);
+		if((loadFlags & loadSampleData) && mptSmp.nLength > 1 && file.Seek(sampleStart + offset))
+			sampleIO.ReadSample(mptSmp, file);
 
 		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded, instrNames[smp - 1]);
 	}

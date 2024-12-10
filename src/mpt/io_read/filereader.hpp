@@ -267,7 +267,7 @@ template <typename T, std::size_t destSize, typename TFileCursor>
 bool ReadArray(TFileCursor & f, std::array<T, destSize> & destArray) {
 	static_assert(mpt::is_binary_safe<T>::value);
 	if (!f.CanRead(sizeof(destArray))) {
-		destArray.fill(T{});
+		mpt::reset(destArray);
 		return false;
 	}
 	f.ReadRaw(mpt::as_raw_memory(destArray));
