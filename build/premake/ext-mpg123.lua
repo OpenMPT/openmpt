@@ -125,5 +125,7 @@ function mpt_use_mpg123 ()
 		links {
 			"mpg123",
 		}
+	filter { "action:vs*" }
+		defines { "LINK_MPG123_DLL" }
 	filter {}
 end
