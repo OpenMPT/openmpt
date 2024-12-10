@@ -459,7 +459,7 @@ void CMainFrame::OnClose()
 
 	BeginWaitCursor();
 	if (IsPlaying()) PauseMod();
-	if (pMDIActive) pMDIActive->SavePosition(TRUE);
+	if (pMDIActive) pMDIActive->SavePosition(true);
 
 	if(gpSoundDevice)
 	{

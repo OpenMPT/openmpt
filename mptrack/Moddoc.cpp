@@ -2120,7 +2120,7 @@ void CModDoc::OnPlayerPlay()
 	if (pMainFrm)
 	{
 		CChildFrame *pChildFrm = GetChildFrame();
- 		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+ 		if(pChildFrm->IsPatternView())
 		{
 			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
@@ -2221,7 +2221,7 @@ void CModDoc::OnPlayerPlayFromStart()
 	if (pMainFrm)
 	{
 		CChildFrame *pChildFrm = GetChildFrame();
-		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		if(pChildFrm->IsPatternView())
 		{
 			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);
@@ -2459,7 +2459,7 @@ void CModDoc::GetEditPosition(ROWINDEX &row, PATTERNINDEX &pat, ORDERINDEX &ord)
 {
 	CChildFrame *pChildFrm = GetChildFrame();
 
-	if(strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0) // dirty HACK
+	if(pChildFrm->IsPatternView())
 	{
 		PatternViewState patternViewState;
 		pChildFrm->SendViewMessage(VIEWMSG_SAVESTATE, (LPARAM)(&patternViewState));
@@ -2516,7 +2516,7 @@ void CModDoc::OnPatternRestart(bool loop)
 
 	if ((pMainFrm) && (pChildFrm))
 	{
-		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		if(pChildFrm->IsPatternView())
 		{
 			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, loop ? 1 : 0);
@@ -2572,7 +2572,7 @@ void CModDoc::OnPatternPlay()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
-		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		if(pChildFrm->IsPatternView())
 		{
 			//User has sent play pattern command: set loop pattern checkbox to true.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 1);
@@ -2623,7 +2623,7 @@ void CModDoc::OnPatternPlayNoLoop()
 
 	if ((pMainFrm) && (pChildFrm))
 	{
-		if (strcmp("CViewPattern", pChildFrm->GetCurrentViewClassName()) == 0)
+		if(pChildFrm->IsPatternView())
 		{
 			//User has sent play song command: set loop pattern checkbox to false.
 			pChildFrm->SendViewMessage(VIEWMSG_PATTERNLOOP, 0);

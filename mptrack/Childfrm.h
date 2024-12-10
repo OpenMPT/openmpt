@@ -99,23 +99,23 @@ protected:
 // Attributes
 protected:
 	CSplitterWnd m_wndSplitter;
-	HWND m_hWndCtrl, m_hWndView;
+	HWND m_hWndCtrl = nullptr, m_hWndView = nullptr;
 	GeneralViewState m_ViewGeneral;
 	PatternViewState m_ViewPatterns;
 	SampleViewState m_ViewSamples;
 	InstrumentViewState m_ViewInstruments;
 	CommentsViewState m_ViewComments;
-	CHAR m_szCurrentViewClassName[256];
-	bool m_bMaxWhenClosed;
-	bool m_bInitialActivation;
+	std::string m_currentViewClassName;
+	int m_dpi = 0;
+	bool m_maxWhenClosed = false;
+	bool m_initialActivation = true;
 
 // Operations
 public:
-	CModControlView *GetModControlView() const { return (CModControlView *)m_wndSplitter.GetPane(0, 0); }
-	BOOL ChangeViewClass(CRuntimeClass* pNewViewClass, CCreateContext* pContext=NULL);
+	CModControlView *GetModControlView() const { return reinterpret_cast<CModControlView *>(m_wndSplitter.GetPane(0, 0)); }
+	BOOL ChangeViewClass(CRuntimeClass *pNewViewClass, CCreateContext *pContext = nullptr);
 	void ForceRefresh();
-	void SavePosition(BOOL bExit=FALSE);
-	const char *GetCurrentViewClassName() const;
+	void SavePosition(bool exit = false);
 	LRESULT SendCtrlMessage(UINT uMsg, LPARAM lParam = 0) const;
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam = 0) const;
 	LRESULT ActivateView(UINT nId, LPARAM lParam);
@@ -126,6 +126,8 @@ public:
 	SampleViewState &GetSampleViewState() { return m_ViewSamples; }
 	InstrumentViewState &GetInstrumentViewState() { return m_ViewInstruments; }
 	CommentsViewState &GetCommentViewState() { return m_ViewComments; }
+
+	bool IsPatternView() const;
 
 	void SetSplitterHeight(int x);
 	int GetSplitterHeight();
