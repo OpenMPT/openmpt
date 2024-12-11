@@ -22,7 +22,7 @@ struct TCBFileHeader
 	uint8    tempo;
 	uint8    unused1;
 	uint8    order[128];
-	uint8    restartOrder;
+	uint8    numOrders;
 	uint8    unused2;  // Supposed to be part of lastOrder but then it would have to be a little-endian word
 
 	bool IsNewFormat() const
@@ -34,7 +34,7 @@ struct TCBFileHeader
 	{
 		if(memcmp(magic, "AN COOL.", 8) && memcmp(magic, "AN COOL!", 8))
 			return false;
-		if(tempo > 15 || unused1 || restartOrder > 127 || unused2 || numPatterns > 128)
+		if(tempo > 15 || unused1 || numOrders > 127 || unused2 || numPatterns > 128)
 			return false;
 		for(uint8 ord : order)
 		{
@@ -85,7 +85,7 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 	SetupMODPanning(true);
 	Order().SetDefaultSpeed(16 - fileHeader.tempo);
 	Order().SetDefaultTempoInt(125);
-	ReadOrderFromArray(Order(), fileHeader.order, std::max(uint8(1), fileHeader.restartOrder));
+	ReadOrderFromArray(Order(), fileHeader.order, std::max(uint8(1), fileHeader.numOrders));
 	m_nSamplePreAmp = 64;
 	m_SongFlags.set(SONG_IMPORTED);
 	m_playBehaviour.set(kApplyUpperPeriodLimit);
@@ -102,14 +102,7 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 	const auto instrNames = file.ReadArray<char[8], 16>();
 	std::array<int16be, 16> specialValues{};
 	if(newFormat)
-	{
 		file.ReadStruct(specialValues);
-	} else
-	{
-		// A pure guess, the only old-format file I found doesn't even use these...
-		static constexpr std::array<int16, 16> defaultSpecialValues{0, 10, 30, 50, 70, 90, -10, -30, -50, -70, -90, 0, 0, 0, 0, 0};
-		std::copy(defaultSpecialValues.begin(), defaultSpecialValues.end(), specialValues.begin());
-	}
 
 	m_nMinPeriod = useAmigaFreqs ? 113 * 4 : 92 * 4;
 	m_nMaxPeriod = useAmigaFreqs ? 856 * 4 : 694 * 4;
