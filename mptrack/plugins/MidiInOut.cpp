@@ -195,7 +195,7 @@ IMixPlugin::ChunkData MidiInOut::GetChunk(bool /*isBank*/)
 				mpt::IO::WriteRaw(s, m_parameterMacros[i].first.c_str(), m_parameterMacros[i].first.size());
 			}
 		}
-		// End of macor section
+		// End of macro section
 		mpt::IO::WriteIntLE<uint32>(s, 0);
 		mpt::IO::WriteIntLE<uint32>(s, 0);
 	}
@@ -284,7 +284,7 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 		while(file.CanRead(sizeof(uint32le) * 2))
 		{
 			const auto [dumpID, dumpSize] = file.ReadArray<uint32le, 2>();
-			if((!dumpID && !dumpSize) || !file.CanRead(dumpSize))
+			if(!dumpSize || !file.CanRead(dumpSize))
 				break;
 			if(dumpID == uint32_max)
 			{
