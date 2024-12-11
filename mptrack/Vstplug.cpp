@@ -1444,6 +1444,8 @@ void CVstPlugin::PositionChanged()
 		float out = 0.0f;
 		Process(&out, &out, 1);
 		Suspend();
+		// As we have now rendered one sample, reset the position change flag again. Otherwise the last bar start position may be off by a sample.
+		m_positionChanged = true;
 	}
 }
 
