@@ -412,7 +412,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 		if(pVstPlugin)
 		{
 			VstTimeInfo &timeInfo = pVstPlugin->timeInfo;
-			MemsetZero(timeInfo);
+			mpt::reset(timeInfo);
 
 			timeInfo.sampleRate = pVstPlugin->m_nSampleRate;
 			if(pVstPlugin->IsSongPlaying())
@@ -1430,6 +1430,20 @@ void CVstPlugin::Suspend()
 		Dispatch(effStopProcess, 0, 0, nullptr, 0.0f);
 		Dispatch(effMainsChanged, 0, 0, nullptr, 0.0f); // calls plugin's suspend (theoretically, plugins should clean their buffers here, but oh well, the number of plugins which don't do this is surprisingly high.)
 		m_isResumed = false;
+	}
+}
+
+
+void CVstPlugin::PositionChanged()
+{
+	m_positionChanged = true;
+	if(!IsResumed())
+	{
+		Resume();
+		// Electri-Q crashes with a heap corruption if we try to process 0 samples.
+		float out = 0.0f;
+		Process(&out, &out, 1);
+		Suspend();
 	}
 }
 

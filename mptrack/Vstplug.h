@@ -37,10 +37,10 @@ class CVstPlugin final : public IMidiPlugin
 {
 protected:
 
-	bool m_maskCrashes;
-	HMODULE m_hLibrary;
+	const bool m_maskCrashes;
+	HMODULE m_hLibrary = nullptr;
 	Vst::AEffect &m_Effect;
-	Vst::ProcessProc m_pProcessFP = nullptr; // Function pointer to AEffect processReplacing if supported, else process.
+	Vst::ProcessProc m_pProcessFP = nullptr;  // Function pointer to AEffect processReplacing if supported, else process.
 
 	double lastBarStartPos = -1.0;
 	uint32 m_nSampleRate;
@@ -51,13 +51,13 @@ protected:
 	bool m_needIdle : 1;
 	bool m_positionChanged : 1;
 
-	VstEventQueue vstEvents;	// MIDI events that should be sent to the plugin
+	VstEventQueue vstEvents;  // MIDI events that should be sent to the plugin
 
-	Vst::VstTimeInfo timeInfo;
+	Vst::VstTimeInfo timeInfo{};
 
 public:
 
-	const bool isBridged : 1;		// True if our built-in plugin bridge is being used.
+	const bool isBridged : 1;  // True if our built-in plugin bridge is being used.
 
 private:
 
@@ -165,7 +165,7 @@ public:
 
 	void Resume() override;
 	void Suspend() override;
-	void PositionChanged() override { m_positionChanged = true; }
+	void PositionChanged() override;
 
 	// Check whether a VST parameter can be automated
 	bool CanAutomateParameter(PlugParamIndex index);
