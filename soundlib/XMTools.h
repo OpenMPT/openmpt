@@ -95,7 +95,7 @@ struct XMInstrument
 	struct SampleList
 	{
 		std::vector<SAMPLEINDEX> samples;  // The list of samples to write to the file
-		bool tooManySamples;               // Does the source instrument contain more samples than what we can write?
+		bool tooManySamples = false;       // Does the source instrument contain more samples than what we can write?
 	};
 
 	// Convert OpenMPT's internal sample representation to an XMInstrument.
