@@ -136,7 +136,7 @@ static void ReadOKTPattern(FileReader &chunk, PATTERNINDEX pat, CSoundFile &sndF
 					// Default volume only works on raw Paula channels
 					if(pairedChn[chn] && sample.nVolume < 256)
 						m.SetVolumeCommand(VOLCMD_VOLUME, 64);
-					
+
 					// If channel and sample type don't match, stop this channel (add 100 to the instrument number to make it understandable what happened during import)
 					if((sample.cues[0] == 1 && pairedChn[chn] != 0) || (sample.cues[0] == 0 && pairedChn[chn] == 0))
 					{
@@ -457,7 +457,6 @@ bool CSoundFile::ReadOKT(FileReader &file, ModLoadingFlags loadFlags)
 
 		ModSample &mptSample = Samples[smp];
 		const bool needCopy = mptSample.cues[1] != 0;
-		mptSample.SetDefaultCuePoints();
 		if(mptSample.nLength == 0)
 			continue;
 
