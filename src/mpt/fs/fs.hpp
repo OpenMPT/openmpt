@@ -83,7 +83,7 @@ public:
 
 #if !(MPT_WINRT_BEFORE(MPT_WIN_10))
 	mpt::native_path absolute(const mpt::native_path & path) {
-		const auto long_path = mpt::support_long_path(path.AsNative());
+		const mpt::os_path long_path = mpt::support_long_path(path.AsNative());
 		DWORD size = ::GetFullPathName(long_path.c_str(), 0, nullptr, nullptr);
 		if (size == 0) {
 			return path;
