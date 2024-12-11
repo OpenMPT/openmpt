@@ -110,7 +110,7 @@ XMInstrument::SampleList XMInstrument::GetSampleList(const ModInstrument &mptIns
 			continue;
 		// We haven't considered this sample yet.
 		addedToList[smp - 1] = true;
-		if(sampleList.samples.size() < (compatibilityExport ? 16 : 32))
+		if(sampleList.samples.size() < (compatibilityExport ? 16u : 32u))
 			sampleList.samples.push_back(smp);
 		else
 			sampleList.tooManySamples = true;
