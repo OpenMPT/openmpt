@@ -2779,17 +2779,11 @@ LRESULT CModDoc::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		case kcToggleLoopSong: SetLoopSong(!TrackerSettings::Instance().gbLoopSong); break;
 
 		case kcTempoIncreaseFine:
-			if(!modSpecs.hasFractionalTempo)
-				break;
-			[[fallthrough]];
 		case kcTempoIncrease:
 			if(auto tempo = m_SndFile.m_PlayState.m_nMusicTempo; tempo < modSpecs.GetTempoMax())
 				m_SndFile.m_PlayState.m_nMusicTempo = std::min(modSpecs.GetTempoMax(), tempo + TEMPO(wParam == kcTempoIncrease ? 1.0 : 0.1));
 			break;
 		case kcTempoDecreaseFine:
-			if(!modSpecs.hasFractionalTempo)
-				break;
-			[[fallthrough]];
 		case kcTempoDecrease:
 			if(auto tempo = m_SndFile.m_PlayState.m_nMusicTempo; tempo > modSpecs.GetTempoMin())
 				m_SndFile.m_PlayState.m_nMusicTempo = std::max(modSpecs.GetTempoMin(), tempo - TEMPO(wParam == kcTempoDecrease ? 1.0 : 0.1));
