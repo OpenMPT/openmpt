@@ -1024,6 +1024,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Reading Patterns
 	Patterns.ResizeArray(numPats);
+	bool hasVolColOffset = false;
 	for(PATTERNINDEX pat = 0; pat < numPats; pat++)
 	{
 		if(patPos[pat] == 0 || !file.Seek(patPos[pat]))
@@ -1158,7 +1159,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				} else
 				// 213-222: Unused (was velocity)
 				// 223-232: Offset
-				if(vol >= 223 && vol <= 232) { m.volcmd = VOLCMD_OFFSET; m.vol = vol - 223; }
+				if(vol >= 223 && vol <= 232) { m.volcmd = VOLCMD_OFFSET; m.vol = vol - 223; hasVolColOffset = true; }
 				lastValue[ch].volcmd = m.volcmd;
 				lastValue[ch].vol = m.vol;
 			}
@@ -1183,6 +1184,14 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				lastValue[ch].command = m.command;
 				lastValue[ch].param = m.param;
 			}
+		}
+	}
+	// Remove (default) cue points if no volume column offset is found (unless it's a new enough MPTM file, which could contain intentionally-placed custom cue points that we don't want to lose)
+	if(!hasVolColOffset && (GetType() != MOD_TYPE_MPT || m_dwLastSavedWithVersion < MPT_V("1.24.02.06")))
+	{
+		for(SAMPLEINDEX smp = 1; smp <= GetNumSamples(); smp++)
+		{
+			Samples[smp].RemoveAllCuePoints();
 		}
 	}
 
