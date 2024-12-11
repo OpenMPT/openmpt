@@ -65,7 +65,7 @@ protected:
 
 	// MIDI queue entry with small storage optimiziation.
 	// This optimiziation is going to be used for all messages that OpenMPT can send internally,
-	// but SysEx messages received from other plugins may be longer.
+	// but SysEx messages created by this plugin or received from other plugins may be longer.
 	class Message
 	{
 	public:

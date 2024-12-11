@@ -295,12 +295,12 @@ void MidiInOut::SetChunk(const ChunkData &chunk, bool /*isBank*/)
 				m_parameterMacros.resize(dumpID - kMacroParamMin + 1);
 				auto &str = m_parameterMacros[dumpID - kMacroParamMin].first;
 				file.ReadString<mpt::String::maybeNullTerminated>(str, dumpSize);
-				m_parameterMacroScratchSpace.reserve(str.size());
 				std::string::size_type pos;
 				while((pos = str.find_first_not_of(" 0123456789ABCDEFabchmnopsuvxyz")) != std::string::npos)
 				{
 					str.erase(pos, 1);
 				}
+				m_parameterMacroScratchSpace.reserve(str.size() + 1);
 			}
 		}
 	}
