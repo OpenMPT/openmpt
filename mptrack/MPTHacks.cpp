@@ -311,6 +311,7 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	// Check for instrument extensions
 	foundHere = false;
 	bool foundEnvelopes = false;
+	INSTRUMENTINDEX instrWithTooManySmps = 0;
 	for(INSTRUMENTINDEX i = 1; i <= m_SndFile.GetNumInstruments(); i++)
 	{
 		ModInstrument *instr = m_SndFile.Instruments[i];
@@ -346,6 +347,9 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 				instr->nFadeOut = ((instr->nFadeOut + 16) / 32) * 32;
 		}
 
+		if(modType == MOD_TYPE_XM && instr->GetSamples().size() > 16)
+			instrWithTooManySmps++;
+
 		// Incompatible envelope shape
 		foundEnvelopes |= FindIncompatibleEnvelopes(instr->VolEnv, autofix);
 		foundEnvelopes |= FindIncompatibleEnvelopes(instr->PanEnv, autofix);
@@ -356,6 +360,8 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 		AddToLog("Found MPT instrument extensions");
 	if(foundEnvelopes)
 		AddToLog("Two envelope points may not share the same tick");
+	if(instrWithTooManySmps)
+		AddToLog(MPT_AFORMAT("{} instruments use too many samples (16 allowed)")(instrWithTooManySmps));
 
 	for(auto &order : m_SndFile.Order)
 	{

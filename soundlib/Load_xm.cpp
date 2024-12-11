@@ -1390,9 +1390,11 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 			if(Instruments[ins] != nullptr)
 			{
 				// Convert instrument
-				insHeader.ConvertToXM(*Instruments[ins], compatibilityExport);
+				auto sampleList = insHeader.ConvertToXM(*Instruments[ins], compatibilityExport);
+				samples = std::move(sampleList.samples);
+				if(sampleList.tooManySamples)
+					AddToLog(LogInformation, MPT_UFORMAT("Instrument {} references too many samples, only the first {} will be exported.")(ins, samples.size()));
 
-				samples = insHeader.instrument.GetSampleList(*Instruments[ins], compatibilityExport);
 				if(samples.size() > 0 && samples[0] <= GetNumSamples())
 				{
 					// Copy over auto-vibrato settings of first sample
