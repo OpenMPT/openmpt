@@ -120,6 +120,7 @@ void QuickStartDlg::OnDPIChanged()
 	if(m_prevDPI)
 	{
 		// We don't use this as a stand-alone dialog but rather embed it in the MDI child area, and it is not resized automatically.
+		MPT_ASSERT(GetStyle() & WS_CHILD);
 		CRect windowRect;
 		GetClientRect(windowRect);
 		windowRect.right = Util::muldiv(windowRect.right, GetDPI(), m_prevDPI);
@@ -312,10 +313,9 @@ void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 {
 	struct OpenItem
 	{
-		const mpt::PathString path;  // Must create copy because dialog will get destroyed after successfully loading the first file
-		const int item;
-		const int group;
-		const size_t index;
+		mpt::PathString path;  // Must create copy because dialog will get destroyed after successfully loading the first file
+		int item = 0;
+		int group = 0;
 	};
 	std::vector<OpenItem> files;
 	int i = -1;
@@ -323,8 +323,7 @@ void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 	{
 		const int group = GetItemGroup(i);
 		const size_t index = GetItemIndex(i);
-		const auto &path = m_paths[group][index];
-		files.push_back({path, i, group, index});
+		files.push_back({std::move(m_paths[group][index]), i, group});
 	}
 	bool success = false;
 	for(const auto &item : files)
@@ -340,7 +339,6 @@ void QuickStartDlg::OnOpenFile(NMHDR *, LRESULT *)
 		// If at least one item managed to load, the dialog will now be destroyed, and there are no items to delete from the list
 		for(auto it = files.rbegin(); it != files.rend(); it++)
 		{
-			m_paths[it->group][it->index] = {};
 			m_list.DeleteItem(it->item);
 		}
 	}
