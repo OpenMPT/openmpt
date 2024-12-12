@@ -1779,12 +1779,12 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-BEGIN_MESSAGE_MAP(CSplashScreen, CDialog)
+BEGIN_MESSAGE_MAP(CSplashScreen, DialogBase)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
-static CSplashScreen *gpSplashScreen = NULL;
+static CSplashScreen *gpSplashScreen = nullptr;
 
 static DWORD64 gSplashScreenStartTime = 0;
 
@@ -1806,13 +1806,13 @@ void CSplashScreen::OnPaint()
 	gfx.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 	gfx.DrawImage(m_Image.get(), 0, 0, rect.right, rect.bottom);
 
-	CDialog::OnPaint();
+	DialogBase::OnPaint();
 }
 
 
 BOOL CSplashScreen::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	DialogBase::OnInitDialog();
 
 	try
 	{
