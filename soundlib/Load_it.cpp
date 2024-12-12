@@ -2310,45 +2310,44 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 	// Extra song data - Yet Another Hack.
 	mpt::IO::WriteIntLE<uint32>(f, MagicBE("MPTS"));
 
-#define WRITEMODULARHEADER(code, fsize) \
-	{ \
-		mpt::IO::WriteIntLE<uint32>(f, code); \
-		MPT_ASSERT(mpt::in_range<uint16>(fsize)); \
-		const uint16 _size = fsize; \
-		mpt::IO::WriteIntLE<uint16>(f, _size); \
-	}
-#define WRITEMODULAR(code, field) \
-	{ \
-		WRITEMODULARHEADER(code, sizeof(field)) \
-		mpt::IO::WriteIntLE(f, field); \
-	}
+	const auto WriteModularHeader = [](std::ostream &f, uint32 code, size_t fsize)
+	{
+		mpt::IO::WriteIntLE<uint32>(f, code);
+		MPT_ASSERT(mpt::in_range<uint16>(fsize));
+		mpt::IO::WriteIntLE<uint16>(f, static_cast<uint16>(fsize));
+	};
+	const auto WriteModular = [&WriteModularHeader](std::ostream &f, uint32 code, auto field)
+	{
+		WriteModularHeader(f, code, sizeof(field));
+		mpt::IO::WriteIntLE(f, field);
+	};
 
 	if(Order().GetDefaultTempo().GetInt() > 255)
 	{
 		uint32 tempo = Order().GetDefaultTempo().GetInt();
-		WRITEMODULAR(MagicBE("DT.."), tempo);
+		WriteModular(f, MagicBE("DT.."), tempo);
 	}
 	if(Order().GetDefaultTempo().GetFract() != 0 && specs.hasFractionalTempo)
 	{
 		uint32 tempo = Order().GetDefaultTempo().GetFract();
-		WRITEMODULAR(MagicLE("DTFR"), tempo);
+		WriteModular(f, MagicLE("DTFR"), tempo);
 	}
 
 	if(m_nDefaultRowsPerBeat > 255 || m_nDefaultRowsPerMeasure > 255 || GetType() == MOD_TYPE_XM)
 	{
-		WRITEMODULAR(MagicBE("RPB."), m_nDefaultRowsPerBeat);
-		WRITEMODULAR(MagicBE("RPM."), m_nDefaultRowsPerMeasure);
+		WriteModular(f, MagicBE("RPB."), m_nDefaultRowsPerBeat);
+		WriteModular(f, MagicBE("RPM."), m_nDefaultRowsPerMeasure);
 	}
 
 	if(GetType() != MOD_TYPE_XM)
 	{
-		WRITEMODULAR(MagicBE("C..."), GetNumChannels());
+		WriteModular(f, MagicBE("C..."), GetNumChannels());
 	}
 
 	if((GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT)) && GetNumChannels() > 64)
 	{
 		// IT header has only room for 64 channels. Save the settings that do not fit to the header here as an extension.
-		WRITEMODULARHEADER(MagicBE("ChnS"), static_cast<uint16>((GetNumChannels() - 64) * 2));
+		WriteModularHeader(f, MagicBE("ChnS"), (GetNumChannels() - 64) * 2);
 		for(CHANNELINDEX chn = 64; chn < GetNumChannels(); chn++)
 		{
 			uint8 panvol[2];
@@ -2360,37 +2359,41 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		}
 	}
 
+	if(m_nTempoMode != TempoMode::Classic)
 	{
-		WRITEMODULARHEADER(MagicBE("TM.."), 1);
+		WriteModularHeader(f, MagicBE("TM.."), 1);
 		uint8 mode = static_cast<uint8>(m_nTempoMode);
 		mpt::IO::WriteIntLE(f, mode);
 	}
 
 	const int32 tmpMixLevels = static_cast<int32>(m_nMixLevels);
-	WRITEMODULAR(MagicBE("PMM."), tmpMixLevels);
+	WriteModular(f, MagicBE("PMM."), tmpMixLevels);
 
 	if(m_dwCreatedWithVersion)
 	{
-		WRITEMODULAR(MagicBE("CWV."), m_dwCreatedWithVersion.GetRawVersion());
+		WriteModular(f, MagicBE("CWV."), m_dwCreatedWithVersion.GetRawVersion());
 	}
 
-	WRITEMODULAR(MagicBE("LSWV"), Version::Current().GetRawVersion());
-	WRITEMODULAR(MagicBE("SPA."), m_nSamplePreAmp);
-	WRITEMODULAR(MagicBE("VSTV"), m_nVSTiVolume);
+	WriteModular(f, MagicBE("LSWV"), Version::Current().GetRawVersion());
+	if(GetType() == MOD_TYPE_XM || m_nSamplePreAmp > 128)
+	{
+		WriteModular(f, MagicBE("SPA."), m_nSamplePreAmp);
+	}
+	WriteModular(f, MagicBE("VSTV"), m_nVSTiVolume);
 
 	if(GetType() == MOD_TYPE_XM && m_nDefaultGlobalVolume != MAX_GLOBAL_VOLUME)
 	{
-		WRITEMODULAR(MagicBE("DGV."), m_nDefaultGlobalVolume);
+		WriteModular(f, MagicBE("DGV."), m_nDefaultGlobalVolume);
 	}
 
 	if(GetType() != MOD_TYPE_XM && Order().GetRestartPos() != 0)
 	{
-		WRITEMODULAR(MagicBE("RP.."), Order().GetRestartPos());
+		WriteModular(f, MagicBE("RP.."), Order().GetRestartPos());
 	}
 
 	if(m_nResampling != SRCMODE_DEFAULT && specs.hasDefaultResampling)
 	{
-		WRITEMODULAR(MagicLE("RSMP"), static_cast<uint32>(m_nResampling));
+		WriteModular(f, MagicLE("RSMP"), static_cast<uint32>(m_nResampling));
 	}
 
 	// Sample cues
@@ -2404,7 +2407,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 				// Write one chunk for every sample.
 				// Rationale: chunks are limited to 65536 bytes, which can easily be reached
 				// with the amount of samples that OpenMPT supports.
-				WRITEMODULARHEADER(MagicLE("CUES"), static_cast<uint16>(2 + std::size(sample.cues) * 4));
+				WriteModularHeader(f, MagicLE("CUES"), 2 + std::size(sample.cues) * 4);
 				mpt::IO::WriteIntLE<uint16>(f, smp);
 				for(auto cue : sample.cues)
 				{
@@ -2421,7 +2424,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		TempoSwing::Serialize(oStrm, m_tempoSwing);
 		std::string data = oStrm.str();
 		uint16 length = mpt::saturate_cast<uint16>(data.size());
-		WRITEMODULARHEADER(MagicLE("SWNG"), length);
+		WriteModularHeader(f, MagicLE("SWNG"), length);
 		mpt::IO::WriteRaw(f, data.data(), length);
 	}
 
@@ -2440,7 +2443,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 			}
 		}
 		uint16 numBytes = static_cast<uint16>(maxBit / 8u);
-		WRITEMODULARHEADER(MagicBE("MSF."), numBytes);
+		WriteModularHeader(f, MagicBE("MSF."), numBytes);
 		mpt::IO::WriteRaw(f, bits.data(), numBytes);
 	}
 
@@ -2448,7 +2451,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 	{
 		std::string songArtistU8 = mpt::ToCharset(mpt::Charset::UTF8, m_songArtist);
 		uint16 length = mpt::saturate_cast<uint16>(songArtistU8.length());
-		WRITEMODULARHEADER(MagicLE("AUTH"), length);
+		WriteModularHeader(f, MagicLE("AUTH"), length);
 		mpt::IO::WriteRaw(f, songArtistU8.c_str(), length);
 	}
 
@@ -2462,7 +2465,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 			AddToLog(LogWarning, U_("Too many MIDI Mapping directives to save; data won't be written."));
 		} else
 		{
-			WRITEMODULARHEADER(MagicBE("MIMA"), static_cast<uint16>(objectsize));
+			WriteModularHeader(f, MagicBE("MIMA"), objectsize);
 			GetMIDIMapper().Serialize(&f);
 		}
 	}
@@ -2479,7 +2482,7 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		}
 		if(numChannels > 0)
 		{
-			WRITEMODULARHEADER(MagicLE("CCOL"), numChannels * 4);
+			WriteModularHeader(f, MagicLE("CCOL"), numChannels * 4);
 			for(CHANNELINDEX i = 0; i < numChannels; i++)
 			{
 				uint32 color = ChnSettings[i].color;
@@ -2491,9 +2494,6 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 		}
 	}
 #endif
-
-#undef WRITEMODULAR
-#undef WRITEMODULARHEADER
 }
 
 #endif // MODPLUG_NO_FILESAVE
@@ -2571,7 +2571,10 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 			case MagicLE("CCOL"):
 				// Channel colors
 				{
-					const CHANNELINDEX numChannels = std::min(MAX_BASECHANNELS, static_cast<CHANNELINDEX>(size / 4u));
+					const CHANNELINDEX channelsInFile = static_cast<CHANNELINDEX>(size / 4u);
+					if(!ignoreChannelCount)
+						ChnSettings.resize(std::clamp(GetNumChannels(), channelsInFile, MAX_BASECHANNELS));
+					const CHANNELINDEX numChannels = std::min(channelsInFile, GetNumChannels());
 					for(CHANNELINDEX i = 0; i < numChannels; i++)
 					{
 						auto rgb = chunk.ReadArray<uint8, 4>();
@@ -2598,8 +2601,8 @@ bool CSoundFile::LoadExtendedSongProperties(FileReader &file, bool ignoreChannel
 					const CHANNELINDEX channelsInFile = mpt::saturate_cast<CHANNELINDEX>(64 + size / 2);
 					if(!ignoreChannelCount)
 						ChnSettings.resize(std::clamp(GetNumChannels(), channelsInFile, MAX_BASECHANNELS));
-					const CHANNELINDEX loopLimit = std::min(channelsInFile, GetNumChannels());
-					for(CHANNELINDEX chn = 64; chn < loopLimit; chn++)
+					const CHANNELINDEX numChannels = std::min(channelsInFile, GetNumChannels());
+					for(CHANNELINDEX chn = 64; chn < numChannels; chn++)
 					{
 						auto [pan, vol] = chunk.ReadArray<uint8, 2>();
 						if(pan != 0xFF)
