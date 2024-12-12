@@ -17,7 +17,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct TCBFileHeader
 {
-	char     magic[8];     // "AN COOL." (new) or "AN COOL!" (old - even TCB Tracker 1.0 cannot load these files)
+	char     magic[8];     // "AN COOL." (new) or "AN COOL!" (early TCB Tracker beta versions; not even TCB Tracker 1.0 can read these files)
 	uint32be numPatterns;
 	uint8    tempo;
 	uint8    unused1;
@@ -182,9 +182,9 @@ bool CSoundFile::ReadTCB(FileReader &file, ModLoadingFlags loadFlags)
 		m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded, instrNames[smp - 1]);
 	}
 
-	m_modFormat.formatName = newFormat ? UL_("TCB Tracker (New Format)") : UL_("TCB Tracker (Old Format)");
+	m_modFormat.formatName = newFormat ? UL_("TCB Tracker") : UL_("TCB Tracker (Beta Format)");
 	m_modFormat.type = UL_("mod");
-	m_modFormat.madeWithTracker = UL_("TCB Tracker");
+	m_modFormat.madeWithTracker = newFormat ? UL_("TCB Tracker 1.0 - 2.0") : UL_("TCB Tracker Beta");
 	m_modFormat.charset = mpt::Charset::AtariST;
 
 	return true;

@@ -145,7 +145,7 @@ bool CSoundFile::ReadCBA(FileReader &file, ModLoadingFlags loadFlags)
 			else if(command == 0x18)
 				m.SetEffectCommand(CMD_RETRIG, param);
 			else if(command >= 0x10 && command <= 0x1E)
-				m.SetEffectCommand(CMD_MODCMDEX, static_cast<ModCommand::PARAM>(((command << 4) + 0x10) | std::min(param ,uint8(0x0F))));
+				m.SetEffectCommand(CMD_MODCMDEX, static_cast<ModCommand::PARAM>(((command << 4) + 0x10) | std::min(param, uint8(0x0F))));
 			else if(command == 0x1F)
 				m.SetEffectCommand(CMD_SPEED, param);
 			else if(command == 0x20)
