@@ -68,7 +68,7 @@ public:
 	// Deallocate pattern data.
 	void Deallocate();
 
-	// Removes all modcommands from the pattern.
+	// Empties all ModCommands in the pattern.
 	void ClearCommands() noexcept;
 
 	// Returns associated soundfile.
@@ -131,7 +131,7 @@ protected:
 protected:
 	std::vector<ModCommand> m_ModCommands;
 	ROWINDEX m_Rows = 0;
-	ROWINDEX m_RowsPerBeat = 0;    // patterns-specific time signature. if != 0, this is implicitely set.
+	ROWINDEX m_RowsPerBeat = 0;    // patterns-specific time signature. if != 0, the time signature is used automatically.
 	ROWINDEX m_RowsPerMeasure = 0; // ditto
 	TempoSwing m_tempoSwing;
 	std::string m_PatternName;
@@ -154,9 +154,9 @@ class EffectWriter
 	// Row advance mode
 	enum RetryMode : uint8
 	{
-		rmIgnore,			// If effect can't be written, abort.
-		rmTryNextRow,		// If effect can't be written, try next row.
-		rmTryPreviousRow,	// If effect can't be written, try previous row.
+		rmIgnore,          // If effect can't be written, abort.
+		rmTryNextRow,      // If effect can't be written, try next row.
+		rmTryPreviousRow,  // If effect can't be written, try previous row.
 	};
 
 public:
