@@ -2499,6 +2499,31 @@ void CSoundFile::SaveExtendedSongProperties(std::ostream &f) const
 #endif // MODPLUG_NO_FILESAVE
 
 
+/*
+The following song properties can be read and written:
+AUTH [all] Song artist
+C... [IT / MPTM] Number of channels (for IT / MPTM where there is no explicit channel count and we want to keep the properties of channels beyond the last channel that contains any pattern data)
+CCOL [all] Channel colors
+ChnS [IT / MPTM] Channel settings for channels 65-127 if needed (doesn't fit to IT header).
+CUES [MPTM] Sample cue points
+CWV. [all] Created With Version
+DGV. [XM] Default Global Volume
+DT.. [all] Default Tempo, if it doesn't fit in the header value
+DTFR [MPTM] Fractional part of default tempo
+LSWV [all] Last Saved With Version
+MIMA [all] MIdi MApping directives
+MSF. [all] Mod(Specific)Flags
+PMM. [all] Mix Mode
+RP.. [IT / MPTM] Legacy Restart Position
+RPB. [all] Rows Per Beat (if not supported / value doesn't fit in header)
+RPM. [all] Per Measure (if not supported / value doesn't fit in header)
+RSMP [MPTM] Default resampling
+SPA. [all] Sample Pre-Amp (if not supported / value doesn't fit in header)
+SWNG [MPTM] Tempo swing factors
+TM.. [all] Tempo Mode
+VSTV [all] Synth volume
+*/
+
 template<typename T>
 void ReadField(FileReader &chunk, std::size_t size, T &field)
 {

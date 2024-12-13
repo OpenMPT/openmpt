@@ -66,94 +66,71 @@ Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOI
 * In use CODE tag dictionary (alphabetical order):
 --------------------------------------------------
 
-						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-						!!! SECTION TO BE UPDATED !!!
-						!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+CS.. nCutSwing
+DCT. nDCT
+dF.. dwFlags
+DNA. nDNA
+FM.. filterMode
+fn[. filename[12]
+FO.. nFadeOut
+GV.. nGlobalVol
+IFC. nIFC
+IFR. nIFR
+K[.. Keyboard[128]
+MB.. wMidiBank
+MC.. nMidiChannel
+MDK. nMidiDrumKey
+MiP. nMixPlug
+MP.. nMidiProgram
+n[.. name[32]
+NNA. nNNA
+NM[. NoteMap[128]
+P... nPan
+PE.. PanEnv.nNodes
+PE[. PanEnv.Values[MAX_ENVPOINTS]
+PiE. PitchEnv.nNodes
+PiE[ PitchEnv.Values[MAX_ENVPOINTS]
+PiLE PitchEnv.nLoopEnd
+PiLS PitchEnv.nLoopStart
+PiP[ PitchEnv.Ticks[MAX_ENVPOINTS]
+PiSB PitchEnv.nSustainStart
+PiSE PitchEnv.nSustainEnd
+PLE. PanEnv.nLoopEnd
+PLS. PanEnv.nLoopStart
+PP[. PanEnv.Ticks[MAX_ENVPOINTS]
+PPC. nPPC
+PPS. nPPS
+PS.. nPanSwing
+PSB. PanEnv.nSustainStart
+PSE. PanEnv.nSustainEnd
+PTTL pitchToTempoLock
+PTTF pitchToTempoLock (fractional part)
+PVEH pluginVelocityHandling
+PVOH pluginVolumeHandling
+R... Resampling
+RS.. nResSwing
+VE.. VolEnv.nNodes
+VE[. VolEnv.Values[MAX_ENVPOINTS]
+VLE. VolEnv.nLoopEnd
+VLS. VolEnv.nLoopStart
+VP[. VolEnv.Ticks[MAX_ENVPOINTS]
+VR.. nVolRampUp
+VS.. nVolSwing
+VSB. VolEnv.nSustainStart
+VSE. VolEnv.nSustainEnd
+PERN PitchEnv.nReleaseNode
+AERN PanEnv.nReleaseNode
+VERN VolEnv.nReleaseNode
+PFLG PitchEnv.dwFlag
+AFLG PanEnv.dwFlags
+VFLG VolEnv.dwFlags
+MPWD MIDI Pitch Wheel Depth
 
-		[EXT]	means external (not related) to ModInstrument content
+Note that many of these extensions were only relevant for ITP files, and thus there is no code for writing them, only reading.
+Some of them used to be written but were never read ("K[.." sample map - it was only relevant for ITP files, but even there
+it was always ignored, because sample indices might change when loading external instruments).
 
-AUTH	[EXT]	Song artist
-C...	[EXT]	nChannels
-ChnS	[EXT]	IT/MPTM: Channel settings for channels 65-127 if needed (doesn't fit to IT header).
-CS..			nCutSwing
-CUES	[EXT]	Sample cue points
-CWV.	[EXT]	dwCreatedWithVersion
-DCT.			nDCT;
-dF..			dwFlags;
-DGV.	[EXT]	nDefaultGlobalVolume
-DT..	[EXT]	nDefaultTempo;
-DTFR	[EXT]	Fractional part of default tempo
-DNA.			nDNA;
-EBIH	[EXT]	embeded instrument header tag (ITP file format)
-FM..			filterMode;
-fn[.			filename[12];
-FO..			nFadeOut;
-GV..			nGlobalVol;
-IFC.			nIFC;
-IFR.			nIFR;
-K[.				Keyboard[128];
-LSWV	[EXT]	Last Saved With Version
-MB..			wMidiBank;
-MC..			nMidiChannel;
-MDK.			nMidiDrumKey;
-MIMA	[EXT]									MIdi MApping directives
-MiP.			nMixPlug;
-MP..			nMidiProgram;
-MPTS	[EXT]									Extra song info tag
-MPTX	[EXT]									EXTRA INFO tag
-MSF.	[EXT]									Mod(Specific)Flags
-n[..			name[32];
-NNA.			nNNA;
-NM[.			NoteMap[128];
-P...			nPan;
-PE..			PanEnv.nNodes;
-PE[.			PanEnv.Values[MAX_ENVPOINTS];
-PiE.			PitchEnv.nNodes;
-PiE[			PitchEnv.Values[MAX_ENVPOINTS];
-PiLE			PitchEnv.nLoopEnd;
-PiLS			PitchEnv.nLoopStart;
-PiP[			PitchEnv.Ticks[MAX_ENVPOINTS];
-PiSB			PitchEnv.nSustainStart;
-PiSE			PitchEnv.nSustainEnd;
-PLE.			PanEnv.nLoopEnd;
-PLS.			PanEnv.nLoopStart;
-PMM.	[EXT]	nPlugMixMode;
-PP[.			PanEnv.Ticks[MAX_ENVPOINTS];
-PPC.			nPPC;
-PPS.			nPPS;
-PS..			nPanSwing;
-PSB.			PanEnv.nSustainStart;
-PSE.			PanEnv.nSustainEnd;
-PTTL			pitchToTempoLock;
-PTTF			pitchToTempoLock (fractional part);
-PVEH			pluginVelocityHandling;
-PVOH			pluginVolumeHandling;
-R...			resampling;
-RP..	[EXT]	nRestartPos;
-RPB.	[EXT]	nRowsPerBeat;
-RPM.	[EXT]	nRowsPerMeasure;
-RS..			nResSwing;
-RSMP	[EXT]	Global resampling
-SEP@	[EXT]	chunk SEPARATOR tag
-SPA.	[EXT]	m_nSamplePreAmp;
-TM..	[EXT]	nTempoMode;
-VE..			VolEnv.nNodes;
-VE[.			VolEnv.Values[MAX_ENVPOINTS];
-VLE.			VolEnv.nLoopEnd;
-VLS.			VolEnv.nLoopStart;
-VP[.			VolEnv.Ticks[MAX_ENVPOINTS];
-VR..			nVolRampUp;
-VS..			nVolSwing;
-VSB.			VolEnv.nSustainStart;
-VSE.			VolEnv.nSustainEnd;
-VSTV	[EXT]	nVSTiVolume;
-PERN			PitchEnv.nReleaseNode
-AERN			PanEnv.nReleaseNode
-VERN			VolEnv.nReleaseNode
-PFLG			PitchEnv.dwFlag
-AFLG			PanEnv.dwFlags
-VFLG			VolEnv.dwFlags
-MPWD			MIDI Pitch Wheel Depth
+
 -----------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------*/
 
