@@ -74,9 +74,10 @@ bool SettingCacheCompleteFileBeforeLoading();
 #ifndef MODPLUG_NO_FILESAVE
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
-bool ReadInstrumentHeaderField(ModInstrument * input, uint32 fcode, uint16 fsize, FileReader &file);
-// --------------------------------------------------------------------------------------------
-// --------------------------------------------------------------------------------------------
+// ITP: Read instrument property with 'code' from 'file' to instrument 'ins'.
+void ReadExtendedInstrumentProperty(ModInstrument *ins, const uint32 code, FileReader &file);
+// ITI / XI: Read extended instrument properties from 'file' to instrument 'ins'.
+void ReadExtendedInstrumentProperties(ModInstrument &ins, FileReader &file);
 
 
 // Sample decompression routines in format-specific source files
@@ -1296,22 +1297,10 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr) const 
 #endif // NO_PLUGINS
 
 
-///////////////////////////////////////////////////////////
-// Low-level Mixing functions
-
 #define FADESONGDELAY		100
 
 MPT_CONSTEXPRINLINE int8 MOD2XMFineTune(int v) { return static_cast<int8>(static_cast<uint8>(v) << 4); }
 MPT_CONSTEXPRINLINE int8 XM2MODFineTune(int v) { return static_cast<int8>(static_cast<uint8>(v) >> 4); }
-
-// Read instrument property with 'code' and 'size' from 'file' to instrument 'pIns'.
-void ReadInstrumentExtensionField(ModInstrument* pIns, const uint32 code, const uint16 size, FileReader &file);
-
-// Read instrument property with 'code' from 'file' to instrument 'pIns'.
-void ReadExtendedInstrumentProperty(ModInstrument* pIns, const uint32 code, FileReader &file);
-
-// Read extended instrument properties from 'file' to instrument 'pIns'.
-void ReadExtendedInstrumentProperties(ModInstrument* pIns, FileReader &file);
 
 
 OPENMPT_NAMESPACE_END
