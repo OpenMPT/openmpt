@@ -1391,7 +1391,10 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 
 		if(pIns->NoteMap[note - NOTE_MIN] > NOTE_MAX) return;
 		uint32 n = pIns->Keyboard[note - NOTE_MIN];
-		pSmp = (n <= GetNumSamples()) ? &Samples[n] : &Samples[0];
+		if(n)
+			pSmp = (n <= GetNumSamples()) ? &Samples[n] : &Samples[0];
+		else
+			pSmp = nullptr;
 	} else if(GetNumInstruments())
 	{
 		// No valid instrument, or not a valid note.
