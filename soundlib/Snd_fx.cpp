@@ -3171,7 +3171,7 @@ bool CSoundFile::ProcessEffects()
 		// Test cases: DoubleSlide.it, DoubleSlideCompatGxx.it
 		if(m_playBehaviour[kITDoublePortamentoSlides] && chn.isFirstTick)
 		{
-			const bool effectColumnTonePorta = (cmd == CMD_TONEPORTAMENTO || cmd == CMD_TONEPORTAVOL);
+			const bool effectColumnTonePorta = (cmd == CMD_TONEPORTAMENTO);
 			if(effectColumnTonePorta)
 				InitTonePortamento(chn, static_cast<uint16>(param));
 			if(volcmd == VOLCMD_TONEPORTAMENTO)
