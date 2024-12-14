@@ -4587,7 +4587,15 @@ int32 CSoundFile::TonePortamento(PlayState &playState, CHANNELINDEX nChn, uint16
 	if(chn.nPeriod && chn.nPortamentoDest && doPorta)
 	{
 		const int32 actualDelta = PeriodsAreFrequencies() ? delta : -delta;
-		if(chn.nPeriod < chn.nPortamentoDest || chn.portaTargetReached)
+		// IT compatibility: Command Lxx, with no tone portamento set up before, will always execute the "portamento down" branch.
+		// Test cases: LxxWith0Portamento-Linear.it, LxxWith0Portamento-Amiga.it
+		if(m_playBehaviour[kITDoublePortamentoSlides] && !delta && chn.rowCommand.command == CMD_TONEPORTAVOL)
+		{
+			if(chn.nPeriod > 1 && m_SongFlags[SONG_LINEARSLIDES])
+				chn.nPeriod--;
+			if(chn.nPeriod < chn.nPortamentoDest)
+				chn.nPeriod = chn.nPortamentoDest;
+		} else if(chn.nPeriod < chn.nPortamentoDest || chn.portaTargetReached)
 		{
 			DoFreqSlide(chn, chn.nPeriod, actualDelta, true);
 			if(chn.nPeriod > chn.nPortamentoDest)
