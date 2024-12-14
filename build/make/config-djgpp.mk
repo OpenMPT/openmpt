@@ -92,19 +92,6 @@ endif
 
 
 
-OPT_NONE  := -O0
-OPT_SOME  := -O1
-
-OPT_DEBUG := -Og
-
-OPT_SPEED := -O2
-OPT_SPEEDX:= -O3
-
-OPT_SIZE  := -Os
-OPT_SIZEX := -Oz
-
-
-
 ifeq ($(OPTIMIZE),default)
 
 OPT_UARCH_EMUL := -Os   # interpreter
