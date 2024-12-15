@@ -197,13 +197,12 @@ void PathConfigDlg::OnAutosaveUseOrigDir()
 		}
 		OnSettingsChanged();
 	}
-	return;
 }
 
 
 void PathConfigDlg::OnAutosaveRetention()
 {
-	const BOOL enabled = IsDlgButtonChecked(IDC_CHECK2) ? TRUE : FALSE;
+	const BOOL enabled = (IsDlgButtonChecked(IDC_AUTOSAVE_ENABLE) && IsDlgButtonChecked(IDC_CHECK2)) ? TRUE : FALSE;
 	GetDlgItem(IDC_EDIT1)->EnableWindow(enabled);
 	GetDlgItem(IDC_SPIN3)->EnableWindow(enabled);
 }
