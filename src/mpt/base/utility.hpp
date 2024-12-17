@@ -60,7 +60,7 @@ constexpr Tdst saturate_cast(float src) {
 	return mpt::saturate_trunc<Tdst>(src);
 }
 
-}
+} // namespace detail
 
 // Returns true iff Tdst can represent the value val.
 // Use as if(mpt::in_range<uint8>(-1)).
