@@ -282,8 +282,8 @@ struct SymTranswaveInst
 		std::pair<SmpLength, SmpLength> ConvertLoop(const ModSample &mptSmp) const
 		{
 			const double loopScale = static_cast<double>(mptSmp.nLength) / (100 << 16);
-			const SmpLength start  = mpt::saturate_cast<SmpLength>(loopScale * std::min(uint32(100 << 16), loopStart.get()));
-			const SmpLength length = mpt::saturate_cast<SmpLength>(loopScale * std::min(uint32(100 << 16), loopLen.get()));
+			const SmpLength start  = mpt::saturate_trunc<SmpLength>(loopScale * std::min(uint32(100 << 16), loopStart.get()));
+			const SmpLength length = mpt::saturate_trunc<SmpLength>(loopScale * std::min(uint32(100 << 16), loopLen.get()));
 			return {start, std::min(mptSmp.nLength - start, length)};
 		}
 	};
@@ -670,8 +670,8 @@ struct SymInstrument
 			loopLen = (loopLen << 16) + loopLenFine;
 
 			const double loopScale = static_cast<double>(mptSmp.nLength) / (100 << 16);
-			loopStart = std::min(mptSmp.nLength, mpt::saturate_cast<SmpLength>(loopStart * loopScale));
-			loopLen = std::min(mptSmp.nLength - loopStart, mpt::saturate_cast<SmpLength>(loopLen * loopScale));
+			loopStart = std::min(mptSmp.nLength, mpt::saturate_trunc<SmpLength>(loopStart * loopScale));
+			loopLen = std::min(mptSmp.nLength - loopStart, mpt::saturate_trunc<SmpLength>(loopLen * loopScale));
 		} else if(mptSmp.HasSampleData())
 		{
 			// The order of operations here may seem weird as it reduces precision, but it's taken directly from the original assembly source (UpdateRecalcLoop)

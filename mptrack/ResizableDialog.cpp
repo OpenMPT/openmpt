@@ -119,15 +119,15 @@ CRect ResizableDialog::AdjustItemRect(const DynamicItem &item, const CSize windo
 
 	CPoint move;
 	if(item.moveSettings.IsHorizontal())
-		move.x = mpt::saturate_cast<int>(ratioX * item.moveSettings.m_nXRatio);
+		move.x = mpt::saturate_trunc<int>(ratioX * item.moveSettings.m_nXRatio);
 	if(item.moveSettings.IsVertical())
-		move.y = mpt::saturate_cast<int>(ratioY * item.moveSettings.m_nYRatio);
+		move.y = mpt::saturate_trunc<int>(ratioY * item.moveSettings.m_nYRatio);
 
 	CSize size;
 	if(item.sizeSettings.IsHorizontal())
-		size.cx = mpt::saturate_cast<int>(ratioX * item.sizeSettings.m_nXRatio);
+		size.cx = mpt::saturate_trunc<int>(ratioX * item.sizeSettings.m_nXRatio);
 	if(item.sizeSettings.IsVertical())
-		size.cy = mpt::saturate_cast<int>(ratioY * item.sizeSettings.m_nYRatio);
+		size.cy = mpt::saturate_trunc<int>(ratioY * item.sizeSettings.m_nYRatio);
 
 	auto itemPoint = item.initialPoint + move;
 	auto itemSize = item.initialSize + size;

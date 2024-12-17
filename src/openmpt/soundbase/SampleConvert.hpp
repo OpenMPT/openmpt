@@ -10,6 +10,7 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/math.hpp"
 #include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/saturate_round.hpp"
 #include "openmpt/base/Int24.hpp"
 #include "openmpt/base/Types.hpp"
 #include "openmpt/soundbase/SampleConvert.hpp"
@@ -566,7 +567,7 @@ struct Convert<int64, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= static_cast<float>(uint64(1) << 63);
-		return mpt::saturate_cast<int64>(SC::fastround(val));
+		return mpt::saturate_trunc<int64>(SC::fastround(val));
 	}
 };
 
@@ -579,7 +580,7 @@ struct Convert<int64, double>
 	{
 		val = std::clamp(val, -1.0, 1.0);
 		val *= static_cast<double>(uint64(1) << 63);
-		return mpt::saturate_cast<int64>(SC::fastround(val));
+		return mpt::saturate_trunc<int64>(SC::fastround(val));
 	}
 };
 

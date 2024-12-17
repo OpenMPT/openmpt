@@ -34,6 +34,8 @@ MPT_TEST_GROUP_INLINE("mpt/base/saturate_round")
 #pragma clang diagnostic pop
 #endif
 {
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<uint32>(static_cast<double>(std::numeric_limits<int64>::max())), std::numeric_limits<uint32>::max());
+
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int32>(std::numeric_limits<int32>::max() + 0.1), std::numeric_limits<int32>::max());
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int32>(std::numeric_limits<int32>::max() - 0.4), std::numeric_limits<int32>::max());
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int32>(std::numeric_limits<int32>::min() + 0.1), std::numeric_limits<int32>::min());

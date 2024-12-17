@@ -20,7 +20,7 @@ namespace mpt::Color
 
 uint8 GetLuma(uint8 r, uint8 g, uint8 b) noexcept
 {
-	return mpt::saturate_cast<uint8>(r * 0.299f + g * 0.587f + b * 0.114f);
+	return mpt::saturate_trunc<uint8>(r * 0.299f + g * 0.587f + b * 0.114f);
 }
 
 

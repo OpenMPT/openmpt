@@ -296,7 +296,7 @@ void CViewSample::UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength cen
 	m_timelineUnit = mpt::saturate_round<int>(std::log(static_cast<double>(timelineInterval)) / std::log(power));
 	if(m_timelineUnit < 1)
 		m_timelineUnit = 0;
-	m_timelineUnit = mpt::saturate_cast<int>(std::pow(power, m_timelineUnit));
+	m_timelineUnit = mpt::saturate_trunc<int>(std::pow(power, m_timelineUnit));
 	timelineInterval = std::max(1.0, std::round(timelineInterval / m_timelineUnit)) * m_timelineUnit;
 	if(format == TimelineFormat::Seconds)
 		timelineInterval *= sampleRate / 1000.0;

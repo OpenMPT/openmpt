@@ -283,7 +283,7 @@ public:
 	void UpdateTree(CModDoc *pModDoc, UpdateHint hint, CObject *pHint = nullptr);
 	void RefreshDlsBanks();
 	static CInputHandler *GetInputHandler();
-	void SetElapsedTime(double t) { m_dwTimeSec = mpt::saturate_cast<samplecount_t>(t * 10.0); }
+	void SetElapsedTime(double t) { m_dwTimeSec = mpt::saturate_trunc<samplecount_t>(t * 10.0); }
 
 #if defined(MPT_ENABLE_UPDATE)
 	bool ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight);

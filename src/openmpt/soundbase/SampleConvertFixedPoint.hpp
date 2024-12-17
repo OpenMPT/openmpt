@@ -232,7 +232,7 @@ struct ConvertToFixedPoint<int32, somefloat32, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		val = mpt::sanitize_nan(val);
-		return mpt::saturate_cast<output_t>(SC::fastround(val * factor));
+		return mpt::saturate_trunc<output_t>(SC::fastround(val * factor));
 	}
 };
 
@@ -251,7 +251,7 @@ struct ConvertToFixedPoint<int32, somefloat64, fractionalBits>
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(input_t) * 8 - 1);
 		val = mpt::sanitize_nan(val);
-		return mpt::saturate_cast<output_t>(SC::fastround(val * factor));
+		return mpt::saturate_trunc<output_t>(SC::fastround(val * factor));
 	}
 };
 

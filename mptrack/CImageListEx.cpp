@@ -46,9 +46,9 @@ bool CImageListEx::Create(UINT resourceID, int cx, int cy, int nInitial, int nGr
 					auto hsv = mpt::Color::RGB{pixel->r / 255.0f, pixel->g / 255.0f, pixel->b / 255.0f}.ToHSV();
 					hsv.v = (1.0f - hsv.v) * (1.0f - hsv.s) + (hsv.v) * hsv.s;
 					const auto rgb = hsv.ToRGB();
-					pixel->r = mpt::saturate_cast<uint8>(rgb.r * 255.0f);
-					pixel->g = mpt::saturate_cast<uint8>(rgb.g * 255.0f);
-					pixel->b = mpt::saturate_cast<uint8>(rgb.b * 255.0f);
+					pixel->r = mpt::saturate_trunc<uint8>(rgb.r * 255.0f);
+					pixel->g = mpt::saturate_trunc<uint8>(rgb.g * 255.0f);
+					pixel->b = mpt::saturate_trunc<uint8>(rgb.b * 255.0f);
 				}
 			}
 		}

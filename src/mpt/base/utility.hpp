@@ -11,6 +11,7 @@
 
 #if MPT_CXX_BEFORE(20)
 #include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/saturate_round.hpp"
 #endif
 
 #if MPT_CXX_BEFORE(23) && !MPT_COMPILER_MSVC && !MPT_COMPILER_GCC && !MPT_COMPILER_CLANG
@@ -42,11 +43,30 @@ using std::in_range;
 
 #else
 
+namespace detail {
+
+template <typename Tdst, typename Tsrc>
+constexpr Tdst saturate_cast(Tsrc src) noexcept {
+	return mpt::saturate_cast<Tdst>(src);
+}
+
+template <typename Tdst>
+constexpr Tdst saturate_cast(double src) {
+	return mpt::saturate_trunc<Tdst>(src);
+}
+
+template <typename Tdst>
+constexpr Tdst saturate_cast(float src) {
+	return mpt::saturate_trunc<Tdst>(src);
+}
+
+}
+
 // Returns true iff Tdst can represent the value val.
 // Use as if(mpt::in_range<uint8>(-1)).
 template <typename Tdst, typename Tsrc>
 constexpr bool in_range(Tsrc val) {
-	return (static_cast<Tsrc>(mpt::saturate_cast<Tdst>(val)) == val);
+	return (static_cast<Tsrc>(mpt::detail::saturate_cast<Tdst>(val)) == val);
 }
 
 #endif
