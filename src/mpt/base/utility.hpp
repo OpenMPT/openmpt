@@ -9,7 +9,7 @@
 #include "mpt/base/detect_libcxx.hpp"
 #include "mpt/base/namespace.hpp"
 
-#if MPT_CXX_BEFORE(20)
+#if MPT_CXX_BEFORE(20) && !MPT_LIBCXX_LLVM_BEFORE(13000)
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
 #endif
