@@ -387,7 +387,7 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 				ins++;
 			} else
 			{
-				ReadExtendedInstrumentProperty(Instruments[ins], code, file);
+				ReadExtendedInstrumentProperty(mpt::as_span(&Instruments[ins], 1), code, file);
 			}
 
 			code = file.ReadUint32LE();

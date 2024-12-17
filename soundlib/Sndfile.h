@@ -75,9 +75,7 @@ bool SettingCacheCompleteFileBeforeLoading();
 void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 only_this_code = -1 /* -1 for all */, uint16 fixedsize = 0);
 #endif // !MODPLUG_NO_FILESAVE
 // ITP: Read instrument property with 'code' from 'file' to instrument 'ins'.
-void ReadExtendedInstrumentProperty(ModInstrument *ins, const uint32 code, FileReader &file);
-// ITI / XI: Read extended instrument properties from 'file' to instrument 'ins'.
-void ReadExtendedInstrumentProperties(ModInstrument &ins, FileReader &file);
+void ReadExtendedInstrumentProperty(mpt::span<ModInstrument *> instruments, const uint32 code, FileReader &file);
 
 
 // Sample decompression routines in format-specific source files
@@ -945,9 +943,10 @@ public:
 	static mpt::ustring GetImpulseTrackerVersion(uint16 cwtv, uint16 cmwt);
 	static mpt::ustring GetSchismTrackerVersion(uint16 cwtv, uint32 reserved);
 
-	// Reads extended instrument properties(XM/IT/MPTM).
+	// Reads extended instrument properties(XM/IT/MPTM/ITI/XI).
 	// Returns true if extended instrument properties were found.
-	bool LoadExtendedInstrumentProperties(FileReader &file);
+	bool LoadExtendedInstrumentProperties(FileReader &file) { return LoadExtendedInstrumentProperties(mpt::as_span(Instruments).subspan(1, GetNumInstruments()), file); }
+	static bool LoadExtendedInstrumentProperties(mpt::span<ModInstrument *> instruments, FileReader &file);
 
 	void SetDefaultPlaybackBehaviour(MODTYPE type);
 	static PlayBehaviourSet GetSupportedPlaybackBehaviour(MODTYPE type);

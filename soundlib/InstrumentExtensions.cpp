@@ -51,11 +51,11 @@ void ReadInstrumentHeaderField(ModInstrument &ins, uint32 fcode, FileReader &fil
 
 - have a look below in current tag dictionnary
 - take the initial ones of the field name
-- 4 caracters code (not more, not less)
-- must be filled with '.' caracters if code has less than 4 caracters
-- for arrays, must include a '[' caracter following significant caracters ('.' not significant!!!)
-- use only caracters used in full member name, ordered as they appear in it
-- match caracter attribute (small,capital)
+- 4 characters code (not more, not less)
+- must be filled with '.' characters if code has less than 4 characters
+- for arrays, must include a '[' character following significant characters ('.' not significant!!!)
+- use only characters used in full member name, ordered as they appear in it
+- match character attribute (small, capital)
 
 Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOINTS]" members :
 - use 'PLE.' for PanEnv.nLoopEnd
@@ -66,6 +66,8 @@ Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOI
 * In use CODE tag dictionary (alphabetical order):
 --------------------------------------------------
 
+AERN PanEnv.nReleaseNode
+AFLG PanEnv.dwFlags
 CS.. nCutSwing
 DCT. nDCT
 dF.. dwFlags
@@ -82,12 +84,15 @@ MC.. nMidiChannel
 MDK. nMidiDrumKey
 MiP. nMixPlug
 MP.. nMidiProgram
+MPWD MIDI Pitch Wheel Depth
 n[.. name[32]
-NNA. nNNA
 NM[. NoteMap[128]
+NNA. nNNA
 P... nPan
 PE.. PanEnv.nNodes
 PE[. PanEnv.Values[MAX_ENVPOINTS]
+PERN PitchEnv.nReleaseNode
+PFLG PitchEnv.dwFlag
 PiE. PitchEnv.nNodes
 PiE[ PitchEnv.Values[MAX_ENVPOINTS]
 PiLE PitchEnv.nLoopEnd
@@ -103,14 +108,16 @@ PPS. nPPS
 PS.. nPanSwing
 PSB. PanEnv.nSustainStart
 PSE. PanEnv.nSustainEnd
-PTTL pitchToTempoLock
 PTTF pitchToTempoLock (fractional part)
+PTTL pitchToTempoLock
 PVEH pluginVelocityHandling
 PVOH pluginVolumeHandling
 R... Resampling
 RS.. nResSwing
 VE.. VolEnv.nNodes
 VE[. VolEnv.Values[MAX_ENVPOINTS]
+VERN VolEnv.nReleaseNode
+VFLG VolEnv.dwFlags
 VLE. VolEnv.nLoopEnd
 VLS. VolEnv.nLoopStart
 VP[. VolEnv.Ticks[MAX_ENVPOINTS]
@@ -118,13 +125,6 @@ VR.. nVolRampUp
 VS.. nVolSwing
 VSB. VolEnv.nSustainStart
 VSE. VolEnv.nSustainEnd
-PERN PitchEnv.nReleaseNode
-AERN PanEnv.nReleaseNode
-VERN VolEnv.nReleaseNode
-PFLG PitchEnv.dwFlag
-AFLG PanEnv.dwFlags
-VFLG VolEnv.dwFlags
-MPWD MIDI Pitch Wheel Depth
 
 Note that many of these extensions were only relevant for ITP files, and thus there is no code for writing them, only reading.
 Some of them used to be written but were never read ("K[.." sample map - it was only relevant for ITP files, but even there
@@ -605,30 +605,20 @@ static void ReadInstrumentHeaderField(ModInstrument &ins, uint32 fcode, FileRead
 
 
 // For ITP and internal usage
-void ReadExtendedInstrumentProperty(ModInstrument *ins, const uint32 code, FileReader &file)
+void ReadExtendedInstrumentProperty(mpt::span<ModInstrument *> instruments, const uint32 code, FileReader &file)
 {
 	uint16 size = file.ReadUint16LE();
-	FileReader chunk = file.ReadChunk(size);
-	if(ins && chunk.GetLength() == size)
-		ReadInstrumentHeaderField(*ins, code, chunk);
-}
-
-
-// For ITI / XI
-void ReadExtendedInstrumentProperties(ModInstrument &ins, FileReader &file)
-{
-	if(!file.ReadMagic("XTPM"))  // 'MPTX'
-		return;
-
-	while(file.CanRead(7))
+	for(ModInstrument *ins : instruments)
 	{
-		ReadExtendedInstrumentProperty(&ins, file.ReadUint32LE(), file);
+		FileReader chunk = file.ReadChunk(size);
+		if(ins && chunk.GetLength() == size)
+			ReadInstrumentHeaderField(*ins, code, chunk);
 	}
 }
 
 
-// For IT / XM / MO3
-bool CSoundFile::LoadExtendedInstrumentProperties(FileReader &file)
+// For IT / XM / MO3 / ITI / XI
+bool CSoundFile::LoadExtendedInstrumentProperties(mpt::span<ModInstrument *> instruments, FileReader &file)
 {
 	if(!file.ReadMagic("XTPM"))  // 'MPTX'
 		return false;
@@ -645,15 +635,7 @@ bool CSoundFile::LoadExtendedInstrumentProperties(FileReader &file)
 			break;
 		}
 
-		// Read size of this property for *one* instrument
-		const uint16 size = file.ReadUint16LE();
-
-		for(INSTRUMENTINDEX i = 1; i <= GetNumInstruments(); i++)
-		{
-			FileReader chunk = file.ReadChunk(size);
-			if(Instruments[i] && chunk.GetLength() == size)
-				ReadInstrumentHeaderField(*Instruments[i], code, chunk);
-		}
+		ReadExtendedInstrumentProperty(instruments, code, file);
 	}
 	return true;
 }
