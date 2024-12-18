@@ -160,6 +160,13 @@ public:
 	MPT_FORCEINLINE operator somefloat32() const {
 		return DecodeIEEE754binary32(GetInt32());
 	}
+	MPT_FORCEINLINE self_t & set(somefloat32 f) {
+		SetInt32(EncodeIEEE754binary32(f));
+		return *this;
+	}
+	MPT_FORCEINLINE somefloat32 get() const {
+		return DecodeIEEE754binary32(GetInt32());
+	}
 	MPT_FORCEINLINE self_t & SetInt32(uint32 i) {
 		bytes[hihi] = static_cast<std::byte>(i >> 24);
 		bytes[hilo] = static_cast<std::byte>(i >> 16);
@@ -214,6 +221,13 @@ public:
 		bytes[7] = b7;
 	}
 	MPT_FORCEINLINE operator somefloat64() const {
+		return DecodeIEEE754binary64(GetInt64());
+	}
+	MPT_FORCEINLINE self_t & set(somefloat64 f) {
+		SetInt64(EncodeIEEE754binary64(f));
+		return *this;
+	}
+	MPT_FORCEINLINE somefloat64 get() const {
 		return DecodeIEEE754binary64(GetInt64());
 	}
 	MPT_FORCEINLINE self_t & SetInt64(uint64 i) {
@@ -315,6 +329,13 @@ public:
 	MPT_FORCEINLINE operator somefloat32() const {
 		return value;
 	}
+	MPT_FORCEINLINE IEEE754binary32Native & set(somefloat32 f) {
+		value = f;
+		return *this;
+	}
+	MPT_FORCEINLINE somefloat32 get() const {
+		return value;
+	}
 	MPT_FORCEINLINE IEEE754binary32Native & SetInt32(uint32 i) {
 		value = DecodeIEEE754binary32(i);
 		return *this;
@@ -363,6 +384,13 @@ public:
 		}
 	}
 	MPT_FORCEINLINE operator somefloat64() const {
+		return value;
+	}
+	MPT_FORCEINLINE IEEE754binary64Native & set(somefloat64 f) {
+		value = f;
+		return *this;
+	}
+	MPT_FORCEINLINE somefloat64 get() const {
 		return value;
 	}
 	MPT_FORCEINLINE IEEE754binary64Native & SetInt64(uint64 i) {
