@@ -166,6 +166,20 @@ mpt::PathString GetPathPrefix()
 }
 
 
+void PrintHeader()
+{
+	#ifdef LIBOPENMPT_BUILD
+		std::cout << "libopenmpt test suite starting." << std::endl;
+	#endif
+}
+
+void PrintFooter()
+{
+	#ifdef LIBOPENMPT_BUILD
+		std::cout << "libopenmpt test suite finished." << std::endl;
+	#endif
+}
+
 void DoTests()
 {
 
@@ -175,7 +189,7 @@ void DoTests()
 		std::clog << std::flush;
 		std::cerr << std::flush;
 	
-		std::cout << "libopenmpt test suite" << std::endl;
+		std::cout << "libopenmpt test run" << std::endl;
 
 		std::cout << "Version: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetVersionString(Build::StringVersion | Build::StringRevision | Build::StringSourceInfo | Build::StringBuildFlags | Build::StringBuildFeatures)) << std::endl;
 		std::cout << "Compiler: " << mpt::ToCharset(mpt::Charset::ASCII, Build::GetBuildCompilerString()) << std::endl;

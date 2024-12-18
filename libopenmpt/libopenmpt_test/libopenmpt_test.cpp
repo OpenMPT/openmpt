@@ -44,6 +44,8 @@ static mpt::uint8 main() {
 
 		using namespace OpenMPT;
 
+		Test::PrintHeader();
+
 		// run test with "C" / classic() locale
 		Test::DoTests();
 
@@ -64,6 +66,8 @@ static mpt::uint8 main() {
 		
 		// and now, run all tests once again
 		Test::DoTests();
+
+		Test::PrintFooter();
 
 	} catch ( const std::exception & e ) {
 		std::cerr << "TEST ERROR: exception: " << ( e.what() ? e.what() : "" ) << std::endl;
