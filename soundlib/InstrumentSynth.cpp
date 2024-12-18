@@ -307,7 +307,7 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 			while(!m_ticksRemain)
 			{
 				m_currentRow = m_nextRow;
-				if(m_currentRow >= events.size())
+				if(m_currentRow >= std::min(events.size(), static_cast<size_t>(STOP_ROW)))
 					break;
 				m_nextRow++;
 				if(EvaluateEvent(events[m_currentRow], playState, channel, sndFile, states))
