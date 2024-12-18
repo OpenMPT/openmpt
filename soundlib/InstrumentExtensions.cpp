@@ -136,13 +136,8 @@ it was always ignored, because sample indices may change when loading external i
 
 #ifndef MODPLUG_NO_FILESAVE
 
-namespace
-{
-	const ModInstrument DEFAULT_INSTRUMENT;
-}
-
 template <auto Member>
-constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return DEFAULT_INSTRUMENT.*Member != ins.*Member; }
+constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return ModInstrument{}.*Member != ins.*Member; }
 
 template <auto Member>
 constexpr uint16 PropertySize() noexcept { return sizeof(ModInstrument{}.*Member); }
@@ -179,7 +174,7 @@ struct PropertyWriterEnum : PropertyWriterBase<Member, PropertyNeededFunc, Prope
 
 struct PropertyWriterReleaseNode
 {
-	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return DEFAULT_INSTRUMENT.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
+	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return ModInstrument{}.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
 	static constexpr uint16 Size() noexcept { return sizeof(InstrumentEnvelope{}.nReleaseNode); }
 	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE(file, ins.GetEnvelope(type).nReleaseNode); }
 	const EnvelopeType type;
@@ -187,19 +182,25 @@ struct PropertyWriterReleaseNode
 
 struct PropertyWriterEnvelopeBase
 {
-	static constexpr bool IsPropertyNeeded(const ModInstrument &) noexcept { return true; }
+	PropertyWriterEnvelopeBase(uint32 nodes, EnvelopeType type) : nodes{nodes}, type{type} {};
+	static constexpr bool IsPropertyNeeded(const ModInstrument&) noexcept
+	{
+		return true;
+	}
 	const uint32 nodes;
 	const EnvelopeType type;
 };
 
 struct PropertyWriterEnvelopeSize : PropertyWriterEnvelopeBase
 {
+	using PropertyWriterEnvelopeBase::PropertyWriterEnvelopeBase;
 	static constexpr uint16 Size() noexcept { return sizeof(uint32le); }
 	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE<uint32>(file, ins.GetEnvelope(type).size()); }
 };
 
 struct PropertyWriterEnvelopeTicks : PropertyWriterEnvelopeBase
 {
+	using PropertyWriterEnvelopeBase::PropertyWriterEnvelopeBase;
 	uint16 Size() const noexcept { return static_cast<uint16>(sizeof(uint16le) * nodes); }
 	void Write(std::ostream &file, const ModInstrument &ins) const
 	{
@@ -220,6 +221,7 @@ struct PropertyWriterEnvelopeTicks : PropertyWriterEnvelopeBase
 
 struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
 {
+	using PropertyWriterEnvelopeBase::PropertyWriterEnvelopeBase;
 	uint16 Size() const noexcept { return static_cast<uint16>(sizeof(uint8) * nodes); }
 	void Write(std::ostream &file, const ModInstrument &ins) const
 	{
@@ -240,7 +242,7 @@ struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
 
 struct PropertyWriterPitchTempoLock
 {
-	static constexpr bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return DEFAULT_INSTRUMENT.pitchToTempoLock != ins.pitchToTempoLock; }
+	static constexpr bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return ModInstrument{}.pitchToTempoLock != ins.pitchToTempoLock; }
 	static constexpr uint16 Size() noexcept { return sizeof(uint16le); }
 	PropertyWriterPitchTempoLock(bool intPart) : m_intPart{intPart} {}
 	void Write(std::ostream &file, const ModInstrument &ins)
@@ -267,9 +269,10 @@ static void WriteProperty(std::ostream &f, uint32 code, mpt::span<const ModInstr
 		return;
 	mpt::IO::WriteIntLE<uint32>(f, code);
 	mpt::IO::WriteIntLE<uint16>(f, property.Size());
+	ModInstrument defaultInstr{};
 	for(const ModInstrument *ins : instruments)
 	{
-		property.Write(f, ins ? *ins : DEFAULT_INSTRUMENT);
+		property.Write(f, ins ? *ins : defaultInstr);
 	}
 }
 
