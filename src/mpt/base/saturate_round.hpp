@@ -10,6 +10,9 @@
 #include "mpt/base/math.hpp"
 
 #include <limits>
+#include <type_traits>
+
+#include <cmath>
 
 
 
@@ -18,23 +21,13 @@ inline namespace MPT_INLINE_NS {
 
 
 
-template <typename Tdst>
-constexpr Tdst saturate_trunc(double src) {
-	if (src >= static_cast<double>(std::numeric_limits<Tdst>::max())) {
+template <typename Tdst, typename Tsrc>
+constexpr Tdst saturate_trunc(Tsrc src) {
+	static_assert(std::is_floating_point<Tsrc>::value);
+	if (src >= static_cast<Tsrc>(std::numeric_limits<Tdst>::max())) {
 		return std::numeric_limits<Tdst>::max();
 	}
-	if (src <= static_cast<double>(std::numeric_limits<Tdst>::min())) {
-		return std::numeric_limits<Tdst>::min();
-	}
-	return static_cast<Tdst>(src);
-}
-
-template <typename Tdst>
-constexpr Tdst saturate_trunc(float src) {
-	if (src >= static_cast<float>(std::numeric_limits<Tdst>::max())) {
-		return std::numeric_limits<Tdst>::max();
-	}
-	if (src <= static_cast<float>(std::numeric_limits<Tdst>::min())) {
+	if (src <= static_cast<Tsrc>(std::numeric_limits<Tdst>::min())) {
 		return std::numeric_limits<Tdst>::min();
 	}
 	return static_cast<Tdst>(src);
@@ -44,22 +37,27 @@ constexpr Tdst saturate_trunc(float src) {
 // Rounds given double value to nearest integer value of type T.
 // Out-of-range values are saturated to the specified integer type's limits.
 
-template <typename T>
-inline T saturate_round(float val) {
-	static_assert(std::numeric_limits<T>::is_integer);
-	return mpt::saturate_trunc<T>(mpt::round(val));
+template <typename Tdst, typename Tsrc>
+inline Tdst saturate_round(Tsrc val) {
+	static_assert(std::is_floating_point<Tsrc>::value);
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	return mpt::saturate_trunc<Tdst>(mpt::round(val));
 }
 
-template <typename T>
-inline T saturate_round(double val) {
-	static_assert(std::numeric_limits<T>::is_integer);
-	return mpt::saturate_trunc<T>(mpt::round(val));
+
+template <typename Tdst, typename Tsrc>
+inline Tdst saturate_ceil(Tsrc val) {
+	static_assert(std::is_floating_point<Tsrc>::value);
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	return mpt::saturate_trunc<Tdst>(std::ceil(val));
 }
 
-template <typename T>
-inline T saturate_round(long double val) {
-	static_assert(std::numeric_limits<T>::is_integer);
-	return mpt::saturate_trunc<T>(mpt::round(val));
+
+template <typename Tdst, typename Tsrc>
+inline Tdst saturate_floor(Tsrc val) {
+	static_assert(std::is_floating_point<Tsrc>::value);
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	return mpt::saturate_trunc<Tdst>(std::floor(val));
 }
 
 

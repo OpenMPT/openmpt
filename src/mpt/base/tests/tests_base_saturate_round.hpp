@@ -44,6 +44,34 @@ MPT_TEST_GROUP_INLINE("mpt/base/saturate_round")
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(110.1), 110);
 	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(-110.1), -110);
 
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(-0.6), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(-0.5), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(-0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(0.5), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_trunc<int8>(0.6), 0);
+
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(-0.6), -1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(-0.5), -1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(-0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(0.5), 1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_round<int8>(0.6), 1);
+
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(-0.6), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(-0.5), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(-0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(0.4), 1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(0.5), 1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_ceil<int8>(0.6), 1);
+
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(-0.6), -1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(-0.5), -1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(-0.4), -1);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(0.4), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(0.5), 0);
+	MPT_TEST_EXPECT_EQUAL(mpt::saturate_floor<int8>(0.6), 0);
+
 	// These should fail to compile
 	//mpt::saturate_round<std::string>(1.0);
 	//mpt::saturate_round<int64>(1.0);
