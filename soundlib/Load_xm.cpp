@@ -1527,7 +1527,7 @@ bool CSoundFile::SaveXM(std::ostream &f, bool compatibilityExport)
 		SaveMixPlugins(&f);
 		if(GetNumInstruments())
 		{
-			SaveExtendedInstrumentProperties(writeInstruments, f);
+			SaveExtendedInstrumentProperties(0, MOD_TYPE_XM, f);
 		}
 		SaveExtendedSongProperties(f);
 	}

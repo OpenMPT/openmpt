@@ -1402,9 +1402,7 @@ bool CSoundFile::SaveXIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f) const
 		}
 	}
 
-	// Write 'MPTX' extension tag
-	mpt::IO::WriteText(f, "XTPM");
-	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
+	SaveExtendedInstrumentProperties(nInstr, MOD_TYPE_XM, f);
 
 	return true;
 }
@@ -2490,9 +2488,7 @@ bool CSoundFile::SaveITIInstrument(INSTRUMENTINDEX nInstr, std::ostream &f, cons
 	}
 
 	mpt::IO::SeekEnd(f);
-	// Write 'MPTX' extension tag
-	mpt::IO::WriteRaw(f, "XTPM", 4);
-	WriteInstrumentHeaderStructOrField(pIns, f);	// Write full extended header.
+	SaveExtendedInstrumentProperties(nInstr, MOD_TYPE_MPT, f);
 
 	return true;
 }

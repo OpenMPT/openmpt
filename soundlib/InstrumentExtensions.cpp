@@ -4,7 +4,7 @@
  * Purpose: Instrument properties I/O
  * Notes  : Welcome to the absolutely horrible abominations that are the "extended instrument properties"
  *          which are some of the earliest additions OpenMPT did to the IT / XM format. They are ugly,
- *          and the way they work even differs between IT/XM and ITI/XI/ITP.
+ *          and the way they work even differs between IT/XM/ITI/XI and ITI/XI/ITP.
  *          Yes, the world would be a better place without this stuff.
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -18,6 +18,8 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+
+#include <functional>
 #endif
 
 OPENMPT_NAMESPACE_BEGIN
@@ -30,10 +32,9 @@ MODULAR (in/out) ModInstrument :
 * to update:
 ------------
 
-- both following functions need to be updated when adding a new member in ModInstrument :
-
-void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 onlyThisCode, int16 fixedsize);
-void ReadInstrumentHeaderField(ModInstrument &ins, uint32 fcode, FileReader &file);
+- both following functions need to be updated when adding a new member in ModInstrument:
+  - SaveExtendedInstrumentProperties
+  - ReadInstrumentHeaderField
 
 - see below for body declaration.
 
@@ -57,7 +58,7 @@ void ReadInstrumentHeaderField(ModInstrument &ins, uint32 fcode, FileReader &fil
 - use only characters used in full member name, ordered as they appear in it
 - match character attribute (small, capital)
 
-Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOINTS]" members :
+Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOINTS]" members:
 - use 'PLE.' for PanEnv.nLoopEnd
 - use 'PiLE' for PitchEnv.nLoopEnd
 - use 'VE[.' for VolEnv.Values[MAX_ENVPOINTS]
@@ -66,65 +67,64 @@ Example with "PanEnv.nLoopEnd" , "PitchEnv.nLoopEnd" & "VolEnv.Values[MAX_ENVPOI
 * In use CODE tag dictionary (alphabetical order):
 --------------------------------------------------
 
-AERN PanEnv.nReleaseNode
-AFLG PanEnv.dwFlags
-CS.. nCutSwing
-DCT. nDCT
-dF.. dwFlags
-DNA. nDNA
-FM.. filterMode
-fn[. filename[12]
-FO.. nFadeOut
-GV.. nGlobalVol
-IFC. nIFC
-IFR. nIFR
-K[.. Keyboard[128]
-MB.. wMidiBank
-MC.. nMidiChannel
-MDK. nMidiDrumKey
-MiP. nMixPlug
-MP.. nMidiProgram
-MPWD MIDI Pitch Wheel Depth
-n[.. name[32]
-NM[. NoteMap[128]
-NNA. nNNA
-P... nPan
-PE.. PanEnv.nNodes
-PE[. PanEnv.Values[MAX_ENVPOINTS]
-PERN PitchEnv.nReleaseNode
-PFLG PitchEnv.dwFlag
-PiE. PitchEnv.nNodes
-PiE[ PitchEnv.Values[MAX_ENVPOINTS]
-PiLE PitchEnv.nLoopEnd
-PiLS PitchEnv.nLoopStart
-PiP[ PitchEnv.Ticks[MAX_ENVPOINTS]
-PiSB PitchEnv.nSustainStart
-PiSE PitchEnv.nSustainEnd
-PLE. PanEnv.nLoopEnd
-PLS. PanEnv.nLoopStart
-PP[. PanEnv.Ticks[MAX_ENVPOINTS]
-PPC. nPPC
-PPS. nPPS
-PS.. nPanSwing
-PSB. PanEnv.nSustainStart
-PSE. PanEnv.nSustainEnd
-PTTF pitchToTempoLock (fractional part)
-PTTL pitchToTempoLock
-PVEH pluginVelocityHandling
-PVOH pluginVolumeHandling
-R... Resampling
-RS.. nResSwing
-VE.. VolEnv.nNodes
-VE[. VolEnv.Values[MAX_ENVPOINTS]
-VERN VolEnv.nReleaseNode
-VFLG VolEnv.dwFlags
-VLE. VolEnv.nLoopEnd
-VLS. VolEnv.nLoopStart
-VP[. VolEnv.Ticks[MAX_ENVPOINTS]
-VR.. nVolRampUp
-VS.. nVolSwing
-VSB. VolEnv.nSustainStart
-VSE. VolEnv.nSustainEnd
+AERN RW PanEnv.nReleaseNode
+AFLG R  PanEnv.dwFlags
+CS.. RW nCutSwing
+DCT. R  nDCT
+dF.. R  dwFlags
+DNA. R  nDNA
+FM.. RW filterMode
+fn[. R  filename[12]
+FO.. RW nFadeOut
+GV.. R  nGlobalVol
+IFC. R  nIFC
+IFR. R  nIFR
+K[..    Keyboard[128]
+MB.. RW wMidiBank
+MC.. RW nMidiChannel
+MiP. RW nMixPlug
+MP.. RW nMidiProgram
+MPWD RW MIDI Pitch Wheel Depth
+n[.. R  name[32]
+NM[. R  NoteMap[128]
+NNA. R  nNNA
+P... RW nPan
+PE.. RW PanEnv.nNodes
+PE[. RW PanEnv.Values[MAX_ENVPOINTS]
+PERN RW PitchEnv.nReleaseNode
+PFLG R  PitchEnv.dwFlags
+PiE. RW PitchEnv.nNodes
+PiE[ RW PitchEnv.Values[MAX_ENVPOINTS]
+PiLE R  PitchEnv.nLoopEnd
+PiLS R  PitchEnv.nLoopStart
+PiP[ RW PitchEnv.Ticks[MAX_ENVPOINTS]
+PiSB R  PitchEnv.nSustainStart
+PiSE R  PitchEnv.nSustainEnd
+PLE. R  PanEnv.nLoopEnd
+PLS. R  PanEnv.nLoopStart
+PP[. RW PanEnv.Ticks[MAX_ENVPOINTS]
+PPC. R  nPPC
+PPS. R  nPPS
+PS.. R  nPanSwing
+PSB. R  PanEnv.nSustainStart
+PSE. R  PanEnv.nSustainEnd
+PTTF RW pitchToTempoLock (fractional part)
+PTTL RW pitchToTempoLock (integer part)
+PVEH RW pluginVelocityHandling
+PVOH RW pluginVolumeHandling
+R... RW Resampling
+RS.. RW nResSwing
+VE.. RW VolEnv.nNodes
+VE[. RW VolEnv.Values[MAX_ENVPOINTS]
+VERN RW VolEnv.nReleaseNode
+VFLG R  VolEnv.dwFlags
+VLE. R  VolEnv.nLoopEnd
+VLS. R  VolEnv.nLoopStart
+VP[. RW VolEnv.Ticks[MAX_ENVPOINTS]
+VR.. RW nVolRampUp
+VS.. R  nVolSwing
+VSB. R  VolEnv.nSustainStart
+VSE. R  VolEnv.nSustainEnd
 
 Note that many of these extensions were only relevant for ITP files, and thus there is no code for writing them, only reading.
 Some of them used to be written but were never read ("K[.." sample map - it was only relevant for ITP files, but even there
@@ -136,292 +136,224 @@ it was always ignored, because sample indices may change when loading external i
 
 #ifndef MODPLUG_NO_FILESAVE
 
-template<typename T, bool is_signed> struct IsNegativeFunctor { bool operator()(T val) const { return val < 0; } };
-template<typename T> struct IsNegativeFunctor<T, true> { bool operator()(T val) const { return val < 0; } };
-template<typename T> struct IsNegativeFunctor<T, false> { bool operator()(T /*val*/) const { return false; } };
-
-template<typename T>
-bool IsNegative(const T &val)
+namespace
 {
-	return IsNegativeFunctor<T, std::numeric_limits<T>::is_signed>()(val);
+	const ModInstrument DEFAULT_INSTRUMENT;
 }
 
-// ------------------------------------------------------------------------------------------
-// Convenient macro to help WRITE_HEADER declaration for single type members ONLY (non-array)
-// ------------------------------------------------------------------------------------------
-#define WRITE_MPTHEADER_sized_member(name,type,code) \
-	static_assert(sizeof(input->name) == sizeof(type), "Instrument property does match specified type!");\
-	fcode = code;\
-	fsize = sizeof( type );\
-	if(writeAll) \
-	{ \
-		mpt::IO::WriteIntLE<uint32>(file, fcode); \
-		mpt::IO::WriteIntLE<uint16>(file, fsize); \
-	} else if(onlyThisCode == fcode)\
-	{ \
-		MPT_ASSERT(fixedsize == fsize); \
-	} \
-	if(onlyThisCode == fcode || onlyThisCode == Util::MaxValueOfType(onlyThisCode)) \
-	{ \
-		type tmp = (type)(input-> name ); \
-		mpt::IO::WriteIntLE(file, tmp); \
-	} \
-/**/
+template <auto Member>
+constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return DEFAULT_INSTRUMENT.*Member != ins.*Member; }
 
-// -----------------------------------------------------------------------------------------------------
-// Convenient macro to help WRITE_HEADER declaration for single type members which are written truncated
-// -----------------------------------------------------------------------------------------------------
-#define WRITE_MPTHEADER_trunc_member(name,type,code) \
-	static_assert(sizeof(input->name) > sizeof(type), "Instrument property would not be truncated, use WRITE_MPTHEADER_sized_member instead!");\
-	fcode = code;\
-	fsize = sizeof( type );\
-	if(writeAll) \
-	{ \
-		mpt::IO::WriteIntLE<uint32>(file, fcode); \
-		mpt::IO::WriteIntLE<uint16>(file, fsize); \
-		type tmp = (type)(input-> name ); \
-		mpt::IO::WriteIntLE(file, tmp); \
-	} else if(onlyThisCode == fcode)\
-	{ \
-		/* hackish workaround to resolve mismatched size values: */ \
-		/* nResampling was a long time declared as uint32 but these macro tables used uint16 and UINT. */ \
-		/* This worked fine on little-endian, on big-endian not so much. Thus support writing size-mismatched fields. */ \
-		MPT_ASSERT(fixedsize >= fsize); \
-		type tmp = (type)(input-> name ); \
-		mpt::IO::WriteIntLE(file, tmp); \
-		if(fixedsize > fsize) \
-		{ \
-			for(int16 i = 0; i < fixedsize - fsize; ++i) \
-			{ \
-				uint8 fillbyte = !IsNegative(tmp) ? 0 : 0xff; /* sign extend */ \
-				mpt::IO::WriteIntLE(file, fillbyte); \
-			} \
-		} \
-	} \
-/**/
+template <auto Member>
+constexpr uint16 PropertySize() noexcept { return sizeof(ModInstrument{}.*Member); }
 
-// ------------------------------------------------------------------------
-// Convenient macro to help WRITE_HEADER declaration for envelope members ONLY
-// ------------------------------------------------------------------------
-#define WRITE_MPTHEADER_envelope_member(envType,envField,type,code) \
-	{\
-		const InstrumentEnvelope &env = input->GetEnvelope(envType); \
-		static_assert(sizeof(type) == sizeof(env[0]. envField)); \
-		fcode = code;\
-		fsize = mpt::saturate_cast<int16>(sizeof( type ) * env.size());\
-		MPT_ASSERT(size_t(fsize) == sizeof( type ) * env.size()); \
-		\
-		if(writeAll) \
-		{ \
-			mpt::IO::WriteIntLE<uint32>(file, fcode); \
-			mpt::IO::WriteIntLE<uint16>(file, fsize); \
-		} else if(onlyThisCode == fcode)\
-		{ \
-			fsize = fixedsize; /* just trust the size we got passed */ \
-		} \
-		if(onlyThisCode == fcode || onlyThisCode == Util::MaxValueOfType(onlyThisCode)) \
-		{ \
-			uint32 maxNodes = std::min(static_cast<uint32>(fsize/sizeof(type)), static_cast<uint32>(env.size())); \
-			for(uint32 i = 0; i < maxNodes; ++i) \
-			{ \
-				type tmp; \
-				tmp = env[i]. envField ; \
-				mpt::IO::WriteIntLE(file, tmp); \
-			} \
-			/* Not every instrument's envelope will be the same length. fill up with zeros. */ \
-			for(uint32 i = maxNodes; i < fsize/sizeof(type); ++i) \
-			{ \
-				type tmp = 0; \
-				mpt::IO::WriteIntLE(file, tmp); \
-			} \
-		} \
-	}\
-/**/
-
-
-// Write (in 'file') 'input' ModInstrument with 'code' & 'size' extra field infos for each member
-void WriteInstrumentHeaderStructOrField(ModInstrument * input, std::ostream &file, uint32 onlyThisCode, uint16 fixedsize)
+template <auto Member, typename PropertyNeededFunc, auto PropertySizeFunc>
+struct PropertyWriterBase
 {
-	uint32 fcode;
-	uint16 fsize;
-	// If true, all extension are written to the file; otherwise only the specified extension is written.
-	// writeAll is true iff we are saving an instrument (or, hypothetically, the legacy ITP format)
-	const bool writeAll = onlyThisCode == Util::MaxValueOfType(onlyThisCode);
+	PropertyNeededFunc IsPropertyNeeded;
+	static constexpr auto Size = PropertySizeFunc;
 
-	if(!writeAll)
+	PropertyWriterBase(PropertyNeededFunc &&propertyNeededFunc = IsPropertyNonDefault<Member>)
+		: IsPropertyNeeded{std::move(propertyNeededFunc)}
+	{ }
+};
+
+template <auto Member, typename PropertyNeededFunc = decltype(&IsPropertyNonDefault<Member>), auto PropertySizeFunc = PropertySize<Member>>
+struct PropertyWriterInt : PropertyWriterBase<Member, PropertyNeededFunc, PropertySizeFunc>
+{
+	using PropertyWriterBase<Member, PropertyNeededFunc, PropertySizeFunc>::PropertyWriterBase;
+	static void Write(std::ostream &file, const ModInstrument &ins) { mpt::IO::WriteIntLE(file, ins.*Member); }
+};
+
+template <auto Member, typename PropertyNeededFunc = decltype(&IsPropertyNonDefault<Member>), auto PropertySizeFunc = PropertySize<Member>>
+struct PropertyWriterEnum : PropertyWriterBase<Member, PropertyNeededFunc, PropertySizeFunc>
+{
+	using PropertyWriterBase<Member, PropertyNeededFunc, PropertySizeFunc>::PropertyWriterBase;
+	static void Write(std::ostream &file, const ModInstrument &ins)
 	{
-		MPT_ASSERT(fixedsize > 0);
+		const auto value = ins.*Member;
+		static_assert(std::is_enum_v<decltype(value)>);
+		mpt::IO::WriteIntLE(file, mpt::to_underlying(value));
+	}
+};
+
+struct PropertyWriterReleaseNode
+{
+	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return DEFAULT_INSTRUMENT.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
+	static constexpr uint16 Size() noexcept { return sizeof(InstrumentEnvelope{}.nReleaseNode); }
+	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE(file, ins.GetEnvelope(type).nReleaseNode); }
+	const EnvelopeType type;
+};
+
+struct PropertyWriterEnvelopeBase
+{
+	static constexpr bool IsPropertyNeeded(const ModInstrument &) noexcept { return true; }
+	const uint32 nodes;
+	const EnvelopeType type;
+};
+
+struct PropertyWriterEnvelopeSize : PropertyWriterEnvelopeBase
+{
+	static constexpr uint16 Size() noexcept { return sizeof(uint32le); }
+	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE<uint32>(file, ins.GetEnvelope(type).size()); }
+};
+
+struct PropertyWriterEnvelopeTicks : PropertyWriterEnvelopeBase
+{
+	uint16 Size() const noexcept { return static_cast<uint16>(sizeof(uint16le) * nodes); }
+	void Write(std::ostream &file, const ModInstrument &ins) const
+	{
+		const auto &env = ins.GetEnvelope(type);
+		const uint32 maxNodes = std::min(nodes, static_cast<uint32>(env.size()));
+		for(uint32 i = 0; i < maxNodes; ++i)
+		{
+			mpt::IO::WriteIntLE(file, static_cast<uint16>(env[i].tick));
+		}
+		// Not every instrument's envelope will be the same length. fill up with zeros.
+		uint16le padding{};
+		for(uint32 i = maxNodes; i < nodes; ++i)
+		{
+			mpt::IO::Write(file, padding);
+		}
+	}
+};
+
+struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
+{
+	uint16 Size() const noexcept { return static_cast<uint16>(sizeof(uint8) * nodes); }
+	void Write(std::ostream &file, const ModInstrument &ins) const
+	{
+		const auto &env = ins.GetEnvelope(type);
+		const uint32 maxNodes = std::min(nodes, static_cast<uint32>(env.size()));
+		for(uint32 i = 0; i < maxNodes; ++i)
+		{
+			mpt::IO::WriteIntLE(file, static_cast<uint8>(env[i].value));
+		}
+		// Not every instrument's envelope will be the same length. fill up with zeros.
+		uint16le padding{};
+		for(uint32 i = maxNodes; i < nodes; ++i)
+		{
+			mpt::IO::Write(file, padding);
+		}
+	}
+};
+
+struct PropertyWriterPitchTempoLock
+{
+	static constexpr bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return DEFAULT_INSTRUMENT.pitchToTempoLock != ins.pitchToTempoLock; }
+	static constexpr uint16 Size() noexcept { return sizeof(uint16le); }
+	PropertyWriterPitchTempoLock(bool intPart) : m_intPart{intPart} {}
+	void Write(std::ostream &file, const ModInstrument &ins)
+	{
+		mpt::IO::WriteIntLE(file, static_cast<uint16>(m_intPart ? ins.pitchToTempoLock.GetInt() : ins.pitchToTempoLock.GetFract()));
 	}
 
-	// clang-format off
-	WRITE_MPTHEADER_sized_member(	nFadeOut					, uint32	, MagicBE("FO..")	)
-	WRITE_MPTHEADER_sized_member(	nPan						, uint32	, MagicBE("P...")	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.size()				, uint32	, MagicBE("VE..")	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.size()				, uint32	, MagicBE("PE..")	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.size()				, uint32	, MagicBE("PiE.")	)
-	WRITE_MPTHEADER_sized_member(	wMidiBank					, uint16	, MagicBE("MB..")	)
-	WRITE_MPTHEADER_sized_member(	nMidiProgram				, uint8		, MagicBE("MP..")	)
-	WRITE_MPTHEADER_sized_member(	nMidiChannel				, uint8		, MagicBE("MC..")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, tick		, uint16	, MagicBE("VP[.")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, tick		, uint16	, MagicBE("PP[.")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, tick		, uint16	, MagicBE("PiP[")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_VOLUME	, value		, uint8		, MagicBE("VE[.")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PANNING	, value		, uint8		, MagicBE("PE[.")	)
-	WRITE_MPTHEADER_envelope_member(	ENV_PITCH	, value		, uint8		, MagicBE("PiE[")	)
-	WRITE_MPTHEADER_sized_member(	nMixPlug					, uint8		, MagicBE("MiP.")	)
-	WRITE_MPTHEADER_sized_member(	nVolRampUp					, uint16	, MagicBE("VR..")	)
-	WRITE_MPTHEADER_sized_member(	resampling					, uint8		, MagicBE("R...")	)
-	WRITE_MPTHEADER_sized_member(	nCutSwing					, uint8		, MagicBE("CS..")	)
-	WRITE_MPTHEADER_sized_member(	nResSwing					, uint8		, MagicBE("RS..")	)
-	WRITE_MPTHEADER_sized_member(	filterMode					, uint8		, MagicBE("FM..")	)
-	WRITE_MPTHEADER_sized_member(	pluginVelocityHandling		, uint8		, MagicBE("PVEH")	)
-	WRITE_MPTHEADER_sized_member(	pluginVolumeHandling		, uint8		, MagicBE("PVOH")	)
-	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetInt()	, uint16	, MagicBE("PTTL")	)
-	WRITE_MPTHEADER_trunc_member(	pitchToTempoLock.GetFract() , uint16	, MagicLE("PTTF")	)
-	WRITE_MPTHEADER_sized_member(	PitchEnv.nReleaseNode		, uint8		, MagicBE("PERN")	)
-	WRITE_MPTHEADER_sized_member(	PanEnv.nReleaseNode			, uint8		, MagicBE("AERN")	)
-	WRITE_MPTHEADER_sized_member(	VolEnv.nReleaseNode			, uint8		, MagicBE("VERN")	)
-	WRITE_MPTHEADER_sized_member(	midiPWD						, int8		, MagicBE("MPWD")	)
-	// clang-format on
+	const bool m_intPart;
+};
 
-}
-
-
-template<typename TIns, typename PropType>
-static bool IsPropertyNeeded(const TIns &Instruments, PropType ModInstrument::*Prop)
+template <typename PropertyWriter>
+static void WriteProperty(std::ostream &f, uint32 code, mpt::span<const ModInstrument *const> instruments, PropertyWriter property)
 {
-	const ModInstrument defaultIns;
-	for(const auto ins : Instruments)
+	bool writeProperty = false;
+	for(const ModInstrument *ins : instruments)
 	{
-		if(ins != nullptr && defaultIns.*Prop != ins->*Prop)
-			return true;
+		if(ins != nullptr && property.IsPropertyNeeded(*ins))
+		{
+			writeProperty = true;
+			break;
+		}
 	}
-	return false;
-}
-
-
-template<typename PropType>
-static void WritePropertyIfNeeded(const CSoundFile &sndFile, PropType ModInstrument::*Prop, uint32 code, uint16 size, std::ostream &f, INSTRUMENTINDEX numInstruments)
-{
-	if(IsPropertyNeeded(sndFile.Instruments, Prop))
+	if(!writeProperty)
+		return;
+	mpt::IO::WriteIntLE<uint32>(f, code);
+	mpt::IO::WriteIntLE<uint16>(f, property.Size());
+	for(const ModInstrument *ins : instruments)
 	{
-		sndFile.WriteInstrumentPropertyForAllInstruments(code, size, f, numInstruments);
+		property.Write(f, ins ? *ins : DEFAULT_INSTRUMENT);
 	}
 }
 
 
-// Used only when saving IT, XM and MPTM.
-// ITI, ITP saves using Ericus' macros etc...
-// The reason is that ITs and XMs save [code][size][ins1.Value][ins2.Value]...
-// whereas ITP saves [code][size][ins1.Value][code][size][ins2.Value]...
-// too late to turn back....
-void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX numInstruments, std::ostream &f) const
+void CSoundFile::SaveExtendedInstrumentProperties(INSTRUMENTINDEX instr, MODTYPE forceType, std::ostream &f) const
 {
-	uint32 code = MagicBE("MPTX");	// write extension header code
+	const bool allInstruments = (instr < 1 || instr > GetNumInstruments());
+	const auto instruments = mpt::as_span(Instruments).subspan(allInstruments ? 1 : instr, allInstruments ? GetNumInstruments() : 1);
+	SaveExtendedInstrumentProperties(instruments, forceType, f, allInstruments);
+}
+
+void CSoundFile::SaveExtendedInstrumentProperties(mpt::span<const ModInstrument * const> instruments, MODTYPE forceType, std::ostream &f, bool allInstruments)
+{
+	uint32 code = MagicBE("MPTX");  // write extension header code
 	mpt::IO::WriteIntLE<uint32>(f, code);
 
-	if (numInstruments == 0)
-		return;
+	WriteProperty(f, MagicBE("VR.."), instruments, PropertyWriterInt<&ModInstrument::nVolRampUp>{});
+	WriteProperty(f, MagicBE("MiP."), instruments, PropertyWriterInt<&ModInstrument::nMixPlug>{});
+	WriteProperty(f, MagicBE("R..."), instruments, PropertyWriterEnum<&ModInstrument::resampling>{});
+	WriteProperty(f, MagicBE("PVEH"), instruments, PropertyWriterEnum<&ModInstrument::pluginVelocityHandling>{});
+	WriteProperty(f, MagicBE("PVOH"), instruments, PropertyWriterEnum<&ModInstrument::pluginVolumeHandling>{});
 
-	WritePropertyIfNeeded(*this, &ModInstrument::nVolRampUp,   MagicBE("VR.."), sizeof(ModInstrument::nVolRampUp),   f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nMixPlug,     MagicBE("MiP."), sizeof(ModInstrument::nMixPlug),     f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nMidiChannel, MagicBE("MC.."), sizeof(ModInstrument::nMidiChannel), f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::nMidiProgram, MagicBE("MP.."), sizeof(ModInstrument::nMidiProgram), f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::wMidiBank,    MagicBE("MB.."), sizeof(ModInstrument::wMidiBank),    f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::resampling,   MagicBE("R..."), sizeof(ModInstrument::resampling),   f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::pluginVelocityHandling, MagicBE("PVEH"), sizeof(ModInstrument::pluginVelocityHandling), f, numInstruments);
-	WritePropertyIfNeeded(*this, &ModInstrument::pluginVolumeHandling,   MagicBE("PVOH"), sizeof(ModInstrument::pluginVolumeHandling),   f, numInstruments);
-
-	if(!(GetType() & MOD_TYPE_XM))
+	if(!(forceType & MOD_TYPE_XM))
 	{
 		// XM instrument headers already stores full-precision fade-out
-		bool writeFadeOut = false, writePan = false, writePWD = false;
-		int32 prevPWD = int32_min;
-		for(const auto ins : Instruments)
+		WriteProperty(f, MagicBE("FO.."), instruments, PropertyWriterInt<&ModInstrument::nFadeOut>{[](const ModInstrument &ins) { return (ins.nFadeOut % 32u) || ins.nFadeOut > 8192; }});
+		// XM instrument headers already have support for this
+		// Note: For ITI we always want to write this property, hence the allInstruments check
+		int32 prevPWD = allInstruments ? int32_max : int32_min;
+		WriteProperty(f, MagicBE("MPWD"), instruments, PropertyWriterInt<&ModInstrument::midiPWD, std::function<bool(const ModInstrument &)>>{[&prevPWD](const ModInstrument& ins)
+		{
+			if((prevPWD != int32_min && ins.midiPWD != prevPWD) || (ins.midiPWD < 0))
+				return true;
+			prevPWD = ins.midiPWD;
+			return false;
+		}});
+		// We never supported these as hacks in XM (luckily!)
+		WriteProperty(f, MagicBE("P..."), instruments, PropertyWriterInt<&ModInstrument::nPan>{[](const ModInstrument &ins) { return ins.dwFlags[INS_SETPANNING] && (ins.nPan % 4u); }});
+		WriteProperty(f, MagicBE("CS.."), instruments, PropertyWriterInt<&ModInstrument::nCutSwing>{});
+		WriteProperty(f, MagicBE("RS.."), instruments, PropertyWriterInt<&ModInstrument::nResSwing>{});
+		WriteProperty(f, MagicBE("FM.."), instruments, PropertyWriterEnum<&ModInstrument::filterMode>{});
+		WriteProperty(f, MagicBE("PTTL"), instruments, PropertyWriterPitchTempoLock{true});
+		WriteProperty(f, MagicLE("PTTF"), instruments, PropertyWriterPitchTempoLock{false});
+	} else
+	{
+		WriteProperty(f, MagicBE("MC.."), instruments, PropertyWriterInt<&ModInstrument::nMidiChannel>{[](const ModInstrument &ins) { return ins.nMidiChannel == MidiMappedChannel; }});
+		// Can be saved in XM, but it's not possible to NOT save a MIDI program if a MIDI channel is set
+		WriteProperty(f, MagicBE("MP.."), instruments, PropertyWriterInt<&ModInstrument::nMidiProgram>{[](const ModInstrument &ins) { return ins.HasValidMIDIChannel() == (ins.nMidiProgram == 0); }});
+		WriteProperty(f, MagicBE("MB.."), instruments, PropertyWriterInt<&ModInstrument::wMidiBank>{});
+	}
+
+	if(forceType & MOD_TYPE_MPT)
+	{
+		uint32 maxNodes[3] = { 0, 0, 0 };
+		for(const ModInstrument *ins : instruments)
 		{
 			if(ins == nullptr)
 				continue;
-			if((ins->nFadeOut % 32u) || ins->nFadeOut > 8192)
-				writeFadeOut = true;
-			if(ins->dwFlags[INS_SETPANNING] && (ins->nPan % 4u))
-				writePan = true;
-			if((prevPWD != int32_min && ins->midiPWD != prevPWD) || (ins->midiPWD < 0))
-				writePWD = true;
-			prevPWD = ins->midiPWD;
-		}
-		if(writeFadeOut)
-			WriteInstrumentPropertyForAllInstruments(MagicBE("FO.."), sizeof(ModInstrument::nFadeOut), f, numInstruments);
-		// XM instrument headers already have support for this
-		if(writePWD)
-			WriteInstrumentPropertyForAllInstruments(MagicBE("MPWD"), sizeof(ModInstrument::midiPWD), f, numInstruments);
-		// We never supported these as hacks in XM (luckily!)
-		if(writePan)
-			WriteInstrumentPropertyForAllInstruments(MagicBE("P..."), sizeof(ModInstrument::nPan), f, numInstruments);
-		WritePropertyIfNeeded(*this, &ModInstrument::nCutSwing, MagicBE("CS.."), sizeof(ModInstrument::nCutSwing), f, numInstruments);
-		WritePropertyIfNeeded(*this, &ModInstrument::nResSwing, MagicBE("RS.."), sizeof(ModInstrument::nResSwing), f, numInstruments);
-		WritePropertyIfNeeded(*this, &ModInstrument::filterMode, MagicBE("FM.."), sizeof(ModInstrument::filterMode), f, numInstruments);
-		if(IsPropertyNeeded(Instruments, &ModInstrument::pitchToTempoLock))
-		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PTTL"), sizeof(uint16), f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicLE("PTTF"), sizeof(uint16), f, numInstruments);
-		}
-	}
-
-	if(GetType() & MOD_TYPE_MPT)
-	{
-		uint32 maxNodes[3] = { 0, 0, 0 };
-		bool hasReleaseNode[3] = { false, false, false };
-		for(INSTRUMENTINDEX i = 1; i <= numInstruments; i++) if(Instruments[i] != nullptr)
-		{
-			maxNodes[0] = std::max(maxNodes[0], Instruments[i]->VolEnv.size());
-			maxNodes[1] = std::max(maxNodes[1], Instruments[i]->PanEnv.size());
-			maxNodes[2] = std::max(maxNodes[2], Instruments[i]->PitchEnv.size());
-			hasReleaseNode[0] |= (Instruments[i]->VolEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
-			hasReleaseNode[1] |= (Instruments[i]->PanEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
-			hasReleaseNode[2] |= (Instruments[i]->PitchEnv.nReleaseNode != ENV_RELEASE_NODE_UNSET);
+			maxNodes[0] = std::max(maxNodes[0], ins->VolEnv.size());
+			maxNodes[1] = std::max(maxNodes[1], ins->PanEnv.size());
+			maxNodes[2] = std::max(maxNodes[2], ins->PitchEnv.size());
 		}
 		// write full envelope information for MPTM files (more env points)
 		if(maxNodes[0] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VE.."), sizeof(ModInstrument::VolEnv.size()), f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VP[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode::tick)),  f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VE[."), static_cast<uint16>(maxNodes[0] * sizeof(EnvelopeNode::value)), f, numInstruments);
+			WriteProperty(f, MagicBE("VE.."), instruments, PropertyWriterEnvelopeSize{maxNodes[0], ENV_VOLUME});
+			WriteProperty(f, MagicBE("VP[."), instruments, PropertyWriterEnvelopeTicks{maxNodes[0], ENV_VOLUME});
+			WriteProperty(f, MagicBE("VE[."), instruments, PropertyWriterEnvelopeValues{maxNodes[0], ENV_VOLUME});
 		}
 		if(maxNodes[1] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PE.."), sizeof(ModInstrument::PanEnv.size()), f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PP[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode::tick)),  f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PE[."), static_cast<uint16>(maxNodes[1] * sizeof(EnvelopeNode::value)), f, numInstruments);
+			WriteProperty(f, MagicBE("PE.."), instruments, PropertyWriterEnvelopeSize{maxNodes[1], ENV_PANNING});
+			WriteProperty(f, MagicBE("PP[."), instruments, PropertyWriterEnvelopeTicks{maxNodes[1], ENV_PANNING});
+			WriteProperty(f, MagicBE("PE[."), instruments, PropertyWriterEnvelopeValues{maxNodes[1], ENV_PANNING});
 		}
 		if(maxNodes[2] > 25)
 		{
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE."), sizeof(ModInstrument::PitchEnv.size()), f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiP["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode::tick)),  f, numInstruments);
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PiE["), static_cast<uint16>(maxNodes[2] * sizeof(EnvelopeNode::value)), f, numInstruments);
+			WriteProperty(f, MagicBE("PiE."), instruments, PropertyWriterEnvelopeSize{maxNodes[2], ENV_PITCH});
+			WriteProperty(f, MagicBE("PiP["), instruments, PropertyWriterEnvelopeTicks{maxNodes[2], ENV_PITCH});
+			WriteProperty(f, MagicBE("PiE["), instruments, PropertyWriterEnvelopeValues{maxNodes[2], ENV_PITCH});
 		}
-		if(hasReleaseNode[0])
-			WriteInstrumentPropertyForAllInstruments(MagicBE("VERN"), sizeof(ModInstrument::VolEnv.nReleaseNode), f, numInstruments);
-		if(hasReleaseNode[1])
-			WriteInstrumentPropertyForAllInstruments(MagicBE("AERN"), sizeof(ModInstrument::PanEnv.nReleaseNode), f, numInstruments);
-		if(hasReleaseNode[2])
-			WriteInstrumentPropertyForAllInstruments(MagicBE("PERN"), sizeof(ModInstrument::PitchEnv.nReleaseNode), f, numInstruments);
-	}
-}
-
-void CSoundFile::WriteInstrumentPropertyForAllInstruments(uint32 code, uint16 size, std::ostream &f, INSTRUMENTINDEX nInstruments) const
-{
-	mpt::IO::WriteIntLE<uint32>(f, code);		//write code
-	mpt::IO::WriteIntLE<uint16>(f, size);		//write size
-	for(INSTRUMENTINDEX i = 1; i <= nInstruments; i++)	//for all instruments...
-	{
-		if (Instruments[i])
-		{
-			WriteInstrumentHeaderStructOrField(Instruments[i], f, code, size);
-		} else
-		{
-			ModInstrument emptyInstrument;
-			WriteInstrumentHeaderStructOrField(&emptyInstrument, f, code, size);
-		}
+		WriteProperty(f, MagicBE("VERN"), instruments, PropertyWriterReleaseNode{ENV_VOLUME});
+		WriteProperty(f, MagicBE("AERN"), instruments, PropertyWriterReleaseNode{ENV_PANNING});
+		WriteProperty(f, MagicBE("PERN"), instruments, PropertyWriterReleaseNode{ENV_PITCH});
 	}
 }
 
@@ -605,7 +537,7 @@ static void ReadInstrumentHeaderField(ModInstrument &ins, uint32 fcode, FileRead
 
 
 // For ITP and internal usage
-void ReadExtendedInstrumentProperty(mpt::span<ModInstrument *> instruments, const uint32 code, FileReader &file)
+void CSoundFile::ReadExtendedInstrumentProperty(mpt::span<ModInstrument *> instruments, const uint32 code, FileReader &file)
 {
 	uint16 size = file.ReadUint16LE();
 	for(ModInstrument *ins : instruments)

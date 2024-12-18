@@ -2030,7 +2030,7 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 	{
 		if(GetNumInstruments())
 		{
-			SaveExtendedInstrumentProperties(itHeader.insnum, f);
+			SaveExtendedInstrumentProperties(0, GetType(), f);
 		}
 		SaveExtendedSongProperties(f);
 	}
