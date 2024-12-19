@@ -148,7 +148,7 @@ struct PropertyWriterBase
 	PropertyNeededFunc IsPropertyNeeded;
 	static constexpr auto Size = PropertySizeFunc;
 
-	PropertyWriterBase(PropertyNeededFunc &&propertyNeededFunc = IsPropertyNonDefault<Member>)
+	PropertyWriterBase(PropertyNeededFunc propertyNeededFunc = IsPropertyNonDefault<Member>)
 		: IsPropertyNeeded{std::move(propertyNeededFunc)}
 	{ }
 };
