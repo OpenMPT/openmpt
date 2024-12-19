@@ -196,7 +196,7 @@ struct PropertyWriterReleaseNode
 struct PropertyWriterEnvelopeBase
 {
 	PropertyWriterEnvelopeBase(uint32 nodes, EnvelopeType type) : nodes{nodes}, type{type} {}
-	static bool IsPropertyNeeded(const ModInstrument&) noexcept
+	static bool IsPropertyNeeded(const ModInstrument &) noexcept
 	{
 		return true;
 	}
@@ -255,7 +255,7 @@ struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
 
 struct PropertyWriterPitchTempoLock
 {
-	static bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return DEFAULT_INSTRUMENT.pitchToTempoLock != ins.pitchToTempoLock; }
+	static constexpr auto IsPropertyNeeded = IsPropertyNonDefault<&ModInstrument::pitchToTempoLock>;
 	static constexpr uint16 Size() noexcept { return sizeof(uint16le); }
 	PropertyWriterPitchTempoLock(bool intPart) : m_intPart{intPart} {}
 	void Write(std::ostream &file, const ModInstrument &ins)
