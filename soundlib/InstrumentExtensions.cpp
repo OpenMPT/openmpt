@@ -301,7 +301,7 @@ void CSoundFile::SaveExtendedInstrumentProperties(mpt::span<const ModInstrument 
 		WriteProperty(f, MagicBE("FO.."), instruments, PropertyWriterInt<&ModInstrument::nFadeOut>{[](const ModInstrument &ins) { return (ins.nFadeOut % 32u) || ins.nFadeOut > 8192; }});
 		// XM instrument headers already have support for this
 		// Note: For ITI we always want to write this property, hence the allInstruments check
-		int32 prevPWD = allInstruments ? int32_max : int32_min;
+		int32 prevPWD = allInstruments ? int32_min : int32_max;
 		WriteProperty(f, MagicBE("MPWD"), instruments, PropertyWriterInt<&ModInstrument::midiPWD, std::function<bool(const ModInstrument &)>>{[&prevPWD](const ModInstrument& ins)
 		{
 			if((prevPWD != int32_min && ins.midiPWD != prevPWD) || (ins.midiPWD < 0))
