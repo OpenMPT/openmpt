@@ -2965,7 +2965,7 @@ void CCtrlInstruments::UpdateTuningComboBox()
 	Reporting::Notification(MPT_CFORMAT("Tuning {} was not found. Setting to default tuning.")(mpt::ToCString(m_sndFile.Instruments[m_nInstrument]->pTuning->GetName())));
 
 	CriticalSection cs;
-	pIns->SetTuning(m_sndFile.GetDefaultTuning());
+	pIns->SetTuning(nullptr);
 
 	m_modDoc.SetModified();
 }

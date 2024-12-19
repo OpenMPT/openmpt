@@ -409,7 +409,6 @@ public:
 	//Tuning-->
 public:
 	static std::unique_ptr<CTuning> CreateTuning12TET(const mpt::ustring &name);
-	static CTuning *GetDefaultTuning() {return nullptr;}
 	CTuningCollection& GetTuneSpecificTunings() {return *m_pTuningsTuneSpecific;}
 
 	mpt::ustring GetNoteName(const ModCommand::NOTE note, const INSTRUMENTINDEX inst, const NoteName *noteNames = nullptr) const;

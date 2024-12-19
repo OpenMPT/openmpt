@@ -2823,7 +2823,7 @@ static void TestLoadXMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 	VERIFY_EQUAL_NONCONT(pIns->midiPWD, 8);
 
-	VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
+	VERIFY_EQUAL_NONCONT(pIns->pTuning, nullptr);
 
 	VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(0, 0));
 
@@ -3144,7 +3144,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 		VERIFY_EQUAL_NONCONT(pIns->midiPWD, -1);
 
-		VERIFY_EQUAL_NONCONT(pIns->pTuning, sndFile.GetDefaultTuning());
+		VERIFY_EQUAL_NONCONT(pIns->pTuning, nullptr);
 
 		VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(130, 2000));
 

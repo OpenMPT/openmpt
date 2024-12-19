@@ -262,13 +262,13 @@ static void ReadTuningMapImpl(std::istream& iStrm, CSoundFile& csf, mpt::Charset
 #endif // MODPLUG_TRACKER
 
 			}
-			csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
+			csf.Instruments[i]->pTuning = nullptr;
 
 		} else
 		{
 			//This 'else' happens probably only in case of corrupted file.
 			if(csf.Instruments[i])
-				csf.Instruments[i]->pTuning = csf.GetDefaultTuning();
+				csf.Instruments[i]->pTuning = nullptr;
 		}
 
 	}

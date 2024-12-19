@@ -159,8 +159,6 @@ ModInstrument::ModInstrument(SAMPLEINDEX sample)
 
 	pitchToTempoLock.Set(0);
 
-	pTuning = CSoundFile::GetDefaultTuning();
-
 	AssignSample(sample);
 	ResetNoteMap();
 }
