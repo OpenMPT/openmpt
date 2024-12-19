@@ -128,7 +128,7 @@ struct ModInstrument
 	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	MPT_CONSTEXPR20_FUN explicit ModInstrument(SAMPLEINDEX sample = 0)
+	explicit ModInstrument(SAMPLEINDEX sample = 0)
 	{
 		AssignSample(sample);
 		ResetNoteMap();
