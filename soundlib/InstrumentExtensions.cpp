@@ -245,7 +245,7 @@ struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
 			mpt::IO::WriteIntLE(file, static_cast<uint8>(env[i].value));
 		}
 		// Not every instrument's envelope will be the same length. fill up with zeros.
-		uint16le padding{};
+		uint8 padding{};
 		for(uint32 i = maxNodes; i < nodes; ++i)
 		{
 			mpt::IO::Write(file, padding);
