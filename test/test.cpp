@@ -3144,7 +3144,10 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->wMidiBank, 2);
 		VERIFY_EQUAL_NONCONT(pIns->midiPWD, -1);
 
-		VERIFY_EQUAL_NONCONT(pIns->pTuning, nullptr);
+		if(ins == 1)
+			VERIFY_EQUAL_NONCONT(pIns->pTuning, nullptr);
+		else
+			VERIFY_EQUAL_NONCONT(pIns->pTuning->GetName(), UL_("Test Tuning"));
 
 		VERIFY_EQUAL_NONCONT(pIns->pitchToTempoLock, TEMPO(130, 2000));
 
@@ -3163,13 +3166,20 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 		VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].tick, 96);
 		VERIFY_EQUAL_NONCONT(pIns->VolEnv[2].value, 0);
 
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.size(), 76);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 22);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.dwFlags, ENV_LOOP | ENV_SUSTAIN);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.size(), (ins == 1) ? 74u : 76u);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopStart, 26);
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nLoopEnd, 29);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nSustainStart, 27);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nSustainEnd, 28);
 		VERIFY_EQUAL_NONCONT(pIns->PanEnv.nReleaseNode, ENV_RELEASE_NODE_UNSET);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].tick, 427);
-		VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].value, 27);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv[73].tick, 417);
+		VERIFY_EQUAL_NONCONT(pIns->PanEnv[73].value, 23);
+		if(ins == 2)
+		{
+			VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].tick, 427);
+			VERIFY_EQUAL_NONCONT(pIns->PanEnv[75].value, 27);
+		}
 
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.dwFlags, ENV_ENABLED | ENV_CARRY | ENV_SUSTAIN | ENV_FILTER);
 		VERIFY_EQUAL_NONCONT(pIns->PitchEnv.size(), 3);
