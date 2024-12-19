@@ -152,18 +152,6 @@ void InstrumentEnvelope::Sanitize(uint8 maxValue)
 }
 
 
-ModInstrument::ModInstrument(SAMPLEINDEX sample)
-{
-	SetCutoff(0, false);
-	SetResonance(0, false);
-
-	pitchToTempoLock.Set(0);
-
-	AssignSample(sample);
-	ResetNoteMap();
-}
-
-
 // Translate instrument properties between two given formats.
 void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 {

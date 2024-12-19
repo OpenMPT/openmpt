@@ -310,13 +310,13 @@ public:
 	Tchar buf[len];
 
 public:
-	charbuf() {
+	MPT_CONSTEXPR20_FUN charbuf() {
 		std::fill(std::begin(buf), std::end(buf), char_constants<Tchar>::null);
 	}
-	charbuf(const charbuf &) = default;
-	charbuf(charbuf &&) = default;
-	charbuf & operator=(const charbuf &) = default;
-	charbuf & operator=(charbuf &&) = default;
+	constexpr charbuf(const charbuf &) = default;
+	constexpr charbuf(charbuf &&) = default;
+	constexpr charbuf & operator=(const charbuf &) = default;
+	constexpr charbuf & operator=(charbuf &&) = default;
 	const Tchar & operator[](std::size_t i) const {
 		return buf[i];
 	}
