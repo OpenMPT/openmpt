@@ -136,8 +136,20 @@ it was always ignored, because sample indices may change when loading external i
 
 #ifndef MODPLUG_NO_FILESAVE
 
+namespace
+{
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif  // MPT_COMPILER_CLANG
+	const ModInstrument DEFAULT_INSTRUMENT;
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif  // MPT_COMPILER_CLANG
+}  // namespace
+
 template <auto Member>
-constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return ModInstrument{}.*Member != ins.*Member; }
+constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return DEFAULT_INSTRUMENT.*Member != ins.*Member; }
 
 template <auto Member>
 constexpr uint16 PropertySize() noexcept { return sizeof(ModInstrument{}.*Member); }
@@ -174,7 +186,7 @@ struct PropertyWriterEnum : PropertyWriterBase<Member, PropertyNeededFunc, Prope
 
 struct PropertyWriterReleaseNode
 {
-	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return ModInstrument{}.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
+	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return DEFAULT_INSTRUMENT.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
 	static constexpr uint16 Size() noexcept { return sizeof(InstrumentEnvelope{}.nReleaseNode); }
 	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE(file, ins.GetEnvelope(type).nReleaseNode); }
 	const EnvelopeType type;
@@ -242,7 +254,7 @@ struct PropertyWriterEnvelopeValues : PropertyWriterEnvelopeBase
 
 struct PropertyWriterPitchTempoLock
 {
-	static bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return ModInstrument{}.pitchToTempoLock != ins.pitchToTempoLock; }
+	static bool IsPropertyNeeded(const ModInstrument &ins) noexcept { return DEFAULT_INSTRUMENT.pitchToTempoLock != ins.pitchToTempoLock; }
 	static constexpr uint16 Size() noexcept { return sizeof(uint16le); }
 	PropertyWriterPitchTempoLock(bool intPart) : m_intPart{intPart} {}
 	void Write(std::ostream &file, const ModInstrument &ins)
@@ -269,10 +281,9 @@ static void WriteProperty(std::ostream &f, uint32 code, mpt::span<const ModInstr
 		return;
 	mpt::IO::WriteIntLE<uint32>(f, code);
 	mpt::IO::WriteIntLE<uint16>(f, property.Size());
-	ModInstrument defaultInstr{};
 	for(const ModInstrument *ins : instruments)
 	{
-		property.Write(f, ins ? *ins : defaultInstr);
+		property.Write(f, ins ? *ins : DEFAULT_INSTRUMENT);
 	}
 }
 
