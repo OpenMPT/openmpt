@@ -140,6 +140,7 @@ namespace
 {
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif  // MPT_COMPILER_CLANG
 	const ModInstrument DEFAULT_INSTRUMENT;
