@@ -182,7 +182,7 @@ struct PropertyWriterReleaseNode
 
 struct PropertyWriterEnvelopeBase
 {
-	PropertyWriterEnvelopeBase(uint32 nodes, EnvelopeType type) : nodes{nodes}, type{type} {};
+	PropertyWriterEnvelopeBase(uint32 nodes, EnvelopeType type) : nodes{nodes}, type{type} {}
 	static bool IsPropertyNeeded(const ModInstrument&) noexcept
 	{
 		return true;
