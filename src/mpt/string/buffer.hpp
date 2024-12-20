@@ -6,7 +6,6 @@
 
 
 #include "mpt/base/detect.hpp"
-#include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/detect/mfc.hpp"
@@ -308,11 +307,13 @@ public:
 	}
 
 public:
-	Tchar buf[len];
+	Tchar buf[len]{};
 
 public:
-	MPT_CONSTEXPR20_FUN charbuf() {
-		std::fill(std::begin(buf), std::end(buf), char_constants<Tchar>::null);
+	constexpr charbuf() {
+		for (std::size_t i = 0; i < len; ++i) {
+			buf[i] = char_constants<Tchar>::null;
+		}
 	}
 	constexpr charbuf(const charbuf &) = default;
 	constexpr charbuf(charbuf &&) = default;
