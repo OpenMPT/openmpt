@@ -1050,7 +1050,7 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s, bool hex) c
 	case VOLCMD_FINEVOLDOWN:
 		if(m.vol > 0 || sndFile.GetType() == MOD_TYPE_XM)
 		{
-			*s = (m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? _T('+') : _T('-')
+			*s = ((m.volcmd == VOLCMD_VOLSLIDEUP || m.volcmd == VOLCMD_FINEVOLUP) ? _T('+') : _T('-'))
 				+ volume;
 		} else
 		{
