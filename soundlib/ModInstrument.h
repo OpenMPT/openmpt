@@ -135,13 +135,13 @@ struct ModInstrument
 	}
 
 	// Assign all notes to a given sample.
-	MPT_CONSTEXPR20_FUN void AssignSample(SAMPLEINDEX sample)
+	void AssignSample(SAMPLEINDEX sample)
 	{
 		Keyboard.fill(sample);
 	}
 
 	// Reset note mapping (i.e. every note is mapped to itself)
-	MPT_CONSTEXPR20_FUN void ResetNoteMap()
+	void ResetNoteMap()
 	{
 		std::iota(NoteMap.begin(), NoteMap.end(), static_cast<uint8>(NOTE_MIN));
 	}
