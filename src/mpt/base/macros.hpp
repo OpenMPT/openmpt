@@ -30,14 +30,25 @@
 
 
 // constexpr
+
 #define MPT_CONSTEXPRINLINE constexpr MPT_FORCEINLINE
-#if MPT_CXX_AT_LEAST(20)
+
+#if MPT_CXX_AT_LEAST(23)
 #define MPT_CONSTEXPR20_FUN constexpr MPT_FORCEINLINE
 #define MPT_CONSTEXPR20_VAR constexpr
-#else // !C++20
+#define MPT_CONSTEXPR23_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_VAR constexpr
+#elif MPT_CXX_AT_LEAST(20)
+#define MPT_CONSTEXPR20_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_VAR constexpr
+#define MPT_CONSTEXPR23_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_VAR const
+#else // C++
 #define MPT_CONSTEXPR20_FUN MPT_FORCEINLINE
 #define MPT_CONSTEXPR20_VAR const
-#endif // C++20
+#define MPT_CONSTEXPR23_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_VAR const
+#endif // C++
 
 
 
