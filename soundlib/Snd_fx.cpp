@@ -2289,11 +2289,32 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 	if(!ModCommand::IsNote(static_cast<ModCommand::NOTE>(note)))
 		return CHANNELINDEX_INVALID;
 
-	// Always NNA cut - using
-	if((!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut) && !srcChn.HasMIDIOutput())
+	// Do we need to apply New/Duplicate Note Action to an instrument plugin?
+#ifndef NO_PLUGINS
+	IMixPlugin *pPlugin = nullptr;
+	if(srcChn.HasMIDIOutput() && ModCommand::IsNote(srcChn.nNote))  // Instrument has MIDI channel assigned (but not necessarily a plugin)
+	{
+		const PLUGINDEX plugin = GetBestPlugin(m_PlayState.Chn[nChn], nChn, PrioritiseInstrument, RespectMutes);
+		if(plugin > 0 && plugin <= MAX_MIXPLUGINS)
+			pPlugin = m_MixPlugins[plugin - 1].pMixPlugin;
+	}
+	// apply NNA to this plugin iff it is currently playing a note on this tracker channel
+	// (and if it is playing a note, we know that would be the last note played on this chan).
+	const bool applyNNAtoPlug = pPlugin && (srcChn.lastMidiNoteWithoutArp != NOTE_NONE) && pPlugin->IsNotePlaying(srcChn.lastMidiNoteWithoutArp, nChn);
+#else
+	const bool applyNNAtoPlug = false;
+#endif  // NO_PLUGINS
+
+	// Always NNA cut
+	if(!(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_MT2)) || !m_nInstruments || forceCut)
 	{
 		if(!srcChn.nLength || srcChn.dwFlags[CHN_MUTE] || !(srcChn.rightVol | srcChn.leftVol))
 			return CHANNELINDEX_INVALID;
+
+#ifndef NO_PLUGINS
+		if(applyNNAtoPlug)
+			SendMIDINote(nChn, NOTE_KEYOFF, 0, m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
+#endif  // NO_PLUGINS
 
 		if(srcChn.dwFlags[CHN_ADLIB] && m_opl)
 		{
@@ -2452,33 +2473,12 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 		}
 	}
 
-	// Do we need to apply New/Duplicate Note Action to a VSTi?
-	bool applyNNAtoPlug = false;
-#ifndef NO_PLUGINS
-	IMixPlugin *pPlugin = nullptr;
-	if(srcChn.HasMIDIOutput() && ModCommand::IsNote(srcChn.nNote)) // instro sends to a midi chan
-	{
-		PLUGINDEX plugin = GetBestPlugin(m_PlayState.Chn[nChn], nChn, PrioritiseInstrument, RespectMutes);
-
-		if(plugin > 0 && plugin <= MAX_MIXPLUGINS)
-		{
-			pPlugin =  m_MixPlugins[plugin - 1].pMixPlugin;
-			if(pPlugin)
-			{
-				// apply NNA to this plugin iff it is currently playing a note on this tracker channel
-				// (and if it is playing a note, we know that would be the last note played on this chan).
-				applyNNAtoPlug = (srcChn.lastMidiNoteWithoutArp != NOTE_NONE) && pPlugin->IsNotePlaying(srcChn.lastMidiNoteWithoutArp, nChn);
-			}
-		}
-	}
-#endif // NO_PLUGINS
-
 	// New Note Action
 	if(!srcChn.IsSamplePlaying() && !applyNNAtoPlug)
 		return CHANNELINDEX_INVALID;
 
 #ifndef NO_PLUGINS
-	if(applyNNAtoPlug && pPlugin)
+	if(applyNNAtoPlug)
 	{
 		switch(srcChn.nNNA)
 		{
