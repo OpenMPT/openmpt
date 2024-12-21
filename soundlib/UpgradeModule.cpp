@@ -805,6 +805,18 @@ void CSoundFile::UpgradeModule()
 			}
 		}
 	}
+
+	if(m_dwLastSavedWithVersion < MPT_V("1.32.00.38") && hasAnyPlugins)
+	{
+		for(const auto &plugin : m_MixPlugins)
+		{
+			if(plugin.Info.dwPluginId1 == PLUGMAGIC('V', 's', 't', 'P'))
+			{
+				m_playBehaviour.set(kLegacyPluginNNABehaviour);
+				break;
+			}
+		}
+	}
 #endif
 }
 

@@ -614,6 +614,7 @@ enum PlayBehaviour
 	kS3MIgnoreCombinedFineSlides,   // S3M commands Kxy and Lxy ignore fine slides
 	kFT2AutoVibratoAbortSweep,      // Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth
 	kLegacyPPQpos,                  // Report fake PPQ position to VST plugins
+	kLegacyPluginNNABehaviour,      // Plugin notes with NNA=continue are affected by note-offs etc.
 
 	// Add new play behaviours here.
 

@@ -2501,7 +2501,7 @@ CHANNELINDEX CSoundFile::CheckNNA(CHANNELINDEX nChn, uint32 instr, int note, boo
 				// If there's no NNA channels available, avoid the note lingering on forever
 				if(nnaChn == CHANNELINDEX_INVALID)
 					SendMIDINote(nChn, NOTE_KEYOFF, 0, m_playBehaviour[kMIDINotesFromChannelPlugin] ? pPlugin : nullptr);
-				else
+				else if(!m_playBehaviour[kLegacyPluginNNABehaviour])
 					pPlugin->MoveChannel(nChn, nnaChn);
 				break;
 		}
@@ -5300,7 +5300,7 @@ void CSoundFile::ExtendedS3MCommands(CHANNELINDEX nChn, ModCommand::PARAM param)
 								IMixPlugin *pPlugin;
 								if(pIns != nullptr && pIns->nMixPlug && (pPlugin = m_MixPlugins[pIns->nMixPlug - 1].pMixPlugin) != nullptr)
 								{
-									pPlugin->MidiCommand(*pIns, bkChn.nNote | IMixPlugin::MIDI_NOTE_OFF, 0, nChn);
+									pPlugin->MidiCommand(*pIns, bkChn.nNote | IMixPlugin::MIDI_NOTE_OFF, 0, m_playBehaviour[kLegacyPluginNNABehaviour] ? nChn : i);
 								}
 #endif // NO_PLUGINS
 							}

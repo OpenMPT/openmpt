@@ -764,6 +764,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kS3MIgnoreCombinedFineSlides: desc =_T("Ignore combined fine slides (Kxy / Lxy)"); break;
 		case kFT2AutoVibratoAbortSweep: desc = _T("Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth"); break;
 		case kLegacyPPQpos: desc = _T("Report inaccurate PPQ position to VST plugins (like OpenMPT 1.31 and older)"); break;
+		case kLegacyPluginNNABehaviour: desc = _T("Plugin notes with New Note Action set to Continue are affected by note-offs (like OpenMPT 1.31 and older)"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
