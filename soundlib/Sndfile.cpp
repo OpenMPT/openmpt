@@ -1044,7 +1044,7 @@ void CSoundFile::ResetChannels()
 		chn.nLength = 0;
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
-			CHANNELINDEX c = static_cast<CHANNELINDEX>(std::distance(std::begin(m_PlayState.Chn), &chn));
+			CHANNELINDEX c = static_cast<CHANNELINDEX>(std::distance(m_PlayState.Chn.data(), &chn));
 			m_opl->NoteCut(c);
 		}
 	}
