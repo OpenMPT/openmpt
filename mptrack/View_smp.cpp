@@ -1857,9 +1857,11 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			m_startDragValue = ScreenToSample(point.x);
 		}
 
+		const bool moveLoop = (flags & MK_CONTROL);
 		bool update = false;
 		SmpLength *updateLoopPoint = nullptr;
 		const char *updateLoopDesc = nullptr;
+		SmpLength loopLength = 0;
 		switch(m_dragItem)
 		{
 		case HitTestItem::SelectionStart:
@@ -1872,28 +1874,50 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			}
 			break;
 		case HitTestItem::LoopStart:
-			if(x < sample.nLoopEnd)
+			if(moveLoop)
+			{
+				updateLoopPoint = &sample.nLoopStart;
+				updateLoopDesc = "Move Loop";
+				loopLength = sample.nLoopEnd - sample.nLoopStart;
+			} else if(x < sample.nLoopEnd)
 			{
 				updateLoopPoint = &sample.nLoopStart;
 				updateLoopDesc = "Set Loop Start";
 			}
 			break;
 		case HitTestItem::LoopEnd:
-			if(x > sample.nLoopStart)
+			if(moveLoop)
+			{
+				updateLoopPoint = &sample.nLoopStart;
+				updateLoopDesc = "Move Loop";
+				loopLength = sample.nLoopEnd - sample.nLoopStart;
+				x = (x > loopLength) ? x - loopLength : 0;
+			} else if(x > sample.nLoopStart)
 			{
 				updateLoopPoint = &sample.nLoopEnd;
 				updateLoopDesc = "Set Loop End";
 			}
 			break;
 		case HitTestItem::SustainStart:
-			if(x < sample.nSustainEnd)
+			if(moveLoop)
+			{
+				updateLoopPoint = &sample.nSustainStart;
+				updateLoopDesc = "Move Sustain Loop";
+				loopLength = sample.nSustainEnd - sample.nSustainStart;
+			} else if(x < sample.nSustainEnd)
 			{
 				updateLoopPoint = &sample.nSustainStart;
 				updateLoopDesc = "Set Sustain Start";
 			}
 			break;
 		case HitTestItem::SustainEnd:
-			if(x > sample.nSustainStart)
+			if(moveLoop)
+			{
+				updateLoopPoint = &sample.nSustainStart;
+				updateLoopDesc = "Move Loop";
+				loopLength = sample.nSustainEnd - sample.nSustainStart;
+				x = (x > loopLength) ? x - loopLength : 0;
+			} else if(x > sample.nSustainStart)
 			{
 				updateLoopPoint = &sample.nSustainEnd;
 				updateLoopDesc = "Set Sustain End";
@@ -1909,6 +1933,9 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			break;
 		}
 
+		if(loopLength)
+			LimitMax(x, sample.nLength - loopLength);
+
 		if(updateLoopPoint && updateLoopDesc && *updateLoopPoint != x)
 		{
 			if(!m_dragPreparedUndo)
@@ -1916,6 +1943,10 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 			m_dragPreparedUndo = true;
 			update = true;
 			*updateLoopPoint = x;
+			if(loopLength && updateLoopPoint == &sample.nLoopStart)
+				sample.nLoopEnd = sample.nLoopStart + loopLength;
+			else if(loopLength && updateLoopPoint == &sample.nSustainStart)
+				sample.nSustainEnd = sample.nSustainStart + loopLength;
 			sample.PrecomputeLoops(sndFile, true);
 			SetModified(SampleHint().Info(), true, false);
 		}
@@ -2050,7 +2081,7 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 	} else
 	{
 		// ctrl + click = play from cursor pos
-		if(flags & MK_CONTROL)
+		if((flags & MK_CONTROL) && point.y >= m_timelineHeight)
 			PlayNote(NOTE_MIDDLEC, ScreenToSample(point.x));
 	}
 }

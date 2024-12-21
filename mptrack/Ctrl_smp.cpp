@@ -2938,99 +2938,29 @@ void CCtrlSamples::OnSustainPointsChanged()
 }
 
 
-#define SMPLOOP_ACCURACY	7	// 5%
-#define BIDILOOP_ACCURACY	2	// 5%
-
-
-bool MPT_LoopCheck(int sstart0, int sstart1, int send0, int send1)
-{
-	int dse0 = send0 - sstart0;
-	if ((dse0 < -SMPLOOP_ACCURACY) || (dse0 > SMPLOOP_ACCURACY)) return false;
-	int dse1 = send1 - sstart1;
-	if ((dse1 < -SMPLOOP_ACCURACY) || (dse1 > SMPLOOP_ACCURACY)) return false;
-	int dstart = sstart1 - sstart0;
-	int dend = send1 - send0;
-	if (!dstart) dstart = dend >> 7;
-	if (!dend) dend = dstart >> 7;
-	if ((dstart ^ dend) < 0) return false;
-	int delta = dend - dstart;
-	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY));
-}
-
-
-bool MPT_BidiEndCheck(int spos0, int spos1, int spos2)
-{
-	int delta0 = spos1 - spos0;
-	int delta1 = spos2 - spos1;
-	int delta2 = spos2 - spos0;
-	if (!delta0) delta0 = delta1 >> 7;
-	if (!delta1) delta1 = delta0 >> 7;
-	if ((delta1 ^ delta0) < 0) return false;
-	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 >= -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
-}
-
-
-bool MPT_BidiStartCheck(int spos0, int spos1, int spos2)
-{
-	int delta1 = spos1 - spos0;
-	int delta0 = spos2 - spos1;
-	int delta2 = spos2 - spos0;
-	if (!delta0) delta0 = delta1 >> 7;
-	if (!delta1) delta1 = delta0 >> 7;
-	if ((delta1 ^ delta0) < 0) return false;
-	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 > -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
-}
-
-
-
 void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 {
-	TCHAR s[256];
+	TCHAR s[32];
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
-	const uint32 inc = sample.GetBytesPerSample();
-	SmpLength i;
-	int pos;
+	const bool moveLoop = CMainFrame::GetInputHandler()->CtrlPressed();
 	bool redraw = false;
 	static CScrollBar *lastScrollbar = nullptr;
 
 	LockControls();
-	if ((!sample.nLength) || (!pSample)) goto NoSample;
-	if (sample.uFlags[CHN_16BIT])
-	{
-		pSample++;
-	}
 	// Loop Start
-	if ((pos = m_SpinLoopStart.GetPos32()) != 0 && sample.nLoopEnd > 0)
+	if(int pos = m_SpinLoopStart.GetPos32(); pos != 0 && sample.nLoopEnd > 0 && sample.HasSampleData())
 	{
-		bool bOk = false;
-		const uint8 *p = pSample + sample.nLoopStart * inc;
-		int find0 = (int)pSample[sample.nLoopEnd*inc-inc];
-		int find1 = (int)pSample[sample.nLoopEnd*inc];
-		// Find Next LoopStart Point
-		if (pos > 0)
+		if(SmpLength i = SampleEdit::FindLoopStart(sample, false, pos > 0, moveLoop); i < sample.nLength)
 		{
-			for (i = sample.nLoopStart + 1; i + 16 < sample.nLoopEnd; i++)
+			if(!m_startedEdit && lastScrollbar != scrollBar)
+				PrepareUndo(moveLoop ? "Move Loop" : "Set Loop Start");
+			if(moveLoop)
 			{
-				p += inc;
-				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiStartCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
+				sample.nLoopEnd = i + (sample.nLoopEnd - sample.nLoopStart);
+				wsprintf(s, _T("%u"), sample.nLoopEnd);
+				m_EditLoopEnd.SetWindowText(s);
 			}
-		} else
-		// Find Prev LoopStart Point
-		{
-			for (i = sample.nLoopStart; i; )
-			{
-				i--;
-				p -= inc;
-				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiStartCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
-			}
-		}
-		if (bOk)
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Set Loop Start");
 			sample.nLoopStart = i;
 			wsprintf(s, _T("%u"), sample.nLoopStart);
 			m_EditLoopStart.SetWindowText(s);
@@ -3040,34 +2970,18 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 		m_SpinLoopStart.SetPos(0);
 	}
 	// Loop End
-	if ((pos = m_SpinLoopEnd.GetPos32()) != 0)
+	if(int pos = m_SpinLoopEnd.GetPos32(); pos != 0 && sample.HasSampleData())
 	{
-		bool bOk = false;
-		const uint8 *p = pSample + sample.nLoopEnd * inc;
-		int find0 = (int)pSample[sample.nLoopStart*inc];
-		int find1 = (int)pSample[sample.nLoopStart*inc+inc];
-		// Find Next LoopEnd Point
-		if (pos > 0)
+		if(SmpLength i = SampleEdit::FindLoopEnd(sample, false, pos > 0, moveLoop); i > 0)
 		{
-			for (i = sample.nLoopEnd + 1; i <= sample.nLength; i++, p += inc)
+			if(!m_startedEdit && lastScrollbar != scrollBar)
+				PrepareUndo(moveLoop ? "Move Loop" : "Set Loop End");
+			if(moveLoop)
 			{
-				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiEndCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
+				sample.nLoopStart = i - (sample.nLoopEnd - sample.nLoopStart);
+				wsprintf(s, _T("%u"), sample.nLoopStart);
+				m_EditLoopStart.SetWindowText(s);
 			}
-		} else
-		// Find Prev LoopEnd Point
-		{
-			for (i = sample.nLoopEnd; i > sample.nLoopStart + 16; )
-			{
-				i--;
-				p -= inc;
-				bOk = sample.uFlags[CHN_PINGPONGLOOP] ? MPT_BidiEndCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
-			}
-		}
-		if (bOk)
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Set Loop End");
 			sample.nLoopEnd = i;
 			wsprintf(s, _T("%u"), sample.nLoopEnd);
 			m_EditLoopEnd.SetWindowText(s);
@@ -3077,35 +2991,18 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 		m_SpinLoopEnd.SetPos(0);
 	}
 	// Sustain Loop Start
-	if ((pos = m_SpinSustainStart.GetPos32()) != 0 && sample.nSustainEnd > 0)
+	if(int pos = m_SpinSustainStart.GetPos32(); pos != 0 && sample.nSustainEnd > 0 && sample.HasSampleData())
 	{
-		bool bOk = false;
-		const uint8 *p = pSample + sample.nSustainStart * inc;
-		int find0 = (int)pSample[sample.nSustainEnd*inc-inc];
-		int find1 = (int)pSample[sample.nSustainEnd*inc];
-		// Find Next Sustain LoopStart Point
-		if (pos > 0)
+		if(SmpLength i = SampleEdit::FindLoopStart(sample, true, pos > 0, moveLoop); i < sample.nLength)
 		{
-			for (i = sample.nSustainStart + 1; i + 16 < sample.nSustainEnd; i++)
+			if(!m_startedEdit && lastScrollbar != scrollBar)
+				PrepareUndo(moveLoop ? "Move Sustain Loop" : "Set Sustain Loop Start");
+			if(moveLoop)
 			{
-				p += inc;
-				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiStartCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
+				sample.nSustainEnd = i + (sample.nSustainEnd - sample.nSustainStart);
+				wsprintf(s, _T("%u"), sample.nSustainEnd);
+				m_EditSustainEnd.SetWindowText(s);
 			}
-		} else
-		// Find Prev Sustain LoopStart Point
-		{
-			for (i = sample.nSustainStart; i; )
-			{
-				i--;
-				p -= inc;
-				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiStartCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
-			}
-		}
-		if (bOk)
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Set Sustain Loop Start");
 			sample.nSustainStart = i;
 			wsprintf(s, _T("%u"), sample.nSustainStart);
 			m_EditSustainStart.SetWindowText(s);
@@ -3115,34 +3012,18 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 		m_SpinSustainStart.SetPos(0);
 	}
 	// Sustain Loop End
-	if ((pos = m_SpinSustainEnd.GetPos32()) != 0)
+	if(int pos = m_SpinSustainEnd.GetPos32(); pos != 0 && sample.HasSampleData())
 	{
-		bool bOk = false;
-		const uint8 *p = pSample + sample.nSustainEnd * inc;
-		int find0 = (int)pSample[sample.nSustainStart*inc];
-		int find1 = (int)pSample[sample.nSustainStart*inc+inc];
-		// Find Next LoopEnd Point
-		if (pos > 0)
+		if(SmpLength i = SampleEdit::FindLoopEnd(sample, true, pos > 0, moveLoop); i > 0)
 		{
-			for (i = sample.nSustainEnd + 1; i + 1 < sample.nLength; i++, p += inc)
+			if(!m_startedEdit && lastScrollbar != scrollBar)
+				PrepareUndo(moveLoop ? "Move Sustain Loop" : "Set Sustain Loop End");
+			if(moveLoop)
 			{
-				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiEndCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
+				sample.nSustainStart = i - (sample.nSustainEnd - sample.nSustainStart);
+				wsprintf(s, _T("%u"), sample.nSustainStart);
+				m_EditSustainStart.SetWindowText(s);
 			}
-		} else
-		// Find Prev LoopEnd Point
-		{
-			for (i = sample.nSustainEnd; i > sample.nSustainStart + 16; )
-			{
-				i--;
-				p -= inc;
-				bOk = sample.uFlags[CHN_PINGPONGSUSTAIN] ? MPT_BidiEndCheck(p[0], p[inc], p[inc*2]) : MPT_LoopCheck(find0, find1, p[0], p[inc]);
-				if (bOk) break;
-			}
-		}
-		if (bOk)
-		{
-			if(!m_startedEdit && lastScrollbar != scrollBar) PrepareUndo("Set Sustain Loop End");
 			sample.nSustainEnd = i;
 			wsprintf(s, _T("%u"), sample.nSustainEnd);
 			m_EditSustainEnd.SetWindowText(s);
@@ -3151,9 +3032,8 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 		}
 		m_SpinSustainEnd.SetPos(0);
 	}
-NoSample:
 	// FineTune / C-5 Speed
-	if ((pos = m_SpinFineTune.GetPos32()) != 0)
+	if(int pos = m_SpinFineTune.GetPos32(); pos != 0)
 	{
 		if(!m_startedEdit && lastScrollbar != scrollBar)
 			PrepareUndo("Finetune");
@@ -3366,8 +3246,7 @@ void CCtrlSamples::OnXFade()
 	CSampleXFadeDlg dlg(this, sample);
 	if(dlg.DoModal() == IDOK)
 	{
-		const SmpLength loopStart = dlg.m_useSustainLoop ? sample.nSustainStart: sample.nLoopStart;
-		const SmpLength loopEnd = dlg.m_useSustainLoop ? sample.nSustainEnd: sample.nLoopEnd;
+		const auto [loopStart, loopEnd] = dlg.m_useSustainLoop ? sample.GetSustainLoop() : sample.GetLoop();
 		const SmpLength maxSamples = std::min({ sample.nLength, loopStart, loopEnd / 2 });
 		SmpLength fadeSamples = dlg.PercentToSamples(dlg.m_fadeLength);
 		LimitMax(fadeSamples, maxSamples);
