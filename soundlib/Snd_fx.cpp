@@ -6076,7 +6076,7 @@ void CSoundFile::PatternLoop(PlayState &state, CHANNELINDEX nChn, ModCommand::PA
 		// IT compatibility 10. Pattern loops (+ same fix for XM / MOD / S3M files)
 		if(!m_playBehaviour[kITFT2PatternLoop] && !(GetType() & (MOD_TYPE_MOD | MOD_TYPE_S3M)))
 		{
-			auto p = std::cbegin(state.Chn);
+			auto p = state.Chn.data();
 			for(CHANNELINDEX i = 0; i < GetNumChannels(); i++, p++)
 			{
 				// Loop on other channel
