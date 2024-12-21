@@ -1106,8 +1106,6 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 
 
 static constexpr int SMPLOOP_ACCURACY = 7;  // 5%
-static constexpr int BIDILOOP_ACCURACY = 2;  // 5%
-
 
 static bool LoopCheck(int sstart0, int sstart1, int send0, int send1)
 {
