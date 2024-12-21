@@ -2233,16 +2233,19 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 	for(CHANNELINDEX i = GetNumChannels(); i < m_PlayState.Chn.size(); i++)
 	{
 		const ModChannel &c = m_PlayState.Chn[i];
-		// No sample and no plugin playing
-		if(!c.nLength && !c.HasMIDIOutput())
+		// Sample playing?
+		if(c.nLength)
+			continue;
+		// Can a plugin potentially be playing?
+		if(!c.HasMIDIOutput())
 			return i;
-		// Plugin channel with already released note
-		if(!c.nLength && c.dwFlags[CHN_KEYOFF | CHN_NOTEFADE])
+		// Has the plugin note already been released? (note: lastMidiNoteWithoutArp is set from within IMixPlugin, so this implies that there is a valid plugin assignment)
+		if(c.dwFlags[CHN_KEYOFF | CHN_NOTEFADE] || c.lastMidiNoteWithoutArp == NOTE_NONE)
 			return i;
 	}
 
-	uint32 vol = 0x800000;
-	if(nChn < MAX_CHANNELS)
+	int32 vol = 0x800100;
+	if(nChn < m_PlayState.Chn.size())
 	{
 		const ModChannel &srcChn = m_PlayState.Chn[nChn];
 		if(!srcChn.nFadeOutVol && srcChn.nLength)
@@ -2264,7 +2267,8 @@ CHANNELINDEX CSoundFile::GetNNAChannel(CHANNELINDEX nChn) const
 		// Use a combination of real volume [14 bit] (which includes volume envelopes, but also potentially global volume) and note volume [9 bit].
 		// Rationale: We need volume envelopes in case e.g. all NNA channels are playing at full volume but are looping on a 0-volume envelope node.
 		// But if global volume is not applied to master and the global volume temporarily drops to 0, we would kill arbitrary channels. Hence, add the note volume as well.
-		uint32 v = (c.nRealVolume << 9) | c.nVolume;
+		int32 v = (c.nRealVolume << 9) | c.nVolume;
+		// Less priority to looped samples
 		if(c.dwFlags[CHN_LOOP])
 			v /= 2;
 		if((v < vol) || ((v == vol) && (c.VolEnv.nEnvPosition > envpos)))
