@@ -160,6 +160,7 @@ public:
 	virtual void MidiCommand(const ModInstrument &/*instr*/, uint16 /*note*/, uint16 /*vol*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void HardAllNotesOff() { }
 	virtual bool IsNotePlaying(uint8 /*note*/, CHANNELINDEX /*trackerChn*/) { return false; }
+	virtual void MoveChannel(CHANNELINDEX /*from*/, CHANNELINDEX /*to*/) { }
 
 	// Modify parameter by given amount. Only needs to be re-implemented if plugin architecture allows this to be performed atomically.
 	virtual void ModifyParameter(PlugParamIndex nIndex, PlugParamValue diff, PlayState &playState, CHANNELINDEX chn);
@@ -286,6 +287,7 @@ public:
 	void MidiVibrato(int32 depth, int8 pwd, CHANNELINDEX trackerChn) override;
 	void MidiCommand(const ModInstrument &instr, uint16 note, uint16 vol, CHANNELINDEX trackChannel) override;
 	bool IsNotePlaying(uint8 note, CHANNELINDEX trackerChn) override;
+	void MoveChannel(CHANNELINDEX from, CHANNELINDEX to) override;
 
 	// Get the MIDI channel currently associated with a given tracker channel
 	virtual uint8 GetMidiChannel(const ModChannel &chn, CHANNELINDEX trackChannel) const;

@@ -1073,6 +1073,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		// Find a channel to play on
 		channel = FindAvailableChannel();
 		ModChannel &chn = m_SndFile.m_PlayState.Chn[channel];
+		m_SndFile.StopOldNNA(chn, channel);
 
 		// reset channel properties; in theory the chan is completely unused anyway.
 		chn.Reset(ModChannel::resetTotal, m_SndFile, CHANNELINDEX_INVALID, CHN_MUTE);
@@ -1112,7 +1113,9 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		}
 
 		m_SndFile.NoteChange(chn, note, false, true, true, channel);
-		if(params.m_volume >= 0) chn.nVolume = std::min(params.m_volume, 256);
+		if(params.m_volume >= 0)
+			chn.nVolume = std::min(params.m_volume, 256);
+		chn.nnaChannelAge = 0;
 
 		// Handle sample looping.
 		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0

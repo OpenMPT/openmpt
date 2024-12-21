@@ -109,7 +109,11 @@ struct ModChannel
 	int16 nVolSwing, nPanSwing;
 	int16 nCutSwing, nResSwing;
 	uint16 volSlideDownRemain, volSlideDownTotal;
-	uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
+	union
+	{
+		uint16 nRestorePanOnNewNote;  // If > 0, nPan should be set to nRestorePanOnNewNote - 1 on new note. Used to recover from pan swing and IT sample / instrument panning. High bit set = surround
+		uint16 nnaChannelAge;         // If channel is moved to background (NNA), this counts up how old it is
+	};
 	uint16 nnaGeneration;         // For PlaybackTest implementation
 	CHANNELINDEX nMasterChn;
 	SAMPLEINDEX swapSampleIndex;  // Sample to swap to when current sample (loop) has finished playing

@@ -1003,6 +1003,19 @@ bool IMidiPlugin::IsNotePlaying(uint8 note, CHANNELINDEX trackerChn)
 }
 
 
+void IMidiPlugin::MoveChannel(CHANNELINDEX from, CHANNELINDEX to)
+{
+	if(from >= std::size(m_MidiCh[GetMidiChannel(from)].noteOnMap[0]) || to >= std::size(m_MidiCh[GetMidiChannel(from)].noteOnMap[0]))
+		return;
+
+	for(auto &noteOnMap : m_MidiCh[GetMidiChannel(from)].noteOnMap)
+	{
+		noteOnMap[to] = noteOnMap[from];
+		noteOnMap[from] = 0;
+	}
+}
+
+
 void IMidiPlugin::ReceiveMidi(mpt::const_byte_span midiData)
 {
 	if(midiData.empty())
