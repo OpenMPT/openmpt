@@ -805,8 +805,7 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
 	   || (!smp.HasPingPongSustainLoop() && sustainLoop))
 		return false;
 
-	const SmpLength loopStart = sustainLoop ? smp.nSustainStart : smp.nLoopStart;
-	const SmpLength loopEnd = sustainLoop ? smp.nSustainEnd : smp.nLoopEnd;
+	const auto [loopStart, loopEnd] = sustainLoop ? smp.GetSustainLoop(): smp.GetLoop();
 	const SmpLength oldLoopLength = loopEnd - loopStart;
 	const SmpLength oldLength = smp.nLength;
 
@@ -1104,6 +1103,186 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 
 	return newSelEnd;
 }
+
+
+static constexpr int SMPLOOP_ACCURACY = 7;  // 5%
+static constexpr int BIDILOOP_ACCURACY = 2;  // 5%
+
+
+static bool LoopCheck(int sstart0, int sstart1, int send0, int send1)
+{
+	int dse0 = send0 - sstart0;
+	if((dse0 < -SMPLOOP_ACCURACY) || (dse0 > SMPLOOP_ACCURACY))
+		return false;
+	int dse1 = send1 - sstart1;
+	if((dse1 < -SMPLOOP_ACCURACY) || (dse1 > SMPLOOP_ACCURACY))
+		return false;
+	int dstart = sstart1 - sstart0;
+	int dend = send1 - send0;
+	if(!dstart)
+		dstart = dend >> 7;
+	if(!dend)
+		dend = dstart >> 7;
+	if((dstart ^ dend) < 0)
+		return false;
+	int delta = dend - dstart;
+	return ((delta > -SMPLOOP_ACCURACY) && (delta < SMPLOOP_ACCURACY));
+}
+
+
+static bool BidiEndCheck(int spos0, int spos1, int spos2)
+{
+	int delta0 = spos1 - spos0;
+	int delta1 = spos2 - spos1;
+	int delta2 = spos2 - spos0;
+	if(!delta0)
+		delta0 = delta1 >> 7;
+	if(!delta1)
+		delta1 = delta0 >> 7;
+	if((delta1 ^ delta0) < 0)
+		return false;
+	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 >= -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
+}
+
+
+static bool BidiStartCheck(int spos0, int spos1, int spos2)
+{
+	int delta1 = spos1 - spos0;
+	int delta0 = spos2 - spos1;
+	int delta2 = spos2 - spos0;
+	if(!delta0)
+		delta0 = delta1 >> 7;
+	if(!delta1)
+		delta1 = delta0 >> 7;
+	if((delta1 ^ delta0) < 0)
+		return false;
+	return ((delta0 >= -1) && (delta0 <= 0) && (delta1 > -1) && (delta1 <= 0) && (delta2 >= -1) && (delta2 <= 0));
+}
+
+
+SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop)
+{
+	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
+	if(sample.uFlags[CHN_16BIT] && mpt::endian_is_little())
+		pSample++;
+	const uint32 inc = sample.GetBytesPerSample();
+	const auto [loopStart, loopEnd] = sustainLoop ? sample.GetSustainLoop() : sample.GetLoop();
+	const SmpLength loopLength = loopEnd - loopStart;
+	const bool pingpong = sample.uFlags[sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGLOOP];
+
+	const uint8 *p = pSample + loopStart * inc;
+	int find0 = static_cast<int>(pSample[loopEnd * inc - inc]);
+	int find1 = static_cast<int>(pSample[loopEnd * inc]);
+	if(goForward)
+	{
+		// Find Next LoopStart Point
+		const SmpLength searchEnd = moveLoop ? sample.nLength - loopLength : (std::max(loopEnd, SmpLength(16)) - 16);
+		for(SmpLength i = sample.nLoopStart + 1; i <= searchEnd; i++)
+		{
+			p += inc;
+			if(pingpong)
+			{
+				if(BidiStartCheck(p[0], p[inc], p[inc * 2]))
+					return i;
+			} else
+			{
+				if(moveLoop)
+				{
+					find0 = static_cast<int>(pSample[(i + loopLength - 1) * inc]);
+					find1 = static_cast<int>(pSample[(i + loopLength) * inc]);
+				}
+				if(LoopCheck(find0, find1, p[0], p[inc]))
+					return i;
+			}
+		}
+	} else
+	{
+		// Find Prev LoopStart Point
+		for(SmpLength i = sample.nLoopStart; i;)
+		{
+			i--;
+			p -= inc;
+			if(pingpong)
+			{
+				if(BidiStartCheck(p[0], p[inc], p[inc * 2]))
+					return i;
+			} else
+			{
+				if(moveLoop)
+				{
+					find0 = static_cast<int>(pSample[(i + loopLength - 1) * inc]);
+					find1 = static_cast<int>(pSample[(i + loopLength) * inc]);
+				}
+				if(LoopCheck(find0, find1, p[0], p[inc]))
+					return i;
+			}
+		}
+	}
+	return sample.nLength;
+}
+
+
+SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop)
+{
+	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
+	if(sample.uFlags[CHN_16BIT] && mpt::endian_is_little())
+		pSample++;
+	const uint32 inc = sample.GetBytesPerSample();
+	const auto [loopStart, loopEnd] = sustainLoop ? sample.GetSustainLoop() : sample.GetLoop();
+	const SmpLength loopLength = loopEnd - loopStart;
+	const bool pingpong = sample.uFlags[sustainLoop ? CHN_PINGPONGSUSTAIN : CHN_PINGPONGLOOP];
+
+	const uint8 *p = pSample + loopEnd * inc;
+	int find0 = static_cast<int>(pSample[loopStart * inc]);
+	int find1 = static_cast<int>(pSample[loopStart * inc + inc]);
+	if(goForward)
+	{
+		// Find Next LoopEnd Point
+		for(SmpLength i = loopEnd + 1; i <= sample.nLength; i++)
+		{
+			p += inc;
+			if(pingpong)
+			{
+				if(BidiEndCheck(p[0], p[inc], p[inc * 2]))
+					return i;
+			} else
+			{
+				if(moveLoop)
+				{
+					find0 = static_cast<int>(pSample[(i - loopLength) * inc]);
+					find1 = static_cast<int>(pSample[(i - loopLength + 1) * inc]);
+				}
+				if(LoopCheck(find0, find1, p[0], p[inc]))
+					return i;
+			}
+		}
+	} else
+	{
+		// Find Prev LoopEnd Point
+		const SmpLength searchEnd = moveLoop ? loopLength : (loopStart + 16);
+		for(SmpLength i = loopEnd; i > searchEnd;)
+		{
+			i--;
+			p -= inc;
+			if(pingpong)
+			{
+				if(BidiEndCheck(p[0], p[inc], p[inc * 2]))
+					return i;
+			} else
+			{
+				if(moveLoop)
+				{
+					find0 = static_cast<int>(pSample[(i - loopLength) * inc]);
+					find1 = static_cast<int>(pSample[(i - loopLength + 1) * inc]);
+				}
+				if(LoopCheck(find0, find1, p[0], p[inc]))
+					return i;
+			}
+		}
+	}
+	return 0;
+}
+
 
 } // namespace SampleEdit
 
