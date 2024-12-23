@@ -74,6 +74,10 @@ public:
 		: subkey(subkey)
 	{
 		no_default_format = no_default_format_;
+		if (!no_default_format) {
+			samplerate = 0;
+			channels = 0;
+		}
 	}
 	void load()
 	{
