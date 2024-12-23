@@ -156,6 +156,11 @@ protected:
 
 	SmpLength SnapToGrid(const SmpLength pos) const;
 
+	// Returns index of preview channel if exactly one one is being previewed, CHANNELINDEX_INVALID otherwise.
+	CHANNELINDEX GetPreviewChannel() const;
+	
+	void PlayOrSetCuePoint(size_t cue);
+
 public:
 	//{{AFX_VIRTUAL(CViewSample)
 	void OnDraw(CDC *) override;

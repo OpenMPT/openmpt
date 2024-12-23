@@ -1394,30 +1394,10 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 			if(m_nZoom != 0 && TrackerSettings::Instance().m_followSamplePlayCursor != FollowSamplePlayCursor::DoNotFollow)
 			{
 				// Scroll sample into view if it's not in the visible range
-				size_t count = 0;
-				SmpLength scrollToPos = 0;
-				bool backwards = false;
-				const auto &playChns = GetDocument()->GetSoundFile().m_PlayState.Chn;
-				for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
+				const CHANNELINDEX previewChannel = GetPreviewChannel();
+				if(previewChannel != CHANNELINDEX_INVALID)
 				{
-					if(m_dwNotifyPos[chn] == Notification::PosInvalid)
-						continue;
-
-					// Only update based on notes triggered by this view
-					if(!playChns[chn].isPreviewNote)
-						continue;
-					if(!ModCommand::IsNote(playChns[chn].nNewNote) || m_noteChannel[playChns[chn].nNewNote - NOTE_MIN] != chn)
-						continue;
-
-					count++;
-					if(count > 1)
-						break;
-
-					scrollToPos = m_dwNotifyPos[chn];
-					backwards = playChns[chn].dwFlags[CHN_PINGPONGFLAG];
-				}
-				if(count == 1)
-				{
+					const SmpLength scrollToPos = m_dwNotifyPos[previewChannel];
 					const auto screenPos = SampleToScreen(scrollToPos);
 					const bool alwaysCenter = (TrackerSettings::Instance().m_followSamplePlayCursor == FollowSamplePlayCursor::FollowCentered);
 					if(alwaysCenter || screenPos < m_rcClient.left || screenPos >= m_rcClient.right)
@@ -1425,7 +1405,7 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 						ScrollTarget target = ScrollTarget::Left;
 						if(alwaysCenter)
 							target = ScrollTarget::Center;
-						else if(backwards)
+						else if(GetDocument()->GetSoundFile().m_PlayState.Chn[previewChannel].dwFlags[CHN_PINGPONGFLAG])  // TODO: this should be taken via notification, not directly from player state
 							target = ScrollTarget::Right;
 						ScrollToSample(scrollToPos, true, target);
 					}
@@ -1438,6 +1418,31 @@ LRESULT CViewSample::OnPlayerNotify(Notification *pnotify)
 		}
 	}
 	return 0;
+}
+
+
+CHANNELINDEX CViewSample::GetPreviewChannel() const
+{
+	size_t count = 0;
+	CHANNELINDEX channel = CHANNELINDEX_INVALID;
+	const auto &playChns = GetDocument()->GetSoundFile().m_PlayState.Chn;
+	for(CHANNELINDEX chn = 0; chn < MAX_CHANNELS; chn++)
+	{
+		if(m_dwNotifyPos[chn] == Notification::PosInvalid)
+			continue;
+
+		// Only update based on notes triggered by this view
+		if(!playChns[chn].isPreviewNote)
+			continue;
+		if(!ModCommand::IsNote(playChns[chn].nNewNote) || m_noteChannel[playChns[chn].nNewNote - NOTE_MIN] != chn)
+			continue;
+
+		count++;
+		if(count > 1)
+			return CHANNELINDEX_INVALID;
+		channel = chn;
+	}
+	return channel;
 }
 
 
@@ -3853,15 +3858,35 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		}
 	} else if(wParam >= kcStartSampleCues && wParam <= kcEndSampleCues)
 	{
-		const ModSample &sample = sndFile.GetSample(m_nSample);
-		SmpLength offset = sample.cues[wParam - kcStartSampleCues];
-		if(offset < sample.nLength)
-			PlayNote(NOTE_MIDDLEC, offset);
+		PlayOrSetCuePoint(wParam - kcStartSampleCues);
 		return wParam;
 	}
 
 	// Pass on to ctrl_smp
 	return GetControlDlg()->SendMessage(WM_MOD_KEYCOMMAND, wParam, lParam);
+}
+
+
+void CViewSample::PlayOrSetCuePoint(size_t cue)
+{
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr)
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	SmpLength offset = sample.cues[cue];
+	if(offset < sample.nLength)
+	{
+		PlayNote(NOTE_MIDDLEC, offset);
+		return;
+	}
+
+	const CHANNELINDEX previewChannel = GetPreviewChannel();
+	if(previewChannel == CHANNELINDEX_INVALID)
+		return;
+	modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_none, "Set Cue Point");
+	sample.cues[cue] = m_dwNotifyPos[previewChannel];
+	SetModified(SampleHint().Info(), true, false);
 }
 
 
