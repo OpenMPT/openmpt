@@ -184,7 +184,11 @@ public:
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
+#if defined(MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE)
+		mpt::path & filename = *optionalfilename;
+#else
 		mpt::path & filename = optionalfilename.value();
+#endif
 		if (filename.empty()) {
 			return std::nullopt;
 		}
@@ -330,7 +334,11 @@ public:
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
+#if defined(MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE)
+		mpt::path & filename = *optionalfilename;
+#else
 		mpt::path & filename = optionalfilename.value();
+#endif
 		if (filename.empty()) {
 			return std::nullopt;
 		}
@@ -384,7 +392,11 @@ public:
 		if (!optionalfilename) {
 			return std::nullopt;
 		}
+#if defined(MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE)
+		mpt::path & filename = *optionalfilename;
+#else
 		mpt::path & filename = optionalfilename.value();
+#endif
 		if (filename.empty()) {
 			return std::nullopt;
 		}
