@@ -355,4 +355,20 @@
 
 
 
+#if MPT_OS_MACOSX_OR_IOS
+#if defined(TARGET_OS_OSX)
+#if TARGET_OS_OSX
+#if !defined(MAC_OS_X_VERSION_10_14)
+#define MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE
+#else
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_14)
+#define MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE
+#endif
+#endif
+#endif
+#endif
+#endif
+
+
+
 #endif // MPT_BASE_DETECT_QUIRKS_HPP
