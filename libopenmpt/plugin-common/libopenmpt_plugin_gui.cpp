@@ -365,6 +365,7 @@ protected:
 
 #if defined(MPT_WITH_MFC)
 
+
 void gui_edit_settings( libopenmpt_settings * s, HWND parent, std::wstring title ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
 	CSettingsDialog dlg( s, title.c_str(), parent ? CWnd::FromHandle( parent ) : nullptr );
@@ -374,7 +375,25 @@ void gui_edit_settings( libopenmpt_settings * s, HWND parent, std::wstring title
 
 void gui_show_file_info( HWND parent, std::wstring title, std::wstring info ) {
 	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
-	CInfoDialog dlg( title.c_str(), info.c_str(), parent ? CWnd::FromHandle( parent ) : nullptr);
+	CInfoDialog dlg( title.c_str(), info.c_str(), parent ? CWnd::FromHandle( parent ) : nullptr );
+	dlg.DoModal();
+}
+
+
+void gui_show_about( HWND parent, std::basic_string<TCHAR> title, std::basic_string<TCHAR> about, std::basic_string<TCHAR> credits ) {
+	AFX_MANAGE_STATE( AfxGetStaticModuleState() );
+	about += TEXT("\r\n");
+	about += TEXT("Show full credits?\r\n");
+	if ( parent ) {
+		if ( CWnd::FromHandle( parent )->MessageBox( about.c_str(), title.c_str(), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+			return;
+		}
+	} else {
+		if ( MessageBox( parent, about.c_str(), title.c_str(), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+			return;
+		}
+	}
+	CInfoDialog dlg( title.c_str(), credits.c_str(), parent ? CWnd::FromHandle( parent ) : nullptr );
 	dlg.DoModal();
 }
 
@@ -466,6 +485,14 @@ void gui_show_file_info( HWND /* parent */ , std::basic_string<TCHAR> title, std
 	WaitForSingleObject( processInformation.hProcess, INFINITE );
 	CloseHandle( processInformation.hProcess );
 	DeleteFile( filename.c_str() );
+}
+
+
+void gui_show_about( HWND parent, std::basic_string<TCHAR> title, std::basic_string<TCHAR> about, std::basic_string<TCHAR> credits ) {
+	if ( MessageBox( parent, about.c_str(), title.c_str(), MB_ICONINFORMATION | MB_YESNOCANCEL | MB_DEFBUTTON1 ) != IDYES ) {
+		return;
+	}
+	gui_show_file_info( parent, title, credits );
 }
 
 
