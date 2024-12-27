@@ -132,7 +132,7 @@ protected:
 	}
 public:
 	xmp_openmpt_settings()
-		: libopenmpt::plugin::settings(TEXT(SHORT_TITLE), false)
+		: libopenmpt::plugin::settings(TEXT(SHORT_TITLE), false, TEXT("XMPlay output format"))
 	{
 		return;
 	}

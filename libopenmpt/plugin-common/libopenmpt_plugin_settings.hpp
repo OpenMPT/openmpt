@@ -12,6 +12,7 @@
 
 #include <windows.h>
 
+#include <optional>
 #include <string>
 
 
@@ -33,6 +34,7 @@ struct libopenmpt_settings {
 	int interpolationfilterlength = 8;
 	int ramping = -1;
 	int vis_allow_scroll = 1;
+	std::optional<std::basic_string<TCHAR>> player_setting_name = std::nullopt;
 	changed_func changed = nullptr;
 };
 
@@ -70,10 +72,11 @@ protected:
 		}
 	}
 public:
-	settings( const std::basic_string<TCHAR> & subkey, bool no_default_format_ )
-		: subkey(subkey)
+	settings( const std::basic_string<TCHAR> & subkey_, bool no_default_format_, const std::optional<std::basic_string<TCHAR>> & player_setting_name_ = std::nullopt)
+		: subkey(subkey_)
 	{
 		no_default_format = no_default_format_;
+		player_setting_name = player_setting_name_;
 		if (!no_default_format) {
 			samplerate = 0;
 			channels = 0;

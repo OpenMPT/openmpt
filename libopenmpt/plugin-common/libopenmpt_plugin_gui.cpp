@@ -127,7 +127,7 @@ protected:
 
 		selected = false;
 		if ( !s->no_default_format ) {
-			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( TEXT("Default") ), 0 );
+			m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( s->player_setting_name ? s->player_setting_name.value().c_str() : TEXT("Default") ), 0 );
 		}
 		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( TEXT("6000") ), 6000 );
 		m_ComboBoxSamplerate.SetItemData( m_ComboBoxSamplerate.AddString( TEXT("8000") ), 8000 );
@@ -154,7 +154,7 @@ protected:
 
 		selected = false;
 		if ( !s->no_default_format ) {
-			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( TEXT("Default") ), 0 );
+			m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( s->player_setting_name ? s->player_setting_name.value().c_str() : TEXT("Default") ), 0 );
 		}
 		m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( TEXT("Mono") ), 1 );
 		m_ComboBoxChannels.SetItemData( m_ComboBoxChannels.AddString( TEXT("Stereo") ), 2 );
