@@ -349,8 +349,17 @@ via/c3-samuel2       := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2 
 via/c3-ezra          := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=64 --param l2-cache-size=64
 via/c3-nehemiah      := $(___) -march=nehemiah    $(FPU_SSE)    -mtune=nehemiah    $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=64
 via/c7-esther        := $(XX_) -march=esther      $(FPU_SSE3)   -mtune=esther      $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=128
+via/eden-x2          := $(___) -march=eden-x2     $(FPU_SSE3)   -mtune=eden-x2     $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=64
+via/nano             := $(___) -march=nano        $(FPU_SSSE3)  -mtune=nano        $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-1000        := $(___) -march=nano-1000   $(FPU_SSSE3)  -mtune=nano-1000   $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-2000        := $(___) -march=nano-2000   $(FPU_SSSE3)  -mtune=nano-2000   $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-3000        := $(___) -march=nano-3000   $(FPU_SSE4_1) -mtune=nano-3000   $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-4000        := $(___) -march=nano-4000   $(FPU_SSE4_1) -mtune=nano-4000   $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-x2          := $(___) -march=nano-x2     $(FPU_SSE4_1) -mtune=nano-x2     $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/nano-x4          := $(___) -march=nano-x4     $(FPU_SSE4_1) -mtune=nano-x4     $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=1024
+via/eden-x4          := $(___) -march=eden-x4     $(FPU_SSE4_2) -mtune=eden-x4     $(OPT_UARCH_SCAL_128) --param l1-cache-size=64 --param l2-cache-size=2048
 
-via/late             := $(XX_) -march=i686        $(FPU_SSE3)   -mtune=esther      $(OPT_UARCH_SCAL_128)
+via/late             := $(XX_) -march=eden-x4     $(FPU_SSE4_2) -mtune=eden-x4     $(OPT_UARCH_SCAL_128)
 
 
 
