@@ -55,7 +55,7 @@
  * caller.
  * - openmpt::module::module() with a seekable std::istream as parameter will
  * load the module via the stream interface. libopenmpt will not implement an
- * additional buffering layer in this case whih means the callbacks are assumed
+ * additional buffering layer in this case which means the callbacks are assumed
  * to be performant even with small i/o sizes.
  * - openmpt::module::module() with an unseekable std::istream as parameter
  * will load the module via the stream interface. libopempt will make an
