@@ -35,7 +35,7 @@ inline void to_json(nlohmann::json &j, const SampleFormat &val)
 }
 inline void from_json(const nlohmann::json &j, SampleFormat &val)
 {
-	val = SampleFormat::FromInt(j);
+	val = SampleFormat::FromInt(j.get<int>());
 }
 
 namespace SoundDevice
@@ -47,7 +47,7 @@ namespace SoundDevice
 	}
 	inline void from_json(const nlohmann::json &j, SoundDevice::ChannelMapping &val)
 	{
-		val = SoundDevice::ChannelMapping::FromString(j);
+		val = SoundDevice::ChannelMapping::FromString(j.get<mpt::ustring>());
 	}
 
 	inline void to_json(nlohmann::json &j, const SoundDevice::Info::Default &val)
