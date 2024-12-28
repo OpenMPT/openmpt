@@ -7,5 +7,8 @@ function mpt_use_nlohmannjson ()
 	files {
 		"../../include/nlohmann-json/include/**.hpp",
 	}
+	defines {
+		"JSON_USE_IMPLICIT_CONVERSIONS=0",
+	}
 	filter {}
 end
