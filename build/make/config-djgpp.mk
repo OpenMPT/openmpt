@@ -170,8 +170,10 @@ CACHE_SEMPRON64  :=128  # 128/256/512
 
 TUNE_586    :=-mtune=pentium
 TUNE_586MMX :=-mtune=pentium-mmx
+TUNE_5863DN :=-mtune=k6-2
 TUNE_686    :=-mtune=pentiumpro
 TUNE_686MMX :=-mtune=pentium2
+TUNE_6863DN :=-mtune=athlon
 TUNE_686SSE :=-mtune=pentium3
 TUNE_686SSE2:=-mtune=pentium-m
 TUNE_686SSE3:=-mtune=pentium-m
@@ -222,7 +224,7 @@ generic/586-3dnow    := $(XX_) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2     
 
 generic/686          := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_UARCH_OOOE)       # Intel Pentium-Pro
 generic/686-mmx      := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Cyrix 6x86MX.., Transmeta Crusoe.., NSC Geode-GX1..
-generic/686-3dnow    := $(___) -march=i686        $(FPU_3DNOW)  -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # VIA Cyrix-3-Joshua
+generic/686-3dnow    := $(___) -march=i686        $(FPU_3DNOW)  -mtune=athlon      $(OPT_UARCH_OOOE_64)    # VIA Cyrix-3-Joshua
 generic/686-3dnowa   := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)    # AMD Athlon..K10
 
 generic/sse          := $(___) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_UARCH_OOOE_128)   # Intel Pentium-3, AMD Athlon-XP, VIA C3-Nehemiah, DM&P Vortex86DX3..
@@ -343,7 +345,7 @@ idt/winchip2         := $(X__) -march=i586        $(FPU_3DNOW)  -mtune=winchip2 
 
 
 
-via/cyrix3-joshua    := $(___) -march=i686        $(FPU_3DNOW)   $(TUNE_686MMX)    $(OPT_UARCH_OOOE_64)  --param l1-cache-size=48 --param l2-cache-size=256
+via/cyrix3-joshua    := $(___) -march=i686        $(FPU_3DNOW)   $(TUNE_6863DN)    $(OPT_UARCH_OOOE_64)  --param l1-cache-size=48 --param l2-cache-size=256
 via/c3-samuel        := $(___) -march=c3          $(FPU_3DNOW)  -mtune=c3          $(OPT_UARCH_SCAL_64)  --param l1-cache-size=64 --param l2-cache-size=0
 via/c3-samuel2       := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=64 --param l2-cache-size=64
 via/c3-ezra          := $(___) -march=samuel-2    $(FPU_3DNOW)  -mtune=samuel-2    $(OPT_UARCH_SCAL_64)  --param l1-cache-size=64 --param l2-cache-size=64
