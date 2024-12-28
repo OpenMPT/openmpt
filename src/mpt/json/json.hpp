@@ -12,10 +12,6 @@
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
 #if MPT_DETECTED_NLOHMANN_JSON
-#include <optional>
-#endif // MPT_DETECTED_NLOHMANN_JSON
-
-#if MPT_DETECTED_NLOHMANN_JSON
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 28020)
@@ -26,9 +22,28 @@
 #endif // MPT_COMPILER_MSVC
 #endif // MPT_DETECTED_NLOHMANN_JSON
 
+#if 0
+// The precise version when std::optional support will be included is still unknown.
+#if NLOHMANN_JSON_VERSION_MAJOR < 3
+#define MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+#elif (NLOHMANN_JSON_VERSION_MAJOR == 3) && (NLOHMANN_JSON_VERSION_MINOR < 11)
+#define MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+#elif (NLOHMANN_JSON_VERSION_MAJOR == 3) && (NLOHMANN_JSON_VERSION_MINOR == 11) && (NLOHMANN_JSON_VERSION_PATCH < 4)
+#define MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+#endif
+#else
+#define MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+#endif
+
+#ifdef MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+#include <optional>
+#endif // MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
 
 
 namespace nlohmann {
+
+
+
 template <>
 struct adl_serializer<mpt::ustring> {
 	static void to_json(json & j, const mpt::ustring & val) {
@@ -38,6 +53,7 @@ struct adl_serializer<mpt::ustring> {
 		val = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, j.get<std::string>());
 	}
 };
+
 template <typename Tvalue>
 struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 	static void to_json(json & j, const std::map<mpt::ustring, Tvalue> & val) {
@@ -56,6 +72,11 @@ struct adl_serializer<std::map<mpt::ustring, Tvalue>> {
 		val = std::move(result);
 	}
 };
+
+
+
+#ifdef MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+
 template <typename Tvalue>
 struct adl_serializer<std::optional<Tvalue>> {
 	static void to_json(json & j, const std::optional<Tvalue> & val) {
@@ -69,6 +90,11 @@ struct adl_serializer<std::optional<Tvalue>> {
 		}
 	}
 };
+
+#endif // MPT_JSON_JSON_NLOHMANN_JSON_QUIRK_NO_STD_OPTIONAL
+
+
+
 } // namespace nlohmann
 
 
