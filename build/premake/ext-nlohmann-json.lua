@@ -4,5 +4,8 @@ function mpt_use_nlohmannjson ()
 	includedirs {
 		"../../include/nlohmann-json/include",
 	}
+	files {
+		"../../include/nlohmann-json/include/**.hpp",
+	}
 	filter {}
 end

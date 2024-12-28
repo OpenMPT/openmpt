@@ -16,6 +16,42 @@
     <Filter Include="include\asiomodern\include\ASIOModern">
       <UniqueIdentifier>{3C486619-A80C-6509-7172-95D3DDF5003F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\nlohmann-json">
+      <UniqueIdentifier>{5A0436C9-C670-F1C3-8F64-8921FB8F132C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include">
+      <UniqueIdentifier>{CDE5467F-39FE-2DA9-02AB-BD426E82C242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann">
+      <UniqueIdentifier>{77988629-63EA-5D19-4C09-9B2938FA7602}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail">
+      <UniqueIdentifier>{59845F72-C5F4-61EB-8E13-DC73FA429AEC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\conversions">
+      <UniqueIdentifier>{A136C046-0DA9-0263-563D-38E7C2EECC5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\input">
+      <UniqueIdentifier>{38633EBD-A474-E663-2DC6-78A399D66F9D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\iterators">
+      <UniqueIdentifier>{05D86162-71BF-4C58-7AAD-4ED4E613F01A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\meta">
+      <UniqueIdentifier>{EF25DD81-DBB9-D229-447E-2CDE30310D1C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\meta\call_std">
+      <UniqueIdentifier>{04E53826-70A2-E15C-F96C-CDC4652954B1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\detail\output">
+      <UniqueIdentifier>{59868A73-45C5-34EF-EE47-1121DA65EA59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\thirdparty">
+      <UniqueIdentifier>{110D8A6D-7DD3-E689-C62E-75EC323455EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\nlohmann-json\include\nlohmann\thirdparty\hedley">
+      <UniqueIdentifier>{7B925EB2-6767-A665-9016-E6617C4AB47C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="misc">
       <UniqueIdentifier>{B1A29A7C-9DD9-9B0D-46C6-811032DC170F}</UniqueIdentifier>
     </Filter>
@@ -308,6 +344,141 @@
     </ClInclude>
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOstdcxx20bit.hpp">
       <Filter>include\asiomodern\include\ASIOModern</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\adl_serializer.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\byte_container_with_subtype.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\abi_macros.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\conversions\from_json.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\conversions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\conversions\to_chars.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\conversions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\conversions\to_json.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\conversions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\exceptions.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\hash.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\binary_reader.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\input_adapters.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\json_sax.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\lexer.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\parser.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\input\position_t.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\internal_iterator.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\iter_impl.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\iteration_proxy.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\iterator_traits.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\json_reverse_iterator.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\iterators\primitive_iterator.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\iterators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\json_custom_base_class.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\json_pointer.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\json_ref.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\macro_scope.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\macro_unscope.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\call_std\begin.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta\call_std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\call_std\end.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta\call_std</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\cpp_future.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\detected.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\identity_tag.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\is_sax.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\std_fs.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\type_traits.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\meta\void_t.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\meta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\output\binary_writer.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\output\output_adapters.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\output\serializer.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail\output</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_concat.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_escape.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\value_t.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\json.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\json_fwd.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\ordered_map.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\thirdparty\hedley</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley_undef.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\thirdparty\hedley</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\WriteMemoryDump.h">
       <Filter>misc</Filter>
