@@ -149,7 +149,7 @@ inline std::vector<mpt::ustring> jws_get_keynames(const mpt::ustring & jws_) {
 	std::vector<mpt::ustring> result;
 	nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
 	for (const auto & s : jws["signatures"]) {
-		result.push_back(s["header"]["kid"]);
+		result.push_back(s["header"]["kid"].get<mpt::ustring>());
 	}
 	return result;
 }
@@ -215,8 +215,8 @@ public:
 					throw std::runtime_error("Cannot parse RSA public key JWK.");
 				}
 				result.name = json["kid"].get<mpt::ustring>();
-				result.public_exp = mpt::decode_base64url(json["e"]);
-				result.modulus = mpt::decode_base64url(json["n"]);
+				result.public_exp = mpt::decode_base64url(json["e"].get<mpt::ustring>());
+				result.modulus = mpt::decode_base64url(json["n"].get<mpt::ustring>());
 				result.length = mpt::saturate_cast<uint32>(result.modulus.size() * 8);
 			} catch (mpt::out_of_memory e) {
 				mpt::rethrow_out_of_memory(e);
@@ -352,7 +352,7 @@ public:
 
 		std::vector<std::byte> jws_verify(const mpt::ustring & jws_) {
 			nlohmann::json jws = nlohmann::json::parse(mpt::transcode<std::string>(mpt::common_encoding::utf8, jws_));
-			std::vector<std::byte> payload = mpt::decode_base64url(jws["payload"]);
+			std::vector<std::byte> payload = mpt::decode_base64url(jws["payload"].get<mpt::ustring>());
 			nlohmann::json jsignature = nlohmann::json::object();
 			bool sigfound = false;
 			for (const auto & s : jws["signatures"]) {
@@ -364,8 +364,8 @@ public:
 			if (!sigfound) {
 				throw signature_verification_failed();
 			}
-			std::vector<std::byte> protectedheaderraw = mpt::decode_base64url(jsignature["protected"]);
-			std::vector<std::byte> signature = mpt::decode_base64url(jsignature["signature"]);
+			std::vector<std::byte> protectedheaderraw = mpt::decode_base64url(jsignature["protected"].get<mpt::ustring>());
+			std::vector<std::byte> signature = mpt::decode_base64url(jsignature["signature"].get<mpt::ustring>());
 			nlohmann::json header = nlohmann::json::parse(mpt::buffer_cast<std::string>(protectedheaderraw));
 			if (header["typ"] != "JWT") {
 				throw signature_verification_failed();
