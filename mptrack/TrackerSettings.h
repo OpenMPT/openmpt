@@ -909,7 +909,6 @@ public:
 	ConfigurableDirectory PathPluginPresets;
 	ConfigurableDirectory PathExport;
 	DefaultAndWorkingDirectory PathTunings;
-	DefaultAndWorkingDirectory PathUserTemplates;
 	mpt::PathString m_szKbdFile;
 
 	// Default template

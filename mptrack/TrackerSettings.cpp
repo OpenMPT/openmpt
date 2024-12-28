@@ -329,7 +329,6 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, PathPluginPresets(conf, UL_("Paths"), UL_("Plugin_Presets_Directory"), mpt::PathString())
 	, PathExport(conf, UL_("Paths"), UL_("Export_Directory"), mpt::PathString())
 	, PathTunings(theApp.GetConfigPath() + P_("tunings\\"))
-	, PathUserTemplates(theApp.GetConfigPath() + P_("TemplateModules\\"))
 	// Default template
 	, defaultTemplateFile(conf, UL_("Paths"), UL_("DefaultTemplate"), mpt::PathString())
 	, defaultArtist(conf, UL_("Misc"), UL_("DefaultArtist"), mpt::getenv(UL_("USERNAME")).value_or(UL_("")))

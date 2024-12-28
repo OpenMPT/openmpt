@@ -294,6 +294,8 @@ public:
 
 	/// Returns path to config folder including trailing '\'.
 	mpt::PathString GetConfigPath() const { return m_ConfigPath; }
+	mpt::PathString GetUserTemplatesPath() const;
+	mpt::PathString GetExampleSongsPath() const;
 	void SetupPaths(bool overridePortable);
 	void CreatePaths();
 

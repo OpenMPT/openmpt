@@ -1018,7 +1018,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 void CTrackApp::CreatePaths()
 {
-	// Create missing diretories
+	// Create missing directories
 	if(!IsPortableMode())
 	{
 		if(!mpt::native_fs{}.is_directory(m_ConfigPath))
@@ -1048,7 +1048,18 @@ void CTrackApp::CreatePaths()
 			RemoveDirectory(oldTunings.AsNative().c_str());
 		}
 	}
+}
 
+
+mpt::PathString CTrackApp::GetUserTemplatesPath() const
+{
+	return GetConfigPath() + P_("TemplateModules\\");
+}
+
+
+mpt::PathString CTrackApp::GetExampleSongsPath() const
+{
+	return GetInstallPath() + P_("ExampleSongs\\");
 }
 
 
@@ -1669,7 +1680,7 @@ CModDoc *CTrackApp::NewDocument(MODTYPE newType)
 		if(TrackerSettings::Instance().defaultNewFileAction == nfDefaultTemplate && !templateFile.empty())
 		{
 			// Template file can be either a filename inside one of the preset and user TemplateModules folders, or a full path.
-			const mpt::PathString dirs[] = { GetConfigPath() + P_("TemplateModules\\"), GetInstallPath() + P_("TemplateModules\\"), mpt::PathString() };
+			const mpt::PathString dirs[] = { GetUserTemplatesPath(), GetInstallPath() + P_("TemplateModules\\"), mpt::PathString() };
 			for(const auto &dir : dirs)
 			{
 				if(mpt::native_fs{}.is_file(dir + templateFile))
