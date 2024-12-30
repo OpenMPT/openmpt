@@ -36,9 +36,11 @@ TEMPO CNumberEdit::GetTempoValue()
 
 void CNumberEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	BOOL bHandled = false;
-	CDecimalSupport<CNumberEdit>::OnChar(0, nChar, 0, bHandled);
-	if(!bHandled) CEdit::OnChar(nChar , nRepCnt,  nFlags);
+	bool handled = false;
+	if(GetStyle() & ES_NUMBER)
+		CDecimalSupport<CNumberEdit>::OnChar(0, nChar, 0, handled);
+	if(!handled)
+		CEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
 
