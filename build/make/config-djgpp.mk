@@ -197,18 +197,18 @@ virtual/bochs        := $(___) -march=i686        $(FPU_387)    -mtune=generic  
 
 virtual/qemu         := $(___) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_UARCH_COMP_128)
 
-virtual/pcem         := $(___) -march=i686        $(FPU_387)    -mtune=generic     $(OPT_UARCH_COMP)
-virtual/86box        := $(___) -march=i686        $(FPU_387)    -mtune=generic     $(OPT_UARCH_COMP)
 virtual/varcem       := $(___) -march=i686        $(FPU_387)    -mtune=generic     $(OPT_UARCH_COMP)
-virtual/pcbox        := $(___) -march=i686        $(FPU_387)    -mtune=generic     $(OPT_UARCH_COMP)
+virtual/pcem         := $(___) -march=i686        $(FPU_3DNOW)  -mtune=generic     $(OPT_UARCH_COMP_64)
+virtual/86box        := $(___) -march=i686        $(FPU_3DNOW)  -mtune=generic     $(OPT_UARCH_COMP_64)
+virtual/pcbox        := $(___) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_UARCH_COMP_128)
 
 virtual/unipcemu     := $(___) -march=i386        $(FPU_NONE)   -mtune=i386        $(OPT_UARCH_EMUL)
 
 virtual/dosbox       := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_EMUL)
 virtual/dosbox-svn   := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_EMUL)
 virtual/dosbox-ece   := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_EMUL)
-virtual/dosbox-sta   := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_EMUL)
-virtual/dosbox-x     := $(___) -march=pentium-mmx $(FPU_MMX)    -mtune=i386        $(OPT_UARCH_EMUL)
+virtual/dosbox-sta   := $(___) -march=i486        $(FPU_387)    -mtune=i386        $(OPT_UARCH_COMP)
+virtual/dosbox-x     := $(___) -march=i686        $(FPU_SSE)    -mtune=generic     $(OPT_UARCH_EMUL_128)
 
 
 
