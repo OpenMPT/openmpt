@@ -208,9 +208,9 @@ public:
 	/// \param lParam
 	/// \param[out] bHandled true, if the key press was handled in this function
 	/// \return 0
-	LRESULT OnChar(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+	LRESULT OnChar(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, bool &handled)
 	{
-		bHandled = false;
+		handled = false;
 		if ((static_cast<TCHAR>(wParam) == m_DecimalSeparator[0] || wParam == _T('.')) && m_allowFractions)
 		{
 			T* pT = static_cast<T*>(this);
@@ -227,7 +227,7 @@ public:
 			}
 
 			pT->ReplaceSel(m_DecimalSeparator, true);
-			bHandled = true;
+			handled = true;
 		}
 
 		if ((static_cast<TCHAR>(wParam) == m_NegativeSign[0] || wParam == _T('-')) && m_allowNegative)
@@ -243,7 +243,7 @@ public:
 			//Verify that the control doesn't already contain a negative sign
 			if (nEndChar == 0 && buffer[0] == m_NegativeSign[0]) return 0;
 			pT->ReplaceSel(m_NegativeSign, true);
-			bHandled = true;
+			handled = true;
 		}
 		return 0;
 	}
