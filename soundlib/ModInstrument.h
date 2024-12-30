@@ -128,20 +128,21 @@ struct ModInstrument
 	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	explicit ModInstrument(SAMPLEINDEX sample = 0)
+	MPT_CONSTEXPR20_CONTAINER_FUN explicit ModInstrument(SAMPLEINDEX sample = 0)
+		: NoteMap{mpt::generate_array<uint8, 128>([](std::size_t i){ return static_cast<uint8>(NOTE_MIN + i); })}
+		, Keyboard{mpt::init_array<SAMPLEINDEX, 128>(sample)}
 	{
-		AssignSample(sample);
-		ResetNoteMap();
+		return;
 	}
 
 	// Assign all notes to a given sample.
-	void AssignSample(SAMPLEINDEX sample)
+	MPT_CONSTEXPR20_ALGORITHM_FUN void AssignSample(SAMPLEINDEX sample)
 	{
 		Keyboard.fill(sample);
 	}
 
 	// Reset note mapping (i.e. every note is mapped to itself)
-	void ResetNoteMap()
+	MPT_CONSTEXPR20_ALGORITHM_FUN void ResetNoteMap()
 	{
 		std::iota(NoteMap.begin(), NoteMap.end(), static_cast<uint8>(NOTE_MIN));
 	}
