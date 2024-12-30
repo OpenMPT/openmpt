@@ -80,4 +80,8 @@
 /* Platform */
 
 /* use the unicode support within libmpg123 */
+#if defined(_WIN32)
+#if defined(UNICODE)
 #define WANT_WIN32_UNICODE 1
+#endif
+#endif
