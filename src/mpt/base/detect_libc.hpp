@@ -95,7 +95,7 @@ static_assert(__MSVCR120_DLL == MPT_LIBC_MS_VER_MSVCR120);
 #endif
 #endif
 #if defined(_UCRT)
-#define MPT_LIBC_MS_UCRT 1
+#define MPT_LIBC_MS_UCRT    1
 #define MPT_LIBC_MS_VERSION MPT_LIBC_MS_VER_UCRT
 #elif defined(__MSVCRT__)
 #define MPT_LIBC_MS_MSVCRT 1
@@ -117,7 +117,7 @@ static_assert(__MSVCR120_DLL == MPT_LIBC_MS_VER_MSVCR120);
 #endif
 #endif
 #elif defined(__CRTDLL__)
-#define MPT_LIBC_MS_CRTDLL 1
+#define MPT_LIBC_MS_CRTDLL  1
 #define MPT_LIBC_MS_VERSION MPT_LIBC_MS_VER_CRTDLL
 #endif
 #elif (defined(__GLIBC__) || defined(__GNU_LIBRARY__))
