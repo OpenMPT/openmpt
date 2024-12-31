@@ -23,6 +23,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+enum CommandID : int;
+
 class CModDoc;
 class CEditCommand;
 class CEffectVis;
@@ -118,7 +120,7 @@ protected:
 	CEditCommand *m_pEditWnd = nullptr;
 	CSize m_szHeader, m_szPluginHeader, m_szCell;
 	CRect m_oldClient;
-	UINT m_nMidRow, m_nSpacing, m_nAccelChar, m_nLastPlayedRow, m_nLastPlayedOrder;
+	uint32 m_nMidRow, m_nSpacing, m_nLastPlayedRow, m_nLastPlayedOrder;
 	FlagSet<PatternStatus> m_Status;
 	ROWINDEX m_nPlayRow, m_nNextPlayRow;
 	uint32 m_nPlayTick, m_nTicksOnRow;
@@ -312,7 +314,7 @@ public:
 	void TempEnterIns(int val);
 	void TempEnterOctave(int val);
 	void TempStopOctave(int val);
-	void TempEnterVol(int v);
+	void TempEnterVol(CommandID cmd);
 	void TempEnterFX(ModCommand::COMMAND c, int v = -1);
 	void TempEnterFXparam(int v);
 	void EnterAftertouch(ModCommand::NOTE note, int atValue);
@@ -328,7 +330,7 @@ public:
 	PATTERNINDEX GetPrevPattern() const;
 	PATTERNINDEX GetNextPattern() const;
 
-	void SetSpacing(int n);
+	void SetSpacing(uint32 n);
 	void OnClearField(const std::bitset<PatternCursor::numColumns> mask, bool step, bool ITStyle = false);
 	void SetSelectionInstrument(const INSTRUMENTINDEX instr, bool setEmptyInstrument);
 

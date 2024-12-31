@@ -937,6 +937,12 @@ static constexpr struct
 	{2110, kcSetVolumeD, _T("Set volume digit D")},
 	{2111, kcSetVolumeE, _T("Set volume digit E")},
 	{2112, kcSetVolumeF, _T("Set volume digit F")},
+	{2113, kcToggleOctaveTransposeMIDI, _T("Toggle Apply Octave Transpose to incoming MIDI Notes")},
+	{2114, kcToggleContinueSongOnMIDINote, _T("Toggle Continue Song when MIDI Note is received")},
+	{2115, kcToggleContinueSongOnMIDIPlayEvents, _T("Toggle Respond to Play / Continue / Stop Song MIDI messages")},
+	{2116, kcToggleRecordMIDIVelocity, _T("Toggle Record MIDI Velocity")},
+	{2117, kcToggleRecordMIDIPitchBend, _T("Toggle Record MIDI Pitch Bend")},
+	{2118, kcToggleRecordMIDICCs, _T("Toggle Record MIDI CCs")},
 };
 // clang-format on
 
@@ -951,7 +957,7 @@ void CCommandSet::SetupCommands()
 
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
-		CString s = MPT_CFORMAT("Preview Sample Cue {}")(j - kcStartSampleCues + 1);
+		CString s = MPT_CFORMAT("Preview / Set Sample Cue {}")(j - kcStartSampleCues + 1);
 		m_commands[j] = {static_cast<uint32>(1924 + j - kcStartSampleCues), s};
 	}
 	static_assert(1924 + kcEndSampleCues - kcStartSampleCues < 1950);

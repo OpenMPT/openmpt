@@ -65,7 +65,7 @@ enum KeyEventType : int8
 DECLARE_FLAGSET(KeyEventType)
 
 
-enum CommandID
+enum CommandID : int
 {
 	kcCommandSetNumNotes = 59,  // kcVPEndNotes - kcVPStartNotes
 
@@ -341,6 +341,12 @@ enum CommandID
 	kcToggleOverflowPaste,
 	kcToggleNoteOffRecordPC,
 	kcToggleNoteOffRecordMIDI,
+	kcToggleOctaveTransposeMIDI,
+	kcToggleContinueSongOnMIDINote,
+	kcToggleContinueSongOnMIDIPlayEvents,
+	kcToggleRecordMIDIVelocity,
+	kcToggleRecordMIDIPitchBend,
+	kcToggleRecordMIDICCs,
 	kcToggleVisibilityInstrColumn,
 	kcToggleVisibilityVolumeColumn,
 	kcToggleVisibilityEffectColumn,

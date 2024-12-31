@@ -186,7 +186,6 @@ void CViewPattern::OnInitialUpdate()
 	m_nXScroll = m_nYScroll = 0;
 	m_nPattern = 0;
 	m_nSpacing = 0;
-	m_nAccelChar = 0;
 	PatternFont::UpdateFont(m_hWnd);
 	UpdateSizes();
 	UpdateScrollSize();
@@ -1864,7 +1863,7 @@ void CViewPattern::OnSoloFromClick()
 
 // When trying to solo a channel that is already the only unmuted channel,
 // this will result in unmuting all channels, in order to satisfy user habits.
-// In all other cases, soloing a channel unsoloes all and mutes all except this channel
+// In all other cases, soloing a channel unsolos all and mutes all except this channel
 void CViewPattern::OnSoloChannel(CHANNELINDEX first, CHANNELINDEX last)
 {
 	CModDoc *pModDoc = GetDocument();
@@ -4226,7 +4225,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case VIEWMSG_SETSPACING:
-		m_nSpacing = static_cast<UINT>(lParam);
+		m_nSpacing = static_cast<uint32>(lParam);
 		break;
 
 	case VIEWMSG_PATTERNPROPERTIES:
@@ -4375,6 +4374,18 @@ void CViewPattern::CursorJump(int distance, bool snap)
 	{
 		PatternStep(row);
 	}
+}
+
+
+static void ToggleFlag(CachedSetting<uint32> &flagSet, uint32 flag, const TCHAR *description)
+{
+	flagSet ^= flag;
+	CString text = description;
+	if(flagSet & flag)
+		text += _T(" is now On");
+	else
+		text += _T(" is now Off");
+	CMainFrame::GetMainFrame()->SetHelpText(text);
 }
 
 
@@ -4744,10 +4755,16 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcDuplicatePattern:     SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
 		case kcSwitchToOrderList:    OnSwitchToOrderList(); return wParam;
 		
-		case kcToggleOverflowPaste:     TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE; return wParam;
-		case kcToggleNoteOffRecordPC:   TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_KBDNOTEOFF; return wParam;
-		case kcToggleNoteOffRecordMIDI: TrackerSettings::Instance().m_dwMidiSetup ^= MIDISETUP_RECORDNOTEOFF; return wParam;
-		
+		case kcToggleOverflowPaste: ToggleFlag(TrackerSettings::Instance().m_dwPatternSetup, PATTERN_OVERFLOWPASTE, _T("Overflow Paste")); return wParam;
+		case kcToggleNoteOffRecordPC: ToggleFlag(TrackerSettings::Instance().m_dwPatternSetup, PATTERN_KBDNOTEOFF, _T("Record Note Off")); return wParam;
+		case kcToggleNoteOffRecordMIDI: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_RECORDNOTEOFF, _T("Record MIDI Note Off")); return wParam;
+		case kcToggleOctaveTransposeMIDI: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_TRANSPOSEKEYBOARD, _T("Apply Octave Transpose")); return wParam;
+		case kcToggleContinueSongOnMIDINote: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_PLAYPATTERNONMIDIIN, _T("Continue Song when MIDI Note is received")); return wParam;
+		case kcToggleContinueSongOnMIDIPlayEvents: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_RESPONDTOPLAYCONTROLMSGS, _T("Respond to Play / Continue Song MIDI messages")); return wParam;
+		case kcToggleRecordMIDIVelocity: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_RECORDVELOCITY, _T("Record MIDI Velocity")); return wParam;
+		case kcToggleRecordMIDIPitchBend: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_MIDIMACROPITCHBEND, _T("Record MIDI Pitch Bend")); return wParam;
+		case kcToggleRecordMIDICCs: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_MIDIMACROCONTROL, _T("Record MIDI CCs")); return wParam;
+
 		case kcToggleVisibilityInstrColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::instrColumn)); return wParam;
 		case kcToggleVisibilityVolumeColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::volumeColumn)); return wParam;
 		case kcToggleVisibilityEffectColumn : UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::effectColumn)); return wParam;
@@ -4871,7 +4888,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 
 	if(wParam >= kcSetSpacing0 && wParam <= kcSetSpacing9)
 	{
-		SetSpacing(static_cast<int>(wParam) - kcSetSpacing0);
+		SetSpacing(static_cast<uint32>(wParam - kcSetSpacing0));
 		return wParam;
 	}
 
@@ -4898,7 +4915,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 	if(wParam >= kcSetVolumeStart && wParam <= kcSetVolumeEnd)
 	{
 		if(IsEditingEnabled_bmsg())
-			TempEnterVol(static_cast<int>(wParam) - kcSetVolumeStart);
+			TempEnterVol(static_cast<CommandID>(wParam));
 		return wParam;
 	}
 
@@ -4979,7 +4996,7 @@ static bool EnterPCNoteValue(int v, ModCommand &m, uint16 (ModCommand::*getMetho
 
 
 // Enter volume effect / number in the pattern.
-void CViewPattern::TempEnterVol(int v)
+void CViewPattern::TempEnterVol(CommandID cmd)
 {
 	CSoundFile *pSndFile = GetSoundFile();
 
@@ -4989,7 +5006,8 @@ void CViewPattern::TempEnterVol(int v)
 	ModCommand &target = GetCursorCommand();
 	ModCommand m = target;  // This is the command we are about to overwrite
 	const bool isHex = TrackerSettings::Instance().patternVolColHex;
-	const bool isDigit = (v >= 0x00) && (v <= 0x0F);
+	const bool isDigit = (cmd >= kcStartVolumeDigits) && (cmd <= kcEndVolumeDigits);
+	const int v = static_cast<int>(cmd) - kcStartVolumeDigits;
 
 	if(m.IsPcNote())
 	{
@@ -5009,7 +5027,7 @@ void CViewPattern::TempEnterVol(int v)
 				volcmd = VOLCMD_VOLUME;
 		} else
 		{
-			switch(v + kcSetVolumeStart)
+			switch(cmd)
 			{
 			case kcSetVolumeVol:          volcmd = VOLCMD_VOLUME; break;
 			case kcSetVolumePan:          volcmd = VOLCMD_PANNING; break;
@@ -5025,6 +5043,8 @@ void CViewPattern::TempEnterVol(int v)
 			case kcSetVolumeITPortaUp:    volcmd = VOLCMD_PORTAUP; break;
 			case kcSetVolumeITPortaDown:  volcmd = VOLCMD_PORTADOWN; break;
 			case kcSetVolumeITOffset:     volcmd = VOLCMD_OFFSET; break;
+			default:
+				break;
 			}
 			if(m.volcmd == VOLCMD_NONE && volcmd == m_cmdOld.volcmd)
 			{
@@ -5078,11 +5098,11 @@ void CViewPattern::TempEnterVol(int v)
 }
 
 
-void CViewPattern::SetSpacing(int n)
+void CViewPattern::SetSpacing(uint32 n)
 {
-	if(static_cast<UINT>(n) != m_nSpacing)
+	if(n != m_nSpacing)
 	{
-		m_nSpacing = static_cast<UINT>(n);
+		m_nSpacing = n;
 		PostCtrlMessage(CTRLMSG_SETSPACING, m_nSpacing);
 	}
 }
@@ -5092,11 +5112,8 @@ void CViewPattern::SetSpacing(int n)
 void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 {
 	CSoundFile *pSndFile = GetSoundFile();
-
 	if(pSndFile == nullptr || !IsEditingEnabled_bmsg())
-	{
 		return;
-	}
 
 	ModCommand &target = GetCursorCommand();
 	ModCommand m = target;
@@ -5154,7 +5171,7 @@ void CViewPattern::TempEnterFX(ModCommand::COMMAND c, int v)
 }
 
 
-// Enter an effect param in the pattenr
+// Enter an effect param in the pattern
 void CViewPattern::TempEnterFXparam(int v)
 {
 	CSoundFile *pSndFile = GetSoundFile();
