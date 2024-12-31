@@ -252,6 +252,8 @@ protected:
 	afx_msg void OnPatternAmplify();
 	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
+	afx_msg void OnToggleMetronome();
+	afx_msg void OnMetronomeSettings();
 	afx_msg void OnFollowSong();
 	afx_msg void OnChangeLoopStatus();
 	// cppcheck-suppress duplInheritedMember

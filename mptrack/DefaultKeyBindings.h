@@ -10,6 +10,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#pragma once
+
 #include "CommandSet.h"
 
 
@@ -114,6 +116,7 @@ constexpr DefaultKeybinding DefaultKeybindings[] =
 	{kcCursorCopy,                             VK_RETURN,          ModNone,            kKeyEventDown,                   MPT_V("1.31")},
 	{kcCursorPaste,                            VK_SPACE,           ModNone,            kKeyEventDown | kKeyEventRepeat, MPT_V("1.31")},
 	{kcPatternRecord,                          VK_SPACE,           ModCtrl,            kKeyEventDown,                   MPT_V("1.31")},
+	{kcToggleMetronome,                        'M',                ModAlt,             kKeyEventDown,                   MPT_V("1.32.00.39")},
 	{kcPatternPlayRow,                         VK_RETURN,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, MPT_V("1.31")},
 	{kcSetSpacing,                             VK_MENU,            ModAlt,             kKeyEventDown,                   MPT_V("1.31")},
 	{kcSwitchToOrderList,                      VK_TAB,             ModCtrl,            kKeyEventDown,                   MPT_V("1.31")},

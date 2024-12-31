@@ -206,6 +206,7 @@ protected:
 
 	// Instrument preview in tree view
 	CSoundFile m_WaveFile;
+	ModSample m_metronomeMeasure{}, m_metronomeBeat{};
 
 	TCHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
 
@@ -255,6 +256,9 @@ public:
 	void midiCloseDevice();
 	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
 	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
+	void LoadMetronomeSamples();
+	void UpdateMetronomeSamples();
+	void UpdateMetronomeVolume();
 
 	static int ApplyVolumeRelatedSettings(const DWORD &dwParam1, const uint8 midivolume);
 

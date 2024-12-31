@@ -99,6 +99,9 @@ void CSoundFile::InitPlayer(bool bReset)
 #ifndef NO_DSP
 	m_BitCrush.Initialize(bReset, m_MixerSettings.gdwMixingFreq);
 #endif
+#ifdef MODPLUG_TRACKER
+	m_metronomeChn.pCurrentSample = nullptr;
+#endif
 	if(m_opl)
 	{
 		m_opl->Initialize(m_MixerSettings.gdwMixingFreq);
@@ -339,6 +342,15 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 			ProcessDSP(countChunk);
 		}
 
+#ifdef MODPLUG_TRACKER
+		// Metronome needs to be mixed last, so that it is not affected by global volume, plugins, DSP effects, etc...
+		// It will still be visible on VU Meters though, which is not optimal.
+		if(IsMetronomeEnabled())
+		{
+			MixChannel(countChunk, m_metronomeChn, CHANNELINDEX_INVALID, true);
+		}
+#endif  // MODPLUG_TRACKER
+
 		if(m_MixerSettings.gnChannels == 4)
 		{
 			InterleaveFrontRear(MixSoundBuffer, MixRearBuffer, countChunk);
@@ -448,8 +460,6 @@ bool CSoundFile::ProcessRow()
 		{
 			m_PlayState.m_nCurrentOrder = m_lockOrderStart;
 		}
-#else
-		MPT_UNUSED_VARIABLE(patternTransition);
 #endif // MODPLUG_TRACKER
 
 		m_PlayState.UpdatePPQ(patternTransition);
@@ -2732,7 +2742,7 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 				break;
 			default:
 				break;
-		}
+		}		
 	}
 }
 

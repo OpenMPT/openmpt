@@ -734,6 +734,20 @@ public:
 
 protected:
 	void HandleRowTransitionEvents(bool nextPattern);
+
+	const ModSample *m_metronomeMeasure = nullptr;
+	const ModSample *m_metronomeBeat = nullptr;
+	ModChannel m_metronomeChn{};
+
+public:
+	void SetMetronomeSamples(const ModSample *measure, const ModSample *beat)
+	{
+		m_metronomeMeasure = measure;
+		m_metronomeBeat = beat;
+		m_metronomeChn.pModSample = nullptr;
+		m_metronomeChn.pCurrentSample = nullptr;
+	}
+	constexpr bool IsMetronomeEnabled() const noexcept { return m_metronomeMeasure || m_metronomeBeat; }
 #endif  // MODPLUG_TRACKER
 
 public:
@@ -974,6 +988,7 @@ public:
 	samplecount_t ReadOneTick();
 private:
 	void CreateStereoMix(int count);
+	bool MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bool doMix);
 public:
 	bool FadeSong(uint32 msec);
 private:

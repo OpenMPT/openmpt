@@ -131,7 +131,7 @@ void CCtrlComments::RecalcLayout()
 
 void CCtrlComments::OnDPIChanged()
 {
-	UpdateView(GeneralHint().MPTOptions(), nullptr);
+	UpdateView(UpdateHint().MPTOptions(), nullptr);
 	CModControlDlg::OnDPIChanged();
 }
 

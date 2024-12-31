@@ -4414,6 +4414,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPatternPlayRow:        OnPatternStep(); return wParam;
 		case kcPatternRecord:         OnPatternRecord(); return wParam;
 		case kcToggleOverflowPaste:   PostCtrlMessage(CTRLMSG_TOGGLE_OVERFLOW_PASTE); return wParam;
+		case kcToggleMetronome:       PostCtrlMessage(CTRLMSG_TOGGLE_METRONOME); return wParam;
 		case kcCursorCopy:            OnCursorCopy(); return wParam;
 		case kcCursorPaste:           OnCursorPaste(); return wParam;
 		case kcChannelMute:

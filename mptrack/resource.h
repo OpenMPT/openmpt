@@ -100,6 +100,7 @@
 #define IDD_MIDIPARAMCONTROL            515
 #define IDD_ADDSILENCE                  517
 #define IDD_OPLEXPORT                   518
+#define IDD_METRONOME_SETTINGS          519
 #define IDD_OPL_PARAMS                  520
 #define IDD_CLEANUP_SONG                521
 #define IDD_CHANNELSETTINGS             522
@@ -849,6 +850,7 @@
 #define IDC_SPIN_ADDSILENCE             2382
 #define IDC_SAMPLE_INITOPL              2383
 #define IDC_RADIO_RESIZETO              2384
+#define IDC_METRONOME                   2385
 #define IDC_CHECK_PATRECORD             2386
 #define IDC_LOAD_COLORSCHEME            2387
 #define IDC_SAVE_COLORSCHEME            2388
@@ -1149,6 +1151,7 @@
 #define ID_VSTMACRO_INFO                36002
 #define ID_VSTINPUT_INFO                36003
 #define ID_FILE_NEWMOD_PC               36004
+#define ID_METRONOME_SETTINGS           36005
 #define ID_APPROX_BPM                   36007
 #define ID_FACTORY_MENU                 36008
 #define ID_PLUG_BYPASS                  36009

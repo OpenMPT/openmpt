@@ -6723,6 +6723,33 @@ void CSoundFile::HandleRowTransitionEvents(bool nextPattern)
 			}
 		}
 	}
+
+	// Metronome
+	if(IsMetronomeEnabled() && !IsRenderingToDisc() && !m_PlayState.m_flags[SONG_PAUSED | SONG_STEP])
+	{
+		const ROWINDEX rpm = m_PlayState.m_nCurrentRowsPerMeasure ? m_PlayState.m_nCurrentRowsPerMeasure : DEFAULT_ROWS_PER_MEASURE;
+		const ROWINDEX rpb = m_PlayState.m_nCurrentRowsPerBeat ? m_PlayState.m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
+		const ModSample *sample = nullptr;
+		if(!m_PlayState.m_lTotalSampleCount || !(m_PlayState.m_nRow % rpm))
+			sample = m_metronomeMeasure;
+		else if(!(m_PlayState.m_nRow % rpm % rpb))
+			sample = m_metronomeBeat;
+		if(sample)
+		{
+			m_metronomeChn.pModSample = sample;
+			m_metronomeChn.pCurrentSample = sample->samplev();
+			m_metronomeChn.dwFlags = (sample->uFlags & CHN_SAMPLEFLAGS) | CHN_NOREVERB;
+			m_metronomeChn.position.Set(0);
+			m_metronomeChn.increment = SamplePosition::Ratio(sample->nC5Speed, m_MixerSettings.gdwMixingFreq);
+			m_metronomeChn.rampLeftVol = m_metronomeChn.rampRightVol = m_metronomeChn.leftVol = m_metronomeChn.rightVol = sample->nVolume * 16;
+			m_metronomeChn.leftRamp = m_metronomeChn.rightRamp = 0;
+			m_metronomeChn.nLength = m_metronomeChn.pModSample->nLength;
+			m_metronomeChn.resamplingMode = m_Resampler.m_Settings.SrcMode;
+		}
+	} else
+	{
+		m_metronomeChn.pCurrentSample = nullptr;
+	}
 }
 #endif // MODPLUG_TRACKER
 

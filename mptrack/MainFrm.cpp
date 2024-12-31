@@ -48,6 +48,7 @@
 #include "../common/Profiler.h"
 #include "../common/version.h"
 #include "../soundlib/AudioReadTarget.h"
+#include "../soundlib/Tables.h"
 #include "../test/PlaybackTest.h"
 #include "mpt/audio/span.hpp"
 #include "mpt/base/alloc.hpp"
@@ -263,6 +264,8 @@ void CMainFrame::Initialize()
 
 	m_InputHandler->UpdateMainMenu();
 
+	LoadMetronomeSamples();
+
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 	CMenu debugMenu;
 	debugMenu.CreatePopupMenu();
@@ -277,6 +280,8 @@ void CMainFrame::Initialize()
 CMainFrame::~CMainFrame()
 {
 	CChannelManagerDlg::DestroySharedInstance();
+	m_metronomeMeasure.FreeSample();
+	m_metronomeBeat.FreeSample();
 }
 
 
@@ -1530,6 +1535,8 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 
 	m_VUMeterInput = VUMeter();
 	m_VUMeterOutput = VUMeter();
+
+	UpdateMetronomeSamples();
 
 	if(!StartPlayback())
 	{
@@ -3136,6 +3143,80 @@ LRESULT CMainFrame::OnViewMIDIMapping(WPARAM wParam, LPARAM lParam)
 		inMapper = false;
 	}
 	return 0;
+}
+
+
+void CMainFrame::LoadMetronomeSamples()
+{
+	const std::tuple<mpt::PathString, ModSample &, const int, const int> metronomeSamples[] =
+	{
+		{TrackerSettings::Instance().metronomeSampleMeasure, m_metronomeMeasure, 4, 256},
+		{TrackerSettings::Instance().metronomeSampleBeat, m_metronomeBeat, 2, 192},
+	};
+	CriticalSection cs;
+	for(auto &[path, sample, speed, amp] : metronomeSamples)
+	{
+		sample.FreeSample();
+		if(path.empty())
+			continue;
+		if(path != TrackerSettings::GetDefaultMetronomeSample())
+		{
+			mpt::IO::InputFile inputFile(path, TrackerSettings::Instance().MiscCacheCompleteFileBeforeLoading);
+			if(inputFile.IsValid())
+			{
+				FileReader file = GetFileReader(inputFile);
+				SAMPLEINDEX srcSmp = m_WaveFile.GetNextFreeSample();
+				if(srcSmp == SAMPLEINDEX_INVALID)
+					srcSmp = 1;
+				if(m_WaveFile.ReadSampleFromFile(srcSmp, file))
+				{
+					std::swap(sample, m_WaveFile.GetSample(srcSmp));
+					sample.Convert(m_WaveFile.GetType(), MOD_TYPE_MPT);
+				}
+			}
+		}
+		if(!sample.HasSampleData())
+		{
+			sample.Initialize(MOD_TYPE_MPT);
+			sample.nC5Speed = 8363 * 16;
+			sample.nLength = 4096;
+			sample.uFlags.set(CHN_16BIT);
+			if(sample.AllocateSample())
+			{
+				int16_t *sampleData = sample.sample16();
+				for(SmpLength i = 0; i < sample.nLength; i++)
+				{
+					sampleData[i] = static_cast<int16>(Util::muldiv(ITSinusTable[(i * speed) % std::size(ITSinusTable)] * amp, 4096 * 4096 - i * i, 4096 * 4096));
+				}
+			}
+		}
+	}
+	UpdateMetronomeVolume();
+	UpdateMetronomeSamples();
+}
+
+
+void CMainFrame::UpdateMetronomeSamples()
+{
+	if(!m_pSndFile)
+		return;
+	ModSample *measure = nullptr, *beat = nullptr;
+	if(TrackerSettings::Instance().metronomeEnabled)
+	{
+		measure = &m_metronomeMeasure;
+		beat = &m_metronomeBeat;
+	}
+	CriticalSection cs;
+	m_pSndFile->SetMetronomeSamples(measure, beat);
+}
+
+
+void CMainFrame::UpdateMetronomeVolume()
+{
+	const float linear = std::pow(10.0f, TrackerSettings::Instance().metronomeVolume / 20.0f);
+	const uint16 volume = std::clamp(mpt::saturate_round<uint16>(linear * 256.0f), uint16(0), uint16(256));
+	CriticalSection cs;
+	m_metronomeBeat.nVolume = m_metronomeMeasure.nVolume = volume;
 }
 
 

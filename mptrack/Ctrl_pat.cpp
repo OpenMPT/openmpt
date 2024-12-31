@@ -51,6 +51,8 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(IDC_PATTERN_PLAY,              &CCtrlPatterns::OnPatternPlay)
 	ON_COMMAND(IDC_PATTERN_PLAYFROMSTART,     &CCtrlPatterns::OnPatternPlayFromStart)
 	ON_COMMAND(IDC_PATTERN_RECORD,            &CCtrlPatterns::OnPatternRecord)
+	ON_COMMAND(IDC_METRONOME,                 &CCtrlPatterns::OnToggleMetronome)
+	ON_COMMAND(ID_METRONOME_SETTINGS,         &CCtrlPatterns::OnMetronomeSettings)
 	ON_COMMAND(IDC_PATTERN_LOOP,              &CCtrlPatterns::OnChangeLoopStatus)
 	ON_COMMAND(ID_PATTERN_PLAYROW,            &CCtrlPatterns::OnPatternPlayRow)
 	ON_COMMAND(ID_PATTERN_CHANNELMANAGER,     &CCtrlPatterns::OnChannelManager)
@@ -153,6 +155,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(IDC_PATTERN_STOP, TIMAGE_PATTERN_STOP);
 	m_ToolBar.AddButton(ID_PATTERN_PLAYROW, TIMAGE_PATTERN_PLAYROW);
 	m_ToolBar.AddButton(IDC_PATTERN_RECORD, TIMAGE_PATTERN_RECORD, TBSTYLE_CHECK, (m_bRecord ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
+	m_ToolBar.AddButton(IDC_METRONOME, TIMAGE_METRONOME, TBSTYLE_CHECK | TBSTYLE_DROPDOWN, (TrackerSettings::Instance().metronomeEnabled ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_PATTERN_VUMETERS, TIMAGE_PATTERN_VUMETERS, TBSTYLE_CHECK, (m_bVUMeters ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 	m_ToolBar.AddButton(ID_VIEWPLUGNAMES, TIMAGE_PATTERN_PLUGINS, TBSTYLE_CHECK, (m_bPluginNames ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
@@ -481,6 +484,11 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 		break;
 
+	case CTRLMSG_TOGGLE_METRONOME:
+		m_ToolBar.CheckButton(IDC_METRONOME, m_ToolBar.IsButtonChecked(IDC_METRONOME) ? FALSE : TRUE);
+		OnToggleMetronome();
+		break;
+
 	case CTRLMSG_TOGGLE_OVERFLOW_PASTE:
 		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, m_ToolBar.IsButtonChecked(ID_OVERFLOWPASTE) ? FALSE : TRUE);
 		OnToggleOverflowPaste();
@@ -538,6 +546,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case CTRLMSG_PAT_UPDATE_TOOLBAR:
 		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TRUE : FALSE);
+		m_ToolBar.CheckButton(IDC_METRONOME, TrackerSettings::Instance().metronomeEnabled ? TRUE : FALSE);
 		break;
 
 	default:
@@ -1103,6 +1112,24 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 }
 
 
+void CCtrlPatterns::OnToggleMetronome()
+{
+	bool enableMetronome = m_ToolBar.IsButtonChecked(IDC_METRONOME) != 0;
+	TrackerSettings::Instance().metronomeEnabled = enableMetronome;
+	CMainFrame::GetMainFrame()->UpdateMetronomeSamples();
+	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
+	SwitchToView();
+}
+
+
+void CCtrlPatterns::OnMetronomeSettings()
+{
+	MetronomeSettingsDlg dlg{this};
+	dlg.DoModal();
+	SwitchToView();
+}
+
+
 void CCtrlPatterns::OnPatternProperties()
 {
 	SendViewMessage(VIEWMSG_PATTERNPROPERTIES, PATTERNINDEX_INVALID);
@@ -1252,6 +1279,13 @@ void CCtrlPatterns::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 		menu.DestroyMenu();
 		break;
 
+	case IDC_METRONOME:
+		menu.CreatePopupMenu();
+		menu.AppendMenu(MF_STRING, ID_METRONOME_SETTINGS, _T("&Metronome Settings"));
+		menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, x, y, this);
+		menu.DestroyMenu();
+		break;
+
 	case ID_PATTERNDETAIL_DROPDOWN:
 		menu.CreatePopupMenu();
 		menu.AppendMenu(MF_STRING | (visibleColumns[PatternCursor::instrColumn] ? MF_CHECKED : 0), ID_PATTERNDETAIL_INSTR, ih->GetKeyTextFromCommand(kcToggleVisibilityInstrColumn, _T("Show &Instrument Column")));
@@ -1351,6 +1385,7 @@ CString CCtrlPatterns::GetToolTipText(UINT id)
 	case IDC_PATTERN_STOP: s = _T("Stop"); cmd = kcPauseSong; break;
 	case ID_PATTERN_PLAYROW: s = _T("Play Row"); cmd = kcPatternPlayRow; break;
 	case IDC_PATTERN_RECORD: s = _T("Record"); cmd = kcPatternRecord; break;
+	case IDC_METRONOME: s = _T("Metronome"); cmd = kcToggleMetronome; break;
 	case ID_PATTERN_VUMETERS: s = _T("VU-Meters"); break;
 	case ID_VIEWPLUGNAMES: s = _T("Show Plugins"); break;
 	case ID_PATTERN_CHANNELMANAGER: s = _T("Channel Manager"); cmd = kcViewChannelManager; break;

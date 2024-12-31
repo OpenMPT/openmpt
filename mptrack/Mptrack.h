@@ -446,6 +446,8 @@ CString FormatFileSize(uint64 fileSize);
 
 bool ValidateMacroString(CEdit &wnd, const std::string_view prevMacro, bool isParametric, bool allowVariables, bool allowMultiline);
 
+mpt::ustring ConstructSampleFormatFileFilter(bool includeRaw);
+
 
 ///////////////////////////////////////////////////
 // Tables

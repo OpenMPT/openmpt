@@ -309,6 +309,7 @@ enum CommandID : int
 	kcPatternGoto,
 	kcFindInstrument,
 	kcPatternRecord,
+	kcToggleMetronome,
 	kcSetSpacing,
 	kcSetSpacing0,
 	kcSetSpacing1,

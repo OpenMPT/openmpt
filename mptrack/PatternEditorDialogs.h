@@ -218,4 +218,35 @@ protected:
 	DECLARE_MESSAGE_MAP();
 };
 
+
+class MetronomeSettingsDlg : public DialogBase
+{
+public:
+	MetronomeSettingsDlg(CWnd *parent = nullptr);
+
+protected:
+	void DoDataExchange(CDataExchange *pDX) override;
+	BOOL OnInitDialog() override;
+
+	void SetSampleInfo(const mpt::PathString &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
+	bool GetSampleInfo(Setting<mpt::PathString> &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
+	mpt::PathString BrowseForSample(const mpt::PathString &path);
+
+	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
+	afx_msg void OnToggleMetronome();
+	afx_msg void OnSampleChanged();
+	afx_msg void OnBrowseMeasure();
+	afx_msg void OnBrowseBeat();
+	BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
+
+	DECLARE_MESSAGE_MAP();
+
+protected:
+	CSliderCtrl m_volumeSlider;
+	CComboBox m_measureCombo, m_beatCombo;
+	CEdit m_measureEdit, m_beatEdit;
+	CButton m_measureButton, m_beatButton;
+};
+
+
 OPENMPT_NAMESPACE_END

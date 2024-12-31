@@ -838,6 +838,10 @@ public:
 	CachedSetting<bool> patternAlwaysDrawWholePatternOnScrollSlow;
 	CachedSetting<bool> orderListOldDropBehaviour;
 	Setting<bool> autoHideVolumeColumnForMOD;
+	Setting<bool> metronomeEnabled;
+	Setting<float> metronomeVolume;
+	Setting<mpt::PathString> metronomeSampleMeasure;
+	Setting<mpt::PathString> metronomeSampleBeat;
 
 	// Sample Editor
 
@@ -1004,6 +1008,8 @@ public:
 	UINT GetCurrentMIDIDevice();
 
 	static mpt::PathString GetDefaultAutosavePath();
+
+	static mpt::PathString GetDefaultMetronomeSample() { return P_("*sine"); }
 
 protected:
 

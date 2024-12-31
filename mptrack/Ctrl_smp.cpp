@@ -1214,80 +1214,13 @@ bool CCtrlSamples::InsertSample(bool duplicate, int8 *confirm)
 }
 
 
-static constexpr std::pair<const mpt::uchar *, const mpt::uchar *> SampleFormats[]
-{
-	{ UL_("Wave Files (*.wav)"), UL_("*.wav") },
-#ifdef MPT_WITH_FLAC
-	{ UL_("FLAC Files (*.flac,*.oga)"), UL_("*.flac;*.oga") },
-#endif // MPT_WITH_FLAC
-#if defined(MPT_WITH_OPUSFILE)
-	{ UL_("Opus Files (*.opus,*.oga)"), UL_("*.opus;*.oga") },
-#endif // MPT_WITH_OPUSFILE
-#if defined(MPT_WITH_VORBISFILE) || defined(MPT_WITH_STBVORBIS)
-	{ UL_("Ogg Vorbis Files (*.ogg,*.oga)"), UL_("*.ogg;*.oga") },
-#endif // VORBIS
-#if defined(MPT_ENABLE_MP3_SAMPLES)
-	{ UL_("MPEG Files (*.mp1,*.mp2,*.mp3)"), UL_("*.mp1;*.mp2;*.mp3") },
-#endif // MPT_ENABLE_MP3_SAMPLES
-	{ UL_("XI Samples (*.xi)"), UL_("*.xi") },
-	{ UL_("Impulse Tracker Samples (*.its)"), UL_("*.its") },
-	{ UL_("Scream Tracker Samples (*.s3i,*.smp)"), UL_("*.s3i;*.smp") },
-	{ UL_("OPL Instruments (*.sb0,*.sb2,*.sbi)"), UL_("*.sb0;*.sb2;*.sbi") },
-	{ UL_("GF1 Patches (*.pat)"), UL_("*.pat") },
-	{ UL_("Wave64 Files (*.w64)"), UL_("*.w64") },
-	{ UL_("CAF Files (*.wav)"), UL_("*.caf") },
-	{ UL_("AIFF Files (*.aiff,*.8svx)"), UL_("*.aif;*.aiff;*.iff;*.8sv;*.8svx;*.svx") },
-	{ UL_("Sun Audio (*.au,*.snd)"), UL_("*.au;*.snd") },
-	{ UL_("SNES BRR Files (*.brr)"), UL_("*.brr") },
-};
-
-
-static mpt::ustring ConstructFileFilter(bool includeRaw)
-{
-	mpt::ustring s = U_("All Samples (*.wav,*.flac,*.xi,*.its,*.s3i,*.sbi,...)|");
-	bool first = true;
-	for(const auto &[name, exts] : SampleFormats)
-	{
-		if(!first)
-			s += U_(";");
-		else
-			first = false;
-		s += exts;
-	}
-#if defined(MPT_WITH_MEDIAFOUNDATION)
-	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
-	s += ToFilterOnlyString(mediaFoundationTypes, true).ToUnicode();
-#endif
-	if(includeRaw)
-	{
-		s += U_(";*.raw;*.snd;*.pcm;*.sam");
-	}
-	s += U_("|");
-	for(const auto &[name, exts] : SampleFormats)
-	{
-		s += name + U_("|");
-		s += exts + U_("|");
-	}
-#if defined(MPT_WITH_MEDIAFOUNDATION)
-	s += ToFilterString(mediaFoundationTypes, FileTypeFormatShowExtensions).ToUnicode();
-#endif
-	if(includeRaw)
-	{
-		s += U_("Raw Samples (*.raw,*.snd,*.pcm,*.sam)|*.raw;*.snd;*.pcm;*.sam|");
-	}
-	s += U_("All Files (*.*)|*.*||");
-	return s;
-}
-
-
 void CCtrlSamples::OnSampleOpen()
 {
 	static int nLastIndex = 0;
-	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter(ConstructFileFilter(true))
+		.ExtensionFilter(ConstructSampleFormatFileFilter(true))
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
@@ -1302,11 +1235,10 @@ void CCtrlSamples::OnSampleOpen()
 void CCtrlSamples::OnSampleOpenKnown()
 {
 	static int nLastIndex = 0;
-	std::vector<FileType> mediaFoundationTypes = CSoundFile::GetMediaFoundationFileTypes();
 	FileDialog dlg = OpenFileDialog()
 		.AllowMultiSelect()
 		.EnableAudioPreview()
-		.ExtensionFilter(ConstructFileFilter(false))
+		.ExtensionFilter(ConstructSampleFormatFileFilter(false))
 		.WorkingDirectory(TrackerSettings::Instance().PathSamples.GetWorkingDir())
 		.FilterIndex(&nLastIndex);
 	if(!dlg.Show(this)) return;
