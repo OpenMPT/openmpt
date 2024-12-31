@@ -10,10 +10,10 @@
 */
 
 #include "config.h"
-#if !defined(__DJGPP__)  /* OpenMPT */
+#ifndef NO_CATCHSIGNAL  /* OpenMPT */
 /* This source file does need _POSIX_SOURCE to get some sigaction. */
 #define _POSIX_SOURCE
-#endif  /* OpenMPT */
+#endif // NO_CATCHSIGNAL  /* OpenMPT */
 #include "compat.h"
 
 #ifdef _MSC_VER
@@ -27,9 +27,11 @@
 #ifdef HAVE_SYS_STAT_H
 #  include <sys/stat.h>
 #endif
+#ifndef NO_DIR  /* OpenMPT */
 #ifdef HAVE_DIRENT_H
 #  include <dirent.h>
 #endif
+#endif // NO_DIR  /* OpenMPT */
 
 /* Win32 is only supported with unicode now. These headers also cover
    module stuff. The WANT_WIN32_UNICODE macro is synonymous with
@@ -42,6 +44,8 @@
 #endif
 
 #include "../common/debug.h"
+
+#ifndef NO_ENV  /* OpenMPT */
 
 #ifndef WINDOWS_UWP
 
@@ -67,6 +71,8 @@ char *INT123_compat_getenv(const char* name)
 }
 
 #endif
+
+#endif // NO_ENV  /* OpenMPT */
 
 #include "wpathconv.h"
 
@@ -161,6 +167,8 @@ int INT123_compat_fclose(FILE *stream)
 	return fclose(stream);
 }
 
+#ifndef NO_FILEMODE  /* OpenMPT */
+
 void INT123_compat_binmode(int fd, int enable)
 {
 #if   defined(HAVE__SETMODE)
@@ -171,6 +179,10 @@ void INT123_compat_binmode(int fd, int enable)
 	setmode(fd, enable ? O_BINARY : O_TEXT);
 #endif
 }
+
+#endif // NO_FILEMODE  /* OpenMPT */
+
+#ifndef NO_DIR  /* OpenMPT */
 
 #ifndef WINDOWS_UWP
 
@@ -430,6 +442,8 @@ char* INT123_compat_nextdir(struct compat_dir *cd)
 }
 
 #endif
+
+#endif // NO_DIR  /* OpenMPT */
 
 // Revisit logic of write():
 // Return -1 if interrupted before any data was written,
