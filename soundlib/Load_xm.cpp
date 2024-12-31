@@ -678,9 +678,10 @@ bool CSoundFile::ReadXM(FileReader &file, ModLoadingFlags loadFlags)
 			m_playBehaviour.reset(kFT2ST3OffsetOutOfRange);
 			// Fix arpeggios in KAPTENFL.XM
 			m_playBehaviour.reset(kFT2Arpeggio);
-		} else if(!memcmp(fileHeader.trackerName, "*Converted ", 11))
+		} else if(!memcmp(fileHeader.trackerName, "*Converted ", 11) && !memcmp(fileHeader.trackerName + 14, "-File*", 6))
 		{
-			madeWith = verDigiTrakker;
+			madeWith = verDigiTrakker | verConfirmed;
+			madeWithTracker = UL_("Digitrakker");
 		}
 	}
 
