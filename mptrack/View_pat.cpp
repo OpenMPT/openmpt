@@ -4413,6 +4413,7 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcNextOrderAtRowEnd:     GotoNextOrder(OrderTransitionMode::AtRowEnd); return wParam;
 		case kcPatternPlayRow:        OnPatternStep(); return wParam;
 		case kcPatternRecord:         OnPatternRecord(); return wParam;
+		case kcToggleOverflowPaste:   PostCtrlMessage(CTRLMSG_TOGGLE_OVERFLOW_PASTE); return wParam;
 		case kcCursorCopy:            OnCursorCopy(); return wParam;
 		case kcCursorPaste:           OnCursorPaste(); return wParam;
 		case kcChannelMute:
@@ -4755,7 +4756,6 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcDuplicatePattern:     SendCtrlMessage(CTRLMSG_PAT_DUPPATTERN); return wParam;
 		case kcSwitchToOrderList:    OnSwitchToOrderList(); return wParam;
 		
-		case kcToggleOverflowPaste: ToggleFlag(TrackerSettings::Instance().m_dwPatternSetup, PATTERN_OVERFLOWPASTE, _T("Overflow Paste")); return wParam;
 		case kcToggleNoteOffRecordPC: ToggleFlag(TrackerSettings::Instance().m_dwPatternSetup, PATTERN_KBDNOTEOFF, _T("Record Note Off")); return wParam;
 		case kcToggleNoteOffRecordMIDI: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_RECORDNOTEOFF, _T("Record MIDI Note Off")); return wParam;
 		case kcToggleOctaveTransposeMIDI: ToggleFlag(TrackerSettings::Instance().m_dwMidiSetup, MIDISETUP_TRANSPOSEKEYBOARD, _T("Apply Octave Transpose")); return wParam;

@@ -302,6 +302,18 @@ void CTrackApp::UpdateAllViews(UpdateHint hint, CObject *pHint)
 }
 
 
+void CTrackApp::PostMessageToAllViews(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if(auto *pDocTmpl = GetModDocTemplate())
+	{
+		for(auto &doc : *pDocTmpl)
+		{
+			doc->PostMessageToAllViews(uMsg, wParam, lParam);
+		}
+	}
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // Command Line options
 

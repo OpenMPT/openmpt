@@ -219,6 +219,7 @@ public:
 	CString GetFriendlyMIDIPortName(const CString &deviceName, bool isInputPort, bool addDeviceName = true);
 
 	void UpdateAllViews(UpdateHint hint, CObject *pHint = nullptr);
+	void PostMessageToAllViews(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0);
 
 public:
 	inline mpt::recursive_mutex_with_lock_count &GetGlobalMutexRef() { return m_GlobalMutex; }

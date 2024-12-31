@@ -180,7 +180,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinInstrument.SetPos(0);
 
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
-	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF));
+	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? BST_UNCHECKED : BST_CHECKED);
 
 	m_SpinSequence.SetRange32(1, m_sndFile.Order.GetNumSequences());
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
@@ -188,7 +188,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 
 	m_OrderList.SetFocus();
 
-	UpdateView(PatternHint().Names().ModType(), NULL);
+	UpdateView(PatternHint().Names().ModType(), nullptr);
 	RecalcLayout();
 
 	m_initialized = true;
@@ -229,7 +229,7 @@ void CCtrlPatterns::RecalcLayout()
 		cx += 2;
 		if((cx > 0) && (cy > 0))
 		{
-			m_OrderList.SetWindowPos(NULL, 0, 0, cx, cy, SWP_NOMOVE | SWP_NOZORDER | SWP_DRAWFRAME);
+			m_OrderList.SetWindowPos(nullptr, 0, 0, cx, cy, SWP_NOMOVE | SWP_NOZORDER | SWP_DRAWFRAME);
 		}
 	}
 }
@@ -279,7 +279,6 @@ void CCtrlPatterns::UpdateView(UpdateHint hint, CObject *pObj)
 	if(hintType[HINT_MPTOPTIONS])
 	{
 		m_ToolBar.UpdateStyle();
-		m_ToolBar.SetState(ID_OVERFLOWPASTE, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 	}
 
 	bool instrPluginsChanged = false;
@@ -442,7 +441,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 
 	case CTRLMSG_FORCEREFRESH:
 		//refresh GUI
-		m_OrderList.InvalidateRect(NULL, FALSE);
+		m_OrderList.InvalidateRect(nullptr, FALSE);
 		break;
 
 	case CTRLMSG_GETCURRENTORDER:
@@ -473,10 +472,18 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_SETRECORD:
-		if (lParam >= 0) m_bRecord = (BOOL)(lParam); else m_bRecord = !m_bRecord;
-		m_ToolBar.SetState(IDC_PATTERN_RECORD, ((m_bRecord) ? TBSTATE_CHECKED : 0)|TBSTATE_ENABLED);
-		TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
+		if(lParam >= 0)
+			m_bRecord = lParam != 0;
+		else
+			m_bRecord = !m_bRecord;
+		m_ToolBar.CheckButton(IDC_PATTERN_RECORD, m_bRecord ? TRUE : FALSE);
+		TrackerSettings::Instance().gbPatternRecord = m_bRecord;
 		SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
+		break;
+
+	case CTRLMSG_TOGGLE_OVERFLOW_PASTE:
+		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, m_ToolBar.IsButtonChecked(ID_OVERFLOWPASTE) ? FALSE : TRUE);
+		OnToggleOverflowPaste();
 		break;
 
 	case CTRLMSG_PREVORDER:
@@ -487,14 +494,13 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		m_OrderList.SetCurSel(Order().GetNextOrderIgnoringSkips(m_OrderList.GetCurSel(true).firstOrd), true);
 		break;
 
-	//rewbs.customKeys
 	case CTRLMSG_PAT_FOLLOWSONG:
 		// parameters: 0 = turn off, 1 = toggle
 		{
 			UINT state = FALSE;
 			if(lParam == 1)	// toggle
 			{
-				state = !IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG);
+				state = IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG) != BST_UNCHECKED;
 			}
 			CheckDlgButton(IDC_PATTERN_FOLLOWSONG, state);
 			OnFollowSong();
@@ -528,6 +534,10 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_PAT_SETSEQUENCE:
 		m_OrderList.SelectSequence(static_cast<SEQUENCEINDEX>(lParam));
 		UpdateView(SequenceHint(static_cast<SEQUENCEINDEX>(lParam)).Names(), nullptr);
+		break;
+
+	case CTRLMSG_PAT_UPDATE_TOOLBAR:
+		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TRUE : FALSE);
 		break;
 
 	default:
@@ -811,8 +821,8 @@ void CCtrlPatterns::OnPatternNew()
 		m_OrderList.Invalidate(FALSE);
 		SetCurrentPattern(newPat);
 		m_modDoc.SetModified();
-		m_modDoc.UpdateAllViews(NULL, PatternHint(newPat).Names(), this);
-		m_modDoc.UpdateAllViews(NULL, SequenceHint().Data(), this);
+		m_modDoc.UpdateAllViews(nullptr, PatternHint(newPat).Names(), this);
+		m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 		SwitchToView();
 	}
 }
@@ -1060,9 +1070,8 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 
 void CCtrlPatterns::OnPatternRecord()
 {
-	UINT nState = m_ToolBar.GetState(IDC_PATTERN_RECORD);
-	m_bRecord = ((nState & TBSTATE_CHECKED) != 0);
-	TrackerSettings::Instance().gbPatternRecord = (m_bRecord != 0);
+	m_bRecord = m_ToolBar.IsButtonChecked(IDC_PATTERN_RECORD) != 0;
+	TrackerSettings::Instance().gbPatternRecord = m_bRecord;
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -1070,23 +1079,29 @@ void CCtrlPatterns::OnPatternRecord()
 
 void CCtrlPatterns::OnPatternVUMeters()
 {
-	UINT nState = m_ToolBar.GetState(ID_PATTERN_VUMETERS);
-	m_bVUMeters = ((nState & TBSTATE_CHECKED) != 0);
+	m_bVUMeters = m_ToolBar.IsButtonChecked(ID_PATTERN_VUMETERS) != 0;
 	TrackerSettings::Instance().gbPatternVUMeters = (m_bVUMeters != 0);
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
 
-//rewbs.patPlugName
+
 void CCtrlPatterns::OnPatternViewPlugNames()
 {
-	UINT nState = m_ToolBar.GetState(ID_VIEWPLUGNAMES);
-	m_bPluginNames = ((nState & TBSTATE_CHECKED) != 0);
+	m_bPluginNames = m_ToolBar.IsButtonChecked(ID_VIEWPLUGNAMES) != 0;
 	TrackerSettings::Instance().gbPatternPluginNames = (m_bPluginNames != 0);
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }
-//end rewbs.patPlugName
+
+
+void CCtrlPatterns::OnToggleOverflowPaste()
+{
+	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
+	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
+	SwitchToView();
+}
+
 
 void CCtrlPatterns::OnPatternProperties()
 {
@@ -1189,7 +1204,7 @@ void CCtrlPatterns::OnPatternNameChanged()
 			{
 				if(m_sndFile.GetType() & (MOD_TYPE_XM | MOD_TYPE_IT | MOD_TYPE_MPT))
 					m_modDoc.SetModified();
-				m_modDoc.UpdateAllViews(NULL, PatternHint(nPat).Names(), this);
+				m_modDoc.UpdateAllViews(nullptr, PatternHint(nPat).Names(), this);
 			}
 		}
 	}
@@ -1223,7 +1238,7 @@ void CCtrlPatterns::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	CInputHandler *ih = CMainFrame::GetInputHandler();
 	NMTOOLBAR *pToolBar = reinterpret_cast<NMTOOLBAR *>(pNMHDR);
-	ClientToScreen(&(pToolBar->rcButton));            // TrackPopupMenu uses screen coords
+	ClientToScreen(&(pToolBar->rcButton));
 	const int offset = HighDPISupport::ScalePixels(4, m_hWnd);  // Compared to the main toolbar, the offset seems to be a bit wrong here...?
 	int x = pToolBar->rcButton.left + offset, y = pToolBar->rcButton.bottom + offset;
 	const auto visibleColumns = std::bitset<PatternCursor::numColumns>{static_cast<unsigned long>(SendViewMessage(VIEWMSG_GETDETAIL))};
@@ -1285,14 +1300,6 @@ void CCtrlPatterns::OnDetailEffect()
 	visibleColumns.flip(PatternCursor::effectColumn);
 	visibleColumns.flip(PatternCursor::paramColumn);
 	SendViewMessage(VIEWMSG_SETDETAIL, visibleColumns.to_ulong());
-	SwitchToView();
-}
-
-
-void CCtrlPatterns::OnToggleOverflowPaste()
-{
-	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
-	UpdateView(UpdateHint().MPTOptions());
 	SwitchToView();
 }
 
