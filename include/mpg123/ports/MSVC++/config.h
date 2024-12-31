@@ -12,6 +12,7 @@
 
 /* POSIX headers */
 
+#define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
 
 /* Windows headers */
@@ -34,13 +35,22 @@
 #define strncasecmp _strnicmp
 
 /* Windows/DOS */
-#define HAVE__SETMODE
 
 /* Features */
 
 /* #define LFS_LARGEFILE_64 1 */
 
+/* libmpg123 does not care about signals */
 #define NO_CATCHSIGNAL
+
+/* libmpg123 does not care about directories */
+#define NO_DIR
+
+/* libmpg123 does not care about environment variables */
+#define NO_ENV
+
+/* libmpg123 does not care about file mode */
+#define NO_FILEMODE
 
 /* We want some frame index, eh? */
 #define FRAME_INDEX 1

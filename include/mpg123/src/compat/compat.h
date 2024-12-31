@@ -189,12 +189,14 @@ FILE* INT123_compat_fdopen(int fd, const char *mode);
 int INT123_compat_close(int infd);
 int INT123_compat_fclose(FILE* stream);
 
+#ifndef NO_FILEMODE  /* OpenMPT */
 /**
  * Setting binary mode on a descriptor, where necessary.
  * We do not bother with errors. This has to work.
  * You can enable or disable binary mode.
  */
 void INT123_compat_binmode(int fd, int enable);
+#endif // NO_FILEMODE  /* OpenMPT */
 
 /* Those do make sense in a separate file, but I chose to include them in compat.c because that's the one source whose object is shared between mpg123 and libmpg123 -- and both need the functionality internally. */
 
@@ -239,6 +241,8 @@ int INT123_win32_wide_utf7(const wchar_t * const wptr, char **mbptr, size_t * bu
 
 int INT123_win32_utf8_wide(const char *const mbptr, wchar_t **wptr, size_t *buflen);
 #endif
+
+#ifndef NO_DIR  /* OpenMPT */
 
 /*
 	A little bit of path abstraction: We always work with plain char strings
@@ -288,6 +292,8 @@ char* INT123_compat_nextfile(struct compat_dir*);
    The returned string is a copy that needs to be freed after use. */
 char* INT123_compat_nextdir (struct compat_dir*);
 
+#endif // NO_DIR  /* OpenMPT */
+
 #ifdef USE_MODULES
 /*
 	For keeping the path mess local, a system-specific dlopen() variant
@@ -316,9 +322,11 @@ size_t INT123_unintr_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *st
 
 #include "../common/true.h"
 
+#ifndef NO_CATCHSIGNAL  /* OpenMPT */
 #if (!defined(WIN32) || defined (__CYGWIN__)) && defined(HAVE_SIGNAL_H)
 void (*INT123_catchsignal(int signum, void(*handler)(int)))(int);
 #endif
+#endif // NO_CATCHSIGNAL  /* OpenMPT */
 
 // Some ancient toolchains miss the documented errno value.
 #if defined(_WIN32) && !defined(EOVERFLOW)

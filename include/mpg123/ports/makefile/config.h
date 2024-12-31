@@ -12,7 +12,6 @@
 
 /* POSIX headers */
 
-#define HAVE_DIRENT_H 1
 #define HAVE_STRINGS_H 1
 #define HAVE_SYS_SIGNAL_H 1
 #define HAVE_SYS_STAT_H 1
@@ -34,17 +33,22 @@
 #endif
 
 /* Windows/DOS */
-#if defined(__DJGPP__)
-#define HAVE_SETMODE
-#elif defined(_WIN32)
-#define HAVE__SETMODE
-#endif
 
 /* Features */
 
 /* #define LFS_LARGEFILE_64 1 */
 
+/* libmpg123 does not care about signals */
 #define NO_CATCHSIGNAL
+
+/* libmpg123 does not care about directories */
+#define NO_DIR
+
+/* libmpg123 does not care about environment variables */
+#define NO_ENV
+
+/* libmpg123 does not care about file mode */
+#define NO_FILEMODE
 
 /* We want some frame index, eh? */
 #define FRAME_INDEX 1
@@ -68,3 +72,5 @@
 
 /* use rounding instead of trunction */
 #define ACCURATE_ROUNDING 1
+
+/* Platform */
