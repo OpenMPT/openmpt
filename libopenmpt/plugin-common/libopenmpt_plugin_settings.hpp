@@ -77,10 +77,6 @@ public:
 	{
 		no_default_format = no_default_format_;
 		player_setting_name = player_setting_name_;
-		if (!no_default_format) {
-			samplerate = 0;
-			channels = 0;
-		}
 	}
 	void load()
 	{
