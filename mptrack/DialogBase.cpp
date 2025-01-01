@@ -114,7 +114,7 @@ BOOL DialogBase::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 	if(s.IsEmpty())
 		return FALSE;
 
-	if(s.GetLength() < std::size(pTTT->szText))
+	if(s.GetLength() < static_cast<int>(std::size(pTTT->szText)))
 	{
 		mpt::String::WriteCStringBuf(pTTT->szText) = s;
 	} else
