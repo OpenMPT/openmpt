@@ -1056,8 +1056,9 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 			// Set instrument (or sample if there are no instruments)
 			chn.ResetEnvelopes();
 			m_SndFile.InstrumentChange(chn, params.m_instr);
-		} else if(params.m_sample > 0 && params.m_sample <= GetNumSamples())	// Or set sample explicitely
+		} else if(params.m_sample > 0 && params.m_sample <= GetNumSamples())
 		{
+			// Or set sample explicitly
 			ModSample &sample = m_SndFile.GetSample(params.m_sample);
 			chn.pCurrentSample = sample.samplev();
 			chn.pModInstrument = nullptr;
@@ -1087,8 +1088,6 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		if(params.m_volume >= 0) chn.nVolume = std::min(params.m_volume, 256);
 
 		// Handle sample looping.
-		// Changed line to fix http://forum.openmpt.org/index.php?topic=1700.0
-		//if ((loopstart + 16 < loopend) && (loopstart >= 0) && (loopend <= (LONG)pchn.nLength))
 		if ((params.m_loopStart + 16 < params.m_loopEnd) && (params.m_loopStart >= 0) && (chn.pModSample != nullptr))
 		{
 			chn.position.Set(params.m_loopStart);
@@ -1169,13 +1168,15 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 {
 	CriticalSection cs;
 
+	const ModInstrument *pIns = nullptr;
+	IMixPlugin *pPlugin = nullptr;
 	if(ins != INSTRUMENTINDEX_INVALID && ins <= m_SndFile.GetNumInstruments() && ModCommand::IsNote(ModCommand::NOTE(note)))
 	{
-		const ModInstrument *pIns = m_SndFile.Instruments[ins];
-		if(pIns && pIns->HasValidMIDIChannel())	// instro sends to a midi chan
+		pIns = m_SndFile.Instruments[ins];
+		if(pIns && pIns->HasValidMIDIChannel())
 		{
-			PLUGINDEX plug = pIns->nMixPlug;      // First try intrument VST
-			if((!plug || plug > MAX_MIXPLUGINS)   // No good plug yet
+			PLUGINDEX plug = pIns->nMixPlug;     // First try instrument VST
+			if((!plug || plug > MAX_MIXPLUGINS)  // No good plug yet
 				&& currentChn < MAX_BASECHANNELS) // Chan OK
 			{
 				plug = m_SndFile.ChnSettings[currentChn].nMixPlugin;// Then try Channel VST
@@ -1183,11 +1184,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 
 			if(plug && plug <= MAX_MIXPLUGINS)
 			{
-				IMixPlugin *pPlugin =  m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
-				if(pPlugin)
-				{
-					pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] | IMixPlugin::MIDI_NOTE_OFF, 0, currentChn);
-				}
+				pPlugin = m_SndFile.m_MixPlugins[plug - 1].pMixPlugin;
 			}
 		}
 	}
@@ -1196,25 +1193,33 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	const CHANNELINDEX startChn = currentChn != CHANNELINDEX_INVALID ? currentChn : m_SndFile.m_nChannels;
 	const CHANNELINDEX endChn = currentChn != CHANNELINDEX_INVALID ? currentChn + 1 : MAX_CHANNELS;
 	ModChannel *pChn = &m_SndFile.m_PlayState.Chn[startChn];
-	for(CHANNELINDEX i = startChn; i < endChn; i++, pChn++)
+	bool found = false;
+	for(CHANNELINDEX i = startChn; i < endChn && !found; i++, pChn++)
 	{
 		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
+		if(pPlugin && pChn->pModInstrument == pIns && (currentChn == CHANNELINDEX_INVALID || currentChn == i) && pChn->lastMidiNoteWithoutArp == pIns->NoteMap[note - NOTE_MIN])
+		{
+			pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] | IMixPlugin::MIDI_NOTE_OFF, 0, currentChn);
+			pChn->lastMidiNoteWithoutArp = NOTE_NONE;
+			found = true;
+		}
 		if((pChn->isPreviewNote || i < m_SndFile.GetNumChannels())
 			&& !pChn->dwFlags[mask]
 			&& (pChn->nLength || pChn->dwFlags[CHN_ADLIB])
 			&& (note == pChn->nNewNote || note == NOTE_NONE))
 		{
 			m_SndFile.KeyOff(*pChn);
-			if (!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP | CHN_PINGPONGFLAG);
-			if (fade) pChn->dwFlags.set(CHN_NOTEFADE);
+			if(!m_SndFile.m_nInstruments) pChn->dwFlags.reset(CHN_LOOP | CHN_PINGPONGFLAG);
+			if(fade) pChn->dwFlags.set(CHN_NOTEFADE);
 			// Instantly stop samples that would otherwise play forever
-			if (pChn->pModInstrument && !pChn->pModInstrument->nFadeOut)
+			if(pChn->pModInstrument && !pChn->pModInstrument->nFadeOut)
 				pChn->nFadeOutVol = 0;
 			if(pChn->dwFlags[CHN_ADLIB] && m_SndFile.m_opl)
 			{
 				m_SndFile.m_opl->NoteOff(i);
 			}
-			if (note) break;
+			if(note)
+				found = true;
 		}
 	}
 
