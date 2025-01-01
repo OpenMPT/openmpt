@@ -552,8 +552,8 @@ void CModTree::RefreshMidiLibrary()
 			tvi.cchTextMax = stmp.GetAllocLength();
 			tvi.iImage = tvi.iSelectedImage = image;
 			GetItem(&tvi);
-			s.ReleaseBuffer();
-			if(s != stmp || tvi.iImage != image)
+			stmp.ReleaseBuffer();
+			if(tvi.iImage != image || s != stmp)
 			{
 				SetItem(m_tiMidi[iMidi], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
 					s, image, image, 0, 0, param);
@@ -567,32 +567,32 @@ void CModTree::RefreshMidiLibrary()
 	// Midi Percussions
 	for(UINT iPerc = 24; iPerc <= 84; iPerc++)
 	{
-		DWORD dwImage = IMAGE_NOSAMPLE;
+		int image = IMAGE_NOSAMPLE;
 		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
 		    + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
 		if(!midiLib[iPerc | 0x80].empty())
 		{
 			s += _T(": ") + midiLib[iPerc | 0x80].GetFilename().ToCString();
-			dwImage = IMAGE_SAMPLES;
+			image = IMAGE_SAMPLES;
 		}
 		if(!m_tiPerc[iPerc])
 		{
 			m_tiPerc[iPerc] = InsertItem(TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM,
-							s, dwImage, dwImage, 0, 0, param, parent, TVI_LAST);
+							s, image, image, 0, 0, param, parent, TVI_LAST);
 		} else
 		{
 			tvi.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM;
 			tvi.hItem = m_tiPerc[iPerc];
 			tvi.pszText = stmp.GetBuffer(s.GetLength() + 1);
 			tvi.cchTextMax = stmp.GetAllocLength();
-			tvi.iImage = tvi.iSelectedImage = dwImage;
+			tvi.iImage = tvi.iSelectedImage = image;
 			GetItem(&tvi);
-			s.ReleaseBuffer();
-			if(s != stmp || tvi.iImage != (int)dwImage)
+			stmp.ReleaseBuffer();
+			if(tvi.iImage != image || s != stmp)
 			{
 				SetItem(m_tiPerc[iPerc], TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE,
-							s, dwImage, dwImage, 0, 0, param);
+							s, image, image, 0, 0, param);
 			}
 		}
 	}
