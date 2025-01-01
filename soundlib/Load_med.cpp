@@ -1121,7 +1121,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			instr.nMidiProgram = sampleHeader.midiPreset;
 		}
 
-		if(instr.nMidiChannel != MidiNoChannel)
+		if(instr.nMidiChannel == MidiNoChannel)
 		{
 			int offset = NOTE_MIDDLEC + (hardwareMixSamples ? 24 : 36);
 			for(auto &note : instr.NoteMap)
