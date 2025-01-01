@@ -533,7 +533,7 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-CString CCtrlSamples::GetToolTipText(UINT uId)
+CString CCtrlSamples::GetToolTipText(UINT uId, HWND) const
 {
 	CString s;
 	if(uId)

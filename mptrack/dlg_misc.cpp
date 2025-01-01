@@ -45,9 +45,6 @@ BEGIN_MESSAGE_MAP(CModTypeDlg, DialogBase)
 	ON_COMMAND(IDC_BUTTON1,					&CModTypeDlg::OnTempoSwing)
 	ON_COMMAND(IDC_BUTTON2,					&CModTypeDlg::OnLegacyPlaybackSettings)
 	ON_COMMAND(IDC_BUTTON3,					&CModTypeDlg::OnDefaultBehaviour)
-
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CModTypeDlg::OnToolTipNotify)
-
 	//}}AFX_MSG_MAP
 
 END_MESSAGE_MAP()
@@ -120,7 +117,6 @@ BOOL CModTypeDlg::OnInitDialog()
 	UpdateDialog();
 
 	m_initialized = true;
-	EnableToolTips(TRUE);
 	return TRUE;
 }
 
@@ -485,18 +481,10 @@ void CModTypeDlg::OnOK()
 }
 
 
-BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
+CString CModTypeDlg::GetToolTipText(UINT id, HWND) const
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
-	UINT_PTR nID = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = ::GetDlgCtrlID((HWND)nID);
-	}
-
-	mpt::tstring text;
-	switch(nID)
+	CString text;
+	switch(id)
 	{
 	case IDC_CHECK1:
 		text = _T("Note slides always slide the same amount, not depending on the sample frequency.");
@@ -535,14 +523,13 @@ BOOL CModTypeDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 				{
 					if(i > 0)
 						text += _T(" / ");
-					text += MPT_TFORMAT("{}%")(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
+					text += MPT_CFORMAT("{}%")(Util::muldivr(m_tempoSwing[i], 100, TempoSwing::Unity));
 				}
 			}
 		}
 	}
 
-	mpt::String::WriteWinBuf(pTTT->szText) = text;
-	return TRUE;
+	return text;
 }
 
 

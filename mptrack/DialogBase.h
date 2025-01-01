@@ -32,11 +32,15 @@ protected:
 	virtual void OnDPIChanged() {}
 	void UpdateDPI();
 
+	virtual CString GetToolTipText(UINT /*id*/, HWND /*hwnd*/) const { return {}; }
+
 	afx_msg LRESULT OnDPIChanged(WPARAM, LPARAM);
+	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 
 	DECLARE_MESSAGE_MAP()
 
 private:
+	CString m_tooltipText;
 	int m_dpi = 0;
 };
 

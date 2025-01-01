@@ -224,7 +224,7 @@ public:
 	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
 	void OnActivatePage(LPARAM) override;
 	void OnDeactivatePage() override;
-	CString GetToolTipText(UINT id) override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 	void OnDPIChanged() override;
 	//}}AFX_VIRTUAL
 protected:

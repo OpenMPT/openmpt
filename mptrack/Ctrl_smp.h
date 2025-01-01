@@ -97,7 +97,7 @@ public:
 	void OnDeactivatePage() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
 	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
-	CString GetToolTipText(UINT uId) override;
+	CString GetToolTipText(UINT uId, HWND hwnd) const override;
 	BOOL PreTranslateMessage(MSG* pMsg) override;
 	void OnDPIChanged() override;
 	//}}AFX_VIRTUAL

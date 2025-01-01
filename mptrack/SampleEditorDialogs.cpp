@@ -653,7 +653,6 @@ BEGIN_MESSAGE_MAP(CSampleXFadeDlg, DialogBase)
 	ON_COMMAND(IDC_RADIO1,  &CSampleXFadeDlg::OnLoopTypeChanged)
 	ON_COMMAND(IDC_RADIO2,  &CSampleXFadeDlg::OnLoopTypeChanged)
 	ON_EN_CHANGE(IDC_EDIT1, &CSampleXFadeDlg::OnFadeLengthChanged)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CSampleXFadeDlg::OnToolTipText)
 END_MESSAGE_MAP()
 
 
@@ -761,35 +760,23 @@ void CSampleXFadeDlg::OnHScroll(UINT, UINT, CScrollBar *sb)
 }
 
 
-BOOL CSampleXFadeDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+CString CSampleXFadeDlg::GetToolTipText(UINT id, HWND) const
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-	UINT_PTR nID = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = (UINT_PTR)::GetDlgCtrlID((HWND)nID);
-	}
-	switch(nID)
+	CString s;
+	switch(id)
 	{
 	case IDC_SLIDER1:
 		{
 			uint32 percent = m_SliderLength.GetPos();
-			wsprintf(pTTT->szText, _T("%u.%03u%% of the loop (%u samples)"), percent / 1000, percent % 1000, PercentToSamples(percent));
+			s.Format(_T("%u.%03u%% of the loop (%u samples)"), percent / 1000, percent % 1000, PercentToSamples(percent));
 		}
 		break;
 	case IDC_SLIDER2:
-		_tcscpy(pTTT->szText, _T("Slide towards constant power for fixing badly looped samples."));
+		s = _T("Slide towards constant power for fixing badly looped samples.");
 		break;
-	default:
-		return FALSE;
 	}
-	*pResult = 0;
-
-	// bring the tooltip window above other popup windows
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0,
-		SWP_NOACTIVATE|SWP_NOSIZE|SWP_NOMOVE|SWP_NOOWNERZORDER);
-	return TRUE;
+	
+	return s;
 }
 
 

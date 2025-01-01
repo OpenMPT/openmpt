@@ -85,9 +85,8 @@ protected:
 	//{{AFX_VIRTUAL(CModCleanupDlg)
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 	//}}AFX_VIRTUAL
-
-	BOOL OnToolTipNotify(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 
 	//{{AFX_MSG(CModCleanupDlg)
 	afx_msg void OnPresetCleanupSong();

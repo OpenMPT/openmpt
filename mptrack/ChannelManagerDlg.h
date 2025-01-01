@@ -100,9 +100,9 @@ protected:
 	BOOL OnInitDialog() override;
 	void OnDPIChanged() override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CChannelManagerDlg)
-	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *);
 	afx_msg void OnApply();
 	afx_msg void OnClose();
 	afx_msg void OnSelectAll();

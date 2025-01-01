@@ -72,8 +72,6 @@ BEGIN_MESSAGE_MAP(CMIDIMappingDialog, ResizableDialog)
 	ON_MESSAGE(WM_MOD_MIDIMSG,		&CMIDIMappingDialog::OnMidiMsg)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINMOVEMAPPING, &CMIDIMappingDialog::OnDeltaposSpinmovemapping)
 	ON_BN_CLICKED(IDC_CHECK_PATRECORD, &CMIDIMappingDialog::OnBnClickedCheckPatRecord)
-
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CMIDIMappingDialog::OnToolTipNotify)
 END_MESSAGE_MAP()
 
 
@@ -163,7 +161,6 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
 
 	CheckDlgButton(IDC_CHECK_MIDILEARN, BST_CHECKED);
-	EnableToolTips(TRUE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 }
@@ -458,18 +455,10 @@ void CMIDIMappingDialog::OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResu
 }
 
 
-BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
+CString CMIDIMappingDialog::GetToolTipText(UINT id, HWND) const
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	const TCHAR *text = _T("");
-	UINT_PTR nID = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = ::GetDlgCtrlID((HWND)nID);
-	}
-
-	switch(nID)
+	switch(id)
 	{
 	case IDC_CHECKCAPTURE:
 		text = _T("The event is not passed to any further MIDI mappings or recording facilities.");
@@ -497,8 +486,7 @@ BOOL CMIDIMappingDialog::OnToolTipNotify(UINT, NMHDR * pNMHDR, LRESULT *)
 		break;
 	}
 
-	mpt::String::WriteWinBuf(pTTT->szText) = mpt::winstring(text);
-	return TRUE;
+	return text;
 }
 
 

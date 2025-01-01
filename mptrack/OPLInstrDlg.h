@@ -41,11 +41,11 @@ protected:
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 	void OnOK() override { }
 	void OnCancel() override { }
 	void OnHScroll(UINT, UINT, CScrollBar *) { ParamsChanged(); }
 	LRESULT OnDragonDropping(WPARAM wParam, LPARAM lParam);
-	BOOL OnToolTip(UINT id, NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 };
 

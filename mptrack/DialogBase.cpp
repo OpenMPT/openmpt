@@ -20,6 +20,7 @@ BEGIN_MESSAGE_MAP(DialogBase, CDialog)
 	//{{AFX_MSG_MAP(DialogBase)
 	ON_MESSAGE(WM_DPICHANGED,             &DialogBase::OnDPIChanged)
 	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &DialogBase::OnDPIChanged)  // Dialog inside dialog
+	ON_NOTIFY_EX(TTN_NEEDTEXT, 0,         &DialogBase::OnToolTipText)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -27,6 +28,7 @@ END_MESSAGE_MAP()
 BOOL DialogBase::OnInitDialog()
 {
 	UpdateDPI();
+	EnableToolTips();
 	return CDialog::OnInitDialog();
 }
 
@@ -97,6 +99,36 @@ INT_PTR DialogBase::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 		}
 	}
 	return nHit;
+}
+
+
+BOOL DialogBase::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+{
+	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	CString s;
+	if(pTTT->uFlags & TTF_IDISHWND)
+		s = GetToolTipText(static_cast<UINT>(::GetDlgCtrlID(reinterpret_cast<HWND>(pNMHDR->idFrom))), reinterpret_cast<HWND>(pNMHDR->idFrom));
+	else
+		s = GetToolTipText(static_cast<UINT>(pNMHDR->idFrom), nullptr);
+
+	if(s.IsEmpty())
+		return FALSE;
+
+	if(s.GetLength() < std::size(pTTT->szText))
+	{
+		mpt::String::WriteCStringBuf(pTTT->szText) = s;
+	} else
+	{
+		m_tooltipText = std::move(s);
+		pTTT->lpszText = const_cast<TCHAR *>(s.GetString());
+	}
+
+	*pResult = 0;
+
+	// bring the tooltip window above other popup windows
+	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
+
+	return TRUE;  // message was handled
 }
 
 

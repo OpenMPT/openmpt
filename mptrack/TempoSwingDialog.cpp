@@ -191,6 +191,7 @@ BOOL CTempoSwingDlg::OnInitDialog()
 		r->valueSlider.SetTicFreq(SliderResolution / 8);
 		r->valueSlider.SetPageSize(SliderResolution / 8);
 		r->valueSlider.SetPos(1);	// Work around https://bugs.winehq.org/show_bug.cgi?id=41909
+		SetWindowLongPtr(r->valueSlider, GWLP_USERDATA, i);
 		r->SetValue(m_tempoSwing[i]);
 		rect.MoveToY(rect.top + m.rowHeight);
 	}
@@ -215,7 +216,6 @@ BOOL CTempoSwingDlg::OnInitDialog()
 
 	windowRect.bottom += displayHeight + m.paddingTop + m.footerHeight;
 	SetWindowPos(nullptr, 0, 0, windowRect.Width(), windowRect.Height(), SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
-	EnableToolTips();
 
 	return TRUE;
 }
@@ -465,15 +465,15 @@ void CTempoSwingDlg::SliderContainer::OnHScroll(UINT nSBCode, UINT nPos, CScroll
 
 BOOL CTempoSwingDlg::SliderContainer::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 {
-	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
-	for(size_t i = 0; i < m_parent.m_controls.size(); i++)
+	TOOLTIPTEXT *pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
+	if(!(pTTT->uFlags & TTF_IDISHWND))
+		return FALSE;
+	CSliderCtrl *slider = dynamic_cast<CSliderCtrl *>(CWnd::FromHandlePermanent(reinterpret_cast<HWND>(pNMHDR->idFrom)));
+	if(slider != nullptr)
 	{
-		if((HWND)pNMHDR->idFrom == m_parent.m_controls[i]->valueSlider.m_hWnd)
-		{
-			int32 val = Util::muldivr(m_parent.m_tempoSwing[i], 100, TempoSwing::Unity) - 100;
-			wsprintf(pTTT->szText, _T("%s%d"), val > 0 ? _T("+") : _T(""), val);
-			return TRUE;
-		}
+		int32 val = Util::muldivr(m_parent.m_tempoSwing[GetWindowLongPtr(*slider, GWLP_USERDATA)], 100, TempoSwing::Unity) - 100;
+		wsprintf(pTTT->szText, _T("%s%d"), val > 0 ? _T("+") : _T(""), val);
+		return TRUE;
 	}
 	return FALSE;
 }

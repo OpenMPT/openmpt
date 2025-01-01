@@ -107,7 +107,6 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 BOOL QuickStartDlg::OnInitDialog()
 {
 	ResizableDialog::OnInitDialog();
-	EnableToolTips();
 	OnDPIChanged();
 	return TRUE;
 }

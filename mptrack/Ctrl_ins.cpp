@@ -1758,13 +1758,13 @@ BOOL CCtrlInstruments::EditSample(UINT nSample)
 }
 
 
-CString CCtrlInstruments::GetToolTipText(UINT uId)
+CString CCtrlInstruments::GetToolTipText(UINT uId, HWND) const
 {
 	CString s;
 	if(uId)
 	{
 		CWnd *wnd = GetDlgItem(uId);
-		bool isEnabled = wnd != nullptr && wnd->IsWindowEnabled() != FALSE;
+		bool isEnabled = wnd == nullptr || wnd->IsWindowEnabled() != FALSE;
 		if(!isEnabled && !m_sndFile.GetNumInstruments())
 		{
 			s = _T("Create a new instrument to enable instrument mode.");
@@ -1789,7 +1789,7 @@ CString CCtrlInstruments::GetToolTipText(UINT uId)
 			// Pitch/Tempo lock
 			if(isEnabled)
 			{
-				const CModSpecifications& specs = m_sndFile.GetModSpecifications();
+				const CModSpecifications &specs = m_sndFile.GetModSpecifications();
 				s = MPT_CFORMAT("Tempo Range: {} - {}")(specs.GetTempoMin().GetInt(), specs.GetTempoMax().GetInt());
 			} else
 			{
@@ -1842,8 +1842,6 @@ CString CCtrlInstruments::GetToolTipText(UINT uId)
 				return s;
 			if(m_sndFile.m_playBehaviour[kMIDICCBugEmulation])
 			{
-				velocityStyle.EnableWindow(FALSE);
-				m_CbnPluginVolumeHandling.EnableWindow(FALSE);
 				s = _T("To enable, clear Plugin volume command bug emulation flag from Song Properties");
 			} else
 			{

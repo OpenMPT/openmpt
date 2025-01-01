@@ -59,9 +59,8 @@ protected:
 	BOOL OnInitDialog() override;
 	void OnDPIChanged() override;
 	void OnOK() override;
+	CString GetToolTipText(UINT id, HWND HWND) const override;
 	//}}AFX_VIRTUAL
-
-	BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 
 	DECLARE_MESSAGE_MAP()
 };

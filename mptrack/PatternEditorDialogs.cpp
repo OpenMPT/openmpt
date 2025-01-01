@@ -1299,7 +1299,6 @@ BEGIN_MESSAGE_MAP(QuickChannelProperties, DialogBase)
 	ON_COMMAND(IDC_BUTTON5, &QuickChannelProperties::OnPickPrevColor)
 	ON_COMMAND(IDC_BUTTON6, &QuickChannelProperties::OnPickNextColor)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&QuickChannelProperties::OnCustomKeyMsg)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &QuickChannelProperties::OnToolTipText)
 END_MESSAGE_MAP()
 
 
@@ -1336,7 +1335,6 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	if(!m_hWnd)
 	{
 		Create(IDD_CHANNELSETTINGS, nullptr);
-		EnableToolTips();
 		m_colorBtn.SubclassDlgItem(IDC_BUTTON4, this);
 		m_colorBtnPrev.SubclassDlgItem(IDC_BUTTON5, this);
 		m_colorBtnNext.SubclassDlgItem(IDC_BUTTON6, this);
@@ -1672,19 +1670,11 @@ LRESULT QuickChannelProperties::OnCustomKeyMsg(WPARAM wParam, LPARAM)
 }
 
 
-BOOL QuickChannelProperties::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+CString QuickChannelProperties::GetToolTipText(UINT id, HWND) const
 {
-	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	UINT_PTR id = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		id = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(id)));
-	}
-
-	mpt::tstring text;
+	CString text;
 	CommandID cmd = kcNull;
-	switch (id)
+	switch(id)
 	{
 	case IDC_EDIT1:
 	case IDC_SLIDER1:
@@ -1710,24 +1700,16 @@ BOOL QuickChannelProperties::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult
 		text = _T("Take color from next channel");
 		cmd = kcChnColorFromNext;
 		break;
-	default:
-		return FALSE;
 	}
 	
 	if(cmd != kcNull)
 	{
 		auto keyText = CMainFrame::GetInputHandler()->m_activeCommandSet->GetKeyTextFromCommand(cmd, 0);
 		if(!keyText.IsEmpty())
-			text += MPT_TFORMAT(" ({})")(keyText);
+			text += MPT_CFORMAT(" ({})")(keyText);
 	}
 
-	mpt::String::WriteWinBuf(pTTT->szText) = text;
-	*pResult = 0;
-
-	// bring the tooltip window above other popup windows
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
-
-	return TRUE;  // message was handled
+	return text;
 }
 
 
@@ -1746,8 +1728,6 @@ BEGIN_MESSAGE_MAP(MetronomeSettingsDlg, DialogBase)
 	ON_CBN_SELCHANGE(IDC_COMBO2, &MetronomeSettingsDlg::OnSampleChanged)
 	ON_EN_KILLFOCUS(IDC_EDIT1,   &MetronomeSettingsDlg::OnSampleChanged)
 	ON_EN_KILLFOCUS(IDC_EDIT2,   &MetronomeSettingsDlg::OnSampleChanged)
-
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &MetronomeSettingsDlg::OnToolTipText)
 END_MESSAGE_MAP()
 
 
@@ -1791,7 +1771,6 @@ void MetronomeSettingsDlg::SetSampleInfo(const mpt::PathString &path, CComboBox 
 BOOL MetronomeSettingsDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
-	EnableToolTips();
 	CheckDlgButton(IDC_CHECK1, TrackerSettings::Instance().metronomeEnabled ? BST_CHECKED : BST_UNCHECKED);
 	m_volumeSlider.SetRange(static_cast<int>(-48 / METRONOME_VOLUME_SCALE), 0, TRUE);
 	m_volumeSlider.SetPos(mpt::saturate_round<int>(TrackerSettings::Instance().metronomeVolume / METRONOME_VOLUME_SCALE));
@@ -1907,16 +1886,8 @@ void MetronomeSettingsDlg::OnBrowseBeat()
 }
 
 
-BOOL MetronomeSettingsDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
+CString MetronomeSettingsDlg::GetToolTipText(UINT id, HWND) const
 {
-	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	UINT_PTR id = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		id = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(id)));
-	}
-
 	CString s;
 	switch(id)
 	{
@@ -1924,17 +1895,9 @@ BOOL MetronomeSettingsDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 		s = (m_volumeSlider.GetPos() >= 0) ? _T("+") : _T("");
 		s.AppendFormat(_T("%.2f dB"), m_volumeSlider.GetPos() * METRONOME_VOLUME_SCALE);
 		break;
-	default:
-		return FALSE;
 	}
 
-	mpt::String::WriteCStringBuf(pTTT->szText) = s;
-	*pResult = 0;
-
-	// bring the tooltip window above other popup windows
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
-
-	return TRUE;  // message was handled
+	return s;
 }
 
 

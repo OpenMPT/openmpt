@@ -695,7 +695,7 @@ LRESULT CCtrlGeneral::OnUpdatePosition(WPARAM, LPARAM lParam)
 }
 
 
-CString CCtrlGeneral::GetToolTipText(UINT uId)
+CString CCtrlGeneral::GetToolTipText(UINT uId, HWND) const
 {
 	CString s;
 	if(uId)

@@ -86,13 +86,10 @@ public:
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual void OnActivatePage(LPARAM) {}
 	virtual void OnDeactivatePage() {}
-	BOOL OnInitDialog() override;
-	virtual CString GetToolTipText(UINT) { return {}; }
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModControlDlg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnUnlockControls(WPARAM, LPARAM) { if (m_nLockCount > 0) m_nLockCount--; return 0; }
-	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

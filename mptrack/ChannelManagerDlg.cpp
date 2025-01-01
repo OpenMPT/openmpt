@@ -50,8 +50,6 @@ BEGIN_MESSAGE_MAP(CChannelManagerDlg, DialogBase)
 	ON_COMMAND(IDC_BUTTON8, &CChannelManagerDlg::OnRestore)
 
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CChannelManagerDlg::OnTabSelchange)
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CChannelManagerDlg::OnToolTipText)
-
 END_MESSAGE_MAP()
 
 CChannelManagerDlg * CChannelManagerDlg::sharedInstance_ = nullptr;
@@ -173,7 +171,6 @@ BOOL CChannelManagerDlg::OnInitDialog()
 
 	m_buttonHeight = HighDPISupport::ScalePixels(CM_BT_HEIGHT, m_hWnd);
 	::ShowWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), SW_HIDE);
-	EnableToolTips();
 
 	ResetState(true, true, true, true);
 
@@ -202,14 +199,13 @@ INT_PTR CChannelManagerDlg::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 }
 
 
-BOOL CChannelManagerDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
+CString CChannelManagerDlg::GetToolTipText(UINT id, HWND hwnd) const
 {
-	TOOLTIPTEXT *pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	if((pTTT->uFlags & TTF_IDISHWND) || !m_ModDoc || pNMHDR->idFrom >= m_states.size())
-		return FALSE;
-
 	CString text;
-	const CHANNELINDEX chn = m_states[pNMHDR->idFrom].sourceChn;
+	if(hwnd || !m_ModDoc || id >= m_states.size())
+		return text;
+
+	const CHANNELINDEX chn = m_states[id].sourceChn;
 	const auto &chnSettings = m_ModDoc->GetSoundFile().ChnSettings[chn];
 	if(!chnSettings.szName.empty())
 		text = MPT_CFORMAT("{}: {}")(chn + 1, mpt::ToWin(m_ModDoc->GetSoundFile().GetCharsetInternal(), chnSettings.szName));
@@ -233,15 +229,14 @@ BOOL CChannelManagerDlg::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 		text += chnSettings.dwFlags[CHN_NOFX] ? _T(" (Plugins Bypassed)") : _T(" (Plugins Enabled)");
 		break;
 	case kReorderRemove:
-		if(m_states[pNMHDR->idFrom].removed)
+		if(m_states[id].removed)
 			text += _T(" (Marked for Removal)");
 		break;
 	case kNumTabs:
 		MPT_ASSERT_NOTREACHED();
 		break;
 	}
-	mpt::String::WriteCStringBuf(pTTT->szText) = text;
-	return TRUE;
+	return text;
 }
 
 

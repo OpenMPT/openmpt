@@ -200,11 +200,12 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+	CString GetToolTipText(UINT id, HWND hwnd) const;
 
 	afx_msg void OnLoopTypeChanged();
 	afx_msg void OnFadeLengthChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
-	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
+
 	DECLARE_MESSAGE_MAP()
 };
 

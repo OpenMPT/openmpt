@@ -61,11 +61,11 @@ protected:
 
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 
 	DECLARE_MESSAGE_MAP()
 
 	afx_msg void OnSelectionChanged(NMHDR *pNMHDR = nullptr, LRESULT *pResult = nullptr);
-	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult);
 	
 	afx_msg void OnBnClickedCheckactive();
 	afx_msg void OnBnClickedCheckCapture();

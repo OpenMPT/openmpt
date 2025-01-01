@@ -51,9 +51,7 @@ static void RestoreLastFocusItem(HWND parent, HWND &lastFocusItem)
 BEGIN_MESSAGE_MAP(CModControlDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
-	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,            &CModControlDlg::OnUnlockControls)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 0xFFFF, &CModControlDlg::OnToolTipText)
+	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS, &CModControlDlg::OnUnlockControls)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -66,14 +64,6 @@ CModControlDlg::CModControlDlg(CModControlView &parent, CModDoc &document) : m_m
 CModControlDlg::~CModControlDlg()
 {
 	MPT_ASSERT(m_hWnd == nullptr);
-}
-
-
-BOOL CModControlDlg::OnInitDialog()
-{
-	DialogBase::OnInitDialog();
-	EnableToolTips(TRUE);
-	return TRUE;
 }
 
 
@@ -155,44 +145,6 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 
 LRESULT CModControlDlg::SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
 void CModControlDlg::UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
-
-
-BOOL CModControlDlg::OnToolTipText(UINT /*nID*/, NMHDR *pNMHDR, LRESULT *pResult)
-{
-	auto pTTT = reinterpret_cast<TOOLTIPTEXT *>(pNMHDR);
-	CString strTipText;
-
-	UINT_PTR nID = pNMHDR->idFrom;
-	if(pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = static_cast<UINT_PTR>(::GetDlgCtrlID(reinterpret_cast<HWND>(nID)));
-	}
-
-	if(nID >= 1000 && nID < 65536)
-	{
-		strTipText = GetToolTipText(static_cast<UINT>(nID));
-	} else
-	{
-		// allow top level routing frame to handle the message
-		if(GetRoutingFrame() != nullptr)
-			return FALSE;
-		if(nID != 0)  // will be zero on a separator
-		{
-			TCHAR szFullText[256] = _T("");
-			AfxLoadString(static_cast<UINT>(nID), szFullText, static_cast<UINT>(std::size(szFullText)));
-			// this is the command id, not the button index
-			AfxExtractSubString(strTipText, szFullText, 1, _T('\n'));
-		}
-	}
-	mpt::String::WriteCStringBuf(pTTT->szText) = strTipText;
-	*pResult = 0;
-
-	// bring the tooltip window above other popup windows
-	::SetWindowPos(pNMHDR->hwndFrom, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
-
-	return TRUE;  // message was handled
-}
 
 
 /////////////////////////////////////////////////////////////////////////////

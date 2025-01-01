@@ -211,9 +211,9 @@ protected:
 	afx_msg void OnPickPrevColor();
 	afx_msg void OnPickNextColor();
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	afx_msg BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 
 	DECLARE_MESSAGE_MAP();
 };
@@ -227,6 +227,7 @@ public:
 protected:
 	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 
 	void SetSampleInfo(const mpt::PathString &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
 	bool GetSampleInfo(Setting<mpt::PathString> &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
@@ -237,7 +238,6 @@ protected:
 	afx_msg void OnSampleChanged();
 	afx_msg void OnBrowseMeasure();
 	afx_msg void OnBrowseBeat();
-	BOOL OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult);
 
 	DECLARE_MESSAGE_MAP();
 

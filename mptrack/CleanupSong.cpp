@@ -100,8 +100,6 @@ BEGIN_MESSAGE_MAP(CModCleanupDlg, DialogBase)
 	ON_COMMAND(IDC_CHK_REMOVE_PLUGINS,			&CModCleanupDlg::OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_RESET_VARIABLES,			&CModCleanupDlg::OnVerifyMutualExclusive)
 	ON_COMMAND(IDC_CHK_UNUSED_CHANNELS,			&CModCleanupDlg::OnVerifyMutualExclusive)
-
-	ON_NOTIFY_EX(TTN_NEEDTEXT, 0, &CModCleanupDlg::OnToolTipNotify)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -127,7 +125,6 @@ BOOL CModCleanupDlg::OnInitDialog()
 	GetDlgItem(m_CleanupIDtoDlgID[kCleanupInstruments])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
 	GetDlgItem(m_CleanupIDtoDlgID[kRemoveAllInstruments])->EnableWindow((sndFile.GetNumInstruments() > 0) ? TRUE : FALSE);
 
-	EnableToolTips(TRUE);
 	return TRUE;
 }
 
@@ -266,18 +263,10 @@ void CModCleanupDlg::OnPresetCompoCleanup()
 }
 
 
-BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
+CString CModCleanupDlg::GetToolTipText(UINT id, HWND) const
 {
-	TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
-	UINT_PTR nID = pNMHDR->idFrom;
-	if (pTTT->uFlags & TTF_IDISHWND)
-	{
-		// idFrom is actually the HWND of the tool
-		nID = ::GetDlgCtrlID((HWND)nID);
-	}
-
-	LPCTSTR lpszText = nullptr;
-	switch(nID)
+	LPCTSTR lpszText = _T("");
+	switch(id)
 	{
 	// patterns
 	case IDC_CHK_CLEANUP_PATTERNS:
@@ -333,12 +322,8 @@ BOOL CModCleanupDlg::OnToolTipNotify(UINT, NMHDR *pNMHDR, LRESULT *)
 	case IDC_CHK_UNUSED_CHANNELS:
 		lpszText = _T("Removes all empty pattern channels.");
 		break;
-	default:
-		lpszText = _T("");
-		break;
 	}
-	pTTT->lpszText = const_cast<LPTSTR>(lpszText);
-	return TRUE;
+	return lpszText;
 }
 
 
