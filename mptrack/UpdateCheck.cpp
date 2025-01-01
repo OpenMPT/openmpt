@@ -1644,6 +1644,8 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	statistics += UL_("\n");
 
 	{
+		statistics += U_("User-Agent: ") + Version::Current().GetOpenMPTVersionString() + UL_("\n");
+		statistics += UL_("\n");
 		statistics += U_("GET ") + settings.apiURL + MPT_UFORMAT("update/{}")(GetChannelName(static_cast<UpdateChannel>(settings.channel))) + UL_("\n");
 		statistics += UL_("\n");
 		std::vector<mpt::ustring> keyAnchors = TrackerSettings::Instance().UpdateSigningKeysRootAnchors;
@@ -1657,6 +1659,8 @@ void CUpdateSetupDlg::OnShowStatisticsData(NMHDR * /*pNMHDR*/, LRESULT * /*pResu
 	if(settings.sendStatistics)
 	{
 		statistics += U_("Statistics:") + UL_("\n");
+		statistics += UL_("\n");
+		statistics += U_("User-Agent: ") + Version::Current().GetOpenMPTVersionString() + UL_("\n");
 		statistics += UL_("\n");
 		if(settings.statisticsUUID.IsValid())
 		{
