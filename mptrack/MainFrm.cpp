@@ -2245,7 +2245,7 @@ void CMainFrame::OpenMenuItemFile(const UINT nId, const bool isTemplateFile)
 	{
 		MPT_ASSERT(nId == UINT(isTemplateFile ? ID_FILE_OPENTEMPLATE_LASTINRANGE : ID_EXAMPLE_MODULES_LASTINRANGE));
 		FileDialog::PathList files;
-		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetConfigPath() + P_("TemplateModules") : theApp.GetInstallPath() + P_("ExampleSongs"));
+		theApp.OpenModulesDialog(files, isTemplateFile ? theApp.GetUserTemplatesPath() : theApp.GetExampleSongsPath());
 		for(const auto &file : files)
 		{
 			theApp.OpenDocumentFile(file.ToCString());

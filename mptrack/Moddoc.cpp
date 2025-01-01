@@ -3114,7 +3114,7 @@ void CModDoc::OnSaveCopy()
 void CModDoc::OnSaveTemplateModule()
 {
 	// Create template folder if doesn't exist already.
-	const mpt::PathString templateFolder = TrackerSettings::Instance().PathUserTemplates.GetDefaultDir();
+	const mpt::PathString templateFolder = theApp.GetUserTemplatesPath();
 	if (!mpt::native_fs{}.is_directory(templateFolder))
 	{
 		if (!CreateDirectory(templateFolder.AsNative().c_str(), nullptr))
