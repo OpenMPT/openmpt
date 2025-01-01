@@ -36,6 +36,7 @@ class QuickStartDlg;
 struct UpdateCheckResult;
 struct UpdateHint;
 struct MODPLUGDIB;
+enum class MidiSetup: int32;
 enum class MainToolBarItem : uint8;
 enum SoundDeviceStopMode : int;
 namespace SoundDevice {
@@ -357,7 +358,7 @@ public:
 	void SetupMiscOptions();
 	void SetupPlayer();
 
-	void SetupMidi(DWORD d, UINT n);
+	void SetupMidi(FlagSet<MidiSetup> d, UINT n);
 	HWND GetFollowSong() const;
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : nullptr; }
 	void ResetNotificationBuffer();

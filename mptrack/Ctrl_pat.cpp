@@ -171,7 +171,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
 	m_ToolBar.AddButton(ID_PATTERNDETAIL_DROPDOWN, TIMAGE_PATTERN_DETAIL, TBSTYLE_BUTTON | TBSTYLE_DROPDOWN);
 	m_ToolBar.AddButton(ID_SEPARATOR, 0, TBSTYLE_SEP);
-	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
+	m_ToolBar.AddButton(ID_OVERFLOWPASTE, TIMAGE_PATTERN_OVERFLOWPASTE, TBSTYLE_CHECK, ((TrackerSettings::Instance().patternSetup & PatternSetup::OverflowPaste) ? TBSTATE_CHECKED : 0) | TBSTATE_ENABLED);
 
 	m_EditPatName.SetLimitText(MAX_PATTERNNAME - 1);
 	// Spin controls
@@ -182,7 +182,7 @@ BOOL CCtrlPatterns::OnInitDialog()
 	m_SpinInstrument.SetPos(0);
 
 	SetDlgItemInt(IDC_EDIT_SPACING, TrackerSettings::Instance().gnPatternSpacing);
-	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FOLLOWSONGOFF) ? BST_UNCHECKED : BST_CHECKED);
+	CheckDlgButton(IDC_PATTERN_FOLLOWSONG, (TrackerSettings::Instance().patternSetup & PatternSetup::FollowSongOffByDefault) ? BST_UNCHECKED : BST_CHECKED);
 
 	m_SpinSequence.SetRange32(1, m_sndFile.Order.GetNumSequences());
 	m_SpinSequence.SetPos(m_sndFile.Order.GetCurrentSequenceIndex() + 1);
@@ -544,7 +544,7 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case CTRLMSG_PAT_UPDATE_TOOLBAR:
-		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) ? TRUE : FALSE);
+		m_ToolBar.CheckButton(ID_OVERFLOWPASTE, (TrackerSettings::Instance().patternSetup & PatternSetup::OverflowPaste) ? TRUE : FALSE);
 		m_ToolBar.CheckButton(IDC_METRONOME, TrackerSettings::Instance().metronomeEnabled ? TRUE : FALSE);
 		break;
 
@@ -1105,7 +1105,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 
 void CCtrlPatterns::OnToggleOverflowPaste()
 {
-	TrackerSettings::Instance().m_dwPatternSetup ^= PATTERN_OVERFLOWPASTE;
+	TrackerSettings::Instance().patternSetup ^= PatternSetup::OverflowPaste;
 	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
 	SwitchToView();
 }

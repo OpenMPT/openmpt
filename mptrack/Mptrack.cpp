@@ -243,7 +243,7 @@ struct AllSoundDeviceComponents
 
 void CTrackApp::OnFileCloseAll()
 {
-	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
+	if(!(TrackerSettings::Instance().patternSetup & PatternSetup::NoCustomCloseDialog))
 	{
 		// Show modified documents window
 		CloseMainDialog dlg;

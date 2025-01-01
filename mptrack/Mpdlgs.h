@@ -200,11 +200,11 @@ protected:
 class CMidiSetupDlg: public CPropertyPage
 {
 public:
-	DWORD m_dwMidiSetup;
+	FlagSet<MidiSetup> m_midiSetup;
 	UINT m_nMidiDevice;
 
 public:
-	CMidiSetupDlg(DWORD flags, UINT device);
+	CMidiSetupDlg(FlagSet<MidiSetup> flags, UINT device);
 
 protected:
 	BOOL OnInitDialog() override;

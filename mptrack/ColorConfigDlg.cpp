@@ -48,8 +48,8 @@ static constexpr struct ColorDescriptions
 {
 	const TCHAR *name;
 	int previewImage;
-	ModColor colorIndex[3];
-	const TCHAR *descText[3];
+	std::array<ModColor, 3> colorIndex;
+	std::array<const TCHAR *, 3> descText;
 } colorDefs[] =
 {
 	{ _T("Pattern Editor"),      0, { MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT }, { _T("Background:"), _T("Foreground:"), _T("Highlighted:") } },
@@ -182,9 +182,10 @@ BOOL COptionsColors::OnInitDialog()
 		0, 0,
 		HighDPISupport::ScalePixels(PREVIEWBMP_WIDTH * 2, m_hWnd) + 2, HighDPISupport::ScalePixels(PREVIEWBMP_HEIGHT * 2, m_hWnd) + 2,
 		SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_STDHIGHLIGHT) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_EFFECTHILIGHT) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_2NDHIGHLIGHT) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
+	const FlagSet<PatternSetup> patternSetup = TrackerSettings::Instance().patternSetup;
+	if(patternSetup[PatternSetup::HighlightMeasures]) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
+	if(patternSetup[PatternSetup::EffectHighlight]) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+	if(patternSetup[PatternSetup::HighlightBeats]) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
 	CheckDlgButton(IDC_CHECK3, TrackerSettings::Instance().patternIgnoreSongTimeSignature ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK5, TrackerSettings::Instance().rememberSongWindows ? BST_CHECKED : BST_UNCHECKED);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, TrackerSettings::Instance().accidentalFlats ? IDC_RADIO2 : IDC_RADIO1);
@@ -269,10 +270,11 @@ void COptionsColors::OnOK()
 		}
 	}
 
-	TrackerSettings::Instance().m_dwPatternSetup &= ~(PATTERN_STDHIGHLIGHT|PATTERN_2NDHIGHLIGHT|PATTERN_EFFECTHILIGHT);
-	if(IsDlgButtonChecked(IDC_CHECK1)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_STDHIGHLIGHT;
-	if(IsDlgButtonChecked(IDC_CHECK2)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_EFFECTHILIGHT;
-	if(IsDlgButtonChecked(IDC_CHECK4)) TrackerSettings::Instance().m_dwPatternSetup |= PATTERN_2NDHIGHLIGHT;
+	FlagSet<PatternSetup> patternSetup = TrackerSettings::Instance().patternSetup;
+	patternSetup.set(PatternSetup::HighlightMeasures, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	patternSetup.set(PatternSetup::EffectHighlight, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	patternSetup.set(PatternSetup::HighlightBeats, IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED);
+	TrackerSettings::Instance().patternSetup = patternSetup;
 	TrackerSettings::Instance().patternIgnoreSongTimeSignature = IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED;
 	TrackerSettings::Instance().rememberSongWindows = IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED;
 	TrackerSettings::Instance().accidentalFlats = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;

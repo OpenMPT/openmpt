@@ -709,7 +709,7 @@ void COrderList::UpdateInfoText()
 
 	const ORDERINDEX length = order.GetLengthTailTrimmed();
 	CString s;
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY)
+	if(TrackerSettings::Instance().patternSetup & PatternSetup::RowAndOrderNumbersHex)
 		s.Format(_T("Position %02Xh of %02Xh"), m_nScrollPos, length);
 	else
 		s.Format(_T("Position %u of %u (%02Xh of %02Xh)"), m_nScrollPos, length, m_nScrollPos, length);

@@ -36,16 +36,17 @@ HMIDIIN CMainFrame::shMidiIn = nullptr;
 int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, uint8 midiChannelVolume)
 {
 	int nVol = MIDIEvents::GetDataByte2FromEvent(dwParam1);
-	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_RECORDVELOCITY)
+	const FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
+	if(midiSetup[MidiSetup::RecordVelocity])
 	{
-		if(!(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL))
+		if(!midiSetup[MidiSetup::ApplyChannelVolumeToVelocity])
 			midiChannelVolume = 127;
 		nVol = Util::muldivr_unsigned(CDLSBank::DLSMidiVolumeToLinear(nVol), TrackerSettings::Instance().midiVelocityAmp * midiChannelVolume, 100 * 127 * 256);
 		Limit(nVol, 1, 256);
 	} else
 	{
 		// Case: No velocity record.
-		if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL)
+		if(midiSetup[MidiSetup::ApplyChannelVolumeToVelocity])
 			nVol = (midiChannelVolume + 1) * 2;
 		else //Use default volume
 			nVol = -1;
@@ -57,8 +58,9 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, uint8 midiChan
 
 void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
 {
-	if ( (TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD)
-		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9) )
+	const FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
+	if(midiSetup[MidiSetup::TransposeKeyboard]
+		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9))
 	{
 		int nTranspose = rMainFrm.GetBaseOctave() - 4;
 		if (nTranspose)

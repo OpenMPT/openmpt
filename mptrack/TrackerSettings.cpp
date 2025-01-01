@@ -93,17 +93,6 @@ MODTYPE SettingsStringToModType(const mpt::ustring &str)
 }
 
 
-static uint32 GetDefaultPatternSetup()
-{
-	return PATTERN_PLAYNEWNOTE | PATTERN_EFFECTHILIGHT
-		| PATTERN_CENTERROW | PATTERN_DRAGNDROPEDIT
-		| PATTERN_FLATBUTTONS | PATTERN_NOEXTRALOUD | PATTERN_2NDHIGHLIGHT
-		| PATTERN_STDHIGHLIGHT | PATTERN_SHOWPREVIOUS | PATTERN_CONTSCROLL
-		| PATTERN_SYNCMUTE | PATTERN_AUTODELAY | PATTERN_NOTEFADE
-		| PATTERN_SHOWDEFAULTVOLUME | PATTERN_LIVEUPDATETREE | PATTERN_SYNCSAMPLEPOS;
-}
-
-
 void SampleUndoBufferSize::CalculateSize()
 {
 	if(sizePercent < 0)
@@ -257,7 +246,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// MIDI Settings
 	, m_nMidiDevice(conf, UL_("MIDI Settings"), UL_("MidiDevice"), 0)
 	, midiDeviceName(conf, UL_("MIDI Settings"), UL_("MidiDeviceName"), _T(""))
-	, m_dwMidiSetup(conf, UL_("MIDI Settings"), UL_("MidiSetup"), MIDISETUP_RECORDVELOCITY | MIDISETUP_RECORDNOTEOFF | MIDISETUP_TRANSPOSEKEYBOARD | MIDISETUP_MIDITOPLUG)
+	, midiSetup(conf, UL_("MIDI Settings"), UL_("MidiSetup"), MidiSetup::Default)
 	, aftertouchBehaviour(conf, UL_("MIDI Settings"), UL_("AftertouchBehaviour"), atDoNotRecord)
 	, midiVelocityAmp(conf, UL_("MIDI Settings"), UL_("MidiVelocityAmp"), 100)
 	, midiIgnoreCCs(conf, UL_("MIDI Settings"), UL_("IgnoredCCs"), std::bitset<128>())
@@ -273,7 +262,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, patternNoEditPopup(conf, UL_("Pattern Editor"), UL_("NoEditPopup"), false)
 	, patternStepCommands(conf, UL_("Pattern Editor"), UL_("EditStepAppliesToCommands"), false)
 	, patternVolColHex(conf, UL_("Pattern Editor"), UL_("VolumeColumnInHex"), false)
-	, m_dwPatternSetup(conf, UL_("Pattern Editor"), UL_("PatternSetup"), GetDefaultPatternSetup())
+	, patternSetup(conf, UL_("Pattern Editor"), UL_("PatternSetup"), PatternSetup::Default)
 	, m_nRowHighlightMeasures(conf, UL_("Pattern Editor"), UL_("RowSpacing"), 16)
 	, m_nRowHighlightBeats(conf, UL_("Pattern Editor"), UL_("RowSpacing2"), 4)
 	, patternIgnoreSongTimeSignature(conf, UL_("Pattern Editor"), UL_("IgnoreSongTimeSignature"), false)
@@ -639,59 +628,60 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	}
 
 	// MIDI Settings
-	if((m_dwMidiSetup & 0x40) != 0 && storedVersion < MPT_V("1.20.00.86"))
+	static constexpr MidiSetup LegacyFlagAmplify2x = static_cast<MidiSetup>(0x40);
+	if(midiSetup.Get()[LegacyFlagAmplify2x] && storedVersion < MPT_V("1.20.00.86"))
 	{
 		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
 		midiVelocityAmp = 200;
-		m_dwMidiSetup &= ~0x40;
+		midiSetup &= ~LegacyFlagAmplify2x;
 	}
 
 	// Pattern Editor
 	if(storedVersion < MPT_V("1.17.02.50"))
 	{
-		m_dwPatternSetup |= PATTERN_NOTEFADE;
+		patternSetup |= PatternSetup::NoteFadeOnKeyUp;
 	}
 	if(storedVersion < MPT_V("1.17.03.01"))
 	{
-		m_dwPatternSetup |= PATTERN_RESETCHANNELS;
+		patternSetup |= PatternSetup::ResetChannelsOnLoop;
 	}
 	if(storedVersion < MPT_V("1.19.00.07"))
 	{
-		m_dwPatternSetup &= ~0x800;					// this was previously deprecated and is now used for something else
+		patternSetup &= ~PatternSetup(0x800);  // this was previously deprecated and is now used for something else
 	}
 	if(storedVersion < MPT_V("1.20.00.04"))
 	{
-		m_dwPatternSetup &= ~0x200000;				// ditto
+		patternSetup &= ~PatternSetup(0x200000);  // ditto
 	}
 	if(storedVersion < MPT_V("1.20.00.07"))
 	{
-		m_dwPatternSetup &= ~0x400000;				// ditto
+		patternSetup &= ~PatternSetup(0x400000);  // ditto
 	}
 	if(storedVersion < MPT_V("1.20.00.39"))
 	{
-		m_dwPatternSetup &= ~0x10000000;			// ditto
+		patternSetup &= ~PatternSetup(0x10000000);  // ditto
 	}
 	if(storedVersion < MPT_V("1.24.01.04"))
 	{
-		commentsFont = FontSetting(UL_("Courier New"), (m_dwPatternSetup & 0x02) ? 120 : 90);
-		patternFont = FontSetting((m_dwPatternSetup & 0x08) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
-		m_dwPatternSetup &= ~(0x08 | 0x02);
+		commentsFont = FontSetting(UL_("Courier New"), (patternSetup & PatternSetup(0x02)) ? 120 : 90);
+		patternFont = FontSetting((patternSetup & PatternSetup(0x08)) ? PATTERNFONT_SMALL : PATTERNFONT_LARGE, 0);
+		patternSetup &= ~PatternSetup(0x08 | 0x02);
 	}
 	if(storedVersion < MPT_V("1.25.00.08") && glGeneralWindowHeight < 222)
 	{
 		glGeneralWindowHeight += 44;
 	}
-	if(storedVersion < MPT_V("1.25.00.16") && (m_dwPatternSetup & 0x100000))
+	if(storedVersion < MPT_V("1.25.00.16") && (patternSetup & PatternSetup(0x100000)))
 	{
 		// Move MIDI recording to MIDI setup
-		m_dwPatternSetup &= ~0x100000;
-		m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
+		patternSetup &= ~PatternSetup(0x100000);
+		midiSetup |= MidiSetup::EnableMidiInOnStartup;
 	}
 	if(storedVersion < MPT_V("1.27.00.51"))
 	{
 		// Moving option out of pattern config
-		CreateBackupFiles = (m_dwPatternSetup & 0x200) != 0;
-		m_dwPatternSetup &= ~0x200;
+		CreateBackupFiles = (patternSetup & PatternSetup(0x200));
+		patternSetup &= ~PatternSetup(0x200);
 	}
 
 	// Export

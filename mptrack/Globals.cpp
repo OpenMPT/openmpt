@@ -851,13 +851,13 @@ void CModControlBar::UpdateStyle()
 {
 	if (m_hWnd)
 	{
-		LONG lStyleOld = GetWindowLong(m_hWnd, GWL_STYLE);
-		if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS)
-			lStyleOld |= TBSTYLE_FLAT;
+		LONG style = GetWindowLong(m_hWnd, GWL_STYLE);
+		if(TrackerSettings::Instance().patternSetup & PatternSetup::FlatToolbarButtons)
+			style |= TBSTYLE_FLAT;
 		else
-			lStyleOld &= ~TBSTYLE_FLAT;
-		lStyleOld |= CCS_NORESIZE | CCS_NOPARENTALIGN | CCS_NODIVIDER | TBSTYLE_TOOLTIPS;
-		SetWindowLong(m_hWnd, GWL_STYLE, lStyleOld);
+			style &= ~TBSTYLE_FLAT;
+		style |= CCS_NORESIZE | CCS_NOPARENTALIGN | CCS_NODIVIDER | TBSTYLE_TOOLTIPS;
+		SetWindowLong(m_hWnd, GWL_STYLE, style);
 		Invalidate();
 	}
 }

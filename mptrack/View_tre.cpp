@@ -213,7 +213,7 @@ void CModTree::Init()
 		dwRemove |= (TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
 		dwAdd &= ~(TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
 	}
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if(TrackerSettings::Instance().patternSetup & PatternSetup::SingleClickToExpand)
 	{
 		dwRemove &= ~TVS_SINGLEEXPAND;
 		dwAdd |= TVS_SINGLEEXPAND;
@@ -434,7 +434,7 @@ void CModTree::OnOptionsChanged()
 {
 	DWORD dwRemove = TVS_SINGLEEXPAND, dwAdd = 0;
 	m_dwStatus &= ~TREESTATUS_SINGLEEXPAND;
-	if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SINGLEEXPAND)
+	if(TrackerSettings::Instance().patternSetup & PatternSetup::SingleClickToExpand)
 	{
 		dwRemove = 0;
 		dwAdd = TVS_SINGLEEXPAND;
@@ -1006,14 +1006,15 @@ void CModTree::UpdateView(ModTreeDocInfo &info, UpdateHint hint)
 				if(sndFile.Order(seq)[iOrd] < sndFile.Patterns.Size())
 				{
 					patName = mpt::ToCString(sndFile.GetCharsetInternal(), sndFile.Patterns[sndFile.Order(seq)[iOrd]].GetName());
+					const bool hexOrders = (TrackerSettings::Instance().patternSetup & PatternSetup::RowAndOrderNumbersHex);
 					if(!patName.IsEmpty())
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] %u: ") : _T("[%02u] %u: "),
+						wsprintf(s, hexOrders ? _T("[%02Xh] %u: ") : _T("[%02u] %u: "),
 							iOrd, sndFile.Order(seq)[iOrd]);
 						_tcscat(s, patName.GetString());
 					} else
 					{
-						wsprintf(s, (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_HEXDISPLAY) ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
+						wsprintf(s, hexOrders ? _T("[%02Xh] Pattern %u") : _T("[%02u] Pattern %u"),
 							iOrd, sndFile.Order(seq)[iOrd]);
 					}
 				} else
@@ -2810,7 +2811,7 @@ void CModTree::UpdatePlayPos(CModDoc &modDoc, Notification *pNotify)
 
 	// Update sample / instrument playing status icons (will only detect instruments with samples, though)
 
-	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_LIVEUPDATETREE) == 0)
+	if(!(TrackerSettings::Instance().patternSetup & PatternSetup::LiveUpdateTreeView))
 		return;
 	// TODO: Is there a way to find out if the treeview is actually visible?
 	/*static int nUpdateCount = 0;

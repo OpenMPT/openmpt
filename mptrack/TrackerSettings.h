@@ -98,53 +98,70 @@ enum ModColor : uint8
 // Pattern Setup (contains also non-pattern related settings)
 // Feel free to replace the deprecated flags by new flags, but be sure to
 // update TrackerSettings::TrackerSettings() as well.
-#define PATTERN_PLAYNEWNOTE			0x01		// play new notes while recording
-#define PATTERN_SMOOTHSCROLL		0x02		// scroll tick by tick, not row by row
-#define PATTERN_STDHIGHLIGHT		0x04		// enable primary highlight (measures)
-#define PATTERN_NOFOLLOWONCLICK		0x08		// disable song follow when clicking into pattern
-#define PATTERN_CENTERROW			0x10		// always center active row
-#define PATTERN_WRAP				0x20		// wrap around cursor in editor
-#define PATTERN_EFFECTHILIGHT		0x40		// effect syntax highlighting
-#define PATTERN_HEXDISPLAY			0x80		// display row number in hex
-#define PATTERN_FLATBUTTONS			0x100		// flat toolbar buttons
-#define PATTERN_PLAYNAVIGATEROW		0x200		// play whole row when navigating
-#define PATTERN_SINGLEEXPAND		0x400		// single click to expand tree
-#define PATTERN_PLAYEDITROW			0x800		// play all notes on the current row while entering notes
-#define PATTERN_NOEXTRALOUD			0x1000		// no loud samples in sample editor
-#define PATTERN_DRAGNDROPEDIT		0x2000		// enable drag and drop editing
-#define PATTERN_2NDHIGHLIGHT		0x4000		// activate secondary highlight (beats)
-#define PATTERN_MUTECHNMODE			0x8000		// ignore muted channels
-#define PATTERN_SHOWPREVIOUS		0x10000		// show prev/next patterns
-#define PATTERN_CONTSCROLL			0x20000		// continous pattern scrolling
-#define PATTERN_KBDNOTEOFF			0x40000		// Record note-off events
-#define PATTERN_FOLLOWSONGOFF		0x80000		// follow song off by default
-#define PATTERN_PLAYTRANSPOSE		0x100000	// Preview note transposition
-#define PATTERN_NOCLOSEDIALOG		0x200000	// Don't use OpenMPT's custom close dialog with a list of saved files when closing the main window
-#define PATTERN_DBLCLICKSELECT		0x400000	// Double-clicking pattern selects whole channel
-#define PATTERN_OLDCTXMENUSTYLE		0x800000	// Hide pattern context menu entries instead of greying them out.
-#define PATTERN_SYNCMUTE			0x1000000	// maintain sample sync on mute
-#define PATTERN_AUTODELAY			0x2000000	// automatically insert delay commands in pattern when entering notes
-#define PATTERN_NOTEFADE			0x4000000	// alt. note fade behaviour when entering notes
-#define PATTERN_OVERFLOWPASTE		0x8000000	// continue paste in the next pattern instead of cutting off
-#define PATTERN_SHOWDEFAULTVOLUME	0x10000000	// if there is no volume command next to note+instr, display the sample's default volume.
-#define PATTERN_RESETCHANNELS		0x20000000	// reset channels when looping
-#define PATTERN_LIVEUPDATETREE		0x40000000	// update active sample / instr icons in treeview
-#define PATTERN_SYNCSAMPLEPOS		0x80000000	// sync sample positions when seeking
+enum class PatternSetup : uint32
+{
+	PlayNewNotesWhileRecording =       0x01,  // play new notes while recording
+	SmoothScrolling            =       0x02,  // scroll tick by tick, not row by row
+	HighlightMeasures          =       0x04,  // enable primary highlight (measures)
+	DisableFollowOnClick       =       0x08,  // disable song follow when clicking into pattern
+	CenterActiveRow            =       0x10,  // always center active row
+	CursorWrap                 =       0x20,  // wrap around cursor in editor
+	EffectHighlight            =       0x40,  // effect syntax highlighting
+	RowAndOrderNumbersHex      =       0x80,  // display row number and order in hex
+	FlatToolbarButtons         =      0x100,  // flat toolbar buttons
+	PlayRowOnNavigate          =      0x200,  // play whole row when navigating
+	SingleClickToExpand        =      0x400,  // single click to expand tree
+	PlayRowOnNoteEntry         =      0x800,  // play all notes on the current row while entering notes
+	NoLoudSamplePreview        =     0x1000,  // no loud samples in sample editor
+	DragNDropEdit              =     0x2000,  // enable drag and drop editing
+	HighlightBeats             =     0x4000,  // activate secondary highlight (beats)
+	IgnoreMutedChannels        =     0x8000,  // ignore muted channels
+	ShowPrevNextPattern        =    0x10000,  // show prev/next patterns
+	ContinuousScrolling        =    0x20000,  // continous pattern scrolling
+	RecordNoteOff              =    0x40000,  // Record note-off events
+	FollowSongOffByDefault     =    0x80000,  // follow song off by default
+	PreviewNoteTransposition   =   0x100000,  // Preview note transposition
+	NoCustomCloseDialog        =   0x200000,  // Don't use OpenMPT's custom close dialog with a list of saved files when closing the main window
+	DblClickSelectsChannel     =   0x400000,  // Double-clicking pattern selects whole channel
+	HideUnavailableMenuEntries =   0x800000,  // Hide pattern context menu entries instead of greying them out.
+	SyncMute                   =  0x1000000,  // maintain sample sync on mute
+	AutoDelayCommands          =  0x2000000,  // automatically insert delay commands in pattern when entering notes
+	NoteFadeOnKeyUp            =  0x4000000,  // alt. note fade behaviour when entering notes
+	OverflowPaste              =  0x8000000,  // continue paste in the next pattern instead of cutting off
+	ShowDefaultVolume          = 0x10000000,  // if there is no volume command next to note+instr, display the sample's default volume.
+	ResetChannelsOnLoop        = 0x20000000,  // reset channels when looping
+	LiveUpdateTreeView         = 0x40000000,  // update active sample / instr icons in treeview
+	SampleSyncOnSeek           = 0x80000000,  // sync sample positions when seeking
+
+	Default = PlayNewNotesWhileRecording | EffectHighlight
+			| CenterActiveRow | DragNDropEdit
+			| FlatToolbarButtons | NoLoudSamplePreview | HighlightBeats
+			| HighlightMeasures | ShowPrevNextPattern | ContinuousScrolling
+			| SyncMute | AutoDelayCommands | NoteFadeOnKeyUp
+			| ShowDefaultVolume | LiveUpdateTreeView | SampleSyncOnSeek
+};
+DECLARE_FLAGSET(PatternSetup)
 
 #define PATTERNFONT_SMALL UL_("@1")
 #define PATTERNFONT_LARGE UL_("@2")
 
 // MIDI Setup
-#define MIDISETUP_RECORDVELOCITY			0x01	// Record MIDI velocity
-#define MIDISETUP_TRANSPOSEKEYBOARD			0x02	// Apply transpose value to MIDI Notes
-#define MIDISETUP_MIDITOPLUG				0x04	// Pass MIDI messages to plugins
-#define MIDISETUP_MIDIVOL_TO_NOTEVOL		0x08	// Combine MIDI volume to note velocity
-#define MIDISETUP_RECORDNOTEOFF				0x10	// Record MIDI Note Off to pattern
-#define MIDISETUP_RESPONDTOPLAYCONTROLMSGS	0x20	// Respond to Restart/Continue/Stop MIDI commands
-#define MIDISETUP_MIDIMACROCONTROL			0x80	// Record MIDI controller changes a MIDI macro changes in pattern
-#define MIDISETUP_PLAYPATTERNONMIDIIN		0x100	// Play pattern if MIDI Note is received and playback is paused
-#define MIDISETUP_ENABLE_RECORD_DEFAULT		0x200	// Enable MIDI recording by default
-#define MIDISETUP_MIDIMACROPITCHBEND		0x400	// Record MIDI pitch bend messages a MIDI macro changes in pattern
+enum class MidiSetup : int32
+{
+	RecordVelocity               =  0x01,  // Record MIDI velocity
+	TransposeKeyboard            =  0x02,  // Apply transpose value to MIDI Notes
+	SendMidiToPlugins            =  0x04,  // Pass MIDI messages to plugins
+	ApplyChannelVolumeToVelocity =  0x08,  // Combine MIDI volume to note velocity
+	RecordNoteOff                =  0x10,  // Record MIDI Note Off to pattern
+	RespondToPlayControl         =  0x20,  // Respond to Restart/Continue/Stop MIDI commands
+	RecordCCsAsMacros            =  0x80,  // Record MIDI controller changes a MIDI macro changes in pattern
+	PlayPatternOnMidiNote        = 0x100,  // Play pattern if MIDI Note is received and playback is paused
+	EnableMidiInOnStartup        = 0x200,  // Enable MIDI recording by default
+	RecordPitchBend              = 0x400,  // Record MIDI pitch bend messages a MIDI macro changes in pattern
+
+	Default = RecordVelocity | RecordNoteOff | TransposeKeyboard | SendMidiToPlugins
+};
+DECLARE_FLAGSET(MidiSetup)
 
 
 #ifndef NO_EQ
@@ -332,6 +349,12 @@ template<> inline DefaultChannelColors FromSettingValue(const SettingValue& val)
 
 template<> inline SettingValue ToSettingValue(const DPIAwarenessMode &val) { return SettingValue(int32(val)); }
 template<> inline DPIAwarenessMode FromSettingValue(const SettingValue &val) { return DPIAwarenessMode(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const FlagSet<PatternSetup>& val) { return SettingValue(int32(val.GetRaw())); }
+template<> inline FlagSet<PatternSetup> FromSettingValue(const SettingValue& val) { return PatternSetup(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const FlagSet<MidiSetup> &val) { return SettingValue(int32(val.GetRaw())); }
+template<> inline FlagSet<MidiSetup> FromSettingValue(const SettingValue &val) { return MidiSetup(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const MODTYPE &val) { return SettingValue(SettingsModTypeToString(val), "MODTYPE"); }
 template<> inline MODTYPE FromSettingValue(const SettingValue &val) { ASSERT(val.GetTypeTag() == "MODTYPE"); return SettingsStringToModType(val.as<mpt::ustring>()); }
@@ -801,7 +824,7 @@ public:
 	// FIXME: MIDI recording is currently done in its own callback/thread and
 	// accesses settings framework from in there. Work-around the ASSERTs for
 	// now by using cached settings.
-	CachedSetting<uint32> m_dwMidiSetup;
+	CachedSetting<FlagSet<MidiSetup>> midiSetup;
 	CachedSetting<RecordAftertouchOptions> aftertouchBehaviour;
 	CachedSetting<uint16> midiVelocityAmp;
 	CachedSetting<std::bitset<128> > midiIgnoreCCs;
@@ -820,7 +843,7 @@ public:
 	CachedSetting<bool> patternNoEditPopup;
 	CachedSetting<bool> patternStepCommands;
 	CachedSetting<bool> patternVolColHex;
-	CachedSetting<uint32> m_dwPatternSetup;
+	CachedSetting<FlagSet<PatternSetup>> patternSetup;
 	CachedSetting<uint32> m_nRowHighlightMeasures; // primary (measures) and secondary (beats) highlight
 	CachedSetting<uint32> m_nRowHighlightBeats;	// primary (measures) and secondary (beats) highlight
 	CachedSetting<bool> patternIgnoreSongTimeSignature;

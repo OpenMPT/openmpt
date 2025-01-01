@@ -1246,6 +1246,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 	COLORREF crFc = GetSysColor(COLOR_3DFACE);
 	COLORREF c1, c2;
 
+	const bool flat = (TrackerSettings::Instance().patternSetup & PatternSetup::FlatToolbarButtons);
 	if(GetNcButtonRect(nBtn, rect))
 	{
 		DWORD dwStyle = m_NcButtonState[nBtn];
@@ -1253,7 +1254,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		int xofs = 0, yofs = 0, nImage = 0;
 
 		c1 = c2 = c3 = c4 = crFc;
-		if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		if(!flat)
 		{
 			c1 = c3 = crHi;
 			c2 = crDk;
@@ -1263,13 +1264,13 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 		{
 			c1 = crDk;
 			c2 = crHi;
-			if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+			if(!flat)
 			{
 				c4 = crHi;
 				c3 = (dwStyle & NCBTNS_PUSHED) ? RGB(0, 0, 0) : crDk;
 			}
 			xofs = yofs = 1;
-		} else if((dwStyle & NCBTNS_MOUSEOVER) && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS))
+		} else if((dwStyle & NCBTNS_MOUSEOVER) && flat)
 		{
 			c1 = crHi;
 			c2 = crDk;
@@ -1305,7 +1306,7 @@ void CViewInstrument::DrawNcButton(CDC *pDC, UINT nBtn)
 	} else
 	{
 		c1 = c2 = crFc;
-		if(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS)
+		if(flat)
 		{
 			c1 = crDk;
 			c2 = crHi;

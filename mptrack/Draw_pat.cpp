@@ -166,7 +166,7 @@ UINT CViewPattern::GetColumnOffset(PatternCursor::Columns column) const
 
 int CViewPattern::GetSmoothScrollOffset() const
 {
-	if((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0	// Actually using the smooth scroll feature
+	if((TrackerSettings::Instance().patternSetup & PatternSetup::SmoothScrolling)	// Actually using the smooth scroll feature
 		&& (m_Status & (psFollowSong | psDragActive)) == psFollowSong	// Not drawing a selection during playback
 		&& (m_nMidRow != 0 || GetYScrollPos() > 0)	// If active row is not centered, only scroll when display position is actually not at the top
 		&& IsLiveRecord()	// Actually playing live (not paused or stepping)
@@ -544,7 +544,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	const int chanColorHeight = MulDiv(4, m_dpi, 96);
 	const int chanColorOffset = MulDiv(2, m_dpi, 96);
 	const int recordInsX = MulDiv(3, m_dpi, 96);
-	const bool doSmoothScroll = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SMOOTHSCROLL) != 0;
+	const bool doSmoothScroll = (TrackerSettings::Instance().patternSetup & PatternSetup::SmoothScrolling);
 
 	GetClientRect(&rcClient);
 
@@ -593,7 +593,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			PATTERNINDEX nPrevPat = PATTERNINDEX_INVALID;
 
 			// Display previous pattern
-			if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS)
+			if(TrackerSettings::Instance().patternSetup & PatternSetup::ShowPrevNextPattern)
 			{
 				if(m_nOrder > 0 && m_nOrder < ordCount)
 				{
@@ -640,7 +640,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	DrawPatternData(hdc, m_nPattern, true, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
-	if ((TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SHOWPREVIOUS) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
+	if((TrackerSettings::Instance().patternSetup & PatternSetup::ShowPrevNextPattern) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
 	{
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if(nVisRows > 0)
@@ -829,7 +829,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 	if(!sndFile.Patterns.IsValidPat(nPattern))
 		return;
 	const CPattern &pattern = sndFile.Patterns[nPattern];
-	const auto patternSetupFlags = TrackerSettings::Instance().m_dwPatternSetup.Get();
+	const FlagSet<PatternSetup> patternSetupFlags = TrackerSettings::Instance().patternSetup;
 	const bool volumeColumnIsHex = TrackerSettings::Instance().patternVolColHex;
 
 	const PATTERNFONT *pfnt = PatternFont::currentFont;
@@ -887,7 +887,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		nMeasure = sndFile.Patterns[nPattern].GetRowsPerMeasure();
 	}
 
-	const bool hexNumbers = (patternSetupFlags & PATTERN_HEXDISPLAY);
+	const bool hexNumbers = patternSetupFlags[PatternSetup::RowAndOrderNumbersHex];
 	bool bRowSel = false;
 	int row_col = -1, row_bkcol = -1;
 	for(ROWINDEX row = startRow; row < numRows; row++)
@@ -929,8 +929,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		ROWINDEX highlightRow = compRow;
 		if(nMeasure > 0)
 			highlightRow %= nMeasure;
-		if ((patternSetupFlags & PATTERN_2NDHIGHLIGHT)
-			&& nBeat > 0)
+		if(patternSetupFlags[PatternSetup::HighlightBeats] && nBeat > 0)
 		{
 			if((highlightRow % nBeat) == 0)
 			{
@@ -938,8 +937,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			}
 		}
 		// primary highlight (measures)
-		if((patternSetupFlags & PATTERN_STDHIGHLIGHT)
-			&& nMeasure > 0)
+		if(patternSetupFlags[PatternSetup::HighlightMeasures] && nMeasure > 0)
 		{
 			if(highlightRow == 0)
 			{
@@ -989,13 +987,13 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			const ModCommand *m = pattern.GetpModCommand(row, static_cast<CHANNELINDEX>(col));
 
 			// Should empty volume commands be replaced with a volume command showing the default volume?
-			const auto defaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) ? DrawDefaultVolume(*m) : std::nullopt;
+			const auto defaultVolume = patternSetupFlags[PatternSetup::ShowDefaultVolume] ? DrawDefaultVolume(*m) : std::nullopt;
 
 			DWORD dwSpeedUpMask = 0;
 			if(useSpeedUpMask && (m_chnState[col].selectedCols & COLUMN_BITS_SKIP) && (row))
 			{
 				const ModCommand *mold = m - ncols;
-				const auto oldDefaultVolume = (patternSetupFlags & PATTERN_SHOWDEFAULTVOLUME) ? DrawDefaultVolume(*mold) : std::nullopt;
+				const auto oldDefaultVolume = patternSetupFlags[PatternSetup::ShowDefaultVolume] ? DrawDefaultVolume(*mold) : std::nullopt;
 
 				if(m->note == mold->note || !m_visibleColumns[PatternCursor::noteColumn])
 					dwSpeedUpMask |= COLUMN_BITS_NOTE;
@@ -1043,7 +1041,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 			{
 				tx_col = row_col;
 				bk_col = row_bkcol;
-				if((patternSetupFlags & PATTERN_EFFECTHILIGHT) && m->IsNote())
+				if(patternSetupFlags[PatternSetup::EffectHighlight] && m->IsNote())
 				{
 					tx_col = MODCOLOR_NOTE;
 
@@ -1084,7 +1082,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				{
 					tx_col = row_col;
 					bk_col = row_bkcol;
-					if ((patternSetupFlags & PATTERN_EFFECTHILIGHT) && (m->instr))
+					if(patternSetupFlags[PatternSetup::EffectHighlight] && (m->instr))
 					{
 						tx_col = MODCOLOR_INSTRUMENT;
 					}
@@ -1111,7 +1109,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 					{
 						tx_col = MODCOLOR_TEXTSELECTED;
 						bk_col = MODCOLOR_BACKSELECTED;
-					} else if (!m->IsPcNote() && (patternSetupFlags & PATTERN_EFFECTHILIGHT))
+					} else if (!m->IsPcNote() && patternSetupFlags[PatternSetup::EffectHighlight])
 					{
 						auto fxColor = effectColors[static_cast<size_t>(m->GetVolumeEffectType())];
 						if(m->volcmd != VOLCMD_NONE && m->volcmd < MAX_VOLCMDS && fxColor != 0)
@@ -1136,7 +1134,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				uint16 val = m->GetValueEffectCol();
 				if(val > ModCommand::maxColumnValue) val = ModCommand::maxColumnValue;
 				fx_col = row_col;
-				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && (patternSetupFlags & PATTERN_EFFECTHILIGHT))
+				if (!isPCnote && m->command != CMD_NONE && m->command < MAX_EFFECTS && patternSetupFlags[PatternSetup::EffectHighlight])
 				{
 					if(auto fxColor = effectColors[static_cast<size_t>(m->GetEffectType())]; fxColor != 0)
 						fx_col = fxColor;
@@ -1401,8 +1399,10 @@ void CViewPattern::UpdateScrollSize()
 	sizePage.cy = sizeLine.cy * 8;
 	GetClientRect(&rect);
 	m_nMidRow = 0;
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_CENTERROW) m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy * 2);
-	if (m_nMidRow) sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
+	if(TrackerSettings::Instance().patternSetup & PatternSetup::CenterActiveRow)
+		m_nMidRow = (rect.Height() - m_szHeader.cy) / (m_szCell.cy * 2);
+	if(m_nMidRow)
+		sizeTotal.cy += m_nMidRow * m_szCell.cy * 2;
 	SetScrollSizes(MM_TEXT, sizeTotal, sizePage, sizeLine);
 	m_bWholePatternFitsOnScreen = (rect.Height() >= sizeTotal.cy);
 	if(m_bWholePatternFitsOnScreen)

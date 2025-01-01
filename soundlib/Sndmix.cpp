@@ -496,7 +496,7 @@ bool CSoundFile::ProcessRow()
 
 					// If channel resetting is disabled in MPT, we will emulate a pattern break (and we always do it if we're not in MPT)
 #ifdef MODPLUG_TRACKER
-					if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_RESETCHANNELS))
+					if(!(TrackerSettings::Instance().patternSetup & PatternSetup::ResetChannelsOnLoop))
 #endif // MODPLUG_TRACKER
 					{
 						m_PlayState.m_flags.set(SONG_BREAKTOROW);

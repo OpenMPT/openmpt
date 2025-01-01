@@ -408,7 +408,7 @@ void CMainToolBar::UpdateSizes()
 
 void CMainToolBar::Init(CMainFrame *pMainFrm)
 {
-	EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
+	EnableFlatButtons(TrackerSettings::Instance().patternSetup & PatternSetup::FlatToolbarButtons);
 	SetHorizontal();
 	pMainFrm->DockControlBar(this);
 }

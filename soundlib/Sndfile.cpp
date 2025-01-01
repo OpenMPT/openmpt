@@ -1937,7 +1937,7 @@ double CSoundFile::GetRowDuration(TEMPO tempo, uint32 speed) const
 ChannelFlags CSoundFile::GetChannelMuteFlag()
 {
 #ifdef MODPLUG_TRACKER
-	return (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCMUTE) ? CHN_SYNCMUTE : CHN_MUTE;
+	return (TrackerSettings::Instance().patternSetup & PatternSetup::SyncMute) ? CHN_SYNCMUTE : CHN_MUTE;
 #else
 	return CHN_SYNCMUTE;
 #endif

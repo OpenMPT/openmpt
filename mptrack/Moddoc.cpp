@@ -1032,7 +1032,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 		break;
 	}
 
-	if((TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_MIDITOPLUG) && CMainFrame::GetMainFrame()->GetModPlaying() == this && plugin != nullptr)
+	if((TrackerSettings::Instance().midiSetup & MidiSetup::SendMidiToPlugins) && CMainFrame::GetMainFrame()->GetModPlaying() == this && plugin != nullptr)
 	{
 		plugin->MidiSend(midiData);
 		// Sending midi may modify the plug. For now, if MIDI data is not active sensing or aftertouch messages, set modified.
@@ -1128,7 +1128,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		}
 
 		// Handle extra-loud flag
-		chn.dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD) && params.m_sample);
+		chn.dwFlags.set(CHN_EXTRALOUD, !(TrackerSettings::Instance().patternSetup & PatternSetup::NoLoudSamplePreview) && params.m_sample);
 
 		// Handle custom start position
 		if(params.m_sampleOffset > 0 && chn.pModSample)
@@ -3009,7 +3009,7 @@ void CModDoc::SetElapsedTime(ORDERINDEX nOrd, ROWINDEX nRow, bool setSamplePos)
 {
 	if(nOrd == ORDERINDEX_INVALID) return;
 
-	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, setSamplePos && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_SYNCSAMPLEPOS) != 0);
+	double t = m_SndFile.GetPlaybackTimeAt(nOrd, nRow, true, setSamplePos && (TrackerSettings::Instance().patternSetup & PatternSetup::SampleSyncOnSeek));
 	if(t < 0)
 	{
 		// Position is never played regularly, but we may want to continue playing from here nevertheless.

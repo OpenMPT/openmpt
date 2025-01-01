@@ -326,7 +326,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	UpdateColors();
 
-	if(TrackerSettings::Instance().m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) midiOpenDevice(false);
+	if(TrackerSettings::Instance().midiSetup & MidiSetup::EnableMidiInOnStartup)
+		midiOpenDevice(false);
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -446,7 +447,7 @@ BOOL CMainFrame::DestroyWindow()
 void CMainFrame::OnClose()
 {
 	MPT_TRACE_SCOPE();
-	if(!(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOCLOSEDIALOG))
+	if(!(TrackerSettings::Instance().patternSetup & PatternSetup::NoCustomCloseDialog))
 	{
 		// Show modified documents window
 		CloseMainDialog dlg;
@@ -1274,7 +1275,7 @@ void CMainFrame::UpdateDspEffects(CSoundFile &sndFile, bool reset)
 void CMainFrame::UpdateAudioParameters(CSoundFile &sndFile, bool reset)
 {
 	CriticalSection cs;
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
+	if (TrackerSettings::Instance().patternSetup & PatternSetup::IgnoreMutedChannels)
 		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
 		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
@@ -1805,7 +1806,7 @@ void CMainFrame::PreparePreview(ModCommand::NOTE note, int volume)
 	m_WaveFile.ResetPlayPos();
 
 	const CModDoc *activeDoc = GetActiveDoc();
-	if(activeDoc != nullptr && (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_NOEXTRALOUD))
+	if(activeDoc != nullptr && (TrackerSettings::Instance().patternSetup & PatternSetup::NoLoudSamplePreview))
 	{
 		m_WaveFile.SetMixLevels(activeDoc->GetSoundFile().GetMixLevels());
 		m_WaveFile.m_nSamplePreAmp = activeDoc->GetSoundFile().m_nSamplePreAmp;
@@ -1934,7 +1935,8 @@ void CMainFrame::SetupPlayer()
 
 void CMainFrame::SetupMiscOptions()
 {
-	if (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_MUTECHNMODE)
+	const FlagSet<PatternSetup> patternSetup = TrackerSettings::Instance().patternSetup;
+	if(patternSetup[PatternSetup::IgnoreMutedChannels])
 		TrackerSettings::Instance().MixerFlags |= SNDMIX_MUTECHNMODE;
 	else
 		TrackerSettings::Instance().MixerFlags &= ~SNDMIX_MUTECHNMODE;
@@ -1943,17 +1945,17 @@ void CMainFrame::SetupMiscOptions()
 		if(GetSoundFilePlaying()) UpdateAudioParameters(*GetSoundFilePlaying());
 	}
 
-	m_wndToolBar.EnableFlatButtons(TrackerSettings::Instance().m_dwPatternSetup & PATTERN_FLATBUTTONS);
+	m_wndToolBar.EnableFlatButtons(patternSetup[PatternSetup::FlatToolbarButtons]);
 
 	UpdateTree(nullptr, UpdateHint().MPTOptions());
 	theApp.UpdateAllViews(UpdateHint().MPTOptions());
 }
 
 
-void CMainFrame::SetupMidi(DWORD d, UINT n)
+void CMainFrame::SetupMidi(FlagSet<MidiSetup> d, UINT n)
 {
 	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
-	TrackerSettings::Instance().m_dwMidiSetup = d;
+	TrackerSettings::Instance().midiSetup = d;
 	TrackerSettings::Instance().SetMIDIDevice(n);
 	if(deviceChanged && shMidiIn)
 	{
@@ -2070,7 +2072,7 @@ void CMainFrame::OnViewOptions()
 #if !defined(NO_REVERB) || !defined(NO_DSP) || !defined(NO_EQ) || !defined(NO_AGC)
 		COptionsPlayer dspdlg;
 #endif
-		CMidiSetupDlg mididlg{TrackerSettings::Instance().m_dwMidiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice()};
+		CMidiSetupDlg mididlg{TrackerSettings::Instance().midiSetup, TrackerSettings::Instance().GetCurrentMIDIDevice()};
 		PathConfigDlg pathsdlg;
 #if defined(MPT_ENABLE_UPDATE)
 		CUpdateSetupDlg updatedlg;

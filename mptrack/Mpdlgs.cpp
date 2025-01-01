@@ -1743,9 +1743,9 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-CMidiSetupDlg::CMidiSetupDlg(DWORD flags, UINT device)
+CMidiSetupDlg::CMidiSetupDlg(FlagSet<MidiSetup> flags, UINT device)
 	: CPropertyPage{IDD_OPTIONS_MIDI}
-	, m_dwMidiSetup{flags}
+	, m_midiSetup{flags}
 	, m_nMidiDevice{device}
 {
 	m_editAmp.SetAccessibleSuffix(_T("%"));
@@ -1756,16 +1756,16 @@ BOOL CMidiSetupDlg::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	// Flags
-	if (m_dwMidiSetup & MIDISETUP_RECORDVELOCITY) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_RECORDNOTEOFF) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_ENABLE_RECORD_DEFAULT) CheckDlgButton(IDC_CHECK3, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_TRANSPOSEKEYBOARD) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDITOPLUG) CheckDlgButton(IDC_MIDI_TO_PLUGIN, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDIMACROCONTROL) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDIVOL_TO_NOTEVOL) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_RESPONDTOPLAYCONTROLMSGS) CheckDlgButton(IDC_MIDIPLAYCONTROL, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_PLAYPATTERNONMIDIIN) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, BST_CHECKED);
-	if (m_dwMidiSetup & MIDISETUP_MIDIMACROPITCHBEND) CheckDlgButton(IDC_CHECK5, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::RecordVelocity]) CheckDlgButton(IDC_CHECK1, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::RecordNoteOff]) CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::EnableMidiInOnStartup]) CheckDlgButton(IDC_CHECK3, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::TransposeKeyboard]) CheckDlgButton(IDC_CHECK4, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::SendMidiToPlugins]) CheckDlgButton(IDC_MIDI_TO_PLUGIN, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::RecordCCsAsMacros]) CheckDlgButton(IDC_MIDI_MACRO_CONTROL, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::ApplyChannelVolumeToVelocity]) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::RespondToPlayControl]) CheckDlgButton(IDC_MIDIPLAYCONTROL, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::PlayPatternOnMidiNote]) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, BST_CHECKED);
+	if(m_midiSetup[MidiSetup::RecordPitchBend]) CheckDlgButton(IDC_CHECK5, BST_CHECKED);
 
 	// Midi In Device
 	RefreshDeviceList(m_nMidiDevice);
@@ -1876,21 +1876,22 @@ void CMidiSetupDlg::OnRenameDevice()
 void CMidiSetupDlg::OnOK()
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	m_dwMidiSetup = 0;
-	m_nMidiDevice = MIDI_MAPPER;
-	if (IsDlgButtonChecked(IDC_CHECK1)) m_dwMidiSetup |= MIDISETUP_RECORDVELOCITY;
-	if (IsDlgButtonChecked(IDC_CHECK2)) m_dwMidiSetup |= MIDISETUP_RECORDNOTEOFF;
-	if (IsDlgButtonChecked(IDC_CHECK3)) m_dwMidiSetup |= MIDISETUP_ENABLE_RECORD_DEFAULT;
-	if (IsDlgButtonChecked(IDC_CHECK4)) m_dwMidiSetup |= MIDISETUP_TRANSPOSEKEYBOARD;
-	if (IsDlgButtonChecked(IDC_MIDI_TO_PLUGIN)) m_dwMidiSetup |= MIDISETUP_MIDITOPLUG;
-	if (IsDlgButtonChecked(IDC_MIDI_MACRO_CONTROL)) m_dwMidiSetup |= MIDISETUP_MIDIMACROCONTROL;
-	if (IsDlgButtonChecked(IDC_MIDIVOL_TO_NOTEVOL)) m_dwMidiSetup |= MIDISETUP_MIDIVOL_TO_NOTEVOL;
-	if (IsDlgButtonChecked(IDC_MIDIPLAYCONTROL)) m_dwMidiSetup |= MIDISETUP_RESPONDTOPLAYCONTROLMSGS;
-	if (IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN)) m_dwMidiSetup |= MIDISETUP_PLAYPATTERNONMIDIIN;
-	if (IsDlgButtonChecked(IDC_CHECK5)) m_dwMidiSetup |= MIDISETUP_MIDIMACROPITCHBEND;
+	m_midiSetup.set(MidiSetup::RecordVelocity, IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::RecordNoteOff, IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::EnableMidiInOnStartup, IsDlgButtonChecked(IDC_CHECK3)  != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::TransposeKeyboard, IsDlgButtonChecked(IDC_CHECK4) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::SendMidiToPlugins, IsDlgButtonChecked(IDC_MIDI_TO_PLUGIN) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::RecordCCsAsMacros, IsDlgButtonChecked(IDC_MIDI_MACRO_CONTROL) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::ApplyChannelVolumeToVelocity, IsDlgButtonChecked(IDC_MIDIVOL_TO_NOTEVOL) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::RespondToPlayControl, IsDlgButtonChecked(IDC_MIDIPLAYCONTROL) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::PlayPatternOnMidiNote, IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::RecordPitchBend, IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED);
 
 	int n = m_InputDevice.GetCurSel();
-	if (n >= 0) m_nMidiDevice = static_cast<UINT>(m_InputDevice.GetItemData(n));
+	if(n >= 0)
+		m_nMidiDevice = static_cast<UINT>(m_InputDevice.GetItemData(n));
+	else
+		m_nMidiDevice = MIDI_MAPPER;
 
 	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
 
@@ -1910,7 +1911,8 @@ void CMidiSetupDlg::OnOK()
 		TrackerSettings::Instance().midiImportQuantize = static_cast<uint32>(m_Quantize.GetItemData(m_Quantize.GetCurSel()));
 	}
 
-	if (pMainFrm) pMainFrm->SetupMidi(m_dwMidiSetup, m_nMidiDevice);
+	if(pMainFrm)
+		pMainFrm->SetupMidi(m_midiSetup, m_nMidiDevice);
 	CPropertyPage::OnOK();
 }
 

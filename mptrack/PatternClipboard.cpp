@@ -551,7 +551,7 @@ bool PatternClipboard::HandlePaste(CSoundFile &sndFile, PatternEditPos &pastePos
 	}
 
 	const CModSpecifications &sourceSpecs = CSoundFile::GetModSpecifications(pasteFormat);
-	const bool overflowPaste = (TrackerSettings::Instance().m_dwPatternSetup & PATTERN_OVERFLOWPASTE) && mode != pmPasteFlood && mode != pmPushForward && patternMode != kMultiInsert && curOrder != ORDERINDEX_INVALID;
+	const bool overflowPaste = (TrackerSettings::Instance().patternSetup & PatternSetup::OverflowPaste) && mode != pmPasteFlood && mode != pmPushForward && patternMode != kMultiInsert && curOrder != ORDERINDEX_INVALID;
 	const bool doITStyleMix = (mode == pmMixPasteIT);
 	const bool doMixPaste = (mode == pmMixPaste) || doITStyleMix;
 	const bool clipboardHasS3MCommands = (pasteFormat & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_S3M));
