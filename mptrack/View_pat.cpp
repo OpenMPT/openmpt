@@ -4232,6 +4232,7 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 
 	case VIEWMSG_SETRECORD:
 		m_Status.set(psRecordingEnabled, !!lParam);
+		InvalidateRow(GetCurrentRow());
 		break;
 
 	case VIEWMSG_SETSPACING:

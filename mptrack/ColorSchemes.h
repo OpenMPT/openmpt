@@ -60,6 +60,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x40, 0x40, 0xA0) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xF0, 0xF0, 0x50) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x70, 0x70, 0x70) },
 }
 },
 { _T("Green (IT2)"),
@@ -99,6 +100,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xE0, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x70, 0x70, 0x70) },
 }
 },
 { _T("Buzz"),
@@ -138,6 +140,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xC0, 0xB4, 0x9E) },
 }
 },
 { _T("arseniiv - my color scheme 2"),
@@ -177,6 +180,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0x88, 0x28) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0x80, 0xC0) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFB, 0xF9, 0xAA) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xC6, 0xD0, 0xD7) },
 }
 },
 { _T("barryvan - Tango"),
@@ -216,6 +220,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x8A, 0xE2, 0x34) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x72, 0x9F, 0xCF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xCF, 0xCF, 0x72) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xBA, 0xBD, 0xB6) },
 }
 },
 { _T("barryvan - TangoDark"),
@@ -255,6 +260,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x8A, 0xE2, 0x34) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x72, 0x9F, 0xCF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xCF, 0xCF, 0x72) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x3A, 0x43, 0x45) },
 }
 },
 { _T("Fasttracker 2 (Why Colors?)"),
@@ -294,6 +300,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xC0, 0xC0, 0xC0) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x8A, 0xDB, 0xF3) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x5F) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x49, 0x75, 0x82) },
 }
 },
 { _T("herodotas - darkwater"),
@@ -333,6 +340,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x55, 0x55) },
 }
 },
 { _T("herodotas - grey&yellow"),
@@ -372,6 +380,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xE4, 0xD5, 0x0C) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x88, 0x7D, 0x00) },
 }
 },
 { _T("herodotas - junglist"),
@@ -411,6 +420,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xFF, 0x00, 0x00) },
 }
 },
 { _T("herodotas - mortician"),
@@ -450,6 +460,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xFF, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC8, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xCA, 0xCA, 0xCA) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x70, 0x70, 0x70) },
 }
 },
 { _T("Hot Dog Stand"),
@@ -489,6 +500,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xFF, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xFF, 0xC0, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xE8, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xFF, 0xC0, 0x00) },
 }
 },
 { _T("Impulse Tracker (Camouflage)"),
@@ -528,6 +540,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x45, 0x9A, 0x49) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x38, 0x9E, 0x75) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xEB, 0xEB, 0xCB) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x10, 0x35, 0x00) },
 }
 },
 { _T("jmkz - Aqua LCD"),
@@ -567,6 +580,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xCC, 0xFF) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0x99, 0xBF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0x00, 0xB3, 0xDF) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x66, 0x80) },
 }
 },
 { _T("jmkz - BeRoTracker"),
@@ -606,6 +620,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x48, 0xF3, 0xA7) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x64, 0x7A, 0x91) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xD2, 0xF3, 0xF7) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xDB, 0x80, 0x24) },
 }
 },
 { _T("jmkz - Classic"),
@@ -645,6 +660,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x8F, 0xEF, 0x8F) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xEF, 0xD0, 0x8F) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xFF, 0xE2, 0x9F) },
 }
 },
 { _T("jmkz - Custom Colors"),
@@ -684,6 +700,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x09, 0xB3, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xB0, 0xB0) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xEA, 0xEA, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x52, 0x4C, 0x34) },
 }
 },
 { _T("jmkz - Custom Colors (inverted)"),
@@ -723,6 +740,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xAD, 0xB3, 0xCB) },
 }
 },
 { _T("jmkz - Dark Pastels"),
@@ -762,6 +780,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x9F, 0xFF, 0x9F) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x9F, 0x9F, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xDF, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x31, 0x00) },
 }
 },
 { _T("jmkz - Deep Sea"),
@@ -801,6 +820,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xC0, 0xFF, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x80, 0xBF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xE0, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x60, 0x90, 0x30) },
 }
 },
 { _T("jmkz - Desert Mint"),
@@ -840,6 +860,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x75, 0xCE, 0x40) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xB0, 0xB0) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xF0, 0xF0, 0x50) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x70, 0x70, 0x70) },
 }
 },
 { _T("jmkz - EL Glow"),
@@ -879,6 +900,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x9F, 0x9F, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFE, 0xDF, 0x81) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x5F, 0x5F, 0x5F) },
 }
 },
 { _T("jmkz - Engrayed"),
@@ -918,6 +940,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xDC, 0xDC, 0xDC) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC8, 0xC8, 0xC8) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xF0, 0xF0, 0xF0) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x50, 0x50, 0x50) },
 }
 },
 { _T("jmkz - GeneGreen"),
@@ -957,6 +980,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xFF, 0x80, 0x00) },
 }
 },
 { _T("jmkz - Harmony"),
@@ -996,6 +1020,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x99, 0xFF, 0x33) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xAA, 0xD5, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xAA, 0x55) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xCC, 0xE6, 0xFF) },
 }
 },
 { _T("jmkz - High Contrast"),
@@ -1035,6 +1060,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x80, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x00, 0xFF) },
 }
 },
 { _T("jmkz - Matrix"),
@@ -1074,6 +1100,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xBF, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0x00, 0xE6, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x80, 0x00) },
 }
 },
 { _T("jmkz - Midnite Blue"),
@@ -1113,6 +1140,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0x00, 0xC8) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0x00, 0xA0) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0x62, 0x62, 0xFF) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x00, 0x9F) },
 }
 },
 { _T("jmkz - Midnite Green"),
@@ -1152,6 +1180,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xC8, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xA0, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0x00, 0xDC, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x9F, 0x00) },
 }
 },
 { _T("jmkz - Midnite Red"),
@@ -1191,6 +1220,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xC8, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xB4, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0x00, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x9F, 0x00, 0x00) },
 }
 },
 { _T("jmkz - Mint"),
@@ -1230,6 +1260,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xBF, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x3C, 0x3C, 0x84) },
 }
 },
 { _T("jmkz - MT2 XP Classic"),
@@ -1269,6 +1300,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x46, 0xA6, 0x4E) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x4D, 0x61, 0x85) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xEC, 0xE9, 0xD2) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xE0, 0xDF, 0xE3) },
 }
 },
 { _T("jmkz - Night Vision Red"),
@@ -1308,6 +1340,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xDC, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC8, 0x00, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0x42, 0x42) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x80, 0x00, 0x00) },
 }
 },
 { _T("jmkz - Oil Pastels"),
@@ -1347,6 +1380,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x80, 0x80, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xBF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x31, 0x00) },
 }
 },
 { _T("jmkz - Old Sunset"),
@@ -1386,6 +1420,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0x97, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0x9B, 0x9B) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x80, 0x00, 0x00) },
 }
 },
 { _T("jmkz - Oxygen Glow"),
@@ -1425,6 +1460,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0x93) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x88, 0xEC, 0xF7) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xD2, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x94, 0x9F) },
 }
 },
 { _T("jmkz - Oxygen"),
@@ -1464,6 +1500,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0x8F, 0x3C) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x49, 0x73, 0x76) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xB8, 0xE3, 0xE7) },
 }
 },
 { _T("jmkz - Pastels"),
@@ -1503,6 +1540,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xCE, 0xFF, 0xCE) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xCE, 0xCE, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xDF, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xCE, 0xFF, 0xCE) },
 }
 },
 { _T("jmkz - Plumbum"),
@@ -1542,6 +1580,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xBF, 0xD7, 0xA8) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xA8, 0xD7, 0xD7) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xD7, 0xD7, 0xA8) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x70, 0x78, 0x8F) },
 }
 },
 { _T("jmkz - Preserve (black)"),
@@ -1581,6 +1620,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x80, 0xFF, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xCE, 0xCE) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xC4, 0xC4, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x52, 0x52, 0x74) },
 }
 },
 { _T("jmkz - Protrekkr"),
@@ -1620,6 +1660,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xA0, 0xBE, 0xE4) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x88, 0xD0, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x88) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x30, 0x24, 0x34) },
 }
 },
 { _T("jmkz - Pure Yellow"),
@@ -1659,6 +1700,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xDF, 0xDF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC8, 0xC8, 0x00) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x80, 0x80, 0x00) },
 }
 },
 { _T("jmkz - Renoise Visual"),
@@ -1698,6 +1740,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xB8, 0xF6, 0xBF) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x43, 0xBD, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xE2, 0xE0, 0x93) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x38, 0x38, 0x38) },
 }
 },
 { _T("jmkz - Renoise"),
@@ -1737,6 +1780,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xB8, 0xF6, 0xBF) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x43, 0xBD, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xE2, 0xE0, 0x93) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x38, 0x38, 0x38) },
 }
 },
 { _T("jmkz - Silver Luna"),
@@ -1776,6 +1820,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x49, 0x88, 0x40) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x40, 0x88, 0x7D) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xEA, 0xEA, 0x15) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xD8, 0xD8, 0xDC) },
 }
 },
 { _T("jmkz - Skale"),
@@ -1815,6 +1860,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x9B, 0xA4, 0xAE) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x22, 0x68, 0x8B) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0x81, 0xC1, 0xE0) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x52, 0x60, 0x6E) },
 }
 },
 { _T("jmkz - Technic"),
@@ -1854,6 +1900,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x1B, 0x85, 0x33) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xC7, 0xC7, 0xC7) },
 }
 },
 { _T("jmkz - Tekton"),
@@ -1893,6 +1940,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x2E, 0xBC, 0xBC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x9F) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xC1, 0xFF, 0xFF) },
 }
 },
 { _T("jmkz - Tundra"),
@@ -1932,6 +1980,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0xCF, 0xD7, 0xF1) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x88, 0x94, 0xB8) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xE0, 0xBE, 0xC0) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xCF, 0xD7, 0xF1) },
 }
 },
 { _T("jmkz - Xenon Glow"),
@@ -1971,6 +2020,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x59, 0x95, 0xE7) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xDF, 0xEC, 0xFF) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x43, 0x9F) },
 }
 },
 { _T("LegovitchColors"),
@@ -2010,9 +2060,10 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x81, 0xA8, 0xD3) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xC6, 0x1A) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xFF, 0xFF, 0xFF) },
 }
 },
-{ _T("melcom - Aquamarine & Blue - Alternative)"),
+{ _T("melcom - Aquamarine & Blue - Alternative"),
 {
 	{ MODCOLOR_BACKNORMAL, RGB(0x14, 0x2D, 0x32) },
 	{ MODCOLOR_TEXTNORMAL, RGB(0x74, 0xA4, 0xB4) },
@@ -2049,6 +2100,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x38, 0x58, 0x78) },
 }
 },
 { _T("melcom - Brown, Olive & Green"),
@@ -2088,6 +2140,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x30, 0xCC, 0x30) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x32, 0xCC, 0xCC) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xCC, 0x30) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x10, 0x35, 0x00) },
 }
 },
 { _T("MiDoRi - Coral Reef"),
@@ -2127,6 +2180,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x9C, 0xE2, 0x8B) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC0, 0x98, 0xCB) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xF1, 0xC9, 0x8D) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x1A, 0x5F, 0x97) },
 }
 },
 { _T("MiDoRi - DarkPlug"),
@@ -2166,6 +2220,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x6A, 0xB9, 0xA4) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x4B, 0x79, 0x94) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xAE, 0xD6, 0x38) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x33, 0x0D, 0x30) },
 }
 },
 { _T("MiDoRi - DX7"),
@@ -2205,6 +2260,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x2D, 0xAC, 0x79) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x6C, 0xDB, 0xCA) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xDC, 0xC5, 0xA3) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x36, 0x69, 0x62) },
 }
 },
 { _T("MiDoRi - Midorian Mode"),
@@ -2244,6 +2300,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x28, 0xC8, 0x31) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xA3, 0xF0, 0x7D) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xD9, 0xC8, 0xA4) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x75, 0x75, 0x75) },
 }
 },
 { _T("MiDoRi - Strawberry"),
@@ -2283,6 +2340,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x88, 0xD2, 0xB7) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC0, 0x98, 0xCB) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xF3, 0xFA, 0xDC) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x43, 0x4D, 0x7C) },
 }
 },
 { _T("MiDoRi - Wineplume"),
@@ -2322,6 +2380,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x53, 0xA4, 0xB5) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0xC8, 0xA0, 0xCB) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFC, 0xF4, 0xE4) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x7A, 0x27, 0x18) },
 }
 },
 { _T("MilkyTracker"),
@@ -2361,6 +2420,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x40, 0x60, 0x80) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x55, 0x80, 0xAA) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x60, 0x20, 0x40) },
 }
 },
 { _T("mp64 - Chromatic v2"),
@@ -2400,6 +2460,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xC0, 0xC0, 0xC0) },
 }
 },
 { _T("mp64 - Chromatic"),
@@ -2439,6 +2500,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xFF, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xFF, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x00) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0xE0, 0xE8, 0xE0) },
 }
 },
 { _T("Oerg866 - AquaMPT"),
@@ -2478,6 +2540,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x6F, 0x88, 0xFF) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x97, 0xBB, 0xFF) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xC6, 0xE1, 0xFF) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x00, 0x40, 0x80) },
 }
 },
 { _T("Scream Tracker 3 (Gold)"),
@@ -2517,6 +2580,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x00, 0xB0, 0x00) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x22, 0x46, 0xA4) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xDF, 0x86) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x1A, 0x2D, 0x71) },
 }
 },
 { _T("tomaes"),
@@ -2556,6 +2620,7 @@ inline constexpr ColorScheme ColorSchemes[] =
 	{ MODCOLOR_SAMPLE_LOOPMARKER, RGB(0x98, 0xC8, 0x09) },
 	{ MODCOLOR_SAMPLE_SUSTAINMARKER, RGB(0x00, 0xDD, 0xDD) },
 	{ MODCOLOR_SAMPLE_CUEPOINT, RGB(0xFF, 0xFF, 0x80) },
+	{ MODCOLOR_BACKRECORDROW, RGB(0x60, 0x60, 0x60) },
 }
 },
 };

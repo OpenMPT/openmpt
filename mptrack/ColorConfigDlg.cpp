@@ -53,7 +53,7 @@ static constexpr struct ColorDescriptions
 } colorDefs[] =
 {
 	{ _T("Pattern Editor"),      0, { MODCOLOR_BACKNORMAL, MODCOLOR_TEXTNORMAL, MODCOLOR_BACKHILIGHT }, { _T("Background:"), _T("Foreground:"), _T("Highlighted:") } },
-	{ _T("Active Row"),          0, { MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
+	{ _T("Active Row"),          0, { MODCOLOR_BACKCURROW, MODCOLOR_TEXTCURROW, MODCOLOR_BACKRECORDROW }, { _T("Background:"), _T("Foreground:"), _T("Background (Record):")}},
 	{ _T("Pattern Selection"),   0, { MODCOLOR_BACKSELECTED, MODCOLOR_TEXTSELECTED, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
 	{ _T("Play Cursor"),         0, { MODCOLOR_BACKPLAYCURSOR, MODCOLOR_TEXTPLAYCURSOR, {} }, { _T("Background:"), _T("Foreground:"), nullptr } },
 	{ _T("Note Highlight"),      0, { MODCOLOR_NOTE, MODCOLOR_INSTRUMENT, MODCOLOR_VOLUME }, { _T("Note:"), _T("Instrument:"), _T("Volume:") } },
@@ -613,6 +613,9 @@ void COptionsColors::OnLoadColorScheme()
 		for(uint32 i = 0; i < MAX_MODCOLORS; i++)
 		{
 			CustomColors[i] = file.Read<int32>(U_("Colors"), MPT_UFORMAT("Color{}")(mpt::ufmt::dec0<2>(i)), CustomColors[i]);
+			// For old color schemes that don't have this color yet
+			if(i == MODCOLOR_BACKCURROW)
+				CustomColors[MODCOLOR_BACKRECORDROW] = CustomColors[MODCOLOR_BACKCURROW];
 		}
 	}
 	OnPreviewChanged();

@@ -957,7 +957,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 				if(m_Status[psFocussed])
 				{
 					row_col = MODCOLOR_TEXTCURROW;
-					row_bkcol = MODCOLOR_BACKCURROW;
+					row_bkcol = m_Status[psRecordingEnabled] ? MODCOLOR_BACKRECORDROW : MODCOLOR_BACKCURROW;
 				} else
 				if(m_Status[psFollowSong] && isPlaying)
 				{

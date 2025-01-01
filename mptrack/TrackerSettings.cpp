@@ -405,6 +405,9 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	{
 		const mpt::ustring colorName = MPT_UFORMAT("Color{}")(mpt::ufmt::dec0<2>(ncol));
 		rgbCustomColors[ncol] = conf.Read<uint32>(UL_("Display"), colorName, rgbCustomColors[ncol]);
+		// For old color schemes that don't have this color yet
+		if(ncol == MODCOLOR_BACKCURROW)
+			rgbCustomColors[MODCOLOR_BACKRECORDROW] = rgbCustomColors[MODCOLOR_BACKCURROW];
 	}
 	// Paths
 	m_szKbdFile = conf.Read<mpt::PathString>(UL_("Paths"), UL_("Key_Config_File"), mpt::PathString());
@@ -1241,6 +1244,7 @@ void TrackerSettings::GetDefaultColourScheme(std::array<COLORREF, MAX_MODCOLORS>
 	colours[MODCOLOR_BACKNORMAL] = RGB(0xFF, 0xFF, 0xFF);
 	colours[MODCOLOR_TEXTNORMAL] = RGB(0x00, 0x00, 0x00);
 	colours[MODCOLOR_BACKCURROW] = RGB(0xC0, 0xC0, 0xC0);
+	colours[MODCOLOR_BACKRECORDROW] = RGB(0xC0, 0xC0, 0xC0);
 	colours[MODCOLOR_TEXTCURROW] = RGB(0x00, 0x00, 0x00);
 	colours[MODCOLOR_BACKSELECTED] = RGB(0x00, 0x00, 0x00);
 	colours[MODCOLOR_TEXTSELECTED] = RGB(0xFF, 0xFF, 0xFF);
