@@ -635,6 +635,7 @@
     <ClInclude Include="..\..\..\include\unrar\headers.hpp" />
     <ClInclude Include="..\..\..\include\unrar\headers5.hpp" />
     <ClInclude Include="..\..\..\include\unrar\isnt.hpp" />
+    <ClInclude Include="..\..\..\include\unrar\largepage.hpp" />
     <ClInclude Include="..\..\..\include\unrar\list.hpp" />
     <ClInclude Include="..\..\..\include\unrar\loclang.hpp" />
     <ClInclude Include="..\..\..\include\unrar\log.hpp" />
@@ -698,6 +699,7 @@
     <ClCompile Include="..\..\..\include\unrar\hash.cpp" />
     <ClCompile Include="..\..\..\include\unrar\headers.cpp" />
     <ClCompile Include="..\..\..\include\unrar\isnt.cpp" />
+    <ClCompile Include="..\..\..\include\unrar\largepage.cpp" />
     <ClCompile Include="..\..\..\include\unrar\list.cpp" />
     <ClCompile Include="..\..\..\include\unrar\match.cpp" />
     <ClCompile Include="..\..\..\include\unrar\options.cpp" />
