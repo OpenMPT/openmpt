@@ -158,6 +158,7 @@ enum class MidiSetup : int32
 	PlayPatternOnMidiNote        = 0x100,  // Play pattern if MIDI Note is received and playback is paused
 	EnableMidiInOnStartup        = 0x200,  // Enable MIDI recording by default
 	RecordPitchBend              = 0x400,  // Record MIDI pitch bend messages a MIDI macro changes in pattern
+	PlayPatternFromStart         = 0x800,  // When continuing playback due to received MIDI events, restart pattern instead of continuing from current row
 
 	Default = RecordVelocity | RecordNoteOff | TransposeKeyboard | SendMidiToPlugins
 };

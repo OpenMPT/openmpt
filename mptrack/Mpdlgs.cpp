@@ -1707,24 +1707,25 @@ void COptionsPlayer::OnSliderFreq(UINT nID)
 // CMidiSetupDlg
 
 BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
-	ON_CBN_SELCHANGE(IDC_COMBO1,			&CMidiSetupDlg::OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO2,			&CMidiSetupDlg::OnSettingsChanged)
-	ON_CBN_SELCHANGE(IDC_COMBO3,			&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_BUTTON1,					&CMidiSetupDlg::OnRenameDevice)
-	ON_COMMAND(IDC_CHECK1,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK2,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK3,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK4,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_CHECK5,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_MIDI_TO_PLUGIN,			&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_MIDI_MACRO_CONTROL,		&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_MIDIVOL_TO_NOTEVOL,		&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_MIDIPLAYCONTROL,			&CMidiSetupDlg::OnSettingsChanged)
-	ON_COMMAND(IDC_MIDIPLAYPATTERNONMIDIIN,	&CMidiSetupDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT1,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT2,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT3,					&CMidiSetupDlg::OnSettingsChanged)
-	ON_EN_CHANGE(IDC_EDIT4,					&CMidiSetupDlg::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO1,            &CMidiSetupDlg::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2,            &CMidiSetupDlg::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO3,            &CMidiSetupDlg::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO4,            &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_BUTTON1,                 &CMidiSetupDlg::OnRenameDevice)
+	ON_COMMAND(IDC_CHECK1,                  &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK2,                  &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK3,                  &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK4,                  &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_CHECK5,                  &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_MIDI_TO_PLUGIN,          &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_MIDI_MACRO_CONTROL,      &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIVOL_TO_NOTEVOL,      &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIPLAYCONTROL,         &CMidiSetupDlg::OnSettingsChanged)
+	ON_COMMAND(IDC_MIDIPLAYPATTERNONMIDIIN, &CMidiSetupDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT1,                 &CMidiSetupDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT2,                 &CMidiSetupDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT3,                 &CMidiSetupDlg::OnSettingsChanged)
+	ON_EN_CHANGE(IDC_EDIT4,                 &CMidiSetupDlg::OnSettingsChanged)
 END_MESSAGE_MAP()
 
 
@@ -1738,6 +1739,7 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO1, m_InputDevice);
 	DDX_Control(pDX, IDC_COMBO2, m_ATBehaviour);
 	DDX_Control(pDX, IDC_COMBO3, m_Quantize);
+	DDX_Control(pDX, IDC_COMBO4, m_ContinueMode);
 	DDX_Control(pDX, IDC_EDIT3,  m_editAmp);
 	//}}AFX_DATA_MAP
 }
@@ -1769,6 +1771,11 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 	// Midi In Device
 	RefreshDeviceList(m_nMidiDevice);
+
+	// Continue behaviour
+	m_ContinueMode.AddString(_T("From Cursor Position"));
+	m_ContinueMode.AddString(_T("From Start of Pattern"));
+	m_ContinueMode.SetCurSel(m_midiSetup[MidiSetup::PlayPatternFromStart] ? 1 : 0);
 
 	// Aftertouch behaviour
 	m_ATBehaviour.ResetContent();
@@ -1886,6 +1893,7 @@ void CMidiSetupDlg::OnOK()
 	m_midiSetup.set(MidiSetup::RespondToPlayControl, IsDlgButtonChecked(IDC_MIDIPLAYCONTROL) != BST_UNCHECKED);
 	m_midiSetup.set(MidiSetup::PlayPatternOnMidiNote, IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN) != BST_UNCHECKED);
 	m_midiSetup.set(MidiSetup::RecordPitchBend, IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED);
+	m_midiSetup.set(MidiSetup::PlayPatternFromStart, m_ContinueMode.GetCurSel() == 1);
 
 	int n = m_InputDevice.GetCurSel();
 	if(n >= 0)

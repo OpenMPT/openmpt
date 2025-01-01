@@ -1398,15 +1398,16 @@ BEGIN
     COMBOBOX        IDC_COMBO1,18,30,234,74,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Re&name",IDC_BUTTON1,258,30,50,14
     CONTROL         "&Apply Octave Transpose to incoming MIDI Notes",IDC_CHECK4,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,48,237,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,48,204,12
     CONTROL         "&Respond to Play / Continue / Stop Song messages",IDC_MIDIPLAYCONTROL,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,60,237,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,60,204,12
     CONTROL         "&Continue song as soon as MIDI notes are being received",IDC_MIDIPLAYPATTERNONMIDIIN,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,73,237,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,72,204,12
+    COMBOBOX        IDC_COMBO4,222,72,86,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "&Pass MIDI to active instrument plugin",IDC_MIDI_TO_PLUGIN,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,237,12
-    CONTROL         "&Enable MIDI recording when launching OpenMPT",IDC_CHECK3,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,97,240,12
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,84,204,12
+    CONTROL         "&Enable MIDI recording when OpenMPT starts",IDC_CHECK3,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,96,204,12
     GROUPBOX        "MIDI Recording - Volume and Controllers",IDC_STATIC,6,120,312,114
     CONTROL         "Record Note &Off",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,138,237,8
     CONTROL         "Record MIDI Note &Velocity, amplify by",IDC_CHECK1,

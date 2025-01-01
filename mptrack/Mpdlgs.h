@@ -218,7 +218,7 @@ protected:
 
 protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
-	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize;
+	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize, m_ContinueMode;
 	AccessibleEdit m_editAmp;
 };
 

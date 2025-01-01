@@ -4036,7 +4036,12 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	case MIDIEvents::evNoteOn:  // Note On
 		// Continue playing as soon as MIDI notes are being received
 		if((pMainFrm->GetSoundFilePlaying() != &sndFile || sndFile.IsPaused()) && midiSetup[MidiSetup::PlayPatternOnMidiNote])
-			pModDoc->OnPatternPlayNoLoop();
+		{
+			if(midiSetup[MidiSetup::PlayPatternFromStart])
+				pModDoc->OnPatternRestart(false);
+			else
+				pModDoc->OnPatternPlayNoLoop();
+		}
 
 		vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
 		if(vol < 0)
