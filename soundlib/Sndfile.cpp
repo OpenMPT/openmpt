@@ -212,6 +212,7 @@ void CSoundFile::InitializeGlobals(MODTYPE type)
 	m_nResampling = SRCMODE_DEFAULT;
 	m_dwLastSavedWithVersion = Version(0);
 	m_dwCreatedWithVersion = Version(0);
+	m_nTempoMode = TempoMode::Classic;
 
 	SetMixLevels(MixLevels::Compatible);
 
