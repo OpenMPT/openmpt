@@ -1392,7 +1392,7 @@ void CCommandSet::SetupCommands()
 
 	for(int j = kcStartSampleCues; j <= kcEndSampleCues; j++)
 	{
-		CString s = MPT_CFORMAT("Preview Sample Cue {}")(j - kcStartSampleCues + 1);
+		CString s = MPT_CFORMAT("Preview / Set Sample Cue {}")(j - kcStartSampleCues + 1);
 		m_commands[j] = {static_cast<uint32>(1924 + j - kcStartSampleCues), s};
 	}
 	static_assert(1924 + kcEndSampleCues - kcStartSampleCues < 1950);
