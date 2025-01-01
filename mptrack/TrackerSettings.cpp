@@ -1418,7 +1418,7 @@ mpt::PathString TrackerSettings::GetDefaultAutosavePath()
 	mpt::PathString path;
 	if(theApp.IsPortableMode())
 	{
-		return theApp.GetInstallPath().WithTrailingSlash();
+		path = theApp.GetInstallPath().WithTrailingSlash();
 	} else
 	{
 		// Try to find non-roaming (local) app data first, fall back to other directory
