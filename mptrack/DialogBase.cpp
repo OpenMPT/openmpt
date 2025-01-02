@@ -120,7 +120,7 @@ BOOL DialogBase::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 	} else
 	{
 		m_tooltipText = std::move(s);
-		pTTT->lpszText = const_cast<TCHAR *>(s.GetString());
+		pTTT->lpszText = const_cast<TCHAR *>(m_tooltipText.GetString());
 	}
 
 	*pResult = 0;
