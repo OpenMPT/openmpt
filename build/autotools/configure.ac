@@ -41,7 +41,7 @@ case $host_os in
   LIBOPENMPT_WIN32_LIBS="-lole32 -lrpcrt4"
   LIBOPENMPT_LIBS_PRIVATE_WIN32="-lole32 -lrpcrt4"
   OPENMPT123_WIN32_LIBS=-lwinmm
-  WIN32_CPPFLAGS=
+  WIN32_CPPFLAGS="-D_UNICODE"
   WIN32_CXXFLAGS="-municode -mthreads"
   WIN32_CFLAGS="-municode -mthreads"
   WIN32_CONSOLE_CXXFLAGS=-mconsole
