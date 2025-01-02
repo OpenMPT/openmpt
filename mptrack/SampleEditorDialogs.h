@@ -200,7 +200,7 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
-	CString GetToolTipText(UINT id, HWND hwnd) const;
+	CString GetToolTipText(UINT id, HWND hwnd) const override;
 
 	afx_msg void OnLoopTypeChanged();
 	afx_msg void OnFadeLengthChanged();
