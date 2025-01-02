@@ -32,7 +32,7 @@ MPT_WARNING("C stdlib is not multi-threaded.")
 #endif
 
 #ifndef MPT_CHECK_LIBC_IGNORE_WARNING_UNICODE_MISMATCH
-#if MPT_OS_WINDWOS
+#if MPT_OS_WINDOWS
 #ifdef UNICODE
 #ifndef _UNICODE
 MPT_WARNING("UNICODE is defined but _UNICODE is not defined. Please #define _UNICODE.")
