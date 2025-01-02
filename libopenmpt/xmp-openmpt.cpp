@@ -1029,6 +1029,7 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 		form->rate = 0;
 		form->chan = 0;
 		form->res = 0;
+		form->chanmask = 0;
 		return;
 	}
 	if ( self->settings.samplerate != 0 ) {
@@ -1057,6 +1058,7 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 		}
 	}
 	form->res = 4; // float
+	form->chanmask = 0;
 }
 
 // get the tags
