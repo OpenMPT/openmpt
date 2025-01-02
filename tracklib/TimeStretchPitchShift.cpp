@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "TimeStretchPitchShift.h"
+#include "SampleEdit.h"
 #include "../soundlib/ModSample.h"
 #include "../soundlib/SampleCopy.h"
 #include "../soundlib/Sndfile.h"
@@ -75,14 +76,14 @@ void Base::FinishProcessing(void *newSampleData)
 
 	m_sample.ReplaceWaveform(newSampleData, m_newLength, m_sndFile);
 
-	if(m_sample.nLoopStart > m_start)
-		m_sample.nLoopStart = m_start + mpt::saturate_round<SmpLength>((m_sample.nLoopStart - m_start) * m_stretchRatio);
-	if(m_sample.nLoopEnd > m_start)
-		m_sample.nLoopEnd = m_start + mpt::saturate_round<SmpLength>((m_sample.nLoopEnd - m_start) * m_stretchRatio);
-	if(m_sample.nSustainStart > m_start)
-		m_sample.nSustainStart = m_start + mpt::saturate_round<SmpLength>((m_sample.nSustainStart - m_start) * m_stretchRatio);
-	if(m_sample.nSustainEnd > m_start)
-		m_sample.nSustainEnd = m_start + mpt::saturate_round<SmpLength>((m_sample.nSustainEnd - m_start) * m_stretchRatio);
+	if(m_stretchRatio != 1.0)
+	{
+		for(SmpLength &cue : SampleEdit::GetCuesAndLoops(m_sample))
+		{
+			if(cue > m_start)
+				cue = m_start + mpt::saturate_round<SmpLength>((cue - m_start) * m_stretchRatio);
+		}
+	}
 	m_sample.SetLoop(
 		m_sample.nLoopStart,
 		m_sample.nLoopEnd,
