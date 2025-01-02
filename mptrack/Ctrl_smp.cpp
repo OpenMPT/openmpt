@@ -2194,15 +2194,19 @@ public:
 			// Swap sample buffer pointer to new buffer, update song + sample data & free old sample buffer
 			ctrlSmp::ReplaceSample(sample, pNewSample, std::min(outPos + remainLength, newSampleLength), sndFile);
 			// Update loops and wrap-around buffer
+			for(SmpLength &cue : SampleEdit::GetCuesAndLoops(sample))
+			{
+				cue = mpt::saturate_round<SmpLength>(cue * m_ratio);
+			}
 			sample.SetLoop(
-				mpt::saturate_round<SmpLength>(sample.nLoopStart * m_ratio),
-				mpt::saturate_round<SmpLength>(sample.nLoopEnd * m_ratio),
+				sample.nLoopStart,
+				sample.nLoopEnd,
 				sample.uFlags[CHN_LOOP],
 				sample.uFlags[CHN_PINGPONGLOOP],
 				sndFile);
 			sample.SetSustainLoop(
-				mpt::saturate_round<SmpLength>(sample.nSustainStart * m_ratio),
-				mpt::saturate_round<SmpLength>(sample.nSustainEnd * m_ratio),
+				sample.nSustainStart,
+				sample.nSustainEnd,
 				sample.uFlags[CHN_SUSTAINLOOP],
 				sample.uFlags[CHN_PINGPONGSUSTAIN],
 				sndFile);
