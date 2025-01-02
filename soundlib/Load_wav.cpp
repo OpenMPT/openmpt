@@ -64,11 +64,13 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 	WAVReader wavFile(file);
 
 	if(!wavFile.IsValid()
-		|| wavFile.GetNumChannels() == 0
-		|| wavFile.GetNumChannels() > MAX_BASECHANNELS
-		|| wavFile.GetBitsPerSample() == 0
-		|| wavFile.GetBitsPerSample() > 32
-		|| (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat))
+	   || wavFile.GetNumChannels() == 0
+	   || wavFile.GetNumChannels() > MAX_BASECHANNELS
+	   || wavFile.GetNumChannels() >= MAX_SAMPLES
+	   || wavFile.GetBitsPerSample() == 0
+	   || wavFile.GetBitsPerSample() > 32
+	   || (wavFile.GetBitsPerSample() < 32 && wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
+	   || (wavFile.GetSampleFormat() != WAVFormatChunk::fmtPCM && wavFile.GetSampleFormat() != WAVFormatChunk::fmtFloat))
 	{
 		return false;
 	} else if(loadFlags == onlyVerifyHeader)
