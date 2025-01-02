@@ -8,6 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.5.36-pre
 
  *  mpg123: Update to v1.32.10 (2024-12-14).
+ *  XMPlay SDK: Update to 2025-01-02.
 
 ### libopenmpt 0.5.35 (2024-12-01)
 
