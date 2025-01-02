@@ -79,7 +79,14 @@ static const char * xmp_openmpt_string = "OpenMPT (" OPENMPT_API_VERSION_STRING 
 
 #define USE_XMPLAY_ISTREAM
 
+// XMPLAY expects a WINAPI (which is __stdcall) function using an undecorated symbol name which conflicts with the provided declaration.
+#if defined(__GNUC__)
+#define XMPIN_GetInterface XMPIN_GetInterface_Dummy
+#endif
 #include "xmplay/xmpin.h"
+#if defined(__GNUC__)
+#undef XMPIN_GetInterface
+#endif
 
 // Shortcut block assigned to the OpenMPT plugin by un4seen.
 enum {
