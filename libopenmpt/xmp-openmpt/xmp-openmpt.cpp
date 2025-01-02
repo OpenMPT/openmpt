@@ -1723,7 +1723,9 @@ static XMPIN xmpin = {
 
 	nullptr, // reserved2
 	openmpt_GetConfig,
-	openmpt_SetConfig
+	openmpt_SetConfig,
+
+	nullptr
 };
 
 static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
