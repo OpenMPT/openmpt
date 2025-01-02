@@ -110,7 +110,9 @@ static void apply_and_save_options();
 
 static std::string convert_to_native( const std::string & str );
 
+#if !defined(UNICODE)
 static std::string StringEncode( const std::wstring &src, UINT codepage );
+#endif
 
 static std::wstring StringDecode( const std::string & src, UINT codepage );
 
@@ -184,6 +186,7 @@ static std::string convert_to_native( const std::string & str ) {
 	return result;
 }
 
+#if !defined(UNICODE)
 static std::string StringEncode( const std::wstring &src, UINT codepage )
 {
 	int required_size = WideCharToMultiByte( codepage, 0, src.c_str(), -1, nullptr, 0, nullptr, nullptr);
@@ -195,6 +198,7 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), encoded_string.size(), nullptr, nullptr);
 	return encoded_string.data();
 }
+#endif
 
 static std::wstring StringDecode( const std::string & src, UINT codepage )
 {
