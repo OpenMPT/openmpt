@@ -279,7 +279,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updat
 				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
 				// If current order and pattern are inconsistent, just jump to start of current pattern
-				if(curPattern != order[curOrder])
+				if(curOrder >= order.size() || curPattern != order[curOrder])
 					return SetCurrentRow(0);
 
 				do
@@ -314,7 +314,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updat
 				PATTERNINDEX curPattern = m_nPattern;
 				ORDERINDEX curOrder = GetCurrentOrder();
 				// If current order and pattern are inconsistent, just jump to end of current pattern
-				if(curPattern != order[curOrder])
+				if(curOrder >= order.size() || curPattern != order[curOrder])
 					return SetCurrentRow(numRows - 1);
 
 				do
