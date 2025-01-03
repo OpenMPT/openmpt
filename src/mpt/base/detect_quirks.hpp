@@ -241,6 +241,16 @@
 
 
 
+#if MPT_OS_CYGWIN
+#define MPT_LIBCXX_QUIRK_BROKEN_USER_LOCALE
+#endif
+
+
+
+// #define MPT_LIBCXX_QUIRK_BROKEN_ACTIVE_LOCALE
+
+
+
 #if MPT_CXX_AT_LEAST(20)
 // Clang 14 is incompatible with libstdc++ 13 in C++20 mode
 #if MPT_CLANG_BEFORE(15, 0, 0) && MPT_LIBCXX_GNU_AT_LEAST(13)
