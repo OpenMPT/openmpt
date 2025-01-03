@@ -24,6 +24,10 @@
 #error "Emscripten >= 1.39.7 is required."
 #endif
 #endif
+#elif defined(__CYGWIN__)
+#define MPT_OS_CYGWIN 1
+
+
 #elif defined(_WIN32)
 #define MPT_OS_WINDOWS 1
 #if defined(WINAPI_FAMILY)
@@ -74,6 +78,9 @@
 #endif
 #ifndef MPT_OS_EMSCRIPTEN
 #define MPT_OS_EMSCRIPTEN 0
+#endif
+#ifndef MPT_OS_CYGWIN
+#define MPT_OS_CYGWIN 0
 #endif
 #ifndef MPT_OS_WINDOWS
 #define MPT_OS_WINDOWS 0
