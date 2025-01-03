@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.13-pre
 
+ *  [**Bug**] Work-around broken user locale support on Cygwin.
+
  *  mpg123: Update to v1.32.10 (2024-12-14).
  *  XMPlay SDK: Update to 2025-01-03.
 
