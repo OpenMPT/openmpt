@@ -681,7 +681,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		int width = HighDPISupport::ScalePixels(1, m_hWnd);
 		rc.SetRect(0, ypaint, rcClient.right + 1, rcClient.bottom + 1);
 		if(width == 1)
-			DrawButtonRect(hdc, lineWidth, &rc, _T(""));
+			DrawButtonRect(hdc, lineWidth, rc, _T(""));
 		else
 			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);  // Prevent lower edge from being drawn
 	}
@@ -700,7 +700,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 	{
 		sprintf(s, "#%u", m_nPattern);
 		rect.right = m_szHeader.cx;
-		DrawButtonRect(hdc, lineWidth, &rect, s, false,
+		DrawButtonRect(hdc, lineWidth, rect, s, false,
 			m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader);
 
 		const int dropWidth = HighDPISupport::ScalePixels(2, m_hWnd);
@@ -723,7 +723,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				else if(numVisibleColums < 5)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
 				sprintf(s, pszfmt, ncolhdr + 1, channel.szName.buf);
-				DrawButtonRect(hdc, lineWidth, &rect, s,
+				DrawButtonRect(hdc, lineWidth, rect, s,
 					channel.dwFlags[CHN_MUTE],
 					m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr,
 					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER, chanColorHeight);
@@ -769,7 +769,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					InvertRect(hdc, &rect);
 					s[0] = (recordGroup == RecordGroup::Group1) ? '1' : '2';
 					s[1] = '\0';
-					DrawButtonRect(hdc, lineWidth, &insRect, s, false, false, DT_CENTER);
+					DrawButtonRect(hdc, lineWidth, insRect, s, false, false, DT_CENTER);
 					FrameRect(hdc, &insRect, blackBrush);
 				}
 
@@ -788,7 +788,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");
 					else
 						sprintf(s, "---");
-					DrawButtonRect(hdc, lineWidth, &rect, s, channel.dwFlags[CHN_NOFX],
+					DrawButtonRect(hdc, lineWidth, rect, s, channel.dwFlags[CHN_NOFX],
 						m_bInItemRect && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr), DT_CENTER);
 				}
 
@@ -921,7 +921,7 @@ void CViewPattern::DrawPatternData(HDC hdc, const int lineWidth, PATTERNINDEX nP
 		else
 			wsprintf(s, _T("%d"), compRow);
 
-		DrawButtonRect(hdc, lineWidth, &rect, s, !selEnable || rowDisabled);
+		DrawButtonRect(hdc, lineWidth, rect, s, !selEnable || rowDisabled);
 		oldrowcolor = EncodeRowColor(row_bkcol, row_col, bRowSel);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;

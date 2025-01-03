@@ -2040,27 +2040,27 @@ static void DrawButtonRectImpl(HDC hdc, int lineWidth, HFONT font, CRect rect, c
 }
 
 
-void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const char *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, const CRect &rect, const char *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), *lpRect, text, disabled, pushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), rect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const wchar_t * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, const CRect &rect, const wchar_t *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), *lpRect, text, disabled, pushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), rect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const char * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const CRect &rect, const char *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, lineWidth, font, *lpRect, text, disabled, pushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, font, rect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const wchar_t * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const CRect &rect, const wchar_t *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, lineWidth, font, *lpRect, text, disabled, pushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, font, rect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 

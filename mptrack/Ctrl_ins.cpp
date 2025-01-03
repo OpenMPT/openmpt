@@ -216,7 +216,7 @@ void CNoteMapWnd::OnPaint()
 				s.clear();
 			}
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(dc, lineWidth, &rect, s.c_str(), false, false);
+			DrawButtonRect(dc, lineWidth, rect, s.c_str(), false, false);
 			// Mapped Note
 			bool highlight = ((focus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
@@ -263,7 +263,7 @@ void CNoteMapWnd::OnPaint()
 			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
 		rect.SetRect(rcClient.left + m_cxFont * 2 - 1, rcClient.top, rcClient.left + m_cxFont * 2 + 3, ypaint);
-		DrawButtonRect(dc, lineWidth, &rect, _T(""), false, false);
+		DrawButtonRect(dc, lineWidth, rect, _T(""), false, false);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);
