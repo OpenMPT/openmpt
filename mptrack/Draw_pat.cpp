@@ -549,9 +549,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 	const int lineWidth = HighDPISupport::ScalePixels(1, *this);
 
 	GetClientRect(&rcClient);
+	CRect clipRect;
+	pDC->GetClipBox(clipRect);
 
 	HDC hdc;
-	HBITMAP oldBitmap = nullptr;
 	if(doSmoothScroll)
 	{
 		if(rcClient != m_oldClient)
@@ -563,11 +564,21 @@ void CViewPattern::OnDraw(CDC *pDC)
 			m_oldClient = rcClient;
 		}
 		hdc = m_offScreenDC;
-		oldBitmap = SelectBitmap(hdc, m_offScreenBitmap);
 	} else
 	{
+		// Off-screen DC for drawing horizontal (channel buttons) and vertical (row number buttons) headers to avoid flicker
+		CRect buttonRect{0, 0, rcClient.Width(), std::max(m_szHeader.cy, m_szCell.cy)};
+		if(buttonRect.Width() > m_oldClient.Width() || buttonRect.Height() > m_oldClient.Height())
+		{
+			m_offScreenBitmap.DeleteObject();
+			m_offScreenDC.DeleteDC();
+			m_offScreenDC.CreateCompatibleDC(pDC);
+			m_offScreenBitmap.CreateCompatibleBitmap(pDC, buttonRect.Width(), buttonRect.Height());
+			m_oldClient = buttonRect;
+		}
 		hdc = pDC->m_hDC;
 	}
+	HBITMAP oldBitmap = SelectBitmap(m_offScreenDC, m_offScreenBitmap);
 
 	const auto dcBrush = GetStockBrush(DC_BRUSH);
 	const auto faceColor = GetSysColor(COLOR_BTNFACE);
@@ -577,9 +588,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	CHANNELINDEX xofs = static_cast<CHANNELINDEX>(GetXScrollPos());
 	ROWINDEX yofs = static_cast<ROWINDEX>(GetYScrollPos());
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
-	UINT nColumnWidth = m_szCell.cx;
-	UINT ncols = sndFile.GetNumChannels();
-	int xpaint = m_szHeader.cx;
+	const UINT nColumnWidth = m_szCell.cx;
+	const UINT numChannels = sndFile.GetNumChannels();
 	int ypaint = rcClient.top + m_szHeader.cy - GetSmoothScrollOffset();
 	const auto &order = Order();
 	const ORDERINDEX ordCount = Order().GetLength();
@@ -614,7 +624,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				ROWINDEX n = std::min(static_cast<ROWINDEX>(nSkip), nPrevRows);
 
 				ypaint += (nSkip - n) * m_szCell.cy;
-				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
+				rect.SetRect(0, m_szHeader.cy, nColumnWidth * numChannels + m_szHeader.cx, ypaint - 1);
 				m_Dib.SetBlendMode(true);
 				DrawPatternData(hdc, lineWidth, nPrevPat, false, false,
 						nPrevRows - n, nPrevRows, xofs, rcClient, &ypaint);
@@ -622,7 +632,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			} else
 			{
 				ypaint += nSkip * m_szCell.cy;
-				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
+				rect.SetRect(0, m_szHeader.cy, nColumnWidth * numChannels + m_szHeader.cx, ypaint - 1);
 			}
 			if ((rect.bottom > rect.top) && (rect.right > rect.left))
 			{
@@ -669,7 +679,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		}
 	}
 	// Drawing outside pattern area
-	xpaint = m_szHeader.cx + (ncols - xofs) * nColumnWidth;
+	int xpaint = m_szHeader.cx + (numChannels - xofs) * nColumnWidth;
 	if ((xpaint < rcClient.right) && (ypaint > rcClient.top))
 	{
 		rc.SetRect(xpaint, rcClient.top, rcClient.right, ypaint);
@@ -692,40 +702,43 @@ void CViewPattern::OnDraw(CDC *pDC)
 	}
 
 	const auto buttonBrush = GetSysColorBrush(COLOR_BTNFACE), blackBrush = GetStockBrush(BLACK_BRUSH);
-	UINT ncolhdr = xofs;
-	xpaint = m_szHeader.cx;
-	ypaint = rcClient.top;
 	rect.SetRect(0, rcClient.top, rcClient.right, rcClient.top + m_szHeader.cy);
-	if(::RectVisible(hdc, &rect))
+	if(pDC->RectVisible(rect))
 	{
 		sprintf(s, "#%u", m_nPattern);
 		rect.right = m_szHeader.cx;
-		DrawButtonRect(hdc, lineWidth, rect, s, false,
-			m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader);
-
-		const int dropWidth = HighDPISupport::ScalePixels(2, m_hWnd);
+		if(pDC->RectVisible(rect))
+		{
+			DrawButtonRect(m_offScreenDC, lineWidth, rect, s, false,
+				m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader);
+		}
 
 		// Drawing Channel Headers
-		while (xpaint < rcClient.right)
+		const int dropWidth = HighDPISupport::ScalePixels(2, m_hWnd);
+		UINT chn = xofs;
+		ypaint = rcClient.top;
+		for(xpaint = m_szHeader.cx; xpaint < clipRect.right; xpaint += nColumnWidth, chn++)
 		{
 			rect.SetRect(xpaint, ypaint, xpaint + nColumnWidth, ypaint + m_szHeader.cy);
-			if (ncolhdr < ncols)
+			if(chn < numChannels)
 			{
-				const auto &channel = sndFile.ChnSettings[ncolhdr];
-				const auto recordGroup = pModDoc->GetChannelRecordGroup(static_cast<CHANNELINDEX>(ncolhdr));
-				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr]? "[Channel %u]" : "Channel %u";
+				if(!pDC->RectVisible(rect))
+					continue;
+				const auto &channel = sndFile.ChnSettings[chn];
+				const auto recordGroup = pModDoc->GetChannelRecordGroup(static_cast<CHANNELINDEX>(chn));
+				const char *pszfmt = sndFile.m_bChannelMuteTogglePending[chn]? "[Channel %u]" : "Channel %u";
 				if(channel.szName[0] != 0)
-					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "%u: [%s]" : "%u: %s";
+					pszfmt = sndFile.m_bChannelMuteTogglePending[chn] ? "%u: [%s]" : "%u: %s";
 				else if(const auto numVisibleColums = m_visibleColumns.count(); numVisibleColums < 2)
-					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[%u]" : "%u";
+					pszfmt = sndFile.m_bChannelMuteTogglePending[chn] ? "[%u]" : "%u";
 				else if(numVisibleColums < 3)
-					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Ch%u]" : "Ch%u";
+					pszfmt = sndFile.m_bChannelMuteTogglePending[chn] ? "[Ch%u]" : "Ch%u";
 				else if(numVisibleColums < 5)
-					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
-				sprintf(s, pszfmt, ncolhdr + 1, channel.szName.buf);
-				DrawButtonRect(hdc, lineWidth, rect, s,
+					pszfmt = sndFile.m_bChannelMuteTogglePending[chn] ? "[Chn %u]" : "Chn %u";
+				sprintf(s, pszfmt, chn + 1, channel.szName.buf);
+				DrawButtonRect(m_offScreenDC, lineWidth, rect, s,
 					channel.dwFlags[CHN_MUTE],
-					m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr,
+					m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == chn,
 					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER, chanColorHeight);
 
 				if(channel.color != ModChannelSettings::INVALID_COLOR)
@@ -737,15 +750,15 @@ void CViewPattern::OnDraw(CDC *pDC)
 					r.left = rect.left + chanColorOffset;
 					r.right = rect.right - chanColorOffset;
 
-					::SetDCBrushColor(hdc, channel.color);
-					::FillRect(hdc, r, dcBrush);
+					::SetDCBrushColor(m_offScreenDC, channel.color);
+					::FillRect(m_offScreenDC, r, dcBrush);
 				}
 
 				// When dragging around channel headers, mark insertion position
 				if(m_Status[psDragging] && !m_bInItemRect
 				   && m_nDragItem.Type() == DragItem::ChannelHeader
 				   && m_nDropItem.Type() == DragItem::ChannelHeader
-				   && m_nDropItem.Value() == ncolhdr)
+				   && m_nDropItem.Value() == chn)
 				{
 					CRect r;
 					r.top = rect.top;
@@ -754,8 +767,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 					r.left = (m_nDropItem.Value() < m_nDragItem.Value() || m_Status[psShiftDragging]) ? rect.left : rect.right - dropWidth;
 					r.right = r.left + dropWidth;
 
-					::SetDCBrushColor(hdc, textColor);
-					::FillRect(hdc, r, dcBrush);
+					::SetDCBrushColor(m_offScreenDC, textColor);
+					::FillRect(m_offScreenDC, r, dcBrush);
 				}
 
 				rect.bottom = rect.top + colHeight;
@@ -765,18 +778,18 @@ void CViewPattern::OnDraw(CDC *pDC)
 				{
 					CRect insRect;
 					insRect.SetRect(xpaint, ypaint + chanColorHeight, xpaint + nColumnWidth / 8 + recordInsX, ypaint + colHeight);
-					FrameRect(hdc, &rect, buttonBrush);
-					InvertRect(hdc, &rect);
+					FrameRect(m_offScreenDC, &rect, buttonBrush);
+					InvertRect(m_offScreenDC, &rect);
 					s[0] = (recordGroup == RecordGroup::Group1) ? '1' : '2';
 					s[1] = '\0';
-					DrawButtonRect(hdc, lineWidth, insRect, s, false, false, DT_CENTER);
-					FrameRect(hdc, &insRect, blackBrush);
+					DrawButtonRect(m_offScreenDC, lineWidth, insRect, s, false, false, DT_CENTER);
+					FrameRect(m_offScreenDC, &insRect, blackBrush);
 				}
 
 				if(m_Status[psShowVUMeters])
 				{
-					m_chnState[ncolhdr].vuMeterOld = 0;
-					DrawChannelVUMeter(hdc, rect.left, rect.bottom, ncolhdr);
+					m_chnState[chn].vuMeterOld = 0;
+					DrawChannelVUMeter(m_offScreenDC, rect.left, rect.bottom, chn);
 					rect.top += vuHeight;
 					rect.bottom += vuHeight;
 				}
@@ -788,25 +801,26 @@ void CViewPattern::OnDraw(CDC *pDC)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");
 					else
 						sprintf(s, "---");
-					DrawButtonRect(hdc, lineWidth, rect, s, channel.dwFlags[CHN_NOFX],
-						m_bInItemRect && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr), DT_CENTER);
+					DrawButtonRect(m_offScreenDC, lineWidth, rect, s, channel.dwFlags[CHN_NOFX],
+						m_bInItemRect && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == chn), DT_CENTER);
 				}
-
-			} else break;
-			ncolhdr++;
-			xpaint += nColumnWidth;
+			} else
+			{
+				break;
+			}
+		}
+		if(!doSmoothScroll)
+		{
+			pDC->BitBlt(clipRect.left, clipRect.top, xpaint - clipRect.left, m_szHeader.cy - clipRect.top, &m_offScreenDC, clipRect.left, clipRect.top, SRCCOPY);
 		}
 	}
 
 	if(doSmoothScroll)
 	{
-		CRect clipRect;
-		pDC->GetClipBox(clipRect);
 		pDC->BitBlt(clipRect.left, clipRect.top, clipRect.Width(), clipRect.Height(), &m_offScreenDC, clipRect.left, clipRect.top, SRCCOPY);
-		SelectBitmap(m_offScreenDC, oldBitmap);
 	}
+	SelectBitmap(m_offScreenDC, oldBitmap);
 
-	//rewbs.fxVis
 	if (m_pEffectVis)
 	{
 		//HACK: Update visualizer on every pattern redraw. Cleary there's space for opt here.
@@ -915,13 +929,22 @@ void CViewPattern::DrawPatternData(HDC hdc, const int lineWidth, PATTERNINDEX nP
 		rect.right = rect.left + m_szHeader.cx;
 
 		const bool rowDisabled = sndFile.m_lockRowStart != ROWINDEX_INVALID && (row < sndFile.m_lockRowStart || row > sndFile.m_lockRowEnd);
-		TCHAR s[32];
-		if(hexNumbers)
-			wsprintf(s, _T("%s%02X"), compRow < 0 ? _T("-") : _T(""), std::abs(compRow));
-		else
-			wsprintf(s, _T("%d"), compRow);
+		// Draw button with row number
+		{
+			TCHAR s[32];
+			if(hexNumbers)
+				wsprintf(s, _T("%s%02X"), compRow < 0 ? _T("-") : _T(""), std::abs(compRow));
+			else
+				wsprintf(s, _T("%d"), compRow);
 
-		DrawButtonRect(hdc, lineWidth, rect, s, !selEnable || rowDisabled);
+			// We already draw to the off-screen buffer in case of smooth scrolling
+			const bool drawOffscreen = !patternSetupFlags[PatternSetup::SmoothScrolling];
+			const CRect drawRect = drawOffscreen ? CRect{0, 0, rect.Width(), rect.Height()} : rect;
+			DrawButtonRect(drawOffscreen ? m_offScreenDC : hdc, lineWidth, drawRect, s, !selEnable || rowDisabled);
+			if(drawOffscreen)
+				::BitBlt(hdc, rect.left, rect.top, rect.Width(), rect.Height(), m_offScreenDC, 0, 0, SRCCOPY);
+		}
+
 		oldrowcolor = EncodeRowColor(row_bkcol, row_col, bRowSel);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;
