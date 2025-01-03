@@ -2001,10 +2001,9 @@ int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT form
 }
 
 template<typename Tchar>
-static void DrawButtonRectImpl(HDC hdc, HFONT font, CRect rect, const Tchar *lpszText, bool disabled, bool pushed, DWORD textFlags, uint32 topMargin)
+static void DrawButtonRectImpl(HDC hdc, int lineWidth, HFONT font, CRect rect, const Tchar *text, bool disabled, bool pushed, DWORD textFlags, uint32 topMargin)
 {
-	int width = HighDPISupport::ScalePixels(1, WindowFromDC(hdc));
-	if(width != 1)
+	if(lineWidth != 1)
 	{
 		// Draw "real" buttons in Hi-DPI mode
 		DrawFrameControl(hdc, rect, DFC_BUTTON, pushed ? (DFCS_PUSHED | DFCS_BUTTONPUSH) : DFCS_BUTTONPUSH);
@@ -2023,45 +2022,45 @@ static void DrawButtonRectImpl(HDC hdc, HFONT font, CRect rect, const Tchar *lps
 		SelectPen(hdc, oldpen);
 	}
 	
-	if(lpszText && lpszText[0])
+	if(text && text[0])
 	{
-		rect.DeflateRect(width, width);
+		rect.DeflateRect(lineWidth, lineWidth);
 		if(pushed)
 		{
-			rect.top += width;
-			rect.left += width;
+			rect.top += lineWidth;
+			rect.left += lineWidth;
 		}
 		::SetTextColor(hdc, GetSysColor(disabled ? COLOR_GRAYTEXT : COLOR_BTNTEXT));
 		::SetBkMode(hdc, TRANSPARENT);
 		rect.top += topMargin;
 		auto oldFont = SelectFont(hdc, font);
-		DrawTextT(hdc, lpszText, -1, &rect, textFlags | DT_SINGLELINE | DT_NOPREFIX);
+		DrawTextT(hdc, text, -1, &rect, textFlags | DT_SINGLELINE | DT_NOPREFIX);
 		SelectFont(hdc, oldFont);
 	}
 }
 
 
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const char *text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, CMainFrame::GetGUIFont(), *lpRect, lpszText, bDisabled, bPushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), *lpRect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText, BOOL bDisabled, BOOL bPushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const wchar_t * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, CMainFrame::GetGUIFont(), *lpRect, lpszText, bDisabled, bPushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, CMainFrame::GetGUIFont(), *lpRect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, HFONT font, const RECT *lpRect, LPCSTR lpszText, bool bDisabled, bool bPushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const char * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, font, *lpRect, lpszText, bDisabled, bPushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, font, *lpRect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 
-void DrawButtonRect(HDC hdc, HFONT font, const RECT *lpRect, LPCWSTR lpszText, bool bDisabled, bool bPushed, DWORD dwFlags, uint32 topMargin)
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const wchar_t * text, bool disabled, bool pushed, DWORD dwFlags, uint32 topMargin)
 {
-	DrawButtonRectImpl(hdc, font, *lpRect, lpszText, bDisabled, bPushed, dwFlags, topMargin);
+	DrawButtonRectImpl(hdc, lineWidth, font, *lpRect, text, disabled, pushed, dwFlags, topMargin);
 }
 
 

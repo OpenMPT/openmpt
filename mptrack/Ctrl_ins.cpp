@@ -173,6 +173,7 @@ void CNoteMapWnd::OnPaint()
 	const auto highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), windowBrush = GetSysColorBrush(COLOR_WINDOW);
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT);
 	const auto colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
+	const int lineWidth = HighDPISupport::ScalePixels(1, *this);
 	auto oldFont = dc.SelectObject(CMainFrame::GetGUIFont());
 	dc.SetBkMode(TRANSPARENT);
 	if ((m_cxFont <= 0) || (m_cyFont <= 0))
@@ -215,7 +216,7 @@ void CNoteMapWnd::OnPaint()
 				s.clear();
 			}
 			rect.SetRect(0, ypaint, m_cxFont, ypaint+m_cyFont);
-			DrawButtonRect(dc, &rect, s.c_str(), FALSE, FALSE);
+			DrawButtonRect(dc, lineWidth, &rect, s.c_str(), false, false);
 			// Mapped Note
 			bool highlight = ((focus) && (nPos == (int)m_nNote));
 			rect.left = rect.right;
@@ -262,7 +263,7 @@ void CNoteMapWnd::OnPaint()
 			dc.DrawText(s.c_str(), -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX);
 		}
 		rect.SetRect(rcClient.left + m_cxFont * 2 - 1, rcClient.top, rcClient.left + m_cxFont * 2 + 3, ypaint);
-		DrawButtonRect(dc, &rect, _T(""), FALSE, FALSE);
+		DrawButtonRect(dc, lineWidth, &rect, _T(""), false, false);
 		if (ypaint < rcClient.bottom)
 		{
 			rect.SetRect(rcClient.left, ypaint, rcClient.right, rcClient.bottom);

@@ -419,10 +419,10 @@ RGBQUAD rgb2quad(COLORREF c);
 // Other bitmap functions
 int DrawTextT(HDC hdc, const wchar_t *lpchText, int cchText, LPRECT lprc, UINT format);
 int DrawTextT(HDC hdc, const char *lpchText, int cchText, LPRECT lprc, UINT format);
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
-void DrawButtonRect(HDC hdc, const RECT *lpRect, LPCWSTR lpszText = nullptr, BOOL bDisabled = FALSE, BOOL bPushed = FALSE, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
-void DrawButtonRect(HDC hdc, HFONT font, const RECT *lpRect, LPCSTR lpszText = nullptr, bool bDisabled = false, bool bPushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
-void DrawButtonRect(HDC hdc, HFONT font, const RECT *lpRect, LPCWSTR lpszText = nullptr, bool bDisabled = false, bool bPushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
+void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const char *text = nullptr, bool disabled = false, bool pushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
+void DrawButtonRect(HDC hdc, int lineWidth, const RECT *lpRect, const wchar_t *text = nullptr, bool disabled = false, bool pushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const char *text = nullptr, bool disabled = false, bool pushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
+void DrawButtonRect(HDC hdc, int lineWidth, HFONT font, const RECT *lpRect, const wchar_t *text = nullptr, bool disabled = false, bool pushed = false, DWORD dwFlags = (DT_CENTER | DT_VCENTER), uint32 topMargin = 0);
 
 // Misc functions
 void ErrorBox(UINT nStringID, CWnd *p = nullptr);

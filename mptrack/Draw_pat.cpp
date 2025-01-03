@@ -538,18 +538,20 @@ void CViewPattern::OnDraw(CDC *pDC)
 	if ((pModDoc = GetDocument()) == nullptr)
 		return;
 	m_chnState.resize(pModDoc->GetNumChannels());
-	
+
+	FlagSet<PatternSetup> patternSetup = TrackerSettings::Instance().patternSetup;
 	const int vuHeight = MulDiv(VUMETERS_HEIGHT, m_dpi, 96);
 	const int colHeight = MulDiv(COLHDR_HEIGHT, m_dpi, 96);
 	const int chanColorHeight = MulDiv(4, m_dpi, 96);
 	const int chanColorOffset = MulDiv(2, m_dpi, 96);
 	const int recordInsX = MulDiv(3, m_dpi, 96);
-	const bool doSmoothScroll = (TrackerSettings::Instance().patternSetup & PatternSetup::SmoothScrolling);
+	const bool doSmoothScroll = patternSetup[PatternSetup::SmoothScrolling];
+	const int lineWidth = HighDPISupport::ScalePixels(1, *this);
 
 	GetClientRect(&rcClient);
 
 	HDC hdc;
-	HBITMAP oldBitmap = NULL;
+	HBITMAP oldBitmap = nullptr;
 	if(doSmoothScroll)
 	{
 		if(rcClient != m_oldClient)
@@ -593,7 +595,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 			PATTERNINDEX nPrevPat = PATTERNINDEX_INVALID;
 
 			// Display previous pattern
-			if(TrackerSettings::Instance().patternSetup & PatternSetup::ShowPrevNextPattern)
+			if(patternSetup[PatternSetup::ShowPrevNextPattern])
 			{
 				if(m_nOrder > 0 && m_nOrder < ordCount)
 				{
@@ -614,7 +616,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				ypaint += (nSkip - n) * m_szCell.cy;
 				rect.SetRect(0, m_szHeader.cy, nColumnWidth * ncols + m_szHeader.cx, ypaint - 1);
 				m_Dib.SetBlendMode(true);
-				DrawPatternData(hdc, nPrevPat, false, false,
+				DrawPatternData(hdc, lineWidth, nPrevPat, false, false,
 						nPrevRows - n, nPrevRows, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(false);
 			} else
@@ -637,10 +639,10 @@ void CViewPattern::OnDraw(CDC *pDC)
 
 	UINT nrows = sndFile.Patterns.IsValidPat(m_nPattern) ? sndFile.Patterns[m_nPattern].GetNumRows() : 0;
 	int ypatternend = ypaint + (nrows-yofs)*m_szCell.cy;
-	DrawPatternData(hdc, m_nPattern, true, (pMainFrm->GetModPlaying() == pModDoc),
+	DrawPatternData(hdc, lineWidth, m_nPattern, true, (pMainFrm->GetModPlaying() == pModDoc),
 					yofs, nrows, xofs, rcClient, &ypaint);
 	// Display next pattern
-	if((TrackerSettings::Instance().patternSetup & PatternSetup::ShowPrevNextPattern) && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
+	if(patternSetup[PatternSetup::ShowPrevNextPattern] && (ypaint < rcClient.bottom) && (ypaint == ypatternend))
 	{
 		int nVisRows = (rcClient.bottom - ypaint + m_szCell.cy - 1) / m_szCell.cy;
 		if(nVisRows > 0)
@@ -660,7 +662,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 				ROWINDEX n = std::min(static_cast<ROWINDEX>(nVisRows), nNextRows);
 
 				m_Dib.SetBlendMode(true);
-				DrawPatternData(hdc, nNextPat, false, false,
+				DrawPatternData(hdc, lineWidth, nNextPat, false, false,
 						0, n, xofs, rcClient, &ypaint);
 				m_Dib.SetBlendMode(false);
 			}
@@ -679,7 +681,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 		int width = HighDPISupport::ScalePixels(1, m_hWnd);
 		rc.SetRect(0, ypaint, rcClient.right + 1, rcClient.bottom + 1);
 		if(width == 1)
-			DrawButtonRect(hdc, &rc, _T(""));
+			DrawButtonRect(hdc, lineWidth, &rc, _T(""));
 		else
 			DrawEdge(hdc, rc, EDGE_RAISED, BF_TOPLEFT | BF_MIDDLE);  // Prevent lower edge from being drawn
 	}
@@ -698,8 +700,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 	{
 		sprintf(s, "#%u", m_nPattern);
 		rect.right = m_szHeader.cx;
-		DrawButtonRect(hdc, &rect, s, FALSE,
-			(m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader) ? TRUE : FALSE);
+		DrawButtonRect(hdc, lineWidth, &rect, s, false,
+			m_bInItemRect && m_nDragItem.Type() == DragItem::PatternHeader);
 
 		const int dropWidth = HighDPISupport::ScalePixels(2, m_hWnd);
 
@@ -721,9 +723,9 @@ void CViewPattern::OnDraw(CDC *pDC)
 				else if(numVisibleColums < 5)
 					pszfmt = sndFile.m_bChannelMuteTogglePending[ncolhdr] ? "[Chn %u]" : "Chn %u";
 				sprintf(s, pszfmt, ncolhdr + 1, channel.szName.buf);
-				DrawButtonRect(hdc, &rect, s,
-					channel.dwFlags[CHN_MUTE] ? TRUE : FALSE,
-					(m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr) ? TRUE : FALSE,
+				DrawButtonRect(hdc, lineWidth, &rect, s,
+					channel.dwFlags[CHN_MUTE],
+					m_bInItemRect && m_nDragItem.Type() == DragItem::ChannelHeader && m_nDragItem.Value() == ncolhdr,
 					recordGroup != RecordGroup::NoGroup ? DT_RIGHT : DT_CENTER, chanColorHeight);
 
 				if(channel.color != ModChannelSettings::INVALID_COLOR)
@@ -767,7 +769,7 @@ void CViewPattern::OnDraw(CDC *pDC)
 					InvertRect(hdc, &rect);
 					s[0] = (recordGroup == RecordGroup::Group1) ? '1' : '2';
 					s[1] = '\0';
-					DrawButtonRect(hdc, &insRect, s, FALSE, FALSE, DT_CENTER);
+					DrawButtonRect(hdc, lineWidth, &insRect, s, false, false, DT_CENTER);
 					FrameRect(hdc, &insRect, blackBrush);
 				}
 
@@ -786,8 +788,8 @@ void CViewPattern::OnDraw(CDC *pDC)
 						sprintf(s, "%u: %s", mixPlug, (sndFile.m_MixPlugins[mixPlug - 1]).pMixPlugin ? sndFile.m_MixPlugins[mixPlug - 1].GetNameLocale() : "[empty]");
 					else
 						sprintf(s, "---");
-					DrawButtonRect(hdc, &rect, s, channel.dwFlags[CHN_NOFX] ? TRUE : FALSE,
-						((m_bInItemRect) && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr)) ? TRUE : FALSE, DT_CENTER);
+					DrawButtonRect(hdc, lineWidth, &rect, s, channel.dwFlags[CHN_NOFX],
+						m_bInItemRect && (m_nDragItem.Type() == DragItem::PluginName) && (m_nDragItem.Value() == ncolhdr), DT_CENTER);
 				}
 
 			} else break;
@@ -819,7 +821,7 @@ static constexpr UINT EncodeRowColor(int rowBkCol, int rowCol, bool rowSelected)
 }
 
 
-void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable,
+void CViewPattern::DrawPatternData(HDC hdc, const int lineWidth, PATTERNINDEX nPattern, bool selEnable,
 	bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint)
 {
 	static_assert(1 << PatternCursor::lastColumn <= Util::MaxValueOfType(ChannelState{}.selectedCols), "Columns are used as bitmasks");
@@ -919,7 +921,7 @@ void CViewPattern::DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnabl
 		else
 			wsprintf(s, _T("%d"), compRow);
 
-		DrawButtonRect(hdc, &rect, s, !selEnable || rowDisabled);
+		DrawButtonRect(hdc, lineWidth, &rect, s, !selEnable || rowDisabled);
 		oldrowcolor = EncodeRowColor(row_bkcol, row_col, bRowSel);
 		bRowSel = (m_Selection.ContainsVertical(PatternCursor(row)));
 		row_col = MODCOLOR_TEXTNORMAL;

@@ -289,7 +289,7 @@ public:
 	void OnDropSelection();
 
 public:
-	void DrawPatternData(HDC hdc, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
+	void DrawPatternData(HDC hdc, const int lineWidth, PATTERNINDEX nPattern, bool selEnable, bool isPlaying, ROWINDEX startRow, ROWINDEX numRows, CHANNELINDEX startChan, CRect &rcClient, int *pypaint);
 	void DrawLetter(int x, int y, char letter, int sizex = 10, int ofsx = 0);
 	void DrawLetter(int x, int y, wchar_t letter, int sizex = 10, int ofsx = 0);
 #if MPT_CXX_AT_LEAST(20)
