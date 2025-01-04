@@ -1,5 +1,6 @@
 libmpg123 library version 1.32.10 (2024-12-14).
 The following changes have been made:
+ *  `ports/generic/config.h` has been added for build system independent builds.
  *  `ports/MSVC++/config.h` has been added for MSVC builds.
  *  `ports/Xcode/config.h` has been retained from older versions.
  *  `ports/Xcode/config.h` has been modified to let the build system set
