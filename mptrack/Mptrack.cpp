@@ -329,6 +329,13 @@ public:
 #endif
 
 public:
+	CMPTCommandLineInfo()
+	{
+		std::vector<TCHAR> curDir(::GetCurrentDirectory(0, nullptr), _T('\0'));
+		::GetCurrentDirectory(static_cast<DWORD>(curDir.size()), curDir.data());
+		m_workingDir = mpt::PathString::FromNative(curDir.data());
+	}
+
 	void ParseParam(LPCTSTR param, BOOL isFlag, BOOL isLast) override
 	{
 		if(isFlag)
@@ -350,11 +357,14 @@ public:
 #endif
 		} else
 		{
-			m_fileNames.push_back(mpt::PathString::FromNative(param));
+			m_fileNames.push_back(mpt::RelativePathToAbsolute(mpt::PathString::FromNative(param), m_workingDir));
 			if(m_nShellCommand == FileNew) m_nShellCommand = FileOpen;
 		}
 		CCommandLineInfo::ParseParam(param, isFlag, isLast);
 	}
+
+protected:
+	mpt::PathString m_workingDir;
 };
 
 
@@ -1088,7 +1098,7 @@ static bool ProcessorCanRunCurrentBuild()
 	return true;
 }
 
-static bool SystemCanRunCurrentBuild() 
+static bool SystemCanRunCurrentBuild()
 {
 	if(mpt::OS::Windows::IsOriginal())
 	{
