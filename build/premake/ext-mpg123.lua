@@ -6,13 +6,13 @@
   mpt_kind "shared"
   targetname "openmpt-mpg123"
   includedirs {
-   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/ports/generic",
    "../../include/mpg123/src/include",
   }
 	filter {}
   files {
    "../../include/mpg123/ports/makefile/config.h",
-   "../../include/mpg123/ports/MSVC++/config.h",
+   "../../include/mpg123/ports/generic/config.h",
   }
   files {
    "../../include/mpg123/src/common/abi_align.h",
