@@ -9,7 +9,7 @@
   dofile "../../build/genie/genie-defaults-winver.lua"
   targetname "openmpt-mpg123"
   includedirs {
-   "../../include/mpg123/ports/MSVC++",
+   "../../include/mpg123/ports/generic",
    "../../include/mpg123/src/include",
   }
   flags { "Unicode" }
