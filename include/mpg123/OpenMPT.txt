@@ -1,12 +1,6 @@
 libmpg123 library version 1.32.10 (2024-12-14).
 The following changes have been made:
  *  `ports/generic/config.h` has been added for build system independent builds.
- *  `ports/makefile/config.h` has been added for plain `Makefile` builds.
- *  `ports/MSVC++/config.h` has been added for MSVC builds.
- *  `ports/Xcode/config.h` has been retained from older versions.
- *  `ports/Xcode/config.h` has been modified to let the build system set
-    `OPT_*`.
- *  `ports/Xcode/config.h` has been modified to `#define HAVE_DIRENT_H`.
  *  `src/compat/compat.c` has been modified to silence MSVC static analyzer
     warnings.
  *  `src/compat/compat.c` and `src/compat/compat.c` have been modified for to
