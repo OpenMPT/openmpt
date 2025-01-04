@@ -8,7 +8,7 @@
   dofile "../../build/premake-xcode/premake-defaults.lua"
   targetname "openmpt-mpg123"
   includedirs {
-   "../../include/mpg123/ports/Xcode",
+   "../../include/mpg123/ports/generic",
    "../../include/mpg123/src/include",
   }
   files {
