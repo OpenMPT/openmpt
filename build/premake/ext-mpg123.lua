@@ -11,7 +11,6 @@
   }
 	filter {}
   files {
-   "../../include/mpg123/ports/makefile/config.h",
    "../../include/mpg123/ports/generic/config.h",
   }
   files {
