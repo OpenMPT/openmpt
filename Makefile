@@ -824,7 +824,7 @@ ifeq ($(ENABLE_DXE),1)
 CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
 LDFLAGS_MPG123  := 
 LDLIBS_MPG123   :=
-CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/
 MPG123_SOURCES := 
 MPG123_SOURCES += include/mpg123/src/compat/compat.c
 MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
@@ -858,8 +858,8 @@ ALL_OBJECTS += $(MPG123_OBJECTS)
 ALL_DEPENDS += $(MPG123_DEPENDS)
 include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
-include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
 LIBS_MPG123 = bin/$(FLAVOUR_DIR)mpg123.a
 
 bin/$(FLAVOUR_DIR)mpg123.a: $(MPG123_OBJECTS)
@@ -879,7 +879,7 @@ else ifeq ($(ENABLE_DLL),1)
 CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
 LDFLAGS_MPG123  :=
 LDLIBS_MPG123   :=
-CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/
 MPG123_SOURCES :=
 MPG123_SOURCES += include/mpg123/src/compat/compat.c
 MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
@@ -913,8 +913,8 @@ ALL_OBJECTS += $(MPG123_OBJECTS)
 ALL_DEPENDS += $(MPG123_DEPENDS)
 include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
-include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
 LIBS_MPG123 = bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX)
 
 bin/$(FLAVOUR_DIR)mpg123$(SOSUFFIX): $(MPG123_OBJECTS)
@@ -934,7 +934,7 @@ else
 CPPFLAGS_MPG123 := -DMPT_WITH_MPG123 -DMPG123_NO_LARGENAME
 LDFLAGS_MPG123  :=
 LDLIBS_MPG123   := 
-CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/
+CPPFLAGS_MPG123 += -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/
 MPG123_SOURCES := 
 MPG123_SOURCES += include/mpg123/src/compat/compat.c
 MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
@@ -964,8 +964,8 @@ MPG123_SOURCES += include/mpg123/src/libmpg123/synth_s32.c
 MPG123_SOURCES += include/mpg123/src/libmpg123/tabinit.c
 include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
-include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.mpg123$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
 MPG123_OBJECTS = $(MPG123_SOURCES:.c=.mpg123$(FLAVOUR_O).o)
 MPG123_DEPENDS = $(MPG123_OBJECTS:$(FLAVOUR_O).o=$(FLAVOUR_O).d)
 ALL_OBJECTS += $(MPG123_OBJECTS)
@@ -1004,7 +1004,7 @@ $(call PRINT_INFO,[DEP] ogg: local)
 CPPFLAGS_OGG := -DMPT_WITH_OGG
 LDFLAGS_OGG  := 
 LDLIBS_OGG   := 
-CPPFLAGS_OGG += -Iinclude/ogg/include/ -Iinclude/ogg/ports/makefile/
+CPPFLAGS_OGG += -Iinclude/ogg/include/ -Iinclude/ogg/ports/generic/
 OGG_SOURCES := 
 OGG_SOURCES += include/ogg/src/bitwise.c
 OGG_SOURCES += include/ogg/src/framing.c
