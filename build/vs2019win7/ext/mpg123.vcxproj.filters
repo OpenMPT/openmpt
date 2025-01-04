@@ -7,9 +7,6 @@
     <Filter Include="ports\generic">
       <UniqueIdentifier>{09A36B38-7563-E76E-3E9E-30ECAA1D2C4B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ports\makefile">
-      <UniqueIdentifier>{8A017C94-76CF-6F9A-5F63-E0C04BD04BFF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -29,9 +26,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\include\mpg123\ports\generic\config.h">
       <Filter>ports\generic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\mpg123\ports\makefile\config.h">
-      <Filter>ports\makefile</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\mpg123\src\common\abi_align.h">
       <Filter>src\common</Filter>

@@ -929,7 +929,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\mpg123\ports\generic\config.h" />
-    <ClInclude Include="..\..\..\include\mpg123\ports\makefile\config.h" />
     <ClInclude Include="..\..\..\include\mpg123\src\common\abi_align.h" />
     <ClInclude Include="..\..\..\include\mpg123\src\common\debug.h" />
     <ClInclude Include="..\..\..\include\mpg123\src\common\sample.h" />
