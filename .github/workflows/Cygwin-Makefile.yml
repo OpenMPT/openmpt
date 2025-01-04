@@ -1,0 +1,24 @@
+name: Cygwin Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.31 ]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cygwin/cygwin-install-action@master
+        with:
+          packages: subversion make gcc-core gcc-g++ autoconf autoconf-archive automake zlib-devel libmpg123-devel libogg-devel libvorbis-devel libsndfile-devel libflac-devel libSDL2-devel libportaudio-devel libportaudiocpp-devel libpulse-devel help2man doygen graphviz curl p7zip zip unzip perl-XML-XPath
+      - name: setup parallel make
+        run: bash -c 'echo MAKEFLAGS=-j${NUMBER_OF_PROCESSORS} >> $GITHUB_ENV'
+      - name: make
+        run: bash -c 'make'
+      - name: make check
+        run: bash -c 'make check'
