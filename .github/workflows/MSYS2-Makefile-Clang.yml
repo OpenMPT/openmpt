@@ -18,6 +18,9 @@ jobs:
           - { sys: MINGW64, rep: mingw64, env: x86_64 }
           - { sys: MINGW32, rep: mingw32, env: i686 }
           - { sys: UCRT64,  rep: ucrt64,  env: ucrt-x86_64 }
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-autotools-${{matrix.sys}}-${{matrix.rep}}-${{matrix.env}}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
