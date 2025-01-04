@@ -52,7 +52,9 @@
 /* yeah, POSIX ... */
 
 #if defined(HAVE_POSIX_CRT)
-#if defined(_FILE_OFFSET_BITS)
+#if defined(__DJGPP__)
+#define SIZEOF_OFF_T 4
+#elif defined(_FILE_OFFSET_BITS)
 #if (_FILE_OFFSET_BITS == 64)
 #define SIZEOF_OFF_T 8
 #elif (_FILE_OFFSET_BITS == 32)
@@ -76,8 +78,6 @@
 #define SIZEOF_OFF_T 4
 #endif
 #elif defined(HAVE_MS_CRT)
-#define SIZEOF_OFF_T 4
-#elif defined(__DJGPP__)
 #define SIZEOF_OFF_T 4
 #else
 #define SIZEOF_OFF_T 8
