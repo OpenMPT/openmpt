@@ -1004,7 +1004,7 @@ $(call PRINT_INFO,[DEP] ogg: local)
 CPPFLAGS_OGG := -DMPT_WITH_OGG
 LDFLAGS_OGG  := 
 LDLIBS_OGG   := 
-CPPFLAGS_OGG += -Iinclude/ogg/include/ -Iinclude/ogg/ports/generic/
+CPPFLAGS_OGG += -Iinclude/ogg/include/ -Iinclude/ogg/ports/makefile/
 OGG_SOURCES := 
 OGG_SOURCES += include/ogg/src/bitwise.c
 OGG_SOURCES += include/ogg/src/framing.c
