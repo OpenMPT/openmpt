@@ -256,6 +256,27 @@ NUMTHREADS:=$(shell nproc)
 
 else ifeq ($(OS),Windows_NT)
 
+ifeq ($(shell uname -o),Cygwin)
+
+HOST=unix
+HOST_FLAVOUR=CYGWIN
+
+TOOLCHAIN_SUFFIX=
+
+CPPCHECK = cppcheck
+
+MKDIR_P = mkdir -p
+RM = rm -f
+RMTREE = rm -rf
+INSTALL = install
+INSTALL_MAKE_DIR = install -d
+INSTALL_DIR = cp -r -v
+FIXPATH = $1
+
+NUMTHREADS:=$(NUMBER_OF_PROCESSORS)
+
+else
+
 HOST=windows
 HOST_FLAVOUR=
 
@@ -272,6 +293,8 @@ INSTALL_DIR = echo install
 FIXPATH = $(subst /,\,$1)
 
 NUMTHREADS:=$(NUMBER_OF_PROCESSORS)
+
+endif
 
 else
 
