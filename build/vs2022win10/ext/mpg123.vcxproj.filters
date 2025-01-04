@@ -4,8 +4,8 @@
     <Filter Include="ports">
       <UniqueIdentifier>{FD8A2810-699F-50C1-3221-F4209EF44CF2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ports\MSVC++">
-      <UniqueIdentifier>{5B499528-47AC-24CD-F031-5D83DC73F04F}</UniqueIdentifier>
+    <Filter Include="ports\generic">
+      <UniqueIdentifier>{09A36B38-7563-E76E-3E9E-30ECAA1D2C4B}</UniqueIdentifier>
     </Filter>
     <Filter Include="ports\makefile">
       <UniqueIdentifier>{8A017C94-76CF-6F9A-5F63-E0C04BD04BFF}</UniqueIdentifier>
@@ -27,8 +27,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\mpg123\ports\MSVC++\config.h">
-      <Filter>ports\MSVC++</Filter>
+    <ClInclude Include="..\..\..\include\mpg123\ports\generic\config.h">
+      <Filter>ports\generic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\mpg123\ports\makefile\config.h">
       <Filter>ports\makefile</Filter>
