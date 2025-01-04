@@ -542,10 +542,10 @@ include/mpg123/src/compat/%.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/compat/%.test.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
 include/mpg123/src/libmpg123/%.test.o : CFLAGS+=$(CFLAGS_SILENT) -DOPT_GENERIC
-include/mpg123/src/compat/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
-include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/makefile/ $(CPPFLAGS)
+include/mpg123/src/compat/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/compat/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
+include/mpg123/src/libmpg123/%.test$(FLAVOUR_O).o : CPPFLAGS:= -Iinclude/mpg123/src/include/ -Iinclude/mpg123/ports/generic/ $(CPPFLAGS)
 else
 ifeq ($(NO_MPG123),1)
 else
