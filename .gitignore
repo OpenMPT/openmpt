@@ -381,11 +381,6 @@
 /include/mpg123/ports/Sony_PSP
 /include/mpg123/ports/cmake
 /include/mpg123/ports/mpg123_.pas
-/include/mpg123/ports/MSVC++/2008clr
-/include/mpg123/ports/MSVC++/2015
-/include/mpg123/ports/MSVC++/CMP3Stream
-/include/mpg123/ports/MSVC++/examples
-/include/mpg123/ports/Xcode/mpg123.xcodeproj
 /include/mpg123/src/Makemodule.am
 /include/mpg123/src/audio.c
 /include/mpg123/src/audio.h
