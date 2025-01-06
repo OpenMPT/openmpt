@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.49-pre
+
 ### libopenmpt 0.4.48 (2025-01-06)
 
  *  The internal LFO plugin could misbehave in Tempo Sync mode when rows per
