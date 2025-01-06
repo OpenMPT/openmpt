@@ -9,6 +9,14 @@ is just a high-level summary.
 
  *  [**Bug**] Work-around broken user locale support on Cygwin.
 
+ *  `module::get_current_estimated_bpm` could return infinity when rows per beat
+    was set to 0. A default of 4 rows per beat is now assumed in this situation.
+ *  Instruments that have a MIDI channel assigned and NNA set to "Continue"
+    could cause NNA channel starvation.
+ *  In non-compatible linear slide mode, the sample rate could wrap around with
+    portamento slides to extremely low frequencies. This should only happen in
+    compatible mode.
+
  *  mpg123: Update to v1.32.10 (2024-12-14).
  *  XMPlay SDK: Update to 2025-01-03.
 
