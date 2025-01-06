@@ -34,6 +34,43 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.14.00 (6 January 2025, revision 22819)
+--------------------------------------------
+Pattern tab
+- [Fix] <js> Upon data entry, the status bar display was not updated unless playback was running.
+- [Fix] <js> Fixed potential crash when trying to move the cursor past the start or end of a pattern when the order list is empty (http://bugs.openmpt.org/view.php?id=1854).
+
+Sample tab
+- [Imp] <js> Pressing Ctrl while moving loop points or clicking loop start / end spin buttons now moves the loop, keeping the loop length constant.
+- [Imp] <js> Cue preview shortcuts now set the cue point if it's currently unused and the sample is being previewed (http://bugs.openmpt.org/view.php?id=1852).
+- [Fix] <js> Time stretching didn't update cue points.
+
+Playback
+- [Fix] <js> Default velocity for instrument plugins was broken in OpenMPT 1.31.13.00 (tx coda).
+- [Fix] <js> MIDI Macros: An unfinished byte right before an "s" SysEx checksum macro letter was not considered in the checksum.
+- [Fix] <js> Avoid NNA channel starvation due to sample-based instruments that have a MIDI channel assigned and NNA set to "Continue". It can still happen if a VST plugin or the MIDI I/O plugin is associated with the instrument. Other built-in plugins are not affected (http://bugs.openmpt.org/view.php?id=1848).
+
+XM
+- [Imp] <js> Warn when saving an instrument that references more than 16 (compatibility export) or 32 samples (http://bugs.openmpt.org/view.php?id=1846).
+- [Imp] <js> Identify XMs saved with Digitrakker that were converted from other formats.
+- [Fix] <js> In non-compatible linear slide mode, the sample rate could wrap around with portamento slides to extremely low frequencies. This should only happen in compatible mode.
+
+Other formats
+- [Imp] <js> MO3: XM dummy command W is now imported.
+- [Fix] <js> ITP: Instruments paths were always read as relative paths since OpenMPT 1.31.01.00, usually causing them to fail to load.
+- [Fix] <js> ITP: Since OpenMPT 1.28.01.00, instrument and envelope flags were no longer read correctly.
+
+Misc
+- [Imp] <js> Fine tempo adjustment shortcuts now also work with formats that don't support fractional tempo.
+- [Imp] <js> "Find MPT Hacks" now warns when an XM instrument uses more than 16 samples (http://bugs.openmpt.org/view.php?id=1846).
+- [Fix] <js> Passing a relative path to a module file as a command-line parameter for OpenMPT did not work as intended since OpenMPT 1.29.10.00.
+- [Fix] <js> Real BPM approximation reported infinity when rows per beat was set to 0. A default of 4 rows per beat is now assumed in this situation.
+- [Fix] <js> Advanced Settings: It was not possible to enter fractional values for settings of type float with system locales using a decimal separator other than ".".
+
+Third-Party Libraries
+- [Imp] Update mpg123 (v1.32.10) and unrar (v7.1.2).
+
+
 v1.31.13.00 (1 December 2024, revision 22403)
 ---------------------------------------------
 Tree view
@@ -67,7 +104,7 @@ MOD
 
 Other formats
 - [Imp] <js> Warn when Startrekker AM companion file for synthesized instruments is most likely missing.
-- [Imp] DBM / IMF / MED: When merging pattern commands, allow to move offset to volume column at the expense of a lower offset resolution. Slightly improves playback of ShowMeLove.med (http://www.un4seen.com/forum/?topic=15448.msg144136#msg144136).
+- [Imp] <js> DBM / IMF / MED: When merging pattern commands, allow to move offset to volume column at the expense of a lower offset resolution. Slightly improves playback of ShowMeLove.med (http://www.un4seen.com/forum/?topic=15448.msg144136#msg144136).
 - [Fix] <js> MED: Fix correct octave transposition in some MED files that have hardware mixing disabled but sample transpose enabled. Fixed Journey.med (http://www.un4seen.com/forum/?topic=15448.msg143713#msg143713).
 - [Fix] <js> MED: Don't enable Amiga resampler if any stereo samples are found, as it does not support stereo samples (http://www.un4seen.com/forum/?topic=15448.msg144058#msg144058).
 - [Fix] <js> MED: Fix tempo in some files using software mixing mode and legacy tempo values (http://www.un4seen.com/forum/?topic=15448.msg144080#msg144080).
@@ -2791,7 +2828,7 @@ Mod Conversion
 - [Imp] <js> When converting note cuts to XM, rewrite them as a v00 command if the effect column is already occupied.
 
 VST::Specific Plugin Fixes
-- [Fix] <js> Some resizable GUI plugins (e.g. Roland D-50) were not resized correctly.
+- [Fix] <js> Some resizable plugin GUIs (e.g. Roland D-50) were not resized correctly.
 
 MOD
 - [Fix] <js> Use M.K. signature instead of M!K! when writing exactly 64 patterns (http://bugs.openmpt.org/view.php?id=958).
