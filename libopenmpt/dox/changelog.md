@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.5.36-pre
+### libopenmpt 0.5.36 (2025-01-06)
 
  *  `module::get_current_estimated_bpm` could return infinity when rows per beat
     was set to 0. A default of 4 rows per beat is now assumed in this situation.
