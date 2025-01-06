@@ -29,15 +29,15 @@ Dependencies
         **MinGW-W64 13.0 (win32 threading model)** 
      *  **emscripten 3.1.1** or higher
      *  **DJGPP GCC 7.1** or higher
-     *  any other **C++20 or C++17 compliant** compiler
+     *  any other **C++23, C++20, or C++17 compliant** compiler
         
         libopenmpt makes the following assumptions about the C++ implementation
         used for building:
          *  `std::numeric_limits<unsigned char>::digits == 8` (enforced by
             static_assert)
          *  existence of `std::uintptr_t` (enforced by static_assert)
-         *  in C++20 mode, `std::endian::little != std::endian::big` (enforced
-            by static_assert)
+         *  in C++23/C++20 mode, `std::endian::little != std::endian::big`
+            (enforced by static_assert)
          *  `wchar_t` encoding is either UTF-16 or UTF-32 (implicitly assumed)
          *  representation of basic source character set is ASCII (implicitly
             assumed)
@@ -61,11 +61,11 @@ Dependencies
             Emscripten when running in `AudioWorkletProcessor` context)
 
  *  Required compilers to use libopenmpt:
-     *  Any **C89** / **C99** / **C11** / **C17** compatible compiler should
-        work with the C API as long as a **C99** compatible **stdint.h** is
-        available.
-     *  Any **C++20** or **C++17** compatible compiler should work with the C++
-        API.
+     *  Any **C89** / **C99** / **C11** / **C17** / **C23** compatible compiler
+        should work with the C API as long as a **C99** compatible **stdint.h**
+        is available.
+     *  Any **C++23**, **C++20**, or **C++17** compatible compiler should work
+        with the C++ API.
  *  **J2B** support requires an inflate (deflate decompression) implementation:
      *  **zlib** (or **miniz** can be used internally)
  *  **MO3** support requires:

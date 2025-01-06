@@ -212,7 +212,7 @@ only required information is listed below. We currently only support building
 libopenmpt itself this way, but the test suite and openmpt123 may follow later.
 
  -  language:
-     -  C++17 / C++20
+     -  C++17 / C++20 / C++23
 
  -  defines:
      -  LIBOPENMPT_BUILD
