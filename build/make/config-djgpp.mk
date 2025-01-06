@@ -223,13 +223,13 @@ generic/586-mmx      := $(XX_) -march=pentium-mmx $(FPU_MMX)    -mtune=pentium-m
 generic/586-3dnow    := $(XX_) -march=k6-2        $(FPU_3DNOW)  -mtune=k6-2        $(OPT_UARCH_SCAL_64)    # AMD K6-2..K6-3+, IDT WinChip-2, VIA-C3-Samuel..VIA C3-Ezra
 
 generic/686          := $(___) -march=pentiumpro  $(FPU_387)    -mtune=pentiumpro  $(OPT_UARCH_OOOE)       # Intel Pentium-Pro
-generic/686-mmx      := $(XXX) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Cyrix 6x86MX.., Transmeta Crusoe.., NSC Geode-GX1..
+generic/686-mmx      := $(XX_) -march=i686        $(FPU_MMX)    -mtune=pentium2    $(OPT_UARCH_OOOE_64)    # Intel Pentium-2.., AMD Bulldozer.., VIA C3-Nehemiah.., Cyrix 6x86MX.., Transmeta Crusoe.., NSC Geode-GX1..
 generic/686-3dnow    := $(___) -march=i686        $(FPU_3DNOW)  -mtune=athlon      $(OPT_UARCH_OOOE_64)    # VIA Cyrix-3-Joshua
 generic/686-3dnowa   := $(XX_) -march=athlon      $(FPU_3DNOWA) -mtune=athlon      $(OPT_UARCH_OOOE_64)    # AMD Athlon..K10
 
 generic/sse          := $(___) -march=i686        $(FPU_SSE)    -mtune=pentium3    $(OPT_UARCH_OOOE_128)   # Intel Pentium-3, AMD Athlon-XP, VIA C3-Nehemiah, DM&P Vortex86DX3..
 
-generic/sse2         := $(XX_) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Pentium-4.., AMD Athlon-64.., VIA C7-Esther.., Transmeta Efficeon..
+generic/sse2         := $(X__) -march=i686        $(FPU_SSE2)   -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Pentium-4.., AMD Athlon-64.., VIA C7-Esther.., Transmeta Efficeon..
 generic/sse3         := $(___) -march=i686        $(FPU_SSE3)   -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Core.., AMD Athlon-64-X2.., VIA C7-Esther.., Transmeta Efficeon-88xx..
 generic/ssse3        := $(___) -march=i686        $(FPU_SSSE3)  -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Core-2.., AMD Bobcat.., Via Nano-1000..
 generic/sse4_1       := $(___) -march=i686        $(FPU_SSE4_1) -mtune=generic     $(OPT_UARCH_OOOE_128)   # Intel Core-1st, AMD Bulldozer.., Via Nano-3000..
