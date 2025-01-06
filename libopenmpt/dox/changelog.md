@@ -7,8 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.48-pre
 
- *  `module::get_current_estimated_bpm` could return infinity when rows per beat
-    was set to 0. A default of 4 rows per beat is now assumed in this situation.
+ *  The internal LFO plugin could misbehave in Tempo Sync mode when rows per
+    beat was set to 0. A default of 4 rows per beat is now assumed in this
+    situation.
 
  *  mpg123: Update to v1.32.10 (2024-12-14).
  *  XMPlay SDK: Update to 2025-01-03.
