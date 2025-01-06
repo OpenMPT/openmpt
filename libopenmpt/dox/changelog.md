@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.23-pre
+
 ### libopenmpt 0.6.22 (2025-01-06)
 
  *  [**Bug**] Work-around broken user locale support on Cygwin.
