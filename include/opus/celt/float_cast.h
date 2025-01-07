@@ -69,6 +69,7 @@ static OPUS_INLINE opus_int32 float2int(float x) {return _mm_cvt_ss2si(_mm_set_s
 
 #elif (defined(_MSC_VER) && _MSC_VER >= 1400) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 1))
 
+        #include <intrin.h>  /* OpenMPT */
         #include <xmmintrin.h>
         static OPUS_INLINE opus_int32 float2int(float value)
         {

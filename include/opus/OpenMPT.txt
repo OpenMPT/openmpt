@@ -1,6 +1,7 @@
 libopus library version 1.5.2 (2024-04-12).
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
+ *  celt/float_cast.h has been modified to compile on ARM64EC.
  *  celt/x86/vq_sse2.c has been modified to check for OPUS_X86_MAY_HAVE_SSE2.
  *  celt/x86/x86_arch_macros.c has been modified to support AVX and AVX2.
  *  A warning in dnn/dred_encoder.c has been silenced.
