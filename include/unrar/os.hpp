@@ -78,10 +78,13 @@
 
 // Use SSE only for x86/x64, not ARM Windows.
 #if !defined(__clang__) // OPENMPT ADDITION
+#if !defined(_M_ARM64EC) // OPENMPT ADDITION
+// MSVC enters an infinite loop when compiling blake2s.cpp in ARM64EC mode with SSE intrinsics enabled. // OPENMPT ADDITION
 #if defined(_M_IX86) || defined(_M_X64)
   #define USE_SSE
   #define SSE_ALIGNMENT 16
 #endif
+#endif // OPENMPT ADDITION
 #endif // OPENMPT ADDITION
 
 #include <stdio.h>
