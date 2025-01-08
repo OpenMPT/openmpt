@@ -615,6 +615,7 @@ enum PlayBehaviour
 	kFT2AutoVibratoAbortSweep,      // Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth
 	kLegacyPPQpos,                  // Report fake PPQ position to VST plugins
 	kLegacyPluginNNABehaviour,      // Plugin notes with NNA=continue are affected by note-offs etc.
+	kITCarryAfterNoteOff,           // Envelope Carry continues to function as normal even after note-off
 
 	// Add new play behaviours here.
 

@@ -1643,10 +1643,12 @@ void CSoundFile::InstrumentChange(ModChannel &chn, uint32 instr, bool bPorta, bo
 			reset = (!chn.nLength
 				|| (insNumber && bPorta && m_SongFlags[SONG_ITCOMPATGXX])
 				|| (insNumber && !bPorta && chn.dwFlags[CHN_NOTEFADE | CHN_KEYOFF] && m_SongFlags[SONG_ITOLDEFFECTS]));
-			// NOTE: IT2.14 with SB/GUS/etc. output is different. We are going after IT's WAV writer here.
-			// For SB/GUS/etc. emulation, envelope carry should only apply when the NNA isn't set to "Note Cut".
+			// NOTE: Carry behaviour is not consistent between IT drivers.
+			// If NNA is set to "Note Cut", carry only works if the driver uses volume ramping on cut notes.
+			// This means that the normal SB and GUS drivers behave differently than what is implemented here.
+			// We emulate  IT's WAV writer and SB16 MMX driver instead.
 			// Test case: CarryNNA.it
-			resetAlways = (!chn.nFadeOutVol || instrumentChanged || chn.dwFlags[CHN_KEYOFF]);
+			resetAlways = !chn.nFadeOutVol || instrumentChanged || (m_playBehaviour[kITCarryAfterNoteOff] ? !chn.rowCommand.IsNote() : chn.dwFlags[CHN_KEYOFF]);
 		} else
 		{
 			reset = (!bPorta || !(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_DBM)) || m_SongFlags[SONG_ITCOMPATGXX]

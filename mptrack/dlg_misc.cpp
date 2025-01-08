@@ -752,6 +752,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kFT2AutoVibratoAbortSweep: desc = _T("Key-off before auto-vibrato sweep-in is complete resets auto-vibrato depth"); break;
 		case kLegacyPPQpos: desc = _T("Report inaccurate PPQ position to VST plugins (like OpenMPT 1.31 and older)"); break;
 		case kLegacyPluginNNABehaviour: desc = _T("Plugin notes with New Note Action set to Continue are affected by note-offs (like OpenMPT 1.31 and older)"); break;
+		case kITCarryAfterNoteOff: desc = _T("Note-Off status does not influence Envelope Carry behaviour"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}

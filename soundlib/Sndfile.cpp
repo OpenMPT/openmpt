@@ -1224,6 +1224,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITEmptyNoteMapSlotIgnoreCell);
 		playBehaviour.set(kITOffsetWithInstrNumber);
 		playBehaviour.set(kITDoublePortamentoSlides);
+		playBehaviour.set(kITCarryAfterNoteOff);
 		break;
 
 	case MOD_TYPE_XM:
