@@ -511,6 +511,15 @@ constexpr struct
 };
 // clang-format on
 
+std::vector<HKL> GetKeyboardLayouts()
+{
+	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
+	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+	// GetKeyboardLayoutList appears to return the layouts in no particular order. Always force the active layout to be evaluated first.
+	layouts.insert(layouts.begin(), GetKeyboardLayout(0));
+	return layouts;
+}
+
 };  // namespace
 
 #ifdef MPT_ALL_LOGGING
@@ -2127,8 +2136,7 @@ ctx:UID:Description:Modifier:Key:EventMask
 	     "//----------------------------------------------------------------------\n"
 	     "version:" << mpt::ToCharset(mpt::Charset::ASCII, Version::Current().ToUString()) << "\n";
 
-	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
-	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+	const std::vector<HKL> layouts = GetKeyboardLayouts();
 
 	for(int ctx = 0; ctx < kCtxMaxInputContexts; ctx++)
 	{
@@ -2185,8 +2193,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 	CString errText;
 	int errorCount = 0;
 
-	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
-	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+	const std::vector<HKL> layouts = GetKeyboardLayouts();
 
 	const std::string whitespace(" \n\r\t");
 	while(iStrm.getline(s, std::size(s)))
@@ -2330,8 +2337,7 @@ void CCommandSet::ApplyDefaultKeybindings(const Version onlyCommandsAfterVersion
 		QuickChange_SetEffects(*specs);
 	}
 
-	std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
-	GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+	const std::vector<HKL> layouts = GetKeyboardLayouts();
 
 	const auto previousVersion = TrackerSettings::Instance().PreviousSettingsVersion;
 
@@ -2558,8 +2564,7 @@ bool CCommandSet::QuickChange_SetEffects(const CModSpecifications &modSpecs)
 		{
 			// Hack for situations where a non-latin keyboard layout without A...Z key code mapping may the current layout (e.g. Russian),
 			// but a latin layout (e.g. EN-US) is installed as well.
-			std::vector<HKL> layouts(GetKeyboardLayoutList(0, nullptr));
-			GetKeyboardLayoutList(static_cast<int>(layouts.size()), layouts.data());
+			const std::vector<HKL> layouts = GetKeyboardLayouts();
 			SHORT codeNmod = -1;
 			for(auto i = layouts.begin(); i != layouts.end() && codeNmod == -1; i++)
 			{
