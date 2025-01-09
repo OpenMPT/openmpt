@@ -1,5 +1,5 @@
 Prerequisites:
-- HTML Help Workshop must be placed in the directory "include\htmlhelp"
+- HTML Help Workshop must be placed in the directory "..\..\build\tools\htmlhelp"
   (build\download_externals.cmd will take care of that)
 - Python 3
 
