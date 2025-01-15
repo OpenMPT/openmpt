@@ -222,12 +222,10 @@ bool CSoundFile::ReadITP(FileReader &file, ModLoadingFlags loadFlags)
 	m_MidiCfg.Sanitize();
 
 	// Song Instruments
-	m_nInstruments = static_cast<INSTRUMENTINDEX>(file.ReadUint32LE());
-	if(m_nInstruments >= MAX_INSTRUMENTS)
-	{
-		m_nInstruments = 0;
+	if(uint32 numIns = file.ReadUint32LE(); numIns < MAX_INSTRUMENTS)
+		m_nInstruments = static_cast<INSTRUMENTINDEX>(numIns);
+	else
 		return false;
-	}
 
 	// Instruments' paths
 	if(version <= 0x102)
