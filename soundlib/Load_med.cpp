@@ -1285,6 +1285,8 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			}
 #endif  // MPT_WITH_VST
 
+			loopStart = instrExt.loopStart;
+			loopEnd = instrExt.loopStart + instrExt.loopLength;
 			for(SAMPLEINDEX i = 0; i < numSamples; i++)
 			{
 				ModSample &sample = Samples[smp + i];
@@ -1292,8 +1294,10 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 				if(!isSynth && size > offsetof(MMDInstrExt, loopLength))
 				{
-					sample.nLoopStart = instrExt.loopStart;
-					sample.nLoopEnd = instrExt.loopStart + instrExt.loopLength;
+					sample.nLoopStart = loopStart;
+					sample.nLoopEnd = loopEnd;
+					loopStart *= 2;
+					loopEnd *= 2;
 				}
 				if(size > offsetof(MMDInstrExt, instrFlags))
 				{
