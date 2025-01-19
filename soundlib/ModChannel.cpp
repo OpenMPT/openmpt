@@ -83,6 +83,7 @@ void ModChannel::Reset(ResetFlags resetMask, const CSoundFile &sndFile, CHANNELI
 		nLeftVU = nRightVU = 0;
 		nOldExtraFinePortaUpDown = nOldFinePortaUpDown = nOldPortaDown = nOldPortaUp = 0;
 		portamentoSlide = 0;
+		nMasterChn = 0;
 
 		// Custom tuning related
 		m_ReCalculateFreqOnFirstTick = false;

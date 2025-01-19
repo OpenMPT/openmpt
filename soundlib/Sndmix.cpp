@@ -2180,7 +2180,7 @@ bool CSoundFile::ReadNote()
 			chn.nROfs = chn.nLOfs = 0;
 		}
 		// Increment age of NNA channels
-		if(chn.nMasterChn && chn.nnaChannelAge < Util::MaxValueOfType(chn.nnaChannelAge))
+		if(chn.nMasterChn && nChn < GetNumChannels() && chn.nnaChannelAge < Util::MaxValueOfType(chn.nnaChannelAge))
 			chn.nnaChannelAge++;
 		// Check for unused channel
 		if(chn.dwFlags[CHN_MUTE] || (nChn >= GetNumChannels() && !chn.nLength))
