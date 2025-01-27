@@ -1010,16 +1010,15 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		m_dcMemMain.MoveTo(x2, y2 - nspace);
 		m_dcMemMain.LineTo(x2, y2 + nspace);
 	}
-	uint32 maxpoint = EnvGetNumPoints();
+	uint32 numPoints = EnvGetNumPoints();
 	// Drawing Envelope
-	if(maxpoint)
+	if(numPoints)
 	{
-		maxpoint--;
 		m_dcMemMain.SelectObject(GetStockObject(DC_PEN));
 		m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPES]);
 		uint32 releaseNode = EnvGetReleaseNode();
 		RECT rect;
-		for(uint32 i = 0; i <= maxpoint; i++)
+		for(uint32 i = 0; i < numPoints; i++)
 		{
 			int x = PointToScreen(i);
 			int y = ValueToScreen(EnvGetValue(i));
@@ -1080,18 +1079,27 @@ bool CViewInstrument::EnvRemovePoint(uint32 nPoint)
 
 			PrepareUndo("Remove Envelope Point");
 			envelope->erase(envelope->begin() + nPoint);
-			if (nPoint >= envelope->size()) nPoint = envelope->size() - 1;
-			if (envelope->nLoopStart > nPoint) envelope->nLoopStart--;
-			if (envelope->nLoopEnd > nPoint) envelope->nLoopEnd--;
-			if (envelope->nSustainStart > nPoint) envelope->nSustainStart--;
-			if (envelope->nSustainEnd > nPoint) envelope->nSustainEnd--;
-			if (envelope->nReleaseNode>nPoint && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET) envelope->nReleaseNode--;
-			envelope->at(0).tick = 0;
+			if(nPoint >= envelope->size())
+				nPoint = envelope->size() - 1;
+			if(envelope->nLoopStart > nPoint)
+				envelope->nLoopStart--;
+			if(envelope->nLoopEnd > nPoint)
+				envelope->nLoopEnd--;
+			if(envelope->nSustainStart > nPoint)
+				envelope->nSustainStart--;
+			if(envelope->nSustainEnd > nPoint)
+				envelope->nSustainEnd--;
+			if(envelope->nReleaseNode > nPoint && envelope->nReleaseNode != ENV_RELEASE_NODE_UNSET)
+				envelope->nReleaseNode--;
 
 			if(envelope->size() <= 1)
 			{
-				// if only one node is left, just disable the envelope completely
-				*envelope = InstrumentEnvelope();
+				// If only one node is left, just disable the envelope completely
+				mpt::reset(*envelope);
+			} else
+			{
+				// If we removed the first node, make sure that we have a node on tick 0 again
+				envelope->at(0).tick = 0;
 			}
 
 			SetModified(InstrumentHint().Envelope(), true);
