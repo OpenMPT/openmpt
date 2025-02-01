@@ -229,6 +229,7 @@ protected:
 	BOOL OnInitDialog() override;
 	CString GetToolTipText(UINT id, HWND hwnd) const override;
 
+	CString GetVolumeString() const;
 	void SetSampleInfo(const mpt::PathString &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
 	bool GetSampleInfo(Setting<mpt::PathString> &path, CComboBox &combo, CEdit &edit, CButton &browseButton);
 	mpt::PathString BrowseForSample(const mpt::PathString &path);

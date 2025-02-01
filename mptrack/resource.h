@@ -728,6 +728,7 @@
 #define IDC_DELPLUGIN                   2239
 #define IDC_AUTOSAVE_USECUSTOMDIR       2245
 #define IDC_BUTTON_MODTYPE2             2246
+#define IDC_VOLUME                      2247
 #define IDC_SLIDER_SAMPLEPREAMP3        2248
 #define IDC_SLIDER_GLOBALVOL            2249
 #define IDC_EDIT_VSTIVOL                2250

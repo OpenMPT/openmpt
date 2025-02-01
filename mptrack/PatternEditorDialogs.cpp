@@ -1783,7 +1783,16 @@ BOOL MetronomeSettingsDlg::OnInitDialog()
 	}
 	SetSampleInfo(TrackerSettings::Instance().metronomeSampleMeasure, m_measureCombo, m_measureEdit, m_measureButton);
 	SetSampleInfo(TrackerSettings::Instance().metronomeSampleBeat, m_beatCombo, m_beatEdit, m_beatButton);
+	GetDlgItem(IDC_VOLUME)->SetWindowText(GetVolumeString());
 	return TRUE;
+}
+
+
+CString MetronomeSettingsDlg::GetVolumeString() const
+{
+	CString s = (m_volumeSlider.GetPos() >= 0) ? _T("+") : _T("");
+	s.AppendFormat(_T("%.2f dB"), m_volumeSlider.GetPos() * METRONOME_VOLUME_SCALE);
+	return s;
 }
 
 
@@ -1793,6 +1802,7 @@ void MetronomeSettingsDlg::OnHScroll(UINT, UINT, CScrollBar *bar)
 	{
 		TrackerSettings::Instance().metronomeVolume = m_volumeSlider.GetPos() * METRONOME_VOLUME_SCALE;
 		CMainFrame::GetMainFrame()->UpdateMetronomeVolume();
+		GetDlgItem(IDC_VOLUME)->SetWindowText(GetVolumeString());
 	}
 }
 
@@ -1892,8 +1902,7 @@ CString MetronomeSettingsDlg::GetToolTipText(UINT id, HWND) const
 	switch(id)
 	{
 	case IDC_SLIDER1:
-		s = (m_volumeSlider.GetPos() >= 0) ? _T("+") : _T("");
-		s.AppendFormat(_T("%.2f dB"), m_volumeSlider.GetPos() * METRONOME_VOLUME_SCALE);
+		s = GetVolumeString();
 		break;
 	}
 
