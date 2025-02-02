@@ -139,7 +139,8 @@ void CAbstractVstEditor::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 		m_clientHeight = -m_clientHeight;
 		int rcHeight = rcWnd.Height() + m_clientHeight;
 
-		SetWindowPos(NULL, 0, 0,
+		EnableAutoLayout(!m_isMinimized);
+		SetWindowPos(nullptr, 0, 0,
 			rcWnd.Width(), rcHeight,
 			SWP_NOZORDER | SWP_NOMOVE);
 	}

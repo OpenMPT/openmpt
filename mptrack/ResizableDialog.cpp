@@ -145,7 +145,7 @@ CRect ResizableDialog::AdjustItemRect(const DynamicItem &item, const CSize windo
 
 void ResizableDialog::ResizeDynamicLayout()
 {
-	if(m_dynamicItems.empty() || IsIconic())
+	if(m_dynamicItems.empty() || IsIconic() || !m_enableAutoLayout)
 		return;
 
 	CRect rectWindow;
@@ -166,13 +166,16 @@ void ResizableDialog::ResizeDynamicLayout()
 
 void ResizableDialog::OnGetMinMaxInfo(MINMAXINFO *mmi)
 {
-	auto size = m_minSize;
-	if(GetDPI() != m_originalDPI)
+	if(m_enableAutoLayout)
 	{
-		size.x = MulDiv(size.x, GetDPI(), m_originalDPI);
-		size.y = MulDiv(size.y, GetDPI(), m_originalDPI);
+		auto size = m_minSize;
+		if(GetDPI() != m_originalDPI)
+		{
+			size.x = MulDiv(size.x, GetDPI(), m_originalDPI);
+			size.y = MulDiv(size.y, GetDPI(), m_originalDPI);
+		}
+		mmi->ptMinTrackSize = size;
 	}
-	mmi->ptMinTrackSize = size;
 	DialogBase::OnGetMinMaxInfo(mmi);
 }
 

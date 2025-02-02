@@ -37,6 +37,8 @@ protected:
 
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO *mmi);
 
+	void EnableAutoLayout(bool enable) { m_enableAutoLayout = enable; }
+
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -47,6 +49,7 @@ private:
 	CPoint m_minSize;
 	CSize m_originalClientSize;
 	int m_originalDPI = 0;
+	bool m_enableAutoLayout = true;
 };
 
 OPENMPT_NAMESPACE_END
