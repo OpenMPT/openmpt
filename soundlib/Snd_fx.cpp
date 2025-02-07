@@ -1076,7 +1076,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						startTick = playState.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
-						if(chn.pModSample != nullptr && m.vol <= CountOf(chn.pModSample->cues))
+						if(chn.pModSample != nullptr && !chn.pModSample->uFlags[CHN_ADLIB] && m.vol <= CountOf(chn.pModSample->cues))
 						{
 							SmpLength offset;
 							if(m.vol == 0)
@@ -3192,7 +3192,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_OFFSET:
-					if (triggerNote && chn.pModSample && vol <= CountOf(chn.pModSample->cues))
+					if(triggerNote && chn.pModSample && !chn.pModSample->uFlags[CHN_ADLIB] && vol <= CountOf(chn.pModSample->cues))
 					{
 						SmpLength offset;
 						if(vol == 0)
@@ -5701,7 +5701,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 		if(m_playBehaviour[kITRetrigger]) chn.position.Set(0);
 
 		offset--;
-		if(chn.pModSample != nullptr && offset >= 0 && offset <= static_cast<int>(CountOf(chn.pModSample->cues)))
+		if(chn.pModSample != nullptr && !chn.pModSample->uFlags[CHN_ADLIB] && offset >= 0 && offset <= static_cast<int>(CountOf(chn.pModSample->cues)))
 		{
 			if(offset == 0)
 				offset = chn.oldOffset;
