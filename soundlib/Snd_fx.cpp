@@ -1146,7 +1146,7 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 						startTick = playState.m_nMusicSpeed - 1;
 					} else if(m.volcmd == VOLCMD_OFFSET)
 					{
-						if(chn.pModSample != nullptr && m.vol <= std::size(chn.pModSample->cues))
+						if(chn.pModSample != nullptr && !chn.pModSample->uFlags[CHN_ADLIB] && m.vol <= std::size(chn.pModSample->cues))
 						{
 							SmpLength offset;
 							if(m.vol == 0)
@@ -3343,7 +3343,7 @@ bool CSoundFile::ProcessEffects()
 					break;
 
 				case VOLCMD_OFFSET:
-					if(triggerNote && chn.pModSample && vol <= std::size(chn.pModSample->cues))
+					if(triggerNote && chn.pModSample && !chn.pModSample->uFlags[CHN_ADLIB] && vol <= std::size(chn.pModSample->cues))
 					{
 						SmpLength offset;
 						if(vol == 0)
@@ -5668,7 +5668,7 @@ void CSoundFile::ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const P
 	{
 		if(m.vol == 0)
 			offset = Util::muldivr_unsigned(chn.nLength, offset, 256u << (8u * std::max(uint32(1), extendedRows)));  // o00 + Oxx = Percentage Offset
-		else if(m.vol <= std::size(ModSample().cues) && chn.pModSample != nullptr)
+		else if(m.vol <= std::size(ModSample().cues) && chn.pModSample != nullptr && !chn.pModSample->uFlags[CHN_ADLIB])
 			offset += chn.pModSample->cues[m.vol - 1];  // Offset relative to cue point
 		chn.oldOffset = offset;
 	}
@@ -5993,7 +5993,7 @@ void CSoundFile::RetrigNote(CHANNELINDEX nChn, int param, int offset)
 			chn.position.Set(0);
 
 		offset--;
-		if(chn.pModSample != nullptr && offset >= 0 && offset <= static_cast<int>(std::size(chn.pModSample->cues)))
+		if(chn.pModSample != nullptr && !chn.pModSample->uFlags[CHN_ADLIB] && offset >= 0 && offset <= static_cast<int>(std::size(chn.pModSample->cues)))
 		{
 			if(offset == 0)
 				offset = chn.oldOffset;
