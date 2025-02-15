@@ -1,6 +1,5 @@
-flac 1.4.3.
+flac 1.5.0 (2025-02-11).
 The FLAC package has been left pretty much untouched, except for a few changes:
- *  https://github.com/xiph/flac/pull/638 has been applied.
  *  In `include/share/compat.h`, the Windows XP compatibility warning has been
     disabled.
  *  All modifications have been marked with "/* OpenMPT */".

@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -178,7 +178,7 @@ if(shadow_error_##macro_order <= INT32_MAX) { \
 		order = macro_order; \
 		smallest_error = total_error_##macro_order ; \
 	} \
-	residual_bits_per_sample[ macro_order ] = (float)((total_error_0 > 0) ? log(M_LN2 * (double)total_error_0 / (double)data_len) / M_LN2 : 0.0); \
+	residual_bits_per_sample[ macro_order ] = (float)((total_error_##macro_order > 0) ? log(M_LN2 * (double)total_error_##macro_order / (double)data_len) / M_LN2 : 0.0); \
 } \
 else \
 	residual_bits_per_sample[ macro_order ] = 34.0f;
