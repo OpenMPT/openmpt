@@ -28,6 +28,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4702) /* unreachable code */
