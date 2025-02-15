@@ -53,7 +53,7 @@ CXXFLAGS_WARNINGS += -Wpedantic -Wframe-larger-than=20000
 #CXXFLAGS_WARNINGS += -Wdouble-promotion -Wframe-larger-than=16000
 CFLAGS_WARNINGS   += -Wpedantic -Wframe-larger-than=4000
 #CFLAGS_WARNINGS   += -Wdouble-promotion
-LDFLAGS_WARNINGS  += -Wl,-no-undefined
+LDFLAGS_WARNINGS  += -Wl,--no-undefined
 CXXFLAGS_WARNINGS += -Wdeprecated -Wextra-semi -Wnon-virtual-dtor -Wreserved-id-macro
 endif
 

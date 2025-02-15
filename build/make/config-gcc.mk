@@ -46,7 +46,7 @@ CXXFLAGS_WARNINGS += -Wpedantic -Wlogical-op -Wframe-larger-than=16000
 #CXXFLAGS_WARNINGS += -Wdouble-promotion
 CFLAGS_WARNINGS   += -Wpedantic -Wlogical-op -Wframe-larger-than=4000
 #CFLAGS_WARNINGS   += -Wdouble-promotion
-LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+LDFLAGS_WARNINGS  += -Wl,--no-undefined -Wl,--detect-odr-violations
 CXXFLAGS_WARNINGS += -Wsuggest-override
 endif
 
