@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.14-pre
 
+ *  pugixml: Update to v1.15 (2025-01-10).
+
 ### libopenmpt 0.7.13 (2025-01-06)
 
  *  [**Bug**] Work-around broken user locale support on Cygwin.
