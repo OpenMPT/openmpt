@@ -225,6 +225,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Paula.cpp \
 	soundlib/patternContainer.cpp \
 	soundlib/pattern.cpp \
+	soundlib/PlaybackTest.cpp \
 	soundlib/PlayState.cpp \
 	soundlib/RowVisitor.cpp \
 	soundlib/S3MTools.cpp \

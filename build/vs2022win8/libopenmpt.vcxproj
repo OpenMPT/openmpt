@@ -1064,6 +1064,7 @@
     <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\Paula.h" />
     <ClInclude Include="..\..\soundlib\PlayState.h" />
+    <ClInclude Include="..\..\soundlib\PlaybackTest.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
@@ -1398,6 +1399,7 @@
     <ClCompile Include="..\..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\..\soundlib\Paula.cpp" />
     <ClCompile Include="..\..\soundlib\PlayState.cpp" />
+    <ClCompile Include="..\..\soundlib\PlaybackTest.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatBRR.cpp" />

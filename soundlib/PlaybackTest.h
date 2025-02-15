@@ -11,9 +11,14 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+
+#if defined(MPT_ENABLE_PLAYBACK_TRACE)
+
 #include "../common/FileReaderFwd.h"
 
 #include <iosfwd>
+
+#endif // MPT_ENABLE_PLAYBACK_TRACE
 
 OPENMPT_NAMESPACE_BEGIN
 

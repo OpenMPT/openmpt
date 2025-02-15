@@ -9,11 +9,17 @@
 
 
 #include "stdafx.h"
+
 #include "PlaybackTest.h"
+
+#include "../common/mptBaseMacros.h"
+
+#if defined(MPT_ENABLE_PLAYBACK_TRACE)
+
 #include "../common/FileReader.h"
-#include "../soundlib/OPL.h"
-#include "../soundlib/SampleIO.h"
-#include "../soundlib/Sndfile.h"
+#include "OPL.h"
+#include "SampleIO.h"
+#include "Sndfile.h"
 
 #include "mpt/base/bit.hpp"
 #include "mpt/binary/hex.hpp"
@@ -26,6 +32,10 @@
 
 #include <sstream>
 #include <iomanip>
+
+
+#endif // MPT_ENABLE_PLAYBACK_TRACE
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -742,6 +752,12 @@ PlaybackTest CSoundFile::CreatePlaybackTest(PlaybackTestSettings settings)
 
 	return PlaybackTest{std::move(testData)};
 }
+
+
+#else // !MPT_ENABLE_PLAYBACK_TRACE
+
+
+MPT_MSVC_WORKAROUND_LNK4221(PlaybackTest)
 
 
 #endif // MPT_ENABLE_PLAYBACK_TRACE

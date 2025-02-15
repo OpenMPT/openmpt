@@ -996,6 +996,9 @@
     <ClInclude Include="..\..\soundlib\PlayState.h">
       <Filter>soundlib</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\soundlib\PlaybackTest.h">
+      <Filter>soundlib</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\soundlib\Resampler.h">
       <Filter>soundlib</Filter>
     </ClInclude>
@@ -1791,9 +1794,6 @@
     <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.hpp">
       <Filter>src\openmpt\streamencoder</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\test\PlaybackTest.h">
-      <Filter>test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\test\TestTools.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -2468,6 +2468,9 @@
     <ClCompile Include="..\..\soundlib\PlayState.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\PlaybackTest.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
@@ -2671,9 +2674,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.cpp">
       <Filter>src\openmpt\streamencoder</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\PlaybackTest.cpp">
-      <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\test\TestToolsLib.cpp">
       <Filter>test</Filter>

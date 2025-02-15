@@ -49,7 +49,7 @@
 #include "../common/version.h"
 #include "../soundlib/AudioReadTarget.h"
 #include "../soundlib/Tables.h"
-#include "../test/PlaybackTest.h"
+#include "../soundlib/PlaybackTest.h"
 #include "mpt/audio/span.hpp"
 #include "mpt/base/alloc.hpp"
 #include "mpt/fs/fs.hpp"

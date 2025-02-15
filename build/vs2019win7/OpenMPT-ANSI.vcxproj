@@ -1004,6 +1004,7 @@
     <ClInclude Include="..\..\soundlib\OggStream.h" />
     <ClInclude Include="..\..\soundlib\Paula.h" />
     <ClInclude Include="..\..\soundlib\PlayState.h" />
+    <ClInclude Include="..\..\soundlib\PlaybackTest.h" />
     <ClInclude Include="..\..\soundlib\Resampler.h" />
     <ClInclude Include="..\..\soundlib\RowVisitor.h" />
     <ClInclude Include="..\..\soundlib\S3MTools.h" />
@@ -1269,7 +1270,6 @@
     <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderRAW.hpp" />
     <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderVorbis.hpp" />
     <ClInclude Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.hpp" />
-    <ClInclude Include="..\..\test\PlaybackTest.h" />
     <ClInclude Include="..\..\test\TestTools.h" />
     <ClInclude Include="..\..\test\TestToolsLib.h" />
     <ClInclude Include="..\..\test\TestToolsTracker.h" />
@@ -1496,6 +1496,7 @@
     <ClCompile Include="..\..\soundlib\OggStream.cpp" />
     <ClCompile Include="..\..\soundlib\Paula.cpp" />
     <ClCompile Include="..\..\soundlib\PlayState.cpp" />
+    <ClCompile Include="..\..\soundlib\PlaybackTest.cpp" />
     <ClCompile Include="..\..\soundlib\RowVisitor.cpp" />
     <ClCompile Include="..\..\soundlib\S3MTools.cpp" />
     <ClCompile Include="..\..\soundlib\SampleFormatBRR.cpp" />
@@ -1564,7 +1565,6 @@
     <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderRAW.cpp" />
     <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderVorbis.cpp" />
     <ClCompile Include="..\..\src\openmpt\streamencoder\StreamEncoderWAV.cpp" />
-    <ClCompile Include="..\..\test\PlaybackTest.cpp" />
     <ClCompile Include="..\..\test\TestToolsLib.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_base.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_binary.cpp" />
