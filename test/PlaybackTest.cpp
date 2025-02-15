@@ -30,6 +30,9 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+#if defined(MPT_ENABLE_PLAYBACK_TRACE)
+
+
 struct TestDataHeader
 {
 	static constexpr char TestDataHeaderMagic[] = "OpenMPT Test Data\r\n\x1A";
@@ -739,5 +742,9 @@ PlaybackTest CSoundFile::CreatePlaybackTest(PlaybackTestSettings settings)
 
 	return PlaybackTest{std::move(testData)};
 }
+
+
+#endif // MPT_ENABLE_PLAYBACK_TRACE
+
 
 OPENMPT_NAMESPACE_END

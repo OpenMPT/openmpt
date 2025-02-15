@@ -17,6 +17,8 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+#if defined(MPT_ENABLE_PLAYBACK_TRACE)
+
 struct PlaybackTestData;
 struct PlaybackTestSettings;
 class CSoundFile;
@@ -47,5 +49,7 @@ private:
 private:
 	std::unique_ptr<PlaybackTestData> m_testData;
 };
+
+#endif // MPT_ENABLE_PLAYBACK_TRACE
 
 OPENMPT_NAMESPACE_END

@@ -1287,7 +1287,10 @@ private:
 public:
 	PLUGINDEX GetBestPlugin(const ModChannel &channel, CHANNELINDEX nChn, PluginPriority priority, PluginMutePriority respectMutes) const;
 
+#if defined(MPT_ENABLE_PLAYBACK_TRACE)
 	PlaybackTest CreatePlaybackTest(PlaybackTestSettings settings);
+#endif // MPT_ENABLE_PLAYBACK_TRACE
+
 };
 
 

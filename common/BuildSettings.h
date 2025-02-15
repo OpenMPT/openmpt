@@ -84,6 +84,9 @@
 #define ENABLE_TESTS
 #endif
 
+// Enable generation and verification of playback traces
+#define MPT_ENABLE_PLAYBACK_TRACE
+
 // Disable any file saving functionality (not really useful except for the player library)
 //#define MODPLUG_NO_FILESAVE
 
@@ -157,6 +160,7 @@
 
 #if defined(LIBOPENMPT_BUILD_TEST)
 #define ENABLE_TESTS
+#define MPT_ENABLE_PLAYBACK_TRACE
 #else
 #define MODPLUG_NO_FILESAVE
 #endif
