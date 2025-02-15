@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2023  Xiph.Org Foundation
+ * Copyright (C) 2011-2025  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -206,5 +206,6 @@ static inline uint32_t FLAC__bitmath_ilog2_wide(FLAC__uint64 v)
 }
 
 uint32_t FLAC__bitmath_silog2(FLAC__int64 v);
+uint32_t FLAC__bitmath_extra_mulbits_unsigned(FLAC__uint32 v);
 
 #endif
