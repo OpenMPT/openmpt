@@ -8,7 +8,7 @@ ifeq ($(MODERN),1)
 CFLAGS_WARNINGS += -Wframe-larger-than=4000
 #CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
 # gold
-LDFLAGS_WARNINGS  += -Wl,-no-undefined -Wl,--detect-odr-violations
+LDFLAGS_WARNINGS  += -Wl,--no-undefined -Wl,--detect-odr-violations
 # GCC 8
 CXXFLAGS_WARNINGS += -Wcast-align=strict
 CFLAGS_WARNINGS   += -Wcast-align=strict

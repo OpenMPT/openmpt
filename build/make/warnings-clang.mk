@@ -18,7 +18,7 @@ endif
 ifeq ($(MODERN),1)
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += 
-LDFLAGS_WARNINGS  += -Wl,-no-undefined
+LDFLAGS_WARNINGS  += -Wl,--no-undefined
 endif
 
 CFLAGS_SILENT += -Wno-\#warnings
