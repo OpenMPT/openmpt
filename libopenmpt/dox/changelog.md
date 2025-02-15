@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.37-pre
 
+ *  pugixml: Update to v1.15 (2025-01-10).
+
 ### libopenmpt 0.5.36 (2025-01-06)
 
  *  `module::get_current_estimated_bpm` could return infinity when rows per beat
