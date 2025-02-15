@@ -294,16 +294,16 @@ cp *.tar.gz libopenmpt/src.autotools/$MPT_LIBOPENMPT_VERSION/
 
 case $TAR_FLAVOUR in
  mac)
-  tar -cv -f ../dist-autotools.tar libopenmpt
+  tar -cv --format pax -f ../dist-autotools.tar libopenmpt
   ;;
  bsd)
-  tar -cv -N -f ../dist-autotools.tar libopenmpt
+  tar -cv -F pax -N -f ../dist-autotools.tar libopenmpt
   ;;
  libarchive)
-  tar -cv --numeric-owner --uname "" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
+  tar -cv --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt
   ;;
  gnu)
-  tar -cv --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
+  tar -cv --format=pax --numeric-owner --owner=0 --group=0 -f ../dist-autotools.tar libopenmpt
   ;;
  *)
   tar -cv -f ../dist-autotools.tar libopenmpt

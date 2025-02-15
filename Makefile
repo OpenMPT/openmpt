@@ -373,6 +373,21 @@ endif
 endif
 
 
+# tar
+
+ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
+TAR_C=tar -c --format pax -f
+else ifeq ($(findstring OpenBSD,$(UNAME_S)),OpenBSD)
+TAR_C=tar -c -F pax -N
+else ifeq ($(findstring BSD,$(UNAME_S)),BSD)
+TAR_C=tar -c --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0
+else
+# GNU
+TAR_C=tar -c --format=pax --numeric-owner --owner=0 --group=0
+#TAR_C=tar -c 
+endif
+
+
 # early build setup
 
 BINDIR_MADE:=$(shell $(MKDIR_P) bin)
@@ -1930,7 +1945,7 @@ bin/$(FLAVOUR_DIR)dist-tar.tar: bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIB
 	cd bin/$(FLAVOUR_DIR)dist-tar/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-tar/ && mkdir -p libopenmpt/src.makefile/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-tar/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar.gz libopenmpt/src.makefile/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-tar/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-tar.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-tar/ && $(TAR_C) -v -f ../dist-tar.tar libopenmpt
 
 .PHONY: dist-zip
 dist-zip: bin/$(FLAVOUR_DIR)dist-zip.tar
@@ -1940,7 +1955,7 @@ bin/$(FLAVOUR_DIR)dist-zip.tar: bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIB
 	cd bin/$(FLAVOUR_DIR)dist-zip/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-zip/ && mkdir -p libopenmpt/src.msvc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-zip/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip libopenmpt/src.msvc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-zip/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-zip.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-zip/ && $(TAR_C) -v -f ../dist-zip.tar libopenmpt
 
 .PHONY: dist-doc
 dist-doc: bin/$(FLAVOUR_DIR)dist-doc.tar
@@ -1950,7 +1965,7 @@ bin/$(FLAVOUR_DIR)dist-doc.tar: bin/$(FLAVOUR_DIR)dist-doc/libopenmpt-$(DIST_LIB
 	cd bin/$(FLAVOUR_DIR)dist-doc/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-doc/ && mkdir -p libopenmpt/doc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-doc/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar.gz libopenmpt/doc/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-doc/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-doc.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-doc/ && $(TAR_C) -v -f ../dist-doc.tar libopenmpt
 
 .PHONY: dist-js
 dist-js: bin/$(FLAVOUR_DIR)dist-js.tar
@@ -1960,7 +1975,7 @@ bin/$(FLAVOUR_DIR)dist-js.tar: bin/$(FLAVOUR_DIR)dist-js/libopenmpt-$(DIST_LIBOP
 	cd bin/$(FLAVOUR_DIR)dist-js/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-js/ && mkdir -p libopenmpt/dev.js/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-js/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar.gz libopenmpt/dev.js/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-js/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-js.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-js/ && $(TAR_C) -v -f ../dist-js.tar libopenmpt
 
 .PHONY: dist-dos
 dist-dos: bin/$(FLAVOUR_DIR)dist-dos.tar
@@ -1970,7 +1985,7 @@ bin/$(FLAVOUR_DIR)dist-dos.tar: bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIB
 	cd bin/$(FLAVOUR_DIR)dist-dos/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-dos/ && mkdir -p libopenmpt/bin.dos/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-dos/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip libopenmpt/bin.dos/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-dos/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-dos.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-dos/ && $(TAR_C) -v -f ../dist-dos.tar libopenmpt
 
 .PHONY: dist-retro-win98
 dist-retro-win98: bin/$(FLAVOUR_DIR)dist-retro-win98.tar
@@ -1980,7 +1995,7 @@ bin/$(FLAVOUR_DIR)dist-retro-win98.tar: bin/$(FLAVOUR_DIR)dist-retro-win98/libop
 	cd bin/$(FLAVOUR_DIR)dist-retro-win98/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-retro-win98/ && mkdir -p libopenmpt/bin.retro.win98/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-retro-win98/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win98.zip libopenmpt/bin.retro.win98/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-retro-win98/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-retro-win98.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-retro-win98/ && $(TAR_C) -v -f ../dist-retro-win98.tar libopenmpt
 
 .PHONY: dist-retro-win95
 dist-retro-win95: bin/$(FLAVOUR_DIR)dist-retro-win95.tar
@@ -1990,7 +2005,7 @@ bin/$(FLAVOUR_DIR)dist-retro-win95.tar: bin/$(FLAVOUR_DIR)dist-retro-win95/libop
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95/ && rm -rf libopenmpt
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95/ && mkdir -p libopenmpt/bin.retro.win95/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95/ && cp libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip libopenmpt/bin.retro.win95/$(DIST_LIBOPENMPT_TARBALL_VERSION)/
-	cd bin/$(FLAVOUR_DIR)dist-retro-win95/ && tar cv --numeric-owner --owner=0 --group=0 -f ../dist-retro-win95.tar libopenmpt
+	cd bin/$(FLAVOUR_DIR)dist-retro-win95/ && $(TAR_C) -v -f ../dist-retro-win95.tar libopenmpt
 
 .PHONY: bin/$(FLAVOUR_DIR)dist.mk
 bin/$(FLAVOUR_DIR)dist.mk:
@@ -2022,7 +2037,7 @@ bin/$(FLAVOUR_DIR)dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar: docs
 	rm -rf bin/$(FLAVOUR_DIR)dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc
 	mkdir -p bin/$(FLAVOUR_DIR)dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc
 	cp -Rv bin/$(FLAVOUR_DIR)docs/html bin/$(FLAVOUR_DIR)dist-doc/libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc/docs
-	cd bin/$(FLAVOUR_DIR)dist-doc/ && tar cv --numeric-owner --owner=0 --group=0 libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc > libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar
+	cd bin/$(FLAVOUR_DIR)dist-doc/ && $(TAR_C) -v libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc > libopenmpt-$(DIST_LIBOPENMPT_VERSION).doc.tar
 
 .PHONY: bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar
 bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: bin/$(FLAVOUR_DIR)dist.mk bin/$(FLAVOUR_DIR)svn_version_dist.h
@@ -2113,7 +2128,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	svn export ./include/stb_vorbis               bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis
 	cp bin/$(FLAVOUR_DIR)dist.mk                  bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/dist.mk
 	cp bin/$(FLAVOUR_DIR)svn_version_dist.h       bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/svn_version/svn_version.h
-	cd bin/$(FLAVOUR_DIR)dist-tar/ && tar cv --numeric-owner --owner=0 --group=0 libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar
+	cd bin/$(FLAVOUR_DIR)dist-tar/ && $(TAR_C) -v libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar
 
 .PHONY: bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip
 bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$(FLAVOUR_DIR)dist.mk bin/$(FLAVOUR_DIR)svn_version_dist.h
@@ -2253,7 +2268,7 @@ bin/$(FLAVOUR_DIR)dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar:
 	cp bin/$(FLAVOUR_DIR)stage/wasm/libopenmpt.wasm     bin/$(FLAVOUR_DIR)dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/$(FLAVOUR_DIR)wasm/libopenmpt.wasm
 	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/$(FLAVOUR_DIR)js
 	cp bin/$(FLAVOUR_DIR)stage/js/libopenmpt.js         bin/$(FLAVOUR_DIR)dist-js/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/bin/$(FLAVOUR_DIR)js/libopenmpt.js
-	cd bin/$(FLAVOUR_DIR)dist-js/ && tar cv --numeric-owner --owner=0 --group=0 libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar
+	cd bin/$(FLAVOUR_DIR)dist-js/ && $(TAR_C) -v libopenmpt-$(DIST_LIBOPENMPT_VERSION) > libopenmpt-$(DIST_LIBOPENMPT_VERSION).dev.js.tar
 
 .PHONY: bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip
 bin/$(FLAVOUR_DIR)dist-dos/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.dos.zip:
