@@ -402,7 +402,7 @@ libopenmpt_la_SOURCES += libopenmpt/libopenmpt_version.h
 
 if ENABLE_LIBOPENMPT_MODPLUG
 lib_LTLIBRARIES += libopenmpt_modplug.la
-libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
+libopenmpt_modplug_la_LDFLAGS = -version-info 1:0:0 --no-undefined
 libopenmpt_modplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
 libopenmpt_modplug_la_CXXFLAGS = 
 libopenmpt_modplug_la_CFLAGS = 
@@ -415,7 +415,7 @@ endif
 if ENABLE_LIBMODPLUG
 pkgconfig_DATA += libmodplug/libmodplug.pc
 lib_LTLIBRARIES += libmodplug.la
-libmodplug_la_LDFLAGS = -version-info 1:0:0 -no-undefined
+libmodplug_la_LDFLAGS = -version-info 1:0:0 --no-undefined
 nobase_include_HEADERS += libmodplug/modplug.h libmodplug/sndfile.h libmodplug/stdafx.h
 libmodplug_la_CPPFLAGS = $(MINGWSTDTHREADS_CPPFLAGS) -I$(srcdir)/
 libmodplug_la_CXXFLAGS = 
