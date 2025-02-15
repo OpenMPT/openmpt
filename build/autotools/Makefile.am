@@ -363,7 +363,7 @@ MPT_FILES_SOUNDDSP += sounddsp/Reverb.h
 
 pkgconfig_DATA += libopenmpt/libopenmpt.pc
 lib_LTLIBRARIES += libopenmpt.la
-libopenmpt_la_LDFLAGS = -version-info $(LIBOPENMPT_LTVER_CURRENT):$(LIBOPENMPT_LTVER_REVISION):$(LIBOPENMPT_LTVER_AGE) --no-undefined
+libopenmpt_la_LDFLAGS = -version-info $(LIBOPENMPT_LTVER_CURRENT):$(LIBOPENMPT_LTVER_REVISION):$(LIBOPENMPT_LTVER_AGE) -no-undefined
 nobase_include_HEADERS += libopenmpt/libopenmpt.h
 nobase_include_HEADERS += libopenmpt/libopenmpt.hpp
 nobase_include_HEADERS += libopenmpt/libopenmpt_version.h
