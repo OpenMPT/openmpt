@@ -16,7 +16,7 @@ LDFLAGS  += -Wl,--thinlto-jobs=all
 endif
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += -Wframe-larger-than=4000
-LDFLAGS_WARNINGS  += -Wl,-no-undefined
+LDFLAGS_WARNINGS  += -Wl,--no-undefined
 # re-renable after 1.29 branch
 #CXXFLAGS_WARNINGS += -Wdouble-promotion
 #CFLAGS_WARNINGS   += -Wdouble-promotion
