@@ -1,4 +1,4 @@
-AC_INIT([libopenmpt-modplug], [0.8.8.5-openmpt1], [https://bugs.openmpt.org/], [libopenmpt-modplug], [https://lib.openmpt.org/])
+AC_INIT([libopenmpt-modplug], [0.8.8.5-openmpt2], [https://bugs.openmpt.org/], [libopenmpt-modplug], [https://lib.openmpt.org/])
 AC_PREREQ([2.68])
 
 AC_CONFIG_MACRO_DIR([m4])
