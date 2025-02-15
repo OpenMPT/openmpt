@@ -136,21 +136,32 @@ it was always ignored, because sample indices may change when loading external i
 
 #ifndef MODPLUG_NO_FILESAVE
 
-namespace
-{
+
+// We want constexpr ModInstrument{} due to bad code generation with temporary objects mostly in MSVC,
+// however most stdlib implementations of C++20 fail to provide constexpr std::vector in C++20 mode,
+// which is required for the envelopes. Thus we only activate that for C++23.
+// For libopenmpt, this code path is only required for test suite,
+// and inefficient code generation does not really matter.
+#if MPT_CXX_AT_LEAST(23) || (MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER))
+#define MODINSTRUMENT_DEFAULT MPT_FORCE_CONSTEXPR_VALUE(ModInstrument{})
+#elif defined(LIBOPENMPT_BUILD)
+#define MODINSTRUMENT_DEFAULT ModInstrument{}
+#else
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wglobal-constructors"
 #pragma clang diagnostic ignored "-Wexit-time-destructors"
 #endif  // MPT_COMPILER_CLANG
-	const ModInstrument DEFAULT_INSTRUMENT;
+static MPT_CONSTEXPR20_CONTAINER_VAR ModInstrument ModInstrumentDefault;
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
 #endif  // MPT_COMPILER_CLANG
-}  // namespace
+#define MODINSTRUMENT_DEFAULT ModInstrumentDefault
+#endif
+
 
 template <auto Member>
-constexpr bool IsPropertyNonDefault(const ModInstrument &ins) { return DEFAULT_INSTRUMENT.*Member != ins.*Member; }
+inline bool IsPropertyNonDefault(const ModInstrument &ins) { return MODINSTRUMENT_DEFAULT.*Member != ins.*Member; }
 
 template <auto Member>
 constexpr uint16 PropertySize() noexcept { return sizeof(ModInstrument{}.*Member); }
@@ -187,7 +198,7 @@ struct PropertyWriterEnum : PropertyWriterBase<Member, PropertyNeededFunc, Prope
 
 struct PropertyWriterReleaseNode
 {
-	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return DEFAULT_INSTRUMENT.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
+	bool IsPropertyNeeded(const ModInstrument &ins) const noexcept { return MODINSTRUMENT_DEFAULT.GetEnvelope(type).nReleaseNode != ins.GetEnvelope(type).nReleaseNode; }
 	static constexpr uint16 Size() noexcept { return sizeof(InstrumentEnvelope{}.nReleaseNode); }
 	void Write(std::ostream &file, const ModInstrument &ins) const { mpt::IO::WriteIntLE(file, ins.GetEnvelope(type).nReleaseNode); }
 	const EnvelopeType type;
@@ -284,7 +295,7 @@ static void WriteProperty(std::ostream &f, uint32 code, mpt::span<const ModInstr
 	mpt::IO::WriteIntLE<uint16>(f, property.Size());
 	for(const ModInstrument *ins : instruments)
 	{
-		property.Write(f, ins ? *ins : DEFAULT_INSTRUMENT);
+		property.Write(f, ins ? *ins : MODINSTRUMENT_DEFAULT);
 	}
 }
 
@@ -371,6 +382,9 @@ void CSoundFile::SaveExtendedInstrumentProperties(mpt::span<const ModInstrument 
 		WriteProperty(f, MagicBE("PERN"), instruments, PropertyWriterReleaseNode{ENV_PITCH});
 	}
 }
+
+
+#undef MODINSTRUMENT_DEFAULT
 
 
 #endif // !MODPLUG_NO_FILESAVE
