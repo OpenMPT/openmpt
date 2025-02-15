@@ -4,7 +4,9 @@ CFLAGS_WARNINGS   += -Wcast-align -Wcast-qual -Wdouble-promotion -Wfloat-convers
 
 CXXFLAGS_WARNINGS += -Wno-psabi
 
+ifneq ($(NO_NO_UNDEFINED_LINKER_FLAG),1)
 LDFLAGS_WARNINGS  += -Wl,--no-undefined
+endif
 
 ifeq ($(MODERN),1)
 # GCC >= 12
