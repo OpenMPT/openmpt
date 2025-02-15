@@ -15,10 +15,12 @@ endif
 #CXXFLAGS_WARNINGS += -Wconversion
 #CXXFLAGS_WARNINGS += -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-c++11-c++14-compat -Wno-padded -Wno-weak-vtables -Wno-sign-conversion -Wno-shadow-field-in-constructor -Wno-conversion -Wno-switch-enum -Wno-old-style-cast
 
+LDFLAGS_WARNINGS  += -Wl,--no-undefined
+
 ifeq ($(MODERN),1)
 CXXFLAGS_WARNINGS += 
 CFLAGS_WARNINGS   += 
-LDFLAGS_WARNINGS  += -Wl,--no-undefined
+LDFLAGS_WARNINGS  += 
 endif
 
 CFLAGS_SILENT += -Wno-\#warnings
