@@ -226,6 +226,14 @@ public:
 		return dump;
 	}
 
+#if MPT_GCC_AT_LEAST(12, 0, 0) && MPT_GCC_BEFORE(13, 1, 0)
+// Work-around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105329> /
+// <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651>.
+#pragma GCC push_options
+#if defined(__OPTIMIZE__)
+#pragma GCC optimize("O1")
+#endif
+#endif
 	static std::string Format(const OPLData &data)
 	{
 		FileReader file(mpt::as_span(data));
@@ -264,6 +272,10 @@ public:
 		}
 		return result;
 	}
+#if MPT_GCC_AT_LEAST(12, 0, 0) && MPT_GCC_BEFORE(13, 1, 0)
+#pragma GCC diagnostic pop
+#pragma GCC pop_options
+#endif
 
 protected:
 	void Port(CHANNELINDEX c, OPL::Register reg, OPL::Value value) override
