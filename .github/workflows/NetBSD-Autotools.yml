@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: '10.0' }
+          - { version: '10.1' }
           - { version: '9.4'  }
 
     concurrency:
