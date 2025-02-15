@@ -150,19 +150,15 @@ public:
 
 struct self_xmplay_t {
 	std::vector<double> subsong_lengths;
-	std::vector<float> last_audio_frames;
 	std::vector<std::string> subsong_names;
 	std::size_t samplerate = 48000;
 	std::size_t num_channels = 2;
-	std::size_t last_audio_frames_write_pos = 0;
 	xmp_openmpt_settings settings;
 	openmpt::module_ext * mod = nullptr;
 	bool set_format_called = false;
 	openmpt::ext::pattern_vis * pattern_vis = nullptr;
 	std::int32_t tempo_factor = 0, pitch_factor = 0;
-	std::int32_t subsong_start_order = 0, subsong_start_row = 0;
 	bool single_subsong_mode = false;
-	bool end_of_song_reached = false;
 	self_xmplay_t() {
 		settings.changed = apply_and_save_options;
 	}
@@ -998,14 +994,8 @@ static DWORD WINAPI openmpt_Open( const char * filename, XMPFILE file ) {
 		self->subsong_lengths = build_subsong_lengths( *self->mod );
 		self->subsong_names = self->mod->get_subsong_names();
 		self->mod->select_subsong( 0 );
-		self->subsong_start_order = self->mod->get_current_order();
-		self->subsong_start_row = self->mod->get_current_row();
 		self->tempo_factor = 0;
 		self->pitch_factor = 0;
-		self->end_of_song_reached = false;
-		self->single_subsong_mode = false;
-		self->last_audio_frames.assign( self->last_audio_frames.size(), 0.0f );
-		self->last_audio_frames_write_pos = 0;
 
 		xmpfin->SetLength( static_cast<float>( self->subsong_lengths[0] ), TRUE );
 		return 2;
@@ -1064,7 +1054,6 @@ static void WINAPI openmpt_SetFormat( XMPFORMAT * form ) {
 	}
 	form->res = 4; // float
 	form->chanmask = 0;
-	self->last_audio_frames.assign( self->samplerate / 500, 0.0f );
 }
 
 // get the tags
@@ -1187,29 +1176,13 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 		// In the auto-looping case, the function should only loop when a loop has been detected, and otherwise return -1
 		// If the time of the loop start position is known, that should be returned, otherwise -2 can be returned to let the time run on.
 		// There is currently no way to easily figure out at which time the loop restarts.
-		self->end_of_song_reached = false;
-		if (self->mod->get_restart_order(self->mod->get_selected_subsong()) != self->subsong_start_order || self->mod->get_restart_row(self->mod->get_selected_subsong()) != self->subsong_start_row) {
-			return -2;
-		} else {
-			// Similar to XMPlay's auto-looping: If the last 2ms of audio are above -33dB RMS (roughly), we assume that the track is meant to loop.
-			float rms = 0.0f;
-			for ( const float v : self->last_audio_frames ) {
-				rms += v;  // v is already squared
-			}
-			if ( std::sqrt( rms / self->last_audio_frames.size() ) >= 0.02f)
-				return -2;
-			else
-				return -1;  // Let XMPlay's "auto-loop any track ending with sound" feature decide
-		}
+		return -2;
 	}
 	if ( pos & XMPIN_POS_SUBSONG ) {
 		self->single_subsong_mode = ( pos & XMPIN_POS_SUBSONG1 ) != 0;
-		self->last_audio_frames.assign( self->last_audio_frames.size(), 0.0f );
 		const int32_t subsong = pos & 0xffff;
 		try {
 			self->mod->select_subsong( subsong );
-			self->subsong_start_order = self->mod->get_current_order();
-			self->subsong_start_row = self->mod->get_current_row();
 		} catch ( ... ) {
 			return 0.0;
 		}
@@ -1220,7 +1193,6 @@ static double WINAPI openmpt_SetPosition( DWORD pos ) {
 		return 0.0;
 	}
 	double new_position = self->mod->set_position_seconds( static_cast<double>( pos ) * 0.001 );
-	self->last_audio_frames.assign(self->last_audio_frames.size(), 0.0f);
 	reset_timeinfos( new_position );
 	return new_position;
 }
@@ -1239,57 +1211,39 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 	if ( !self->mod || self->num_channels == 0 ) {
 		return 0;
 	}
-	if (self->end_of_song_reached) {
-		self->end_of_song_reached = false;
-		return 0;
-	}
 	update_timeinfos( self->samplerate, 0 );
 	std::size_t frames = count / self->num_channels;
 	std::size_t frames_to_render = frames;
 	std::size_t frames_rendered = 0;
 	while ( frames_to_render > 0 ) {
 		std::size_t frames_chunk = std::min( frames_to_render, static_cast<std::size_t>( ( self->samplerate + 99 ) / 100 ) ); // 100 Hz timing info update interval
-		std::size_t frames_read = 0;
 		switch ( self->num_channels ) {
 		case 1:
 			{
-				frames_read = self->mod->read( self->samplerate, frames_chunk, dstbuf );
-				for ( std::size_t i = 0; i < frames_read; i++ ) {
-					self->last_audio_frames[self->last_audio_frames_write_pos++] = dstbuf[i] * dstbuf[i];
-					if ( self->last_audio_frames_write_pos >= self->last_audio_frames.size() )
-						self->last_audio_frames_write_pos = 0;
-				}
+				frames_chunk = self->mod->read( self->samplerate, frames_chunk, dstbuf );
 			}
 			break;
 		case 2:
 			{
-				frames_read = self->mod->read_interleaved_stereo( self->samplerate, frames_chunk, dstbuf );
-				for ( std::size_t i = 0; i < frames_read * 2; i += 2 ) {
-					self->last_audio_frames[self->last_audio_frames_write_pos++] = (dstbuf[i] * dstbuf[i] + dstbuf[i + 1] * dstbuf[i + 1]) / 2;
-					if ( self->last_audio_frames_write_pos >= self->last_audio_frames.size() )
-						self->last_audio_frames_write_pos = 0;
-				}
+				frames_chunk = self->mod->read_interleaved_stereo( self->samplerate, frames_chunk, dstbuf );
 			}
 			break;
 		case 4:
 			{
-				frames_read = self->mod->read_interleaved_quad( self->samplerate, frames_chunk, dstbuf );
-				for ( std::size_t i = 0; i < frames_read * 4; i += 4 ) {
-					self->last_audio_frames[self->last_audio_frames_write_pos++] = ( dstbuf[i] * dstbuf[i] + dstbuf[i + 1] * dstbuf[i + 1] + dstbuf[i + 2] * dstbuf[i + 2] + dstbuf[i + 3] * dstbuf[i + 3]) / 4;
-					if ( self->last_audio_frames_write_pos >= self->last_audio_frames.size() )
-						self->last_audio_frames_write_pos = 0;
-				}
+				frames_chunk = self->mod->read_interleaved_quad( self->samplerate, frames_chunk, dstbuf );
 			}
 			break;
 		}
-		dstbuf += frames_read * self->num_channels;
-		update_timeinfos( self->samplerate, frames_read );
-		frames_to_render -= frames_read;
-		frames_rendered += frames_read;
-		if ( frames_read < frames_chunk ) {
-			self->end_of_song_reached = true;
+		dstbuf += frames_chunk * self->num_channels;
+		if ( frames_chunk == 0 ) {
 			break;
 		}
+		update_timeinfos( self->samplerate, frames_chunk );
+		frames_to_render -= frames_chunk;
+		frames_rendered += frames_chunk;
+	}
+	if ( frames_rendered == 0 ) {
+		return 0;
 	}
 	return frames_rendered * self->num_channels;
 }
@@ -1738,7 +1692,7 @@ static void WINAPI VisButton( DWORD /* x */ , DWORD /* y */ ) {
 #endif
 
 static XMPIN xmpin = {
-	XMPIN_FLAG_CONFIG | XMPIN_FLAG_LOOP,  // Add XMPIN_FLAG_LOOPSOUND to let XMPlay automatically determine whether the song should loop when returning -1 from openmpt_SetPosition
+	XMPIN_FLAG_CONFIG | XMPIN_FLAG_LOOP,
 	xmp_openmpt_string,
 	nullptr, // "libopenmpt\0mptm/mptmz",
 	openmpt_About,
@@ -1775,7 +1729,7 @@ static XMPIN xmpin = {
 	openmpt_GetConfig,
 	openmpt_SetConfig,
 
-	nullptr  // Options
+	nullptr
 };
 
 static const char * xmp_openmpt_default_exts = "OpenMPT\0mptm/mptmz";
