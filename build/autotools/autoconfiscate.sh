@@ -297,7 +297,8 @@ case $TAR_FLAVOUR in
   tar -cv --format pax -f ../dist-autotools.tar libopenmpt
   ;;
  bsd)
-  tar -cv -F pax -N -f ../dist-autotools.tar libopenmpt
+  #tar -cv -F pax -N -f ../dist-autotools.tar libopenmpt
+  tar -cv -N -f ../dist-autotools.tar libopenmpt
   ;;
  libarchive)
   tar -cv --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt

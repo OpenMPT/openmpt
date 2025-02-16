@@ -378,7 +378,8 @@ endif
 ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
 TAR_C=tar -c --format pax -f
 else ifeq ($(findstring OpenBSD,$(UNAME_S)),OpenBSD)
-TAR_C=tar -c -F pax -N
+#TAR_C=tar -c -F pax -N
+TAR_C=tar -c -N
 else ifeq ($(findstring BSD,$(UNAME_S)),BSD)
 TAR_C=tar -c --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0
 else
