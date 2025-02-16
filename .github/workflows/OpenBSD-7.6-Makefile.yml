@@ -1,0 +1,79 @@
+name: OpenBSD 7.6 Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.30 ]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@v0.27.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openbsd
+        version: '7.6'
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@v0.27.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openbsd
+        version: '7.6'
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo pkg_add -u
+          sudo pkg_add -I ghostscript-10.03.1
+          sudo pkg_add -I autoconf-2.71 automake-1.16.5
+          sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
+    - name: Build
+      uses: cross-platform-actions/action@v0.27.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openbsd
+        version: '7.6'
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1
+    - name: Test
+      uses: cross-platform-actions/action@v0.27.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openbsd
+        version: '7.6'
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1 check
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@v0.27.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openbsd
+        version: '7.6'
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
