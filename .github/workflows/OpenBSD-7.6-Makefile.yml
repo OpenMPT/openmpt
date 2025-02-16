@@ -39,8 +39,8 @@ jobs:
         shutdown_vm: false
         run: |
           sudo pkg_add -u
-          sudo pkg_add -I ghostscript-10.03.1
-          sudo pkg_add -I autoconf-2.71 automake-1.16.5
+          sudo pkg_add -I ghostscript-10.03.1p2
+          sudo pkg_add -I autoconf-2.72p0 automake-1.16.5
           sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
     - name: Build
       uses: cross-platform-actions/action@v0.27.0
