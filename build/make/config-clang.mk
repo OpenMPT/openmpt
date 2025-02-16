@@ -59,13 +59,13 @@ LDFLAGS  += -Wl,--thinlto-jobs=all
 endif
 
 ifeq ($(CHECKED_ADDRESS),1)
-CXXFLAGS += -fsanitize=address
-CFLAGS   += -fsanitize=address
+CXXFLAGS += -fsanitize=address -shared-libsan
+CFLAGS   += -fsanitize=address -shared-libsan
 endif
 
 ifeq ($(CHECKED_UNDEFINED),1)
-CXXFLAGS += -fsanitize=undefined
-CFLAGS   += -fsanitize=undefined
+CXXFLAGS += -fsanitize=undefined -shared-libsan
+CFLAGS   += -fsanitize=undefined -shared-libsan
 endif
 
 include build/make/warnings-clang.mk
