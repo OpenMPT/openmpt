@@ -477,8 +477,8 @@ void PlaybackTest::ToTSV(std::ostream &output) const noexcept(false)
 				   << channel.leftVol << "\t"
 				   << channel.rightVol << "\t"
 				   << ((channel.flags & TestDataChannel::kSurround) ? "yes" : "no") << "\t"
-				   << (channel.increment * positionPrecision * header.mixingFreq) << "\t"
-				   << ((channel.flags & TestDataChannel::kOPL) ? "OPL" : mpt::afmt::fmt(channel.position * positionPrecision, floatFormat)) << "\t"
+				   << (static_cast<double>(channel.increment) * positionPrecision * header.mixingFreq) << "\t"
+				   << ((channel.flags & TestDataChannel::kOPL) ? "OPL" : mpt::afmt::fmt(static_cast<double>(channel.position) * positionPrecision, floatFormat)) << "\t"
 				   << filterType << "\t"
 				   << channel.filterA0 * filterPrecision << "\t"
 				   << channel.filterB0 * filterPrecision << "\t"
@@ -607,9 +607,9 @@ std::vector<mpt::ustring> PlaybackTest::Compare(const PlaybackTest &otherTest) c
 				MPT_LOG_TEST_WITH_ROW_CHN("Left volume", l, r);
 			if(const auto l = lChn.rightVol * lChannelVolumeScale, r = rChn.rightVol * rChannelVolumeScale; !FuzzyEquals(l, r, epsilon))
 				MPT_LOG_TEST_WITH_ROW_CHN("Right volume", l, r);
-			if(const auto l = lChn.increment * lPositionPrecision * header.mixingFreq, r = rChn.increment * rPositionPrecision * other.header.mixingFreq; !FuzzyEquals(l, r, epsilon))
+			if(const auto l = static_cast<double>(lChn.increment) * lPositionPrecision * header.mixingFreq, r = static_cast<double>(rChn.increment) * rPositionPrecision * other.header.mixingFreq; !FuzzyEquals(l, r, epsilon))
 				MPT_LOG_TEST_WITH_ROW_CHN("Speed", l, r);
-			if(const auto l = lChn.position * lPositionPrecision, r = rChn.position * rPositionPrecision; !FuzzyEquals(l, r, epsilon))
+			if(const auto l = static_cast<double>(lChn.position) * lPositionPrecision, r = static_cast<double>(rChn.position) * rPositionPrecision; !FuzzyEquals(l, r, epsilon))
 				MPT_LOG_TEST_WITH_ROW_CHN("Position", l, r);
 			if(const auto l = lChn.filterA0 * lFilterPrecision, r = rChn.filterA0 * rFilterPrecision; !FuzzyEquals(l, r, epsilon))
 				MPT_LOG_TEST_WITH_ROW_CHN("Filter A0", l, r);
@@ -728,7 +728,7 @@ PlaybackTest CSoundFile::CreatePlaybackTest(PlaybackTestSettings settings)
 
 				auto &channel = m_PlayState.Chn[chn];
 				auto &channelData = row.channels.emplace_back();
-				channelData.channel = channel.nMasterChn ? -static_cast<int>(channel.nMasterChn) : (chn + 1);
+				channelData.channel = static_cast<int16>(channel.nMasterChn ? -static_cast<int>(channel.nMasterChn) : (chn + 1));
 				channelData.nnaAge = channel.nnaGeneration;
 				if(channel.dwFlags[CHN_SURROUND])
 					channelData.flags |= TestDataChannel::kSurround;
