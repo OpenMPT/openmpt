@@ -51,7 +51,7 @@ jobs:
         run: |
           sudo pkgin -y update
           sudo pkgin -y full-upgrade
-          sudo pkgin -y install subversion-base p5-subversion py-subversion ruby-subversion git p5-XML-XPath mawk
+          sudo pkgin -y install subversion-base git p5-XML-XPath mawk
           sudo pkgin -y install gmake pkgconf
           sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
           sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
