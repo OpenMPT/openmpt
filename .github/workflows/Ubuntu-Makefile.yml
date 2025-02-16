@@ -19,9 +19,6 @@ jobs:
           - { version: '22.04', deps: sys   }
           - { version: '22.04', deps: local }
           - { version: '22.04', deps: small }
-          - { version: '20.04', deps: sys   }
-          - { version: '20.04', deps: local }
-          - { version: '20.04', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}

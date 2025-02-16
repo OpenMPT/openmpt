@@ -15,7 +15,6 @@ jobs:
         include:
           - { version: '24.04' }
           - { version: '22.04' }
-          - { version: '20.04' }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
