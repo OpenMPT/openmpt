@@ -20,6 +20,42 @@ case $UNAME_S in
  OpenBSD)
   TAR_FLAVOUR=bsd
   MAKE=gmake
+  UNAME_R="$(uname -r)"
+  case $UNAME_R in
+   1.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   2.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   3.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   4.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   5.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   6.*)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   7.1)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   7.2)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   7.3)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   7.4)
+    TAR_FLAVOUR=oldbsd
+    ;;
+   7.5)
+    TAR_FLAVOUR=oldbsd
+    ;;
+  esac
   ;;
  *BSD*)
   TAR_FLAVOUR=libarchive
@@ -296,9 +332,11 @@ case $TAR_FLAVOUR in
  mac)
   tar -cv --format pax -f ../dist-autotools.tar libopenmpt
   ;;
- bsd)
-  #tar -cv -F pax -N -f ../dist-autotools.tar libopenmpt
+ oldbsd)
   tar -cv -N -f ../dist-autotools.tar libopenmpt
+  ;;
+ bsd)
+  tar -cv -F pax -N -f ../dist-autotools.tar libopenmpt
   ;;
  libarchive)
   tar -cv --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0 -f ../dist-autotools.tar libopenmpt

@@ -378,8 +378,36 @@ endif
 ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
 TAR_C=tar -c --format pax -f
 else ifeq ($(findstring OpenBSD,$(UNAME_S)),OpenBSD)
-#TAR_C=tar -c -F pax -N
+UNAME_R:=$(shell uname -r)
+ifeq ($(findstring 1.,$(UNAME_R)),1.)
 TAR_C=tar -c -N
+else ifeq ($(findstring 1.,$(UNAME_R)),1.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 2.,$(UNAME_R)),2.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 3.,$(UNAME_R)),3.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 4.,$(UNAME_R)),4.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 5.,$(UNAME_R)),5.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 6.,$(UNAME_R)),6.)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.0,$(UNAME_R)),7.0)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.1,$(UNAME_R)),7.1)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.2,$(UNAME_R)),7.2)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.3,$(UNAME_R)),7.3)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.4,$(UNAME_R)),7.4)
+TAR_C=tar -c -N
+else ifeq ($(findstring 7.5,$(UNAME_R)),7.5)
+TAR_C=tar -c -N
+else
+TAR_C=tar -c -F pax -N
+endif
 else ifeq ($(findstring BSD,$(UNAME_S)),BSD)
 TAR_C=tar -c --format pax --numeric-owner --uname "" --gname "" --uid 0 --gid 0
 else
