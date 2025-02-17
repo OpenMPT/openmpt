@@ -46,12 +46,12 @@ MPT_CONSTEXPRINLINE Tdst function_pointer_cast(Tsrc f) {
 	static_assert(std::is_function<typename std::remove_pointer<typename std::remove_cv<Tsrc>::type>::type>::value);
 	static_assert(std::is_function<typename std::remove_pointer<typename std::remove_cv<Tdst>::type>::type>::value);
 #endif
-#if MPT_CLANG_AT_LEAST(19, 0, 0)
+#if (MPT_CLANG_AT_LEAST(19, 0, 0) && !MPT_OS_ANDROID) || MPT_CLANG_AT_LEAST(20, 0, 0)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
 #endif
 	return reinterpret_cast<Tdst>(f);
-#if MPT_CLANG_AT_LEAST(19, 0, 0)
+#if (MPT_CLANG_AT_LEAST(19, 0, 0) && !MPT_OS_ANDROID) || MPT_CLANG_AT_LEAST(20, 0, 0)
 #pragma clang diagnostic pop
 #endif
 }
