@@ -119,7 +119,9 @@ public:
 		{
 			return nullptr;
 		}
-		return lib->get_address(symbol);
+		FuncPtr result = nullptr;
+		lib->bind(result, symbol);
+		return result;
 	}
 
 };

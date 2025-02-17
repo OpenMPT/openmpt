@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/utility.hpp"
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -97,7 +99,7 @@ public:
 			static_assert(std::is_function<Tfunc>::value);
 		#endif
 		const FuncPtr addr = GetProcAddress(symbol);
-		f = reinterpret_cast<Tfunc*>(addr);
+		f = mpt::function_pointer_cast<Tfunc*>(addr);
 		return (addr != nullptr);
 	}
 };

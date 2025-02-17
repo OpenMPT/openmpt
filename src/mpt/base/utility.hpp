@@ -5,8 +5,7 @@
 
 
 
-#include "mpt/base/detect_compiler.hpp"
-#include "mpt/base/detect_libcxx.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 
 #if MPT_CXX_BEFORE(20) || MPT_LIBCXX_LLVM_BEFORE(13000)
@@ -33,6 +32,28 @@ inline namespace MPT_INLINE_NS {
 template <typename Tdst, typename Tsrc>
 MPT_CONSTEXPRINLINE Tdst c_cast(Tsrc && x) {
 	return (Tdst)std::forward<Tsrc>(x);
+}
+
+
+
+template <typename Tdst, typename Tsrc>
+MPT_CONSTEXPRINLINE Tdst function_pointer_cast(Tsrc f) {
+#if !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
+	// MinGW64 std::is_function is always false for non __cdecl functions.
+	// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
+	static_assert(std::is_pointer<typename std::remove_cv<Tsrc>::type>::value);
+	static_assert(std::is_pointer<typename std::remove_cv<Tdst>::type>::value);
+	static_assert(std::is_function<typename std::remove_pointer<typename std::remove_cv<Tsrc>::type>::type>::value);
+	static_assert(std::is_function<typename std::remove_pointer<typename std::remove_cv<Tdst>::type>::type>::value);
+#endif
+#if MPT_CLANG_AT_LEAST(19, 0, 0)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
+	return reinterpret_cast<Tdst>(f);
+#if MPT_CLANG_AT_LEAST(19, 0, 0)
+#pragma clang diagnostic pop
+#endif
 }
 
 

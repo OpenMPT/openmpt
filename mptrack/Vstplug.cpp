@@ -219,9 +219,9 @@ std::pair<Vst::AEffect *, Vst::MainProc> CVstPlugin::LoadPluginInternal(bool mas
 
 	if(library != nullptr && library != INVALID_HANDLE_VALUE)
 	{
-		auto pMainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(library, "VSTPluginMain"));
+		auto pMainProc = mpt::function_pointer_cast<Vst::MainProc>(GetProcAddress(library, "VSTPluginMain"));
 		if(pMainProc == nullptr)
-			pMainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(library, "main"));
+			pMainProc = mpt::function_pointer_cast<Vst::MainProc>(GetProcAddress(library, "main"));
 
 		if(pMainProc != nullptr)
 		{

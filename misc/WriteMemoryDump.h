@@ -12,6 +12,8 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/utility.hpp"
+
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:4091) // 'typedef ': ignored on left of '' when no variable is declared
@@ -32,7 +34,7 @@ inline bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *fi
 	HMODULE hDll = ::LoadLibrary(_T("DBGHELP.DLL"));
 	if(hDll)
 	{
-		MINIDUMPWRITEDUMP pDump = (MINIDUMPWRITEDUMP)::GetProcAddress(hDll, "MiniDumpWriteDump");
+		MINIDUMPWRITEDUMP pDump = mpt::function_pointer_cast<MINIDUMPWRITEDUMP>(::GetProcAddress(hDll, "MiniDumpWriteDump"));
 		if(pDump)
 		{
 

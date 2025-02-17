@@ -368,9 +368,9 @@ void PluginBridge::InitBridge(InitMsg &msg)
 		return;
 	}
 
-	m_mainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(m_library, "VSTPluginMain"));
+	m_mainProc = mpt::function_pointer_cast<Vst::MainProc>(GetProcAddress(m_library, "VSTPluginMain"));
 	if(m_mainProc == nullptr)
-		m_mainProc = reinterpret_cast<Vst::MainProc>(GetProcAddress(m_library, "main"));
+		m_mainProc = mpt::function_pointer_cast<Vst::MainProc>(GetProcAddress(m_library, "main"));
 
 	if(m_mainProc != nullptr)
 	{
