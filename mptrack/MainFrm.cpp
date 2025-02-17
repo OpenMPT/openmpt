@@ -2810,7 +2810,7 @@ void CMainFrame::StopRenderer(CSoundFile *pSndFile)
 CInputHandler *CMainFrame::GetInputHandler()
 {
 	if(CMainFrame *mainFrm = GetMainFrame())
-		return GetMainFrame()->m_InputHandler.get();
+		return mainFrm->m_InputHandler.get();
 	return nullptr;
 }
 
