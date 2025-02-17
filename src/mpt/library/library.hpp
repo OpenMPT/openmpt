@@ -429,7 +429,7 @@ public:
 	}
 
 	func_ptr get_address(const std::string & symbol) const {
-		return reinterpret_cast<func_ptr>(dlsym(handle, symbol.c_str()));
+		return reinterpret_cast<func_ptr>(lt_dlsym(handle, symbol.c_str()));
 	}
 
 	~library() {
