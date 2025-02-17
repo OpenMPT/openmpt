@@ -47,8 +47,12 @@ MPT_WARNING("C++ compiler has no exception support.")
 MPT_WARNING("C++ compiler has no exception support.")
 #endif
 #elif MPT_COMPILER_CLANG
-#if (!defined(__EXCEPTIONS) || (__EXCEPTIONS != 1))
+#if (!__has_feature(cxx_exceptions) && (!defined(__EXCEPTIONS) || (__EXCEPTIONS != 1)) && !defined(_CPPUNWIND))
 MPT_WARNING("C++ compiler has no exception support.")
+#else
+#if (MPT_CXX_AT_LEAST(20) && !defined(__cpp_exceptions))
+MPT_WARNING("C++ compiler has no exception support.")
+#endif
 #endif
 #endif
 #endif
