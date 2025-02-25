@@ -1676,20 +1676,19 @@ void CViewSample::ScrollToPosition(int x)    // logical coordinates
 }
 
 
-template<class T, class uT>
+template<class T>
 T CViewSample::GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const
 {
-	static_assert(sizeof(T) == sizeof(uT) && sizeof(T) <= 2);
+	static_assert(sizeof(T) < sizeof(int));
 	const int channelHeight = (m_rcClient.Height() - m_timelineHeight) / smp.GetNumChannels();
-	int yPos = point.y - m_drawChannel * channelHeight - m_timelineHeight;
+	const int yPos = point.y - m_drawChannel * channelHeight - m_timelineHeight;
 
-	int value = std::numeric_limits<T>::max() - std::numeric_limits<uT>::max() * yPos / channelHeight;
-	Limit(value, std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-	return static_cast<T>(value);
+	const int value = std::numeric_limits<T>::max() - (std::numeric_limits<T>::max() - std::numeric_limits<T>::min()) * yPos / channelHeight;
+	return mpt::saturate_cast<T>(value);
 }
 
 
-template<class T, class uT>
+template<class T>
 void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 {
 	if(m_rcClient.Height() >= m_timelineHeight)
@@ -1699,24 +1698,29 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
 
 	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel;
-	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T, uT>(smp, point);
+	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T>(smp, point);
 }
 
 
-template<class T, class uT>
+template<class T>
 void CViewSample::SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old)
 {
-	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel + old * smp.GetNumChannels();
-	const int oldvalue = *data;
-	const int value = GetSampleValueFromPoint<T, uT>(smp, point);
-	const int inc = (m_dwEndDrag > old ? 1 : -1);
-	const int ptrInc = inc * smp.GetNumChannels();
-
-	for(SmpLength i = old; i != m_dwEndDrag; i += inc, data += ptrInc)
+	SmpLength x1 = old, x2 = m_dwEndDrag;
+	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel + x1 * smp.GetNumChannels();
+	T v1 = *data, v2 = GetSampleValueFromPoint<T>(smp, point);
+	if(x1 > x2)
 	{
-		*data = static_cast<T>(static_cast<double>(oldvalue) + (value - oldvalue) * (static_cast<double>(i - old) / static_cast<double>(m_dwEndDrag - old)));
+		data -= (x1 - x2) * smp.GetNumChannels();
+		std::swap(x1, x2);
+		std::swap(v1, v2);
 	}
-	*data = static_cast<T>(value);
+
+	const uint8 ptrInc = smp.GetNumChannels();
+	for(SmpLength length = x2 - x1, remain = length; remain != 0; remain--, data += ptrInc)
+	{
+		*data = static_cast<T>(v2 + Util::muldivr(v1 - v2, remain, length));
+	}
+	*data = v2;
 }
 
 
@@ -1966,9 +1970,9 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 
 				LimitMax(old, sample.nLength);
 				if(sample.GetElementarySampleSize() == 2)
-					SetSampleData<int16, uint16>(sample, point, old);
+					SetSampleData<int16>(sample, point, old);
 				else if(sample.GetElementarySampleSize() == 1)
-					SetSampleData<int8, uint8>(sample, point, old);
+					SetSampleData<int8>(sample, point, old);
 
 				sample.PrecomputeLoops(sndFile, false);
 
@@ -2067,9 +2071,9 @@ void CViewSample::OnLButtonDown(UINT flags, CPoint point)
 		m_lastDrawPoint = point;
 		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Draw Sample");
 		if(sample.GetElementarySampleSize() == 2)
-			SetInitialDrawPoint<int16, uint16>(sample, point);
+			SetInitialDrawPoint<int16>(sample, point);
 		else if(sample.GetElementarySampleSize() == 1)
-			SetInitialDrawPoint<int8, uint8>(sample, point);
+			SetInitialDrawPoint<int8>(sample, point);
 
 		sndFile.GetSample(m_nSample).PrecomputeLoops(sndFile, false);
 

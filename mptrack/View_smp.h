@@ -131,15 +131,15 @@ protected:
 	void DoPaste(PasteMode pasteMode);
 
 	// Sets sample data on sample draw.
-	template<class T, class uT>
+	template<class T>
 	void SetSampleData(ModSample &smp, const CPoint &point, const SmpLength old);
 
 	// Sets initial draw point on sample draw.
-	template<class T, class uT>
+	template<class T>
 	void SetInitialDrawPoint(ModSample &smp, const CPoint &point);
 
 	// Returns sample value corresponding given point in the sample view.
-	template<class T, class uT>
+	template<class T>
 	T GetSampleValueFromPoint(const ModSample &smp, const CPoint &point) const;
 
 	int GetZoomLevel(SmpLength length) const;
