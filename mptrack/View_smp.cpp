@@ -1001,10 +1001,10 @@ void CViewSample::OnDraw(CDC *pDC)
 
 	const CRect rcClient = m_rcClient;
 	CRect rect, rc;
-	const SmpLength smpScrollPos = ScrollPosToSamplePos();
 	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
 	const CSoundFile &sndFile = pModDoc->GetSoundFile();
 	const ModSample &sample = sndFile.GetSample((m_nSample <= sndFile.GetNumSamples()) ? m_nSample : 0);
+	const SmpLength smpScrollPos = std::min(ScrollPosToSamplePos(), sample.nLength);
 	if(sample.uFlags[CHN_ADLIB])
 	{
 		CModScrollView::OnDraw(pDC);
