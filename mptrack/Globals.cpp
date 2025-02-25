@@ -770,8 +770,12 @@ void CModScrollView::SetScrollSizes(int nMapMode, SIZE sizeTotal, const SIZE& si
 	SCROLLINFO info;
 	if(GetScrollInfo(SB_HORZ, &info, SIF_POS))
 		m_nScrollPosX = info.nPos;
+	else
+		m_nScrollPosX = 0;
 	if(GetScrollInfo(SB_VERT, &info, SIF_POS))
 		m_nScrollPosY = info.nPos;
+	else
+		m_nScrollPosY = 0;
 }
 
 
