@@ -1039,13 +1039,13 @@ void CSoundFile::ResetChannels()
 {
 	m_SongFlags.reset(SONG_FADINGSONG | SONG_ENDREACHED);
 	m_PlayState.m_nBufferCount = 0;
-	for(auto &chn : m_PlayState.Chn)
+	for(CHANNELINDEX c = 0; c < static_cast<CHANNELINDEX>(std::size(m_PlayState.Chn)); ++c)
 	{
+		ModChannel &chn = m_PlayState.Chn[c];
 		chn.nROfs = chn.nLOfs = 0;
 		chn.nLength = 0;
 		if(chn.dwFlags[CHN_ADLIB] && m_opl)
 		{
-			CHANNELINDEX c = static_cast<CHANNELINDEX>(std::distance(m_PlayState.Chn.data(), &chn));
 			m_opl->NoteCut(c);
 		}
 	}
