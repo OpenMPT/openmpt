@@ -504,10 +504,10 @@ LRESULT CCtrlPatterns::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_PAT_FOLLOWSONG:
 		// parameters: 0 = turn off, 1 = toggle
 		{
-			UINT state = FALSE;
+			UINT state = BST_UNCHECKED;
 			if(lParam == 1)	// toggle
 			{
-				state = IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG) != BST_UNCHECKED;
+				state = (IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG) == BST_UNCHECKED) ? BST_CHECKED : BST_UNCHECKED;
 			}
 			CheckDlgButton(IDC_PATTERN_FOLLOWSONG, state);
 			OnFollowSong();
