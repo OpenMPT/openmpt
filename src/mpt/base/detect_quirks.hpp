@@ -17,6 +17,11 @@
 #include <array>
 #endif // C++20
 
+#if MPT_LIBCXX_MS
+// for _ITERATOR_DEBUG_LEVEL
+#include <array>
+#endif // MPT_LIBCXX_MS
+
 
 
 #if MPT_OS_DJGPP
@@ -277,7 +282,20 @@
 
 #if MPT_CXX_AT_LEAST(20)
 #if MPT_LIBCXX_GNU_BEFORE(12) || MPT_LIBCXX_LLVM_BEFORE(15000) || (MPT_LIBCXX_MS && MPT_MSVC_BEFORE(2022, 0)) || (MPT_LIBCXX_MS && !MPT_COMPILER_MSVC)
+#ifndef MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER
 #define MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER
+#endif
+#endif
+#if MPT_LIBCXX_MS
+// So, in 2025, Microsoft still ships a STL that by default is not standard-compliant with its own default Debug options.
+// constexpr auto foo = std::vector<int>{}; does not compile with iterator debugging enabled (i.e. in Debug builds).
+#if defined(_ITERATOR_DEBUG_LEVEL)
+#if (_ITERATOR_DEBUG_LEVEL >= 1)
+#ifndef MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER
+#define MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER
+#endif
+#endif
+#endif
 #endif
 #endif
 
