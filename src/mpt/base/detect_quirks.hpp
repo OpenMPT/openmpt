@@ -289,6 +289,7 @@
 #if MPT_LIBCXX_MS
 // So, in 2025, Microsoft still ships a STL that by default is not standard-compliant with its own default Debug options.
 // constexpr auto foo = std::vector<int>{}; does not compile with iterator debugging enabled (i.e. in Debug builds).
+// See <https://developercommunity.visualstudio.com/t/Iterator-Debugging-breaks-C20-constexp/10861623>.
 #if defined(_ITERATOR_DEBUG_LEVEL)
 #if (_ITERATOR_DEBUG_LEVEL >= 1)
 #ifndef MPT_LIBCXX_QUIRK_NO_CXX20_CONSTEXPR_CONTAINER
