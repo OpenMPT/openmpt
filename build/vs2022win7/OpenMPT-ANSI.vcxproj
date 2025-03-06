@@ -1311,7 +1311,6 @@
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
-    <ClCompile Include="..\..\common\mptFileTemporary.cpp" />
     <ClCompile Include="..\..\common\mptFileType.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
     <ClCompile Include="..\..\common\mptRandom.cpp" />

@@ -343,7 +343,6 @@ MPT_FILES_COMMON += common/mptBaseTypes.h
 MPT_FILES_COMMON += common/mptBaseUtils.h
 MPT_FILES_COMMON += common/mptCPU.h
 MPT_FILES_COMMON += common/mptFileIO.h
-MPT_FILES_COMMON += common/mptFileTemporary.cpp
 MPT_FILES_COMMON += common/mptFileTemporary.h
 MPT_FILES_COMMON += common/mptFileType.cpp
 MPT_FILES_COMMON += common/mptFileType.h

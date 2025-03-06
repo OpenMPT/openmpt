@@ -124,7 +124,6 @@ endif
 LOCAL_SRC_FILES += \
 	common/ComponentManager.cpp \
 	common/Logging.cpp \
-	common/mptFileTemporary.cpp \
 	common/mptFileType.cpp \
 	common/mptPathString.cpp \
 	common/mptRandom.cpp \

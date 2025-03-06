@@ -110,7 +110,6 @@
 		B591ED4C6887F6FEB9AA538C /* ComponentManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13F9789407F8C2068CE3D6D4 /* ComponentManager.cpp */; };
 		B5D9190DF9ECEA3FEDBE6F4D /* Sndmix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A0FD6B58B3277A740F924F5 /* Sndmix.cpp */; };
 		BA54A1E79971BC19757B1827 /* Load_ams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 29DC06EFBC69D0E12542752F /* Load_ams.cpp */; };
-		BB65D2D86E5BDC8ABF7E3918 /* mptFileTemporary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF7F8F60F37ED8D27869EDA0 /* mptFileTemporary.cpp */; };
 		BBC2281DFFD5F94FF3A77E5D /* Tables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488AACC5B9AD4DB76F73FB05 /* Tables.cpp */; };
 		BC15882904B4C65B27E07E69 /* patternContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8BE9A4117CE11203E8E49251 /* patternContainer.cpp */; };
 		BCC110A956E505DB070AE6E9 /* DMOUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 664DAA91DAA7EF83588B78D1 /* DMOUtils.cpp */; };
@@ -644,7 +643,6 @@
 		FC85D407DBA2EE39B7AC4A47 /* inputfile.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = inputfile.hpp; path = ../../src/mpt/io_file/inputfile.hpp; sourceTree = "<group>"; };
 		FED01DA32FB4159542CC4BE3 /* tuning.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tuning.h; path = ../../soundlib/tuning.h; sourceTree = "<group>"; };
 		FEDB3A1791690409FA41A857 /* Echo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Echo.h; path = ../../soundlib/plugins/dmo/Echo.h; sourceTree = "<group>"; };
-		FF7F8F60F37ED8D27869EDA0 /* mptFileTemporary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptFileTemporary.cpp; path = ../../common/mptFileTemporary.cpp; sourceTree = "<group>"; };
 		FFB3088F4401AE018628E6CF /* Resampler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resampler.h; path = ../../soundlib/Resampler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1092,7 +1090,6 @@
 				12DCF57C800503EE8197F3BC /* mptBaseUtils.h */,
 				BA99A2F415DAF666E9354134 /* mptCPU.h */,
 				50CF7EB4C1F21FA677B8CCF4 /* mptFileIO.h */,
-				FF7F8F60F37ED8D27869EDA0 /* mptFileTemporary.cpp */,
 				43CBFB4A068C5BBC63C1398A /* mptFileTemporary.h */,
 				074C76BE5EB1E9B010C004FE /* mptFileType.cpp */,
 				AFFB10484288DA3AAB617E88 /* mptFileType.h */,
@@ -1633,7 +1630,6 @@
 				B591ED4C6887F6FEB9AA538C /* ComponentManager.cpp in Sources */,
 				527E833E969254708A63D97E /* Logging.cpp in Sources */,
 				1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */,
-				BB65D2D86E5BDC8ABF7E3918 /* mptFileTemporary.cpp in Sources */,
 				1F7082161F13654859681856 /* mptFileType.cpp in Sources */,
 				DF08AE5AEEEDDA8CDB61649A /* mptPathString.cpp in Sources */,
 				926864F471857F264D8EDB34 /* mptRandom.cpp in Sources */,
