@@ -537,6 +537,9 @@
     <ClInclude Include="..\..\misc\mptColor.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\misc\mptFileCompression.h">
+      <Filter>misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\misc\mptLibrary.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -1850,9 +1853,6 @@
     <ClCompile Include="..\..\common\Profiler.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\common\mptFileIO.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\common\mptFileTemporary.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -1878,6 +1878,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptColor.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\misc\mptFileCompression.cpp">
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\..\misc\mptLibrary.cpp">

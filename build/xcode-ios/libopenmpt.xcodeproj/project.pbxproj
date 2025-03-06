@@ -21,7 +21,6 @@
 		168C3C51AED92203DD202291 /* Message.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 681E06B9AC6CAC2BEE93E4F9 /* Message.cpp */; };
 		18C62C9BF7E346CDD3ECA2DB /* SampleIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78CAB4630B587E55743122A3 /* SampleIO.cpp */; };
 		19C908D7F8E62309D4EF7F17 /* Load_tcb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73A166DF062F30D16F07D51F /* Load_tcb.cpp */; };
-		1CD4D902FBF1F334D7FB4F42 /* mptFileIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */; };
 		1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F52A05ED3A145D015C87E9E /* Profiler.cpp */; };
 		1E48E6EB2E2E131D1AA19D2B /* Gargle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78BD15B31AA6B1A511CDC3F3 /* Gargle.cpp */; };
 		1F7082161F13654859681856 /* mptFileType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 074C76BE5EB1E9B010C004FE /* mptFileType.cpp */; };
@@ -247,7 +246,6 @@
 		1197459E05968F108A81A3DE /* feature_flags.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = feature_flags.hpp; path = ../../src/mpt/arch/feature_flags.hpp; sourceTree = "<group>"; };
 		124C374986A67C3B048A0589 /* ContainerMMCMP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ContainerMMCMP.cpp; path = ../../soundlib/ContainerMMCMP.cpp; sourceTree = "<group>"; };
 		12DCF57C800503EE8197F3BC /* mptBaseUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptBaseUtils.h; path = ../../common/mptBaseUtils.h; sourceTree = "<group>"; };
-		13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mptFileIO.cpp; path = ../../common/mptFileIO.cpp; sourceTree = "<group>"; };
 		13F9789407F8C2068CE3D6D4 /* ComponentManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ComponentManager.cpp; path = ../../common/ComponentManager.cpp; sourceTree = "<group>"; };
 		14715833DAFF4FA549017673 /* WindowedFIR.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WindowedFIR.cpp; path = ../../soundlib/WindowedFIR.cpp; sourceTree = "<group>"; };
 		14754CCFA70316C10FDBBB0F /* Load_etx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_etx.cpp; path = ../../soundlib/Load_etx.cpp; sourceTree = "<group>"; };
@@ -1093,7 +1091,6 @@
 				F78A378464B245F6664535C4 /* mptBaseTypes.h */,
 				12DCF57C800503EE8197F3BC /* mptBaseUtils.h */,
 				BA99A2F415DAF666E9354134 /* mptCPU.h */,
-				13F63AEAA68404DC0F5CA92A /* mptFileIO.cpp */,
 				50CF7EB4C1F21FA677B8CCF4 /* mptFileIO.h */,
 				FF7F8F60F37ED8D27869EDA0 /* mptFileTemporary.cpp */,
 				43CBFB4A068C5BBC63C1398A /* mptFileTemporary.h */,
@@ -1636,7 +1633,6 @@
 				B591ED4C6887F6FEB9AA538C /* ComponentManager.cpp in Sources */,
 				527E833E969254708A63D97E /* Logging.cpp in Sources */,
 				1CE1B0B6B52E9668E37596F6 /* Profiler.cpp in Sources */,
-				1CD4D902FBF1F334D7FB4F42 /* mptFileIO.cpp in Sources */,
 				BB65D2D86E5BDC8ABF7E3918 /* mptFileTemporary.cpp in Sources */,
 				1F7082161F13654859681856 /* mptFileType.cpp in Sources */,
 				DF08AE5AEEEDDA8CDB61649A /* mptPathString.cpp in Sources */,

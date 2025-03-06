@@ -17,6 +17,7 @@
 #include "Reporting.h"
 #include "../common/mptFileIO.h"
 #include "../common/version.h"
+#include "../misc/mptFileCompression.h"
 #include "../misc/WriteMemoryDump.h"
 #include "../soundlib/mod_specifications.h"
 

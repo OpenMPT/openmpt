@@ -1357,6 +1357,7 @@
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptColor.h" />
+    <ClInclude Include="..\..\misc\mptFileCompression.h" />
     <ClInclude Include="..\..\misc\mptLibrary.h" />
     <ClInclude Include="..\..\misc\mptMutex.h" />
     <ClInclude Include="..\..\misc\mptOS.h" />
@@ -1549,7 +1550,6 @@
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
     <ClCompile Include="..\..\common\Logging.cpp" />
     <ClCompile Include="..\..\common\Profiler.cpp" />
-    <ClCompile Include="..\..\common\mptFileIO.cpp" />
     <ClCompile Include="..\..\common\mptFileTemporary.cpp" />
     <ClCompile Include="..\..\common\mptFileType.cpp" />
     <ClCompile Include="..\..\common\mptPathString.cpp" />
@@ -1560,6 +1560,7 @@
     <ClCompile Include="..\..\common\version.cpp" />
     <ClCompile Include="..\..\installer\updatesigntool\updatesigntool.cpp" />
     <ClCompile Include="..\..\misc\mptColor.cpp" />
+    <ClCompile Include="..\..\misc\mptFileCompression.cpp" />
     <ClCompile Include="..\..\misc\mptLibrary.cpp" />
     <ClCompile Include="..\..\misc\mptOS.cpp" />
     <ClCompile Include="..\..\misc\mptWine.cpp" />

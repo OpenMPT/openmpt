@@ -1,7 +1,7 @@
 /*
- * mptFileIO.cpp
- * -------------
- * Purpose: File I/O wrappers
+ * mptFileCompression.cpp
+ * ----------------------
+ * Purpose: File System compression.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -80,7 +80,6 @@ bool SetFilesystemCompression(const mpt::PathString &filename)
 #endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
-
 
 #endif // MPT_ENABLE_FILEIO
 
