@@ -202,8 +202,8 @@ extern int vorbis_encode_setup_init(vorbis_info *vi);
  *
  * \param vi      Pointer to an initialized vorbis_info struct.
  *
- * \param number Specifies the desired action; See \ref encctlcodes "the list
- * of available requests".
+ * \param number Specifies the desired action; See \ref encctlcodes
+ * "the list of available requests".
  *
  * \param arg void * pointing to a data structure matching the request
  * argument.
@@ -298,7 +298,7 @@ struct ovectl_ratemanage2_arg {
  * The type of the referent of that function's \c arg pointer depends on these
  * codes.
  */
-/*@{*/
+/**@{*/
 
 /**
  * Query the current encoder bitrate management setting.
@@ -424,7 +424,7 @@ struct ovectl_ratemanage2_arg {
  */
 #define OV_ECTL_RATEMANAGE_HARD      0x13
 
-/*@}*/
+/**@}*/
 
 
 

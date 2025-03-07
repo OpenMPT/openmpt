@@ -1,11 +1,16 @@
-libvorbis library version 1.3.7.
+libvorbis library version 1.3.7 (2020-07-04).
 The following changes have been made:
-- Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
-  symbian, test, vq) have been removed.
-- https://github.com/xiph/vorbis/pull/100 and
-  https://github.com/xiph/vorbis/pull/101 have been applied.
-- GCC warnings in lib/lpc.c and lib/psy.c have been silenced.
-- os.h has been modified to build for ARM64EC.
-- All modifications have been marked with /* OpenMPT */.
-- For building, premake is used to generate Visual Studio project files.
-  See ../build/premake/ for details.
+ *  Obviously, unnecessary folders and files (doc, examples, m4, macos, macosx,
+    symbian, test, vq) have been removed.
+ *  The following commits have been applied:
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/4e1155cc77a2c672f3dd18f9a32dbf1404693289
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/bb4047de4c05712bf1fd49b9584c360b8e4e0adf
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/315da9cc9d30484c802b2e2ea150df39e060e2b9
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/f978052c2002456c11bbe34d80ccf3fb3ceb35cf
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/13f0141eb2fc90869c4dd1957e7f300c8343a7fa
+     *  https://gitlab.xiph.org/xiph/vorbis/-/commit/e868e6b70dd3b444876f3e2943bc6ef2a48ee29c
+ *  GCC warnings in lib/lpc.c and lib/psy.c have been silenced.
+ *  os.h has been modified to build for ARM64EC.
+ *  All modifications have been marked with /* OpenMPT */.
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
