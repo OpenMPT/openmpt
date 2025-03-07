@@ -711,8 +711,15 @@ void _vp_noisemask(vorbis_look_psy *p,
 
   for(i=0;i<n;i++)work[i]=logmdct[i]-logmask[i];
 
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)  /* OpenMPT */
+#pragma GCC diagnostic push  /* OpenMPT */
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  /* OpenMPT */
+#endif  /* OpenMPT */
   bark_noise_hybridmp(n,p->bark,work,logmask,0.,
                       p->vi->noisewindowfixed);
+#if defined(__GNUC__) && !defined(__clang__) && !defined(_MSC_VER)  /* OpenMPT */
+#pragma GCC diagnostic pop  /* OpenMPT */
+#endif  /* OpenMPT */
 
   for(i=0;i<n;i++)work[i]=logmdct[i]-work[i];
 
