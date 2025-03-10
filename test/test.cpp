@@ -117,6 +117,10 @@
 
 #include "TestTools.h"
 
+#if defined(LIBOPENMPT_BUILD)
+#include "../libopenmpt/libopenmpt.hpp"
+#endif
+
 
 // enable tests which may fail spuriously
 //#define FLAKY_TESTS
@@ -171,6 +175,19 @@ void PrintHeader()
 {
 	#ifdef LIBOPENMPT_BUILD
 		std::cout << "libopenmpt test suite starting." << std::endl;
+		std::cout << "libopenmpt library version: " << std::hex << std::setfill('0') << std::setw(8) << openmpt::get_library_version() << std::endl;
+		std::cout << "libopenmpt core version: " << std::hex << std::setfill('0') << std::setw(8) << openmpt::get_core_version() << std::endl;
+		std::cout << "libopenmpt library_version: " << openmpt::string::get("library_version") << std::endl;
+		std::cout << "libopenmpt library_features: " << openmpt::string::get("library_features") << std::endl;
+		std::cout << "libopenmpt core_version: " << openmpt::string::get("core_version") << std::endl;
+		std::cout << "libopenmpt source_url: " << openmpt::string::get("source_url") << std::endl;
+		std::cout << "libopenmpt source_date: " << openmpt::string::get("source_date") << std::endl;
+		std::cout << "libopenmpt source_revision: " << openmpt::string::get("source_revision") << std::endl;
+		std::cout << "libopenmpt source_is_modified: " << openmpt::string::get("source_is_modified") << std::endl;
+		std::cout << "libopenmpt source_has_mixed_revisions: " << openmpt::string::get("source_has_mixed_revisions") << std::endl;
+		std::cout << "libopenmpt source_is_package: " << openmpt::string::get("source_is_package") << std::endl;
+		std::cout << "libopenmpt build: " << openmpt::string::get("build") << std::endl;
+		std::cout << "libopenmpt build_compiler: " << openmpt::string::get("build_compiler") << std::endl;
 	#endif
 }
 
