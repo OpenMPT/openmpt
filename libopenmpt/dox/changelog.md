@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.49-pre
 
+ *  [**Bug**] `openmpt::string::get("source_has_mixed_revisions")` and
+    `openmpt_get_string("source_has_mixed_revisions")` always returned an empty
+    string.
+
 ### libopenmpt 0.4.48 (2025-01-06)
 
  *  The internal LFO plugin could misbehave in Tempo Sync mode when rows per
