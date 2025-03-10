@@ -28,6 +28,7 @@
 #include "../misc/mptWine.h"
 #include "mpt/crc/crc.hpp"
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/string/utility.hpp"
@@ -707,7 +708,7 @@ void Initialize()
 
 		{
 			std::string fn = "libopenmpt_native_support.so";
-			mpt::ofstream f(wine.PathToWindows(nativeSearchPath) + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::IO::ofstream f(wine.PathToWindows(nativeSearchPath) + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.write(&result.filetree[fn][0], result.filetree[fn].size());
 			f.flush();
 			if(!f)
@@ -717,7 +718,7 @@ void Initialize()
 		}
 		{
 			std::string fn = "openmpt_wine_wrapper.dll";
-			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::IO::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.write(&result.filetree[fn][0], result.filetree[fn].size());
 			f.flush();
 			if(!f)
@@ -727,7 +728,7 @@ void Initialize()
 		}
 		{
 			std::string fn = "success.txt";
-			mpt::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
+			mpt::IO::ofstream f(paths.AppData_Wine_WineVersion_OpenMPTVersion + P_("\\") + mpt::PathString::FromUTF8(fn), std::ios::binary);
 			f.imbue(std::locale::classic());
 			f << std::string("1");
 			f.flush();

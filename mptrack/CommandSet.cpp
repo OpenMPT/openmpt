@@ -16,6 +16,7 @@
 #include "../soundlib/mod_specifications.h"
 #include "../soundlib/Tables.h"
 #include "../mptrack/Reporting.h"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "../common/mptFileIO.h"
 #include <sstream>
@@ -1865,7 +1866,7 @@ bool CCommandSet::LoadFile(std::istream &iStrm, const mpt::ustring &filenameDesc
 
 bool CCommandSet::LoadFile(const mpt::PathString &filename)
 {
-	mpt::ifstream fin(filename);
+	mpt::IO::ifstream fin(filename);
 	if(fin.fail())
 	{
 		Reporting::Warning(MPT_TFORMAT("Can't open key bindings file {} for reading. Default key bindings will be used.")(filename));

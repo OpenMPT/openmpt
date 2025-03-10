@@ -33,16 +33,6 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_ENABLE_FILEIO)
 
 
-namespace mpt
-{
-
-using fstream = mpt::IO::fstream;
-using ifstream = mpt::IO::ifstream;
-using ofstream = mpt::IO::ofstream;
-
-} // namespace mpt
-
-
 template <typename Targ1>
 inline FileCursor GetFileReader(Targ1 &&arg1)
 {

@@ -13,6 +13,7 @@
 
 #include "mpt/fs/fs.hpp"
 #include "mpt/io_file/fileref.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/path/native_path.hpp"
 #include "mpt/string/utility.hpp"
@@ -267,7 +268,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	// write the script to disk
 	mpt::PathString scriptFilenameWindows = dirWindows + P_("script.sh");
 	{
-		mpt::ofstream tempfile(scriptFilenameWindows, std::ios::binary);
+		mpt::IO::ofstream tempfile(scriptFilenameWindows, std::ios::binary);
 		tempfile << script;
 		tempfile.flush();
 		if(!tempfile)
@@ -287,7 +288,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	// create a wrapper that will call the script and gather result.
 	mpt::PathString wrapperstarterFilenameWindows = dirWindows + P_("wrapperstarter.sh");
 	{
-		mpt::ofstream tempfile(wrapperstarterFilenameWindows, std::ios::binary);
+		mpt::IO::ofstream tempfile(wrapperstarterFilenameWindows, std::ios::binary);
 		std::string wrapperstarterscript;
 		wrapperstarterscript += std::string() + "#!/usr/bin/env sh" "\n";
 		wrapperstarterscript += std::string() + "exec /usr/bin/env sh " + dirPosixEscape + "wrapper.sh" "\n";
@@ -301,7 +302,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	mpt::PathString wrapperFilenameWindows = dirWindows + P_("wrapper.sh");
 	std::string cleanupscript;
 	{
-		mpt::ofstream tempfile(wrapperFilenameWindows, std::ios::binary);
+		mpt::IO::ofstream tempfile(wrapperFilenameWindows, std::ios::binary);
 		std::string wrapperscript;
 		if(!flags[ExecFlagSilent])
 		{
@@ -394,7 +395,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	// create a wrapper that will find a suitable terminal and run the wrapper script in the terminal window.
 	mpt::PathString terminalWrapperFilenameWindows = dirWindows + P_("terminal.sh");
 	{
-		mpt::ofstream tempfile(terminalWrapperFilenameWindows, std::ios::binary);
+		mpt::IO::ofstream tempfile(terminalWrapperFilenameWindows, std::ios::binary);
 		// NOTE:
 		// Modern terminals detach themselves from the invoking shell if another instance is already present.
 		// This means we cannot rely on terminal invocation being syncronous.
@@ -592,7 +593,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 
 	int exitCode = 0;
 	{
-		mpt::ifstream exitFile(dirWindows + P_("exit"), std::ios::binary);
+		mpt::IO::ifstream exitFile(dirWindows + P_("exit"), std::ios::binary);
 		if(!exitFile)
 		{
 			throw mpt::Wine::Exception("Script .exit file not found.");
@@ -611,7 +612,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	std::string outputString;
 	if(!flags[ExecFlagInteractive])
 	{
-		mpt::ifstream outputFile(dirWindows + P_("out"), std::ios::binary);
+		mpt::IO::ifstream outputFile(dirWindows + P_("out"), std::ios::binary);
 		if(outputFile)
 		{
 			outputFile.seekg(0, std::ios::end);
@@ -628,7 +629,7 @@ ExecResult Context::ExecutePosixShellScript(std::string script, FlagSet<ExecFlag
 	std::string errorString;
 	if(flags[ExecFlagSplitOutput])
 	{
-		mpt::ifstream errorFile(dirWindows + P_("err"), std::ios::binary);
+		mpt::IO::ifstream errorFile(dirWindows + P_("err"), std::ios::binary);
 		if(errorFile)
 		{
 			errorFile.seekg(0, std::ios::end);

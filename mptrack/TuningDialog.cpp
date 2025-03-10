@@ -22,6 +22,7 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/string/utility.hpp"
@@ -792,7 +793,7 @@ void CTuningDialog::OnBnClickedButtonImport()
 		const bool bIsScl = (mpt::PathCompareNoCase(fileExt, P_(".scl")) == 0);
 		//const bool bIsTc = (mpt::PathCompareNoCase(fileExt, mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)) == 0);
 
-		mpt::ifstream fin(file, std::ios::binary);
+		mpt::IO::ifstream fin(file, std::ios::binary);
 
 		// "HSCT", 0x01, 0x00, 0x00, 0x00
 		const uint8 magicTColdV1 [] = {  'H', 'S', 'C', 'T',0x01,0x00,0x00,0x00                          };
@@ -1557,7 +1558,7 @@ CTuningDialog::EnSclImport CTuningDialog::ImportScl(const mpt::PathString &filen
 {
 	MPT_ASSERT(result == nullptr);
 	result = nullptr;
-	mpt::ifstream iStrm(filename, std::ios::in | std::ios::binary);
+	mpt::IO::ifstream iStrm(filename, std::ios::in | std::ios::binary);
 	if(!iStrm)
 	{
 		return enSclImportFailUnableToOpenFile;

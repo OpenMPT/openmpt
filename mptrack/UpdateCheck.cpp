@@ -33,6 +33,7 @@
 #include "mpt/fs/fs.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
@@ -1249,7 +1250,7 @@ public:
 					std::array<std::byte, 512/8> expected;
 					std::copy(binhash.begin(), binhash.end(), expected.begin());
 					mpt::crypto::hash::SHA512 hash;
-					mpt::ifstream f(updateFilename, std::ios::binary);
+					mpt::IO::ifstream f(updateFilename, std::ios::binary);
 					f.imbue(std::locale::classic());
 					f.exceptions(std::ios::badbit);
 					while(!mpt::IO::IsEof(f))

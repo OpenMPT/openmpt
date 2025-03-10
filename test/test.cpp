@@ -30,6 +30,7 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_read/filecursor_stdstream.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/dos_version.hpp"
@@ -608,7 +609,7 @@ static MPT_NOINLINE void TestVersion()
 #if MPT_TEST_HAS_FILESYSTEM
 #if !MPT_OS_DJGPP
 	mpt::PathString version_mk = GetPathPrefix() + P_("libopenmpt/libopenmpt_version.mk");
-	mpt::ifstream f(version_mk, std::ios::in);
+	mpt::IO::ifstream f(version_mk, std::ios::in);
 	VERIFY_EQUAL(f ? true : false, true);
 	std::map<std::string, std::string> fields;
 	std::string line;
@@ -3628,7 +3629,7 @@ static CSoundFile &GetSoundFile(TSoundFileContainer &sndFile)
 
 static TSoundFileContainer CreateSoundFileContainer(const mpt::PathString &filename)
 {
-	mpt::ifstream stream(filename, std::ios::binary);
+	mpt::IO::ifstream stream(filename, std::ios::binary);
 	FileReader file = mpt::IO::make_FileCursor<mpt::PathString>(stream);
 	std::shared_ptr<CSoundFile> pSndFile = std::make_shared<CSoundFile>();
 	pSndFile->Create(file, CSoundFile::loadCompleteModule);
@@ -3644,25 +3645,25 @@ static void DestroySoundFileContainer(TSoundFileContainer & /* sndFile */ )
 
 static void SaveIT(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::IO::ofstream f(filename, std::ios::binary);
 	sndFile->SaveIT(f, filename, false);
 }
 
 static void SaveXM(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::IO::ofstream f(filename, std::ios::binary);
 	sndFile->SaveXM(f, false);
 }
 
 static void SaveS3M(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::IO::ofstream f(filename, std::ios::binary);
 	sndFile->SaveS3M(f);
 }
 
 static void SaveMOD(const TSoundFileContainer &sndFile, const mpt::PathString &filename)
 {
-	mpt::ofstream f(filename, std::ios::binary);
+	mpt::IO::ofstream f(filename, std::ios::binary);
 	sndFile->SaveMod(f);
 }
 

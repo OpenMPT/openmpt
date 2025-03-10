@@ -19,6 +19,7 @@
 #include "../mptrack/ExceptionHandler.h"
 #include "../common/mptFileIO.h"
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "../common/mptStringBuffer.h"
 #include "../common/misc_util.h"
 
@@ -171,7 +172,7 @@ PluginArch BridgeWrapper::GetNativePluginBinaryType()
 PluginArch BridgeWrapper::GetPluginBinaryType(const mpt::PathString &pluginPath)
 {
 	PluginArch type = PluginArch_unknown;
-	mpt::ifstream file(pluginPath, std::ios::in | std::ios::binary);
+	mpt::IO::ifstream file(pluginPath, std::ios::in | std::ios::binary);
 	if(file.is_open())
 	{
 		IMAGE_DOS_HEADER dosHeader;

@@ -21,6 +21,7 @@
 #include "Mainfrm.h"
 
 #include <algorithm>
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
 #include "../common/mptFileIO.h"
@@ -416,7 +417,7 @@ IniFileSettingsBackend::~IniFileSettingsBackend()
 
 static std::vector<char> ReadFile(const mpt::PathString &filename)
 {
-	mpt::ifstream s(filename, std::ios::binary);
+	mpt::IO::ifstream s(filename, std::ios::binary);
 	std::vector<char> result;
 	while(s)
 	{

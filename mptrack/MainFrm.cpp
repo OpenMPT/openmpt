@@ -53,6 +53,7 @@
 #include "mpt/audio/span.hpp"
 #include "mpt/base/alloc.hpp"
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
 #include "mpt/string/utility.hpp"
@@ -3449,7 +3450,7 @@ void CMainFrame::OnCreateMixerDump()
 		if(!sndFile->Create(GetFileReader(f)))
 			continue;
 		auto playTest = sndFile->CreatePlaybackTest(PlaybackTestSettings{});
-		mpt::ofstream outFile(fileName + P_(".testdata.gz"), std::ios::binary | std::ios::trunc);
+		mpt::IO::ofstream outFile(fileName + P_(".testdata.gz"), std::ios::binary | std::ios::trunc);
 		if(outFile)
 		{
 			std::ostringstream outStream;
@@ -3542,7 +3543,7 @@ void CMainFrame::OnConvertMixerDumpToText()
 			if(!f.IsValid())
 				throw std::runtime_error{"Cannot open test data file!"};
 			PlaybackTest playTest{GetFileReader(f)};
-			mpt::ofstream output(fileName.ReplaceExtension(P_(".tsv")), std::ios::binary);
+			mpt::IO::ofstream output(fileName.ReplaceExtension(P_(".tsv")), std::ios::binary);
 			playTest.ToTSV(output);
 		} catch(const std::exception &e)
 		{

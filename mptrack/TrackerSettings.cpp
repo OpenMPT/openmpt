@@ -32,6 +32,7 @@
 #include "mpt/environment/environment.hpp"
 #include "mpt/fs/common_directories.hpp"
 #include "mpt/fs/fs.hpp"
+#include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
 #include "mpt/uuid/uuid.hpp"
@@ -1045,7 +1046,7 @@ void TrackerSettings::MigrateTunings(const Version storedVersion)
 std::unique_ptr<CTuningCollection> TrackerSettings::LoadLocalTunings()
 {
 	std::unique_ptr<CTuningCollection> s_pTuningsSharedLocal = std::make_unique<CTuningCollection>();
-	mpt::ifstream f(
+	mpt::IO::ifstream f(
 			PathTunings.GetDefaultDir()
 			+ P_("local_tunings")
 			+ mpt::PathString::FromUTF8(CTuningCollection::s_FileExtension)
