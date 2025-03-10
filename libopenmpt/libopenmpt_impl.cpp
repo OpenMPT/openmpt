@@ -242,7 +242,7 @@ std::string get_string( const std::string & key ) {
 		return get_source_revision_string();
 	} else if ( key == "source_is_modified" ) {
 		return OpenMPT::SourceInfo::Current().IsDirty() ? "1" : "0";
-	} else if ( key == "source_has_mixed_revision" ) {
+	} else if ( key == "source_has_mixed_revisions" ) {
 		return OpenMPT::SourceInfo::Current().HasMixedRevisions() ? "1" : "0";
 	} else if ( key == "source_is_package" ) {
 		return OpenMPT::SourceInfo::Current().IsPackage() ? "1" : "0";
