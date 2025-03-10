@@ -689,10 +689,10 @@ void CTuningDialog::OnBnClickedButtonExport()
 			}
 			mpt::ustring fileNameW = fileName.ToUnicode();
 			mpt::ustring numberW = mpt::ufmt::fmt(i + 1, numberFmt);
-			numberW = SanitizePathComponent(numberW);
+			numberW = mpt::SanitizePathComponent(numberW);
 			fileNameW = mpt::replace(fileNameW, U_("%tuning_number%"), numberW);
 			mpt::ustring nameW = mpt::ToUnicode(tuningName);
-			nameW = SanitizePathComponent(nameW);
+			nameW = mpt::SanitizePathComponent(nameW);
 			fileNameW = mpt::replace(fileNameW, U_("%tuning_name%"), nameW);
 			fileName = mpt::PathString::FromUnicode(fileNameW);
 

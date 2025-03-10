@@ -19,6 +19,10 @@
 #include "mpt/path/os_path.hpp"
 #include "mpt/string/types.hpp"
 
+#if defined(MODPLUG_TRACKER)
+#include "mpt/string_transcode/transcode.hpp"
+#endif
+
 #include "mptString.h"
 
 
@@ -64,7 +68,11 @@ inline mpt::ustring ToUString(const T &x)
 
 
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER)
+
+
+
+#if MPT_OS_WINDOWS
 
 
 
@@ -89,25 +97,23 @@ int PathCompareNoCase(const PathString &a, const PathString &b);
 
 
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+#endif // MPT_OS_WINDOWS
+
+
+
+template <typename Tstring>
+inline Tstring SanitizePathComponent(const Tstring &str)
+{
+	return mpt::transcode<Tstring>(mpt::native_path::FromNative(mpt::transcode<mpt::native_path::raw_path_type>(str)).AsSanitizedComponent().AsNative());
+}
+
+
+
+#endif // MODPLUG_TRACKER
 
 
 
 } // namespace mpt
-
-
-
-#if defined(MODPLUG_TRACKER)
-
-// Sanitize a filename (remove special chars)
-
-mpt::ustring SanitizePathComponent(mpt::ustring str);
-
-#if defined(MPT_WITH_MFC)
-CString SanitizePathComponent(CString str);
-#endif // MPT_WITH_MFC
-
-#endif // MODPLUG_TRACKER
 
 
 

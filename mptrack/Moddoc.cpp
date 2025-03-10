@@ -1878,7 +1878,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 			if(!fileNameAdd.empty())
 			{
-				fileNameAdd = SanitizePathComponent(fileNameAdd);
+				fileNameAdd = mpt::SanitizePathComponent(fileNameAdd);
 				thisName += mpt::PathString::FromUnicode(fileNameAdd);
 			}
 			thisName += fileExt;

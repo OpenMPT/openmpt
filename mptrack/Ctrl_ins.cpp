@@ -2127,8 +2127,8 @@ void CCtrlInstruments::SaveInstrument(bool doBatchSave)
 			{
 				mpt::ustring instrName = mpt::ToUnicode(m_sndFile.GetCharsetInternal(), pIns->name[0] ? pIns->GetName() : "untitled");
 				mpt::ustring instrFilename = mpt::ToUnicode(m_sndFile.GetCharsetInternal(), pIns->filename[0] ? pIns->GetFilename() : pIns->GetName());
-				instrName = SanitizePathComponent(instrName);
-				instrFilename = SanitizePathComponent(instrFilename);
+				instrName = mpt::SanitizePathComponent(instrName);
+				instrFilename = mpt::SanitizePathComponent(instrFilename);
 
 				mpt::ustring fileNameW = fileName.ToUnicode();
 				fileNameW = mpt::replace(fileNameW, U_("%instrument_number%"), mpt::ufmt::fmt(ins, numberFmt));

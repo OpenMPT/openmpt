@@ -132,22 +132,4 @@ mpt::PathString GetAbsolutePath(const mpt::PathString &path)
 
 
 
-#if defined(MODPLUG_TRACKER)
-
-mpt::ustring SanitizePathComponent(mpt::ustring str)
-{
-	return mpt::PathString::FromUnicode(str).AsSanitizedComponent().ToUnicode();
-}
-
-#if defined(MPT_WITH_MFC)
-CString SanitizePathComponent(CString str)
-{
-	return mpt::PathString::FromCString(str).AsSanitizedComponent().ToCString();
-}
-#endif // MPT_WITH_MFC
-
-#endif // MODPLUG_TRACKER
-
-
-
 OPENMPT_NAMESPACE_END
