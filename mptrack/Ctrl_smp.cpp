@@ -1394,7 +1394,6 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	const auto numberFmt = mpt::format_simple_spec<mpt::ustring>().Dec().FillNul().Width(1 + static_cast<int>(std::log10(maxSmp)));
 
 	bool ok = false;
-	CString sampleName, sampleFilename;
 
 	for(SAMPLEINDEX smp = minSmp; smp <= maxSmp; smp++)
 	{
@@ -1406,15 +1405,15 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 			fileName = dlg.GetFirstFile();
 			if(doBatchSave)
 			{
-				sampleName = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
-				sampleFilename = mpt::ToCString(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
+				mpt::ustring sampleName = mpt::ToUnicode(m_sndFile.GetCharsetInternal(), (!m_sndFile.m_szNames[smp].empty()) ? std::string(m_sndFile.m_szNames[smp]) : "untitled");
+				mpt::ustring sampleFilename = mpt::ToUnicode(m_sndFile.GetCharsetInternal(), (!sample.filename.empty()) ? sample.GetFilename() : m_sndFile.m_szNames[smp]);
 				sampleName = SanitizePathComponent(sampleName);
 				sampleFilename = SanitizePathComponent(sampleFilename);
 
 				mpt::ustring fileNameU = fileName.ToUnicode();
 				fileNameU = mpt::replace(fileNameU, U_("%sample_number%"), mpt::ufmt::fmt(smp, numberFmt));
-				fileNameU = mpt::replace(fileNameU, U_("%sample_filename%"), mpt::ToUnicode(sampleFilename));
-				fileNameU = mpt::replace(fileNameU, U_("%sample_name%"), mpt::ToUnicode(sampleName));
+				fileNameU = mpt::replace(fileNameU, U_("%sample_filename%"), sampleFilename);
+				fileNameU = mpt::replace(fileNameU, U_("%sample_name%"), sampleName);
 				fileName = mpt::PathString::FromUnicode(fileNameU);
 
 				// Need to enforce S3I for Adlib samples
