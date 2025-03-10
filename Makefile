@@ -1256,6 +1256,7 @@ ALL_DEPENDS += $(OPENMPT123_DEPENDS)
 
 LIBOPENMPTTEST_CXX_SOURCES += \
  test/libopenmpt_test.cpp \
+ $(sort $(wildcard libopenmpt/*.cpp)) \
  $(SOUNDLIB_CXX_SOURCES) \
  test/mpt_tests_base.cpp \
  test/mpt_tests_binary.cpp \
