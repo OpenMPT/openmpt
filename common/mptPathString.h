@@ -64,14 +64,16 @@ inline mpt::ustring ToUString(const T &x)
 
 
 
-#if MPT_OS_WINDOWS
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
+
+
 #if !(MPT_WINRT_BEFORE(MPT_WIN_10))
 // Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
 mpt::PathString GetAbsolutePath(const mpt::PathString &path);
 #endif
-#endif // MPT_OS_WINDOWS
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+
 
 // Relative / absolute paths conversion
 
@@ -79,15 +81,15 @@ mpt::PathString AbsolutePathToRelative(const mpt::PathString &p, const mpt::Path
 	
 mpt::PathString RelativePathToAbsolute(const mpt::PathString &p, const mpt::PathString &relativeTo);
 
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
-
-#if MPT_OS_WINDOWS
 #if !MPT_OS_WINDOWS_WINRT
 int PathCompareNoCase(const PathString &a, const PathString &b);
 #endif // !MPT_OS_WINDOWS_WINRT
-#endif
+
+
+
+#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 
 
