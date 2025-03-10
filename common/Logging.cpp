@@ -16,9 +16,14 @@
 #include "mpt/io/base.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#if defined(MODPLUG_TRACKER)
 #include "mpt/io_file/fstream.hpp"
+#endif
 
+#if defined(MODPLUG_TRACKER)
 #include "mptFileIO.h"
+#endif
+
 #if defined(MODPLUG_TRACKER)
 #include <atomic>
 #endif
