@@ -11,8 +11,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#if defined(MPT_ENABLE_FILEIO)
-
 #ifdef MODPLUG_TRACKER
 #if MPT_OS_WINDOWS
 
@@ -23,13 +21,9 @@
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
 
-#endif // MPT_ENABLE_FILEIO
-
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-#if defined(MPT_ENABLE_FILEIO)
 
 // Sets the NTFS compression attribute on the file or directory.
 // Requires read and write permissions for already opened files.
@@ -42,8 +36,6 @@ bool SetFilesystemCompression(int fd);
 bool SetFilesystemCompression(const mpt::PathString &filename);
 #endif // MPT_OS_WINDOWS
 #endif // MODPLUG_TRACKER
-
-#endif // MPT_ENABLE_FILEIO
 
 
 OPENMPT_NAMESPACE_END

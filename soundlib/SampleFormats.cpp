@@ -141,7 +141,7 @@ bool CSoundFile::ReadSampleAsInstrument(INSTRUMENTINDEX nInstr, FileReader &file
 	DestroyInstrument(nInstr, doNoDeleteAssociatedSamples);
 	Instruments[nInstr] = pIns;
 
-#if defined(MPT_ENABLE_FILEIO) && defined(MPT_EXTERNAL_SAMPLES)
+#if defined(MPT_EXTERNAL_SAMPLES)
 	SetSamplePath(nSample, file.GetOptionalFileName().value_or(P_("")));
 #endif
 

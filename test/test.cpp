@@ -1166,7 +1166,6 @@ static MPT_NOINLINE void TestMisc2()
 	}
 
 #ifdef MODPLUG_TRACKER
-#ifdef MPT_ENABLE_FILEIO
 
 	{
 		std::vector<std::byte> data;
@@ -1188,7 +1187,6 @@ static MPT_NOINLINE void TestMisc2()
 		RemoveFile(fn);
 	}
 
-#endif
 #endif // MODPLUG_TRACKER
 
 #ifdef MPT_WITH_ZLIB
