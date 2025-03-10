@@ -615,7 +615,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 	};
 
 	PlugMatchQuality match = kNoMatch;  // "Match quality" of found plugin. Higher value = better match.
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 	const mpt::PathString libraryName = mpt::PathString::FromUnicode(mixPlugin.GetLibraryName());
 #else
 	const std::string libraryName = mpt::ToCharset(mpt::Charset::UTF8, mixPlugin.GetLibraryName());
@@ -625,7 +625,7 @@ bool CVstPluginManager::CreateMixPlugin(SNDMIXPLUGIN &mixPlugin, CSoundFile &snd
 		const bool matchID = (plug->pluginId1 == mixPlugin.Info.dwPluginId1)
 			&& (plug->pluginId2 == mixPlugin.Info.dwPluginId2)
 			&& (plug->shellPluginID == mixPlugin.Info.shellPluginID);
-#if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 		const bool matchName = !mpt::PathCompareNoCase(plug->libraryName, libraryName);
 #else
 		const bool matchName = !mpt::CompareNoCaseAscii(plug->libraryName.ToUTF8(), libraryName);
