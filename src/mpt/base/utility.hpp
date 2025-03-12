@@ -38,7 +38,7 @@ MPT_CONSTEXPRINLINE Tdst c_cast(Tsrc && x) {
 
 template <typename Tdst, typename Tsrc>
 MPT_CONSTEXPRINLINE Tdst function_pointer_cast(Tsrc f) {
-#if !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
+#if !defined(MPT_LIBCXX_QUIRK_INCOMPLETE_IS_FUNCTION)
 	// MinGW64 std::is_function is always false for non __cdecl functions.
 	// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
 	static_assert(std::is_pointer<typename std::remove_cv<Tsrc>::type>::value);

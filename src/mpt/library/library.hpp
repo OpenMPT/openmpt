@@ -482,7 +482,7 @@ public:
 
 	template <typename Tfunc>
 	bool bind(Tfunc *& f, const std::string & symbol) const {
-#if !(MPT_OS_WINDOWS && MPT_COMPILER_GCC)
+#if !defined(MPT_LIBCXX_QUIRK_INCOMPLETE_IS_FUNCTION)
 		// MinGW64 std::is_function is always false for non __cdecl functions.
 		// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
 		static_assert(std::is_function<Tfunc>::value);
