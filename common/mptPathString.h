@@ -25,6 +25,10 @@
 
 #include "mptString.h"
 
+#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
+#include <windows.h>
+#endif
+
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -92,7 +96,10 @@ mpt::PathString RelativePathToAbsolute(const mpt::PathString &p, const mpt::Path
 
 
 #if !MPT_OS_WINDOWS_WINRT
-int PathCompareNoCase(const PathString &a, const PathString &b);
+inline int PathCompareNoCase(const PathString &a, const PathString &b)
+{
+	return lstrcmpi(a.AsNative().c_str(), b.AsNative().c_str());
+}
 #endif // !MPT_OS_WINDOWS_WINRT
 
 

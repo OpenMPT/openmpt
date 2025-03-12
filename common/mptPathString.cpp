@@ -16,10 +16,6 @@
 #include <tchar.h>
 #endif
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-#include <windows.h>
-#endif
-
 OPENMPT_NAMESPACE_BEGIN
 
 
@@ -30,17 +26,6 @@ namespace mpt
 
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-
-
-
-#if !MPT_OS_WINDOWS_WINRT
-
-int PathCompareNoCase(const PathString & a, const PathString & b)
-{
-	return lstrcmpi(a.AsNative().c_str(), b.AsNative().c_str());
-}
-
-#endif // !MPT_OS_WINDOWS_WINRT
 
 
 
