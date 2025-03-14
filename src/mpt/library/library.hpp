@@ -488,12 +488,15 @@ public:
 		static_assert(std::is_function<Tfunc>::value);
 #endif
 		auto sym_ptr = get_address(symbol);
+		if (!sym_ptr) {
+			return false;
+		}
 		if constexpr (std::is_same<decltype(sym_ptr), void *>::value) {
 			f = reinterpret_cast<Tfunc *>(sym_ptr);
 		} else {
 			f = mpt::function_pointer_cast<Tfunc *>(sym_ptr);
 		}
-		return (sym_ptr != nullptr);
+		return true;
 	}
 
 	template <typename Tdata>
@@ -504,12 +507,15 @@ public:
 		static_assert(!std::is_function<Tdata>::value);
 #endif
 		auto sym_ptr = get_address(symbol);
+		if (!sym_ptr) {
+			return false;
+		}
 		if constexpr (std::is_same<decltype(sym_ptr), void *>::value) {
 			d = static_cast<Tdata *>(sym_ptr);
 		} else {
 			d = reinterpret_cast<Tdata *>(sym_ptr);
 		}
-		return (sym_ptr != nullptr);
+		return true;
 	}
 };
 
