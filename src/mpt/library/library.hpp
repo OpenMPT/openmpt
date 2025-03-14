@@ -481,7 +481,7 @@ public:
 #endif
 
 	template <typename Tfunc>
-	bool bind(Tfunc *& f, const std::string & symbol) const {
+	bool bind_function(Tfunc * & f, const std::string & symbol) const {
 #if !defined(MPT_LIBCXX_QUIRK_INCOMPLETE_IS_FUNCTION)
 		// MinGW64 std::is_function is always false for non __cdecl functions.
 		// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
@@ -492,6 +492,22 @@ public:
 			f = reinterpret_cast<Tfunc *>(sym_ptr);
 		} else {
 			f = mpt::function_pointer_cast<Tfunc *>(sym_ptr);
+		}
+		return (sym_ptr != nullptr);
+	}
+
+	template <typename Tdata>
+	bool bind_data(Tdata * & d, const std::string & symbol) const {
+#if !defined(MPT_LIBCXX_QUIRK_INCOMPLETE_IS_FUNCTION)
+		// MinGW64 std::is_function is always false for non __cdecl functions.
+		// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.
+		static_assert(!std::is_function<Tdata>::value);
+#endif
+		auto sym_ptr = get_address(symbol);
+		if constexpr (std::is_same<decltype(sym_ptr), void *>::value) {
+			d = static_cast<Tdata *>(sym_ptr);
+		} else {
+			d = reinterpret_cast<Tdata *>(sym_ptr);
 		}
 		return (sym_ptr != nullptr);
 	}

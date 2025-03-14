@@ -120,7 +120,7 @@ public:
 			return nullptr;
 		}
 		FuncPtr result = nullptr;
-		lib->bind(result, symbol);
+		lib->bind_function(result, symbol);
 		return result;
 	}
 

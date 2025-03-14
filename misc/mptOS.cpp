@@ -381,7 +381,7 @@ Architecture GetHostArchitecture() noexcept
 		if(kernel32.has_value())
 		{
 			BOOL (WINAPI * fIsWow64Process2)(HANDLE hProcess, USHORT *pProcessMachine, USHORT *pNativeMachine) = NULL;
-			if(kernel32->bind(fIsWow64Process2, "IsWow64Process2"))
+			if(kernel32->bind_function(fIsWow64Process2, "IsWow64Process2"))
 			{
 				USHORT ProcessMachine = 0;
 				USHORT NativeMachine = 0;
@@ -617,9 +617,9 @@ VersionContext::VersionContext()
 			const char * (__cdecl * wine_get_version)(void) = nullptr;
 			const char * (__cdecl * wine_get_build_id)(void) = nullptr;
 			void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-			NTDLL->bind(wine_get_version, "wine_get_version");
-			NTDLL->bind(wine_get_build_id, "wine_get_build_id");
-			NTDLL->bind(wine_get_host_version, "wine_get_host_version");
+			NTDLL->bind_function(wine_get_version, "wine_get_version");
+			NTDLL->bind_function(wine_get_build_id, "wine_get_build_id");
+			NTDLL->bind_function(wine_get_host_version, "wine_get_host_version");
 			const char * wine_version = nullptr;
 			const char * wine_build_id = nullptr;
 			const char * wine_host_sysname = nullptr;
