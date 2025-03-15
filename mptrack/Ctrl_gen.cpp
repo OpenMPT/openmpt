@@ -22,7 +22,7 @@
 #include "View_gen.h"
 #include "WindowMessages.h"
 #include "../common/misc_util.h"
-#include "../common/mptTime.h"
+#include "../misc/mptClock.h"
 #include "../soundlib/mod_specifications.h"
 #include "mpt/parse/parse.hpp"
 

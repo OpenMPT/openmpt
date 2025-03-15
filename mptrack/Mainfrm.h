@@ -23,6 +23,7 @@
 #include "mpt/mutex/mutex.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
+#include "../misc/mptClock.h"
 
 #include <Msctf.h>
 

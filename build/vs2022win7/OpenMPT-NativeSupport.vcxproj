@@ -738,6 +738,7 @@
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
+    <ClInclude Include="..\..\misc\mptClock.h" />
     <ClInclude Include="..\..\misc\mptColor.h" />
     <ClInclude Include="..\..\misc\mptFileCompression.h" />
     <ClInclude Include="..\..\misc\mptLibrary.h" />
@@ -972,6 +973,7 @@
     <ClCompile Include="..\..\common\mptTime.cpp" />
     <ClCompile Include="..\..\common\serialization_utils.cpp" />
     <ClCompile Include="..\..\common\version.cpp" />
+    <ClCompile Include="..\..\misc\mptClock.cpp" />
     <ClCompile Include="..\..\misc\mptColor.cpp" />
     <ClCompile Include="..\..\misc\mptFileCompression.cpp" />
     <ClCompile Include="..\..\misc\mptLibrary.cpp" />

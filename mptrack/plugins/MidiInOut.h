@@ -13,7 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/mutex/mutex.hpp"
-#include "../../common/mptTime.h"
+#include "../../misc/mptClock.h"
 #include "../../soundlib/plugins/PlugInterface.h"
 #include <rtmidi/RtMidi.h>
 #include <array>
