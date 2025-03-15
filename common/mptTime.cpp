@@ -17,13 +17,17 @@
 
 #include "mptStringBuffer.h"
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && !(defined(MODPLUG_TRACKER) && defined(MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME))
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <chrono>
 #endif
 
 #if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
 #include <optional>
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
+
+#if defined(MPT_FALLBACK_TIMEZONE_C)
+#include <ctime>
+#endif // MPT_FALLBACK_TIMEZONE_C
 
 #if MPT_OS_WINDOWS
 #include <windows.h>
@@ -37,6 +41,8 @@ namespace mpt
 {
 namespace Date
 {
+
+
 
 #if defined(MODPLUG_TRACKER)
 
@@ -87,6 +93,8 @@ mpt::ustring ToUString(uint64 time100ns)
 #endif // MPT_OS_WINDOWS
 
 #endif // MODPLUG_TRACKER
+
+
 
 namespace nochrono
 {
