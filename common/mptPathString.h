@@ -80,13 +80,6 @@ inline mpt::ustring ToUString(const T &x)
 
 
 
-#if !(MPT_WINRT_BEFORE(MPT_WIN_10))
-// Returns the absolute path for a potentially relative path and removes ".." or "." components. (same as GetFullPathNameW)
-mpt::PathString GetAbsolutePath(const mpt::PathString &path);
-#endif
-
-
-
 // Relative / absolute paths conversion
 
 mpt::PathString AbsolutePathToRelative(const mpt::PathString &p, const mpt::PathString &relativeTo); // similar to std::fs::path::lexically_approximate

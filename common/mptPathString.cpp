@@ -88,27 +88,6 @@ mpt::PathString RelativePathToAbsolute(const mpt::PathString &path, const mpt::P
 
 
 
-#if !(MPT_WINRT_BEFORE(MPT_WIN_10))
-
-mpt::PathString GetAbsolutePath(const mpt::PathString &path)
-{
-	DWORD size = GetFullPathName(path.AsNative().c_str(), 0, nullptr, nullptr);
-	if(size == 0)
-	{
-		return path;
-	}
-	std::vector<TCHAR> fullPathName(size, TEXT('\0'));
-	if(GetFullPathName(path.AsNative().c_str(), size, fullPathName.data(), nullptr) == 0)
-	{
-		return path;
-	}
-	return mpt::PathString::FromNative(fullPathName.data());
-}
-
-#endif
-
-
-
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
 

@@ -969,16 +969,18 @@ void CTrackApp::SetupPaths(bool overridePortable)
 	}
 	if(modeSourceProject)
 	{
-		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\"));
-		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
+		mpt::native_fs fs;
+		m_InstallPath = fs.absolute(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\"));
+		m_InstallBinPath = fs.absolute(exePath + P_("..\\"));
 		m_InstallBinArchPath = exePath;
-		m_InstallPkgPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\packageTemplate\\"));
+		m_InstallPkgPath = fs.absolute(exePath + P_("..\\") + P_("..\\") + P_("..\\") + P_("..\\packageTemplate\\"));
 	} else if(modeMultiArch)
 	{
-		m_InstallPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\"));
-		m_InstallBinPath = mpt::GetAbsolutePath(exePath + P_("..\\"));
+		mpt::native_fs fs;
+		m_InstallPath = fs.absolute(exePath + P_("..\\") + P_("..\\"));
+		m_InstallBinPath = fs.absolute(exePath + P_("..\\"));
 		m_InstallBinArchPath = exePath;
-		m_InstallPkgPath = mpt::GetAbsolutePath(exePath + P_("..\\") + P_("..\\"));
+		m_InstallPkgPath = fs.absolute(exePath + P_("..\\") + P_("..\\"));
 	} else
 	{
 		m_InstallPath = exePath;
