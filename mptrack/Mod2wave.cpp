@@ -19,7 +19,6 @@
 #include "resource.h"
 #include "Sndfile.h"
 #include "WAVTools.h"
-#include "../common/Dither.h"
 #include "../common/mptFileIO.h"
 #include "../common/mptFileTemporary.h"
 #include "../common/mptString.h"

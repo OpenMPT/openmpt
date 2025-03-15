@@ -20,7 +20,6 @@
 #include "resource.h"
 #include "Sndfile.h"
 #include "WindowMessages.h"
-#include "../common/Dither.h"
 #include "../common/mptStringBuffer.h"
 #include "../soundlib/mod_specifications.h"
 #include "mpt/parse/parse.hpp"

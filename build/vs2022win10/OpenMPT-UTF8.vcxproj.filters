@@ -291,9 +291,6 @@
     <ClInclude Include="..\..\common\ComponentManager.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\Dither.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\FileReader.h">
       <Filter>common</Filter>
     </ClInclude>

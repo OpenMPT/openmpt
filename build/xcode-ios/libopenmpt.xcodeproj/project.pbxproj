@@ -614,7 +614,6 @@
 		EDB72A5D8FA0C64F86C7D89D /* PlaybackTest.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PlaybackTest.cpp; path = ../../soundlib/PlaybackTest.cpp; sourceTree = "<group>"; };
 		EDF8E6598086B04BE95F5499 /* Load_cba.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_cba.cpp; path = ../../soundlib/Load_cba.cpp; sourceTree = "<group>"; };
 		EEC8D9B98156A3ABEA2F47F9 /* tuningbase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tuningbase.h; path = ../../soundlib/tuningbase.h; sourceTree = "<group>"; };
-		EF78F5224ABA48941E149362 /* Dither.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Dither.h; path = ../../common/Dither.h; sourceTree = "<group>"; };
 		F06C78E982FA42DBEBD2E729 /* RowVisitor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RowVisitor.h; path = ../../soundlib/RowVisitor.h; sourceTree = "<group>"; };
 		F1208C2D83AE561FEC86FA6D /* Load_psm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_psm.cpp; path = ../../soundlib/Load_psm.cpp; sourceTree = "<group>"; };
 		F18CD1F1E58C1B636A773031 /* saturate_cast.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = saturate_cast.hpp; path = ../../src/mpt/base/saturate_cast.hpp; sourceTree = "<group>"; };
@@ -1075,7 +1074,6 @@
 				9F2E1C1AF92F330CC0762A5A /* BuildSettingsCompiler.h */,
 				13F9789407F8C2068CE3D6D4 /* ComponentManager.cpp */,
 				0A20B0FECCE111702A15EF3E /* ComponentManager.h */,
-				EF78F5224ABA48941E149362 /* Dither.h */,
 				6D2350A8B171F61AF3992EE8 /* FileReader.h */,
 				C6F2110A1E5783FCD0659F4A /* FileReaderFwd.h */,
 				B55D7A70F9AC1FE23BD358B0 /* GzipWriter.h */,
