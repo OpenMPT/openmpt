@@ -20,7 +20,7 @@
 #endif
 #include <string>
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <ctime>
 #endif
 
@@ -176,7 +176,7 @@ struct Unix
 	}
 };
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_CXX_BEFORE(20) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO) || defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 
 inline Unix UnixNow()
 {
