@@ -117,10 +117,14 @@ class BrowseForFolder
 {
 protected:
 	mpt::PathString m_workingDirectory;
+	std::vector<mpt::PathString> m_places;
 	CString m_caption;
 
 public:
 	BrowseForFolder(const mpt::PathString &dir, const CString &caption) : m_workingDirectory(dir), m_caption(caption) { }
+
+	// Add a directory to the application-specific quick-access directories in the file dialog
+	BrowseForFolder &AddPlace(mpt::PathString path) { m_places.push_back(std::move(path)); return *this; }
 
 	// Show the folder selection dialog.
 	bool Show(CWnd *parent = nullptr);

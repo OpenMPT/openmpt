@@ -239,6 +239,12 @@ bool BrowseForFolder::Show(CWnd *parent)
 	{
 		CFileDialogEx dlg{FileDialogType::BrowseForFolder, nullptr, m_workingDirectory.AsNative().c_str(), 0, nullptr, parent, 0, TRUE, false};
 		dlg.m_ofn.lpstrTitle = m_caption;
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+		for(const auto &place : m_places)
+		{
+			dlg.AddPlace(place);
+		}
+#endif
 		if(dlg.DoModal() != IDOK)
 			return false;
 		m_workingDirectory = mpt::PathString::FromCString(dlg.GetPathName());

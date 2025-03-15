@@ -124,6 +124,7 @@ void MissingExternalSamplesDlg::OnScanFolder()
 	}
 
 	BrowseForFolder dlg(TrackerSettings::Instance().PathSamples.GetWorkingDir(), _T("Select a folder to search for missing samples..."));
+	dlg.AddPlace(m_modDoc.GetPathNameMpt().GetDirectoryWithDrive());
 	if(dlg.Show())
 	{
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetDirectory());
