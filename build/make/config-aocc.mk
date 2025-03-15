@@ -12,6 +12,8 @@ ifeq ($(origin AR),default)
 AR  = $(TOOLCHAIN_PREFIX)ar$(TOOLCHAIN_SUFFIX)
 endif
 
+STDCXX?=c++20
+
 ifneq ($(STDCXX),)
 CXXFLAGS_STDCXX = -std=$(STDCXX) -fexceptions -frtti -pthread
 else ifeq ($(shell printf '\n' > bin/empty.cpp ; if $(CXX) -std=c++23 -c bin/empty.cpp -o bin/empty.out > /dev/null 2>&1 ; then echo 'c++23' ; fi ), c++23)
