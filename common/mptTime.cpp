@@ -54,7 +54,11 @@ namespace ANSI
 uint64 Now()
 {
 	FILETIME filetime;
+#if MPT_WIN_AT_LEAST(MPT_WIN_8)
+	GetSystemTimePreciseAsFileTime(&filetime);
+#else
 	GetSystemTimeAsFileTime(&filetime);
+#endif
 	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
 }
 
