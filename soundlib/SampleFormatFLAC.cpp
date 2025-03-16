@@ -695,7 +695,12 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
 #if (FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
 	uint32 threads = TrackerSettings::Instance().m_FLACMultithreading ? static_cast<uint32>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1))) : static_cast<uint32>(1);
-	FLAC__stream_encoder_set_num_threads(encoder, threads);
+	// Work-around <https://github.com/xiph/flac/issues/823>.
+	//FLAC__stream_encoder_set_num_threads(encoder, threads);
+	while((FLAC__stream_encoder_set_num_threads(encoder, threads) == FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS) && (threads > 1))
+	{
+		threads /= 2;
+	}
 #endif
 #endif // MODPLUG_TRACKER
 

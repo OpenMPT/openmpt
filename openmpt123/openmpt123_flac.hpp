@@ -72,7 +72,12 @@ public:
 		FLAC__stream_encoder_set_sample_rate( encoder, flags.samplerate );
 		FLAC__stream_encoder_set_compression_level( encoder, 8 );
 #if (FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
-		FLAC__stream_encoder_set_num_threads(encoder, static_cast<std::uint32_t>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1))));
+		std::uint32_t threads = static_cast<std::uint32_t>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1)));
+		// Work-around <https://github.com/xiph/flac/issues/823>.
+		//FLAC__stream_encoder_set_num_threads( encoder, threads );
+		while ( ( FLAC__stream_encoder_set_num_threads( encoder, threads ) == FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS ) && ( threads > 1 ) ) {
+			threads /= 2;
+		}
 #endif
 	}
 	~flac_stream_raii() {
