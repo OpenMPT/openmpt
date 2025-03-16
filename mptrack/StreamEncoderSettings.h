@@ -96,6 +96,7 @@ struct EncoderSettingsConf
 struct StreamEncoderSettingsConf
 {
 	Setting<int32> FLACCompressionLevel;
+	Setting<bool> FLACMultithreading;
 	Setting<uint32> AUPaddingAlignHint;
 	Setting<uint32> MP3ID3v2MinPadding;
 	Setting<uint32> MP3ID3v2PaddingAlignHint;

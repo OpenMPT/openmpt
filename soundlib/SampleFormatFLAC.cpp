@@ -34,6 +34,10 @@
 #include "mpt/parse/parse.hpp"
 //#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
+#include <algorithm>
+#if MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+#include <thread>
+#endif
 #ifdef MPT_WITH_OGG
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
@@ -689,6 +693,10 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	FLAC__stream_encoder_set_metadata(encoder, metadata.data(), numBlocks);
 #ifdef MODPLUG_TRACKER
 	FLAC__stream_encoder_set_compression_level(encoder, TrackerSettings::Instance().m_FLACCompressionLevel);
+#if (FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+	uint32 threads = TrackerSettings::Instance().m_FLACMultithreading ? static_cast<uint32>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1))) : static_cast<uint32>(1);
+	FLAC__stream_encoder_set_num_threads(encoder, threads);
+#endif
 #endif // MODPLUG_TRACKER
 
 	bool success = FLAC__stream_encoder_init_stream(encoder, &FLAC__StreamEncoder_RAII::StreamEncoderWriteCallback, &FLAC__StreamEncoder_RAII::StreamEncoderSeekCallback, &FLAC__StreamEncoder_RAII::StreamEncoderTellCallback, nullptr, &encoder.f) == FLAC__STREAM_ENCODER_INIT_STATUS_OK;

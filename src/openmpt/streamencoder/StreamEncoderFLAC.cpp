@@ -8,6 +8,7 @@
 #include "openmpt/streamencoder/StreamEncoderFLAC.hpp"
 
 #include "mpt/base/bit.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_cast.hpp"
@@ -25,8 +26,12 @@
 #include "openmpt/soundfile_data/tags.hpp"
 #include "openmpt/streamencoder/StreamEncoder.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <string>
+#if MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+#include <thread>
+#endif
 #include <vector>
 
 #include <cassert>
@@ -122,6 +127,11 @@ public:
 
 		int compressionLevel = settings.Details.FLACCompressionLevel;
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
+
+#if (FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+		uint32 threads = settings.Details.FLACMultithreading ? static_cast<uint32>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1))) : static_cast<uint32>(1);
+		FLAC__stream_encoder_set_num_threads(encoder, threads);
+#endif
 
 		if(settings.Tags)
 		{

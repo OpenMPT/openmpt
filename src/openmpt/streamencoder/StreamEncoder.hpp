@@ -213,6 +213,7 @@ struct Traits
 struct StreamSettings
 {
 	int32 FLACCompressionLevel = 5;  // 8
+	bool FLACMultithreading = true;
 	uint32 AUPaddingAlignHint = 4096;
 	uint32 MP3ID3v2MinPadding = 1024;
 	uint32 MP3ID3v2PaddingAlignHint = 4096;

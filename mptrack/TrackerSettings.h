@@ -878,6 +878,7 @@ public:
 	Setting<ResamplingMode> sampleEditorDefaultResampler;
 	Setting<int32> m_nFinetuneStep;	// Increment finetune by x cents when using spin control.
 	Setting<int32> m_FLACCompressionLevel;	// FLAC compression level for saving (0...8)
+	Setting<bool> m_FLACMultithreading;
 	Setting<bool> compressITI;
 	Setting<bool> m_MayNormalizeSamplesOnLoad;
 	Setting<bool> previewInFileDialogs;

@@ -69,6 +69,7 @@ EncoderSettingsConf::operator Encoder::Settings() const
 
 StreamEncoderSettingsConf::StreamEncoderSettingsConf(SettingsContainer &conf, const mpt::ustring &section)
 	: FLACCompressionLevel(conf, section, U_("FLACCompressionLevel"), Encoder::StreamSettings().FLACCompressionLevel)
+	, FLACMultithreading(conf, section, U_("FLACMultithreading"), Encoder::StreamSettings().FLACMultithreading)
 	, AUPaddingAlignHint(conf, section, U_("AUPaddingAlignHint"), Encoder::StreamSettings().AUPaddingAlignHint)
 	, MP3ID3v2MinPadding(conf, section, U_("MP3ID3v2MinPadding"), Encoder::StreamSettings().MP3ID3v2MinPadding)
 	, MP3ID3v2PaddingAlignHint(conf, section, U_("MP3ID3v2PaddingAlignHint"), Encoder::StreamSettings().MP3ID3v2PaddingAlignHint)
@@ -87,6 +88,7 @@ StreamEncoderSettingsConf::operator Encoder::StreamSettings() const
 {
 	Encoder::StreamSettings result;
 	result.FLACCompressionLevel = FLACCompressionLevel;
+	result.FLACMultithreading = FLACMultithreading;
 	result.AUPaddingAlignHint = AUPaddingAlignHint;
 	result.MP3ID3v2MinPadding = MP3ID3v2MinPadding;
 	result.MP3ID3v2PaddingAlignHint = MP3ID3v2PaddingAlignHint;
