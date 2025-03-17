@@ -26,7 +26,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@freebsd-13.5
+      uses: cross-platform-actions/action@2d97d42e1972a17b045fd709a422f7e55a86230d
       with:
         architecture: x86_64
         memory: 4G
@@ -37,7 +37,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@freebsd-13.5
+      uses: cross-platform-actions/action@2d97d42e1972a17b045fd709a422f7e55a86230d
       with:
         architecture: x86_64
         memory: 4G
@@ -50,7 +50,7 @@ jobs:
           sudo pkg upgrade -y
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@freebsd-13.5
+      uses: cross-platform-actions/action@2d97d42e1972a17b045fd709a422f7e55a86230d
       with:
         architecture: x86_64
         memory: 4G
@@ -62,7 +62,7 @@ jobs:
         run: |
           export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
-      uses: cross-platform-actions/action@freebsd-13.5
+      uses: cross-platform-actions/action@2d97d42e1972a17b045fd709a422f7e55a86230d
       with:
         architecture: x86_64
         memory: 4G
