@@ -69,6 +69,22 @@
 			}
 		end
 	filter {}
+	filter { "architecture:x86" }
+		defines {
+			"HAVE_XMMINTRIN_H",
+		}
+		if _OPTIONS["windows-version"] ~= "winxp" then
+			-- WinXP builds do not use SSE2 by default
+			defines {
+				"MIN_ARCH_SSE",
+			}
+		end
+	filter { "architecture:x86_64" }
+		defines {
+			"HAVE_XMMINTRIN_H",
+			"MIN_ARCH_SSE",
+		}
+	filter {}
 
 function mpt_use_lame ()
 	filter {}
