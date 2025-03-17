@@ -227,9 +227,9 @@ public:
 
 public:
 	// Write a sample loop information chunk to the file.
-	void WriteLoopInformation(const ModSample &sample);
+	void WriteLoopInformation(const ModSample &sample, SmpLength rangeStart = 0, SmpLength rangeEnd = 0);
 	// Write a sample's cue points to the file.
-	void WriteCueInformation(const ModSample &sample);
+	void WriteCueInformation(const ModSample &sample, SmpLength rangeStart = 0, SmpLength rangeEnd = 0);
 	// Write MPT's sample information chunk to the file.
 	void WriteExtraInformation(const ModSample &sample, MODTYPE modType, const char *sampleName = nullptr);
 };

@@ -348,11 +348,16 @@ WAVSampleWriter::~WAVSampleWriter()
 
 
 // Write a sample loop information chunk to the file.
-void WAVSampleWriter::WriteLoopInformation(const ModSample &sample)
+void WAVSampleWriter::WriteLoopInformation(const ModSample &sample, SmpLength rangeStart, SmpLength rangeEnd)
 {
 	if(!sample.uFlags[CHN_LOOP | CHN_SUSTAINLOOP] && !ModCommand::IsNote(sample.rootNote))
 	{
 		return;
+	}
+	if(rangeEnd <= rangeStart)
+	{
+		rangeStart = 0;
+		rangeEnd = sample.nLength;
 	}
 
 	StartChunk(RIFFChunk::idsmpl);
@@ -367,16 +372,17 @@ void WAVSampleWriter::WriteLoopInformation(const ModSample &sample)
 	info.ConvertToWAV(sampleRate, sample.rootNote);
 
 	// Set up loops
-	WAVSampleLoop loops[2];
-	Clear(loops);
-	if(sample.uFlags[CHN_SUSTAINLOOP])
+	std::array<WAVSampleLoop, 2> loops{{}};
+	const bool writeSustainLoop = sample.uFlags[CHN_SUSTAINLOOP] && sample.nSustainStart < rangeEnd && sample.nSustainEnd >= rangeStart;
+	const bool writeNormalLoop = sample.uFlags[CHN_LOOP] && sample.nLoopStart < rangeEnd && sample.nLoopEnd >= rangeStart;
+	if(writeSustainLoop)
 	{
-		loops[info.numLoops++].ConvertToWAV(sample.nSustainStart, sample.nSustainEnd, sample.uFlags[CHN_PINGPONGSUSTAIN]);
+		loops[info.numLoops++].ConvertToWAV(std::max(sample.nSustainStart, rangeStart) - rangeStart, std::clamp(sample.nSustainEnd, rangeStart, rangeEnd) - rangeStart, sample.uFlags[CHN_PINGPONGSUSTAIN]);
 	}
-	if(sample.uFlags[CHN_LOOP])
+	if(writeNormalLoop)
 	{
-		loops[info.numLoops++].ConvertToWAV(sample.nLoopStart, sample.nLoopEnd, sample.uFlags[CHN_PINGPONGLOOP]);
-	} else if(sample.uFlags[CHN_SUSTAINLOOP])
+		loops[info.numLoops++].ConvertToWAV(std::max(sample.nLoopStart, rangeStart) - rangeStart, std::clamp(sample.nLoopEnd, rangeStart, rangeEnd) - rangeStart, sample.uFlags[CHN_PINGPONGLOOP]);
+	} else if(writeSustainLoop)
 	{
 		// Since there are no "loop types" to distinguish between sustain and normal loops, OpenMPT assumes
 		// that the first loop is a sustain loop if there are two loops. If we only want a sustain loop,
@@ -393,12 +399,18 @@ void WAVSampleWriter::WriteLoopInformation(const ModSample &sample)
 
 
 // Write a sample's cue points to the file.
-void WAVSampleWriter::WriteCueInformation(const ModSample &sample)
+void WAVSampleWriter::WriteCueInformation(const ModSample &sample, SmpLength rangeStart, SmpLength rangeEnd)
 {
+	if(rangeEnd <= rangeStart)
+	{
+		rangeStart = 0;
+		rangeEnd = sample.nLength;
+	}
+
 	uint32 numMarkers = 0;
 	for(const auto cue : sample.cues)
 	{
-		if(cue < sample.nLength)
+		if(mpt::is_in_range(cue, rangeStart, rangeEnd))
 			numMarkers++;
 	}
 
@@ -407,9 +419,9 @@ void WAVSampleWriter::WriteCueInformation(const ModSample &sample)
 	uint32 i = 0;
 	for(const auto cue : sample.cues)
 	{
-		if(cue < sample.nLength)
+		if(mpt::is_in_range(cue, rangeStart, rangeEnd))
 		{
-			WAVCuePoint cuePoint = ConvertToWAVCuePoint(i++, cue);
+			WAVCuePoint cuePoint = ConvertToWAVCuePoint(i++, cue - rangeStart);
 			mpt::IO::Write(s, cuePoint);
 		}
 	}
