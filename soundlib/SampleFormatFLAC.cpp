@@ -699,7 +699,7 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 	//FLAC__stream_encoder_set_num_threads(encoder, threads);
 	while((FLAC__stream_encoder_set_num_threads(encoder, threads) == FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS) && (threads > 1))
 	{
-		threads /= 2;
+		threads = ((threads > 256) ? 256 : (threads / 2));
 	}
 #endif
 #endif // MODPLUG_TRACKER
