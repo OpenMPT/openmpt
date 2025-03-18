@@ -81,6 +81,8 @@ is just a high-level summary.
     following rows) in various formats.
  *  The pattern channel limit was raised from 127 to 192 for some formats.
 
+ *  openmpt123: Multi-threaded encoding is enabled with libFLAC 1.5.0 or newer.
+
  *  xmp-openmpt: Memory consumption during file loading has been reduced.
 
 ### libopenmpt 0.7.0 (2023-04-30)
