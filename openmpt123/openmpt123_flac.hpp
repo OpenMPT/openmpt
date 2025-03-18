@@ -76,7 +76,7 @@ public:
 		// Work-around <https://github.com/xiph/flac/issues/823>.
 		//FLAC__stream_encoder_set_num_threads( encoder, threads );
 		while ( ( FLAC__stream_encoder_set_num_threads( encoder, threads ) == FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS ) && ( threads > 1 ) ) {
-			threads = ( ( threads > 256 ) ? 256 : ( threads / 2 ) );
+			threads = ( ( threads > 256 ) ? 256 : ( threads - 1 ) );
 		}
 #endif
 	}
