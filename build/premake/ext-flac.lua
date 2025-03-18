@@ -122,9 +122,15 @@
   filter { "kind:SharedLib" }
    defines { "FLAC_API_EXPORTS" }
 	filter { "architecture:x86" }
-		defines { "FLAC__HAS_X86INTRIN" }
+		defines {
+			"FLAC__HAS_X86INTRIN",
+			"FLAC__USE_AVX",
+		}
 	filter { "architecture:x86_64" }
-		defines { "FLAC__HAS_X86INTRIN" }
+		defines {
+			"FLAC__HAS_X86INTRIN",
+			"FLAC__USE_AVX",
+		}
 	filter {}
 
 function mpt_use_flac ()
