@@ -414,6 +414,9 @@ enum class vendor : uint8 {
 	#ifdef MPT_ARCH_X86_FSIN
 		flags |= feature::fsin;
 	#endif
+	#ifdef MPT_ARCH_X86_I486
+		flags |= feature::intel486;
+	#endif
 	#ifdef MPT_ARCH_X86_CPUID
 		flags |= feature::cpuid;
 	#endif
