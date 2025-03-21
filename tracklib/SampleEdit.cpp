@@ -31,7 +31,7 @@
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
 
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2)
+#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 #if MPT_COMPILER_MSVC
 #include <intrin.h>
 #endif
@@ -43,7 +43,7 @@ OPENMPT_NAMESPACE_BEGIN
 namespace SampleEdit
 {
 
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2)
+#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 
 // SSE2 implementation for min/max finder, packs 8*int16 in a 128-bit XMM register.
 // scanlen = How many samples to process on this channel
@@ -187,7 +187,7 @@ std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChann
 {
 	int minVal = 127;
 	int maxVal = -128;
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2)
+#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 16)
 	{
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
@@ -211,7 +211,7 @@ std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChan
 {
 	int minVal = 32767;
 	int maxVal = -32768;
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2)
+#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 8)
 	{
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);
