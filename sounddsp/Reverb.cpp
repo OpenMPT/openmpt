@@ -920,7 +920,7 @@ void CReverb::ProcessLateReverb(SWLateReverb * MPT_RESTRICT pReverb, LR16 * MPT_
 			// Apply decay gain
 			__m128i histDecay = _mm_srai_epi32(_mm_madd_epi16(Load64SSE(pReverb->nDecayDC), lpHistory), 15);
 			__m128i histDecayPacked = _mm_shuffle_epi32(_mm_packs_epi32(histDecay, histDecay), _MM_SHUFFLE(2, 0, 2, 0));
-			__m128i histDecayIn = _mm_adds_epi16(_mm_shuffle_epi32(_mm_packs_epi32(histDecay, histDecay), _MM_SHUFFLE(2, 0, 2, 0)), _mm_srai_epi16(_mm_unpacklo_epi32(refIn, refIn), 2));
+			__m128i histDecayIn = _mm_adds_epi16(histDecayPacked, _mm_srai_epi16(_mm_unpacklo_epi32(refIn, refIn), 2));
 			__m128i histDecayInDiff = _mm_subs_epi16(histDecayIn, _mm_mulhi_epi16(_mm_cvtsi32_si128(diffusion1), difCoeffs));
 			pReverb->Diffusion1[delayPos].lr = _mm_cvtsi128_si32(histDecayInDiff);
 
