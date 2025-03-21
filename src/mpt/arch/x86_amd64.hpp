@@ -255,8 +255,6 @@
 
 // clang-format off
 
-// TODO: This needs to be as fine-grained as the MPT_ARCH_X86_??? macros.
-
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 
 #if MPT_COMPILER_MSVC
