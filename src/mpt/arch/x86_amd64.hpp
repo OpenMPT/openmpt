@@ -37,8 +37,10 @@
 
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 #if MPT_COMPILER_MSVC
-#include <immintrin.h>
 #include <intrin.h>
+#endif
+#if MPT_COMPILER_MSVC
+#include <immintrin.h>
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #include <cpuid.h>
 #include <x86intrin.h>
