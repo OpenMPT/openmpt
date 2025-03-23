@@ -1359,7 +1359,7 @@ bool CSoundFile::ReadMID(FileReader &file, ModLoadingFlags loadFlags)
 			continue;
 		}
 
-		const mpt::PathString &midiMapName = midiLib[midiCode];
+		const mpt::PathString &midiMapName = midiLib[midiCode].value_or(P_(""));
 		if(!midiMapName.empty())
 		{
 			// Load from DLS/SF2 Bank

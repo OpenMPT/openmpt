@@ -61,7 +61,9 @@ struct MODPLUGDIB
 /////////////////////////////////////////////////////////////////////////////
 // Midi Library
 
-using MidiLibrary = std::array<mpt::PathString, 128 * 2>;  // 128 instruments + 128 percussions
+// 128 melodic instruments + 128 percussions
+// std::nullopt = default, empty string = unassigned by user
+using MidiLibrary = std::array<std::optional<mpt::PathString>, 128 * 2>;
 
 
 //////////////////////////////////////////////////////////////////////////

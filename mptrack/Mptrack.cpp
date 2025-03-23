@@ -400,7 +400,7 @@ void CTrackApp::ImportMidiConfig(const mpt::PathString &filename, bool hideWarni
 		{
 			for(uint32 ins = 0; ins < 256; ins++)
 			{
-				if(replaceAll || midiLibrary[ins].empty())
+				if(replaceAll || !midiLibrary[ins] || midiLibrary[ins]->empty())
 				{
 					uint32 prog = (ins < 128) ? ins : 0xFF;
 					uint32 key = (ins < 128) ? 0xFF : ins & 0x7F;
@@ -457,36 +457,40 @@ void CTrackApp::ImportMidiConfig(SettingsContainer &file, const mpt::PathString 
 				filename = localPatchDir + filename + P_(".pat");
 			}
 		}
-		if(!filename.empty())
-		{
-			filename = theApp.PathInstallRelativeToAbsolute(filename);
-			midiLibrary[prog] = filename;
-		}
+
+		if(filename == P_("*empty"))
+			midiLibrary[prog] = P_("");
+		else if(!filename.empty())
+			midiLibrary[prog] = theApp.PathInstallRelativeToAbsolute(filename);
 	}
 }
 
 
 void CTrackApp::ExportMidiConfig(const mpt::PathString &filename)
 {
-	if(filename.empty()) return;
+	if(filename.empty())
+		return;
 	IniFileSettingsContainer file(filename);
 	ExportMidiConfig(file);
 }
 
 void CTrackApp::ExportMidiConfig(SettingsContainer &file)
 {
-	for(uint32 prog = 0; prog < 256; prog++) if (!midiLibrary[prog].empty())
+	for(uint32 prog = 0; prog < 256; prog++)
 	{
-		mpt::PathString szFileName = midiLibrary[prog];
-
-		if(!szFileName.empty())
+		const mpt::ustring key = MPT_UFORMAT("{}{}")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
+		if(!midiLibrary[prog])
 		{
-			if(theApp.IsPortableMode())
-				szFileName = theApp.PathAbsoluteToInstallRelative(szFileName);
-
-			mpt::ustring key = MPT_UFORMAT("{}{}")((prog < 128) ? U_("Midi") : U_("Perc"), prog & 0x7F);
-			file.Write<mpt::PathString>(U_("Midi Library"), key, szFileName);
+			file.Forget(U_("Midi Library"), key);
+			continue;
 		}
+
+		mpt::PathString fileName = *midiLibrary[prog];
+		if(midiLibrary[prog]->empty())
+			fileName = P_("*empty");
+		else if(theApp.IsPortableMode())
+			fileName = theApp.PathAbsoluteToInstallRelative(fileName);
+		file.Write<mpt::PathString>(U_("Midi Library"), key, fileName);
 	}
 }
 
@@ -1384,9 +1388,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		RUNTIME_CLASS(CModControlView));
 	AddDocTemplate(m_pModTemplate);
 
-	// Load Midi Library
-	ImportMidiConfig(theApp.GetSettings(), {}, true);
-
 	// Enable DDE Execute open
 	// requires m_pDocManager
 	EnableShellOpen();
@@ -1424,9 +1425,11 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Set default note names
 	CSoundFile::SetDefaultNoteNames();
 
-	// Load DLS Banks
+	// Load Soundfonts and default MIDI Library
 	if (!cmdInfo.m_noDls)
 		m_scannedDlsBanks = LoadDefaultDLSBanks();
+	// Load user-defined MIDI Library
+	ImportMidiConfig(theApp.GetSettings(), {}, true);
 
 	// Initialize Plugins
 	if (!cmdInfo.m_noPlugins) InitializeDXPlugins();

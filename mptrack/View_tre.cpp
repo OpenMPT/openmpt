@@ -535,9 +535,9 @@ void CModTree::RefreshMidiLibrary()
 		int image = IMAGE_INSTRMUTE;
 		s = mpt::cfmt::val(iMidi) + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiProgramNames[iMidi]);
 		const LPARAM param = (MODITEM_MIDIINSTRUMENT << MIDILIB_SHIFT) | iMidi;
-		if(!midiLib[iMidi].empty())
+		if(midiLib[iMidi] && !midiLib[iMidi]->empty())
 		{
-			s += _T(": ") + midiLib[iMidi].GetFilename().ToCString();
+			s += _T(": ") + midiLib[iMidi]->GetFilename().ToCString();
 			image = IMAGE_INSTRUMENTS;
 		}
 		if(!m_tiMidi[iMidi])
@@ -571,9 +571,9 @@ void CModTree::RefreshMidiLibrary()
 		s = mpt::ToCString(CSoundFile::GetNoteName((ModCommand::NOTE)(iPerc + NOTE_MIN), CSoundFile::GetDefaultNoteNames()))
 		    + _T(": ") + mpt::ToCString(mpt::Charset::ASCII, szMidiPercussionNames[iPerc - 24]);
 		const LPARAM param = (MODITEM_MIDIPERCUSSION << MIDILIB_SHIFT) | iPerc;
-		if(!midiLib[iPerc | 0x80].empty())
+		if(midiLib[iPerc | 0x80] && !midiLib[iPerc | 0x80]->empty())
 		{
-			s += _T(": ") + midiLib[iPerc | 0x80].GetFilename().ToCString();
+			s += _T(": ") + midiLib[iPerc | 0x80]->GetFilename().ToCString();
 			image = IMAGE_SAMPLES;
 		}
 		if(!m_tiPerc[iPerc])
@@ -1585,20 +1585,20 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 		case MODITEM_MIDIINSTRUMENT:
 			{
 				const MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
-				if(modItemID < midiLib.size() && !midiLib[modItemID].empty())
+				if(modItemID < midiLib.size() && midiLib[modItemID] && !midiLib[modItemID]->empty())
 				{
 					CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 					CDLSBank *dlsBank = nullptr;
-					if(!mpt::PathCompareNoCase(m_cachedBankName, midiLib[modItemID]))
+					if(!mpt::PathCompareNoCase(m_cachedBankName, *midiLib[modItemID]))
 					{
 						dlsBank = m_cachedBank.get();
 					}
-					if(dlsBank == nullptr && CDLSBank::IsDLSBank(midiLib[modItemID]))
+					if(dlsBank == nullptr && CDLSBank::IsDLSBank(*midiLib[modItemID]))
 					{
 						m_cachedBank = std::make_unique<CDLSBank>();
-						if(m_cachedBank->Open(midiLib[modItemID]))
+						if(m_cachedBank->Open(*midiLib[modItemID]))
 						{
-							m_cachedBankName = midiLib[modItemID];
+							m_cachedBankName = *midiLib[modItemID];
 							dlsBank = m_cachedBank.get();
 						}
 					}
@@ -1616,7 +1616,7 @@ BOOL CModTree::PlayItem(HTREEITEM hItem, ModCommand::NOTE note, int volume)
 						}
 					} else
 					{
-						pMainFrm->PlaySoundFile(midiLib[modItemID], note, volume);
+						pMainFrm->PlaySoundFile(*midiLib[modItemID], note, volume);
 					}
 				}
 			}
@@ -2543,11 +2543,12 @@ bool CModTree::GetDropInfo(DRAGONDROP &dropInfo, mpt::PathString &fullPath)
 		dropInfo.dropItem |= 0x80;
 		[[fallthrough]];
 	case MODITEM_MIDIINSTRUMENT:
+		if(dropInfo.dropItem < CTrackApp::GetMidiLibrary().size())
 		{
-			MidiLibrary &midiLib = CTrackApp::GetMidiLibrary();
-			if(!midiLib[dropInfo.dropItem & 0xFF].empty())
+			const auto &libItem = CTrackApp::GetMidiLibrary()[dropInfo.dropItem];
+			if(libItem && !libItem->empty())
 			{
-				fullPath = midiLib[dropInfo.dropItem & 0xFF];
+				fullPath = *libItem;
 				dropInfo.dropType = DRAGONDROP_MIDIINSTR;
 				dropInfo.dropParam = reinterpret_cast<uintptr_t>(&fullPath);
 			}
