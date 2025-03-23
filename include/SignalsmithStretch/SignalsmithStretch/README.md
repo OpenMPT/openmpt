@@ -6,6 +6,8 @@ It can handle a wide-range of pitch-shifts (multiple octaves) but time-stretchin
 
 ## How to use it
 
+Just include `signalsmith-stretch.h` where needed:
+
 ```cpp
 #include "signalsmith-stretch.h"
 
@@ -92,21 +94,35 @@ You should be supplying input samples slightly ahead of the processing time (whi
 
 To follow pitch/time automation accurately, you should give it automation values from the current processing time (`.outputLatency()` samples ahead of the output), and feed it input from `.inputLatency()` samples ahead of the current processing time.
 
-#### Starting and ending
+### Seeking and starting
 
-After initialisation/reset to zero, the current processing time is `.inputLatency()` samples *before* t=0 in the input. This means you'll get `stretch.outputLatency() + stretch.inputLatency()*stretchFactor` samples of pre-roll output in total.
+You can use `.seek()` which lets you move around the input audio, by providing a bunch of input samples.  You should ideally provide at least (one block-length + one interval) of input data:
 
-If you're processing a fixed-length sound (instead of an infinite stream), you'll end up providing `.inputLatency()` samples of extra (zero) input at the end, to get the processing time to the right place. You'll then want to give it another `.outputLatency()` samples of (zero) input to fully clear the buffer, producing a correspondly-stretched amount of output.
+```cpp
+stretch.seek(inputBuffers, inputSamples, playbackRateHint);
+```
 
-What you do with this extra start/end output is up to you. Personally, I'd try inverting the phase and reversing them in time, and then adding them to the start/end of the result. (Wrapping this up in a helper function is on the TODO list.)
+At the very start of playback (or after a `.reset()`), the current processing time is `.inputLatency()` samples *before* the first input samples you give it.  You therefore might want to call `.seek()` to provide the first `inputSamples = stretch.inputLatency()` samples of input, so that the processing time matches the start of the input (meaning your pre-roll output is only `.outputLatency()` samples long).
+
+### Ending
+
+If you're processing a fixed-length sound (instead of an infinite stream), you'll reach the end of your input, but still have some pending output.  You should first make sure the processing time gets to the end, by passing an additional `.inputLatency()` samples of silence to `.process()` (similar to using `.seek()` at the beginning).
+
+You can then read the final part of the output using `.flush()`.  It's recommended to read at least `.outputLatency()` samples of output:
+
+```cpp
+stretch.flush(outputBuffers, outputSamples);
+``` 
+
+Using `.seek()`/`.flush()` like this, you can perform an exact time-stretch on a fixed-length sound, and your result will have `.outputLatency()` of pre-roll. 
 
 ## Compiling
 
-⚠️ This has mostly been tested with Clang. If you're using another compiler and have any problems, please get in touch.
+⚠️ This has mostly been tested with Clang.  If you're using another compiler and have any problems, please get in touch.
 
-Just include `signalsmith-stretch.h` where needed.
+🚨 It's generally be OK to enable `-ffast-math`, however there's a bug in Apple Clang 16.0.0 which can generate incorrect SIMD code.  If you _have_ to use this version, we advise you don't use `-ffast-math`.
 
-It's much slower (about 10x) if optimisation is disabled though, so you might want to enable optimisation where it's used, even in debug builds.
+It's much slower (about 10x) if optimisation is disabled altogether, so you might want to enable optimisation where it's used, even in Debug builds.
 
 ### DSP Library
 
@@ -116,4 +132,21 @@ For convenience, a copy of the library is included (with its own `LICENSE.txt`) 
 
 ## License
 
-[MIT License](LICENSE.txt) for now - get in touch if you need anything else.
+Released under the [MIT License](LICENSE.txt) - get in touch if you need anything else.
+
+## Other environments / languages
+
+There's a Web Audio wrapper in `web/` (using WASM/AudioWorklet).  This will remain in-sync with the C++ library.
+
+There's a [Python binding](https://pypi.org/project/python-stretch/) written/published by [Gregorio Andrea Giudici](https://github.com/gregogiudici/python-stretch), and a [Rust wrapper](https://crates.io/crates/signalsmith-stretch) by [Colin Marc](https://github.com/colinmarc/signalsmith-stretch-rs).
+
+## Thanks
+
+We'd like to particularly thank the following people who sponsored specific features or improvements:
+
+* **Metronaut**: web audio (JS/WASM) release
+* **Daniel L Bowling** and the Stanford School of Medicine: web audio improvements
+
+We're also grateful for the following community contributions:
+
+* **Steve MacKinnon** for finding/resolving a bug in `.reset()`

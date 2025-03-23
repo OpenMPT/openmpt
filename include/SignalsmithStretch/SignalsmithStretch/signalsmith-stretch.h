@@ -12,8 +12,9 @@ SIGNALSMITH_DSP_VERSION_CHECK(1, 6, 0); // Check version is compatible
 
 namespace signalsmith { namespace stretch {
 
-template<typename Sample=float>
+template<typename Sample=float, class RandomEngine=std::default_random_engine>
 struct SignalsmithStretch {
+	static constexpr size_t version[3] = {1, 1, 1};
 
 	SignalsmithStretch() : randomEngine(std::random_device{}()) {}
 	SignalsmithStretch(long seed) : randomEngine(seed) {}
@@ -36,7 +37,7 @@ struct SignalsmithStretch {
 		inputBuffer.reset();
 		prevInputOffset = -1;
 		channelBands.assign(channelBands.size(), Band());
-		silenceCounter = 2*stft.windowSize();
+		silenceCounter = 0;
 		didSeek = false;
 		flushed = true;
 	}
@@ -52,18 +53,14 @@ struct SignalsmithStretch {
 	// Manual setup
 	void configure(int nChannels, int blockSamples, int intervalSamples) {
 		channels = nChannels;
+		stft.setWindow(stft.kaiser, true);
 		stft.resize(channels, blockSamples, intervalSamples);
 		bands = stft.bands();
 		inputBuffer.resize(channels, blockSamples + intervalSamples + 1);
 		timeBuffer.assign(stft.fftSize(), 0);
 		channelBands.assign(bands*channels, Band());
 		
-		// Various phase rotations
-		rotCentreSpectrum.resize(bands);
-		rotPrevInterval.assign(bands, 0);
-		timeShiftPhases(blockSamples*Sample(-0.5), rotCentreSpectrum);
-		timeShiftPhases(-intervalSamples, rotPrevInterval);
-		peaks.reserve(bands);
+		peaks.reserve(bands/2);
 		energy.resize(bands);
 		smoothedEnergy.resize(bands);
 		outputMap.resize(bands);
@@ -93,13 +90,20 @@ struct SignalsmithStretch {
 	template<class Inputs>
 	void seek(Inputs &&inputs, int inputSamples, double playbackRate) {
 		inputBuffer.reset();
+		Sample totalEnergy = 0;
 		for (int c = 0; c < channels; ++c) {
 			auto &&inputChannel = inputs[c];
 			auto &&bufferChannel = inputBuffer[c];
 			int startIndex = std::max<int>(0, inputSamples - stft.windowSize() - stft.interval());
 			for (int i = startIndex; i < inputSamples; ++i) {
-				bufferChannel[i] = inputChannel[i];
+				Sample s = inputChannel[i];
+				totalEnergy += s*s;
+				bufferChannel[i] = s;
 			}
+		}
+		if (totalEnergy >= noiseFloor) {
+			silenceCounter = 0;
+			silenceFirst = true;
 		}
 		inputBuffer += inputSamples;
 		didSeek = true;
@@ -121,7 +125,7 @@ struct SignalsmithStretch {
 				if (silenceFirst) {
 					silenceFirst = false;
 					for (auto &b : channelBands) {
-						b.input = b.prevInput = b.output = b.prevOutput = 0;
+						b.input = b.prevInput = b.output = 0;
 						b.inputEnergy = 0;
 					}
 				}
@@ -190,7 +194,7 @@ struct SignalsmithStretch {
 						auto channelBands = bandsForChannel(c);
 						auto &&spectrumBands = stft.spectrum[c];
 						for (int b = 0; b < bands; ++b) {
-							channelBands[b].input = signalsmith::perf::mul(spectrumBands[b], rotCentreSpectrum[b]);
+							channelBands[b].input = spectrumBands[b];
 						}
 					}
 
@@ -213,7 +217,7 @@ struct SignalsmithStretch {
 							auto channelBands = bandsForChannel(c);
 							auto &&spectrumBands = stft.spectrum[c];
 							for (int b = 0; b < bands; ++b) {
-								channelBands[b].prevInput = signalsmith::perf::mul(spectrumBands[b], rotCentreSpectrum[b]);
+								channelBands[b].prevInput = spectrumBands[b];
 							}
 						}
 					}
@@ -227,7 +231,7 @@ struct SignalsmithStretch {
 					auto channelBands = bandsForChannel(c);
 					auto &&spectrumBands = stft.spectrum[c];
 					for (int b = 0; b < bands; ++b) {
-						spectrumBands[b] = signalsmith::perf::mul<true>(channelBands[b].output, rotCentreSpectrum[b]);
+						spectrumBands[b] = channelBands[b].output;
 					}
 				}
 			});
@@ -278,7 +282,7 @@ struct SignalsmithStretch {
 		for (int c = 0; c < channels; ++c) {
 			auto channelBands = bandsForChannel(c);
 			for (int b = 0; b < bands; ++b) {
-				channelBands[b].prevInput = channelBands[b].prevOutput = 0;
+				channelBands[b].prevInput = channelBands[b].output = 0;
 			}
 		}
 		flushed = true;
@@ -301,23 +305,16 @@ private:
 	bool didSeek = false, flushed = true;
 	Sample seekTimeFactor = 1;
 
-	std::vector<Complex> rotCentreSpectrum, rotPrevInterval;
 	Sample bandToFreq(Sample b) const {
 		return (b + Sample(0.5))/stft.fftSize();
 	}
 	Sample freqToBand(Sample f) const {
 		return f*stft.fftSize() - Sample(0.5);
 	}
-	void timeShiftPhases(Sample shiftSamples, std::vector<Complex> &output) const {
-		for (int b = 0; b < bands; ++b) {
-			Sample phase = bandToFreq(b)*shiftSamples*Sample(-2*M_PI);
-			output[b] = {std::cos(phase), std::sin(phase)};
-		}
-	}
 	
 	struct Band {
 		Complex input, prevInput{0};
-		Complex output, prevOutput{0};
+		Complex output{0};
 		Sample inputEnergy;
 	};
 	std::vector<Band> channelBands;
@@ -372,7 +369,6 @@ private:
 	struct Prediction {
 		Sample energy = 0;
 		Complex input;
-		Complex shortVerticalTwist, longVerticalTwist;
 
 		Complex makeOutput(Complex phase) {
 			Sample phaseNorm = std::norm(phase);
@@ -387,8 +383,8 @@ private:
 	Prediction * predictionsForChannel(int c) {
 		return channelPredictions.data() + c*bands;
 	}
-	
-	std::default_random_engine randomEngine;
+
+	RandomEngine randomEngine;
 
 	void processSpectrum(bool newSpectrum, Sample timeFactor) {
 		timeFactor = std::max<Sample>(timeFactor, 1/maxCleanStretch);
@@ -398,10 +394,16 @@ private:
 		if (newSpectrum) {
 			for (int c = 0; c < channels; ++c) {
 				auto bins = bandsForChannel(c);
+
+				Complex rot = std::polar(Sample(1), bandToFreq(0)*stft.interval()*Sample(2*M_PI));
+				Sample freqStep = bandToFreq(1) - bandToFreq(0);
+				Complex rotStep = std::polar(Sample(1), freqStep*stft.interval()*Sample(2*M_PI));
+				
 				for (int b = 0; b < bands; ++b) {
 					auto &bin = bins[b];
-					bin.prevOutput = signalsmith::perf::mul(bin.prevOutput, rotPrevInterval[b]);
-					bin.prevInput = signalsmith::perf::mul(bin.prevInput, rotPrevInterval[b]);
+					bin.output = signalsmith::perf::mul(bin.output, rot);
+					bin.prevInput = signalsmith::perf::mul(bin.prevInput, rot);
+					rot = signalsmith::perf::mul(rot, rotStep);
 				}
 			}
 		}
@@ -441,22 +443,8 @@ private:
 				auto &outputBin = bins[b];
 				Complex prevInput = getFractional<&Band::prevInput>(c, lowIndex, fracIndex);
 				Complex freqTwist = signalsmith::perf::mul<true>(prediction.input, prevInput);
-				Complex phase = signalsmith::perf::mul(outputBin.prevOutput, freqTwist);
+				Complex phase = signalsmith::perf::mul(outputBin.output, freqTwist);
 				outputBin.output = phase/(std::max(prevEnergy, prediction.energy) + noiseFloor);
-
-				if (b > 0) {
-					Sample binTimeFactor = randomTimeFactor ? timeFactorDist(randomEngine) : timeFactor;
-					Complex downInput = getFractional<&Band::input>(c, mapPoint.inputBin - binTimeFactor);
-					prediction.shortVerticalTwist = signalsmith::perf::mul<true>(prediction.input, downInput);
-					if (b >= longVerticalStep) {
-						Complex longDownInput = getFractional<&Band::input>(c, mapPoint.inputBin - longVerticalStep*binTimeFactor);
-						prediction.longVerticalTwist = signalsmith::perf::mul<true>(prediction.input, longDownInput);
-					} else {
-						prediction.longVerticalTwist = 0;
-					}
-				} else {
-					prediction.shortVerticalTwist = prediction.longVerticalTwist = 0;
-				}
 			}
 		}
 
@@ -479,27 +467,46 @@ private:
 			auto &outputBin = bins[b];
 
 			Complex phase = 0;
+			auto mapPoint = outputMap[b];
 
 			// Upwards vertical steps
 			if (b > 0) {
+				Sample binTimeFactor = randomTimeFactor ? timeFactorDist(randomEngine) : timeFactor;
+				Complex downInput = getFractional<&Band::input>(maxChannel, mapPoint.inputBin - binTimeFactor);
+				Complex shortVerticalTwist = signalsmith::perf::mul<true>(prediction.input, downInput);
+
 				auto &downBin = bins[b - 1];
-				phase += signalsmith::perf::mul(downBin.output, prediction.shortVerticalTwist);
+				phase += signalsmith::perf::mul(downBin.output, shortVerticalTwist);
 				
 				if (b >= longVerticalStep) {
+					Complex longDownInput = getFractional<&Band::input>(maxChannel, mapPoint.inputBin - longVerticalStep*binTimeFactor);
+					Complex longVerticalTwist = signalsmith::perf::mul<true>(prediction.input, longDownInput);
+
 					auto &longDownBin = bins[b - longVerticalStep];
-					phase += signalsmith::perf::mul(longDownBin.output, prediction.longVerticalTwist);
+					phase += signalsmith::perf::mul(longDownBin.output, longVerticalTwist);
 				}
 			}
 			// Downwards vertical steps
 			if (b < bands - 1) {
 				auto &upPrediction = predictions[b + 1];
+				auto &upMapPoint = outputMap[b + 1];
+
+				Sample binTimeFactor = randomTimeFactor ? timeFactorDist(randomEngine) : timeFactor;
+				Complex downInput = getFractional<&Band::input>(maxChannel, upMapPoint.inputBin - binTimeFactor);
+				Complex shortVerticalTwist = signalsmith::perf::mul<true>(upPrediction.input, downInput);
+
 				auto &upBin = bins[b + 1];
-				phase += signalsmith::perf::mul<true>(upBin.output, upPrediction.shortVerticalTwist);
+				phase += signalsmith::perf::mul<true>(upBin.output, shortVerticalTwist);
 				
 				if (b < bands - longVerticalStep) {
 					auto &longUpPrediction = predictions[b + longVerticalStep];
+					auto &longUpMapPoint = outputMap[b + longVerticalStep];
+
+					Complex longDownInput = getFractional<&Band::input>(maxChannel, longUpMapPoint.inputBin - longVerticalStep*binTimeFactor);
+					Complex longVerticalTwist = signalsmith::perf::mul<true>(longUpPrediction.input, longDownInput);
+
 					auto &longUpBin = bins[b + longVerticalStep];
-					phase += signalsmith::perf::mul<true>(longUpBin.output, longUpPrediction.longVerticalTwist);
+					phase += signalsmith::perf::mul<true>(longUpBin.output, longVerticalTwist);
 				}
 			}
 
@@ -520,11 +527,8 @@ private:
 
 		if (newSpectrum) {
 			for (auto &bin : channelBands) {
-				bin.prevOutput = bin.output;
 				bin.prevInput = bin.input;
 			}
-		} else {
-			for (auto &bin : channelBands) bin.prevOutput = bin.output;
 		}
 	}
 	

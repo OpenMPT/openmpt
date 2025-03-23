@@ -162,8 +162,10 @@ namespace signalsmith { namespace fft {
 			plan.resize(0);
 			twiddleVector.resize(0);
 			addPlanSteps(0, 0, _size, 1);
+			twiddleVector.shrink_to_fit();
 			
 			permutation.resize(0);
+			permutation.reserve(_size);
 			permutation.push_back(PermutationPair{0, 0});
 			size_t indexLow = 0, indexHigh = factors.size();
 			size_t inputStepLow = _size, outputStepLow = 1;

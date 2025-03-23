@@ -89,16 +89,17 @@ namespace spectral {
 			return mrfft.size();
 		}
 		
-		/// Performs an FFT (with windowing)
-		template<class Input, class Output>
+		/// Performs an FFT, with windowing and rotation (if enabled)
+		template<bool withWindow=true, bool withScaling=false, class Input, class Output>
 		void fft(Input &&input, Output &&output) {
 			int fftSize = size();
+			const Sample norm = (withScaling ? 1/(Sample)fftSize : 1);
 			for (int i = 0; i < offsetSamples; ++i) {
 				// Inverted polarity since we're using the MRFFT
-				timeBuffer[i + fftSize - offsetSamples] = -input[i]*fftWindow[i];
+				timeBuffer[i + fftSize - offsetSamples] = -input[i]*norm*(withWindow ? fftWindow[i] : Sample(1));
 			}
 			for (int i = offsetSamples; i < fftSize; ++i) {
-				timeBuffer[i - offsetSamples] = input[i]*fftWindow[i];
+				timeBuffer[i - offsetSamples] = input[i]*norm*(withWindow ? fftWindow[i] : Sample(1));
 			}
 			mrfft.fft(timeBuffer, output);
 		}
@@ -108,22 +109,22 @@ namespace spectral {
 			mrfft.fft(input, output);
 		}
 
-		/// Inverse FFT, with windowing and 1/N scaling
-		template<class Input, class Output>
+		/// Inverse FFT, with windowing, 1/N scaling and rotation (if enabled)
+		template<bool withWindow=true, bool withScaling=true, class Input, class Output>
 		void ifft(Input &&input, Output &&output) {
 			mrfft.ifft(input, timeBuffer);
 			int fftSize = mrfft.size();
-			Sample norm = 1/(Sample)fftSize;
+			const Sample norm = (withScaling ? 1/(Sample)fftSize : 1);
 
 			for (int i = 0; i < offsetSamples; ++i) {
 				// Inverted polarity since we're using the MRFFT
-				output[i] = -timeBuffer[i + fftSize - offsetSamples]*norm*fftWindow[i];
+				output[i] = -timeBuffer[i + fftSize - offsetSamples]*norm*(withWindow ? fftWindow[i] : Sample(1));
 			}
 			for (int i = offsetSamples; i < fftSize; ++i) {
-				output[i] = timeBuffer[i - offsetSamples]*norm*fftWindow[i];
+				output[i] = timeBuffer[i - offsetSamples]*norm*(withWindow ? fftWindow[i] : Sample(1));
 			}
 		}
-		/// Performs an IFFT (no windowing or rotation)
+		/// Performs an IFFT (no windowing, scaling or rotation)
 		template<class Input, class Output>
 		void ifftRaw(Input &&input, Output &&output) {
 			mrfft.ifft(input, output);
@@ -169,6 +170,7 @@ namespace spectral {
 	*/
 	template<typename Sample>
 	class STFT : public signalsmith::delay::MultiBuffer<Sample> {
+
 		using Super = signalsmith::delay::MultiBuffer<Sample>;
 		using Complex = std::complex<Sample>;
 
@@ -206,6 +208,7 @@ namespace spectral {
 		};
 		std::vector<Sample> timeBuffer;
 
+		bool rotate = false;
 		void resizeInternal(int newChannels, int windowSize, int newInterval, int historyLength, int zeroPadding) {
 			Super::resize(newChannels,
 				windowSize /* for output summing */
@@ -213,14 +216,14 @@ namespace spectral {
 				+ historyLength);
 
 			int fftSize = fft.fastSizeAbove(windowSize + zeroPadding);
-			
+
 			this->channels = newChannels;
 			_windowSize = windowSize;
 			this->_fftSize = fftSize;
 			this->_interval = newInterval;
 			validUntilIndex = -1;
 			
-			setWindow(windowShape);
+			setWindow(windowShape, rotate);
 
 			spectrum.resize(channels, fftSize/2);
 			timeBuffer.resize(fftSize);
@@ -242,6 +245,7 @@ namespace spectral {
 		// TODO: these should both be set before resize()
 		void setWindow(Window shape, bool rotateToZero=false) {
 			windowShape = shape;
+			rotate = rotateToZero;
 
 			auto &window = fft.setSizeWindow(_fftSize, rotateToZero ? _windowSize/2 : 0);
 			if (windowShape == Window::kaiser) {

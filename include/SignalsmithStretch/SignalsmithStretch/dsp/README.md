@@ -22,7 +22,7 @@ Delay delayLine(1024);
 You can add a compile-time version-check to make sure you have a compatible version of the library:
 ```cpp
 #include "dsp/envelopes.h"
-SIGNALSMITH_DSP_VERSION_CHECK(1, 6, 0)
+SIGNALSMITH_DSP_VERSION_CHECK(1, 6, 1)
 ```
 
 ### Development / contributing
