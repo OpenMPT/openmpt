@@ -1807,7 +1807,7 @@ CString CCtrlInstruments::GetToolTipText(UINT uId, HWND) const
 		case IDC_EDIT8:
 			// Global volume
 			if(isEnabled)
-				s = CModDoc::LinearToDecibels(GetDlgItemInt(IDC_EDIT8), 64.0);
+				s = CModDoc::LinearToDecibelsString(GetDlgItemInt(IDC_EDIT8), 64.0);
 			else
 				s = _T("Only available in IT / MPTM format");
 			break;

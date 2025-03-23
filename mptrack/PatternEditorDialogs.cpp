@@ -1678,7 +1678,7 @@ CString QuickChannelProperties::GetToolTipText(UINT id, HWND) const
 	{
 	case IDC_EDIT1:
 	case IDC_SLIDER1:
-		text = CModDoc::LinearToDecibels(m_document->GetSoundFile().ChnSettings[m_channel].nVolume, 64.0);
+		text = CModDoc::LinearToDecibelsString(m_document->GetSoundFile().ChnSettings[m_channel].nVolume, 64.0);
 		break;
 	case IDC_EDIT2:
 	case IDC_SLIDER2:

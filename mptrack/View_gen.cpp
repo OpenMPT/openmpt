@@ -1805,13 +1805,13 @@ BOOL CViewGlobals::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 		case IDC_EDIT3:
 		case IDC_EDIT5:
 		case IDC_EDIT7:
-			text = CModDoc::LinearToDecibels(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT1) / 2].nVolume, 64.0);
+			text = CModDoc::LinearToDecibelsString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT1) / 2].nVolume, 64.0);
 			break;
 		case IDC_SLIDER1:
 		case IDC_SLIDER3:
 		case IDC_SLIDER5:
 		case IDC_SLIDER7:
-			text = CModDoc::LinearToDecibels(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER1) / 2].nVolume, 64.0);
+			text = CModDoc::LinearToDecibelsString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER1) / 2].nVolume, 64.0);
 			break;
 		case IDC_EDIT2:
 		case IDC_EDIT4:
@@ -1828,7 +1828,7 @@ BOOL CViewGlobals::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 		case IDC_EDIT16:
 			{
 				const auto gain = GetDocument()->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].GetGain();
-				text = CModDoc::LinearToDecibels(gain ? gain : 10, 10.0);
+				text = CModDoc::LinearToDecibelsString(gain ? gain : 10, 10.0);
 			}
 			break;
 		case IDC_BUTTON5:

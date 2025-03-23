@@ -533,6 +533,36 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
+static CString EffectiveSampleVolume(double value, double valueAtZeroDB, double effectiveFactor, const CSoundFile &sndFile)
+{
+	CString s = CModDoc::LinearToDecibelsString(value, valueAtZeroDB);
+	if(value == 0)
+		return s;
+
+	const auto &playConfig = sndFile.GetPlayConfig();
+	if(!playConfig.getDisplayDBValues())
+		return s;
+
+	s += _T(" (") + CModDoc::LinearToDecibelsString(value * effectiveFactor * sndFile.m_nSamplePreAmp, valueAtZeroDB * playConfig.getNormalSamplePreAmp()) + _T(" effectively)");
+	return s;
+}
+
+
+static CString EffectiveOPLVolume(double value, double effectiveFactor, const CSoundFile &sndFile)
+{
+	const double dB = (value - 64.0) * 0.75;
+	const double effectiveDB = (effectiveFactor - 64.0) * 0.75;
+	CString s = CModDoc::DecibelsToStrings(dB);
+
+	const auto &playConfig = sndFile.GetPlayConfig();
+	if(!playConfig.getDisplayDBValues())
+		return s;
+
+	s += _T(" (") + CModDoc::DecibelsToStrings(dB + effectiveDB + CModDoc::LinearToDecibels(sndFile.m_nVSTiVolume, playConfig.getNormalVSTiVol())) + _T(" effectively)");
+	return s;
+}
+
+
 CString CCtrlSamples::GetToolTipText(UINT uId, HWND) const
 {
 	CString s;
@@ -561,10 +591,14 @@ CString CCtrlSamples::GetToolTipText(UINT uId, HWND) const
 		case IDC_EDIT7:
 		case IDC_EDIT8:
 			// Volume to dB
-			if(IsOPLInstrument())
-				s = mpt::cfmt::fix((static_cast<int32>(val) - 64) * 0.75, 2) + _T(" dB");
-			else
-				s = CModDoc::LinearToDecibels(val, 64.0);
+			if(m_nSample)
+			{
+				const auto globalVol = m_sndFile.GetSample(m_nSample).nGlobalVol;
+				if(IsOPLInstrument())
+					s = EffectiveOPLVolume(val, (uId == IDC_EDIT7) ? globalVol : 64.0, m_sndFile);
+				else
+					s = EffectiveSampleVolume(val, 64.0, (uId == IDC_EDIT7) ? globalVol / 64.0 : 1.0, m_sndFile);
+			}
 			break;
 
 		case IDC_EDIT9:

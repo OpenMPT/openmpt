@@ -3176,12 +3176,27 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 }
 
 
-CString CModDoc::LinearToDecibels(double value, double valueAtZeroDB)
+
+CString CModDoc::LinearToDecibelsString(double value, double valueAtZeroDB)
 {
-	if (value == 0) return _T("-inf");
+	return DecibelsToStrings(LinearToDecibels(value, valueAtZeroDB));
+}
+
+
+double CModDoc::LinearToDecibels(double value, double valueAtZeroDB)
+{
+	if(value == 0 || valueAtZeroDB == 0)
+		return -std::numeric_limits<double>::infinity();
 
 	double changeFactor = value / valueAtZeroDB;
-	double dB = 20.0 * std::log10(changeFactor);
+	return 20.0 * std::log10(changeFactor);
+}
+
+
+CString CModDoc::DecibelsToStrings(double dB)
+{
+	if(std::isinf(dB))
+		return dB < 0 ? _T("-inf") : _T("inf");
 
 	CString s = (dB >= 0) ? _T("+") : _T("");
 	s.AppendFormat(_T("%.2f dB"), dB);
