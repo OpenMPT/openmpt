@@ -34,6 +34,24 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.31.15.00 (23 March 2025, revision 23072)
+-------------------------------------------
+Sample tab
+- [Imp] <js> Relaxed BRR file rejection heuristics a bit (http://bugs.openmpt.org/view.php?id=1859).
+- [Imp] <js> Loop and cue point information is now also copied for sample selections (http://bugs.openmpt.org/view.php?id=1869).
+- [Fix] <js> Possible crash when replacing a sample with a shorter one while outside of the sample editor, and then returning to the same sample slot (http://bugs.openmpt.org/view.php?id=1866).
+- [Fix] <js> Drawing sample data from right to left caused the drawn lines to not be interpolated properly.
+
+Instrument tab
+- [Fix] <js> Fixed crash when trying to remove the only point of an envelope.
+
+Misc
+- [Fix] <js> If multiple keyboard layouts were installed, note key mpaping could be based on the wrong layout, causing e.g. B-4 and Note-Off keys to be swapped on the default key map with an active US keyboard layout but also a German layout being present.
+
+Third-Party Libraries
+- [Imp] Update FLAC (v1.5.0)
+
+
 v1.31.14.00 (6 January 2025, revision 22819)
 --------------------------------------------
 Pattern tab
