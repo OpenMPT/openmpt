@@ -20,8 +20,8 @@ if IS_RELEASE:
 	changelog_url = "https://openmpt.org/release_notes/History.txt"
 else:
 	download_base_url = "https://builds.openmpt.org/builds/auto/openmpt/pkg.win-retro/"
-	announcement_url = "https://source.openmpt.org/browse/openmpt/trunk/OpenMPT/?op=log&isdir=1&sr=" + SVNVERSION + "&max=1000"
-	changelog_url = "https://source.openmpt.org/browse/openmpt/trunk/OpenMPT/?op=log&isdir=1&sr=" + SVNVERSION + "&max=1000"
+	announcement_url = "https://source.openmpt.org/browse/openmpt/branches/OpenMPT-1.32/?op=log&isdir=1&sr=" + SVNVERSION + "&max=1000"
+	changelog_url = "https://source.openmpt.org/browse/openmpt/branches/OpenMPT-1.32/?op=log&isdir=1&sr=" + SVNVERSION + "&max=1000"
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 os.chdir("..")
