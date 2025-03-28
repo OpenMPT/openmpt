@@ -4,16 +4,27 @@ branching release branches
  1. adjust buildbot status dashboard page
  2. adjust buildbot configuration by copying current trunk configuration to a
     new branch configuration and replace `trunk` with the branch version (i.e.
-    `127`), remember to also adjust url of nondist externals
+    `127`), remember to also adjust url of nondist externals:
+    in config and config-dist:
+     *  "trunk/OpenMPT" -> "branches/OpenMPT-1.32"
+     *  "trunk" -> "132"
  3. add release build configuration to the buildbot branch configuration file,
     adjust buildbot config of release build configurations to output to the
     separate auto-release (append _rel to the publish scripcts) directory,
     change the archive format from 7z to zip for windows binaries, use separate
-    release schedulers for lib and trk
- 4. adjust buildbot update management script
- 5. branch the nondist externals repository
- 6. add versioned libopenmpt release script for new branch which copies release
+    release schedulers for lib and trk.
+    in config-rel (from config-dist):
+     *  "dist" -> "rel"
+     *  "publish_v2.sh" -> "publish_v2_rel.sh"
+     *  "publish_v2_noindex.sh" -> "publish_v2_noindex_rel.sh"
+     *  " rel" -> " dist"
+     *  ".sh dist" -> ".sh rel"
+     *  "nonrel" -> "nondist"
+     *  "7z" -> "zip"
+ 4. branch the nondist externals repository
+ 5. add versioned libopenmpt release script for new branch which copies release
     packages into place
+ 6. adjust old stable libopenmpt release script to not overwrite docs
  7. branch the current trunk HEAD (`$VER` is the branch version):
     `svn copy -m "branch OpenMPT-$VER" https://source.openmpt.org/svn/openmpt/trunk/OpenMPT https://source.openmpt.org/svn/openmpt/branches/OpenMPT-$VER`
  8. update versions in trunk
@@ -30,6 +41,11 @@ branching release branches
         `1.$VER.00.$MINORMINOR+1`
      2. run `build/update_libopenmpt_version.sh bumpprerel`
 10. update announcement/changelog URLs for test builds in branch:
-    `installer/generate_update_json.py` and `generate_update_json_retro.py`
-11. update buildbot scripts that copy OpenMPT update information into place
-12. update branch release date on libopenmpt trunk changelog
+    `installer/generate_update_json.py` and `generate_update_json_retro.py`:
+     *  "trunk/OpenMPT" -> "banches/OpenMPT-1.32"
+11. update https://builds.openmpt.org/builds/
+12. update buildbot scripts that copy OpenMPT update information into place
+13. update branch release date on libopenmpt trunk changelog
+
+unclear:
+ *  adjust buildbot update management script
