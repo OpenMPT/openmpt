@@ -40,12 +40,13 @@ branching release branches
      1. set OpenMPT version in `common/versionNumber.h` to
         `1.$VER.00.$MINORMINOR+1`
      2. run `build/update_libopenmpt_version.sh bumpprerel`
-10. update announcement/changelog URLs for test builds in branch:
+10. update CI branch configuration in new branch
+11. update announcement/changelog URLs for test builds in branch:
     `installer/generate_update_json.py` and `generate_update_json_retro.py`:
      *  "trunk/OpenMPT" -> "banches/OpenMPT-1.32"
-11. update https://builds.openmpt.org/builds/
-12. update buildbot scripts that copy OpenMPT update information into place
-13. update branch release date on libopenmpt trunk changelog
+12. update https://builds.openmpt.org/builds/
+13. update buildbot scripts that copy OpenMPT update information into place
+14. update branch release date on libopenmpt trunk changelog
 
 unclear:
  *  adjust buildbot update management script
