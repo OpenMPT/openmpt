@@ -76,6 +76,8 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("EasyTrax"),                           "etx" },
 	{ UL_("Farandole Composer"),                 "far" },
 	{ UL_("Future Composer"),                    "fc" },
+	{ UL_("Future Composer"),                    "fc13" },
+	{ UL_("Future Composer"),                    "fc14" },
 	{ UL_("FM Tracker"),                         "fmt" },
 	{ UL_("ProTracker"),                         "fst" },
 	{ UL_("Face The Music"),                     "ftm" },
