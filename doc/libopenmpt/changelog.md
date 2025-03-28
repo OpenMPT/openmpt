@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.9.0-pre
+
 ### libopenmpt 0.8.0-pre
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
