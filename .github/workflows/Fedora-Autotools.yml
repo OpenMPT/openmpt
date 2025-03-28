@@ -2,9 +2,7 @@ name: Fedora Autotools
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ OpenMPT-1.32 ]
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
