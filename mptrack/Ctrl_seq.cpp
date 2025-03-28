@@ -1185,7 +1185,7 @@ void COrderList::OnRButtonUp(UINT nFlags, CPoint pt)
 		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_MEASURE_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtMeasureEnd, _T("Transition at end of current &measure")));
 		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_BEAT_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtBeatEnd, _T("Transition at end of current &beat")));
 		AppendMenu(menuQueue, MF_STRING, ID_QUEUE_AT_ROW_END, ih->GetKeyTextFromCommand(kcOrderlistQueueAtRowEnd, _T("Transition at end of current &row")));
-		AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(menuQueue), _T("&Queue Pattern..."));
+		AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(menuQueue), _T("&Queue Pattern"));
 	}
 
 	AppendMenu(hMenu, MF_SEPARATOR, NULL, _T(""));
