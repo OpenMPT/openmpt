@@ -114,7 +114,8 @@ ModSequence &CCtrlPatterns::Order() { return m_sndFile.Order(); }
 
 
 CCtrlPatterns::CCtrlPatterns(CModControlView &parent, CModDoc &document)
-    : CModControlDlg(parent, document), m_OrderList(*this, document)
+	: CModControlDlg{parent, document}
+	, m_OrderList{*this, document}
 {
 	m_BtnPrev.SetAccessibleText(_T("Select Previous Order"));
 	m_BtnNext.SetAccessibleText(_T("Select Next Order"));
@@ -1078,8 +1079,9 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 
 void CCtrlPatterns::OnPatternRecord()
 {
-	m_bRecord = m_ToolBar.IsButtonChecked(IDC_PATTERN_RECORD) != 0;
+	m_bRecord = !m_bRecord;
 	TrackerSettings::Instance().gbPatternRecord = m_bRecord;
+	m_ToolBar.CheckButton(IDC_PATTERN_RECORD, m_bRecord ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
 	SwitchToView();
 }
@@ -1087,8 +1089,9 @@ void CCtrlPatterns::OnPatternRecord()
 
 void CCtrlPatterns::OnPatternVUMeters()
 {
-	m_bVUMeters = m_ToolBar.IsButtonChecked(ID_PATTERN_VUMETERS) != 0;
-	TrackerSettings::Instance().gbPatternVUMeters = (m_bVUMeters != 0);
+	m_bVUMeters = !m_bVUMeters;
+	TrackerSettings::Instance().gbPatternVUMeters = m_bVUMeters;
+	m_ToolBar.CheckButton(ID_PATTERN_VUMETERS, m_bVUMeters ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
 	SwitchToView();
 }
@@ -1096,8 +1099,9 @@ void CCtrlPatterns::OnPatternVUMeters()
 
 void CCtrlPatterns::OnPatternViewPlugNames()
 {
-	m_bPluginNames = m_ToolBar.IsButtonChecked(ID_VIEWPLUGNAMES) != 0;
-	TrackerSettings::Instance().gbPatternPluginNames = (m_bPluginNames != 0);
+	m_bPluginNames = !m_bPluginNames;
+	TrackerSettings::Instance().gbPatternPluginNames = m_bPluginNames;
+	m_ToolBar.CheckButton(ID_VIEWPLUGNAMES, m_bPluginNames ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
 	SwitchToView();
 }
@@ -1113,8 +1117,7 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 
 void CCtrlPatterns::OnToggleMetronome()
 {
-	bool enableMetronome = m_ToolBar.IsButtonChecked(IDC_METRONOME) != 0;
-	TrackerSettings::Instance().metronomeEnabled = enableMetronome;
+	TrackerSettings::Instance().metronomeEnabled = !TrackerSettings::Instance().metronomeEnabled;
 	CMainFrame::GetMainFrame()->UpdateMetronomeSamples();
 	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
 	SwitchToView();
