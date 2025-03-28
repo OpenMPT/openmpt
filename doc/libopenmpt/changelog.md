@@ -11,12 +11,15 @@ is just a high-level summary.
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
  *  [**New**] Can now read Face The Music (`FTM`) modules.
+ *  [**New**] Can now read Future Composer (`FC` / `FC13` / `FC14` / `SMOD`)
+    modules.
  *  [**New**] Can now read Game Music Creator (`GMC`) modules.
  *  [**New**] Can now read Chuck Biscuits / Black Artist (`CBA`) modules from
     the Expoze musicdisk by Heretics
  *  [**New**] Can now read Real Tracker 2 (`RTM`) modules.
  *  [**New**] Can now read Images Music System (`IMS`) modules.
  *  [**New**] Can now read ChipTracker (`MOD`) modules.
+ *  [**New**] Can now read TCB Tracker (`MOD`) modules.
  *  [**New**] Can now read EasyTrax (`ETX`) modules.
  *  [**New**] Can now load UNIC Tracker v1 (`UNIC`) files.
  *  [**New**] MED: Synthesized and hybrid instruments are now supported.
@@ -67,17 +70,31 @@ is just a high-level summary.
  *  [**Regression**] Using `EMSCRIPTEN_PORTS=1` with Emscripten older than
     3.1.54 now requires additionally specifying `ANCIENT=1`.
 
- *  IT: Various plaback fixes. 
- *  XM: If key-off is reached before auto-vibrato reaches full depth, the depth
-    is reset.
+ *  IT: Various playback fixes.
+ *  IT: When using tone portamento to another sample after the previous sample's
+    sustain loop has been released, the new sample should also not play its
+    sustain loop.
+ *  IT: When triggering an empty instrument note slot, completely ignore the
+    pattern cell - do not reset the currently playing instrument's envelopes,
+    and also don't process any effects - including global ones.
+ *  IT: Offset with instrument number but no note should play offset effect with
+    previous note.
+ *  IT: Fixed various combinations of volume column and effect column portamento
+    effects.
+ *  IT: Implemented a quirk in command Lxx that always executes a portamento
+    down when no tone portamento has been set up before, sometimes causing the
+    target note to be reached immediately, or sliding the note down very subtly.
+ *  IT: Envelope Carry should not be influenced by a previous note-off.
+
+ *  XM: When a key-off is encountered before auto-vibrato reaches full depth,
+    the depth is reset.
  *  S3M: Combined slides (Kxy / Lxy) are no longer run on the first tick of a
     row in files made with Scream Tracker.
  *  MOD: Groo's "The Ultimate Beeper" now plays like in ProTracker.
  *  DTM: Portamentos are now also evaluated on the first tick of the row.
  *  MO3: If multiple sample slots shared the same Ogg Vorbis sample, only one
     sample slot was loaded.
- *  MED: Tempo parameters > 255 BPM were not imported properly if the files was
-    imported as MOD instead of XM.
+ *  MED: Various playback fixes.
  *  SymMOD: Files containing more than 127 channels are no longer rejected. 
  *  Better support for automatic slide commands (commands that keep sliding on
     following rows) in various formats.
