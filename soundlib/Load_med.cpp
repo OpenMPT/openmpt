@@ -1043,6 +1043,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 
 		MMD0Sample sampleHeader;
 		sampleHeaderChunk.ReadStruct(sampleHeader);
+		int8 sampleTranspose = sampleHeader.sampleTranspose;
 
 		uint8 numSamples = std::max(uint8(1), static_cast<uint8>(waveformOffsets.size()));
 		static constexpr uint8 SamplesPerType[] = {1, 5, 3, 2, 4, 6, 7};
@@ -1077,14 +1078,16 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			// TODO: Move octaves so that they align better (C-4 = lowest, we don't have access to the highest four octaves)
 			if(!isSynth)
 			{
-				for(int octave = 4; octave < 10; octave++)
+				for(int i = 0; i < static_cast<int>(instr.Keyboard.size()); i++)
 				{
-					for(int note = 0, i = 12 * octave; note < 12; note++, i++)
-					{
-						instr.Keyboard[i] = smp + OctSampleMap[numSamples - 2][octave - 4];
-						instr.NoteMap[i] = static_cast<uint8>(instr.NoteMap[i] + OctTransposeMap[numSamples - 2][octave - 4]);
-					}
+					int note = i + sampleTranspose;
+					if(note < 0)
+						note = -note % 12;
+					int octave = std::clamp(note / 12 - 4, 0, static_cast<int>(std::size(OctTransposeMap[0]) - 1));
+					instr.Keyboard[i] = smp + OctSampleMap[numSamples - 2][octave];
+					instr.NoteMap[i] = static_cast<uint8>(NOTE_MIN + note + OctTransposeMap[numSamples - 2][octave]);
 				}
+				sampleTranspose = 0;
 			}
 		} else if(maskedType == MMDInstrHeader::EXTSAMPLE)
 		{
@@ -1126,7 +1129,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			int offset = NOTE_MIDDLEC + (hardwareMixSamples ? 24 : 36);
 			for(auto &note : instr.NoteMap)
 			{
-				int realNote = note + sampleHeader.sampleTranspose;
+				int realNote = note + sampleTranspose;
 				if(realNote >= offset)
 					note -= static_cast<uint8>(mpt::align_down(realNote - offset + 12, 12));
 			}
@@ -1137,7 +1140,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 			ModSample &mptSmp = Samples[smp + i];
 			mptSmp.Initialize(MOD_TYPE_MED);
 			mptSmp.nVolume = 4u * std::min<uint8>(sampleHeader.sampleVolume, 64u);
-			mptSmp.RelativeTone = sampleHeader.sampleTranspose;
+			mptSmp.RelativeTone = sampleTranspose;
 		}
 
 		SampleIO sampleIO(
