@@ -42,11 +42,11 @@ jobs:
       if: ${{ matrix.version == 'rockylinux:9' }}
       run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
     - name: Install dependencies
-      run: dnf -y install subversion perl-XML-XPath git gawk zip unzip xz make binutils gcc gcc-c++ clang pkgconf help2man doxygen autoconf autoconf-archive automake libtool zlib-devel mpg123-devel libogg-devel libvorbis-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
+      run: dnf -y install --allowerasing subversion perl-XML-XPath git gawk zip unzip xz make binutils gcc gcc-c++ clang pkgconf help2man doxygen autoconf autoconf-archive automake libtool zlib-devel mpg123-devel libogg-devel libvorbis-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
     - name: Enable EPEL
       run: dnf -y install epel-release
     - name: Install EPEL dependencies
-      run: dnf -y install ccache portaudio-devel
+      run: dnf -y install --allowerasing ccache portaudio-devel
     - name: Checkout
       uses: actions/checkout@v4
     - name: fix git
