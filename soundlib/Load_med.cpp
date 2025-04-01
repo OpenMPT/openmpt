@@ -456,7 +456,8 @@ static void ConvertMEDEffect(ModCommand &m, bool is8ch, bool bpmMode, uint8 rows
 				m.command = CMD_NONE;
 				break;
 			case 0xFF:  // Turn note off
-				m.note = NOTE_NOTECUT;
+				if(!m.IsNote())
+					m.note = NOTE_NOTECUT;
 				m.command = CMD_NONE;
 				break;
 			default:
