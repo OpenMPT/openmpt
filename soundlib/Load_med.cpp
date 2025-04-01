@@ -530,7 +530,8 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 			case 0xFE:  // End of song
 				break;
 			case 0xFF:  // Turn note off
-				m.note = NOTE_NOTECUT;
+				if(!m.IsNote())
+					m.note = NOTE_NOTECUT;
 				break;
 		}
 		break;
