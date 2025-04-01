@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { host: macos-15, compiler: '16.3' }
           - { host: macos-15, compiler: '16.2' }
           - { host: macos-15, compiler: '16.1' }
           - { host: macos-15, compiler: '16.0' }
