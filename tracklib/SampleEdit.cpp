@@ -1019,15 +1019,19 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 	{
 		sndFile.Patterns.ForEachModCommand([&](ModCommand &m)
 		{
-			if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET && m.command != CMD_OFFSETPERCENTAGE)
+			if(m.command != CMD_OFFSET && m.command != CMD_REVERSEOFFSET)
+				return;
+			// Percentage offset is unaffected
+			if(m.volcmd == VOLCMD_OFFSET && m.vol == 0)
+				return;
+			// Recall last parameter
+			if(m.param == 0)
 				return;
 			if(sndFile.GetSampleIndex(m.note, m.instr) != sampleIndex)
 				return;
 			SmpLength point = m.param * 256u;
 
-			if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
-				point = Util::muldivr_unsigned(point, oldLength, 65536);
-			else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(oldCues))
+			if(m.volcmd == VOLCMD_OFFSET && m.vol <= oldCues.size())
 				point += oldCues[m.vol - 1];
 
 			if(point >= oldLength)
@@ -1038,16 +1042,19 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 				point = start + Util::muldivr_unsigned(point - start, newRate, oldRate);
 			LimitMax(point, newTotalLength);
 
-			if(m.command == CMD_OFFSETPERCENTAGE || (m.volcmd == VOLCMD_OFFSET && m.vol == 0))
-				point = Util::muldivr_unsigned(point, 65536, newTotalLength);
-			else if(m.volcmd == VOLCMD_OFFSET && m.vol <= std::size(smp.cues))
+			if(m.volcmd == VOLCMD_OFFSET && m.vol <= smp.cues.size())
 				point -= smp.cues[m.vol - 1];
+
+			ModCommand::PARAM newParam = std::max(mpt::saturate_cast<ModCommand::PARAM>((point + 128u) / 256u), ModCommand::PARAM(1));
+			if(m.param == newParam)
+				return;
+
 			if(!patternUndoCreated)
 			{
 				patternUndoCreated = true;
 				preparePatternUndoFunc();
 			}
-			m.param = mpt::saturate_cast<ModCommand::PARAM>(point / 256u);
+			m.param = newParam;
 		});
 	}
 
