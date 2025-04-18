@@ -644,6 +644,11 @@ bool CSoundFile::SaveFLACSample(SAMPLEINDEX nSample, std::ostream &f) const
 		{
 			chunk.loops[chunk.info.numLoops++].ConvertToWAV(sample.nLoopStart, sample.nLoopEnd, sample.uFlags[CHN_PINGPONGLOOP]);
 			chunk.header.length += sizeof(WAVSampleLoop);
+		} else if(sample.uFlags[CHN_SUSTAINLOOP])
+		{
+			// Invent zero-length loop to distinguish sustain loop from normal loop
+			chunk.loops[chunk.info.numLoops++].ConvertToWAV(0, 0, false);
+			chunk.header.length += sizeof(WAVSampleLoop);
 		}
 
 		const uint32 length = sizeof(RIFFChunk) + chunk.header.length;

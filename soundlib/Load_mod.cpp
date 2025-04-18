@@ -697,7 +697,10 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 				file.Seek(nextSample);
 			}
 		}
-		if(isMdKd && file.ReadArray<char, 9>() == std::array<char, 9>{0x00, 0x11, 0x55, 0x33, 0x22, 0x11, 0x04, 0x01, 0x01})
+		// XOR with 0xDF gives the message "TakeTrackered with version 0.9E!!!!!"
+		if(GetNumChannels() <= 16 && file.ReadMagic("\x8B\xBE\xB4\xBA\x8B\xAD\xBE\xBC\xB4\xBA\xAD\xBA\xBB\xFF\xA8\xB6\xAB\xB7\xFF\xA9\xBA\xAD\xAC\xB6\xB0\xB1\xFF\xEF\xF1\xE6\xBA\xFE\xFE\xFE\xFE\xFE"))
+			modMagicResult.madeWithTracker = UL_("TakeTracker");
+		else if(isMdKd && file.ReadArray<char, 6>() == std::array<char, 6>{0x00, 0x11, 0x55, 0x33, 0x22, 0x11} && file.CanRead(3))  // 3 more bytes that differ between modules and Tetramed version, purpose unknown
 			modMagicResult.madeWithTracker = UL_("Tetramed");
 	}
 
