@@ -176,7 +176,7 @@ constexpr CModSpecifications xmEx_ =
 	255,										// Order max.
 	1,											// Only one order list
 	1,											// Channel min
-	127,										// Channel max
+	128,										// Channel max
 	32,											// Min tempo
 	1000,										// Max tempo
 	1,											// Min Speed
