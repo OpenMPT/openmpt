@@ -1250,6 +1250,7 @@
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\output\serializer.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_concat.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_utils.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\value_t.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\json.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\json_fwd.hpp" />
