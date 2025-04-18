@@ -420,6 +420,9 @@
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_escape.hpp">
       <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\string_utils.hpp">
+      <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\detail\value_t.hpp">
       <Filter>include\nlohmann-json\include\nlohmann\detail</Filter>
     </ClInclude>
