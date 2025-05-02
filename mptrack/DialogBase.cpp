@@ -63,6 +63,21 @@ bool DialogBase::HandleGlobalKeyMessage(const MSG &msg)
 }
 
 
+void DialogBase::SetFocusToFirstControl()
+{
+	CWnd *child = GetWindow(GW_CHILD);
+	while(child)
+	{
+		if((child->GetStyle() & WS_TABSTOP) && child->IsWindowEnabled())
+		{
+			child->SetFocus();
+			return;
+		}
+		child = child->GetNextWindow();
+	}
+}
+
+
 LRESULT DialogBase::OnDPIChanged(WPARAM, LPARAM)
 {
 	// We may receive a first WM_DPICHANGED before OnInitDialog() even runs. We don't want to tell our dialogs about a DPI "change" that early.

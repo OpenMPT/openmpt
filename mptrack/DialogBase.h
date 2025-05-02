@@ -28,6 +28,8 @@ public:
 
 	int GetDPI() const { return m_dpi; }
 
+	void SetFocusToFirstControl();
+
 protected:
 	virtual void OnDPIChanged() {}
 	void UpdateDPI();

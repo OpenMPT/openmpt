@@ -1346,8 +1346,6 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 		m_panSlider.SetRange(0, 64);
 		m_panSlider.SetTicFreq(8);
 		m_panSpin.SetRange(0, 256);
-
-		m_nameEdit.SetFocus();
 	}
 	m_document = modDoc;
 	m_channel = chn;
@@ -1362,8 +1360,6 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	    Clamp(static_cast<int>(position.x) - rect.Width() / 2, 0, static_cast<int>(screenRect.right) - rect.Width()),
 	    Clamp(static_cast<int>(position.y) - rect.Height() / 2, 0, static_cast<int>(screenRect.bottom) - rect.Height()));
 	MoveWindow(rect);
-
-	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(chn + 1).c_str());
 
 	UpdateDisplay();
 
@@ -1384,6 +1380,7 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 	// Channel name
 	m_nameEdit.EnableWindow((m_document->GetModType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)) ? TRUE : FALSE);
 
+	SetFocusToFirstControl();
 	ShowWindow(SW_SHOW);
 	m_visible = true;
 }
@@ -1391,6 +1388,8 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 
 void QuickChannelProperties::UpdateDisplay()
 {
+	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(m_channel + 1).c_str());
+
 	// Set up channel properties
 	m_visible = false;
 	const ModChannelSettings &settings = m_document->GetSoundFile().ChnSettings[m_channel];
