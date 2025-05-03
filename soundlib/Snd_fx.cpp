@@ -5656,7 +5656,9 @@ void CSoundFile::ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const P
 		// No X-param (normal behaviour)
 		const bool isPercentageOffset = (m.volcmd == VOLCMD_OFFSET && m.vol == 0);
 		offset <<= 8;
-		if(offset)
+		// FT2 compatibility: 9xx command without a note next to it does not update effect memory.
+		// Test case: OffsetWithoutNote.xm
+		if(offset && (!m_playBehaviour[kFT2OffsetMemoryRequiresNote] || m.IsNote()))
 			chn.oldOffset = offset;
 		else if(m.volcmd != VOLCMD_OFFSET)
 			offset = chn.oldOffset;

@@ -753,6 +753,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kLegacyPPQpos: desc = _T("Report inaccurate PPQ position to VST plugins (like OpenMPT 1.31 and older)"); break;
 		case kLegacyPluginNNABehaviour: desc = _T("Plugin notes with New Note Action set to Continue are affected by note-offs (like OpenMPT 1.31 and older)"); break;
 		case kITCarryAfterNoteOff: desc = _T("Note-Off status does not influence Envelope Carry behaviour"); break;
+		case kFT2OffsetMemoryRequiresNote: desc = _T("Offset effect memory is only updated when the command is next to a note"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
