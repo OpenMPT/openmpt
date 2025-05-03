@@ -99,6 +99,9 @@ ModTreeDocInfo::ModTreeDocInfo(CModDoc &modDoc)
 
 BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	//{{AFX_MSG_MAP(CViewModTree)
+	ON_WM_DESTROY()
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
@@ -156,8 +159,6 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND, &CModTree::OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMSG,    &CModTree::OnMidiMsg)
 	//}}AFX_MSG_MAP
-	ON_WM_KILLFOCUS()
-	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 
@@ -258,6 +259,15 @@ void CModTree::Init()
 	RefreshDlsBanks();
 	RefreshInstrumentLibrary();
 	m_DropTarget.Register(this);
+}
+
+
+void CModTree::OnDestroy()
+{
+	if(CMainFrame::GetMainFrame()->GetMidiRecordWnd() == m_hWnd)
+	{
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(nullptr);
+	}
 }
 
 
@@ -4375,8 +4385,6 @@ void CModTree::OnKillFocus(CWnd *pNewWnd)
 	}
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
-	if(pNewWnd != nullptr)
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
 }
 
 
