@@ -926,6 +926,10 @@ void ModCommand::Convert(MODTYPE fromType, MODTYPE toType, const CSoundFile &snd
 			command = CMD_XFINEPORTAUPDOWN;
 	}
 
+	// Offset effect memory is only updated when the command is placed next to a note.
+	if(oldTypeIsXM && command == CMD_OFFSET && !IsNote())
+		command = CMD_NONE;
+
 	if((command == CMD_REVERSEOFFSET || command == CMD_OFFSETPERCENTAGE) && !newSpecs.HasCommand(command))
 	{
 		command = CMD_OFFSET;
