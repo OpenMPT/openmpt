@@ -345,6 +345,7 @@ protected:
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
+	afx_msg void OnDestroy();
 
 	afx_msg void OnSetItemPath();
 	afx_msg void OnSaveItem();
