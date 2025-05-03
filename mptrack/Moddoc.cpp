@@ -692,6 +692,8 @@ void CModDoc::InitializeMod()
 	}
 
 	m_SndFile.m_songArtist = TrackerSettings::Instance().defaultArtist;
+
+	m_SndFile.ResetPlayPos();
 }
 
 
