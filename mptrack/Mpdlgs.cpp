@@ -1710,6 +1710,7 @@ BEGIN_MESSAGE_MAP(CMidiSetupDlg, CPropertyPage)
 	ON_CBN_SELCHANGE(IDC_COMBO2,            &CMidiSetupDlg::OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO3,            &CMidiSetupDlg::OnSettingsChanged)
 	ON_CBN_SELCHANGE(IDC_COMBO4,            &CMidiSetupDlg::OnSettingsChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO5,            &CMidiSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_BUTTON1,                 &CMidiSetupDlg::OnRenameDevice)
 	ON_COMMAND(IDC_CHECK1,                  &CMidiSetupDlg::OnSettingsChanged)
 	ON_COMMAND(IDC_CHECK2,                  &CMidiSetupDlg::OnSettingsChanged)
@@ -1739,6 +1740,7 @@ void CMidiSetupDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO2, m_ATBehaviour);
 	DDX_Control(pDX, IDC_COMBO3, m_Quantize);
 	DDX_Control(pDX, IDC_COMBO4, m_ContinueMode);
+	DDX_Control(pDX, IDC_COMBO5, m_RecordPitchBend);
 	DDX_Control(pDX, IDC_EDIT3,  m_editAmp);
 	//}}AFX_DATA_MAP
 }
@@ -1766,7 +1768,6 @@ BOOL CMidiSetupDlg::OnInitDialog()
 	if(m_midiSetup[MidiSetup::ApplyChannelVolumeToVelocity]) CheckDlgButton(IDC_MIDIVOL_TO_NOTEVOL, BST_CHECKED);
 	if(m_midiSetup[MidiSetup::RespondToPlayControl]) CheckDlgButton(IDC_MIDIPLAYCONTROL, BST_CHECKED);
 	if(m_midiSetup[MidiSetup::PlayPatternOnMidiNote]) CheckDlgButton(IDC_MIDIPLAYPATTERNONMIDIIN, BST_CHECKED);
-	if(m_midiSetup[MidiSetup::RecordPitchBend]) CheckDlgButton(IDC_CHECK5, BST_CHECKED);
 
 	// Midi In Device
 	RefreshDeviceList(m_nMidiDevice);
@@ -1778,20 +1779,40 @@ BOOL CMidiSetupDlg::OnInitDialog()
 
 	// Aftertouch behaviour
 	m_ATBehaviour.ResetContent();
-	static constexpr std::pair<const TCHAR *, RecordAftertouchOptions> aftertouchOptions[] =
+	static constexpr std::pair<const TCHAR *, RecordAftertouch> aftertouchOptions[] =
 	{
-		{ _T("Do not record Aftertouch"), atDoNotRecord },
-		{ _T("Record as Volume Commands"), atRecordAsVolume },
-		{ _T("Record as MIDI Macros"), atRecordAsMacro },
+		{ _T("Do not record Aftertouch"), RecordAftertouch::DoNotRecord },
+		{ _T("Record as Volume Commands"), RecordAftertouch::RecordAsVolume },
+		{ _T("Record as MIDI Macros"), RecordAftertouch::RecordAsMacro },
 	};
 
 	for(const auto & [str, value] : aftertouchOptions)
 	{
 		int item = m_ATBehaviour.AddString(str);
-		m_ATBehaviour.SetItemData(item, value);
+		m_ATBehaviour.SetItemData(item, static_cast<DWORD_PTR>(value));
 		if(value == TrackerSettings::Instance().aftertouchBehaviour)
 		{
 			m_ATBehaviour.SetCurSel(item);
+		}
+	}
+
+	// Pitch Bend behaviour
+	m_RecordPitchBend.ResetContent();
+	static constexpr std::pair<const TCHAR *, RecordPitchBend> pitchBendOptions[] =
+	{
+		{ _T("Do not record Pitch Bends"), RecordPitchBend::DoNotRecord },
+		{ _T("Record only as MIDI Macros"), RecordPitchBend::RecordAsMacro },
+		{ _T("Record as Finetune or MIDI Macros"), RecordPitchBend::RecordAsFinetuneOrMacro },
+		{ _T("Record only as Finetune"), RecordPitchBend::RecordAsFinetune },
+	};
+
+	for (const auto & [str, value] : pitchBendOptions)
+	{
+		int item = m_RecordPitchBend.AddString(str);
+		m_RecordPitchBend.SetItemData(item, static_cast<DWORD_PTR>(value));
+		if (value == TrackerSettings::Instance().pitchBendBehaviour)
+		{
+			m_RecordPitchBend.SetCurSel(item);
 		}
 	}
 
@@ -1891,7 +1912,6 @@ void CMidiSetupDlg::OnOK()
 	m_midiSetup.set(MidiSetup::ApplyChannelVolumeToVelocity, IsDlgButtonChecked(IDC_MIDIVOL_TO_NOTEVOL) != BST_UNCHECKED);
 	m_midiSetup.set(MidiSetup::RespondToPlayControl, IsDlgButtonChecked(IDC_MIDIPLAYCONTROL) != BST_UNCHECKED);
 	m_midiSetup.set(MidiSetup::PlayPatternOnMidiNote, IsDlgButtonChecked(IDC_MIDIPLAYPATTERNONMIDIIN) != BST_UNCHECKED);
-	m_midiSetup.set(MidiSetup::RecordPitchBend, IsDlgButtonChecked(IDC_CHECK5) != BST_UNCHECKED);
 	m_midiSetup.set(MidiSetup::PlayPatternFromStart, m_ContinueMode.GetCurSel() == 1);
 
 	int n = m_InputDevice.GetCurSel();
@@ -1900,7 +1920,8 @@ void CMidiSetupDlg::OnOK()
 	else
 		m_nMidiDevice = MIDI_MAPPER;
 
-	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouchOptions>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
+	TrackerSettings::Instance().aftertouchBehaviour = static_cast<RecordAftertouch>(m_ATBehaviour.GetItemData(m_ATBehaviour.GetCurSel()));
+	TrackerSettings::Instance().pitchBendBehaviour = static_cast<RecordPitchBend>(m_RecordPitchBend.GetItemData(m_RecordPitchBend.GetCurSel()));
 
 	TrackerSettings::Instance().midiVelocityAmp = static_cast<uint16>(Clamp(GetDlgItemInt(IDC_EDIT3), 1u, 10000u));
 
