@@ -158,7 +158,6 @@ enum class MidiSetup : int32
 	RecordCCsAsMacros            =  0x80,  // Record MIDI controller changes a MIDI macro changes in pattern
 	PlayPatternOnMidiNote        = 0x100,  // Play pattern if MIDI Note is received and playback is paused
 	EnableMidiInOnStartup        = 0x200,  // Enable MIDI recording by default
-	RecordPitchBend              = 0x400,  // Record MIDI pitch bend messages a MIDI macro changes in pattern
 	PlayPatternFromStart         = 0x800,  // When continuing playback due to received MIDI events, restart pattern instead of continuing from current row
 
 	Default = RecordVelocity | RecordNoteOff | TransposeKeyboard | SendMidiToPlugins
@@ -231,11 +230,19 @@ struct MPTChord
 using MPTChords = std::array<MPTChord, 60>;  // Size == kcCommandSetNumNotes + 1
 
 // MIDI recording
-enum RecordAftertouchOptions
+enum class RecordAftertouch
 {
-	atDoNotRecord = 0,
-	atRecordAsVolume,
-	atRecordAsMacro,
+	DoNotRecord = 0,
+	RecordAsVolume,
+	RecordAsMacro,
+};
+
+enum class RecordPitchBend
+{
+	DoNotRecord = 0,
+	RecordAsMacro,
+	RecordAsFinetuneOrMacro,
+	RecordAsFinetune,
 };
 
 // New file action
@@ -334,8 +341,11 @@ mpt::ustring SettingsModTypeToString(MODTYPE modtype);
 MODTYPE SettingsStringToModType(const mpt::ustring &str);
 
 
-template<> inline SettingValue ToSettingValue(const RecordAftertouchOptions &val) { return SettingValue(int32(val)); }
-template<> inline RecordAftertouchOptions FromSettingValue(const SettingValue &val) { return RecordAftertouchOptions(val.as<int32>()); }
+template<> inline SettingValue ToSettingValue(const RecordAftertouch &val) { return SettingValue(int32(val)); }
+template<> inline RecordAftertouch FromSettingValue(const SettingValue &val) { return RecordAftertouch(val.as<int32>()); }
+
+template<> inline SettingValue ToSettingValue(const RecordPitchBend &val) { return SettingValue(int32(val)); }
+template<> inline RecordPitchBend FromSettingValue(const SettingValue& val) { return RecordPitchBend(val.as<int32>()); }
 
 template<> inline SettingValue ToSettingValue(const SampleEditorKeyBehaviour &val) { return SettingValue(int32(val)); }
 template<> inline SampleEditorKeyBehaviour FromSettingValue(const SettingValue &val) { return SampleEditorKeyBehaviour(val.as<int32>()); }
@@ -827,7 +837,8 @@ public:
 	// accesses settings framework from in there. Work-around the ASSERTs for
 	// now by using cached settings.
 	CachedSetting<FlagSet<MidiSetup>> midiSetup;
-	CachedSetting<RecordAftertouchOptions> aftertouchBehaviour;
+	CachedSetting<RecordAftertouch> aftertouchBehaviour;
+	CachedSetting<RecordPitchBend> pitchBendBehaviour;
 	CachedSetting<uint16> midiVelocityAmp;
 	CachedSetting<std::bitset<128> > midiIgnoreCCs;
 

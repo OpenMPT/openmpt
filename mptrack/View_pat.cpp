@@ -4016,6 +4016,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	}
 
 	const FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
+	const RecordPitchBend pitchBendBehaviour = TrackerSettings::Instance().pitchBendBehaviour;
 	const auto &modSpecs = sndFile.GetModSpecifications();
 	bool recordParamAsZxx = false;
 
@@ -4060,7 +4061,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		break;
 
 	case MIDIEvents::evPitchBend:  // Pitch wheel
-		recordParamAsZxx = midiSetup[MidiSetup::RecordPitchBend] || modSpecs.HasCommand(CMD_FINETUNE);
+		if(modSpecs.HasCommand(CMD_FINETUNE))
+			recordParamAsZxx = pitchBendBehaviour != RecordPitchBend::DoNotRecord;
+		else
+			recordParamAsZxx = pitchBendBehaviour == RecordPitchBend::RecordAsFinetuneOrMacro || pitchBendBehaviour == RecordPitchBend::RecordAsMacro;
 		break;
 
 	case MIDIEvents::evControllerChange:  //Controller change
@@ -4129,7 +4133,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		ModCommand &m = GetModCommand(sndFile, editpos);
 		bool update = false;
 
-		if(event == MIDIEvents::evPitchBend && (m.command == CMD_NONE || m.command == CMD_FINETUNE || m.command == CMD_FINETUNE_SMOOTH) && modSpecs.HasCommand(CMD_FINETUNE))
+		if(event == MIDIEvents::evPitchBend
+			&& (m.command == CMD_NONE || m.command == CMD_FINETUNE || m.command == CMD_FINETUNE_SMOOTH)
+			&& modSpecs.HasCommand(CMD_FINETUNE)
+			&& (pitchBendBehaviour == RecordPitchBend::RecordAsFinetune || pitchBendBehaviour == RecordPitchBend::RecordAsFinetuneOrMacro))
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 			m.command = (m.command == CMD_NONE) ? CMD_FINETUNE : CMD_FINETUNE_SMOOTH;
@@ -4140,7 +4147,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				CriticalSection cs;
 				sndFile.ProcessFinetune(editpos.pattern, editpos.row, editpos.channel, false);
 			}
-		} else if(m.IsPcNote())
+		} else if(m.IsPcNote() && event != MIDIEvents::evPitchBend)
 		{
 			pModDoc->GetPatternUndo().PrepareUndo(editpos.pattern, editpos.channel, editpos.row, 1, 1, "MIDI Record Entry");
 			m.SetValueEffectCol(static_cast<decltype(m.GetValueEffectCol())>(Util::muldivr(midiByte2, ModCommand::maxColumnValue, 127)));
@@ -4775,8 +4782,28 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcToggleContinueSongOnMIDINote: ToggleFlag(TrackerSettings::Instance().midiSetup, MidiSetup::PlayPatternOnMidiNote, _T("Continue Song when MIDI Note is received")); return wParam;
 		case kcToggleContinueSongOnMIDIPlayEvents: ToggleFlag(TrackerSettings::Instance().midiSetup, MidiSetup::RespondToPlayControl, _T("Respond to Play / Continue Song MIDI messages")); return wParam;
 		case kcToggleRecordMIDIVelocity: ToggleFlag(TrackerSettings::Instance().midiSetup, MidiSetup::RecordVelocity, _T("Record MIDI Velocity")); return wParam;
-		case kcToggleRecordMIDIPitchBend: ToggleFlag(TrackerSettings::Instance().midiSetup, MidiSetup::RecordPitchBend, _T("Record MIDI Pitch Bend")); return wParam;
 		case kcToggleRecordMIDICCs: ToggleFlag(TrackerSettings::Instance().midiSetup, MidiSetup::RecordCCsAsMacros, _T("Record MIDI CCs")); return wParam;
+		case kcToggleRecordMIDIPitchBend:
+			switch(TrackerSettings::Instance().pitchBendBehaviour)
+			{
+			case RecordPitchBend::DoNotRecord:
+				TrackerSettings::Instance().pitchBendBehaviour = RecordPitchBend::RecordAsMacro;
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Record MIDI Pitch Bend: Record only as MIDI Macro"));
+				break;
+			case RecordPitchBend::RecordAsMacro:
+				TrackerSettings::Instance().pitchBendBehaviour = RecordPitchBend::RecordAsFinetuneOrMacro;
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Record MIDI Pitch Bend: Record as Finetune or MIDI Macro"));
+				break;
+			case RecordPitchBend::RecordAsFinetuneOrMacro:
+				TrackerSettings::Instance().pitchBendBehaviour = RecordPitchBend::RecordAsFinetune;
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Record MIDI Pitch Bend: Record only as Finetune"));
+				break;
+			case RecordPitchBend::RecordAsFinetune:
+				TrackerSettings::Instance().pitchBendBehaviour = RecordPitchBend::DoNotRecord;
+				CMainFrame::GetMainFrame()->SetHelpText(_T("Record MIDI Pitch Bend: Do not Record"));
+				break;
+			}
+			return wParam;
 
 		case kcToggleVisibilityInstrColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::instrColumn)); return wParam;
 		case kcToggleVisibilityVolumeColumn: UpdateVisibileColumns(m_visibleColumns.flip(PatternCursor::volumeColumn)); return wParam;
@@ -6104,7 +6131,7 @@ void CViewPattern::TempEnterChord(ModCommand::NOTE note)
 // Translate incoming MIDI aftertouch messages to pattern commands
 void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 {
-	if(TrackerSettings::Instance().aftertouchBehaviour == atDoNotRecord || !IsEditingEnabled())
+	if(TrackerSettings::Instance().aftertouchBehaviour == RecordAftertouch::DoNotRecord || !IsEditingEnabled())
 		return;
 
 	const CHANNELINDEX numChannels = GetSoundFile()->GetNumChannels();
@@ -6155,10 +6182,10 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 
 		switch(TrackerSettings::Instance().aftertouchBehaviour)
 		{
-			case atDoNotRecord:
+			case RecordAftertouch::DoNotRecord:
 				break;
 
-			case atRecordAsVolume:
+			case RecordAftertouch::RecordAsVolume:
 			// Record aftertouch messages as volume commands
 			if(specs.HasVolCommand(VOLCMD_VOLUME))
 			{
@@ -6177,7 +6204,7 @@ void CViewPattern::EnterAftertouch(ModCommand::NOTE note, int atValue)
 			}
 			break;
 
-		case atRecordAsMacro:
+		case RecordAftertouch::RecordAsMacro:
 			// Record aftertouch messages as MIDI Macros
 			if(newCommand.command == CMD_NONE || newCommand.command == CMD_SMOOTHMIDI || newCommand.command == CMD_MIDI)
 			{

@@ -248,7 +248,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, m_nMidiDevice(conf, UL_("MIDI Settings"), UL_("MidiDevice"), 0)
 	, midiDeviceName(conf, UL_("MIDI Settings"), UL_("MidiDeviceName"), _T(""))
 	, midiSetup(conf, UL_("MIDI Settings"), UL_("MidiSetup"), MidiSetup::Default)
-	, aftertouchBehaviour(conf, UL_("MIDI Settings"), UL_("AftertouchBehaviour"), atDoNotRecord)
+	, aftertouchBehaviour(conf, UL_("MIDI Settings"), UL_("AftertouchBehaviour"), RecordAftertouch::DoNotRecord)
+	, pitchBendBehaviour(conf, UL_("MIDI Settings"), UL_("PitchBendBehaviour"), RecordPitchBend::RecordAsFinetune)
 	, midiVelocityAmp(conf, UL_("MIDI Settings"), UL_("MidiVelocityAmp"), 100)
 	, midiIgnoreCCs(conf, UL_("MIDI Settings"), UL_("IgnoredCCs"), std::bitset<128>())
 	, midiImportPatternLen(conf, UL_("MIDI Settings"), UL_("MidiImportPatLen"), 128)
@@ -634,11 +635,18 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 
 	// MIDI Settings
 	static constexpr MidiSetup LegacyFlagAmplify2x = static_cast<MidiSetup>(0x40);
+	static constexpr MidiSetup LegacyRecordMidiPitchBendAsMacro = static_cast<MidiSetup>(0x400);
 	if(midiSetup.Get()[LegacyFlagAmplify2x] && storedVersion < MPT_V("1.20.00.86"))
 	{
 		// This flag used to be "amplify MIDI Note Velocity" - with a fixed amplification factor of 2.
 		midiVelocityAmp = 200;
 		midiSetup &= ~LegacyFlagAmplify2x;
+	}
+	if(midiSetup.Get()[LegacyRecordMidiPitchBendAsMacro] && storedVersion < MPT_V("1.32.00.43"))
+	{
+		// This flag used to be "Record Pitch Bend messages as MIDI macros"
+		pitchBendBehaviour = RecordPitchBend::RecordAsFinetuneOrMacro;
+		midiSetup &= ~LegacyRecordMidiPitchBendAsMacro;
 	}
 
 	// Pattern Editor
