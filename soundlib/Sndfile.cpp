@@ -1269,6 +1269,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kFT2NoteDelayWithoutInstr);
 		playBehaviour.set(kFT2PortaResetDirection);
 		playBehaviour.set(kFT2AutoVibratoAbortSweep);
+		playBehaviour.set(kFT2OffsetMemoryRequiresNote);
 		break;
 
 	case MOD_TYPE_S3M:

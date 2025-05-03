@@ -627,6 +627,7 @@ void CSoundFile::UpgradeModule()
 			{ kITFT2DontResetNoteOffOnPorta, MPT_V("1.29.00.34") },
 			{ kFT2PortaResetDirection,       MPT_V("1.30.00.40") },
 			{ kFT2AutoVibratoAbortSweep,     MPT_V("1.32.00.29") },
+			{ kFT2OffsetMemoryRequiresNote,  MPT_V("1.32.00.43") },
 		};
 
 		for(const auto &b : behaviours)

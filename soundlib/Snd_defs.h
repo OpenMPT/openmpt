@@ -616,6 +616,7 @@ enum PlayBehaviour
 	kLegacyPPQpos,                  // Report fake PPQ position to VST plugins
 	kLegacyPluginNNABehaviour,      // Plugin notes with NNA=continue are affected by note-offs etc.
 	kITCarryAfterNoteOff,           // Envelope Carry continues to function as normal even after note-off
+	kFT2OffsetMemoryRequiresNote,   // Offset memory is only updated when offset command is next to a note
 
 	// Add new play behaviours here.
 
