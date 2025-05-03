@@ -735,9 +735,9 @@ HRESULT COrderList::get_accName(VARIANT, BSTR *pszName)
 	const bool singleSel = m_nScrollPos2nd == ORDERINDEX_INVALID || m_nScrollPos2nd == m_nScrollPos;
 	const auto firstOrd = singleSel ? m_nScrollPos : std::min(m_nScrollPos, m_nScrollPos2nd), lastOrd = singleSel ? m_nScrollPos : std::max(m_nScrollPos, m_nScrollPos2nd);
 	if(singleSel)
-		s = MPT_CFORMAT("Order {}, ")(m_nScrollPos);
+		s = MPT_CFORMAT("Order {}, ")(FormatOrderRow(m_nScrollPos));
 	else
-		s = MPT_CFORMAT("Order selection {} to {}: ")(firstOrd, lastOrd);
+		s = MPT_CFORMAT("Order selection {} to {}: ")(FormatOrderRow(firstOrd), FormatOrderRow(lastOrd));
 	bool first = true;
 	for(ORDERINDEX o = firstOrd; o <= lastOrd; o++)
 	{
@@ -1296,6 +1296,7 @@ void COrderList::OnInsertOrder()
 	Invalidate(FALSE);
 	m_modDoc.SetModified();
 	m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
+	UpdateInfoText();
 }
 
 

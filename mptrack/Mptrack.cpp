@@ -2133,6 +2133,16 @@ CString FormatFileSize(uint64 fileSize)
 }
 
 
+CString FormatOrderRow(uint32 value)
+{
+	const bool rowAndOrderNumbersHex = TrackerSettings::Instance().patternSetup & PatternSetup::RowAndOrderNumbersHex;
+	if(rowAndOrderNumbersHex)
+		return mpt::cfmt::HEX0<2>(value);
+	else
+		return mpt::cfmt::val(value);
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // CFastBitmap 8-bit output / 4-bit input
 // useful for lots of small blits with color mapping
