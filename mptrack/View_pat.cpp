@@ -7659,9 +7659,9 @@ HRESULT CViewPattern::get_accName(VARIANT varChild, BSTR *pszName)
 
 	CString str = TrackerSettings::Instance().patternAccessibilityFormat;
 	str.Replace(_T("%sequence%"), mpt::cfmt::val(sndFile->Order.GetCurrentSequenceIndex()));
-	str.Replace(_T("%order%"), mpt::cfmt::val(GetCurrentOrder()));
+	str.Replace(_T("%order%"), FormatOrderRow(GetCurrentOrder()));
 	str.Replace(_T("%pattern%"), mpt::cfmt::val(GetCurrentPattern()));
-	str.Replace(_T("%row%"), mpt::cfmt::val(m_Cursor.GetRow()));
+	str.Replace(_T("%row%"), FormatOrderRow(m_Cursor.GetRow()));
 	str.Replace(_T("%channel%"), channelNumber);
 	str.Replace(_T("%column_type%"), column);
 	str.Replace(_T("%column_description%"), GetCursorDescription());
