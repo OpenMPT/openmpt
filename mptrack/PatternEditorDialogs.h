@@ -28,22 +28,45 @@ struct SplitKeyboardSettings;
 
 class CPatternPropertiesDlg : public DialogBase
 {
-protected:
-	CModDoc &modDoc;
-	TempoSwing m_tempoSwing;
-	PATTERNINDEX m_nPattern;
-
 public:
 	CPatternPropertiesDlg(CModDoc &modParent, PATTERNINDEX nPat, CWnd *parent = nullptr);
 
 protected:
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+
 	afx_msg void OnHalfRowNumber();
 	afx_msg void OnDoubleRowNumber();
 	afx_msg void OnOverrideSignature();
 	afx_msg void OnTempoSwing();
+	afx_msg void OnPatternChanged();
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar *pScrollBar);
+
 	DECLARE_MESSAGE_MAP()
+
+	struct PatternProperties
+	{
+		std::string name;
+		TempoSwing tempoSwing;
+		ROWINDEX numRows = 0, rowsPerBeat = 0, rowsPerMeasure = 0;
+		ROWINDEX resizeWarningShown = 0;
+		bool resizeWarningAtEnd = false;
+		bool resizeAtEnd = true, repeatContents = false;
+	};
+
+	PatternProperties& GetPatternProperties(PATTERNINDEX pat);
+	PatternProperties& GetPatternProperties() { return GetPatternProperties(m_nPattern); }
+	void StorePatternProperties();
+	void SetCurrentPattern(PATTERNINDEX pat);
+	bool ValidatePatternProperties();
+
+	CModDoc &m_modDoc;
+	std::map<PATTERNINDEX, PatternProperties> m_properties;
+	PATTERNINDEX m_nPattern;
+	CSpinButtonCtrl m_spinPattern, m_spinRPB, m_spinRPM;
+	CComboBox m_numRows;
+	bool m_locked = true;
 };
 
 
@@ -115,7 +138,7 @@ protected:
 	CComboBox m_CbnShortcut, m_CbnBaseNote, m_CbnNote[MPTChord::notesPerChord - 1];
 	MPTChords m_chords;
 	MPTChord::NoteType m_mouseDownKey = MPTChord::noNote, m_dragKey = MPTChord::noNote;
-	
+
 	static constexpr MPTChord::NoteType CHORD_MIN = -24;
 	static constexpr MPTChord::NoteType CHORD_MAX = 24;
 

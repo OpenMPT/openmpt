@@ -81,6 +81,7 @@ public:
 	// Set pattern signature (rows per beat, rows per measure). Returns true on success.
 	bool SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure) noexcept;
 	void RemoveSignature() noexcept { m_RowsPerBeat = m_RowsPerMeasure = 0; }
+	static bool IsValidSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure) noexcept;
 
 	bool HasTempoSwing() const noexcept { return !m_tempoSwing.empty(); }
 	const TempoSwing& GetTempoSwing() const noexcept { return m_tempoSwing; }
@@ -88,7 +89,7 @@ public:
 	void RemoveTempoSwing() noexcept { m_tempoSwing.clear(); }
 
 	// Pattern name functions - bool functions return true on success.
-	bool SetName(const std::string &newName);
+	bool SetName(std::string newName);
 	bool SetName(const char *newName, size_t maxChars);
 	template<size_t bufferSize>
 	bool SetName(const char (&buffer)[bufferSize])

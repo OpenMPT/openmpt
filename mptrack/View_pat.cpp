@@ -1410,7 +1410,6 @@ void CViewPattern::ShowPatternProperties(PATTERNINDEX pat)
 			UpdateScrollSize();
 			InvalidatePattern(true, true);
 			SanitizeCursor();
-			pModDoc->UpdateAllViews(this, PatternHint(pat).Data(), this);
 		}
 	}
 }
