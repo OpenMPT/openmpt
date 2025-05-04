@@ -65,16 +65,18 @@ bool CPattern::RowHasJump(ROWINDEX row) const noexcept
 
 bool CPattern::SetSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure) noexcept
 {
-	if(rowsPerBeat < 1
-		|| rowsPerBeat > GetSoundFile().GetModSpecifications().patternRowsMax
-		|| rowsPerMeasure < rowsPerBeat
-		|| rowsPerMeasure > GetSoundFile().GetModSpecifications().patternRowsMax)
-	{
+	if(!IsValidSignature(rowsPerBeat, rowsPerMeasure))
 		return false;
-	}
 	m_RowsPerBeat = rowsPerBeat;
 	m_RowsPerMeasure = rowsPerMeasure;
 	return true;
+}
+
+
+bool CPattern::IsValidSignature(const ROWINDEX rowsPerBeat, const ROWINDEX rowsPerMeasure) noexcept
+{
+	return rowsPerBeat > 0 && rowsPerBeat <= MAX_ROWS_PER_BEAT
+	   && rowsPerBeat <= rowsPerMeasure && rowsPerMeasure <= MAX_ROWS_PER_MEASURE;
 }
 
 
@@ -273,9 +275,9 @@ bool CPattern::Shrink()
 #endif // MODPLUG_TRACKER
 
 
-bool CPattern::SetName(const std::string &newName)
+bool CPattern::SetName(std::string newName)
 {
-	m_PatternName = newName;
+	m_PatternName = std::move(newName);
 	return true;
 }
 
