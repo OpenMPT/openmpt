@@ -3473,7 +3473,7 @@ static void TestLoadMODFile(CSoundFile &sndFile)
 {
 	// Global Variables
 	VERIFY_EQUAL_NONCONT(sndFile.GetTitle(), "MOD_Test___________X");
-	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA);
+	VERIFY_EQUAL_NONCONT(sndFile.m_SongFlags, SONG_PT_MODE | SONG_AMIGALIMITS | SONG_ISAMIGA | SONG_FORMAT_NO_VOLCOL);
 	VERIFY_EQUAL_NONCONT(sndFile.GetMixLevels(), MixLevels::Compatible);
 	VERIFY_EQUAL_NONCONT(sndFile.m_nTempoMode, TempoMode::Classic);
 	VERIFY_EQUAL_NONCONT(sndFile.GetNumChannels(), 4);

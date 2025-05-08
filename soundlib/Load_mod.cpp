@@ -298,7 +298,6 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	InitializeGlobals(MOD_TYPE_MOD, modMagicResult.numChannels);
-	m_SongFlags.set(SONG_FORMAT_NO_VOLCOL);
 
 	bool isNoiseTracker = modMagicResult.isNoiseTracker;
 	bool isStartrekker = modMagicResult.isStartrekker;
@@ -432,7 +431,7 @@ bool CSoundFile::ReadMOD(FileReader &file, ModLoadingFlags loadFlags)
 	// is the maximum possible sample pre-amp without getting distortion (Compatible mix levels given).
 	// The more channels we have, the less likely it is that all of them are used at the same time, though, so cap at 32...
 	m_nSamplePreAmp = Clamp(256 / GetNumChannels(), 32, 128);
-	m_SongFlags.reset();  // SONG_ISAMIGA will be set conditionally
+	m_SongFlags = SONG_FORMAT_NO_VOLCOL;  // SONG_ISAMIGA will be set conditionally
 
 	// Setup channel pan positions and volume
 	SetupMODPanning();
