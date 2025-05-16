@@ -134,6 +134,7 @@ void CViewComments::OnInitialUpdate()
 	m_ToolBar.Init(CMainFrame::GetMainFrame()->m_MiscIcons, CMainFrame::GetMainFrame()->m_MiscIconsDisabled);
 	m_ItemList.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_EDITLABELS | LVS_NOSORTHEADER, rect, this, IDC_LIST_DETAILS);
 	m_ItemList.ModifyStyleEx(0, WS_EX_STATICEDGE);
+	m_ItemList.SetExtendedStyle(m_ItemList.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	// Add ToolBar Buttons
 	m_ToolBar.AddButton(IDC_LIST_SAMPLES, IMAGE_SAMPLES);
