@@ -683,483 +683,6 @@ BEGIN
     PUSHBUTTON      "&Browse...",IDC_BUTTON2,210,156,50,12
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_MISSINGSAMPLES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 312
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 178
-    END
-
-    IDD_CLEANUP_SONG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 387
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 147
-    END
-
-    IDD_KEYBOARD_SPLIT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 177
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 130
-    END
-
-    IDD_SAMPLE_GENERATOR, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 297
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 184
-    END
-
-    IDD_SAMPLE_GENERATOR_PRESETS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 309
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 94
-    END
-
-    IDD_MIXSAMPLES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 189
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 82
-    END
-
-    IDD_OPTIONS_SAMPLEEDITOR, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 318
-        TOPMARGIN, 7
-    END
-
-    IDD_EDITHISTORY, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 309
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 178
-    END
-
-    IDD_SAMPLE_GRID_SIZE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 147
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 64
-    END
-
-    IDD_SAMPLE_XFADE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 285
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 94
-    END
-
-    IDD_OPTIONS_UPDATE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 318
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 307
-    END
-
-    IDD_CLOSEDOCUMENTS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 363
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 190
-    END
-
-    IDD_AUTOTUNE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 159
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 75
-    END
-
-    IDD_CHANNELSETTINGS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 237
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 88
-    END
-
-    IDD_CLIPBOARD, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 176
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 194
-    END
-
-    IDD_INPUT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 159
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 59
-    END
-
-    IDD_OPTIONS_ADVANCED, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 318
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 274
-    END
-
-    IDD_SCANPLUGINS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 309
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 27
-    END
-
-    IDD_RESAMPLE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 190
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 115
-    END
-
-    IDD_WECLOME, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 250
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 259
-    END
-
-    IDD_UPDATE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 189
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 131
-    END
-
-    IDD_TEMPO_SWING, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 239
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 136
-    END
-
-    IDD_LEGACY_PLAYBACK, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 382
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 237
-    END
-
-    IDD_FIND_RANGE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 249
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 46
-    END
-
-    IDD_MIDI_IO_PLUGIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 245
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 208
-    END
-
-    IDD_OPTIONS_WINE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 319
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 304
-    END
-
-    IDD_LFOPLUGIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 296
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 194
-    END
-
-    IDD_OPL_PARAMS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 403
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 211
-    END
-
-    IDD_MISSINGPLUGS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 300
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 163
-    END
-
-    IDD_MODIFIEDSAMPLES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 312
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 178
-    END
-
-    IDD_OPLEXPORT, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 302
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 151
-    END
-
-    IDD_METRONOME_SETTINGS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 272
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 200
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// PNG
-//
-
-IDB_ENVTOOLBAR          PNG                     "res\\envelope_toolbar.png"
-
-IDB_IMAGELIST           PNG                     "res\\icons.png"
-
-IDB_MAINBAR             PNG                     "res\\main_toolbar.png"
-
-IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
-
-IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
-
-IDB_SPLASHNOFOLDFIN     PNG                     "res\\Splash.png"
-
-IDB_MPTRACK             PNG                     "res\\About.png"
-
-IDB_NEW_BIG             PNG                     "res\\New32.png"
-
-IDB_OPEN_BIG            PNG                     "res\\Open32.png"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_MIDI_IO_PLUGIN AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    0, 0, 100, 0,
-    0, 0, 100, 0,
-    0, 0, 100, 0,
-    0, 0, 100, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 100, 100,
-    0, 0, 100, 100,
-    0, 100, 0, 0,
-    100, 100, 0, 0,
-    100, 100, 0, 0,
-    0, 100, 100, 0,
-    0, 100, 0, 0,
-    0, 100, 100, 0
-END
-
-IDD_LFOPLUGIN AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_OPTIONS_SAMPLEEDITOR AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_OPTIONS_WINE AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CLIPBOARD AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    0, 0, 100, 100,
-    0, 100, 0, 0,
-    0, 100, 0, 0,
-    0, 100, 0, 0,
-    0, 100, 0, 0
-END
-
-IDD_OPL_PARAMS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CLOSEDOCUMENTS AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    100, 100, 0, 0,
-    0, 0, 100, 100,
-    0, 100, 0, 0,
-    100, 100, 0, 0,
-    100, 100, 0, 0
-END
-
-IDD_MISSINGPLUGS AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 100, 100,
-    100, 100, 0, 0
-END
-
-IDD_MISSINGSAMPLES AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 100, 100,
-    0, 100, 0, 0,
-    0, 100, 100, 0
-END
-
-IDD_OPTIONS_UPDATE AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_WECLOME AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_LEGACY_PLAYBACK AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    100, 100, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 100, 0,
-    0, 0, 100, 100,
-    0, 100, 0, 0,
-    0, 100, 0, 0
-END
-
-IDD_EDITHISTORY AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    0, 100, 0, 0,
-    0, 0, 100, 100,
-    0, 100, 100, 0
-END
-
-IDD_MODIFIEDSAMPLES AFX_DIALOG_LAYOUT
-BEGIN
-    0,
-    100, 100, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 100, 100,
-    100, 100, 0, 0,
-    100, 100, 0, 0,
-    0, 100, 100, 0
-END
-
-IDD_UPDATE AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CHANNELSETTINGS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_RESAMPLE AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_OPLEXPORT AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_OPTIONS_ADVANCED AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_METRONOME_SETTINGS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-#endif    // German (Germany) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(1252)
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
 IDD_ABOUTBOX DIALOGEX 0, 0, 340, 266
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "About OpenMPT"
@@ -1926,24 +1449,24 @@ BEGIN
     LTEXT           "Name:",IDC_STATIC,6,26,36,8
     EDITTEXT        IDC_EDIT2,42,24,84,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,6,48,184,1
-    LTEXT           "&Rows:",IDC_STATIC,12,54,108,8
-    COMBOBOX        IDC_COMBO1,12,66,48,93,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&/2",IDC_BUTTON_HALF,66,66,18,12
-    PUSHBUTTON      "&x2",IDC_BUTTON_DOUBLE,90,66,18,12
-    LTEXT           "Remove rows from / Add rows at:",IDC_STATIC,12,84,126,8
-    CONTROL         "&Top of Pattern",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,12,96,84,12
-    CONTROL         "&Bottom of Pattern",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,96,96,84,12
+    LTEXT           "&Rows:",IDC_STATIC,6,56,36,8
+    COMBOBOX        IDC_COMBO1,42,54,48,93,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&/2",IDC_BUTTON_HALF,96,54,18,12
+    PUSHBUTTON      "&x2",IDC_BUTTON_DOUBLE,120,54,18,12
+    LTEXT           "Remove rows from / Add rows at:",IDC_STATIC,6,78,126,8
+    CONTROL         "&Top of Pattern",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,6,90,84,12
+    CONTROL         "&Bottom of Pattern",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,90,90,84,12
     CONTROL         "Repeat pattern contents when &adding rows",IDC_CHECK2,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,114,168,10
-    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,6,132,184,1
-    CONTROL         "Override &song signature:",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,138,108,12
-    PUSHBUTTON      "Configure S&wing",IDC_BUTTON1,124,138,66,12
-    LTEXT           "Rows per b&eat",IDC_STATIC,64,159,126,8
-    EDITTEXT        IDC_ROWSPERBEAT,24,156,30,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,159,11,14
-    LTEXT           "Rows per &measure",IDC_STATIC,64,176,126,8
-    EDITTEXT        IDC_ROWSPERMEASURE,24,175,30,12,ES_AUTOHSCROLL | ES_NUMBER
-    CONTROL         "",IDC_SPIN3,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,48,173,11,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,108,168,10
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,6,126,184,1
+    CONTROL         "Override &song signature:",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,132,114,12
+    PUSHBUTTON      "Configure S&wing",IDC_BUTTON1,124,132,66,12
+    LTEXT           "Rows per b&eat",IDC_STATIC,58,153,128,8
+    EDITTEXT        IDC_ROWSPERBEAT,18,151,30,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,42,153,11,14
+    LTEXT           "Rows per &measure",IDC_STATIC,58,170,128,8
+    EDITTEXT        IDC_ROWSPERMEASURE,18,169,30,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "",IDC_SPIN3,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,42,167,11,14
     DEFPUSHBUTTON   "&OK",IDOK,140,6,50,14
     PUSHBUTTON      "&Cancel",IDCANCEL,140,24,50,14
 END
@@ -2405,273 +1928,263 @@ END
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO
 BEGIN
-    IDD_ABOUTBOX, DIALOG
+    IDD_MISSINGSAMPLES, DIALOG
     BEGIN
-        RIGHTMARGIN, 334
-        BOTTOMMARGIN, 261
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
     END
 
-    IDD_OPTIONS_PLAYER, DIALOG
+    IDD_CLEANUP_SONG, DIALOG
     BEGIN
-        LEFTMARGIN, 6
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 387
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+
+    IDD_KEYBOARD_SPLIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 177
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 130
+    END
+
+    IDD_SAMPLE_GENERATOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 297
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 184
+    END
+
+    IDD_SAMPLE_GENERATOR_PRESETS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 94
+    END
+
+    IDD_MIXSAMPLES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 189
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 82
+    END
+
+    IDD_OPTIONS_SAMPLEEDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
         RIGHTMARGIN, 318
-        VERTGUIDE, 50
-        VERTGUIDE, 169
+        TOPMARGIN, 7
     END
 
-    IDD_WAVECONVERT, DIALOG
+    IDD_EDITHISTORY, DIALOG
     BEGIN
-        RIGHTMARGIN, 338
-        BOTTOMMARGIN, 281
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
     END
 
-    IDD_PROGRESS, DIALOG
+    IDD_SAMPLE_GRID_SIZE, DIALOG
     BEGIN
-        RIGHTMARGIN, 186
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 147
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
     END
 
-    IDD_OPTIONS_KEYBOARD, DIALOG
+    IDD_SAMPLE_XFADE, DIALOG
     BEGIN
-        LEFTMARGIN, 5
-        RIGHTMARGIN, 320
-        TOPMARGIN, 5
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 285
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 94
     END
 
-    IDD_OPTIONS_COLORS, DIALOG
+    IDD_OPTIONS_UPDATE, DIALOG
     BEGIN
-        LEFTMARGIN, 6
+        LEFTMARGIN, 7
         RIGHTMARGIN, 318
-        TOPMARGIN, 6
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 307
     END
 
-    IDD_OPTIONS_MIDI, DIALOG
+    IDD_CLOSEDOCUMENTS, DIALOG
     BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 318
-        TOPMARGIN, 6
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 363
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
     END
 
-    IDD_LOADRAWSAMPLE, DIALOG
+    IDD_AUTOTUNE, DIALOG
     BEGIN
-        RIGHTMARGIN, 227
-        BOTTOMMARGIN, 127
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 159
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 75
     END
 
-    IDD_CONTROL_GLOBALS, DIALOG
+    IDD_CHANNELSETTINGS, DIALOG
     BEGIN
-        RIGHTMARGIN, 374
-        BOTTOMMARGIN, 118
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 237
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 88
     END
 
-    IDD_CONTROL_COMMENTS, DIALOG
+    IDD_CLIPBOARD, DIALOG
     BEGIN
-        RIGHTMARGIN, 348
-    END
-
-    IDD_CONTROL_PATTERNS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 554
-        VERTGUIDE, 39
-        VERTGUIDE, 134
-        BOTTOMMARGIN, 76
-        HORZGUIDE, 37
-        HORZGUIDE, 61
-        HORZGUIDE, 73
-    END
-
-    IDD_CONTROL_SAMPLES, DIALOG
-    BEGIN
-        LEFTMARGIN, 2
-        RIGHTMARGIN, 552
-        BOTTOMMARGIN, 104
-    END
-
-    IDD_CONTROL_INSTRUMENTS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 506
-        BOTTOMMARGIN, 165
-    END
-
-    IDD_MODDOC_MODTYPE, DIALOG
-    BEGIN
-        RIGHTMARGIN, 248
-        BOTTOMMARGIN, 280
-    END
-
-    IDD_REMOVECHANNELS, DIALOG
-    BEGIN
-        RIGHTMARGIN, 163
-        BOTTOMMARGIN, 219
-    END
-
-    IDD_VIEW_GLOBALS, DIALOG
-    BEGIN
-        BOTTOMMARGIN, 324
-    END
-
-    IDD_EDIT_FIND, DIALOG
-    BEGIN
+        LEFTMARGIN, 7
         RIGHTMARGIN, 176
-        BOTTOMMARGIN, 146
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
     END
 
-    IDD_EDIT_REPLACE, DIALOG
+    IDD_INPUT, DIALOG
     BEGIN
-        RIGHTMARGIN, 182
-        BOTTOMMARGIN, 148
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 159
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+
+    IDD_OPTIONS_ADVANCED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 318
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 274
+    END
+
+    IDD_SCANPLUGINS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 27
+    END
+
+    IDD_RESAMPLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 190
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 115
+    END
+
+    IDD_WECLOME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 250
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 259
+    END
+
+    IDD_UPDATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 189
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 131
+    END
+
+    IDD_TEMPO_SWING, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_LEGACY_PLAYBACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 382
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 237
+    END
+
+    IDD_FIND_RANGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 249
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 46
+    END
+
+    IDD_MIDI_IO_PLUGIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 245
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 208
+    END
+
+    IDD_OPTIONS_WINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 319
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 304
+    END
+
+    IDD_LFOPLUGIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
+    END
+
+    IDD_OPL_PARAMS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 403
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 211
+    END
+
+    IDD_MISSINGPLUGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 300
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_MODIFIEDSAMPLES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 178
+    END
+
+    IDD_OPLEXPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 151
+    END
+
+    IDD_METRONOME_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 272
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
     END
 
     IDD_PATTERN_PROPERTIES, DIALOG
     BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 190
-        TOPMARGIN, 6
-        BOTTOMMARGIN, 187
-    END
-
-    IDD_PATTERN_EDITCOMMAND, DIALOG
-    BEGIN
-        RIGHTMARGIN, 244
-        BOTTOMMARGIN, 47
-    END
-
-    IDD_SAMPLE_AMPLIFY, DIALOG
-    BEGIN
-        RIGHTMARGIN, 184
-        BOTTOMMARGIN, 89
-    END
-
-    IDD_INFO_BOX, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 266
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 166
-    END
-
-    IDD_OPTIONS_GENERAL, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 318
-        TOPMARGIN, 6
-        BOTTOMMARGIN, 313
-    END
-
-    IDD_OPTIONS_SOUNDCARD, DIALOG
-    BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 318
-        TOPMARGIN, 6
-        BOTTOMMARGIN, 306
-    END
-
-    IDD_MIDIMACRO, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 365
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 330
-    END
-
-    IDD_CHORDEDIT, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 317
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 120
-    END
-
-    IDD_SPLASHSCREEN, DIALOG
-    BEGIN
-    END
-
-    IDD_MOD2MIDI, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 263
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 190
-    END
-
-    IDD_SAVEPRESET, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 147
-        BOTTOMMARGIN, 52
-    END
-
-    IDD_EDITSAMPLEMAP, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 283
-        TOPMARGIN, 4
-    END
-
-    IDD_SELECTMIXPLUGIN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 246
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 278
-    END
-
-    IDD_PLUGINEDITOR, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 481
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 149
-    END
-
-    IDD_EFFECTVISUALIZER, DIALOG
-    BEGIN
-        LEFTMARGIN, 4
-        RIGHTMARGIN, 418
-        TOPMARGIN, 3
-        BOTTOMMARGIN, 104
-    END
-
-    IDD_PITCHSHIFT, DIALOG
-    BEGIN
-    END
-
-    IDD_OPTIONS_AUTOSAVE, DIALOG
-    BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 319
-        TOPMARGIN, 6
-        BOTTOMMARGIN, 306
-    END
-
-    IDD_EDIT_GOTO, DIALOG
-    BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 116
-        TOPMARGIN, 4
-        BOTTOMMARGIN, 117
-    END
-
-    IDD_ADDSILENCE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 188
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 86
-    END
-
-    IDD_OPTIONS_MIXER, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 318
-        TOPMARGIN, 7
-    END
-
-    IDD_QUICKSTART, DIALOG
-    BEGIN
-        LEFTMARGIN, 10
-        RIGHTMARGIN, 321
-        TOPMARGIN, 9
-        BOTTOMMARGIN, 202
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2686,11 +2199,192 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\mptrack.ico"
 
+IDR_MODULETYPE          ICON                    "res\\moddoc.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_ENVTOOLBAR          PNG                     "res\\envelope_toolbar.png"
+
+IDB_IMAGELIST           PNG                     "res\\icons.png"
+
+IDB_MAINBAR             PNG                     "res\\main_toolbar.png"
+
+IDB_PATTERNS            PNG                     "res\\pattern_toolbar.png"
+
+IDB_SMPTOOLBAR          PNG                     "res\\sample_toolbar.png"
+
+IDB_SPLASHNOFOLDFIN     PNG                     "res\\Splash.png"
+
+IDB_MPTRACK             PNG                     "res\\About.png"
+
+IDB_NEW_BIG             PNG                     "res\\New32.png"
+
+IDB_OPEN_BIG            PNG                     "res\\Open32.png"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // AFX_DIALOG_LAYOUT
 //
+
+IDD_MIDI_IO_PLUGIN AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    0, 0, 100, 0,
+    0, 0, 100, 0,
+    0, 0, 100, 0,
+    0, 0, 100, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    100, 100, 0, 0,
+    100, 100, 0, 0,
+    0, 100, 100, 0,
+    0, 100, 0, 0,
+    0, 100, 100, 0
+END
+
+IDD_LFOPLUGIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPTIONS_SAMPLEEDITOR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPTIONS_WINE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CLIPBOARD AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    0, 100, 0, 0,
+    0, 100, 0, 0,
+    0, 100, 0, 0
+END
+
+IDD_OPL_PARAMS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CLOSEDOCUMENTS AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    100, 100, 0, 0,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    100, 100, 0, 0,
+    100, 100, 0, 0
+END
+
+IDD_MISSINGPLUGS AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    100, 100, 0, 0
+END
+
+IDD_MISSINGSAMPLES AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    0, 100, 100, 0
+END
+
+IDD_OPTIONS_UPDATE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_WECLOME AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_LEGACY_PLAYBACK AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 0,
+    0, 0, 100, 100,
+    0, 100, 0, 0,
+    0, 100, 0, 0
+END
+
+IDD_EDITHISTORY AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 100, 0, 0,
+    0, 0, 100, 100,
+    0, 100, 100, 0
+END
+
+IDD_MODIFIEDSAMPLES AFX_DIALOG_LAYOUT
+BEGIN
+    0,
+    100, 100, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 100, 100,
+    100, 100, 0, 0,
+    100, 100, 0, 0,
+    0, 100, 100, 0
+END
+
+IDD_UPDATE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_CHANNELSETTINGS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_RESAMPLE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPLEXPORT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_OPTIONS_ADVANCED AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_METRONOME_SETTINGS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 IDD_MIDIMACRO AFX_DIALOG_LAYOUT
 BEGIN
