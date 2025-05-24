@@ -3098,6 +3098,15 @@ bool CSoundFile::ProcessEffects()
 					if(!m_playBehaviour[kITInstrWithNoteOff] || ModCommand::IsNote(note)) chn.nNewIns = 0;
 				}
 
+				// When swapping samples without explicit note change (e.g. during portamento), avoid clicks at end of sample (as there won't be an NNA channel to fade the sample out)
+				if(oldSample != nullptr && oldSample != chn.pModSample)
+				{
+					m_dryLOfsVol += chn.nLOfs;
+					m_dryROfsVol += chn.nROfs;
+					chn.nLOfs = 0;
+					chn.nROfs = 0;
+				}
+
 				if(m_playBehaviour[kITPortamentoSwapResetsPos])
 				{
 					// Test cases: PortaInsNum.it, PortaSample.it
