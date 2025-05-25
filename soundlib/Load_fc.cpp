@@ -119,6 +119,7 @@ static void TranslateFCScript(InstrumentSynth::Events &events, const mpt::span<c
 	FileReader file{script};
 	const bool isVolume = startSequence > 255;
 	const uint8 volScriptSpeed = (script[0] > 0) ? script[0] : uint8_max;
+	events.push_back(InstrumentSynth::Event::JumpMarker(0));
 	if(isVolume)
 		events.push_back(InstrumentSynth::Event::SetStepSpeed(volScriptSpeed, true));
 
