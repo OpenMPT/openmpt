@@ -11,6 +11,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { version: '7.7', deps: sys   }
+          - { version: '7.7', deps: local }
+          - { version: '7.7', deps: small }
           - { version: '7.6', deps: sys   }
           - { version: '7.6', deps: local }
           - { version: '7.6', deps: small }
