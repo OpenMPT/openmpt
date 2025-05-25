@@ -90,6 +90,12 @@ int outputLatency = stretch.outputLatency();
 
 You should be supplying input samples slightly ahead of the processing time (which is where changes to pitch-shift or stretch rate will be centred), and you'll receive output samples slightly behind that processing time.
 
+### Split computation
+
+All of the `.preset???()` and `.configure()` methods have an optional `splitComputation` flag.  When enabled, this introduces one extra interval of output latency, and uses this to spread the computation out more evenly.
+
+Without this (as is common for spectral processing) the library will occasionally do a bunch of computation all at once, to compute the next spectral block of audio.  This is often fine, when audio's being processed across multiple threads with a decent amount of buffering (like mixing in a DAW), but if you're in a stricter situation then this flag might help. 
+
 #### Automation
 
 To follow pitch/time automation accurately, you should give it automation values from the current processing time (`.outputLatency()` samples ahead of the output), and feed it input from `.inputLatency()` samples ahead of the current processing time.
@@ -114,21 +120,36 @@ You can then read the final part of the output using `.flush()`.  It's recommend
 stretch.flush(outputBuffers, outputSamples);
 ``` 
 
-Using `.seek()`/`.flush()` like this, you can perform an exact time-stretch on a fixed-length sound, and your result will have `.outputLatency()` of pre-roll. 
+Using `.seek()`/`.flush()` like this, you can perform an exact time-stretch on a fixed-length sound, and your result will have `.outputLatency()` of pre-roll.
+
+### Formant compensation
+
+```cpp
+stretch.setFormantFactor(1.2); // up ~3 semitones
+
+stretch.setTransposeSemitones(3);
+```
+
+Both of those methods both have an optional `compensatePitch` flag.  Enabling this adjust for the pitch-shift (or non-linear map) when correcting/shifting formants.
+
+The formant correction is not a sharp as monophonic algorithms (such such as PSOLA).  It also needs you to give it a rough estimate of fundamental frequency (relative to Nyquist):
+
+```cpp
+// if 200Hz is the middle-register of the instrument
+stretch.setFormantBase(200/sampleRate);
+```
 
 ## Compiling
 
-⚠️ This has mostly been tested with Clang.  If you're using another compiler and have any problems, please get in touch.
+⚠️ This has mostly been tested with AppleClang (Mac), and MSVC (Windows).  We aim to support other compilers though, so please get in touch if you have any problems.
 
-🚨 It's generally be OK to enable `-ffast-math`, however there's a bug in Apple Clang 16.0.0 which can generate incorrect SIMD code.  If you _have_ to use this version, we advise you don't use `-ffast-math`.
+Enabling `-ffast-math` (or equivalent) is fine, unless you're using Apple Clang 16.0.0 (in which case it will deliberately break, because that version generates incorrect SIMD code).
 
-It's much slower (about 10x) if optimisation is disabled altogether, so you might want to enable optimisation where it's used, even in Debug builds.
+The algorithm has a lot of number-crunching, so Debug builds are much slower (up to 10x).  If possible, you might want to enable optimisation where Stretch is used, even in Debug builds.
 
-### DSP Library
+### Dependencies and `#define`s
 
-This uses the Signalsmith DSP library for FFTs and other bits and bobs.
-
-For convenience, a copy of the library is included (with its own `LICENSE.txt`) in `dsp/`, but if you're already using this elsewhere then you should remove this copy to avoid versioning issues.
+This uses the [Signalsmith Linear](https://github.com/Signalsmith-Audio/linear) library for FFTs and other speedups.  There are [flags]([Linear repo](https://github.com/Signalsmith-Audio/linear?tab=readme-ov-file#building)) to enable Accelerate (`SIGNALSMITH_USE_ACCELERATE`) or IPP (`SIGNALSMITH_USE_IPP`).
 
 ## License
 
@@ -136,14 +157,18 @@ Released under the [MIT License](LICENSE.txt) - get in touch if you need anythin
 
 ## Other environments / languages
 
-There's a Web Audio wrapper in `web/` (using WASM/AudioWorklet).  This will remain in-sync with the C++ library.
+There's a Web Audio release in [`web/`](web/) (WASM/AudioWorklet), also available on [NPM](npmjs.com/package/signalsmith-stretch).  This has its own (higher-level) API, but the stretching algorithm will remain in-sync with the C++ library.
 
-There's a [Python binding](https://pypi.org/project/python-stretch/) written/published by [Gregorio Andrea Giudici](https://github.com/gregogiudici/python-stretch), and a [Rust wrapper](https://crates.io/crates/signalsmith-stretch) by [Colin Marc](https://github.com/colinmarc/signalsmith-stretch-rs).
+There's a [Python binding](https://pypi.org/project/python-stretch/) written/published by [Gregorio Andrea Giudici](https://github.com/gregogiudici/python-stretch).  This is used as the default pitch/time method in [Audiomentations](https://iver56.github.io/audiomentations/).
+
+There's a [Rust wrapper](https://crates.io/crates/signalsmith-stretch) by [Colin Marc](https://github.com/colinmarc/signalsmith-stretch-rs).
 
 ## Thanks
 
 We'd like to particularly thank the following people who sponsored specific features or improvements:
 
+* **Future Audio Workshop**: chunked-computation mode
+* **Jochem de Jong**: formant shifting/compensation
 * **Metronaut**: web audio (JS/WASM) release
 * **Daniel L Bowling** and the Stanford School of Medicine: web audio improvements
 
