@@ -687,10 +687,9 @@ bool InstrumentSynth::States::State::EvaluateEvent(const Event &event, PlayState
 		m_medArpPos = 0;
 		return true;
 	case Event::Type::MED_JumpScript:
-		if(event.u8 < chn.synthState.states.size())
+		if(event.u8 < chn.synthState.states.size() && chn.pModInstrument && event.u8 < chn.pModInstrument->synth.m_scripts.size())
 		{
-			chn.synthState.states[event.u8].m_nextRow = event.u16;
-			chn.synthState.states[event.u8].m_ticksRemain = 0;
+			chn.synthState.states[event.u8].JumpToPosition(chn.pModInstrument->synth.m_scripts[event.u8], event.u16);
 			chn.synthState.states[event.u8].m_stepsRemain = 0;
 		}
 		return false;
