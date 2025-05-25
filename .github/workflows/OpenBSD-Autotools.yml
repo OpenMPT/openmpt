@@ -50,8 +50,8 @@ jobs:
         shutdown_vm: false
         run: |
           sudo pkg_add -u
-          sudo pkg_add -I ${{ (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
-          sudo pkg_add -I ${{ (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
+          sudo pkg_add -I ${{ (matrix.version == '7.7') && 'ghostscript-10.05.0' || (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
+          sudo pkg_add -I ${{ (matrix.version == '7.7') && 'autoconf-2.72p0 automake-1.17' || (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
           sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
     - name: Build
       uses: cross-platform-actions/action@v0.28.0
