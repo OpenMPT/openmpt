@@ -19,6 +19,7 @@ branching release branches
      *  "publish_v2_noindex.sh" -> "publish_v2_noindex_rel.sh"
      *  " rel" -> " dist"
      *  "bin/rel-" -> "bin/dist-"
+     *  "auto/rel-" -> "auto/dist-"
      *  ".sh dist" -> ".sh rel"
      *  "nonrel" -> "nondist"
      *  "7z" -> "zip"
