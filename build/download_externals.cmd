@@ -69,13 +69,13 @@ goto error
 :main
 if not exist "build\externals" mkdir "build\externals"
 
-call :download_and_unpack "winamp"    "https://web.archive.org/web/20131217072017if_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "WA5.55_SDK.exe"                     "."                "-" || goto error
+call :download_and_unpack "winamp"    "https://web.archive.org/web/20131217072017id_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe" "WA5.55_SDK.exe"                     "."                "-" || goto error
 
 call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."                "-" || goto error
 
-call :download_and_unpack "ASIOSDK2"  "https://web.archive.org/web/20191011060157if_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
+call :download_and_unpack "ASIOSDK2"  "https://web.archive.org/web/20191011060157id_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3"       "-" || goto error
 
-call :download_and_unpack "vstsdk2.4" "https://web.archive.org/web/20200502121256if_/https://www.steinberg.net/sdk_downloads/vstsdk367_03_03_2017_build_352.zip" "vstsdk367_03_03_2017_build_352.zip" "VST_SDK\VST2_SDK" "-" || goto error
+call :download_and_unpack "vstsdk2.4" "https://web.archive.org/web/20200502121256id_/https://www.steinberg.net/sdk_downloads/vstsdk367_03_03_2017_build_352.zip" "vstsdk367_03_03_2017_build_352.zip" "VST_SDK\VST2_SDK" "-" || goto error
 rmdir /s /q include\VST_SDK || goto error
 
 call :download_and_unpack "lame"      "https://netcologne.dl.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz"   "lame-3.100.tar.gz"                 "lame-3.100"      "lame-3.100.tar" || goto error
@@ -84,7 +84,7 @@ rem PowerShell 3 on Windows 7 requires https://www.microsoft.com/en-us/download/
 powershell -Version 3 -Command "(Get-Content include\lame.def -Raw).replace(\"libmp3lame.DLL\", \"\") | Set-Content include\lame.def -Force" || goto error
 cd ..\.. || goto error
 
-call :download_and_unpack "htmlhelp" "https://web.archive.org/web/20200918004813if_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
+call :download_and_unpack "htmlhelp" "https://web.archive.org/web/20200918004813id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe" "htmlhelp.exe" "." "-" || goto error
 
 goto ok
 
