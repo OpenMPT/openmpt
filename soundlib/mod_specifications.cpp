@@ -466,29 +466,40 @@ bool CModSpecifications::HasNote(ModCommand::NOTE note) const
 bool CModSpecifications::HasVolCommand(ModCommand::VOLCMD volcmd) const
 {
 	if(volcmd >= MAX_VOLCMDS) return false;
-	if(volcommands[volcmd] == '?') return false;
-	return true;
+	return volcommands[volcmd] != '?';
 }
 
 
 bool CModSpecifications::HasCommand(ModCommand::COMMAND cmd) const
 {
 	if(cmd >= MAX_EFFECTS) return false;
-	if(commands[cmd] == '?') return false;
-	return true;
+	return commands[cmd] != '?';
 }
 
 
 char CModSpecifications::GetVolEffectLetter(ModCommand::VOLCMD volcmd) const
 {
-	if(volcmd >= MAX_VOLCMDS) return '?';
+	if(volcmd >= MAX_VOLCMDS)
+		return '?';
 	return volcommands[volcmd];
+}
+
+
+char CModSpecifications::GetGenericVolEffectLetter(ModCommand::VOLCMD volcmd)
+{
+	// Note: Remove this function if volume effect letter display is ever going to differ between formats, and update users to GetVolEffectLetter instead.
+	static constexpr char VolCommands[] = " vpcdabuhlrgfe:o";
+	static_assert(std::size(VolCommands) == MAX_VOLCMDS + 1);
+	if(volcmd >= MAX_VOLCMDS)
+		return '?';
+	return VolCommands[volcmd];
 }
 
 
 char CModSpecifications::GetEffectLetter(ModCommand::COMMAND cmd) const
 {
-	if(cmd >= MAX_EFFECTS) return '?';
+	if(cmd >= MAX_EFFECTS)
+		return '?';
 	return commands[cmd];
 }
 
