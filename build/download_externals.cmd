@@ -61,8 +61,8 @@ if not exist "build\externals" mkdir "build\externals"
 
 call :download_and_unpack "winamp"    "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"              "WA5.55_SDK.exe"                     "."          "-" || goto error
 call :download_and_unpack "xmplay"    "https://www.un4seen.com/files/xmp-sdk.zip"                                  "xmp-sdk.zip"                        "."          "-" || goto error
-call :download_and_unpack "ASIOSDK2"  "https://web.archive.org/web/20191011060157if_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" "-" || goto error
-call :download_and_unpack "vstsdk2.4" "https://web.archive.org/web/20200502121256if_/https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   "-" || goto error
+call :download_and_unpack "ASIOSDK2"  "https://web.archive.org/web/20191011060157id_/https://www.steinberg.net/sdk_downloads/asiosdk2.3.zip"                     "asiosdk2.3.zip"                     "ASIOSDK2.3" "-" || goto error
+call :download_and_unpack "vstsdk2.4" "https://web.archive.org/web/20200502121256id_/https://www.steinberg.net/sdk_downloads/vstsdk365_12_11_2015_build_67.zip"  "vstsdk365_12_11_2015_build_67.zip"  "VST3 SDK"   "-" || goto error
 rem call :download_and_unpack "minimp3"   "http://keyj.emphy.de/files/projects/minimp3.tar.gz"                         "minimp3.tar.gz"                     "minimp3"    "minimp3.tar" || goto error
 
 goto ok
