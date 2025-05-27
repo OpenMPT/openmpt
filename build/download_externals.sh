@@ -39,5 +39,4 @@ if [ ! -d "build/externals" ]; then
  mkdir build/externals
 fi
 
-download_and_unpack "minimp3" "http://keyj.emphy.de/files/projects/minimp3.tar.gz" "minimp3.tar.gz" "minimp3" 
-
+download_and_unpack "minimp3" "https://web.archive.org/web/20170917231422id_/http://keyj.emphy.de/files/projects/minimp3.tar.gz" "minimp3.tar.gz" "minimp3" 
