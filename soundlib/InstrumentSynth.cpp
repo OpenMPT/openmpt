@@ -291,8 +291,9 @@ void InstrumentSynth::States::State::NextTick(const Events &events, PlayState &p
 		if(m_medVolumeEnv != uint8_max && chn->pModInstrument)
 		{
 			m_volumeFactor = static_cast<uint16>(std::clamp((MEDEnvelopeFromSample(*chn->pModInstrument, sndFile, m_medVolumeEnv & 0x7F, m_medVolumeEnvPos) + 128) * 64, 0, 16384));
-			m_medVolumeEnvPos++;
-			if(m_medVolumeEnvPos >= 128 && (m_medVolumeEnv & 0x80))
+			if(m_medVolumeEnvPos < 127)
+				m_medVolumeEnvPos++;
+			else if(m_medVolumeEnv & 0x80)
 				m_medVolumeEnvPos = 0;
 		}
 
