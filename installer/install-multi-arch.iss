@@ -131,7 +131,7 @@ Source: packageTemplate\readme.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\History.txt; DestDir: {app}; Flags: ignoreversion
 Source: ..\packageTemplate\OpenMPT Manual.chm; DestDir: {app}; Flags: ignoreversion
 
-Source: ..\packageTemplate\ReleaseNotesImages\*.*; DestDir: {app}\ReleaseNotesImages\; Flags: ignoreversion
+Source: ..\packageTemplate\ReleaseNotesImages\*.*; DestDir: {app}\ReleaseNotesImages\; Flags: ignoreversion recursesubdirs
 Source: ..\packageTemplate\Release Notes.html; DestDir: {app}; Flags: ignoreversion
 
 Source: ..\packageTemplate\OpenMPT Support and Community Forum.url; DestDir: {app}; Flags: ignoreversion
