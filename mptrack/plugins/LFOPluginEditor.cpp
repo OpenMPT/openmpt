@@ -123,6 +123,13 @@ void LFOPluginEditor::UpdateParamDisplays()
 		m_plugParam.ResetContent();
 		SetWindowLongPtr(m_plugParam, GWLP_USERDATA, 0);
 	}
+	const BOOL enableWindow = outPlug ? TRUE : FALSE;
+	m_midiCC.EnableWindow(enableWindow);
+	m_midiChnEdit.EnableWindow(enableWindow);
+	m_midiChnSpin.EnableWindow(enableWindow);
+	GetDlgItem(IDC_RADIO7)->EnableWindow(enableWindow);
+	GetDlgItem(IDC_RADIO8)->EnableWindow(enableWindow);
+
 	m_plugParam.SetRedraw(TRUE);
 	m_locked = false;
 }
@@ -170,7 +177,7 @@ void LFOPluginEditor::UpdateParam(int32 p)
 void LFOPluginEditor::UpdateView(UpdateHint hint)
 {
 	CAbstractVstEditor::UpdateView(hint);
-	m_outPlug.Update(PluginComboBox::Config{PluginComboBox::ShowLibraryNames}
+	m_outPlug.Update(PluginComboBox::Config{PluginComboBox::ShowLibraryNames | PluginComboBox::ShowNoPlugin}
 		.Hint(hint)
 		.CurrentSelection(m_lfoPlugin.m_pMixStruct->GetOutputPlugin())
 		.FirstPlugin(m_lfoPlugin.GetSlot() + 1), m_lfoPlugin.GetSoundFile());
@@ -333,14 +340,11 @@ void LFOPluginEditor::OnOutputPlugChanged()
 		return;
 
 	PLUGINDEX plug = m_outPlug.GetSelection().value_or(PLUGINDEX_INVALID);
-	if(plug > m_lfoPlugin.GetSlot() && plug < MAX_MIXPLUGINS)
-	{
-		m_lfoPlugin.GetSoundFile().m_MixPlugins[m_lfoPlugin.GetSlot()].SetOutputPlugin(plug);
-		m_lfoPlugin.SetModified();
-		UpdateParamDisplays();
-		if(CModDoc *modDoc = m_lfoPlugin.GetSoundFile().GetpModDoc(); modDoc != nullptr)
-			modDoc->UpdateAllViews(nullptr, PluginHint(m_lfoPlugin.GetSlot() + 1).Info(), this);
-	}
+	m_lfoPlugin.GetSoundFile().m_MixPlugins[m_lfoPlugin.GetSlot()].SetOutputPlugin(plug);
+	m_lfoPlugin.SetModified();
+	UpdateParamDisplays();
+	if(CModDoc *modDoc = m_lfoPlugin.GetSoundFile().GetpModDoc(); modDoc != nullptr)
+		modDoc->UpdateAllViews(nullptr, PluginHint(m_lfoPlugin.GetSlot() + 1).Info(), this);
 }
 
 
