@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="language" content="en">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>OpenMPT 1.31 Release Notes</title>
+	<title>OpenMPT 1.32 Release Notes</title>
 	<style type="text/css">
 	* { font-family: Calibri, Roboto, sans-serif; }
 	body
@@ -93,75 +93,96 @@
 
 	<h1>
 		<img src="ReleaseNotesImages/modplug.png" width="64" height="64" alt="OpenMPT Logo">
-		OpenMPT 1.31 - Release Notes
+		OpenMPT 1.32 - Release Notes
 	</h1>
 
 	<p>
 		It's been a while since the last major feature update, and we have been working on a bunch of great new features for this new version.
-		This document should give a rough overview about the biggest changes in OpenMPT 1.31.
+		This document should give a rough overview about the biggest changes in OpenMPT 1.32.
 	</p>
 
 	<h2>What's new?</h2>
 
 	<h3>General</h3>
+	<div class="screenshots">
+		<a href="ReleaseNotesImages/1.32/quick_start.png"><img src="ReleaseNotesImages/1.32/quick_start.png" width="300" height="382" alt="Project Assistant" title="Project Assistant"></a><br>
+		<a href="ReleaseNotesImages/1.32/main_toolbar.png"><img src="ReleaseNotesImages/1.32/main_toolbar.png" width="300" height="32" alt="New, editable global volume readout in the main toolbar" title="New, editable global volume readout in the main toolbar"></a><br>
+		<a href="ReleaseNotesImages/1.32/metronome_settings.png"><img src="ReleaseNotesImages/1.32/metronome_settings.png" width="300" height="266" alt="Metronome Settings" title="Metronome Settings"></a>
+	</div>
 	<ul>
-	<li>Removing unused samples now works more reliably in instrument mode.</li>
-	<li>Instead of re-adding all non-conflicting default shortcuts every time a keymap is loaded, they will now only be added if the keymap was last saved with an older version of OpenMPT than the version that introduced the default shortcut.</li>
-	<li><strong>Channel panning</strong> is now exported in <strong>MIDI export</strong> as MIDI CC 10. If several notes play on the same MIDI channel, the last triggered note's panning is always considered.</li>
-	<li>When a text field is focussed, native text field shortcuts (such as Ctrl+A and others) are now preferred over OpenMPT shortcuts that are specific to the current view. Previously, they already took precedence over global OpenMPT shortcuts that apply to all views.</li>
-	<li>Builds for Windows XP and Vista can now receive automatic updates as well.</li>
+	<li>There is now a quick start "<strong>project assistant</strong>" view that is shown whenever there is no module loaded.</li>
+	<li>OpenMPT is now fully DPI-aware by default, so it will look crisp and clean on all screen configurations. DPI-awareness can be changed in OpenMPT's Display settings to accomodate for older VST plugin editors that are not DPI-aware.</li>
+	<li><strong>Stream Export</strong> and <strong>MIDI Export</strong> have been updated to allow all sub songs of a module to be exported to separate files, the same way as it was already possible with VGM export.</li>
+	<li>When <strong>auto-save</strong> is set to save files to a specific folder, this folder is now cleaned regularly and auto-save files older than 30 days are removed by default. Auto-saves are now moved to the recycling bin instead of deleting them permanently by default.</li>
+	<li>The <strong>main toolbar</strong> is now more flexible, allowing you to hide individual readouts, adding a new <strong>global volume readout</strong>, and it wraps to multiple rows when it becomes wider than the main window. Readouts can now be edited using the keyboard during module playback.</li>
+	<li>The <strong>keyboard settings</strong> have been considerably revamped and cleaned up. Assigning keyboard shortcuts and keeping track of current key assignments and conflicts should be much easier now. Two new built-in default keyboard maps, matching the note entry of Fasttracker 2 and Impulse Tracker more closely, are now available.</li>
 	</ul>
 
 	<h3>Instrument Library</h3>
 	<ul>
-	<li>The <strong>Instrument Library</strong> in the Tree View is now <strong>searchable</strong>: Locating files and folders in the instrument library is now as easy as hitting Ctrl+F to open text field and entering a search term. Wildcards (* to match any number of characters, ? to match any single character) are supported, too.</li>
-	<li>It is now also possible to change the <strong>sorting</strong> of the instrument library. From the context menu, you can choose to sort the library alphabetically, by file size or file modification date.</li>
-	<li>Selecting a file in the instrument library shows its file size and modification date in the status bar.</li>
+	<li>The tree view can now also be placed on the right side of the window (View &rarr; Toolbars).</li>
+	<li>The Instrument Library now shows size information for samples in modules as well.</li>
 	</ul>
 
 	<h3>Pattern Editor</h3>
 	<ul>
-	<li>New <strong>shortcuts to scroll the pattern view</strong> without having to use the mouse.</li>
-	<li>In the <strong>Effect Visualizer</strong>, the currently edited plugin parameter for PC events can now be selected from a dropdown menu.</li>
+	<li>OpenMPT now has a <strong>metronome</strong> that can be enabled from the pattern toolbar or via a keyboard shortcut.</li>
+	<li>Merge functionality has been extended to support <strong>merging into multiple patterns</strong> with a user-specified length. This way, it becomes possible to automatically rearrange e.g. 64-row patterns into 128-row patterns in one go.</li>
+	<li>When <strong>increasing pattern size</strong>, there is now an option to <strong>duplicate the existing contents</strong> to the newly-added rows.</li>
+	<li>Instrument / volume / effect <strong>column visibility</strong> can now be toggled independently, and column visibility is now remembered per-module if "Remember song window positions" is enabled.</li>
+	<li>For <strong>live playback</strong>, it is now possible to <strong>queue the next pattern</strong> to not only play when the current pattern is finished, but also when the current measure, beat or row is finished.</li>
+	<li>To better distinguish whether record mode is enabled or not, it is now possible to set a <strong>separate background color</strong> for the active row when recording is enabled.</li>
+	<li>It is now possible to <strong>solo a group of channels</strong> at once. The solo shortcut applies to all channels in the current pattern selection.</li>
 	</ul>
-	
+
 	<h3>Plugins</h3>
 	<ul>
-	<li><strong>Tone portamento</strong> can now be applied to plugins the same way as it works for samples (assuming that the target note is within the plugin's pitch bend range), and as a result now works properly in MIDI export as well. In order to make use of this feature in existing module files made with previous OpenMPT versions, compatibility settings need to be upgraded in the Song Properties dialog.</li>
-	<li>Individual plugins can now be <strong>auto-suspended</strong> if they output silence for four seconds.</li>
-	<li>Arpeggio notes no longer reset the current pitch bend position.</li>
+	<li><strong>VST shell plugins</strong> are now supported. Most importantly, this allows OpenMPT to use polac's vst3shell plugin to enable the use of VST 3 plugins.</li>
+	<li>Improved correctness of <strong>PPQ position reporting</strong>. The reported PPQ is now also correct when the tempo changes, and when breaking to the next pattern, the position is rounded to the next start of measure. It is also sent to MIDI devices when using the MIDI Input / Output Plugin and the "Send timing messages" option is enabled.</li>
+	<li>Plugins can now be <strong>solo</strong>-ed by holding Shift when pressing the Bypass checkbox. Holding Ctrl instead, only Master plugins are affected.</li>
+	<li>All <strong>mix modes</strong> are now available for <strong>instrument plugins</strong> as well.</li>
+	<li>The <strong>MIDI Input / Output Plugin</strong> was enhanced with the ability to send initial MIDI dumps on playback start, plus a new extended MIDI macro system realized through plugin parameters. This allows to send MIDI macros of any length through the MIDI I/O plugin.</strong>
+	<li>The output device list of the MIDI Input / Output Plugin now contains a new <strong>virtual MIDI output device</strong> that allows MIDI messages to be forwarded to the configured output plugin, thus allowing the aforementioned extended MIDI macros system to work with other plugins beyond just MIDI output devices.</strong>
 	</ul>
 
 	<h3>Sample / Instrument Editor</h3>
 	<ul>
-	<li>Is is now possible to follow the play cursor when the sample waveform is zoomed in and not fully visible, as long as only a single note is being previewed. This can be enabled through the settings dialog or a keyboard shortcut (Shift+F by default).</li>
-	<li>Double-clicking a timeline item now pops up an input dialog for finetuning that item.</li>
+	<li>Greatly improved <strong>pitch shifting and time stretching</strong> with new high-quality algorithms. Using the Signalsmith Stretch library for both operations, pitch and duration can now be changed at the same time in high quality, with an optional "Akai"-like lo-fi mode available.</li>
+	<li>When <strong>resampling samples in MOD</strong> files, there's now an option to automatically adjust pattern data accordingly.</li>
+	<li>To reduce confusion, the default / global volume tooltips now also show the <strong>effective amplification</strong> based on the sample / synth volume specified in the General tab.</li>
 	</ul>
 
-	<h3>Playback</h3>
-	<p>
-		A couple of playback behaviours have been changed and improved:
-	</p>
+	<h3>Comments</h3>
 	<ul>
-	<li>Reduced <strong>aliasing</strong> when downsampling with the Sinc + Low-Pass resampler.</li>
-	<li>XM fine portamentos are now also sent to plugins and also work when exporting XM to MIDI.</li>
-	<li>The sample position is now rounded instead of truncated when resampling without interpolation.</li>
-	<li>Improved playback compatibility for IT, S3M, MOD, MED, MO3 and ULT files.</li>
+	<li>In addition to copying sample / instrument texts, they can now be pasted as well. Now you can easily replace your instrument names with a poem you have written in an external text editor!</li>
+	<li>Sample and instrument names and filenames are now drawn using the same font that is used for Comments text.</li>
 	</ul>
 
-	<h3>File Format Support</h3>
+	<h3>Playback and File Format Support</h3>
 	<ul>
-	<li>Samples can now be saved as <strong>Amiga IFF</strong> (8SVX / 16SVX) files.</li>
-	<li>OpenMPT 1.31 adds support for the following module formats: <strong>Composer 667</strong> (667), <strong>Graoumf Tracker</strong> (GTK / GT2), <strong>Dynamic Studio</strong> (DSM) and music from the game <strong>Imperium Galactica</strong> (XMF).</li>
-	<li>A variant of the <strong>DSMI AMF</strong> format typically using the DMF file extension, found in some DOS games distributed by Webfoot, is now supported as well.</li>
-	<li>A hacked variant of the MOD format (also using the DMF file extension) found in the DOS game "Apocalypse Abyss" can now be read as well.</li>
-	<li>In IT files, mono samples are now stored with <strong>lossless IT sample compression</strong> by default, reducing the file size of IT files. As compressed stereo samples are still not supported properly by some software that is most likely not going to be updated anymore, compression for stereo samples remain disabled for now.</li>
-	<li>FLAC stream export now supports 32-bit resolution.</li>
-	<li>DLS / SF2: Added support for delay and hold envelope sections as well as pitch envelopes. Individual envelopes for each drum key are now supported.</li>
+	<li>In the MPTM format, every sequence now has its own <strong>default tempo and speed</strong>.</li>
+	<li>OpenMPT 1.32 adds support for eleven new module formats:
+		<strong>PumaTracker</strong> (PUMA),
+		<strong>Game Music Creator</strong> (GMC),
+		<strong>ChipTracker</strong> (MOD),
+		<strong>TCB Tracker</strong> (MOD),
+		<strong>Images Music System</strong> (IMS),
+		<strong>Face The Music</strong> (FTM),
+		<strong>RealTracker</strong> (RTM),
+		<strong>EasyTrax</strong> (ETX),
+		<strong>UNIC Tracker</strong> (UNIC),
+		<strong>Future Composer</strong> (FC / FC13 / FC14 / SMOD),
+		and <strong>Chuck Biscuits / Black Artist </strong> (CBA).</li>
+	<li>Support for synthesized and hybrid instruments in MED files was added, together with several other playback fixes for MED files.</li>
+	<li>Better support for <strong>automatic slide commands</strong> (commands that keep sliding on following rows) in various formats was added.</li>
+	<li>"Mupp" instruments in His Master's Noise modules are now supported, as well as command 7 "mega-arp".</li>
+	<li>Sub-songs in PSM files are now imported as independent sequences instead of being crammed together into the same order list.</li>
+	<li>Various playback compatibility fixes for DTM, MOD, XM, S3M and IT modules.</li>
 	</ul>
 
 	<h3>There's more...</h3>
 	<p>
+		This summary just scratches the surface of what has changed since OpenMPT 1.31.
 		For a detailed description of what has changed, check <a href="History.txt">History.txt</a>. If you are new to OpenMPT, be sure to read the manual as well.
 	</p>
 
