@@ -124,7 +124,7 @@ CString Flanger::GetParamDisplay(PlugParamIndex param)
 		value = FrequencyInHertz();
 		break;
 	case kFlangerWaveShape:
-		return (value < 1) ? _T("Triangle") : _T("Sine");
+		return (value < 1) ? _T("Square") : _T("Sine");
 		break;
 	case kFlangerPhase:
 		switch(Phase())

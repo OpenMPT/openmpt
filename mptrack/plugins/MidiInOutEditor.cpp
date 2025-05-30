@@ -14,6 +14,7 @@
 #include "MidiInOut.h"
 #include "../FileDialog.h"
 #include "../Mptrack.h"
+#include "../Reporting.h"
 #include "../resource.h"
 #include "../UpdateHints.h"
 #include "../../soundlib/MIDIEvents.h"
@@ -288,6 +289,11 @@ void MidiInOutEditor::OnLoadMidiDump()
 	FileReader file = GetFileReader(f);
 	std::vector<uint8> dump;
 	file.ReadVector(dump, file.GetLength());
+	if(!dump.empty() && dump[0] < 0x80)
+	{
+		if(Reporting::Confirm("This file is most likely not a valid SysEx dump. Load it anyway?") != cnfYes)
+			return;
+	}
 	static_cast<MidiInOut &>(m_VstPlugin).SetInitialMidiDump(std::move(dump));
 	m_locked = true;
 	UpdateMidiDump();
