@@ -68,6 +68,8 @@ is just a high-level summary.
  *  [**Regression**] Using `EMSCRIPTEN_PORTS=1` with Emscripten older than
     3.1.54 now requires additionally specifying `ANCIENT=1`.
 
+ *  When formatting pattern data, effect letters in the volume column are now
+    always formatted correctly, regardless of the module format.
  *  IT: Various playback fixes.
  *  IT: When using tone portamento to another sample after the previous sample's
     sustain loop has been released, the new sample should also not play its
