@@ -111,17 +111,11 @@
 	</div>
 	<ul>
 	<li>There is now a quick start "<strong>project assistant</strong>" view that is shown whenever there is no module loaded.</li>
-	<li>OpenMPT is now fully DPI-aware by default, so it will look crisp and clean on all screen configurations. DPI-awareness can be changed in OpenMPT's Display settings to accomodate for older VST plugin editors that are not DPI-aware.</li>
+	<li>OpenMPT is now fully DPI-aware by default, so it will look crisp and clean on all screen configurations. DPI-awareness can be changed in OpenMPT's Display settings to accommodate for older VST plugin editors that are not DPI-aware.</li>
 	<li><strong>Stream Export</strong> and <strong>MIDI Export</strong> have been updated to allow all sub songs of a module to be exported to separate files, the same way as it was already possible with VGM export.</li>
 	<li>When <strong>auto-save</strong> is set to save files to a specific folder, this folder is now cleaned regularly and auto-save files older than 30 days are removed by default. Auto-saves are now moved to the recycling bin instead of deleting them permanently by default.</li>
 	<li>The <strong>main toolbar</strong> is now more flexible, allowing you to hide individual readouts, adding a new <strong>global volume readout</strong>, and it wraps to multiple rows when it becomes wider than the main window. Readouts can now be edited using the keyboard during module playback.</li>
 	<li>The <strong>keyboard settings</strong> have been considerably revamped and cleaned up. Assigning keyboard shortcuts and keeping track of current key assignments and conflicts should be much easier now. Two new built-in default keyboard maps, matching the note entry of Fasttracker 2 and Impulse Tracker more closely, are now available.</li>
-	</ul>
-
-	<h3>Instrument Library</h3>
-	<ul>
-	<li>The tree view can now also be placed on the right side of the window (View &rarr; Toolbars).</li>
-	<li>The Instrument Library now shows size information for samples in modules as well.</li>
 	</ul>
 
 	<h3>Pattern Editor</h3>
@@ -145,7 +139,7 @@
 	<li>The output device list of the MIDI Input / Output Plugin now contains a new <strong>virtual MIDI output device</strong> that allows MIDI messages to be forwarded to the configured output plugin, thus allowing the aforementioned extended MIDI macros system to work with other plugins beyond just MIDI output devices.</strong>
 	</ul>
 
-	<h3>Sample / Instrument Editor</h3>
+	<h3>Sample Editor</h3>
 	<ul>
 	<li>Greatly improved <strong>pitch shifting and time stretching</strong> with new high-quality algorithms. Using the Signalsmith Stretch library for both operations, pitch and duration can now be changed at the same time in high quality, with an optional "Akai"-like lo-fi mode available.</li>
 	<li>When <strong>resampling samples in MOD</strong> files, there's now an option to automatically adjust pattern data accordingly.</li>
@@ -158,9 +152,16 @@
 	<li>Sample and instrument names and filenames are now drawn using the same font that is used for Comments text.</li>
 	</ul>
 
+	<h3>Instrument Library</h3>
+	<ul>
+	<li>The tree view can now also be placed on the right side of the window (View &rarr; Toolbars).</li>
+	<li>The Instrument Library now shows size information for samples in modules as well.</li>
+	</ul>
+
 	<h3>Playback and File Format Support</h3>
 	<ul>
-	<li>In the MPTM format, every sequence now has its own <strong>default tempo and speed</strong>.</li>
+	<li>In the <strong>MPTM</strong> format, every sequence now has its own <strong>default tempo and speed</strong>.</li>
+	<li>When <strong>creating MOD files</strong>, you can now choose if you would like to create a MOD file compatible with ProTracker (4 channels, various ProTracker-specific quirks and the Amiga resampler are enabled) or if you want to use the MOD format with PC extensions (8 channels, bigger octave range, various ProTracker-specific quirks and the Amiga resampler are disabled).</li>
 	<li>OpenMPT 1.32 adds support for eleven new module formats:
 		<strong>PumaTracker</strong> (PUMA),
 		<strong>Game Music Creator</strong> (GMC),

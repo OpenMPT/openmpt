@@ -33,8 +33,8 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.32.01.00 (? May 2025, revision 23230)
-----------------------------------------
+v1.32.01.00 (31 May 2025, revision 23242)
+-----------------------------------------
 Tree view
 - [New] <js> The tree view can now also be placed on the right side of the window (View -> Toolbars).
 - [Imp] <js> The Instrument Library now shows size information for samples in modules as well, and uses cached information for displaying file size and modification time of on-disk files instead of querying this information from the operating system every time a file is selected.
@@ -151,9 +151,10 @@ Other formats
 - [Fix] <js> MED: Tempo parameters > 255 BPM were not imported properly if the files was imported as MOD instead of XM (http://www.un4seen.com/forum/?msg=143478).
 - [Fix] <js> MED: Import notes that exceed OpenMPT's note range.
 - [Fix] <js> MED: Better handling of high octaves for non-MIDI instruments (http://www.un4seen.com/forum/?msg=144154).
-- [Fix] <js> MED: Improve handling of low tempos in BPM mode (https://www.un4seen.com/forum/?msg=144160).
+- [Fix] <js> MED: Improve handling of low tempos in BPM mode (http://www.un4seen.com/forum/?msg=144160).
 - [Fix] <js> MED: For IFFOCT instruments with extra sample loop information, the loop length was not correct. Sample transpose was also not applied correctly for IFFOCT instruments.
 - [Fix] <js> MED: Command FFF should not stop a note if it is triggered on the same row (http://www.un4seen.com/forum/?msg=144691).
+- [Fix] <js> MED: Set Pitch command (FFD) was not implemented (http://www.un4seen.com/forum/?msg=145039).
 
 Stream Export
 - [New] <js> Can now export all sub songs to individual files (http://bugs.openmpt.org/view.php?id=1515).
@@ -196,7 +197,8 @@ Misc
 - [Mod] <js> Special key interception (Windows / Caps Lock / Scroll Lock / Num Lock) is now only active in contexts where a shortcut using that key is present (so e.g. having Note Off assigned to Caps Lock will now allow Caps Lock to be used as normal in another text edit field).
 - [Fix] <js> Various keyboard handling issues on Wine should be fixed (http://bugs.openmpt.org/view.php?id=713).
 - [Fix] <js> The "Previous Order" and "Next Order" shortcuts now also work when the pattern editor isn't focussed (http://bugs.openmpt.org/view.php?id=1489).
-- [Fix] <js> Fix various keyboard focus issues when switching between upper and lower half of editor views or switching to another application and back (http://bugs.openmpt.org/view.php?id=1799, http://bugs.openmpt.org/view.php?id=1800).
+- [Fix] <js> Fixed various keyboard focus issues when switching between upper and lower half of editor views or switching to another application and back (http://bugs.openmpt.org/view.php?id=1799, http://bugs.openmpt.org/view.php?id=1800).
+- [Fix] <js> Fixed accessibility issues in the Chord Editor (http://bugs.openmpt.org/view.php?id=1886).
 - [Reg] <js> Global keyboard shortcuts can no longer be triggered while a menu or context menu is open.
 - [Reg] <js> On Windows XP and Wine 3.12 and older, messages with "don't show again" option are now always shown at most once (the checkbox is no longer visible).
 
@@ -646,7 +648,7 @@ Pattern tab
 - [Mod] <js> Fixed volume and envelope position issues when seeking with sample sync and the target row contained a note without instrument number.
 
 Sample tab
-- [Fix] <js> IFF: The workaround for 8SVX files with claimed zero-length body chunks (to accomodate for http://bugs.openmpt.org/view.php?id=117) was too aggressive, causing also files with empty NAME chunks to not load properly (http://bugs.openmpt.org/view.php?id=1715).
+- [Fix] <js> IFF: The workaround for 8SVX files with claimed zero-length body chunks (to accommodate for http://bugs.openmpt.org/view.php?id=117) was too aggressive, causing also files with empty NAME chunks to not load properly (http://bugs.openmpt.org/view.php?id=1715).
 - [Fix] <js> IFF: 16-bit mono samples were saved as little-endian instead of big-endian.
 - [Fix] <js> Remove cue points from newly-created samples after slicing at cue points. The old cue points no longer make sense in the context of the new sample.
 
