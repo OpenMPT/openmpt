@@ -32,6 +32,13 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.30/doc/libopenmpt_rele
 0.7
 ---
 
+For libopenmpt 0.7, see
+https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.31/doc/libopenmpt_release.md
+.
+
+0.8
+---
+
  1. ensure that the OpenMPT version is preferrably at a aa.bb.cc.00 version,
     otherwise increment the minorminor part to a new value used specifically for
     the libopenmpt release
@@ -41,7 +48,7 @@ https://source.openmpt.org/svn/openmpt/branches/OpenMPT-1.30/doc/libopenmpt_rele
  4. website: update download links
  5. wait for buildbot
  6. in a website checkout, run (as printed by the release script)
-        ./release-0.7.sh $NEWVER +release
+        ./release-0.8.sh $NEWVER +release
  7. increment OpenMPT version minorminor in `common/versionNumber.h` when all
     releases are done on the svn side (either libopenmpt only, or both
     libopenmpt and OpenMPT)
