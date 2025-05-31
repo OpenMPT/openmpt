@@ -7,7 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.9.0-pre
 
-### libopenmpt 0.8.0-pre
+### libopenmpt 0.8.0 (2025-05-31)
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
  *  [**New**] Can now read Face The Music (`FTM`) modules.
