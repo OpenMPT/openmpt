@@ -87,7 +87,6 @@ is just a high-level summary.
     down when no tone portamento has been set up before, sometimes causing the
     target note to be reached immediately, or sliding the note down very subtly.
  *  IT: Envelope Carry should not be influenced by a previous note-off.
-
  *  XM: When a key-off is encountered before auto-vibrato reaches full depth,
     the depth is reset.
  *  S3M: Combined slides (Kxy / Lxy) are no longer run on the first tick of a
