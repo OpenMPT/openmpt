@@ -524,9 +524,11 @@ static std::pair<EffectCommand, ModCommand::PARAM> ConvertMEDEffect(ModCommand &
 			case 0xF9:  // Turn filter on
 				m.SetEffectCommand(CMD_MODCMDEX, 0xF9 - param);
 				break;
+			case 0xFD:  // Set pitch
+				m.SetEffectCommand(CMD_TONEPORTA_DURATION, 0);
+				break;
 			case 0xFA:  // MIDI pedal on
 			case 0xFB:  // MIDI pedal off
-			case 0xFD:  // Set pitch
 			case 0xFE:  // End of song
 				break;
 			case 0xFF:  // Turn note off
