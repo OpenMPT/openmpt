@@ -38,11 +38,13 @@ branching release branches
      4. update version numbers in `build/svn/do_libopenmpt_release.sh` and
         `build/svn/do_libopenmpt_release_rc.sh`
      5. update version number in `.appveyor.yml`
+     6. update `doc/libopenmpt_release.md`
  9. update versions in branch
     `https://source.openmpt.org/svn/openmpt/branches/OpenMPT-$VER`:
      1. set OpenMPT version in `common/versionNumber.h` to
         `1.$VER.00.$MINORMINOR+1`
      2. run `build/update_libopenmpt_version.sh bumpprerel`
+     4. update `doc/libopenmpt_release.md`
 10. update old stable branch
      1. uncomment updating OpenMPT version in
         `build/svn/do_libopenmpt_release.sh`
@@ -53,6 +55,3 @@ branching release branches
 13. update https://builds.openmpt.org/builds/
 14. update buildbot scripts that copy OpenMPT update information into place
 15. update branch release date on libopenmpt trunk changelog
-
-unclear:
- *  adjust buildbot update management script
