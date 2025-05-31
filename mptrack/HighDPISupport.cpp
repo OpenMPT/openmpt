@@ -24,7 +24,9 @@ struct HighDPISupportData
 		m_user32.Bind(m_SetThreadDpiAwarenessContext, "SetThreadDpiAwarenessContext");
 		m_user32.Bind(m_GetDpiForWindow, "GetDpiForWindow");
 		m_user32.Bind(m_GetSystemMetricsForDpi, "GetSystemMetricsForDpi");
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)  // Pre-Vista NONCLIENTMETRICS struct is not compatible with SystemParametersInfoForDpi
 		m_user32.Bind(m_SystemParametersInfoForDpi, "SystemParametersInfoForDpi");
+#endif
 		m_user32.Bind(m_AdjustWindowRectExForDpi, "AdjustWindowRectExForDpi");
 	}
 

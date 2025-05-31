@@ -1588,7 +1588,7 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 #endif
 	{
 		Reporting::Information(msg.message, msg.mainTitle ? CString{msg.mainTitle} : CString{});
-		TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= msg.mask;
+		TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~msg.mask;
 	}
 }
 
