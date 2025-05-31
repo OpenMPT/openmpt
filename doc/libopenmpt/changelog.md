@@ -106,6 +106,20 @@ is just a high-level summary.
 
  *  xmp-openmpt: Memory consumption during file loading has been reduced.
 
+ *  zlib: v1.3.1 (2024-01-22).
+ *  mpg123: v1.32.10 (2024-12-14).
+ *  ogg: v1.3.5 (2021-06-04).
+ *  vorbis: v1.3.7 (2020-07-04).
+ *  miniz: v2.2.0 (2021-06-27).
+ *  minimp3: fork
+    <https://github.com/manxorist/minimp3/releases/tag/openmpt-2024-08-15-v4>
+    commit 2116754771b79347ad2f39127abace2a093c383e (2024-08-15).
+ *  stb_vorbis: v1.22 commit 5a0bb8b1c1b1ca3f4e2485f4114c1c8ea021b781
+    (2021-07-12).
+ *  pugixml: v1.15 (2025-01-10).
+ *  flac: v1.5.0 (2025-02-11).
+ *  portaudio: v19.7.0 (2021-04-06).
+
 ### libopenmpt 0.7.0 (2023-04-30)
 
  *  [**New**] `667` files from Composer 667 are now supported.
