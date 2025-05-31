@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.0-rc
+### libopenmpt 0.8.0 (2025-05-31)
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
  *  [**New**] Can now read Face The Music (`FTM`) modules.
