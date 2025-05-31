@@ -2385,7 +2385,7 @@ void CModDoc::OnEstimateSongLength()
 			}
 			songCount++;
 			if(songsPerSequence[song.sequence] > 1)
-				s.AppendFormat(_T("\n%sSong %u, starting at order %u:\t"), indent, songCount, song.startOrder);
+				s.AppendFormat(_T("\n%sSong %u, starting at order %s:\t"), indent, songCount, FormatOrderRow(song.startOrder).GetString());
 			else
 				s.AppendChar(_T('\t'));
 		}
