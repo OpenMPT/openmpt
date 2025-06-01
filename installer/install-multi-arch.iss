@@ -27,6 +27,7 @@ AppPublisher=OpenMPT
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
+ArchitecturesAllowed=x86compatible x64compatible arm32compatible arm64
 ArchitecturesInstallIn64BitMode=x64os arm64
 ChangesAssociations=yes
 Compression=lzma2/ultra64
