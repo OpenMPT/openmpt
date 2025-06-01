@@ -409,6 +409,7 @@ public:
 	afx_msg void OnAddDlsBank();
 	afx_msg void OnImportMidiLib();
 	afx_msg void OnViewOptions();
+	afx_msg void OnHelp();
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnRButtonDown(UINT, CPoint);
@@ -452,7 +453,6 @@ protected:
 	afx_msg LRESULT OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam);
 	afx_msg LRESULT OnToolbarUpdateIndicatorClick(WPARAM wparam, LPARAM lparam);
 #endif // MPT_ENABLE_UPDATE
-	afx_msg void OnHelp();
 	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg BOOL OnQueryEndSession();
