@@ -2053,7 +2053,31 @@ class CPropertySheetMPT : public CPropertySheet
 
 		return CPropertySheet::PreTranslateMessage(pMsg);
 	}
+
+	BOOL OnInitDialog() override
+	{
+		ModifyStyleEx(0, WS_EX_CONTEXTHELP);
+		return CPropertySheet::OnInitDialog();
+	}
+
+	afx_msg void OnSysCommand(UINT id, LPARAM param)
+	{
+		if(id == SC_CONTEXTHELP)
+		{
+			CMainFrame::GetMainFrame()->OnHelp();
+			return;
+		}
+		CPropertySheet::OnSysCommand(id, param);
+	}
+
+	DECLARE_MESSAGE_MAP()
 };
+
+BEGIN_MESSAGE_MAP(CPropertySheetMPT, CPropertySheet)
+	//{{AFX_MSG_MAP(CPropertySheetMPT)
+	ON_WM_SYSCOMMAND()
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 
 void CMainFrame::OnViewOptions()
@@ -2106,7 +2130,9 @@ void CMainFrame::OnViewOptions()
 #if defined(MPT_ENABLE_UPDATE)
 	m_UpdateOptionsDialog = &pages->updatedlg;
 #endif // MPT_ENABLE_UPDATE
+
 	dlg.DoModal();
+
 	m_SoundCardOptionsDialog = nullptr;
 #if defined(MPT_ENABLE_UPDATE)
 	m_UpdateOptionsDialog = nullptr;
