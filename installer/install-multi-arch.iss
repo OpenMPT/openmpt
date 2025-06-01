@@ -239,6 +239,10 @@ begin
 			begin
 				WizardSelectComponents('archx86,archamd64,!archarm,!archarm64');
 			end;
+		paArm32:
+			begin
+				WizardSelectComponents('archx86,!archamd64,archarm,!archarm64');
+			end;
 		paARM64:
 			begin
 				WizardSelectComponents('archx86,archamd64,archarm,archarm64');
@@ -261,6 +265,10 @@ begin
 		paX64:
 			begin
 				Result := 'amd64';
+			end;
+		paArm32:
+			begin
+				Result := 'arm';
 			end;
 		paARM64:
 			begin
