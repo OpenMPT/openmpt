@@ -1549,7 +1549,7 @@ ifeq ($(NO_MINIZ),1)
 else
 LIBOPENMPT_C_SOURCES += include/miniz/miniz.c
 LIBOPENMPTTEST_C_SOURCES += include/miniz/miniz.c
-CPPFLAGS += -DMPT_WITH_MINIZ
+CPPFLAGS += -DMPT_WITH_MINIZ -DMINIZ_NO_STDIO
 CPPFLAGS += -Iinclude
 endif
 endif

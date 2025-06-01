@@ -13,9 +13,12 @@
   filter { "action:vs*" }
     buildoptions { "/wd4244" }
 	filter {}
-
 	filter { "kind:SharedLib" }
 		defines { "MINIZ_EXPORT=__declspec(dllexport)" }
+	filter {}
+	defines {
+		"MINIZ_NO_STDIO",
+	}
 	filter {}
 
 function mpt_use_miniz ()
@@ -28,6 +31,10 @@ function mpt_use_miniz ()
 		externalincludedirs {
 			"../../include",
 		}
+	filter {}
+	defines {
+		"MINIZ_NO_STDIO",
+	}
 	filter {}
 	links {
 		"miniz",
