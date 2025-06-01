@@ -27,6 +27,7 @@ AppPublisher=OpenMPT
 AppPublisherURL=https://openmpt.org/
 AppSupportURL=https://forum.openmpt.org/
 AppUpdatesURL=https://openmpt.org/
+ArchitecturesAllowed=x86compatible x64compatible arm32compatible arm64
 ArchitecturesInstallIn64BitMode=x64os arm64
 ChangesAssociations=yes
 Compression=lzma2/ultra64
@@ -148,18 +149,22 @@ Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags:
 
 Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
 Name: {autodesktop}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm')
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64')
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm'); MinVersion: 6.2
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
 
 Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
 Name: {group}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
-Name: {group}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm')
-Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64')
+Name: {group}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm'); MinVersion: 6.2
+Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
+Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
+Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
 
 Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: archx86
 Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
-Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm
-Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64
+Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm; MinVersion: 6.2
+Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.19044
 
 Name: {group}\Manual; Filename: {app}\OpenMPT Manual.chm
 Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and Community Forum.url
@@ -178,8 +183,10 @@ Filename: "{app}\Release Notes.html"; Description: "View Release Notes"; Flags: 
 
 Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('x86')
 Filename: {app}\bin\amd64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('amd64')
-Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm')
-Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64')
+Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm'); MinVersion: 6.2
+Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
+Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
+Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
 
 
 
@@ -239,6 +246,10 @@ begin
 			begin
 				WizardSelectComponents('archx86,archamd64,!archarm,!archarm64');
 			end;
+		paArm32:
+			begin
+				WizardSelectComponents('archx86,!archamd64,archarm,!archarm64');
+			end;
 		paARM64:
 			begin
 				WizardSelectComponents('archx86,archamd64,archarm,archarm64');
@@ -261,6 +272,10 @@ begin
 		paX64:
 			begin
 				Result := 'amd64';
+			end;
+		paArm32:
+			begin
+				Result := 'arm';
 			end;
 		paARM64:
 			begin
