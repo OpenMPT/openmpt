@@ -158,8 +158,8 @@ Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaul
 
 Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: archx86
 Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
-Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm
-Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64
+Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm; MinVersion: 6.2
+Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.19044
 
 Name: {group}\Manual; Filename: {app}\OpenMPT Manual.chm
 Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and Community Forum.url
