@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.1-pre
 
+ *  miniz: v3.0.2 (2023-01-15).
+
 ### libopenmpt 0.8.0 (2025-05-31)
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
