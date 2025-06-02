@@ -10,6 +10,8 @@ is just a high-level summary.
  *  [**Bug**] `openmpt::string::get("source_has_mixed_revisions")` and
     `openmpt_get_string("source_has_mixed_revisions")` always returned an empty
     string.
+ *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
+    UTF8.
 
  *  miniz: v3.0.2 (2023-01-15).
  *  pugixml: Update to v1.15 (2025-01-10).
