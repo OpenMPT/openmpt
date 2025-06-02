@@ -1413,6 +1413,9 @@ CString CCtrlPatterns::GetToolTipText(UINT id, HWND) const
 		if(!GetDlgItem(id)->IsWindowEnabled())
 			s = _T("Multiple sequences are only supported in the MPTM format.");
 		break;
+
+	case IDC_BUTTON1: s = _T("Next Pattern"); cmd = kcNextOrder; break;
+	case IDC_BUTTON2: s = _T("Previous Pattern"); cmd = kcPrevOrder; break;
 	}
 
 	if(cmd != kcNull)
