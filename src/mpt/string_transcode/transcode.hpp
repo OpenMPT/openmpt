@@ -1667,7 +1667,7 @@ inline Tdststring encode(logical_encoding encoding, const mpt::widestring & src)
 		case logical_encoding::locale:
 #if defined(MPT_LIBCXX_QUIRK_BROKEN_USER_LOCALE)
 #if defined(MPT_LIBCXX_QUIRK_ASSUME_USER_LOCALE_UTF8)
-			return encode_utf<Tdststring>(src);
+			return encode_utf8<Tdststring>(src);
 #else
 			try {
 				return encode_locale<Tdststring>(std::locale(""), src);
