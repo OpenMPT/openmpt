@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.1-pre
 
+ *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
+    UTF8.
+
  *  miniz: v3.0.2 (2023-01-15).
 
 ### libopenmpt 0.8.0 (2025-05-31)
