@@ -96,6 +96,7 @@ Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssoc
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stp"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".symmod"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".tcb"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ult"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".umx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".unic"; ValueData: {#OpenMPTFile}; Components: {#Component}
