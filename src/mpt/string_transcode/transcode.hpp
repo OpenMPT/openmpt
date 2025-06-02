@@ -1944,7 +1944,7 @@ inline mpt::widestring decode(logical_encoding encoding, const Tsrcstring & src)
 #endif
 			break;
 		case logical_encoding::active_locale:
-#if defined(MPT_LIBCXX_QUIRK_BROKEN_USER_LOCALE)
+#if defined(MPT_LIBCXX_QUIRK_BROKEN_ACTIVE_LOCALE)
 			try {
 				return decode_locale(std::locale(), src);
 			} catch (mpt::out_of_memory e) {
