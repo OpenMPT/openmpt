@@ -120,6 +120,12 @@ Source: ..\bin\{#BuildFolder}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
 
+Source: ..\bin\{#BuildFolder}\arm64ec\OpenMPT.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridge-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridgeLegacy-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-lame.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-mpg123.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+
 Source: "..\mptrack\res\MPTRACK.ICO"; DestName: "OpenMPT App Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packageTemplate\OpenMPT File Icon.ico"; DestName: "OpenMPT File Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
@@ -161,6 +167,7 @@ Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: ar
 Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
 Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm; MinVersion: 6.2
 Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.19044
+Name: {group}\OpenMPT (arm64ec); Filename: {app}\bin\arm64ec\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.22000
 
 Name: {group}\Manual; Filename: {app}\OpenMPT Manual.chm
 Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and Community Forum.url
@@ -181,6 +188,7 @@ Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}""";
 Filename: {app}\bin\amd64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('amd64')
 Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm');
 Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64');
+;Filename: {app}\bin\arm64ec\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64')
 
 
 
@@ -215,6 +223,13 @@ Type: files; Name: {app}\bin\arm64\PluginBridgeLegacy-arm64.exe
 Type: files; Name: {app}\bin\arm64\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm64\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\arm64\openmpt-soundtouch.dll
+
+Type: files; Name: {app}\bin\arm64ec\OpenMPT.exe
+Type: files; Name: {app}\bin\arm64ec\PluginBridge-arm64ec.exe
+Type: files; Name: {app}\bin\arm64ec\PluginBridgeLegacy-arm64ec.exe
+Type: files; Name: {app}\bin\arm64ec\openmpt-lame.dll
+Type: files; Name: {app}\bin\arm64ec\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm64ec\openmpt-soundtouch.dll
 
 
 

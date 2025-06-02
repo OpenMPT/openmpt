@@ -35,18 +35,18 @@ environment:
       MPT_APPVEYOR_TARGET: win10
       MPT_APPVEYOR_ARCH: amd64
       MPT_APPVEYOR_ARCH_CONFIG: x64
-    - job_name: VS2022 Win8 arm
-      job_group: Builds
-      MPT_APPVEYOR_VS: vs2022
-      MPT_APPVEYOR_TARGET: win8
-      MPT_APPVEYOR_ARCH: arm
-      MPT_APPVEYOR_ARCH_CONFIG: ARM
     - job_name: VS2022 Win10 arm64
       job_group: Builds
       MPT_APPVEYOR_VS: vs2022
       MPT_APPVEYOR_TARGET: win10
       MPT_APPVEYOR_ARCH: arm64
       MPT_APPVEYOR_ARCH_CONFIG: ARM64
+    - job_name: VS2022 Win10 arm64ec
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2022
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: arm64ec
+      MPT_APPVEYOR_ARCH_CONFIG: ARM64EC
     - job_name: VS2022 Win7 x86
       job_group: Builds
       MPT_APPVEYOR_VS: vs2022
@@ -59,6 +59,12 @@ environment:
       MPT_APPVEYOR_TARGET: win7
       MPT_APPVEYOR_ARCH: amd64
       MPT_APPVEYOR_ARCH_CONFIG: x64
+    - job_name: VS2022 Win8 arm
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2022
+      MPT_APPVEYOR_TARGET: win8
+      MPT_APPVEYOR_ARCH: arm
+      MPT_APPVEYOR_ARCH_CONFIG: ARM
     - job_name: Package
       job_depends_on: Builds
 
@@ -177,10 +183,11 @@ for:
             }
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 x86'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 amd64'
-            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win8 arm'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 arm64'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 arm64ec'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 x86'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 amd64'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win8 arm'
       - build\tools\7zip\7z.exe x -y bin\*.7z
 
     build_script:

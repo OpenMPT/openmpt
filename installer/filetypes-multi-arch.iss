@@ -136,4 +136,15 @@ Root: HKA; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\OpenMPT.
 #undef OpenMPTarch
 #undef OpenMPTFile
 
+#define Component "archarm64"
+#define OpenMPTFile "OpenMPTFilearm64ec"
+#define OpenMPTarch "OpenMPTarm64ec"
+#define OpenMPTarchPath "arm64ec"
+#define OpenMPTarchFriendly "OpenMPT (arm64ec)"
+#include "filetypes-multi-arch-per-arch.iss"
+#undef OpenMPTarchFriendly
+#undef OpenMPTarchPath
+#undef OpenMPTarch
+#undef OpenMPTFile
+
 
