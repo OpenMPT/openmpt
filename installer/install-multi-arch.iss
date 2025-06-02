@@ -149,17 +149,13 @@ Source: ..\packageTemplate\ExtraKeymaps\*.*; DestDir: {app}\ExtraKeymaps; Flags:
 
 Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
 Name: {autodesktop}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm'); MinVersion: 6.2
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
-Name: {autodesktop}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm');
+Name: {autodesktop}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64');
 
 Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('x86')
 Name: {group}\OpenMPT; Filename: {app}\bin\amd64\OpenMPT.exe; Check: CheckDefaultArch('amd64')
-Name: {group}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm'); MinVersion: 6.2
-Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
-Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
-Name: {group}\OpenMPT; Filename: {app}\bin\x86\OpenMPT.exe; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
+Name: {group}\OpenMPT; Filename: {app}\bin\arm\OpenMPT.exe; Check: CheckDefaultArch('arm');
+Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaultArch('arm64');
 
 Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: archx86
 Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
@@ -183,10 +179,8 @@ Filename: "{app}\Release Notes.html"; Description: "View Release Notes"; Flags: 
 
 Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('x86')
 Filename: {app}\bin\amd64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('amd64')
-Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm'); MinVersion: 6.2
-Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm'); OnlyBelowVersion: 6.2
-Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64'); MinVersion: 10.0.19044
-Filename: {app}\bin\x86\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64'); OnlyBelowVersion: 10.0.19044
+Filename: {app}\bin\arm\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm');
+Filename: {app}\bin\arm64\OpenMPT.exe; Parameters: """{code:RandomExampleFile}"""; Description: {cm:LaunchProgram,OpenMPT}; Flags: runasoriginaluser nowait postinstall skipifsilent; Check: CheckDefaultArch('arm64');
 
 
 
@@ -275,11 +269,25 @@ begin
 			end;
 		paArm32:
 			begin
-				Result := 'arm';
+				if (GetWindowsVersion >= $06020000) then
+				begin
+					Result := 'arm';
+				end
+				else
+				begin
+					Result := 'x86';
+				end;
 			end;
 		paARM64:
 			begin
-				Result := 'arm64';
+				if (GetWindowsVersion >= $0A004A64) then
+				begin
+					Result := 'arm64';
+				end
+				else
+				begin
+					Result := 'x86';
+				end;
 			end;
 	end;
 end;
