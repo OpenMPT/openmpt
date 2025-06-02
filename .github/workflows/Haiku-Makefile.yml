@@ -1,0 +1,91 @@
+name: Haiku Makefile
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: 'r1beta5', deps: sys   }
+          - { version: 'r1beta5', deps: local }
+          - { version: 'r1beta5', deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    # disable due to <https://github.com/cross-platform-actions/action/issues/103> and <https://github.com/cross-platform-actions/action/issues/104>
+    if: false
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          pkgman refresh
+          pkgman full-sync -y
+          pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
+    - name: Build
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          make -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: Test
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          make -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
