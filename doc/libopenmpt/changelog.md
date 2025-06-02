@@ -10,6 +10,10 @@ is just a high-level summary.
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
     UTF8.
 
+ *  [**Change**] TCB was added to the list of supported file extension. ModLand
+    and Fujiology use this extension for TCB Tracker modules, instead of the
+    canonical .MOD extension.
+
  *  miniz: v3.0.2 (2023-01-15).
 
 ### libopenmpt 0.8.0 (2025-05-31)
