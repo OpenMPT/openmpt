@@ -663,8 +663,8 @@
 /include/premake/OpenMPT-expected.txt
 /include/premake/OpenMPT-version.txt
 /include/premake/bin
-/include/premake/build/gmake2.unix/bin
-/include/premake/build/gmake2.unix/obj
+/include/premake/build/gmake.unix/bin
+/include/premake/build/gmake.unix/obj
 /include/premake/build/vs2017/.vs
 /include/premake/build/vs2017/bin
 /include/premake/build/vs2017/obj
