@@ -298,7 +298,7 @@
    defines { "NDEBUG" }
    symbols "On"
 		if not _OPTIONS["clang"] then
-			flags { "LinkTimeOptimization" }
+			linktimeoptimization "On"
 			if _ACTION >= "vs2022" then
 				buildoptions { "/Gw" }
 				buildoptions { "/Zc:checkGwOdr" }
@@ -314,7 +314,7 @@
    defines { "NDEBUG" }
    symbols "On"
 		if not _OPTIONS["clang"] then
-			flags { "LinkTimeOptimization" }
+			linktimeoptimization "On"
 			if _ACTION >= "vs2022" then
 				buildoptions { "/Gw" }
 				buildoptions { "/Zc:checkGwOdr" }

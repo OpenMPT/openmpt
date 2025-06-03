@@ -1,7 +1,7 @@
 
 function mpt_use_mfc ()
 	filter {}
-	flags { "MFC" }
+	mfc "On"
 	defines {
 		"_CSTRING_DISABLE_NARROW_WIDE_CONVERSION",
 		"_AFX_NO_MFC_CONTROLS_IN_DIALOGS",
