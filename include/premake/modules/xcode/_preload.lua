@@ -1,7 +1,7 @@
 ---
 -- xcode/_preload.lua
 -- Define the Apple XCode actions and new APIs.
--- Copyright (c) 2009-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2009-2015 Jess Perkins and the Premake project
 ---
 
 	local p = premake
@@ -69,7 +69,7 @@
 
 		-- Xcode always uses Mac OS X path and naming conventions
 
-		toolset  = "clang",
+		toolset  = "clang", -- TODO: os.target() == p.MACOSX and p.checkVersion(minOSVersion, "<10.7") -> gcc
 
 		-- The capabilities of this action
 

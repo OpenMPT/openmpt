@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6332880B-CF3B-887C-58B7-9E7CC4BF937C}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <OutDir>bin\x86\Release\</OutDir>
+    <IntDir>obj\x86\Release\Web\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <OutDir>bin\x64\Release\</OutDir>
+    <IntDir>obj\x64\Release\Web\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <OutDir>bin\x86\Debug\</OutDir>
+    <IntDir>obj\x86\Debug\Web\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <OutDir>bin\x64\Debug\</OutDir>
+    <IntDir>obj\x64\Debug\Web\</IntDir>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeOutput>$(OutDir)Web</NMakeOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NMakeOutput>$(OutDir)Web</NMakeOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeOutput>$(OutDir)Web</NMakeOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeOutput>$(OutDir)Web</NMakeOutput>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\website\.gitignore" />
+    <None Include="..\..\website\README.md" />
+    <None Include="..\..\website\babel.config.js" />
+    <None Include="..\..\website\blog\2019-08-31-community-update-1.md" />
+    <None Include="..\..\website\blog\2019-10-23- community-update-2.md" />
+    <None Include="..\..\website\blog\2020-01-08-community-update-3.md" />
+    <None Include="..\..\website\blog\2020-04-07-community-update-4.md" />
+    <None Include="..\..\website\blog\2020-08-04-community-update-5.md" />
+    <None Include="..\..\website\blog\2020-11-02-community-udpate-6.md" />
+    <None Include="..\..\website\blog\2021-02-24-community-update-7.md" />
+    <None Include="..\..\website\blog\2021-04-20-community-update-8.md" />
+    <None Include="..\..\website\blog\2021-08-01-community-update-9.md" />
+    <None Include="..\..\website\blog\2021-11-21-community-update-10.md" />
+    <None Include="..\..\website\blog\authors.yml" />
+    <None Include="..\..\website\community\modules.md" />
+    <None Include="..\..\website\community\showcase.md" />
+    <None Include="..\..\website\community\support.md" />
+    <None Include="..\..\website\docusaurus.config.js" />
+    <None Include="..\..\website\package.json" />
+    <None Include="..\..\website\sidebars-community.js" />
+    <None Include="..\..\website\sidebars.js" />
+    <None Include="..\..\website\src\components\Grid.js" />
+    <None Include="..\..\website\src\components\Sponsors.js" />
+    <None Include="..\..\website\src\css\custom.css" />
+    <None Include="..\..\website\src\pages\download.js" />
+    <None Include="..\..\website\src\pages\index.js" />
+    <None Include="..\..\website\static\.nojekyll" />
+    <None Include="..\..\website\static\img\favicon.ico" />
+    <None Include="..\..\website\static\js\localizeLastUpdatedDate.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\website\static\img\premake-logo.png" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

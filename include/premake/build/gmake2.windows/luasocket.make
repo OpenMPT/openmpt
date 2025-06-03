@@ -11,13 +11,22 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
 # Configurations
 # #############################################
 
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
 RESCOMP = windres
 INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim
 FORCE_INCLUDE +=
@@ -35,7 +44,7 @@ ifeq ($(config),release_x86)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x86/Release/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\)
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x86/Release/luashim-lib.lib -lws2_32
@@ -46,7 +55,7 @@ else ifeq ($(config),release_x64)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x64/Release/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\)
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x64/Release/luashim-lib.lib -lws2_32
@@ -57,7 +66,7 @@ else ifeq ($(config),debug_x86)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x86/Debug/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\)
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 LIBS += bin/x86/Debug/luashim-lib.lib -lws2_32
@@ -68,7 +77,7 @@ else ifeq ($(config),debug_x64)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x64/Debug/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\)
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 LIBS += bin/x64/Debug/luashim-lib.lib -lws2_32

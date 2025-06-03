@@ -1,7 +1,7 @@
 --
 -- tests/actions/vstudio/vc2010/test_compile_settings.lua
 -- Validate compiler settings in Visual Studio 2019 C/C++ projects.
--- Copyright (c) 2011-2020 Jason Perkins and the Premake project
+-- Copyright (c) 2011-2020 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -79,6 +79,20 @@
 		]]
 	end
 
+	function suite.openmpOnWithClang()
+		toolset "clang"
+		openmp "On"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<OpenMPSupport>true</OpenMPSupport>
+	<AdditionalOptions>/openmp %(AdditionalOptions)</AdditionalOptions>
+		]]
+	end
+
 --
 -- Check ClCompile for ScanForModuleDependencies
 --
@@ -91,6 +105,7 @@
 	<PrecompiledHeader>NotUsing</PrecompiledHeader>
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
 	<ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
 		]]
 	end
@@ -103,6 +118,59 @@
 	<PrecompiledHeader>NotUsing</PrecompiledHeader>
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
 	<ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+		]]
+	end
+
+	function suite.UseStandardPreprocessorOn()
+		usestandardpreprocessor 'On'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<UseStandardPreprocessor>true</UseStandardPreprocessor>
+		]]
+	end
+
+	function suite.UseStandardPreprocessorOff()
+		usestandardpreprocessor 'Off'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<UseStandardPreprocessor>false</UseStandardPreprocessor>
+		]]
+	end
+
+	function suite.enableModulesOff()
+		enablemodules 'Off'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<EnableModules>false</EnableModules>
+		]]
+	end
+
+	function suite.enableModulesOn()
+		enablemodules 'On'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<EnableModules>true</EnableModules>
 		]]
 	end

@@ -1,7 +1,7 @@
 /**
  * \file   string_endswith.c
  * \brief  Determines if a string ends with the given sequence.
- * \author Copyright (c) 2002-2009 Jason Perkins and the Premake project
+ * \author Copyright (c) 2002-2009 Jess Perkins and the Premake project
  */
 
 #include "premake.h"
@@ -17,7 +17,7 @@ int string_endswith(lua_State* L)
 	{
 		size_t hlen = strlen(haystack);
 		size_t nlen = strlen(needle);
-		if (hlen >= nlen) 
+		if (hlen >= nlen)
 		{
 			lua_pushboolean(L, strcmp(haystack + hlen - nlen, needle) == 0);
 			return 1;

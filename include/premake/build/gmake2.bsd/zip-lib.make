@@ -11,16 +11,25 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
 # Configurations
 # #############################################
 
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
 RESCOMP = windres
 INCLUDES += -I../../contrib/libzip/include
-FORCE_INCLUDE +=
+FORCE_INCLUDE += -include unistd.h
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=

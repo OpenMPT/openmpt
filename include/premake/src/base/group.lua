@@ -1,7 +1,7 @@
 ---
 -- group.lua
--- A psuedo-configuration container to represent project groups.
--- Copyright (c) 2014 Jason Perkins and the Premake project
+-- A pseudo-configuration container to represent project groups.
+-- Copyright (c) 2014 Jess Perkins and the Premake project
 ---
 
 	local p = premake

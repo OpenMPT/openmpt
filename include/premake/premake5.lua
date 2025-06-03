@@ -96,7 +96,7 @@
 
 	newoption {
 		trigger     = "bytecode",
-		description = "Embed scripts as bytecode instead of stripped souce code"
+		description = "Embed scripts as bytecode instead of stripped source code"
 	}
 
 	newoption {
@@ -112,10 +112,9 @@
 			--
 			{ "Win32", "Same as x86" },
 			{ "x64", "Same as x86_64" },
-			--
-			{ "default", "Generates default platforms for targets, x86 and x86_64 projects for Windows." }
 		},
-		default = "default",
+		-- "Generates default platforms for targets, x86 and x86_64 projects for Windows." }
+		default = nil,
 	}
 
 --
@@ -133,7 +132,7 @@
 		configurations { "Release", "Debug" }
 		location ( _OPTIONS["to"] )
 
-		flags { "StaticRuntime", "MultiProcessorCompile" }
+		flags { "MultiProcessorCompile" }
 		warnings "Extra"
 
 		if not _OPTIONS["no-zlib"] then
@@ -168,7 +167,7 @@
 		filter { "system:windows", "options:arch=x86_64 or arch=x64" }
 			platforms { "x64" }
 
-		filter { "system:windows", "options:arch=default" }
+		filter { "system:windows", "options:not arch" }
 			platforms { "x86", "x64" }
 
 		filter "configurations:Debug"
@@ -189,6 +188,10 @@
 		-- MinGW AR does not handle LTO out of the box and need a plugin to be setup
 		filter { "system:windows", "configurations:Release", "toolset:not mingw" }
 			flags		{ "LinkTimeOptimization" }
+
+		filter { "system:uwp" }
+			systemversion "latest:latest"
+			consumewinrtextension "false"
 
 	project "Premake5"
 		targetname  "premake5"
@@ -234,7 +237,7 @@
 			files { "src/**.rc" }
 
 		filter "toolset:mingw"
-			links		{ "crypt32" }
+			links		{ "crypt32", "bcrypt" }
 
 		filter "system:linux or bsd or hurd"
 			defines     { "LUA_USE_POSIX", "LUA_USE_DLOPEN" }
@@ -252,8 +255,8 @@
 		filter "system:macosx"
 			defines     { "LUA_USE_MACOSX" }
 			links       { "CoreServices.framework", "Foundation.framework", "Security.framework", "readline" }
-			
-		filter "system:linux"
+
+		filter { "system:linux", "toolset:not cosmocc" }
 			links		{ "uuid" }
 
 		filter { "system:macosx", "action:gmake" }
@@ -270,7 +273,26 @@
 			defines     { "LUA_USE_POSIX", "LUA_USE_DLOPEN", "_BSD_SOURCE" }
 			links       { "network", "bsd" }
 
+if premake.action.supports("None") then
+	project "Web"
+		kind "None"
 
+		files
+		{
+			"website/blog/**",
+			"website/community/**",
+			"website/doc/**",
+			"website/src/**",
+			"website/static/**",
+			"website/*"
+		}
+		-- ensure that "website/node_modules/**" is not there (generated files)
+
+	project "Github"
+		kind "None"
+
+		files ".github/**"
+end
 	-- optional 3rd party libraries
 	group "contrib"
 		include "contrib/lua"
@@ -286,13 +308,14 @@
 			include "contrib/curl"
 		end
 
-	group "Binary Modules"
-		include "binmodules/example"
+	if _OPTIONS["cc"] ~= "cosmocc" then
+		group "Binary Modules"
+			include "binmodules/example"
 
-		if not _OPTIONS["no-luasocket"] then
-			include "binmodules/luasocket"
-		end
-
+			if not _OPTIONS["no-luasocket"] then
+				include "binmodules/luasocket"
+			end
+	end
 --
 -- A more thorough cleanup.
 --

@@ -12,7 +12,13 @@
 		</FileRef>
 	</Group>
 	<FileRef
+		location = "group:Github.xcodeproj">
+	</FileRef>
+	<FileRef
 		location = "group:Premake5.xcodeproj">
+	</FileRef>
+	<FileRef
+		location = "group:Web.xcodeproj">
 	</FileRef>
 	<Group
 		location = "container:"

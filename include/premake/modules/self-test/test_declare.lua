@@ -3,8 +3,8 @@
 --
 -- Declare unit test suites, and fetch tests from them.
 --
--- Author Jason Perkins
--- Copyright (c) 2008-2016 Jason Perkins and the Premake project.
+-- Author Jess Perkins
+-- Copyright (c) 2008-2016 Jess Perkins and the Premake project.
 ---
 
 	local p = premake
@@ -168,10 +168,10 @@
 					end
 				end
 			end
-			
+
 			return tests
 		else
-			local suite, test, err = _.checkTestIdentifier(_.suites, suiteName, testName)		
+			local suite, test, err = _.checkTestIdentifier(_.suites, suiteName, testName)
 			if err then
 				return nil, err
 			end
@@ -193,7 +193,7 @@
 -- Parse a test identifier and split it into separate suite and test names.
 --
 -- @param identifier
---    A test identifier, which may be nil or an empty string, a test suite 
+--    A test identifier, which may be nil or an empty string, a test suite
 --    name, or a suite and test with the format "suiteName.testName".
 -- @return
 --    Two values: the suite name and the test name, or nil if not included

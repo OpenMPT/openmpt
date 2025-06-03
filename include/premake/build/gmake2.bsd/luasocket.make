@@ -11,13 +11,22 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
 # Configurations
 # #############################################
 
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
 RESCOMP = windres
 INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim
 FORCE_INCLUDE +=
@@ -33,7 +42,7 @@ endef
 
 ifeq ($(config),release)
 TARGETDIR = ../../bin/release
-TARGET = $(TARGETDIR)/libluasocket.so
+TARGET = $(TARGETDIR)/luasocket.so
 OBJDIR = obj/Release/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
@@ -44,7 +53,7 @@ ALL_LDFLAGS += $(LDFLAGS) -shared -s
 
 else ifeq ($(config),debug)
 TARGETDIR = ../../bin/debug
-TARGET = $(TARGETDIR)/libluasocket.so
+TARGET = $(TARGETDIR)/luasocket.so
 OBJDIR = obj/Debug/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra

@@ -1,0 +1,322 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		0082D9A750966E59D3149FE7 /* Web */ = {isa = PBXFileReference; explicitFileType = nil; includeInIndex = 0; name = Web; path = Web; sourceTree = BUILT_PRODUCTS_DIR; };
+		14696771ACE154E3D8C845B1 /* 2021-04-20-community-update-8.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2021-04-20-community-update-8.md"; path = "../../website/blog/2021-04-20-community-update-8.md"; sourceTree = "<group>"; };
+		159742376CFCB5291F0AD077 /* premake-logo.png */ = {isa = PBXFileReference; lastKnownFileType = text; name = "premake-logo.png"; path = "../../website/static/img/premake-logo.png"; sourceTree = "<group>"; };
+		17CEEBF46531E226DB50E234 /* showcase.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = showcase.md; path = ../../website/community/showcase.md; sourceTree = "<group>"; };
+		188C5A53B10447C5DCEB3893 /* 2021-02-24-community-update-7.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2021-02-24-community-update-7.md"; path = "../../website/blog/2021-02-24-community-update-7.md"; sourceTree = "<group>"; };
+		22478D706AB871A2AF5743B0 /* package.json */ = {isa = PBXFileReference; lastKnownFileType = text; name = package.json; path = ../../website/package.json; sourceTree = "<group>"; };
+		240954B84A2F846AB1367AF8 /* sidebars.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = sidebars.js; path = ../../website/sidebars.js; sourceTree = "<group>"; };
+		2817E00BC08FCD7DEC76BE4B /* 2020-01-08-community-update-3.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2020-01-08-community-update-3.md"; path = "../../website/blog/2020-01-08-community-update-3.md"; sourceTree = "<group>"; };
+		2BD45502101B5D3494088B42 /* docusaurus.config.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = docusaurus.config.js; path = ../../website/docusaurus.config.js; sourceTree = "<group>"; };
+		30F24FB9C96A3D2BF5512DF9 /* 2021-08-01-community-update-9.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2021-08-01-community-update-9.md"; path = "../../website/blog/2021-08-01-community-update-9.md"; sourceTree = "<group>"; };
+		5A6A60190D6069CB5E82C659 /* localizeLastUpdatedDate.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = localizeLastUpdatedDate.js; path = ../../website/static/js/localizeLastUpdatedDate.js; sourceTree = "<group>"; };
+		5E7A4487F6F231F922D922C7 /* 2020-11-02-community-udpate-6.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2020-11-02-community-udpate-6.md"; path = "../../website/blog/2020-11-02-community-udpate-6.md"; sourceTree = "<group>"; };
+		63CA3136BF0B84A89265CF76 /* Grid.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = Grid.js; path = ../../website/src/components/Grid.js; sourceTree = "<group>"; };
+		69B166B42D1D28666BC0CCF4 /* support.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = support.md; path = ../../website/community/support.md; sourceTree = "<group>"; };
+		7153C427A0E593197BF2D267 /* authors.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = authors.yml; path = ../../website/blog/authors.yml; sourceTree = "<group>"; };
+		8178444224666AF4B38C4A82 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = README.md; path = ../../website/README.md; sourceTree = "<group>"; };
+		884E2CB8CC9CD22A0EC40AF8 /* Sponsors.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = Sponsors.js; path = ../../website/src/components/Sponsors.js; sourceTree = "<group>"; };
+		91EBBFFD2A63AD6F564A9E3D /* 2019-08-31-community-update-1.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2019-08-31-community-update-1.md"; path = "../../website/blog/2019-08-31-community-update-1.md"; sourceTree = "<group>"; };
+		A65F8A9BC82B37CD04E060DB /* custom.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = custom.css; path = ../../website/src/css/custom.css; sourceTree = "<group>"; };
+		A84E09F540C5F7676CACE835 /* 2020-08-04-community-update-5.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2020-08-04-community-update-5.md"; path = "../../website/blog/2020-08-04-community-update-5.md"; sourceTree = "<group>"; };
+		AC7034B26FDBF664AE7F9AF2 /* babel.config.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = babel.config.js; path = ../../website/babel.config.js; sourceTree = "<group>"; };
+		AD99D46B04273EDDDCA052AB /* .nojekyll */ = {isa = PBXFileReference; lastKnownFileType = text; name = .nojekyll; path = ../../website/static/.nojekyll; sourceTree = "<group>"; };
+		AE3F3909A800F57BE1FFF749 /* favicon.ico */ = {isa = PBXFileReference; lastKnownFileType = text; name = favicon.ico; path = ../../website/static/img/favicon.ico; sourceTree = "<group>"; };
+		BCB79DEC80235F9EBEC7042C /* modules.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = modules.md; path = ../../website/community/modules.md; sourceTree = "<group>"; };
+		BD1C198153452B7314AB87C1 /* 2021-11-21-community-update-10.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2021-11-21-community-update-10.md"; path = "../../website/blog/2021-11-21-community-update-10.md"; sourceTree = "<group>"; };
+		C0E5C204E9207AB6D0BC0844 /* index.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = index.js; path = ../../website/src/pages/index.js; sourceTree = "<group>"; };
+		CBD631F4E2E8CD26D304C834 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; name = .gitignore; path = ../../website/.gitignore; sourceTree = "<group>"; };
+		D8186524257B5B569B9A5B64 /* download.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = download.js; path = ../../website/src/pages/download.js; sourceTree = "<group>"; };
+		E51290717D8A7DE3A9716EB1 /* 2020-04-07-community-update-4.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2020-04-07-community-update-4.md"; path = "../../website/blog/2020-04-07-community-update-4.md"; sourceTree = "<group>"; };
+		E6C9A9337CF2BB253E591773 /* 2019-10-23- community-update-2.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2019-10-23- community-update-2.md"; path = "../../website/blog/2019-10-23- community-update-2.md"; sourceTree = "<group>"; };
+		EEFDDF5C0127BC0E3518A59C /* sidebars-community.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = "sidebars-community.js"; path = "../../website/sidebars-community.js"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CA141397B6051F49083CB9D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7532A5C3219565F5E01DDC03 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXGroup section */
+		5775D4184366DFCA959E7A58 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				D361F74B1BD2DB7D6071AD8B /* components */,
+				ED4640513D59D503BFD80691 /* css */,
+				A55B457F49ADE3315BE62BBF /* pages */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		63FE36DE6F2EE6D0C8D1651E /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				CBD631F4E2E8CD26D304C834 /* .gitignore */,
+				8178444224666AF4B38C4A82 /* README.md */,
+				AC7034B26FDBF664AE7F9AF2 /* babel.config.js */,
+				7825861024884642E310BC50 /* blog */,
+				88A1EC722B901324BAB5F2B2 /* community */,
+				2BD45502101B5D3494088B42 /* docusaurus.config.js */,
+				22478D706AB871A2AF5743B0 /* package.json */,
+				EEFDDF5C0127BC0E3518A59C /* sidebars-community.js */,
+				240954B84A2F846AB1367AF8 /* sidebars.js */,
+				5775D4184366DFCA959E7A58 /* src */,
+				DAC50D587E10968A98E16398 /* static */,
+				A6C936B49B3FADE6EA134CF4 /* Products */,
+			);
+			name = Web;
+			sourceTree = "<group>";
+		};
+		7825861024884642E310BC50 /* blog */ = {
+			isa = PBXGroup;
+			children = (
+				91EBBFFD2A63AD6F564A9E3D /* 2019-08-31-community-update-1.md */,
+				E6C9A9337CF2BB253E591773 /* 2019-10-23- community-update-2.md */,
+				2817E00BC08FCD7DEC76BE4B /* 2020-01-08-community-update-3.md */,
+				E51290717D8A7DE3A9716EB1 /* 2020-04-07-community-update-4.md */,
+				A84E09F540C5F7676CACE835 /* 2020-08-04-community-update-5.md */,
+				5E7A4487F6F231F922D922C7 /* 2020-11-02-community-udpate-6.md */,
+				188C5A53B10447C5DCEB3893 /* 2021-02-24-community-update-7.md */,
+				14696771ACE154E3D8C845B1 /* 2021-04-20-community-update-8.md */,
+				30F24FB9C96A3D2BF5512DF9 /* 2021-08-01-community-update-9.md */,
+				BD1C198153452B7314AB87C1 /* 2021-11-21-community-update-10.md */,
+				7153C427A0E593197BF2D267 /* authors.yml */,
+			);
+			name = blog;
+			sourceTree = "<group>";
+		};
+		88A1EC722B901324BAB5F2B2 /* community */ = {
+			isa = PBXGroup;
+			children = (
+				BCB79DEC80235F9EBEC7042C /* modules.md */,
+				17CEEBF46531E226DB50E234 /* showcase.md */,
+				69B166B42D1D28666BC0CCF4 /* support.md */,
+			);
+			name = community;
+			sourceTree = "<group>";
+		};
+		A55B457F49ADE3315BE62BBF /* pages */ = {
+			isa = PBXGroup;
+			children = (
+				D8186524257B5B569B9A5B64 /* download.js */,
+				C0E5C204E9207AB6D0BC0844 /* index.js */,
+			);
+			name = pages;
+			sourceTree = "<group>";
+		};
+		A6C936B49B3FADE6EA134CF4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0082D9A750966E59D3149FE7 /* Web */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA625739FCE8822BCF2CE579 /* js */ = {
+			isa = PBXGroup;
+			children = (
+				5A6A60190D6069CB5E82C659 /* localizeLastUpdatedDate.js */,
+			);
+			name = js;
+			sourceTree = "<group>";
+		};
+		D361F74B1BD2DB7D6071AD8B /* components */ = {
+			isa = PBXGroup;
+			children = (
+				63CA3136BF0B84A89265CF76 /* Grid.js */,
+				884E2CB8CC9CD22A0EC40AF8 /* Sponsors.js */,
+			);
+			name = components;
+			sourceTree = "<group>";
+		};
+		DAC50D587E10968A98E16398 /* static */ = {
+			isa = PBXGroup;
+			children = (
+				AD99D46B04273EDDDCA052AB /* .nojekyll */,
+				F5EFCAB902AC7A2B7796E8F9 /* img */,
+				AA625739FCE8822BCF2CE579 /* js */,
+			);
+			name = static;
+			sourceTree = "<group>";
+		};
+		ED4640513D59D503BFD80691 /* css */ = {
+			isa = PBXGroup;
+			children = (
+				A65F8A9BC82B37CD04E060DB /* custom.css */,
+			);
+			name = css;
+			sourceTree = "<group>";
+		};
+		F5EFCAB902AC7A2B7796E8F9 /* img */ = {
+			isa = PBXGroup;
+			children = (
+				AE3F3909A800F57BE1FFF749 /* favicon.ico */,
+				159742376CFCB5291F0AD077 /* premake-logo.png */,
+			);
+			name = img;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Web" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 1;
+			mainGroup = 63FE36DE6F2EE6D0C8D1651E /* Web */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				47F298AD80AD5F1F104496ED /* Web */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		39FB943725EC9FE978243A77 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A3A8AD8E8F99B940E1D153CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		34A2412DE105015F9F8D776D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					PREMAKE_COMPRESSION,
+					CURL_STATICLIB,
+					PREMAKE_CURL,
+					_DEBUG,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/x64/Debug/Web;
+				ONLY_ACTIVE_ARCH = YES;
+				SYMROOT = bin/x64/Debug;
+				WARNING_CFLAGS = "-Wall -Wextra";
+			};
+			name = Debug;
+		};
+		71158BB6882826E8784421F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/x64/Release;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				PRODUCT_NAME = Web;
+			};
+			name = Release;
+		};
+		DA9F1AA72AB2AF59AD30E0E7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					PREMAKE_COMPRESSION,
+					CURL_STATICLIB,
+					PREMAKE_CURL,
+					NDEBUG,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/x64/Release/Web;
+				ONLY_ACTIVE_ARCH = NO;
+				SYMROOT = bin/x64/Release;
+				WARNING_CFLAGS = "-Wall -Wextra";
+			};
+			name = Release;
+		};
+		FC4711BC9F35386E2E5B17FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				PRODUCT_NAME = Web;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Web" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA9F1AA72AB2AF59AD30E0E7 /* Release */,
+				DA9F1AA72AB2AF59AD30E0E7 /* Release */,
+				34A2412DE105015F9F8D776D /* Debug */,
+				34A2412DE105015F9F8D776D /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B84F5BF6A44067A8F6780236 /* Build configuration list for PBXNativeTarget "Web" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				71158BB6882826E8784421F6 /* Release */,
+				71158BB6882826E8784421F6 /* Release */,
+				FC4711BC9F35386E2E5B17FC /* Debug */,
+				FC4711BC9F35386E2E5B17FC /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+};
+rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

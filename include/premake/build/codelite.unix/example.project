@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="example" InternalType="Library">
-  <Plugins/>
+<CodeLite_Project Name="example" InternalType="Library" Version="11000">
   <Description/>
-<VirtualDirectory Name="example">
-  <File Name="../../binmodules/example/main.c"/>
-  <File Name="../../binmodules/example/premake5.lua"/>
-</VirtualDirectory>
+  <VirtualDirectory Name="example">
+    <File Name="../../binmodules/example/main.c"/>
+    <File Name="../../binmodules/example/premake5.lua"/>
+  </VirtualDirectory>
   <Dependencies Name="Release">
     <Project Name="luashim-lib"/>
   </Dependencies>
@@ -23,7 +22,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -31,10 +30,11 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-shared;-Wl,-soname=example.so;bin/Release/libluashim-lib.a">
+      <Linker Options="-shared;-Wl,-soname=example.so;bin/Release/libluashim-lib.a" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/example.so" IntermediateDirectory="obj/Release/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -43,7 +43,18 @@
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
-      <CustomBuild Enabled="no"/>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
       <AdditionalRules>
         <CustomPostBuild/>
         <CustomPreBuild/>
@@ -56,7 +67,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
@@ -64,10 +75,11 @@
         <Preprocessor Value="PREMAKE_CURL"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-shared;-Wl,-soname=example.so;bin/Debug/libluashim-lib.a">
+      <Linker Options="-shared;-Wl,-soname=example.so;bin/Debug/libluashim-lib.a" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/debug/example.so" IntermediateDirectory="obj/Debug/example" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -76,7 +88,18 @@
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
-      <CustomBuild Enabled="no"/>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
       <AdditionalRules>
         <CustomPostBuild/>
         <CustomPreBuild/>

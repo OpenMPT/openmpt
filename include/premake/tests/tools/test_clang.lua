@@ -1,7 +1,7 @@
 --
 -- tests/test_clang.lua
 -- Automated test suite for the GCC toolset interface.
--- Copyright (c) 2009-2013 Jason Perkins and the Premake project
+-- Copyright (c) 2009-2013 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -26,6 +26,27 @@
 		cfg = test.getconfig(prj, "Debug")
 	end
 
+
+--
+-- Check the selection of tools based on the target system.
+--
+
+	function suite.tools_onDefaults()
+		prepare()
+		test.isequal("clang", clang.gettoolname(cfg, "cc"))
+		test.isequal("clang++", clang.gettoolname(cfg, "cxx"))
+		test.isequal("ar", clang.gettoolname(cfg, "ar"))
+		test.isequal("windres", clang.gettoolname(cfg, "rc"))
+	end
+
+	function suite.tools_forVersion()
+		toolset "clang-16"
+		prepare()
+		test.isequal("clang-16", clang.gettoolname(cfg, "cc"))
+		test.isequal("clang++-16", clang.gettoolname(cfg, "cxx"))
+		test.isequal("ar-16", clang.gettoolname(cfg, "ar"))
+		test.isequal("windres-16", clang.gettoolname(cfg, "rc"))
+	end
 
 --
 -- Check Mac OS X deployment target flags
@@ -86,8 +107,25 @@
 	end
 
 --
+-- Check handling of linker flag.
+--
+
+function suite.ldflags_linker_lld()
+	linker "LLD"
+	prepare()
+	test.contains("-fuse-ld=lld", clang.getldflags(cfg))
+end
+
+--
 -- Check the translation of CXXFLAGS.
 --
+
+function suite.onSanitizeAddress()
+	sanitize { "Address" }
+	prepare()
+	test.contains({ "-fsanitize=address" }, clang.getcxxflags(cfg))
+	test.contains({ "-fsanitize=address" }, clang.getldflags(cfg))
+end
 
 function suite.cxxflags_onSanitizeFuzzer()
 	sanitize { "Fuzzer" }

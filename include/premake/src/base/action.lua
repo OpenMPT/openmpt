@@ -1,7 +1,7 @@
 ---
 -- action.lua
 -- Work with the list of registered actions.
--- Copyright (c) 2002-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2015 Jess Perkins and the Premake project
 ---
 
 	local p = premake
@@ -211,10 +211,11 @@
 	function action.set(name)
 		_ACTION = name
 
-		-- Some actions imply a particular operating system
+		-- Some actions imply a particular operating system or architecture
 		local act = action.get(name)
 		if act then
 			_TARGET_OS = act.targetos or _TARGET_OS
+			_TARGET_ARCH =  act.targetarch or _TARGET_ARCH
 		end
 
 		-- Some are implemented in standalone modules
@@ -257,6 +258,46 @@
 		return false
 	end
 
+---
+-- Determines if an action supports a particular toolset.
+--
+-- @param language
+--    The language that toolset belongs.
+-- @param toolset
+--    The toolset to check.
+-- @returns
+--    True if the toolset is supported, false otherwise.
+---
+	function action.supportsToolset(language, toolset)
+		if not language or not toolset then
+			return true
+		end
+		local self = action.current()
+		if not self then
+			return false
+		end
+		local language_keys_map = {
+			["C"] = "cc",
+			["C++"] = "cc",
+			["C#"] = "dotnet",
+		}
+		local language_key = language_keys_map[language]
+		if not language_key then
+			p.warn("Unknown mapping for language %s", language)
+			return true
+		end
+		if not self.valid_tools then
+			return true
+		end
+		local valid_tools = self.valid_tools[language_key]
+		if not valid_tools then
+			return true
+		end
+		toolset = p.tools.normalize(toolset)
+		toolset = toolset:explode("-", true, 1)[1] -- get rid of version
+
+		return table.contains(valid_tools, toolset)
+	end
 
 --
 -- Determines if an action supports a particular configuration.

@@ -1,7 +1,7 @@
 --
 -- tests/config/test_targetinfo.lua
 -- Test the config object's build target accessor.
--- Copyright (c) 2011-2013 Jason Perkins and the Premake project
+-- Copyright (c) 2011-2013 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -149,7 +149,7 @@
 
 
 --
--- Name should use "lib and ".a" for Mac static libraries.
+-- Name should use "lib" and ".a" for Mac static libraries.
 --
 
 	function suite.nameUsesLib_onMacStaticLib()

@@ -40,7 +40,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -59,7 +59,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-O0;-fPIC;-g;-std=c++11;-fno-exceptions;-fno-stack-protector;-fno-rtti;-include forced_include1.h;-include forced_include2.h;-opt1;-opt2" C_Options="-O0;-fPIC;-g;-include forced_include1.h;-include forced_include2.h;-opt1;-opt2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-O0;-fPIC;-g;-std=c++11;-fno-exceptions;-fno-stack-protector;-fno-rtti;-include forced_include1.h;-include forced_include2.h;-opt1;-opt2" C_Options="-O0;-fPIC;-g;-include forced_include1.h;-include forced_include2.h;-opt1;-opt2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -69,7 +69,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="dir"/>
         <IncludePath Value="dir2"/>
       </Compiler>
@@ -81,7 +81,17 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-isystem sysdir;-isystem sysdir2" C_Options="-isystem sysdir;-isystem sysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-isystem sysdir;-isystem sysdir2" C_Options="-isystem sysdir;-isystem sysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+      </Compiler>
+		]]
+	end
+
+	function suite.OnProjectCfg_IncludeDirsAfter()
+		includedirsafter { "sysdir", "sysdir2/"}
+		prepare()
+		codelite.project.compiler(cfg)
+		test.capture [[
+      <Compiler Options="-idirafter sysdir;-idirafter sysdir2" C_Options="-idirafter sysdir;-idirafter sysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -92,11 +102,22 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <Preprocessor Value="TEST"/>
         <Preprocessor Value="DEF"/>
         <Preprocessor Value="VAL=1"/>
         <Preprocessor Value="ESCAPE=&quot;WITH\ SPACE&quot;"/>
+      </Compiler>
+		]]
+	end
+
+	function suite.OnProjectCfg_Undefines()
+		defines { "TEST" }
+		undefines { "UNDEF" }
+		prepare()
+		codelite.project.compiler(cfg)
+		test.capture [[
+      <Compiler Options="-DTEST;-UUNDEF" C_Options="-DTEST;-UUNDEF" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -106,7 +127,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="pch.h" PCHInCommandLine="yes" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="pch.h" PCHInCommandLine="yes" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -124,7 +145,7 @@
 		prepare()
 		codelite.project.linker(cfg)
 		test.capture [[
-      <Linker Required="yes" Options="">
+      <Linker Options="" Required="yes">
       </Linker>
 		]]
 	end
@@ -134,7 +155,7 @@
 		prepare()
 		codelite.project.linker(cfg)
 		test.capture [[
-      <Linker Required="yes" Options="">
+      <Linker Options="" Required="yes">
         <LibraryPath Value="test"/>
         <LibraryPath Value="test2"/>
       </Linker>
@@ -146,7 +167,7 @@
 		prepare()
 		codelite.project.linker(cfg)
 		test.capture [[
-      <Linker Required="yes" Options="-la;-lb">
+      <Linker Options="-la;-lb" Required="yes">
       </Linker>
 		]]
 	end
@@ -330,6 +351,31 @@ cmd2</StartupCommands>
 		]]
 	end
 
+	function suite.OnProjectCfg_PreLinkAfterPreBuild()
+		prebuildmessage "msg_prebuild"
+		prebuildcommands {
+			"cmd_prebuild1",
+			"cmd_prebuild2"
+		}
+		prelinkmessage "msg_prelink"
+		prelinkcommands {
+			"cmd_prelink1",
+			"cmd_prelink2"
+		}
+		prepare()
+		codelite.project.preBuild(prj)
+		test.capture [[
+      <PreBuild>
+        <Command Enabled="yes">@echo "msg_prebuild"</Command>
+        <Command Enabled="yes">cmd_prebuild1</Command>
+        <Command Enabled="yes">cmd_prebuild2</Command>
+        <Command Enabled="yes">@echo "msg_prelink"</Command>
+        <Command Enabled="yes">cmd_prelink1</Command>
+        <Command Enabled="yes">cmd_prelink2</Command>
+      </PreBuild>
+		]]
+	end
+
 	function suite.OnProjectCfg_PostBuild()
 		postbuildcommands { "cmd0", "cmd1" }
 		prepare()
@@ -377,7 +423,7 @@ cmd2</StartupCommands>
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-funsigned-char" C_Options="-funsigned-char" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-funsigned-char" C_Options="-funsigned-char" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -388,7 +434,7 @@ cmd2</StartupCommands>
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-fno-unsigned-char" C_Options="-fno-unsigned-char" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-fno-unsigned-char" C_Options="-fno-unsigned-char" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end

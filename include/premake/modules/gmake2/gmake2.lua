@@ -1,6 +1,6 @@
 --
 -- gmake2.lua
--- (c) 2016-2017 Jason Perkins, Blizzard Entertainment and the Premake project
+-- (c) 2016-2017 Jess Perkins, Blizzard Entertainment and the Premake project
 --
 
 	local p       = premake
@@ -118,7 +118,7 @@
 
 --
 -- Rules for file ops based on the shell type. Can't use defines and $@ because
--- it screws up the escaping of spaces and parethesis (anyone know a fix?)
+-- it screws up the escaping of spaces and parenthesis (anyone know a fix?)
 --
 
 	function gmake2.mkdir(dirname)
@@ -127,6 +127,15 @@
 		_p('else')
 		_p('\t$(SILENT) mkdir $(subst /,\\\\,%s)', dirname)
 		_p('endif')
+	end
+
+	function gmake2.copyfile_cmds(source, dest)
+		local cmd = '$(SILENT) {COPYFILE} ' .. source .. ' ' .. dest
+		return { 'ifeq (posix,$(SHELLTYPE))',
+			'\t' .. os.translateCommands(cmd, 'posix'),
+			'else',
+			'\t' .. os.translateCommands(cmd, 'windows'),
+			'endif' }
 	end
 
 	function gmake2.mkdirRules(dirname)
@@ -173,7 +182,7 @@
 
 	function gmake2.getToolSet(cfg)
 		local default = iif(cfg.system == p.MACOSX, "clang", "gcc")
-		local toolset = p.tools[_OPTIONS.cc or cfg.toolset or default]
+		local toolset, version = p.tools.canonical(cfg.toolset or default)
 		if not toolset then
 			error("Invalid toolset '" .. cfg.toolset .. "'")
 		end
@@ -259,8 +268,18 @@
 
 
 	function gmake2.shellType()
+		-- Determine whether the build rules
+		-- of the Makefile are being executed under
+		-- cmd.exe or sh.exe. GNU Make prefers using
+		-- `sh.exe`, if it is found on the PATH (see variable.c).
+		-- Therefore, the shell make is being executed from,
+		-- and the shell used to execute the build rules can be different
+		--
+		-- To determine this, use a "polyglot test" by executing
+		-- echo "test" in the shell. cmd.exe will write "test" with quotes
+		-- and sh will write test without quotes.
 		_p('SHELLTYPE := posix')
-		_p('ifeq (.exe,$(findstring .exe,$(ComSpec)))')
+		_p('ifeq ($(shell echo \"test\"), \"test\")')
 		_p('\tSHELLTYPE := msdos')
 		_p('endif')
 		_p('')

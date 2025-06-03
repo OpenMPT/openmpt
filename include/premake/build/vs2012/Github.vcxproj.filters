@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ISSUE_TEMPLATE">
+      <UniqueIdentifier>{C9E6B823-B5B4-AC29-9E48-1D508AB5888E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="workflows">
+      <UniqueIdentifier>{334DFAD0-9FB7-AE47-E8F5-5FED549F8C9C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\.github\ISSUE_TEMPLATE\ask-a-question.md">
+      <Filter>ISSUE_TEMPLATE</Filter>
+    </None>
+    <None Include="..\..\.github\ISSUE_TEMPLATE\get-help.md">
+      <Filter>ISSUE_TEMPLATE</Filter>
+    </None>
+    <None Include="..\..\.github\ISSUE_TEMPLATE\report-a-bug.md">
+      <Filter>ISSUE_TEMPLATE</Filter>
+    </None>
+    <None Include="..\..\.github\ISSUE_TEMPLATE\request-a-feature.md">
+      <Filter>ISSUE_TEMPLATE</Filter>
+    </None>
+    <None Include="..\..\.github\dependabot.yml" />
+    <None Include="..\..\.github\pull_request_template.md" />
+    <None Include="..\..\.github\workflows\ci-workflow.yml">
+      <Filter>workflows</Filter>
+    </None>
+    <None Include="..\..\.github\workflows\website.yml">
+      <Filter>workflows</Filter>
+    </None>
+  </ItemGroup>
+</Project>

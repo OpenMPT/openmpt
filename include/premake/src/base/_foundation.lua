@@ -1,6 +1,6 @@
 ---
 -- Base definitions required by all the other scripts.
--- @copyright 2002-2015 Jason Perkins and the Premake project
+-- @copyright 2002-2015 Jess Perkins and the Premake project
 ---
 
 	premake = premake or {}
@@ -27,7 +27,6 @@
 --
 
 	premake.C           = "C"
-	premake.C7          = "c7"
 	premake.CLANG       = "clang"
 	premake.CONSOLEAPP  = "ConsoleApp"
 	premake.CPP         = "C++"
@@ -54,6 +53,7 @@
 	premake.UNICODE     = "Unicode"
 	premake.UNIVERSAL   = "universal"
 	premake.UTILITY     = "Utility"
+	premake.UWP         = "uwp"
 	premake.PACKAGING   = "Packaging"
 	premake.WINDOWEDAPP = "WindowedApp"
 	premake.WINDOWS     = "windows"
@@ -118,34 +118,18 @@
 	end
 
 
-	-- TODO: THIS IMPLEMENTATION IS GOING AWAY
-
-	function premake.callarray(namespace, array, ...)
-		local n = #array
-		for i = 1, n do
-			local fn = namespace[array[i]]
-			if not fn then
-				error(string.format("Unable to find function '%s'", array[i]))
-			end
-			fn(...)
-		end
-
-	end
-
-
-
 ---
 -- Compare a version string that uses semver semantics against a
--- version comparision string. Comparisions take the form of ">=5.0" (5.0 or
+-- version comparison string. Comparisons take the form of ">=5.0" (5.0 or
 -- later), "5.0" (5.0 or later), ">=5.0 <6.0" (5.0 or later but not 6.0 or
 -- later).
 --
 -- @param version
 --    The version to be tested.
 -- @param checks
---    The comparision string to be evaluated.
+--    The comparison string to be evaluated.
 -- @return
---    True if the comparisions pass, false if any fail.
+--    True if the comparisons pass, false if any fail.
 ---
 
 	function p.checkVersion(version, checks)
@@ -211,33 +195,41 @@
 	end
 
 
-
---
--- Raise an error, with a formatted message built from the provided
--- arguments.
---
--- @param message
---    The error message, which may contain string formatting tokens.
--- @param ...
---    Values to fill in the string formatting tokens.
---
-
-	function premake.error(message, ...)
-		error(string.format("** Error: " .. message, ...), 0)
-	end
-
-
 --
 -- Finds the correct premake script filename to be run.
 --
 -- @param fname
 --    The filename of the script to run.
 -- @return
---    The correct location and filename of the script to run.
+--    The correct of filename of the script to run, and the function to load the chunk.
 --
 
 	function premake.findProjectScript(fname)
-		return os.locate(fname, fname .. ".lua", path.join(fname, "premake5.lua"), path.join(fname, "premake4.lua"))
+		local filenames = {
+			fname,
+			fname .. ".lua",
+			path.join(fname, "premake5.lua"),
+			path.join(fname, "premake4.lua"),
+		}
+
+		-- If the currently running script was embedded, try to find this file as if it were embedded too.
+		if _SCRIPT_DIR and _SCRIPT_DIR:startswith('$') then
+			table.insert(filenames, path.getabsolute(fname, _SCRIPT_DIR))
+		end
+
+		local compiled_chunk
+		local res = os.locate(table.unpack(filenames))
+		if res == nil then
+			local caller = filelineinfo(3)
+			premake.error(caller .. ": Cannot find neither " .. table.implode(filenames, "", "", " nor "))
+		else
+			compiled_chunk, err = loadfile(res)
+			if err ~= nil then
+				local caller = filelineinfo(3)
+				premake.error(caller .. ": Error loading '" .. fname .. ": " .. err)
+			end
+		end
+		return res, compiled_chunk
 	end
 
 
@@ -331,6 +323,20 @@
 		return scope, name
 	end
 
+
+--
+-- Raise an error, with a formatted message built from the provided
+-- arguments.
+--
+-- @param message
+--    The error message, which may contain string formatting tokens.
+-- @param ...
+--    Values to fill in the string formatting tokens.
+--
+
+function premake.error(message, ...)
+	error(string.format("** Error: " .. message, ...), 0)
+end
 
 
 --

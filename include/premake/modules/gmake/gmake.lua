@@ -1,7 +1,7 @@
 --
 -- gmake.lua
 -- Define the makefile action(s).
--- Copyright (c) 2002-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2015 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -139,7 +139,7 @@
 
 --
 -- Rules for file ops based on the shell type. Can't use defines and $@ because
--- it screws up the escaping of spaces and parethesis (anyone know a fix?)
+-- it screws up the escaping of spaces and parenthesis (anyone know a fix?)
 --
 
 	function make.mkdir(dirname)
@@ -248,7 +248,7 @@
 
 
 	function make.preLinkRules(prj)
-		_p('prelink:')
+		_p('prelink: $(OBJECTS)')
 		_p('\t$(PRELINKCMDS)')
 		_p('')
 	end

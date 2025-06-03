@@ -1,8 +1,8 @@
 --
 -- api.lua
 -- Implementation of the workspace, project, and configuration APIs.
--- Author Jason Perkins
--- Copyright (c) 2002-2015 Jason Perkins and the Premake project
+-- Author Jess Perkins
+-- Copyright (c) 2002-2015 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -15,7 +15,7 @@
 
 ---
 -- Set up a place to store the current active objects in each configuration
--- scope (e.g. wprkspaces, projects, groups, and configurations). This likely
+-- scope (e.g. workspaces, projects, groups, and configurations). This likely
 -- ought to be internal scope, but it is useful for testing.
 ---
 
@@ -25,7 +25,7 @@
 
 ---
 -- Define a new class of configuration container. A container can receive and
--- store configuration blocks, which are what hold the individial settings
+-- store configuration blocks, which are what hold the individual settings
 -- from the scripts. A container can also hold one or more kinds of child
 -- containers; a workspace can contain projects, for instance.
 --
@@ -81,11 +81,10 @@
 ---
 
 	function includeexternal(fname)
-		local fullPath = p.findProjectScript(fname)
+		fname, compiled_chunk = p.findProjectScript(fname)
 		local wasIncludingExternal = api._isIncludingExternal
 		api._isIncludingExternal = true
-		fname = fullPath or fname
-		dofile(fname)
+		compiled_chunk()
 		api._isIncludingExternal = wasIncludingExternal
 	end
 
@@ -489,7 +488,7 @@
 
 --
 -- Callback for all API functions; everything comes here first, and then
--- gets parceled out to the individual set...() functions.
+-- gets parcelled out to the individual set...() functions.
 --
 
 	function api.storeField(field, value)
@@ -1140,25 +1139,6 @@
 			return true
 		end
 	})
-
-
-
----
--- Start a new block of configuration settings, using the old, "open"
--- style of matching without field prefixes.
----
-
-	function configuration(terms)
-		-- Sep 16 2021
-		premake.warnOnce("configuration", "`configuration` has been deprecated; use `filter` instead (https://premake.github.io/docs/Filters/)")
-		if terms then
-			if (type(terms) == "table" and #terms == 1 and terms[1] == "*") or (terms == "*") then
-				terms = nil
-			end
-			configset.addblock(api.scope.current, {terms}, os.getcwd())
-		end
-		return api.scope.current
-	end
 
 
 

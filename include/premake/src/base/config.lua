@@ -1,7 +1,7 @@
 --
 -- config.lua
 -- Premake configuration object API
--- Copyright (c) 2011-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2011-2015 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -152,7 +152,8 @@
 	function config.canLinkIncremental(cfg)
 		if cfg.kind == "StaticLib"
 				or config.isOptimizedBuild(cfg)
-				or cfg.flags.NoIncrementalLink then
+				or cfg.flags.NoIncrementalLink
+				or cfg.flags.LinkTimeOptimization then
 			return false
 		end
 		return true
@@ -262,10 +263,20 @@
 			local link = cfg.links[i]
 			local item
 
+			-- Strip linking decorators from link, to determine if the link
+			-- is a "sibling" project.
+			local endswith = function(s, ptrn)
+				return ptrn == string.sub(s, -string.len(ptrn))
+			end
+			local name = link
+			if endswith(name, ":static") or endswith(name, ":shared") then
+				name = string.sub(name, 0, -8)
+			end
+
 			-- Sort the links into "sibling" (is another project in this same
 			-- workspace) and "system" (is not part of this workspace) libraries.
 
-			local prj = p.workspace.findproject(cfg.workspace, link)
+			local prj = p.workspace.findproject(cfg.workspace, name)
 			if prj and kind ~= "system" then
 
 				-- Sibling; is there a matching configuration in this project that
@@ -300,7 +311,7 @@
 			end
 
 			-- If this is something I can link against, pull out the requested part
-			-- dont link against my self
+			-- don't link against my self
 			if item and item ~= cfg then
 				if part == "directory" then
 					item = path.getdirectory(item)
@@ -330,10 +341,10 @@
 
 --
 -- Returns the list of sibling target directories
--- 
+--
 -- @param cfg
 --    The configuration object to query.
--- @return 
+-- @return
 --    Absolute path list
 --
 	function config.getsiblingtargetdirs(cfg)

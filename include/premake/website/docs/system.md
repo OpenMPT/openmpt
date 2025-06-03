@@ -18,6 +18,7 @@ If no system is specified, Premake will identify and target the current operatin
 * linux
 * macosx
 * solaris
+* uwp
 * wii
 * windows
 * xbox360
@@ -50,4 +51,4 @@ workspace "MyWorkspace"
 ### See Also ###
 
 * [architecture](architecture.md)
-* [_OS](premake_OS.md)
+* [_OS](globals/premake_OS.md)

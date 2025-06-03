@@ -1,13 +1,14 @@
 --
 -- vs2005_dotnetbase.lua
 -- Generate a Visual Studio 2005+ .NET project.
--- Copyright (c) Jason Perkins and the Premake project
+-- Copyright (c) Jess Perkins and the Premake project
 --
 
 	local p = premake
 	p.vstudio.dotnetbase = {}
 
 	local vstudio = p.vstudio
+	local vs2005 = p.vstudio.vs2005
 	local dotnetbase  = p.vstudio.dotnetbase
 	local project = p.project
 	local config = p.config
@@ -58,7 +59,7 @@
 		if dotnetbase.isNewFormatProject(prj) then
 			if prj.flags.WPF then
 				_p('<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">')
-			else				
+			else
 				_p('<Project Sdk="Microsoft.NET.Sdk">')
 			end
 		else
@@ -232,12 +233,34 @@
 			end
 		end
 
-		local cfg = project.getfirstconfig(prj)
-		if #cfg.prebuildcommands > 0 or #cfg.postbuildcommands > 0 then
-			_p(1,'<PropertyGroup>')
-			output("Pre", cfg.prebuildcommands)
-			output("Post", cfg.postbuildcommands)
-			_p(1,'</PropertyGroup>')
+		for cfg in project.eachconfig(prj) do
+			if #cfg.prebuildcommands > 0 or #cfg.postbuildcommands > 0 then
+				_p(1,'<PropertyGroup %s>', dotnetbase.condition(cfg))
+				output("Pre", cfg.prebuildcommands)
+				output("Post", cfg.postbuildcommands)
+				_p(1,'</PropertyGroup>')
+			end
+		end
+	end
+
+--
+-- Write out the additional props.
+--
+
+	function dotnetbase.additionalProps(cfg)
+		local function recurseTableIfNeeded(tbl, tab_level)
+			for key, value in spairs(tbl) do
+				if (type(value) == "table") then
+					_p(tab_level, '<%s>', key)
+					recurseTableIfNeeded(value, tab_level + 1)
+					_p(tab_level, '</%s>', key)
+				else
+					_p(tab_level, '<%s>%s</%s>', key, vs2005.esc(value), key)
+				end
+			end
+		end
+		for i = 1, #cfg.vsprops do
+			recurseTableIfNeeded(cfg.vsprops[i], 2)
 		end
 	end
 
@@ -740,6 +763,7 @@
 		end
 	end
 
+
 	function dotnetbase.targetFrameworkProfile(cfg)
 		if _ACTION == "vs2010" then
 			_p(2,'<TargetFrameworkProfile>')
@@ -751,6 +775,17 @@
 	function dotnetbase.xmlDeclaration()
 		if _ACTION > "vs2008" then
 			p.xmlUtf8()
+		end
+	end
+
+	function dotnetbase.documentationfile(cfg)
+		if cfg.documentationFile then
+			if _ACTION > "vs2015" and cfg.documentationFile == true then
+				_p(2,'<GenerateDocumentationFile>true</GenerateDocumentationFile>')
+			else
+				local documentationFile = iif(cfg.documentationFile ~= true, cfg.documentationFile, cfg.targetdir)
+				_p(2, string.format('<DocumentationFile>%s\\%s.xml</DocumentationFile>', vstudio.path(cfg, documentationFile),cfg.project.name))
+			end
 		end
 	end
 

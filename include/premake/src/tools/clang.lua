@@ -1,7 +1,7 @@
 --
 -- clang.lua
 -- Clang toolset adapter for Premake
--- Copyright (c) 2013 Jason Perkins and the Premake project
+-- Copyright (c) 2013 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -65,7 +65,10 @@
 		symbols = gcc.shared.symbols,
 		unsignedchar = gcc.shared.unsignedchar,
 		omitframepointer = gcc.shared.omitframepointer,
-		compileas = gcc.shared.compileas
+		compileas = gcc.shared.compileas,
+		sanitize = gcc.shared.sanitize,
+		visibility = gcc.shared.visibility,
+		inlinesvisibility = gcc.shared.inlinesvisibility
 	}
 
 	clang.cflags = table.merge(gcc.cflags, {
@@ -86,7 +89,7 @@
 	end
 
 --
--- Returns C/C++ system version related build flags
+-- Returns system version related build flags
 --
 
 	function clang.getsystemversionflags(cfg)
@@ -186,14 +189,23 @@
 -- @param dirs
 --    An array of include file search directories; as an array of
 --    string values.
+-- @param extdirs
+--    An array of include file search directories for external includes;
+--    as an array of string values.
+-- @param frameworkdirs
+--    An array of file search directories for the framework includes;
+--    as an array of string vlaues
+-- @param includedirsafter
+--    An array of include file search directories for includes after system;
+--    as an array of string values.
 -- @return
 --    An array of symbols with the appropriate flag decorations.
 --
 
-	function clang.getincludedirs(cfg, dirs, extdirs, frameworkdirs)
+	function clang.getincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
 
 		-- Just pass through to GCC for now
-		local flags = gcc.getincludedirs(cfg, dirs, extdirs, frameworkdirs)
+		local flags = gcc.getincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
 		return flags
 
 	end
@@ -240,6 +252,10 @@
 			WindowedApp = function(cfg)
 				if cfg.system == p.WINDOWS then return "-mwindows" end
 			end,
+		},
+		linker = gcc.ldflags.linker,
+		sanitize = {
+			Address = "-fsanitize=address",
 		},
 		system = {
 			wii = "$(MACHDEP)",
@@ -328,13 +344,18 @@
 	clang.tools = {
 		cc = "clang",
 		cxx = "clang++",
-		ar = function(cfg) return iif(cfg.flags.LinkTimeOptimization, "llvm-ar", "ar") end
+		ar = function(cfg) return iif(cfg.flags.LinkTimeOptimization, "llvm-ar", "ar") end,
+		rc = "windres"
 	}
 
 	function clang.gettoolname(cfg, tool)
+		local toolset, version = p.tools.canonical(cfg.toolset or p.CLANG)
 		local value = clang.tools[tool]
 		if type(value) == "function" then
 			value = value(cfg)
+		end
+		if toolset == p.tools.clang and version ~= nil then
+			value = value .. "-" .. version
 		end
 		return value
 	end

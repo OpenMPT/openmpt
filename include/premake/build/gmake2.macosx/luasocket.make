@@ -11,7 +11,7 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
@@ -27,11 +27,12 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
+RESCOMP = windres
 INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/libluasocket.dylib
+ALL_LDFLAGS += $(LDFLAGS) -dynamiclib -Wl,-install_name,@rpath/luasocket.dylib
 LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
 define PREBUILDCMDS
 endef
@@ -42,7 +43,7 @@ endef
 
 ifeq ($(config),release)
 TARGETDIR = ../../bin/release
-TARGET = $(TARGETDIR)/libluasocket.dylib
+TARGET = $(TARGETDIR)/luasocket.dylib
 OBJDIR = obj/Release/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
@@ -52,7 +53,7 @@ LDDEPS += bin/Release/libluashim-lib.a
 
 else ifeq ($(config),debug)
 TARGETDIR = ../../bin/debug
-TARGET = $(TARGETDIR)/libluasocket.dylib
+TARGET = $(TARGETDIR)/luasocket.dylib
 OBJDIR = obj/Debug/luasocket
 DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra

@@ -1,7 +1,7 @@
 --
 -- tests/actions/vstudio/vc2010/test_files.lua
 -- Validate generation of files block in Visual Studio 2010 C/C++ projects.
--- Copyright (c) 2011-2014 Jason Perkins and the Premake project
+-- Copyright (c) 2011-2014 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -107,11 +107,13 @@
 -- Check handling of buildaction.
 --
 	function suite.customBuildTool_onBuildAction()
-		files { "test.x", "test2.cpp", "test3.cpp" }
+		files { "test.x", "test2.cpp", "test3.cpp", "test4.dll" }
 		filter "files:**.x"
 			buildaction "FxCompile"
 		filter "files:test2.cpp"
 			buildaction "None"
+		filter { "files:test4.dll" }
+			buildaction "Copy"
 		prepare()
 		test.capture [[
 <ItemGroup>
@@ -122,6 +124,12 @@
 </ItemGroup>
 <ItemGroup>
 	<None Include="test2.cpp" />
+</ItemGroup>
+<ItemGroup>
+	<CopyFileToFolders Include="test4.dll">
+		<DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bin\Debug</DestinationFolders>
+		<DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bin\Release</DestinationFolders>
+	</CopyFileToFolders>
 </ItemGroup>
 		]]
 	end
@@ -649,6 +657,67 @@
 		]]
 	end
 
+	function suite.onCompileAsExt()
+		files { "hello.unknown_ext" }
+		filter "files:hello.unknown_ext"
+			compileas "C++"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ClCompile Include="hello.unknown_ext">
+		<CompileAs>CompileAsCpp</CompileAs>
+		]]
+	end
+
+--
+-- Check handling of per-file cdialect.
+--
+	function suite.onCDialect()
+		p.action.set("vs2019")
+		cdialect "c11"
+		files { "file.c", "file11.c", "file17.c" }
+		filter "files:file11.c"
+			cdialect "c11"
+		filter "files:file17.c"
+			cdialect "c17"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ClCompile Include="file.c" />
+	<ClCompile Include="file11.c">
+		<LanguageStandard_C>stdc11</LanguageStandard_C>
+	</ClCompile>
+	<ClCompile Include="file17.c">
+		<LanguageStandard_C>stdc17</LanguageStandard_C>
+	</ClCompile>
+  <ItemGroup>]]
+	end
+
+--
+-- Check handling of per-file cppdialect.
+--
+	function suite.onCppDialect()
+		p.action.set("vs2017")
+		cppdialect "c++14"
+		files { "file.cpp", "file14.cpp", "file17.cpp" }
+		filter "files:file14.cpp"
+			cppdialect "c++14"
+		filter "files:file17.cpp"
+			cppdialect "c++17"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ClCompile Include="file.cpp" />
+	<ClCompile Include="file14.cpp">
+		<LanguageStandard>stdcpp14</LanguageStandard>
+	</ClCompile>
+	<ClCompile Include="file17.cpp">
+		<LanguageStandard>stdcpp17</LanguageStandard>
+	</ClCompile>
+  <ItemGroup>]]
+	end
+
+
 --
 -- Check handling of per-file optimization levels.
 --
@@ -916,7 +985,7 @@
 </ItemGroup>
 		]]
 	end
-	
+
 --
 -- test consumewinrtextension set for a single file
 --

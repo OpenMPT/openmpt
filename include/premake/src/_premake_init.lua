@@ -3,7 +3,7 @@
 --
 -- Prepares the runtime environment for the add-ons and user project scripts.
 --
--- Copyright (c) 2012-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2012-2015 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -117,7 +117,7 @@
 	api.register {
 		name = "buildinputs",
 		scope = "config",
-		kind = "list:path",
+		kind = "list:file",
 		tokens = true,
 		pathVars = false,
 	}
@@ -299,6 +299,7 @@
 			"Mixed",
 			"NativeOnly",
 			"ManagedOnly",
+			"NativeWithManagedCore"
 		}
 	}
 
@@ -363,6 +364,9 @@
 		scope = "config",
 		kind = "list:string",
 		tokens = true,
+		allowed = function(value)
+			return iif(value == "", nil, value)
+		end
 	}
 
 	api.register {
@@ -511,7 +515,7 @@
 			"NoEditAndContinue",   -- DEPRECATED
 			"NoFramePointer",      -- DEPRECATED
 			"NoImplicitLink",
-			"NoImportLib",
+			"NoImportLib",         -- DEPRECATED
 			"NoIncrementalLink",
 			"NoManifest",
 			"NoMinimalRebuild",
@@ -766,6 +770,12 @@
 	}
 
 	api.register {
+		name = "documentationfile",
+		scope = "project",
+		kind = "string",
+	}
+
+	api.register {
 		name = "cdialect",
 		scope = "config",
 		kind = "string",
@@ -800,6 +810,8 @@
 			"C++17",
 			"C++2a",
 			"C++20",
+			"C++2b",
+			"C++23",
 			"gnu++98",
 			"gnu++0x",
 			"gnu++11",
@@ -809,6 +821,8 @@
 			"gnu++17",
 			"gnu++2a",
 			"gnu++20",
+			"gnu++2b",
+			"gnu++23",
 		}
 	}
 
@@ -882,6 +896,16 @@
 		allowed = {
 			"Off",
 			"On",
+		}
+	}
+
+	api.register {
+		name = "linker",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"LLD",
 		}
 	}
 
@@ -1203,6 +1227,7 @@
 			"linux",
 			"macosx",
 			"solaris",
+			"uwp",
 			"wii",
 			"windows",
 		},
@@ -1504,6 +1529,13 @@
 		}
 	}
 
+	api.register {
+		name = "includedirsafter",
+		scope = "config",
+		kind = "list:directory",
+		tokens = true
+	}
+
 	api.register {   -- DEPRECATED 2021-11-16
 		name = "sysincludedirs",
 		scope = "config",
@@ -1782,6 +1814,19 @@
 			{ "clang", "Clang (clang)" },
 			{ "gcc", "GNU GCC (gcc/g++)" },
 			{ "mingw", "MinGW GCC (gcc/g++)" },
+			{ "msc-v80", "Microsoft compiler (Visual Studio 2005)" },
+			{ "msc-v90", "Microsoft compiler (Visual Studio 2008)" },
+			{ "msc-v100", "Microsoft compiler (Visual Studio 2010)" },
+			{ "msc-v110", "Microsoft compiler (Visual Studio 2012)" },
+			{ "msc-v120", "Microsoft compiler (Visual Studio 2013)" },
+			{ "msc-v140", "Microsoft compiler (Visual Studio 2015)" },
+			{ "msc-v141", "Microsoft compiler (Visual Studio 2017)" },
+			{ "msc-v142", "Microsoft compiler (Visual Studio 2019)" },
+			{ "msc-v143", "Microsoft compiler (Visual Studio 2022)" },
+			function (name)
+				local toolset, version = p.tools.canonical(name)
+				return toolset
+			end
 		}
 	}
 
@@ -1849,7 +1894,37 @@
 			{ "linux",    "Linux" },
 			{ "macosx",   "Apple Mac OS X" },
 			{ "solaris",  "Solaris" },
+			{ "uwp",      "Microsoft Universal Windows Platform"},
 			{ "windows",  "Microsoft Windows" },
+		}
+	}
+
+	local function getArchs()
+		local keys={}
+		for key,_ in pairs(premake.field.get("architecture").allowed) do
+			if type(key) ~= "number" then
+				table.insert(keys, { key, "" })
+			end
+		end
+		return keys
+	end
+
+	newoption
+	{
+		trigger     = "arch",
+		value       = "VALUE",
+		description = "Generate files for a different architecture",
+		allowed = getArchs()
+	}
+
+	newoption
+	{
+		trigger     = "shell",
+		value       = "VALUE",
+		description = "Select shell (for command token substitution)",
+		allowed = {
+			{ "cmd", "Windows command shell" },
+			{ "posix", "For posix shells" },
 		}
 	}
 
@@ -1876,7 +1951,7 @@
 	if http ~= nil then
 		newoption {
 			trigger = "insecure",
-			description = "forfit SSH certification checks."
+			description = "Forfeit SSH certification checks."
 		}
 	end
 
@@ -1954,6 +2029,9 @@
 
 	filter { "system:darwin" }
 		toolset "clang"
+
+	filter { "platforms:Win32" }
+		architecture "x86"
 
 	filter { "platforms:Win64" }
 		architecture "x86_64"

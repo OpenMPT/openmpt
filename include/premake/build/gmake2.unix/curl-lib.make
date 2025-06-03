@@ -11,13 +11,22 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
 # Configurations
 # #############################################
 
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
 RESCOMP = windres
 INCLUDES += -I../../contrib/curl/lib -I../../contrib/mbedtls/include -I../../contrib/zlib -isystem ../../contrib/curl/include
 FORCE_INCLUDE +=
@@ -37,7 +46,7 @@ ifeq ($(config),release)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Release/curl-lib
-DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DNDEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DNDEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -D_GNU_SOURCE -DCURL_HIDDEN_SYMBOLS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
 ALL_LDFLAGS += $(LDFLAGS) -s
@@ -46,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libcurl-lib.a
 OBJDIR = obj/Debug/curl-lib
-DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -D_DEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -DCURL_HIDDEN_SYMBOLS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -D_DEBUG -DBUILDING_LIBCURL -DCURL_STATICLIB -DHTTP_ONLY -DUSE_ZLIB -DUSE_MBEDTLS -D_GNU_SOURCE -DCURL_HIDDEN_SYMBOLS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_LDFLAGS += $(LDFLAGS)
@@ -63,11 +72,22 @@ endif
 GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/altsvc.o
 GENERATED += $(OBJDIR)/amigaos.o
 GENERATED += $(OBJDIR)/asyn-ares.o
 GENERATED += $(OBJDIR)/asyn-thread.o
-GENERATED += $(OBJDIR)/axtls.o
 GENERATED += $(OBJDIR)/base64.o
+GENERATED += $(OBJDIR)/bearssl.o
+GENERATED += $(OBJDIR)/bufq.o
+GENERATED += $(OBJDIR)/bufref.o
+GENERATED += $(OBJDIR)/c-hyper.o
+GENERATED += $(OBJDIR)/cf-h1-proxy.o
+GENERATED += $(OBJDIR)/cf-h2-proxy.o
+GENERATED += $(OBJDIR)/cf-haproxy.o
+GENERATED += $(OBJDIR)/cf-https-connect.o
+GENERATED += $(OBJDIR)/cf-socket.o
+GENERATED += $(OBJDIR)/cfilters.o
+GENERATED += $(OBJDIR)/cipher_suite.o
 GENERATED += $(OBJDIR)/cleartext.o
 GENERATED += $(OBJDIR)/conncache.o
 GENERATED += $(OBJDIR)/connect.o
@@ -78,35 +98,49 @@ GENERATED += $(OBJDIR)/curl_addrinfo.o
 GENERATED += $(OBJDIR)/curl_des.o
 GENERATED += $(OBJDIR)/curl_endian.o
 GENERATED += $(OBJDIR)/curl_fnmatch.o
+GENERATED += $(OBJDIR)/curl_get_line.o
 GENERATED += $(OBJDIR)/curl_gethostname.o
 GENERATED += $(OBJDIR)/curl_gssapi.o
 GENERATED += $(OBJDIR)/curl_memrchr.o
+GENERATED += $(OBJDIR)/curl_msh3.o
 GENERATED += $(OBJDIR)/curl_multibyte.o
+GENERATED += $(OBJDIR)/curl_ngtcp2.o
 GENERATED += $(OBJDIR)/curl_ntlm_core.o
-GENERATED += $(OBJDIR)/curl_ntlm_wb.o
+GENERATED += $(OBJDIR)/curl_osslq.o
+GENERATED += $(OBJDIR)/curl_path.o
+GENERATED += $(OBJDIR)/curl_quiche.o
+GENERATED += $(OBJDIR)/curl_range.o
 GENERATED += $(OBJDIR)/curl_rtmp.o
 GENERATED += $(OBJDIR)/curl_sasl.o
+GENERATED += $(OBJDIR)/curl_sha512_256.o
 GENERATED += $(OBJDIR)/curl_sspi.o
 GENERATED += $(OBJDIR)/curl_threads.o
-GENERATED += $(OBJDIR)/cyassl.o
-GENERATED += $(OBJDIR)/darwinssl.o
+GENERATED += $(OBJDIR)/curl_trc.o
+GENERATED += $(OBJDIR)/cw-out.o
 GENERATED += $(OBJDIR)/dict.o
 GENERATED += $(OBJDIR)/digest.o
 GENERATED += $(OBJDIR)/digest_sspi.o
-GENERATED += $(OBJDIR)/dotdot.o
+GENERATED += $(OBJDIR)/dllmain.o
+GENERATED += $(OBJDIR)/doh.o
+GENERATED += $(OBJDIR)/dynbuf.o
+GENERATED += $(OBJDIR)/dynhds.o
 GENERATED += $(OBJDIR)/easy.o
+GENERATED += $(OBJDIR)/easygetopt.o
+GENERATED += $(OBJDIR)/easyoptions.o
 GENERATED += $(OBJDIR)/escape.o
 GENERATED += $(OBJDIR)/file.o
 GENERATED += $(OBJDIR)/fileinfo.o
+GENERATED += $(OBJDIR)/fopen.o
 GENERATED += $(OBJDIR)/formdata.o
 GENERATED += $(OBJDIR)/ftp.o
 GENERATED += $(OBJDIR)/ftplistparser.o
 GENERATED += $(OBJDIR)/getenv.o
 GENERATED += $(OBJDIR)/getinfo.o
 GENERATED += $(OBJDIR)/gopher.o
-GENERATED += $(OBJDIR)/gskit.o
+GENERATED += $(OBJDIR)/gsasl.o
 GENERATED += $(OBJDIR)/gtls.o
 GENERATED += $(OBJDIR)/hash.o
+GENERATED += $(OBJDIR)/headers.o
 GENERATED += $(OBJDIR)/hmac.o
 GENERATED += $(OBJDIR)/hostasyn.o
 GENERATED += $(OBJDIR)/hostcheck.o
@@ -114,57 +148,69 @@ GENERATED += $(OBJDIR)/hostip.o
 GENERATED += $(OBJDIR)/hostip4.o
 GENERATED += $(OBJDIR)/hostip6.o
 GENERATED += $(OBJDIR)/hostsyn.o
+GENERATED += $(OBJDIR)/hsts.o
 GENERATED += $(OBJDIR)/http.o
+GENERATED += $(OBJDIR)/http1.o
 GENERATED += $(OBJDIR)/http2.o
+GENERATED += $(OBJDIR)/http_aws_sigv4.o
 GENERATED += $(OBJDIR)/http_chunks.o
 GENERATED += $(OBJDIR)/http_digest.o
 GENERATED += $(OBJDIR)/http_negotiate.o
 GENERATED += $(OBJDIR)/http_ntlm.o
 GENERATED += $(OBJDIR)/http_proxy.o
-GENERATED += $(OBJDIR)/idn_win32.o
+GENERATED += $(OBJDIR)/idn.o
 GENERATED += $(OBJDIR)/if2ip.o
 GENERATED += $(OBJDIR)/imap.o
 GENERATED += $(OBJDIR)/inet_ntop.o
 GENERATED += $(OBJDIR)/inet_pton.o
+GENERATED += $(OBJDIR)/keylog.o
 GENERATED += $(OBJDIR)/krb5.o
 GENERATED += $(OBJDIR)/krb5_gssapi.o
 GENERATED += $(OBJDIR)/krb5_sspi.o
 GENERATED += $(OBJDIR)/ldap.o
+GENERATED += $(OBJDIR)/libssh.o
+GENERATED += $(OBJDIR)/libssh2.o
 GENERATED += $(OBJDIR)/llist.o
+GENERATED += $(OBJDIR)/macos.o
 GENERATED += $(OBJDIR)/mbedtls.o
+GENERATED += $(OBJDIR)/mbedtls_threadlock.o
 GENERATED += $(OBJDIR)/md4.o
 GENERATED += $(OBJDIR)/md5.o
 GENERATED += $(OBJDIR)/memdebug.o
+GENERATED += $(OBJDIR)/mime.o
 GENERATED += $(OBJDIR)/mprintf.o
+GENERATED += $(OBJDIR)/mqtt.o
 GENERATED += $(OBJDIR)/multi.o
 GENERATED += $(OBJDIR)/netrc.o
-GENERATED += $(OBJDIR)/non-ascii.o
 GENERATED += $(OBJDIR)/nonblock.o
-GENERATED += $(OBJDIR)/nss.o
+GENERATED += $(OBJDIR)/noproxy.o
 GENERATED += $(OBJDIR)/ntlm.o
 GENERATED += $(OBJDIR)/ntlm_sspi.o
-GENERATED += $(OBJDIR)/nwlib.o
-GENERATED += $(OBJDIR)/nwos.o
 GENERATED += $(OBJDIR)/oauth2.o
 GENERATED += $(OBJDIR)/openldap.o
 GENERATED += $(OBJDIR)/openssl.o
 GENERATED += $(OBJDIR)/parsedate.o
 GENERATED += $(OBJDIR)/pingpong.o
-GENERATED += $(OBJDIR)/pipeline.o
-GENERATED += $(OBJDIR)/polarssl.o
-GENERATED += $(OBJDIR)/polarssl_threadlock.o
 GENERATED += $(OBJDIR)/pop3.o
 GENERATED += $(OBJDIR)/progress.o
+GENERATED += $(OBJDIR)/psl.o
 GENERATED += $(OBJDIR)/rand.o
+GENERATED += $(OBJDIR)/rename.o
+GENERATED += $(OBJDIR)/request.o
 GENERATED += $(OBJDIR)/rtsp.o
+GENERATED += $(OBJDIR)/rustls.o
 GENERATED += $(OBJDIR)/schannel.o
-GENERATED += $(OBJDIR)/security.o
+GENERATED += $(OBJDIR)/schannel_verify.o
+GENERATED += $(OBJDIR)/sectransp.o
 GENERATED += $(OBJDIR)/select.o
 GENERATED += $(OBJDIR)/sendf.o
+GENERATED += $(OBJDIR)/setopt.o
+GENERATED += $(OBJDIR)/sha256.o
 GENERATED += $(OBJDIR)/share.o
 GENERATED += $(OBJDIR)/slist.o
 GENERATED += $(OBJDIR)/smb.o
 GENERATED += $(OBJDIR)/smtp.o
+GENERATED += $(OBJDIR)/socketpair.o
 GENERATED += $(OBJDIR)/socks.o
 GENERATED += $(OBJDIR)/socks_gssapi.o
 GENERATED += $(OBJDIR)/socks_sspi.o
@@ -172,7 +218,6 @@ GENERATED += $(OBJDIR)/speedcheck.o
 GENERATED += $(OBJDIR)/splay.o
 GENERATED += $(OBJDIR)/spnego_gssapi.o
 GENERATED += $(OBJDIR)/spnego_sspi.o
-GENERATED += $(OBJDIR)/ssh.o
 GENERATED += $(OBJDIR)/strcase.o
 GENERATED += $(OBJDIR)/strdup.o
 GENERATED += $(OBJDIR)/strerror.o
@@ -181,20 +226,38 @@ GENERATED += $(OBJDIR)/strtoofft.o
 GENERATED += $(OBJDIR)/system_win32.o
 GENERATED += $(OBJDIR)/telnet.o
 GENERATED += $(OBJDIR)/tftp.o
+GENERATED += $(OBJDIR)/timediff.o
 GENERATED += $(OBJDIR)/timeval.o
 GENERATED += $(OBJDIR)/transfer.o
 GENERATED += $(OBJDIR)/url.o
+GENERATED += $(OBJDIR)/urlapi.o
 GENERATED += $(OBJDIR)/vauth.o
 GENERATED += $(OBJDIR)/version.o
+GENERATED += $(OBJDIR)/version_win32.o
+GENERATED += $(OBJDIR)/vquic-tls.o
+GENERATED += $(OBJDIR)/vquic.o
 GENERATED += $(OBJDIR)/vtls.o
 GENERATED += $(OBJDIR)/warnless.o
-GENERATED += $(OBJDIR)/wildcard.o
+GENERATED += $(OBJDIR)/wolfssh.o
+GENERATED += $(OBJDIR)/wolfssl.o
+GENERATED += $(OBJDIR)/ws.o
 GENERATED += $(OBJDIR)/x509asn1.o
+OBJECTS += $(OBJDIR)/altsvc.o
 OBJECTS += $(OBJDIR)/amigaos.o
 OBJECTS += $(OBJDIR)/asyn-ares.o
 OBJECTS += $(OBJDIR)/asyn-thread.o
-OBJECTS += $(OBJDIR)/axtls.o
 OBJECTS += $(OBJDIR)/base64.o
+OBJECTS += $(OBJDIR)/bearssl.o
+OBJECTS += $(OBJDIR)/bufq.o
+OBJECTS += $(OBJDIR)/bufref.o
+OBJECTS += $(OBJDIR)/c-hyper.o
+OBJECTS += $(OBJDIR)/cf-h1-proxy.o
+OBJECTS += $(OBJDIR)/cf-h2-proxy.o
+OBJECTS += $(OBJDIR)/cf-haproxy.o
+OBJECTS += $(OBJDIR)/cf-https-connect.o
+OBJECTS += $(OBJDIR)/cf-socket.o
+OBJECTS += $(OBJDIR)/cfilters.o
+OBJECTS += $(OBJDIR)/cipher_suite.o
 OBJECTS += $(OBJDIR)/cleartext.o
 OBJECTS += $(OBJDIR)/conncache.o
 OBJECTS += $(OBJDIR)/connect.o
@@ -205,35 +268,49 @@ OBJECTS += $(OBJDIR)/curl_addrinfo.o
 OBJECTS += $(OBJDIR)/curl_des.o
 OBJECTS += $(OBJDIR)/curl_endian.o
 OBJECTS += $(OBJDIR)/curl_fnmatch.o
+OBJECTS += $(OBJDIR)/curl_get_line.o
 OBJECTS += $(OBJDIR)/curl_gethostname.o
 OBJECTS += $(OBJDIR)/curl_gssapi.o
 OBJECTS += $(OBJDIR)/curl_memrchr.o
+OBJECTS += $(OBJDIR)/curl_msh3.o
 OBJECTS += $(OBJDIR)/curl_multibyte.o
+OBJECTS += $(OBJDIR)/curl_ngtcp2.o
 OBJECTS += $(OBJDIR)/curl_ntlm_core.o
-OBJECTS += $(OBJDIR)/curl_ntlm_wb.o
+OBJECTS += $(OBJDIR)/curl_osslq.o
+OBJECTS += $(OBJDIR)/curl_path.o
+OBJECTS += $(OBJDIR)/curl_quiche.o
+OBJECTS += $(OBJDIR)/curl_range.o
 OBJECTS += $(OBJDIR)/curl_rtmp.o
 OBJECTS += $(OBJDIR)/curl_sasl.o
+OBJECTS += $(OBJDIR)/curl_sha512_256.o
 OBJECTS += $(OBJDIR)/curl_sspi.o
 OBJECTS += $(OBJDIR)/curl_threads.o
-OBJECTS += $(OBJDIR)/cyassl.o
-OBJECTS += $(OBJDIR)/darwinssl.o
+OBJECTS += $(OBJDIR)/curl_trc.o
+OBJECTS += $(OBJDIR)/cw-out.o
 OBJECTS += $(OBJDIR)/dict.o
 OBJECTS += $(OBJDIR)/digest.o
 OBJECTS += $(OBJDIR)/digest_sspi.o
-OBJECTS += $(OBJDIR)/dotdot.o
+OBJECTS += $(OBJDIR)/dllmain.o
+OBJECTS += $(OBJDIR)/doh.o
+OBJECTS += $(OBJDIR)/dynbuf.o
+OBJECTS += $(OBJDIR)/dynhds.o
 OBJECTS += $(OBJDIR)/easy.o
+OBJECTS += $(OBJDIR)/easygetopt.o
+OBJECTS += $(OBJDIR)/easyoptions.o
 OBJECTS += $(OBJDIR)/escape.o
 OBJECTS += $(OBJDIR)/file.o
 OBJECTS += $(OBJDIR)/fileinfo.o
+OBJECTS += $(OBJDIR)/fopen.o
 OBJECTS += $(OBJDIR)/formdata.o
 OBJECTS += $(OBJDIR)/ftp.o
 OBJECTS += $(OBJDIR)/ftplistparser.o
 OBJECTS += $(OBJDIR)/getenv.o
 OBJECTS += $(OBJDIR)/getinfo.o
 OBJECTS += $(OBJDIR)/gopher.o
-OBJECTS += $(OBJDIR)/gskit.o
+OBJECTS += $(OBJDIR)/gsasl.o
 OBJECTS += $(OBJDIR)/gtls.o
 OBJECTS += $(OBJDIR)/hash.o
+OBJECTS += $(OBJDIR)/headers.o
 OBJECTS += $(OBJDIR)/hmac.o
 OBJECTS += $(OBJDIR)/hostasyn.o
 OBJECTS += $(OBJDIR)/hostcheck.o
@@ -241,57 +318,69 @@ OBJECTS += $(OBJDIR)/hostip.o
 OBJECTS += $(OBJDIR)/hostip4.o
 OBJECTS += $(OBJDIR)/hostip6.o
 OBJECTS += $(OBJDIR)/hostsyn.o
+OBJECTS += $(OBJDIR)/hsts.o
 OBJECTS += $(OBJDIR)/http.o
+OBJECTS += $(OBJDIR)/http1.o
 OBJECTS += $(OBJDIR)/http2.o
+OBJECTS += $(OBJDIR)/http_aws_sigv4.o
 OBJECTS += $(OBJDIR)/http_chunks.o
 OBJECTS += $(OBJDIR)/http_digest.o
 OBJECTS += $(OBJDIR)/http_negotiate.o
 OBJECTS += $(OBJDIR)/http_ntlm.o
 OBJECTS += $(OBJDIR)/http_proxy.o
-OBJECTS += $(OBJDIR)/idn_win32.o
+OBJECTS += $(OBJDIR)/idn.o
 OBJECTS += $(OBJDIR)/if2ip.o
 OBJECTS += $(OBJDIR)/imap.o
 OBJECTS += $(OBJDIR)/inet_ntop.o
 OBJECTS += $(OBJDIR)/inet_pton.o
+OBJECTS += $(OBJDIR)/keylog.o
 OBJECTS += $(OBJDIR)/krb5.o
 OBJECTS += $(OBJDIR)/krb5_gssapi.o
 OBJECTS += $(OBJDIR)/krb5_sspi.o
 OBJECTS += $(OBJDIR)/ldap.o
+OBJECTS += $(OBJDIR)/libssh.o
+OBJECTS += $(OBJDIR)/libssh2.o
 OBJECTS += $(OBJDIR)/llist.o
+OBJECTS += $(OBJDIR)/macos.o
 OBJECTS += $(OBJDIR)/mbedtls.o
+OBJECTS += $(OBJDIR)/mbedtls_threadlock.o
 OBJECTS += $(OBJDIR)/md4.o
 OBJECTS += $(OBJDIR)/md5.o
 OBJECTS += $(OBJDIR)/memdebug.o
+OBJECTS += $(OBJDIR)/mime.o
 OBJECTS += $(OBJDIR)/mprintf.o
+OBJECTS += $(OBJDIR)/mqtt.o
 OBJECTS += $(OBJDIR)/multi.o
 OBJECTS += $(OBJDIR)/netrc.o
-OBJECTS += $(OBJDIR)/non-ascii.o
 OBJECTS += $(OBJDIR)/nonblock.o
-OBJECTS += $(OBJDIR)/nss.o
+OBJECTS += $(OBJDIR)/noproxy.o
 OBJECTS += $(OBJDIR)/ntlm.o
 OBJECTS += $(OBJDIR)/ntlm_sspi.o
-OBJECTS += $(OBJDIR)/nwlib.o
-OBJECTS += $(OBJDIR)/nwos.o
 OBJECTS += $(OBJDIR)/oauth2.o
 OBJECTS += $(OBJDIR)/openldap.o
 OBJECTS += $(OBJDIR)/openssl.o
 OBJECTS += $(OBJDIR)/parsedate.o
 OBJECTS += $(OBJDIR)/pingpong.o
-OBJECTS += $(OBJDIR)/pipeline.o
-OBJECTS += $(OBJDIR)/polarssl.o
-OBJECTS += $(OBJDIR)/polarssl_threadlock.o
 OBJECTS += $(OBJDIR)/pop3.o
 OBJECTS += $(OBJDIR)/progress.o
+OBJECTS += $(OBJDIR)/psl.o
 OBJECTS += $(OBJDIR)/rand.o
+OBJECTS += $(OBJDIR)/rename.o
+OBJECTS += $(OBJDIR)/request.o
 OBJECTS += $(OBJDIR)/rtsp.o
+OBJECTS += $(OBJDIR)/rustls.o
 OBJECTS += $(OBJDIR)/schannel.o
-OBJECTS += $(OBJDIR)/security.o
+OBJECTS += $(OBJDIR)/schannel_verify.o
+OBJECTS += $(OBJDIR)/sectransp.o
 OBJECTS += $(OBJDIR)/select.o
 OBJECTS += $(OBJDIR)/sendf.o
+OBJECTS += $(OBJDIR)/setopt.o
+OBJECTS += $(OBJDIR)/sha256.o
 OBJECTS += $(OBJDIR)/share.o
 OBJECTS += $(OBJDIR)/slist.o
 OBJECTS += $(OBJDIR)/smb.o
 OBJECTS += $(OBJDIR)/smtp.o
+OBJECTS += $(OBJDIR)/socketpair.o
 OBJECTS += $(OBJDIR)/socks.o
 OBJECTS += $(OBJDIR)/socks_gssapi.o
 OBJECTS += $(OBJDIR)/socks_sspi.o
@@ -299,7 +388,6 @@ OBJECTS += $(OBJDIR)/speedcheck.o
 OBJECTS += $(OBJDIR)/splay.o
 OBJECTS += $(OBJDIR)/spnego_gssapi.o
 OBJECTS += $(OBJDIR)/spnego_sspi.o
-OBJECTS += $(OBJDIR)/ssh.o
 OBJECTS += $(OBJDIR)/strcase.o
 OBJECTS += $(OBJDIR)/strdup.o
 OBJECTS += $(OBJDIR)/strerror.o
@@ -308,14 +396,21 @@ OBJECTS += $(OBJDIR)/strtoofft.o
 OBJECTS += $(OBJDIR)/system_win32.o
 OBJECTS += $(OBJDIR)/telnet.o
 OBJECTS += $(OBJDIR)/tftp.o
+OBJECTS += $(OBJDIR)/timediff.o
 OBJECTS += $(OBJDIR)/timeval.o
 OBJECTS += $(OBJDIR)/transfer.o
 OBJECTS += $(OBJDIR)/url.o
+OBJECTS += $(OBJDIR)/urlapi.o
 OBJECTS += $(OBJDIR)/vauth.o
 OBJECTS += $(OBJDIR)/version.o
+OBJECTS += $(OBJDIR)/version_win32.o
+OBJECTS += $(OBJDIR)/vquic-tls.o
+OBJECTS += $(OBJDIR)/vquic.o
 OBJECTS += $(OBJDIR)/vtls.o
 OBJECTS += $(OBJDIR)/warnless.o
-OBJECTS += $(OBJDIR)/wildcard.o
+OBJECTS += $(OBJDIR)/wolfssh.o
+OBJECTS += $(OBJDIR)/wolfssl.o
+OBJECTS += $(OBJDIR)/ws.o
 OBJECTS += $(OBJDIR)/x509asn1.o
 
 # Rules
@@ -380,6 +475,9 @@ endif
 # File Rules
 # #############################################
 
+$(OBJDIR)/altsvc.o: ../../contrib/curl/lib/altsvc.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/amigaos.o: ../../contrib/curl/lib/amigaos.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -390,6 +488,33 @@ $(OBJDIR)/asyn-thread.o: ../../contrib/curl/lib/asyn-thread.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/base64.o: ../../contrib/curl/lib/base64.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/bufq.o: ../../contrib/curl/lib/bufq.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/bufref.o: ../../contrib/curl/lib/bufref.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/c-hyper.o: ../../contrib/curl/lib/c-hyper.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cf-h1-proxy.o: ../../contrib/curl/lib/cf-h1-proxy.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cf-h2-proxy.o: ../../contrib/curl/lib/cf-h2-proxy.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cf-haproxy.o: ../../contrib/curl/lib/cf-haproxy.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cf-https-connect.o: ../../contrib/curl/lib/cf-https-connect.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cf-socket.o: ../../contrib/curl/lib/cf-socket.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cfilters.o: ../../contrib/curl/lib/cfilters.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/conncache.o: ../../contrib/curl/lib/conncache.c
@@ -416,6 +541,9 @@ $(OBJDIR)/curl_endian.o: ../../contrib/curl/lib/curl_endian.c
 $(OBJDIR)/curl_fnmatch.o: ../../contrib/curl/lib/curl_fnmatch.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/curl_get_line.o: ../../contrib/curl/lib/curl_get_line.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/curl_gethostname.o: ../../contrib/curl/lib/curl_gethostname.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -431,7 +559,10 @@ $(OBJDIR)/curl_multibyte.o: ../../contrib/curl/lib/curl_multibyte.c
 $(OBJDIR)/curl_ntlm_core.o: ../../contrib/curl/lib/curl_ntlm_core.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/curl_ntlm_wb.o: ../../contrib/curl/lib/curl_ntlm_wb.c
+$(OBJDIR)/curl_path.o: ../../contrib/curl/lib/curl_path.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/curl_range.o: ../../contrib/curl/lib/curl_range.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/curl_rtmp.o: ../../contrib/curl/lib/curl_rtmp.c
@@ -440,19 +571,43 @@ $(OBJDIR)/curl_rtmp.o: ../../contrib/curl/lib/curl_rtmp.c
 $(OBJDIR)/curl_sasl.o: ../../contrib/curl/lib/curl_sasl.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/curl_sha512_256.o: ../../contrib/curl/lib/curl_sha512_256.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/curl_sspi.o: ../../contrib/curl/lib/curl_sspi.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/curl_threads.o: ../../contrib/curl/lib/curl_threads.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/curl_trc.o: ../../contrib/curl/lib/curl_trc.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cw-out.o: ../../contrib/curl/lib/cw-out.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/dict.o: ../../contrib/curl/lib/dict.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/dotdot.o: ../../contrib/curl/lib/dotdot.c
+$(OBJDIR)/dllmain.o: ../../contrib/curl/lib/dllmain.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/doh.o: ../../contrib/curl/lib/doh.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/dynbuf.o: ../../contrib/curl/lib/dynbuf.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/dynhds.o: ../../contrib/curl/lib/dynhds.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/easy.o: ../../contrib/curl/lib/easy.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/easygetopt.o: ../../contrib/curl/lib/easygetopt.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/easyoptions.o: ../../contrib/curl/lib/easyoptions.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/escape.o: ../../contrib/curl/lib/escape.c
@@ -462,6 +617,9 @@ $(OBJDIR)/file.o: ../../contrib/curl/lib/file.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/fileinfo.o: ../../contrib/curl/lib/fileinfo.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/fopen.o: ../../contrib/curl/lib/fopen.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/formdata.o: ../../contrib/curl/lib/formdata.c
@@ -485,13 +643,13 @@ $(OBJDIR)/gopher.o: ../../contrib/curl/lib/gopher.c
 $(OBJDIR)/hash.o: ../../contrib/curl/lib/hash.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/headers.o: ../../contrib/curl/lib/headers.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/hmac.o: ../../contrib/curl/lib/hmac.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/hostasyn.o: ../../contrib/curl/lib/hostasyn.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/hostcheck.o: ../../contrib/curl/lib/hostcheck.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/hostip.o: ../../contrib/curl/lib/hostip.c
@@ -506,10 +664,19 @@ $(OBJDIR)/hostip6.o: ../../contrib/curl/lib/hostip6.c
 $(OBJDIR)/hostsyn.o: ../../contrib/curl/lib/hostsyn.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/hsts.o: ../../contrib/curl/lib/hsts.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/http.o: ../../contrib/curl/lib/http.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/http1.o: ../../contrib/curl/lib/http1.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/http2.o: ../../contrib/curl/lib/http2.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/http_aws_sigv4.o: ../../contrib/curl/lib/http_aws_sigv4.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/http_chunks.o: ../../contrib/curl/lib/http_chunks.c
@@ -527,7 +694,7 @@ $(OBJDIR)/http_ntlm.o: ../../contrib/curl/lib/http_ntlm.c
 $(OBJDIR)/http_proxy.o: ../../contrib/curl/lib/http_proxy.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/idn_win32.o: ../../contrib/curl/lib/idn_win32.c
+$(OBJDIR)/idn.o: ../../contrib/curl/lib/idn.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/if2ip.o: ../../contrib/curl/lib/if2ip.c
@@ -551,6 +718,9 @@ $(OBJDIR)/ldap.o: ../../contrib/curl/lib/ldap.c
 $(OBJDIR)/llist.o: ../../contrib/curl/lib/llist.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/macos.o: ../../contrib/curl/lib/macos.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/md4.o: ../../contrib/curl/lib/md4.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -560,7 +730,13 @@ $(OBJDIR)/md5.o: ../../contrib/curl/lib/md5.c
 $(OBJDIR)/memdebug.o: ../../contrib/curl/lib/memdebug.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mime.o: ../../contrib/curl/lib/mime.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/mprintf.o: ../../contrib/curl/lib/mprintf.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mqtt.o: ../../contrib/curl/lib/mqtt.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/multi.o: ../../contrib/curl/lib/multi.c
@@ -569,16 +745,10 @@ $(OBJDIR)/multi.o: ../../contrib/curl/lib/multi.c
 $(OBJDIR)/netrc.o: ../../contrib/curl/lib/netrc.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/non-ascii.o: ../../contrib/curl/lib/non-ascii.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/nonblock.o: ../../contrib/curl/lib/nonblock.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/nwlib.o: ../../contrib/curl/lib/nwlib.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/nwos.o: ../../contrib/curl/lib/nwos.c
+$(OBJDIR)/noproxy.o: ../../contrib/curl/lib/noproxy.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/openldap.o: ../../contrib/curl/lib/openldap.c
@@ -590,28 +760,37 @@ $(OBJDIR)/parsedate.o: ../../contrib/curl/lib/parsedate.c
 $(OBJDIR)/pingpong.o: ../../contrib/curl/lib/pingpong.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/pipeline.o: ../../contrib/curl/lib/pipeline.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/pop3.o: ../../contrib/curl/lib/pop3.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/progress.o: ../../contrib/curl/lib/progress.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psl.o: ../../contrib/curl/lib/psl.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/rand.o: ../../contrib/curl/lib/rand.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/rtsp.o: ../../contrib/curl/lib/rtsp.c
+$(OBJDIR)/rename.o: ../../contrib/curl/lib/rename.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/security.o: ../../contrib/curl/lib/security.c
+$(OBJDIR)/request.o: ../../contrib/curl/lib/request.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/rtsp.o: ../../contrib/curl/lib/rtsp.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/select.o: ../../contrib/curl/lib/select.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/sendf.o: ../../contrib/curl/lib/sendf.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/setopt.o: ../../contrib/curl/lib/setopt.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/sha256.o: ../../contrib/curl/lib/sha256.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/share.o: ../../contrib/curl/lib/share.c
@@ -624,6 +803,9 @@ $(OBJDIR)/smb.o: ../../contrib/curl/lib/smb.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/smtp.o: ../../contrib/curl/lib/smtp.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/socketpair.o: ../../contrib/curl/lib/socketpair.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/socks.o: ../../contrib/curl/lib/socks.c
@@ -639,9 +821,6 @@ $(OBJDIR)/speedcheck.o: ../../contrib/curl/lib/speedcheck.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/splay.o: ../../contrib/curl/lib/splay.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/ssh.o: ../../contrib/curl/lib/ssh.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/strcase.o: ../../contrib/curl/lib/strcase.c
@@ -668,6 +847,9 @@ $(OBJDIR)/telnet.o: ../../contrib/curl/lib/telnet.c
 $(OBJDIR)/tftp.o: ../../contrib/curl/lib/tftp.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/timediff.o: ../../contrib/curl/lib/timediff.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/timeval.o: ../../contrib/curl/lib/timeval.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -675,6 +857,9 @@ $(OBJDIR)/transfer.o: ../../contrib/curl/lib/transfer.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/url.o: ../../contrib/curl/lib/url.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/urlapi.o: ../../contrib/curl/lib/urlapi.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cleartext.o: ../../contrib/curl/lib/vauth/cleartext.c
@@ -687,6 +872,9 @@ $(OBJDIR)/digest.o: ../../contrib/curl/lib/vauth/digest.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/digest_sspi.o: ../../contrib/curl/lib/vauth/digest_sspi.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/gsasl.o: ../../contrib/curl/lib/vauth/gsasl.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/krb5_gssapi.o: ../../contrib/curl/lib/vauth/krb5_gssapi.c
@@ -716,49 +904,85 @@ $(OBJDIR)/vauth.o: ../../contrib/curl/lib/vauth/vauth.c
 $(OBJDIR)/version.o: ../../contrib/curl/lib/version.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/axtls.o: ../../contrib/curl/lib/vtls/axtls.c
+$(OBJDIR)/version_win32.o: ../../contrib/curl/lib/version_win32.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/cyassl.o: ../../contrib/curl/lib/vtls/cyassl.c
+$(OBJDIR)/curl_msh3.o: ../../contrib/curl/lib/vquic/curl_msh3.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/darwinssl.o: ../../contrib/curl/lib/vtls/darwinssl.c
+$(OBJDIR)/curl_ngtcp2.o: ../../contrib/curl/lib/vquic/curl_ngtcp2.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/gskit.o: ../../contrib/curl/lib/vtls/gskit.c
+$(OBJDIR)/curl_osslq.o: ../../contrib/curl/lib/vquic/curl_osslq.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/curl_quiche.o: ../../contrib/curl/lib/vquic/curl_quiche.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/vquic-tls.o: ../../contrib/curl/lib/vquic/vquic-tls.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/vquic.o: ../../contrib/curl/lib/vquic/vquic.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/libssh.o: ../../contrib/curl/lib/vssh/libssh.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/libssh2.o: ../../contrib/curl/lib/vssh/libssh2.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/wolfssh.o: ../../contrib/curl/lib/vssh/wolfssh.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/bearssl.o: ../../contrib/curl/lib/vtls/bearssl.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cipher_suite.o: ../../contrib/curl/lib/vtls/cipher_suite.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/gtls.o: ../../contrib/curl/lib/vtls/gtls.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/hostcheck.o: ../../contrib/curl/lib/vtls/hostcheck.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/keylog.o: ../../contrib/curl/lib/vtls/keylog.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/mbedtls.o: ../../contrib/curl/lib/vtls/mbedtls.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/nss.o: ../../contrib/curl/lib/vtls/nss.c
+$(OBJDIR)/mbedtls_threadlock.o: ../../contrib/curl/lib/vtls/mbedtls_threadlock.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/openssl.o: ../../contrib/curl/lib/vtls/openssl.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/polarssl.o: ../../contrib/curl/lib/vtls/polarssl.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/polarssl_threadlock.o: ../../contrib/curl/lib/vtls/polarssl_threadlock.c
+$(OBJDIR)/rustls.o: ../../contrib/curl/lib/vtls/rustls.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/schannel.o: ../../contrib/curl/lib/vtls/schannel.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/schannel_verify.o: ../../contrib/curl/lib/vtls/schannel_verify.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/sectransp.o: ../../contrib/curl/lib/vtls/sectransp.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/vtls.o: ../../contrib/curl/lib/vtls/vtls.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/wolfssl.o: ../../contrib/curl/lib/vtls/wolfssl.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/x509asn1.o: ../../contrib/curl/lib/vtls/x509asn1.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/warnless.o: ../../contrib/curl/lib/warnless.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/wildcard.o: ../../contrib/curl/lib/wildcard.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/x509asn1.o: ../../contrib/curl/lib/x509asn1.c
+$(OBJDIR)/ws.o: ../../contrib/curl/lib/ws.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

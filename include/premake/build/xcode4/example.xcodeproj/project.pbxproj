@@ -213,7 +213,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/x64/Release/example;
 				ONLY_ACTIVE_ARCH = NO;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
@@ -242,7 +241,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = obj/x64/Debug/example;
 				ONLY_ACTIVE_ARCH = YES;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,

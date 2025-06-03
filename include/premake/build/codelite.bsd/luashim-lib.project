@@ -1,12 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="luashim-lib" InternalType="Library">
-  <Plugins/>
+<CodeLite_Project Name="luashim-lib" InternalType="Library" Version="11000">
   <Description/>
-<VirtualDirectory Name="luashim-lib">
-  <File Name="../../contrib/luashim/luashim.c"/>
-  <File Name="../../contrib/luashim/luashim.h"/>
-  <File Name="../../contrib/luashim/premake5.lua"/>
-</VirtualDirectory>
+  <VirtualDirectory Name="luashim-lib">
+    <File Name="../../contrib/luashim/luashim.c"/>
+    <File Name="../../contrib/luashim/luashim.h"/>
+    <File Name="../../contrib/luashim/premake5.lua"/>
+  </VirtualDirectory>
   <Dependencies Name="Release"/>
   <Dependencies Name="Debug"/>
   <Settings Type="Static Library">
@@ -20,7 +19,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Release" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -29,10 +28,11 @@
         <Preprocessor Value="LUA_USE_POSIX"/>
         <Preprocessor Value="LUA_USE_DLOPEN"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Options="" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Release/libluashim-lib.a" IntermediateDirectory="obj/Release/luashim-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -41,7 +41,18 @@
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
-      <CustomBuild Enabled="no"/>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
       <AdditionalRules>
         <CustomPostBuild/>
         <CustomPreBuild/>
@@ -54,7 +65,7 @@
       </Completion>
     </Configuration>
     <Configuration Name="Debug" CompilerType="clang" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlagsPolicy="1" PCHFlags="">
+      <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -63,10 +74,11 @@
         <Preprocessor Value="LUA_USE_POSIX"/>
         <Preprocessor Value="LUA_USE_DLOPEN"/>
       </Compiler>
-      <Linker Required="yes" Options="">
+      <Linker Options="" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/Debug/libluashim-lib.a" IntermediateDirectory="obj/Debug/luashim-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -75,7 +87,18 @@
         <PostConnectCommands/>
         <StartupCommands/>
       </Debugger>
-      <CustomBuild Enabled="no"/>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
       <AdditionalRules>
         <CustomPostBuild/>
         <CustomPreBuild/>

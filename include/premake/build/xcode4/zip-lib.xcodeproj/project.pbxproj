@@ -497,6 +497,8 @@
 					PREMAKE_CURL,
 					NDEBUG,
 					N_FSEEKO,
+					HAVE_SSIZE_T_LIBZIP,
+					HAVE_CONFIG_H,
 					_WINDOWS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -504,7 +506,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Release/zip-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,
@@ -527,6 +528,8 @@
 					PREMAKE_CURL,
 					_DEBUG,
 					N_FSEEKO,
+					HAVE_SSIZE_T_LIBZIP,
+					HAVE_CONFIG_H,
 					_WINDOWS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
@@ -534,7 +537,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Debug/zip-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,

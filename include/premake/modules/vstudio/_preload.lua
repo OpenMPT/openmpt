@@ -1,7 +1,7 @@
 --
 -- _preload.lua
 -- Define the makefile action(s).
--- Copyright (c) Jason Perkins and the Premake project
+-- Copyright (c) Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -65,6 +65,7 @@
 			"Hull",
 			"Domain",
 			"Compute",
+			"Library",
 			"Mesh",
 			"Amplification",
 			"Texture",
@@ -92,7 +93,8 @@
 			"6.2",
 			"6.3",
 			"6.4",
-			"6.5"
+			"6.5",
+			"6.6"
 		}
 	}
 
@@ -175,6 +177,122 @@
 		kind = "boolean"
 	}
 
+	p.api.register {
+		name = "usestandardpreprocessor",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "enableunitybuild",
+		scope = { "config" },
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "enablemodules",
+		scope = { "config" },
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "buildstlmodules",
+		scope = { "config" },
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "clangtidy",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "runcodeanalysis",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "vsprops",
+		scope = "config",
+		kind = "list:table",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "toolchainversion",
+		scope = "config",
+		kind = "string",
+		allowed = {}
+	}
+
+--
+-- Register Linux properties
+--
+
+	p.api.addAllowed("toolchainversion", { "remote", "wsl", "wsl2" })
+
+	-- Directory in the remote machine where our files will be copied before compilation
+	p.api.register {
+		name = "remoterootdir",
+		scope = "config",
+		kind = "string",
+	}
+
+	-- Relative per-project directory. Set to empty for the entire project to be copied as is
+	-- Should default to empty really for the more seamless experience
+	p.api.register {
+		name = "remoteprojectrelativedir",
+		scope = "config",
+		kind = "string",
+	}
+
+	-- Directory in the remote machine where the build is deployed
+	-- Only applies to WSL projects
+	p.api.register {
+		name = "remotedeploydir",
+		scope = "config",
+		kind = "string",
+	}
+
+	p.api.register {
+		name = "remoteprojectdir",
+		scope = "config",
+		kind = "string",
+	}
+
+	-- Directory of LLVM install
+	p.api.register {
+		name = "llvmdir",
+		scope = "config",
+		kind = "directory",
+		tokens = "true",
+	}
+
+	-- Version of LLVM Install
+	p.api.register {
+		name = "llvmversion",
+		scope = "config",
+		kind = "string",
+		tokens = "true",
+	}
 
 --
 -- Decide when the full module should be loaded.

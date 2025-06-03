@@ -3,7 +3,7 @@
 --
 -- Expands tokens.
 --
--- Copyright (c) 2011-2014 Jason Perkins and the Premake project
+-- Copyright (c) 2011-2014 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -41,7 +41,7 @@
 				end
 			end
 
-			-- fetch the pathVars from the enviroment.
+			-- fetch the pathVars from the environment.
 			local envMap = e.pathVars or {}
 
 			-- enable access to the global environment

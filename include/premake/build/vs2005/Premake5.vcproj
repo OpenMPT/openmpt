@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /GL /Ox /MT /W4 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -192,7 +192,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /MTd /Z7 /W4 /EHsc"
+				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /MTd /Z7 /W4 /EHsc"
+				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
@@ -444,90 +444,6 @@
 					</File>
 					<File
 						RelativePath="..\..\modules\codelite\tests\test_codelite_workspace.lua"
-						>
-					</File>
-				</Filter>
-			</Filter>
-			<Filter
-				Name="d"
-				>
-				<File
-					RelativePath="..\..\modules\d\LICENSE.txt"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\d\README.md"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\d\_manifest.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\d\_preload.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\d\d.lua"
-					>
-				</File>
-				<Filter
-					Name="actions"
-					>
-					<File
-						RelativePath="..\..\modules\d\actions\gmake.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\actions\vcxproj.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\actions\visuald.lua"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="tests"
-					>
-					<File
-						RelativePath="..\..\modules\d\tests\_tests.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tests\test_dmd.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tests\test_gdc.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tests\test_gmake.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tests\test_ldc.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tests\test_visualstudio.lua"
-						>
-					</File>
-				</Filter>
-				<Filter
-					Name="tools"
-					>
-					<File
-						RelativePath="..\..\modules\d\tools\dmd.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tools\gdc.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\d\tools\ldc.lua"
 						>
 					</File>
 				</Filter>
@@ -732,6 +648,10 @@
 					</File>
 					<File
 						RelativePath="..\..\modules\gmake2\tests\test_gmake2_flags.lua"
+						>
+					</File>
+					<File
+						RelativePath="..\..\modules\gmake2\tests\test_gmake2_includes.lua"
 						>
 					</File>
 					<File
@@ -954,6 +874,10 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\modules\vstudio\tests\cs2005\test_additional_props.lua"
+							>
+						</File>
+						<File
 							RelativePath="..\..\modules\vstudio\tests\cs2005\test_assembly_refs.lua"
 							>
 						</File>
@@ -975,6 +899,10 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\cs2005\test_debug_props_2019.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\cs2005\test_documentation_file.lua"
 							>
 						</File>
 						<File
@@ -1330,6 +1258,10 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2019\test_output_props.lua"
+							>
+						</File>
+						<File
 							RelativePath="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua"
 							>
 						</File>
@@ -1516,6 +1448,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\base\git_integration.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\base\global.lua"
 					>
 				</File>
@@ -1688,6 +1624,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\host\os_getnumcpus.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\host\os_getpass.c"
 					>
 				</File>
@@ -1697,6 +1637,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\host\os_host.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\host\os_hostarch.c"
 					>
 				</File>
 				<File
@@ -1852,6 +1796,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\tools\cosmocc.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\tools\dotnet.lua"
 					>
 				</File>
@@ -1885,6 +1833,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tests\test_lua.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\test_lua_loaded.lua"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\test_lua_loaded_noenv.lua"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tests\test_premake.lua"
 				>
 			</File>
@@ -1913,6 +1873,10 @@
 				</File>
 				<File
 					RelativePath="..\..\tests\api\test_directory_kind.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tests\api\test_file_kind.lua"
 					>
 				</File>
 				<File
@@ -2047,6 +2011,10 @@
 			<Filter
 				Name="folder"
 				>
+				<File
+					RelativePath="..\..\tests\folder\init.lua"
+					>
+				</File>
 				<File
 					RelativePath="..\..\tests\folder\ok.lua"
 					>

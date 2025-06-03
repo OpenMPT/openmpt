@@ -11,16 +11,25 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
 # Configurations
 # #############################################
 
+ifeq ($(origin CC), default)
+  CC = gcc
+endif
+ifeq ($(origin CXX), default)
+  CXX = g++
+endif
+ifeq ($(origin AR), default)
+  AR = ar
+endif
 RESCOMP = windres
 INCLUDES += -I../../contrib/libzip/include
-FORCE_INCLUDE +=
+FORCE_INCLUDE += -include unistd.h
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=
@@ -37,7 +46,7 @@ ifeq ($(config),release_x86)
 TARGETDIR = bin/x86/Release
 TARGET = $(TARGETDIR)/zip-lib.lib
 OBJDIR = obj/x86/Release/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -D_WINDOWS
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP -DHAVE_CONFIG_H -D_WINDOWS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -w -fno-stack-protector
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -flto -s
@@ -46,7 +55,7 @@ else ifeq ($(config),release_x64)
 TARGETDIR = bin/x64/Release
 TARGET = $(TARGETDIR)/zip-lib.lib
 OBJDIR = obj/x64/Release/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -D_WINDOWS
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP -DHAVE_CONFIG_H -D_WINDOWS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -w -fno-stack-protector
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -flto -s
@@ -55,7 +64,7 @@ else ifeq ($(config),debug_x86)
 TARGETDIR = bin/x86/Debug
 TARGET = $(TARGETDIR)/zip-lib.lib
 OBJDIR = obj/x86/Debug/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -D_WINDOWS
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP -DHAVE_CONFIG_H -D_WINDOWS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -w
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32
@@ -64,7 +73,7 @@ else ifeq ($(config),debug_x64)
 TARGETDIR = bin/x64/Debug
 TARGET = $(TARGETDIR)/zip-lib.lib
 OBJDIR = obj/x64/Debug/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -D_WINDOWS
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP -DHAVE_CONFIG_H -D_WINDOWS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -w
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64

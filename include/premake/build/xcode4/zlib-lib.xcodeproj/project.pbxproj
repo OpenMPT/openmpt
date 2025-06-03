@@ -216,7 +216,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Release/zlib-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Release;
 				WARNING_CFLAGS = "-w";
 			};
@@ -269,7 +268,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Debug/zlib-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Debug;
 				WARNING_CFLAGS = "-w";
 			};

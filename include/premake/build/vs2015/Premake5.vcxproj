@@ -107,7 +107,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -119,6 +118,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;ws2_32.lib;advapi32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -134,7 +134,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <MinimalRebuild>false</MinimalRebuild>
       <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -146,6 +145,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;ws2_32.lib;advapi32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -158,7 +158,6 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -180,7 +179,6 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
@@ -217,9 +215,11 @@
     <ClCompile Include="..\..\src\host\os_copyfile.c" />
     <ClCompile Include="..\..\src\host\os_getWindowsRegistry.c" />
     <ClCompile Include="..\..\src\host\os_getcwd.c" />
+    <ClCompile Include="..\..\src\host\os_getnumcpus.c" />
     <ClCompile Include="..\..\src\host\os_getpass.c" />
     <ClCompile Include="..\..\src\host\os_getversion.c" />
     <ClCompile Include="..\..\src\host\os_host.c" />
+    <ClCompile Include="..\..\src\host\os_hostarch.c" />
     <ClCompile Include="..\..\src\host\os_is64bit.c" />
     <ClCompile Include="..\..\src\host\os_isdir.c" />
     <ClCompile Include="..\..\src\host\os_isfile.c" />
@@ -283,23 +283,6 @@
     <None Include="..\..\modules\codelite\tests\test_codelite_config.lua" />
     <None Include="..\..\modules\codelite\tests\test_codelite_project.lua" />
     <None Include="..\..\modules\codelite\tests\test_codelite_workspace.lua" />
-    <None Include="..\..\modules\d\LICENSE.txt" />
-    <None Include="..\..\modules\d\README.md" />
-    <None Include="..\..\modules\d\_manifest.lua" />
-    <None Include="..\..\modules\d\_preload.lua" />
-    <None Include="..\..\modules\d\actions\gmake.lua" />
-    <None Include="..\..\modules\d\actions\vcxproj.lua" />
-    <None Include="..\..\modules\d\actions\visuald.lua" />
-    <None Include="..\..\modules\d\d.lua" />
-    <None Include="..\..\modules\d\tests\_tests.lua" />
-    <None Include="..\..\modules\d\tests\test_dmd.lua" />
-    <None Include="..\..\modules\d\tests\test_gdc.lua" />
-    <None Include="..\..\modules\d\tests\test_gmake.lua" />
-    <None Include="..\..\modules\d\tests\test_ldc.lua" />
-    <None Include="..\..\modules\d\tests\test_visualstudio.lua" />
-    <None Include="..\..\modules\d\tools\dmd.lua" />
-    <None Include="..\..\modules\d\tools\gdc.lua" />
-    <None Include="..\..\modules\d\tools\ldc.lua" />
     <None Include="..\..\modules\gmake\_manifest.lua" />
     <None Include="..\..\modules\gmake\_preload.lua" />
     <None Include="..\..\modules\gmake\gmake.lua" />
@@ -344,6 +327,7 @@
     <None Include="..\..\modules\gmake2\tests\test_gmake2_clang.lua" />
     <None Include="..\..\modules\gmake2\tests\test_gmake2_file_rules.lua" />
     <None Include="..\..\modules\gmake2\tests\test_gmake2_flags.lua" />
+    <None Include="..\..\modules\gmake2\tests\test_gmake2_includes.lua" />
     <None Include="..\..\modules\gmake2\tests\test_gmake2_ldflags.lua" />
     <None Include="..\..\modules\gmake2\tests\test_gmake2_linking.lua" />
     <None Include="..\..\modules\gmake2\tests\test_gmake2_makefile.lua" />
@@ -368,12 +352,14 @@
     <None Include="..\..\modules\vstudio\_preload.lua" />
     <None Include="..\..\modules\vstudio\tests\_tests.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\projectsettings.lua" />
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_additional_props.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_assembly_refs.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_build_events.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_common_props.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_compiler_props.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_debug_props.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_debug_props_2019.lua" />
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_documentation_file.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_files.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_icon.lua" />
     <None Include="..\..\modules\vstudio\tests\cs2005\test_netcore.lua" />
@@ -455,6 +441,7 @@
     <None Include="..\..\modules\vstudio\tests\vc2013\test_vcxitems.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_compile_settings.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua" />
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_output_props.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua" />
     <None Include="..\..\modules\vstudio\tests\vc2022\test_output_props.lua" />
@@ -520,6 +507,7 @@
     <None Include="..\..\src\base\detoken.lua" />
     <None Include="..\..\src\base\field.lua" />
     <None Include="..\..\src\base\fileconfig.lua" />
+    <None Include="..\..\src\base\git_integration.lua" />
     <None Include="..\..\src\base\global.lua" />
     <None Include="..\..\src\base\globals.lua" />
     <None Include="..\..\src\base\group.lua" />
@@ -545,6 +533,7 @@
     <None Include="..\..\src\base\validation.lua" />
     <None Include="..\..\src\base\workspace.lua" />
     <None Include="..\..\src\tools\clang.lua" />
+    <None Include="..\..\src\tools\cosmocc.lua" />
     <None Include="..\..\src\tools\dotnet.lua" />
     <None Include="..\..\src\tools\gcc.lua" />
     <None Include="..\..\src\tools\mingw.lua" />
@@ -555,6 +544,7 @@
     <None Include="..\..\tests\api\test_containers.lua" />
     <None Include="..\..\tests\api\test_deprecations.lua" />
     <None Include="..\..\tests\api\test_directory_kind.lua" />
+    <None Include="..\..\tests\api\test_file_kind.lua" />
     <None Include="..\..\tests\api\test_list_kind.lua" />
     <None Include="..\..\tests\api\test_path_kind.lua" />
     <None Include="..\..\tests\api\test_register.lua" />
@@ -585,6 +575,7 @@
     <None Include="..\..\tests\config\test_linkinfo.lua" />
     <None Include="..\..\tests\config\test_links.lua" />
     <None Include="..\..\tests\config\test_targetinfo.lua" />
+    <None Include="..\..\tests\folder\init.lua" />
     <None Include="..\..\tests\folder\ok.lua" />
     <None Include="..\..\tests\folder\premake5.lua" />
     <None Include="..\..\tests\oven\test_filtering.lua" />
@@ -596,6 +587,9 @@
     <None Include="..\..\tests\project\test_location.lua" />
     <None Include="..\..\tests\project\test_sources.lua" />
     <None Include="..\..\tests\project\test_vpaths.lua" />
+    <None Include="..\..\tests\test_lua.lua" />
+    <None Include="..\..\tests\test_lua_loaded.lua" />
+    <None Include="..\..\tests\test_lua_loaded_noenv.lua" />
     <None Include="..\..\tests\test_premake.lua" />
     <None Include="..\..\tests\test_stress.lua" />
     <None Include="..\..\tests\test_string.lua" />

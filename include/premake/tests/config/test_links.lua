@@ -1,7 +1,7 @@
 --
 -- tests/config/test_links.lua
 -- Test the list of linked objects retrieval function.
--- Copyright (c) 2012-2013 Jason Perkins and the Premake project
+-- Copyright (c) 2012-2013 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -221,4 +221,46 @@
 
 		local r = prepare("all", "fullpath")
 		test.isequal({ "bin/Debug/MyProject2.lib" }, r)
+	end
+
+--
+-- Linking decorators need to be passed through
+--
+
+	function suite.canLink_StaticDecoratorSystemLib()
+		links { "SystemLibrary:static" }
+		local r = prepare("all", "fullpath")
+		test.isequal({ "SystemLibrary:static" }, r)
+	end
+
+	function suite.canLink_SharedDecoratorSystemLib()
+		links { "SystemLibrary:shared" }
+		local r = prepare("all", "fullpath")
+		test.isequal({ "SystemLibrary:shared" }, r)
+	end
+
+--
+-- Linking decorators need to be stripped for sibling projects
+--
+
+	function suite.canLink_StaticDecoratorSiblingLib()
+		links { "SiblingLibrary:static" }
+
+		project "SiblingLibrary"
+		kind "StaticLib"
+		language "C++"
+
+		local r = prepare("all", "fullpath")
+		test.isequal({ "bin/Debug/SiblingLibrary.lib" }, r)
+	end
+
+	function suite.canLink_SharedDecoratorSiblingLib()
+		links { "SiblingLibrary:shared" }
+
+		project "SiblingLibrary"
+		kind "SharedLib"
+		language "C++"
+
+		local r = prepare("all", "fullpath")
+		test.isequal({ "bin/Debug/SiblingLibrary.lib" }, r)
 	end

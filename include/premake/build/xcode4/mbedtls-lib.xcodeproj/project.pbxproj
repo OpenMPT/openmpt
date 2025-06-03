@@ -710,7 +710,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Debug/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/mbedtls/include,
@@ -751,7 +750,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OBJROOT = "obj/x64/Release/mbedtls-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = bin/x64/Release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/mbedtls/include,

@@ -324,6 +324,7 @@
 					PREMAKE_CURL,
 					_DEBUG,
 					"LUASOCKET_API=__declspec(dllexport)",
+					_WINSOCK_DEPRECATED_NO_WARNINGS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -333,7 +334,6 @@
 				OTHER_LDFLAGS = (
 					"-lws2_32",
 				);
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,
@@ -355,6 +355,7 @@
 					PREMAKE_CURL,
 					NDEBUG,
 					"LUASOCKET_API=__declspec(dllexport)",
+					_WINSOCK_DEPRECATED_NO_WARNINGS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -364,7 +365,6 @@
 				OTHER_LDFLAGS = (
 					"-lws2_32",
 				);
-				STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;
 				SYMROOT = ../../bin/release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/lua/src,

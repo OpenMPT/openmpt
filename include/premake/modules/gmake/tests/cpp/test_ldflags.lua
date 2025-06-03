@@ -1,7 +1,7 @@
 --
 -- tests/actions/make/cpp/test_ldflags.lua
 -- Tests compiler and linker flags for Makefiles.
--- Copyright (c) 2012-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2012-2015 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -39,7 +39,7 @@
 	end
 
 --
--- Check addition of library search directores.
+-- Check addition of library search directories.
 --
 
 	function suite.checkLibDirs()

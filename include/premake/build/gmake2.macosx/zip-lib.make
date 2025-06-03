@@ -11,7 +11,7 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
@@ -27,8 +27,9 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
+RESCOMP = windres
 INCLUDES += -I../../contrib/libzip/include
-FORCE_INCLUDE +=
+FORCE_INCLUDE += -include unistd.h
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=
@@ -46,7 +47,7 @@ ifeq ($(config),release)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libzip-lib.a
 OBJDIR = obj/Release/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DN_FSEEKO -DHAVE_CONFIG_H -DHAVE_SSIZE_T_LIBZIP
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
 
@@ -54,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libzip-lib.a
 OBJDIR = obj/Debug/zip-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -DHAVE_SSIZE_T_LIBZIP
+DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DN_FSEEKO -DHAVE_CONFIG_H -DHAVE_SSIZE_T_LIBZIP
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 

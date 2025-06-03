@@ -3,8 +3,8 @@
 --
 -- Helper functions for setting up workspaces and projects, etc.
 --
--- Author Jason Perkins
--- Copyright (c) 2008-2016 Jason Perkins and the Premake project.
+-- Author Jess Perkins
+-- Copyright (c) 2008-2016 Jess Perkins and the Premake project.
 ---
 
 	local p = premake
@@ -44,7 +44,7 @@
 		return prj
 	end
 
-	function m.createGroup(wks)		
+	function m.createGroup(wks)
 		local prj = group ("MyGroup" .. (#wks.groups + 1))
 		return prj
 	end

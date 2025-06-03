@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="modules">
@@ -15,18 +15,6 @@
     </Filter>
     <Filter Include="modules\codelite\tests">
       <UniqueIdentifier>{B8384320-A432-6C72-8D9F-02837938D2DE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\d">
-      <UniqueIdentifier>{F1EA2A26-5D55-DF9C-A693-9042123DBDF1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\d\actions">
-      <UniqueIdentifier>{B1B1DF92-1DC8-DD28-663F-694AD294AEB0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\d\tests">
-      <UniqueIdentifier>{9386D446-FF11-420B-0823-C5FF742D9E0B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\d\tools">
-      <UniqueIdentifier>{51F0D946-BD7B-470B-C68C-CAFF3297A30B}</UniqueIdentifier>
     </Filter>
     <Filter Include="modules\gmake">
       <UniqueIdentifier>{12B50CC7-7E75-88FD-47B0-D17AB32FCDD9}</UniqueIdentifier>
@@ -209,6 +197,9 @@
     <ClCompile Include="..\..\src\host\os_getcwd.c">
       <Filter>src\host</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\host\os_getnumcpus.c">
+      <Filter>src\host</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\host\os_getpass.c">
       <Filter>src\host</Filter>
     </ClCompile>
@@ -216,6 +207,9 @@
       <Filter>src\host</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_host.c">
+      <Filter>src\host</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\host\os_hostarch.c">
       <Filter>src\host</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\host\os_is64bit.c">
@@ -393,57 +387,6 @@
     <None Include="..\..\modules\codelite\tests\test_codelite_workspace.lua">
       <Filter>modules\codelite\tests</Filter>
     </None>
-    <None Include="..\..\modules\d\LICENSE.txt">
-      <Filter>modules\d</Filter>
-    </None>
-    <None Include="..\..\modules\d\README.md">
-      <Filter>modules\d</Filter>
-    </None>
-    <None Include="..\..\modules\d\_manifest.lua">
-      <Filter>modules\d</Filter>
-    </None>
-    <None Include="..\..\modules\d\_preload.lua">
-      <Filter>modules\d</Filter>
-    </None>
-    <None Include="..\..\modules\d\actions\gmake.lua">
-      <Filter>modules\d\actions</Filter>
-    </None>
-    <None Include="..\..\modules\d\actions\vcxproj.lua">
-      <Filter>modules\d\actions</Filter>
-    </None>
-    <None Include="..\..\modules\d\actions\visuald.lua">
-      <Filter>modules\d\actions</Filter>
-    </None>
-    <None Include="..\..\modules\d\d.lua">
-      <Filter>modules\d</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\_tests.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\test_dmd.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\test_gdc.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\test_gmake.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\test_ldc.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tests\test_visualstudio.lua">
-      <Filter>modules\d\tests</Filter>
-    </None>
-    <None Include="..\..\modules\d\tools\dmd.lua">
-      <Filter>modules\d\tools</Filter>
-    </None>
-    <None Include="..\..\modules\d\tools\gdc.lua">
-      <Filter>modules\d\tools</Filter>
-    </None>
-    <None Include="..\..\modules\d\tools\ldc.lua">
-      <Filter>modules\d\tools</Filter>
-    </None>
     <None Include="..\..\modules\gmake\_manifest.lua">
       <Filter>modules\gmake</Filter>
     </None>
@@ -576,6 +519,9 @@
     <None Include="..\..\modules\gmake2\tests\test_gmake2_flags.lua">
       <Filter>modules\gmake2\tests</Filter>
     </None>
+    <None Include="..\..\modules\gmake2\tests\test_gmake2_includes.lua">
+      <Filter>modules\gmake2\tests</Filter>
+    </None>
     <None Include="..\..\modules\gmake2\tests\test_gmake2_ldflags.lua">
       <Filter>modules\gmake2\tests</Filter>
     </None>
@@ -648,6 +594,9 @@
     <None Include="..\..\modules\vstudio\tests\cs2005\projectsettings.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_additional_props.lua">
+      <Filter>modules\vstudio\tests\cs2005</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_assembly_refs.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
@@ -664,6 +613,9 @@
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_debug_props_2019.lua">
+      <Filter>modules\vstudio\tests\cs2005</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_documentation_file.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_files.lua">
@@ -909,6 +861,9 @@
     <None Include="..\..\modules\vstudio\tests\vc2019\test_link.lua">
       <Filter>modules\vstudio\tests\vc2019</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2019\test_output_props.lua">
+      <Filter>modules\vstudio\tests\vc2019</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\vc2019\test_toolset_settings.lua">
       <Filter>modules\vstudio\tests\vc2019</Filter>
     </None>
@@ -1100,6 +1055,9 @@
     <None Include="..\..\src\base\fileconfig.lua">
       <Filter>src\base</Filter>
     </None>
+    <None Include="..\..\src\base\git_integration.lua">
+      <Filter>src\base</Filter>
+    </None>
     <None Include="..\..\src\base\global.lua">
       <Filter>src\base</Filter>
     </None>
@@ -1175,6 +1133,9 @@
     <None Include="..\..\src\tools\clang.lua">
       <Filter>src\tools</Filter>
     </None>
+    <None Include="..\..\src\tools\cosmocc.lua">
+      <Filter>src\tools</Filter>
+    </None>
     <None Include="..\..\src\tools\dotnet.lua">
       <Filter>src\tools</Filter>
     </None>
@@ -1203,6 +1164,9 @@
       <Filter>tests\api</Filter>
     </None>
     <None Include="..\..\tests\api\test_directory_kind.lua">
+      <Filter>tests\api</Filter>
+    </None>
+    <None Include="..\..\tests\api\test_file_kind.lua">
       <Filter>tests\api</Filter>
     </None>
     <None Include="..\..\tests\api\test_list_kind.lua">
@@ -1295,6 +1259,9 @@
     <None Include="..\..\tests\config\test_targetinfo.lua">
       <Filter>tests\config</Filter>
     </None>
+    <None Include="..\..\tests\folder\init.lua">
+      <Filter>tests\folder</Filter>
+    </None>
     <None Include="..\..\tests\folder\ok.lua">
       <Filter>tests\folder</Filter>
     </None>
@@ -1327,6 +1294,15 @@
     </None>
     <None Include="..\..\tests\project\test_vpaths.lua">
       <Filter>tests\project</Filter>
+    </None>
+    <None Include="..\..\tests\test_lua.lua">
+      <Filter>tests</Filter>
+    </None>
+    <None Include="..\..\tests\test_lua_loaded.lua">
+      <Filter>tests</Filter>
+    </None>
+    <None Include="..\..\tests\test_lua_loaded_noenv.lua">
+      <Filter>tests</Filter>
     </None>
     <None Include="..\..\tests\test_premake.lua">
       <Filter>tests</Filter>

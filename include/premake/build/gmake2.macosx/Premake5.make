@@ -11,7 +11,7 @@ endif
 .PHONY: clean prebuild
 
 SHELLTYPE := posix
-ifeq (.exe,$(findstring .exe,$(ComSpec)))
+ifeq ($(shell echo "test"), "test")
 	SHELLTYPE := msdos
 endif
 
@@ -27,6 +27,7 @@ endif
 ifeq ($(origin AR), default)
   AR = ar
 endif
+RESCOMP = windres
 INCLUDES += -I../../contrib/lua/src -I../../contrib/luashim -I../../contrib/zlib -I../../contrib/libzip -I../../contrib/curl/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
@@ -87,9 +88,11 @@ GENERATED += $(OBJDIR)/os_compile.o
 GENERATED += $(OBJDIR)/os_copyfile.o
 GENERATED += $(OBJDIR)/os_getWindowsRegistry.o
 GENERATED += $(OBJDIR)/os_getcwd.o
+GENERATED += $(OBJDIR)/os_getnumcpus.o
 GENERATED += $(OBJDIR)/os_getpass.o
 GENERATED += $(OBJDIR)/os_getversion.o
 GENERATED += $(OBJDIR)/os_host.o
+GENERATED += $(OBJDIR)/os_hostarch.o
 GENERATED += $(OBJDIR)/os_is64bit.o
 GENERATED += $(OBJDIR)/os_isdir.o
 GENERATED += $(OBJDIR)/os_isfile.o
@@ -138,9 +141,11 @@ OBJECTS += $(OBJDIR)/os_compile.o
 OBJECTS += $(OBJDIR)/os_copyfile.o
 OBJECTS += $(OBJDIR)/os_getWindowsRegistry.o
 OBJECTS += $(OBJDIR)/os_getcwd.o
+OBJECTS += $(OBJDIR)/os_getnumcpus.o
 OBJECTS += $(OBJDIR)/os_getpass.o
 OBJECTS += $(OBJDIR)/os_getversion.o
 OBJECTS += $(OBJDIR)/os_host.o
+OBJECTS += $(OBJDIR)/os_hostarch.o
 OBJECTS += $(OBJDIR)/os_is64bit.o
 OBJECTS += $(OBJDIR)/os_isdir.o
 OBJECTS += $(OBJDIR)/os_isfile.o
@@ -282,6 +287,9 @@ $(OBJDIR)/os_getWindowsRegistry.o: ../../src/host/os_getWindowsRegistry.c
 $(OBJDIR)/os_getcwd.o: ../../src/host/os_getcwd.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_getnumcpus.o: ../../src/host/os_getnumcpus.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_getpass.o: ../../src/host/os_getpass.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -289,6 +297,9 @@ $(OBJDIR)/os_getversion.o: ../../src/host/os_getversion.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_host.o: ../../src/host/os_host.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_hostarch.o: ../../src/host/os_hostarch.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_is64bit.o: ../../src/host/os_is64bit.c

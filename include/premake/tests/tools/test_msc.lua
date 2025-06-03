@@ -1,7 +1,7 @@
 --
 -- tests/test_msc.lua
 -- Automated test suite for the Microsoft C toolset interface.
--- Copyright (c) 2012-2013 Jason Perkins and the Premake project
+-- Copyright (c) 2012-2013 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -301,12 +301,45 @@
 		test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
+	function suite.cflags_onVs2008ExternalIncludeDirs()
+		p.action.set("vs2008")
+		externalincludedirs { "/usr/local/include" }
+		prepare()
+		test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+	end
+
 	function suite.cflags_onVs2022ExternalIncludeDirs()
 		p.action.set("vs2022")
 		externalincludedirs { "/usr/local/include" }
 		prepare()
+		test.contains("/external:W3", msc.getsharedflags(cfg))
 		test.contains("/external:I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
+
+--
+-- Check handling includedirsafter.
+--
+
+function suite.cflags_onIncludeDirsAfter()
+	includedirsafter { "/usr/local/include" }
+	prepare()
+	test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+end
+
+function suite.cflags_onVs2008IncludeDirsAfter()
+	p.action.set("vs2008")
+	includedirsafter { "/usr/local/include" }
+	prepare()
+	test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+end
+
+function suite.cflags_onVs2022IncludeDirsAfter()
+	p.action.set("vs2022")
+	includedirsafter { "/usr/local/include" }
+	prepare()
+	test.contains("/external:W3", msc.getsharedflags(cfg))
+	test.contains("/external:I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+end
 
 
 --
@@ -330,6 +363,71 @@
 		test.contains('/FIinclude/sys.h', msc.getforceincludes(cfg))
 	end
 
+--
+-- Check handling of cdialect.
+--
+
+	function suite.cdialectC11()
+		cdialect "C11"
+		prepare()
+		test.contains('/std:c11', msc.getcflags(cfg))
+	end
+
+	function suite.cdialectC17()
+		cdialect "C17"
+		prepare()
+		test.contains('/std:c17', msc.getcflags(cfg))
+	end
+
+--
+-- Check handling of cppdialect.
+--
+
+	function suite.cppdialectCpp14()
+		cppdialect "C++14"
+		prepare()
+		test.contains('/std:c++14', msc.getcxxflags(cfg))
+	end
+
+	function suite.cppdialectCpp17()
+		cppdialect "C++17"
+		prepare()
+		test.contains('/std:c++17', msc.getcxxflags(cfg))
+	end
+
+	function suite.cppdialectCpp20()
+		cppdialect "C++20"
+		prepare()
+		test.contains('/std:c++20', msc.getcxxflags(cfg))
+	end
+
+	function suite.cppdialectCpp23()
+		cppdialect "C++23"
+		prepare()
+		test.contains('/std:c++latest', msc.getcxxflags(cfg))
+	end
+
+	function suite.cppdialectCppLatest()
+		cppdialect "C++latest"
+		prepare()
+		test.contains('/std:c++latest', msc.getcxxflags(cfg))
+	end
+
+--
+-- Check handling of compileas.
+--
+
+	function suite.compileasC()
+		compileas "C"
+		prepare()
+		test.contains('/TC', msc.getsharedflags(cfg))
+	end
+
+	function suite.compileasCPP()
+		compileas "C++"
+		prepare()
+		test.contains('/TP', msc.getsharedflags(cfg))
+	end
 
 --
 -- Check handling of floating point modifiers.
@@ -460,6 +558,30 @@
 		test.contains("/fsanitize=fuzzer", msc.getcxxflags(cfg))
 	end
 
+--
+-- Check entrypoint linker options.
+--
+
+	function suite.ldflags_entrypoint_windows()
+		kind "WindowedApp"
+		entrypoint "main2"
+		prepare()
+		test.contains("/SUBSYSTEM:WINDOWS", msc.getldflags(cfg))
+		test.contains("/ENTRY:main2", msc.getldflags(cfg))
+	end
+	function suite.ldflags_entrypoint_console()
+		kind "ConsoleApp"
+		entrypoint "main2"
+		prepare()
+		test.contains("/SUBSYSTEM:CONSOLE", msc.getldflags(cfg))
+		test.contains("/ENTRY:main2", msc.getldflags(cfg))
+	end
+	function suite.ldflags_entrypoint_other()
+		entrypoint "main2"
+		prepare()
+		test.contains("/SUBSYSTEM:NATIVE", msc.getldflags(cfg))
+		test.contains("/ENTRY:main2", msc.getldflags(cfg))
+	end
 
 --
 -- Check handling of additional linker options.

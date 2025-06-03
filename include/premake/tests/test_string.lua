@@ -1,7 +1,7 @@
 --
 -- tests/test_string.lua
 -- Automated test suite for the new string functions.
--- Copyright (c) 2008 Jason Perkins and the Premake project
+-- Copyright (c) 2008 Jess Perkins and the Premake project
 --
 
 	local suite = test.declare("string")
@@ -18,11 +18,11 @@
 	function suite.endswith_ReturnsFalse_OnMismatch()
 		test.isfalse(string.endswith("Abcedf", "efg"))
 	end
-	
+
 	function suite.endswith_ReturnsFalse_OnLongerNeedle()
 		test.isfalse(string.endswith("Abc", "Abcdef"))
 	end
-	
+
 	function suite.endswith_ReturnsFalse_OnNilHaystack()
 		test.isfalse(string.endswith(nil, "ghi"))
 	end
@@ -30,7 +30,7 @@
 	function suite.endswith_ReturnsFalse_OnNilNeedle()
 		test.isfalse(string.endswith("Abc", nil))
 	end
-	
+
 	function suite.endswith_ReturnsTrue_OnExactMatch()
 		test.istrue(string.endswith("/", "/"))
 	end

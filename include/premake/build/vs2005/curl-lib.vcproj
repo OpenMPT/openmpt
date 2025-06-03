@@ -43,7 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MD /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"
@@ -65,7 +65,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/NOLOGO"
-				AdditionalDependencies="crypt32.lib"
+				AdditionalDependencies="crypt32.lib bcrypt.lib"
 				OutputFile="$(OutDir)\curl-lib.lib"
 			/>
 			<Tool
@@ -109,7 +109,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /GL /Ox /MT /W0 /EHsc"
+				AdditionalOptions="/MP /GL /Ox /MD /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"
@@ -131,7 +131,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/NOLOGO"
-				AdditionalDependencies="crypt32.lib"
+				AdditionalDependencies="crypt32.lib bcrypt.lib"
 				OutputFile="$(OutDir)\curl-lib.lib"
 			/>
 			<Tool
@@ -174,7 +174,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /MTd /Z7 /W0 /EHsc"
+				AdditionalOptions="/MP /MDd /Z7 /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"
@@ -196,7 +196,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/NOLOGO"
-				AdditionalDependencies="crypt32.lib"
+				AdditionalDependencies="crypt32.lib bcrypt.lib"
 				OutputFile="$(OutDir)\curl-lib.lib"
 			/>
 			<Tool
@@ -240,7 +240,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/MP /MTd /Z7 /W0 /EHsc"
+				AdditionalOptions="/MP /MDd /Z7 /W0 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\curl\lib;..\..\contrib\mbedtls\include;..\..\contrib\zlib"
 				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;BUILDING_LIBCURL;CURL_STATICLIB;HTTP_ONLY;USE_ZLIB;USE_SCHANNEL;USE_WINDOWS_SSPI"
 				UsePrecompiledHeader="0"
@@ -262,7 +262,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				AdditionalOptions="/NOLOGO"
-				AdditionalDependencies="crypt32.lib"
+				AdditionalDependencies="crypt32.lib bcrypt.lib"
 				OutputFile="$(OutDir)\curl-lib.lib"
 			/>
 			<Tool
@@ -296,19 +296,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\include\curl\curlbuild.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\include\curl\curlrules.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\curl\include\curl\curlver.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\curl\include\curl\easy.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\include\curl\header.h"
 					>
 				</File>
 				<File
@@ -320,11 +316,27 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\curl\include\curl\options.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\curl\include\curl\stdcheaders.h"
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\curl\include\curl\system.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\curl\include\curl\typecheck-gcc.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\include\curl\urlapi.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\include\curl\websockets.h"
 					>
 				</File>
 			</Filter>
@@ -332,6 +344,14 @@
 		<Filter
 			Name="lib"
 			>
+			<File
+				RelativePath="..\..\contrib\curl\lib\altsvc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\altsvc.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\amigaos.c"
 				>
@@ -361,11 +381,79 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\config-amigaos.h"
+				RelativePath="..\..\contrib\curl\lib\bufq.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\config-dos.h"
+				RelativePath="..\..\contrib\curl\lib\bufq.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\bufref.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\bufref.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\c-hyper.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\c-hyper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-h1-proxy.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-h1-proxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-h2-proxy.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-h2-proxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-haproxy.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-haproxy.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-https-connect.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-https-connect.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-socket.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cf-socket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cfilters.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cfilters.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\config-cosmo.h"
 				>
 			</File>
 			<File
@@ -373,39 +461,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\config-mac.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\config-os400.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\curl\lib\config-osx.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\config-riscos.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\config-symbian.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\config-tpf.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\config-vxworks.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\curl\lib\config-win32.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\config-win32ce.h"
 				>
 			</File>
 			<File
@@ -453,6 +513,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\curl_ctype.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\curl_des.c"
 				>
 			</File>
@@ -477,6 +541,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\curl_get_line.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_get_line.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\curl_gethostname.c"
 				>
 			</File>
@@ -494,6 +566,10 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\curl_hmac.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_krb5.h"
 				>
 			</File>
 			<File
@@ -537,15 +613,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\curl_ntlm_wb.c"
+				RelativePath="..\..\contrib\curl\lib\curl_path.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\curl_ntlm_wb.h"
+				RelativePath="..\..\contrib\curl\lib\curl_path.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\curl_printf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_range.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_range.h"
 				>
 			</File>
 			<File
@@ -565,15 +649,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\curl_sec.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\curl\lib\curl_setup.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\curl_setup_once.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_sha256.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_sha512_256.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_sha512_256.h"
 				>
 			</File>
 			<File
@@ -593,7 +685,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\curl_trc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\curl_trc.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\curlx.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cw-out.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\cw-out.h"
 				>
 			</File>
 			<File
@@ -605,11 +713,31 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\dotdot.c"
+				RelativePath="..\..\contrib\curl\lib\dllmain.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\dotdot.h"
+				RelativePath="..\..\contrib\curl\lib\doh.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\doh.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\dynbuf.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\dynbuf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\dynhds.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\dynhds.h"
 				>
 			</File>
 			<File
@@ -617,7 +745,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\easy_lock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\easygetopt.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\easyif.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\easyoptions.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\easyoptions.h"
 				>
 			</File>
 			<File
@@ -645,6 +789,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\fopen.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\fopen.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\formdata.c"
 				>
 			</File>
@@ -666,6 +818,10 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\ftplistparser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\functypes.h"
 				>
 			</File>
 			<File
@@ -697,19 +853,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\headers.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\headers.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\hmac.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\hostasyn.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\hostcheck.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\hostcheck.h"
 				>
 			</File>
 			<File
@@ -733,6 +889,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\hsts.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\hsts.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\http.c"
 				>
 			</File>
@@ -741,11 +905,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\http1.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\http1.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\http2.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\http2.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\http_aws_sigv4.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\http_aws_sigv4.h"
 				>
 			</File>
 			<File
@@ -789,7 +969,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\idn_win32.c"
+				RelativePath="..\..\contrib\curl\lib\idn.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\idn.h"
 				>
 			</File>
 			<File
@@ -841,6 +1025,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\macos.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\macos.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\md4.c"
 				>
 			</File>
@@ -857,7 +1049,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\mime.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\mime.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\mprintf.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\mqtt.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\mqtt.h"
 				>
 			</File>
 			<File
@@ -881,14 +1089,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\non-ascii.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\non-ascii.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\curl\lib\nonblock.c"
 				>
 			</File>
@@ -897,11 +1097,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\nwlib.c"
+				RelativePath="..\..\contrib\curl\lib\noproxy.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\nwos.c"
+				RelativePath="..\..\contrib\curl\lib\noproxy.h"
 				>
 			</File>
 			<File
@@ -925,14 +1125,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\pipeline.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\pipeline.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\curl\lib\pop3.c"
 				>
 			</File>
@@ -949,6 +1141,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\psl.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\psl.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\rand.c"
 				>
 			</File>
@@ -957,15 +1157,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\rename.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\rename.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\request.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\request.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\rtsp.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\rtsp.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\security.c"
 				>
 			</File>
 			<File
@@ -985,11 +1197,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\setopt.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\setopt.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\setup-os400.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\setup-vms.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\setup-win32.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\sha256.c"
 				>
 			</File>
 			<File
@@ -1033,6 +1261,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\socketpair.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\socketpair.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\socks.c"
 				>
 			</File>
@@ -1062,14 +1298,6 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\splay.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\ssh.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\ssh.h"
 				>
 			</File>
 			<File
@@ -1137,6 +1365,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\timediff.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\timediff.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\timeval.c"
 				>
 			</File>
@@ -1161,11 +1397,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\curl\lib\urlapi-int.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\urlapi.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\curl\lib\urldata.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\curl\lib\version.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\version_win32.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\curl\lib\version_win32.h"
 				>
 			</File>
 			<File
@@ -1177,19 +1429,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\wildcard.c"
+				RelativePath="..\..\contrib\curl\lib\ws.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\curl\lib\wildcard.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\x509asn1.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\curl\lib\x509asn1.h"
+				RelativePath="..\..\contrib\curl\lib\ws.h"
 				>
 			</File>
 			<Filter
@@ -1213,6 +1457,10 @@
 				</File>
 				<File
 					RelativePath="..\..\contrib\curl\lib\vauth\digest_sspi.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vauth\gsasl.c"
 					>
 				</File>
 				<File
@@ -1257,38 +1505,98 @@
 				</File>
 			</Filter>
 			<Filter
+				Name="vquic"
+				>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_msh3.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_msh3.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_ngtcp2.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_ngtcp2.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_osslq.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_osslq.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_quiche.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\curl_quiche.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\vquic-tls.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\vquic-tls.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\vquic.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\vquic.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vquic\vquic_int.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="vssh"
+				>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vssh\libssh.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vssh\libssh2.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vssh\ssh.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vssh\wolfssh.c"
+					>
+				</File>
+			</Filter>
+			<Filter
 				Name="vtls"
 				>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\axtls.c"
+					RelativePath="..\..\contrib\curl\lib\vtls\bearssl.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\axtls.h"
+					RelativePath="..\..\contrib\curl\lib\vtls\bearssl.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\cyassl.c"
+					RelativePath="..\..\contrib\curl\lib\vtls\cipher_suite.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\cyassl.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\darwinssl.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\darwinssl.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\gskit.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\gskit.h"
+					RelativePath="..\..\contrib\curl\lib\vtls\cipher_suite.h"
 					>
 				</File>
 				<File
@@ -1300,6 +1608,22 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\hostcheck.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\hostcheck.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\keylog.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\keylog.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\curl\lib\vtls\mbedtls.c"
 					>
 				</File>
@@ -1308,11 +1632,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\nss.c"
+					RelativePath="..\..\contrib\curl\lib\vtls\mbedtls_threadlock.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\nssg.h"
+					RelativePath="..\..\contrib\curl\lib\vtls\mbedtls_threadlock.h"
 					>
 				</File>
 				<File
@@ -1324,19 +1648,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\polarssl.c"
+					RelativePath="..\..\contrib\curl\lib\vtls\rustls.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\polarssl.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\polarssl_threadlock.c"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\curl\lib\vtls\polarssl_threadlock.h"
+					RelativePath="..\..\contrib\curl\lib\vtls\rustls.h"
 					>
 				</File>
 				<File
@@ -1348,11 +1664,47 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\schannel_int.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\schannel_verify.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\sectransp.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\sectransp.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\curl\lib\vtls\vtls.c"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\curl\lib\vtls\vtls.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\vtls_int.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\wolfssl.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\wolfssl.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\x509asn1.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\curl\lib\vtls\x509asn1.h"
 					>
 				</File>
 			</Filter>

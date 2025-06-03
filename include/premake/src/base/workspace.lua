@@ -1,7 +1,7 @@
 ---
 -- workspace.lua
 -- Work with the list of workspaces loaded from the script.
--- Copyright (c) 2002-2015 Jason Perkins and the Premake project
+-- Copyright (c) 2002-2015 Jess Perkins and the Premake project
 ---
 
 	local p = premake
@@ -84,7 +84,7 @@
 -- Locate a project by name, case insensitive.
 --
 -- @param name
---    The name of the projec to find.
+--    The name of the project to find.
 -- @return
 --    The project object, or nil if a matching project could not be found.
 --

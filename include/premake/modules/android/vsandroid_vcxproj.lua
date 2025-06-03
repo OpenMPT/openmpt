@@ -447,6 +447,7 @@
 		else
 			vc2010.element("AndroidAppLibName", nil, "$(RootNamespace)")
 		end
+		vc2010.element("AntTarget", nil, iif(premake.config.isDebugBuild(cfg), "debug", "release"))
 		p.pop('</AntPackage>')
 	end
 
@@ -638,5 +639,20 @@ end)
 	p.override(vc2010, "outDir", function(oldfn, cfg)
 		if cfg.system ~= p.ANDROID then
 			return oldfn(cfg)
+		end
+	end)
+
+--
+-- Disable usage of ExternalIncludePath, Android project format ignores it.
+--
+
+	p.override(vc2010, "includePath", function(oldfn, cfg)
+		if cfg.system == p.ANDROID then
+			local dirs = vstudio.path(cfg, cfg.externalincludedirs)
+			if #dirs > 0 then
+				vc2010.element("IncludePath", nil, "%s;$(IncludePath)", table.concat(dirs, ";"))
+			end
+		else
+			oldfn(cfg)
 		end
 	end)
