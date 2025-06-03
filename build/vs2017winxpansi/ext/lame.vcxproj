@@ -363,6 +363,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2017-winxpansi-static\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -389,6 +390,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2017-winxpansi-static\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -514,6 +516,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2017-winxpansi-shared\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -540,6 +543,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2017-winxpansi-shared\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>

@@ -285,6 +285,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -310,6 +311,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -339,6 +341,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -346,6 +349,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-static\x86\openmpt-mpg123.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
@@ -368,6 +372,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -375,6 +380,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-static\amd64\openmpt-mpg123.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
@@ -399,6 +405,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -429,6 +436,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -455,6 +463,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -479,6 +488,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -507,6 +517,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -514,6 +525,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-shared\x86\openmpt-mpg123.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
@@ -536,6 +548,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -543,6 +556,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\..\..\bin\release\vs2019-win7-shared\amd64\openmpt-mpg123.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
@@ -567,6 +581,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
@@ -597,6 +612,7 @@
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <Link>
