@@ -16,20 +16,20 @@
     <Filter Include="modules\gmake\tests">
       <UniqueIdentifier>{74A5A7AC-E006-85BA-6974-CB6CD5D4BB79}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\gmake\tests\cpp">
-      <UniqueIdentifier>{46B9405A-B2F0-88F1-BBFA-EC1427B1AFEA}</UniqueIdentifier>
+    <Filter Include="modules\gmakelegacy">
+      <UniqueIdentifier>{47AEE339-B30F-C147-3C7D-07FAA8DDF706}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\gmake\tests\cs">
-      <UniqueIdentifier>{19F6011A-05F0-2A6C-EE5C-C17CDAF590D8}</UniqueIdentifier>
+    <Filter Include="modules\gmakelegacy\tests">
+      <UniqueIdentifier>{69F2E3BC-D5B4-1747-1E65-A6D38A66F024}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\gmake\tests\workspace">
-      <UniqueIdentifier>{F29FF7B5-5EB8-DEDF-2765-6E79933C7379}</UniqueIdentifier>
+    <Filter Include="modules\gmakelegacy\tests\cpp">
+      <UniqueIdentifier>{BB781499-2791-FBC2-F03D-8B5C5C15905C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\gmake2">
-      <UniqueIdentifier>{8457A3A8-7025-97AE-59B9-07D545267313}</UniqueIdentifier>
+    <Filter Include="modules\gmakelegacy\tests\cs">
+      <UniqueIdentifier>{EE1AF13A-DAD5-E0E6-838D-59316F272B77}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\gmake2\tests">
-      <UniqueIdentifier>{66D59E88-5264-2852-FB82-3C4DE7F038F8}</UniqueIdentifier>
+    <Filter Include="modules\gmakelegacy\tests\workspace">
+      <UniqueIdentifier>{2763BC68-931C-2713-1C7C-41ED8834DD82}</UniqueIdentifier>
     </Filter>
     <Filter Include="modules\raw">
       <UniqueIdentifier>{B7B3915C-2369-0A52-AC5D-042918120156}</UniqueIdentifier>
@@ -384,140 +384,140 @@
     <None Include="..\..\modules\gmake\tests\_tests.lua">
       <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_clang.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_file_rules.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_flags.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_ldflags.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_make_linking.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_make_pch.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_objects.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_target_rules.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_tools.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cpp\test_wiidev.lua">
-      <Filter>modules\gmake\tests\cpp</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cs\test_embed_files.lua">
-      <Filter>modules\gmake\tests\cs</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cs\test_flags.lua">
-      <Filter>modules\gmake\tests\cs</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cs\test_links.lua">
-      <Filter>modules\gmake\tests\cs</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cs\test_response.lua">
-      <Filter>modules\gmake\tests\cs</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\cs\test_sources.lua">
-      <Filter>modules\gmake\tests\cs</Filter>
-    </None>
-    <None Include="..\..\modules\gmake\tests\test_make_escaping.lua">
+    <None Include="..\..\modules\gmake\tests\test_gmake_buildcmds.lua">
       <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\test_make_tovar.lua">
+    <None Include="..\..\modules\gmake\tests\test_gmake_clang.lua">
       <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\workspace\test_config_maps.lua">
-      <Filter>modules\gmake\tests\workspace</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_file_rules.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\workspace\test_default_config.lua">
-      <Filter>modules\gmake\tests\workspace</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_flags.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\workspace\test_group_rule.lua">
-      <Filter>modules\gmake\tests\workspace</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_includes.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\workspace\test_help_rule.lua">
-      <Filter>modules\gmake\tests\workspace</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_ldflags.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake\tests\workspace\test_project_rule.lua">
-      <Filter>modules\gmake\tests\workspace</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_linking.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\_manifest.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_makefile.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\_preload.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_objects.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_pch.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2_cpp.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_perfile_flags.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2_csharp.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_target_rules.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2_makefile.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_tools.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2_utility.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmake\tests\test_gmake_wks.lua">
+      <Filter>modules\gmake\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\gmake2_workspace.lua">
-      <Filter>modules\gmake2</Filter>
+    <None Include="..\..\modules\gmakelegacy\_manifest.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\_tests.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\_preload.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_buildcmds.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_clang.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy_cpp.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_file_rules.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy_csharp.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_flags.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy_makefile.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_includes.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy_utility.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_ldflags.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\gmakelegacy_workspace.lua">
+      <Filter>modules\gmakelegacy</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_linking.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\_tests.lua">
+      <Filter>modules\gmakelegacy\tests</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_makefile.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_clang.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_objects.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_file_rules.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_pch.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_flags.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_perfile_flags.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_ldflags.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_target_rules.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_make_linking.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_tools.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_make_pch.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
     </None>
-    <None Include="..\..\modules\gmake2\tests\test_gmake2_wks.lua">
-      <Filter>modules\gmake2\tests</Filter>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_objects.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_target_rules.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_tools.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cpp\test_wiidev.lua">
+      <Filter>modules\gmakelegacy\tests\cpp</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cs\test_embed_files.lua">
+      <Filter>modules\gmakelegacy\tests\cs</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cs\test_flags.lua">
+      <Filter>modules\gmakelegacy\tests\cs</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cs\test_links.lua">
+      <Filter>modules\gmakelegacy\tests\cs</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cs\test_response.lua">
+      <Filter>modules\gmakelegacy\tests\cs</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\cs\test_sources.lua">
+      <Filter>modules\gmakelegacy\tests\cs</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\test_make_escaping.lua">
+      <Filter>modules\gmakelegacy\tests</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\test_make_tovar.lua">
+      <Filter>modules\gmakelegacy\tests</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\workspace\test_config_maps.lua">
+      <Filter>modules\gmakelegacy\tests\workspace</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\workspace\test_default_config.lua">
+      <Filter>modules\gmakelegacy\tests\workspace</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\workspace\test_group_rule.lua">
+      <Filter>modules\gmakelegacy\tests\workspace</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\workspace\test_help_rule.lua">
+      <Filter>modules\gmakelegacy\tests\workspace</Filter>
+    </None>
+    <None Include="..\..\modules\gmakelegacy\tests\workspace\test_project_rule.lua">
+      <Filter>modules\gmakelegacy\tests\workspace</Filter>
     </None>
     <None Include="..\..\modules\raw\README.md">
       <Filter>modules\raw</Filter>
@@ -592,6 +592,9 @@
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_documentation_file.lua">
+      <Filter>modules\vstudio\tests\cs2005</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\cs2005\test_dotnetsdk.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\test_files.lua">

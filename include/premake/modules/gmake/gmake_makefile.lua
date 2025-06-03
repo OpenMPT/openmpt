@@ -1,20 +1,21 @@
 --
--- make_makefile.lua
+-- gmake_makefile.lua
 -- Generate a C/C++ project makefile.
--- Copyright (c) 2002-2014 Jess Perkins and the Premake project
+-- (c) 2016-2017 Jess Perkins, Blizzard Entertainment and the Premake project
 --
 
 	local p = premake
-	p.make.makefile = {}
+	local gmake = p.modules.gmake
 
-	local make       = p.make
-	local makefile   = p.make.makefile
+	gmake.makefile  = {}
+	local makefile   = gmake.makefile
+
 	local project    = p.project
 	local config     = p.config
 	local fileconfig = p.fileconfig
 
 ---
--- Add namespace for element definition lists for p.callarray()
+-- Add namespace for element definition lists for p.callArray()
 ---
 	makefile.elements = {}
 
@@ -22,26 +23,31 @@
 -- Generate a GNU make makefile project makefile.
 --
 
-	makefile.elements.makefile = {
-		"header",
-		"phonyRules",
-		"makefileConfigs",
-		"makefileTargetRules"
-	}
+	makefile.elements.makefile = function(prj)
+		return {
+			gmake.header,
+			gmake.phonyRules,
+			makefile.configs,
+			makefile.targetRules
+		}
+	end
 
-	function make.makefile.generate(prj)
+	function makefile.generate(prj)
 		p.eol("\n")
-		p.callarray(make, makefile.elements.makefile, prj)
+		p.callArray(makefile.elements.makefile, prj)
 	end
 
 
-	makefile.elements.configuration = {
-		"target",
-		"buildCommands",
-		"cleanCommands",
-	}
+	makefile.elements.configuration = function(cfg)
+		return {
+			gmake.target,
+			gmake.buildCommands,
+			gmake.cleanCommands,
+		}
+	end
 
-	function make.makefileConfigs(prj)
+	function makefile.configs(prj)
+		local first = true
 		for cfg in project.eachconfig(prj) do
 			-- identify the toolset used by this configurations (would be nicer if
 			-- this were computed and stored with the configuration up front)
@@ -51,14 +57,26 @@
 				error("Invalid toolset '" .. cfg.toolset .. "'")
 			end
 
-			_x('ifeq ($(config),%s)', cfg.shortname)
-			p.callarray(make, makefile.elements.configuration, cfg, toolset)
+			if first then
+				_x('ifeq ($(config),%s)', cfg.shortname)
+				first = false
+			else
+				_x('else ifeq ($(config),%s)', cfg.shortname)
+			end
+
+			p.callArray(makefile.elements.configuration, cfg, toolset)
+			_p('')
+		end
+
+		if not first then
+			_p('else')
+			_p('  $(error "invalid configuration $(config)")')
 			_p('endif')
 			_p('')
 		end
 	end
 
-	function make.makefileTargetRules(prj)
+	function makefile.targetRules(prj)
 		_p('$(TARGET):')
 		_p('\t$(BUILDCMDS)')
 		_p('')
@@ -68,7 +86,7 @@
 	end
 
 
-	function make.buildCommands(cfg)
+	function gmake.buildCommands(cfg)
 		_p('  define BUILDCMDS')
 		local steps = cfg.buildcommands
 		if #steps > 0 then
@@ -80,7 +98,7 @@
 	end
 
 
-	function make.cleanCommands(cfg)
+	function gmake.cleanCommands(cfg)
 		_p('  define CLEANCMDS')
 		local steps = cfg.cleancommands
 		if #steps > 0 then

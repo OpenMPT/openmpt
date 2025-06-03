@@ -7,6 +7,36 @@
     <Filter Include="community">
       <UniqueIdentifier>{0A09193C-7673-CDB2-BFB1-7E582B5BAB07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="docs">
+      <UniqueIdentifier>{CECA957C-BA01-970D-63EE-7C104F04130F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\globals">
+      <UniqueIdentifier>{C16BA48B-ADCE-3330-5654-6CE64296FFB2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\http">
+      <UniqueIdentifier>{7D3FD8B7-E9A9-8C2E-32E8-3DD49E916A83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\json">
+      <UniqueIdentifier>{5753D9B7-C3BD-8D2E-0CFC-3ED478A56B83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\os">
+      <UniqueIdentifier>{BF56AB1F-2B36-2ABB-344E-B591A0AC901C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\path">
+      <UniqueIdentifier>{AA51DCB7-16BC-902E-5FFA-41D4CBA36E83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\string">
+      <UniqueIdentifier>{B4A98D28-205F-061E-A953-00F51508FD21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\table">
+      <UniqueIdentifier>{459DAEB3-3155-F000-9A5C-C95C86338BF1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\term">
+      <UniqueIdentifier>{F593DEB7-61FE-922E-AA3C-44D416E67083}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="docs\zip">
+      <UniqueIdentifier>{905C1615-7C29-7120-A542-5FC8916EA6AE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -80,6 +110,1224 @@
     </None>
     <None Include="..\..\website\community\support.md">
       <Filter>community</Filter>
+    </None>
+    <None Include="..\..\website\docs\Adding-New-Action.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Adding-Source-Files.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Adding-Unit-Tests.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Build-Settings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Building-Premake.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Code-Overview.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Coding-Conventions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Command-Line-Arguments.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Configurations-and-Platforms.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Custom-Build-Commands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Custom-Rules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Debugging-Scripts.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Developing-Modules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Development-Roadmap.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Embedding-Frameworks-in-Xcode.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Embedding-Modules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Extending-Premake.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Feature-Matrix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Filters.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Generating-Project-Files.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Home.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\How-to-Help.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Introducing-Modules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Linking.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Locating-Scripts.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Lua-Library-Additions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Makefile-Projects.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Migrating-From-4.x.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Overrides-and-Call-Arrays.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Precompiled-Headers.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Project-API.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Removing-Values.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Scopes-and-Inheritance.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Sharing-Configuration-Settings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Sharing-Your-Module.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Starting-Your-New-Action.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Style-Guide.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\System-Scripts.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Tokens.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Topics.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Usages.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Using-Modules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Using-Premake.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\What-Is-Premake.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Whats-New-in-5.0.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Why-Do-Call-Arrays-Need-Functions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Workspaces-and-Projects.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\Your-First-Script.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\allmodulespublic.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\androidapilevel.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\androidapplibname.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\architecture.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\assemblydebug.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\atl.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\basedir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\bindirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildaction.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildcustomizations.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\builddependencies.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildinputs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildlog.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildmessage.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildoutputs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\buildstlmodules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\callingconvention.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\cdialect.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\characterset.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\clangtidy.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\cleancommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\cleanextensions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\clr.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\compileas.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\compilebuildoutputs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\configfile.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\configmap.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\configuration.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\configurations.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\conformancemode.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\consumewinrtextension.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\copylocal.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\cppdialect.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\csversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\customtoolnamespace.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debug.prompt.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugargs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugcommand.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugconnectcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugenvs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugextendedprotocol.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugformat.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugger.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debuggerflavor.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debuggertype.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugport.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugremotehost.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugsearchpaths.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\debugstartupcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\defaultplatform.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\defines.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\dependson.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\deploymentoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\disablewarnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\display.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\documentationfile.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\dotnetframework.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\dotnetsdk.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\dpiawareness.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\editandcontinue.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\editorintegration.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\embed.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\embedandsign.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\enabledefaultcompileitems.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\enablemodules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\enableunitybuild.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\enablewarnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\endian.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\entrypoint.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\exceptionhandling.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\external.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\externalanglebrackets.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\externalincludedirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\externalproject.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\externalrule.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\externalwarnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\fastuptodate.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\fatalwarnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\fileextension.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\filename.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\files.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\filter.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\flags.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\floatabi.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\floatingpoint.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\floatingpointexceptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\forceincludes.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\forceusings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\fpu.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\framework.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\frameworkdirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\functionlevellinking.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\gccprefix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\gitintegration.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\dofileopt.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\iif.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\include.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\includeexternal.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_ACTION.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_ARGS.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_MAIN_SCRIPT.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_MAIN_SCRIPT_DIR.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_OPTIONS.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_OS.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_PREMAKE_COMMAND.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_PREMAKE_DIR.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_PREMAKE_VERSION.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_TARGET_ARCH.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_TARGET_OS.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\premake_WORKING_DIR.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\printf.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\require.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\globals\verbosef.md">
+      <Filter>docs\globals</Filter>
+    </None>
+    <None Include="..\..\website\docs\group.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\http\http-options-table.md">
+      <Filter>docs\http</Filter>
+    </None>
+    <None Include="..\..\website\docs\http\http.download.md">
+      <Filter>docs\http</Filter>
+    </None>
+    <None Include="..\..\website\docs\http\http.get.md">
+      <Filter>docs\http</Filter>
+    </None>
+    <None Include="..\..\website\docs\http\http.post.md">
+      <Filter>docs\http</Filter>
+    </None>
+    <None Include="..\..\website\docs\icon.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\ignoredefaultlibraries.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\imageoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\imagepath.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\implibdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\implibextension.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\implibname.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\implibprefix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\implibsuffix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\includedirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\includedirsafter.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\inheritdependencies.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\inlinesvisibility.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\inlining.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\intrinsics.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\io.readfile.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\io.utf8.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\io.writefile.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\iosfamily.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\isaextensions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\json\json.decode.md">
+      <Filter>docs\json</Filter>
+    </None>
+    <None Include="..\..\website\docs\json\json.encode.md">
+      <Filter>docs\json</Filter>
+    </None>
+    <None Include="..\..\website\docs\justmycode.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\kind.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\language.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\largeaddressaware.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\libdirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linkbuildoutputs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linker.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linkerfatalwarnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linkgroups.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linkoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\links.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linksectiondata.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linksectionfunction.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\linktimeoptimization.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\llvmdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\llvmversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\locale.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\location.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\makesettings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\mfc.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\namespace.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\nativewchar.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\newaction.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\newoption.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\nuget.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\nugetsource.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\objdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\omitframepointer.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\openmp.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\optimize.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.chdir.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.chmod.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.comparefiles.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.copyfile.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.execute.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.executef.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.findheader.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.findlib.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.get.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getSystemTags.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getcwd.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getenv.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getnumcpus.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getpass.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.getversion.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.host.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.hostarch.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.is.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.is64bit.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.isdir.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.isfile.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.islink.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.istarget.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.linkdir.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.linkfile.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.locate.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.matchdirs.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.matchfiles.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.mkdir.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.outputof.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.pathsearch.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.realpath.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.remove.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.rename.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.rmdir.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.stat.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.target.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.targetarch.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.touchfile.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.translateCommands.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.uuid.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\os\os.writefile_ifnotequal.md">
+      <Filter>docs\os</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.appendExtension.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getabsolute.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getbasename.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getdirectory.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getdrive.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getextension.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getname.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.getrelative.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.hasextension.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.isabsolute.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.iscfile.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.iscppfile.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.iscppheader.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.isframework.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.islinkable.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.isobjectfile.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.isresourcefile.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.join.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.normalize.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.rebase.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.replaceextension.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.translate.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\path\path.wildcards.md">
+      <Filter>docs\path</Filter>
+    </None>
+    <None Include="..\..\website\docs\pchheader.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\pchsource.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\pic.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\platforms.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\postbuildcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\postbuildmessage.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\prebuildcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\prebuildmessage.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\preferredtoolarchitecture.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\prelinkcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\prelinkmessage.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\project.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\propertydefinition.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\rebuildcommands.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\remotedeploydir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\remoteprojectdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\remoteprojectrelativedir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\remoterootdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\removeunreferencedcodedata.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\resdefines.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\resincludedirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\resoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\resourcegenerator.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\rtti.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\rule.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\rules.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\runcodeanalysis.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\runpathdirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\runtime.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\sanitize.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\scanformoduledependencies.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderassembler.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderassembleroutput.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderdefines.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderentry.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderheaderfileoutput.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderincludedirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shadermodel.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderobjectfileoutput.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shaderoptions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shadertype.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\shadervariablename.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\sharedlibtype.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\startproject.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\staticruntime.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\stl.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\strictaliasing.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.capitalized.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.contains.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.endswith.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.escapepattern.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.explode.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.findlast.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.hash.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.lines.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.plural.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.sha1.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\string\string.startswith.md">
+      <Filter>docs\string</Filter>
+    </None>
+    <None Include="..\..\website\docs\stringpooling.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\structmemberalign.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\swiftversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\symbols.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\symbolspath.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\sysincludedirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\syslibdirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\system.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\systemversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.arraycopy.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.contains.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.deepcopy.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.extract.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.filterempty.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.flatten.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.fold.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.foreachi.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.implode.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.indexof.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.insertafter.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.insertflat.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.isempty.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.join.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.keys.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.merge.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.replace.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.tostring.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\table\table.translate.md">
+      <Filter>docs\table</Filter>
+    </None>
+    <None Include="..\..\website\docs\tags.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\tailcalls.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetdir.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetextension.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetname.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetprefix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetsuffix.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.clearToEndOfLine.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.getTextColor.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.moveLeft.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.popColor.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.pushColor.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\term\term.setTextColor.md">
+      <Filter>docs\term</Filter>
+    </None>
+    <None Include="..\..\website\docs\thumbmode.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\toolchainversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\toolset.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\toolsversion.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\undefines.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\unsignedchar.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\usefullpaths.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\usestandardpreprocessor.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\usingdirs.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\uuid.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\vectorextensions.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\visibility.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\vpaths.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\vsprops.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\warnings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\workspace.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\xcodebuildresources.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\xcodebuildsettings.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\xcodecodesigningidentity.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\xcodesystemcapabilities.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\zip\zip.extract.md">
+      <Filter>docs\zip</Filter>
     </None>
     <None Include="..\..\website\docusaurus.config.js" />
     <None Include="..\..\website\package.json" />

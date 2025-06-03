@@ -1,33 +1,18 @@
 require ("gmake")
 
 return {
-	-- Makefile tests
-	"test_make_escaping.lua",
-	"test_make_tovar.lua",
-
-	-- Makefile workspaces
-	"workspace/test_config_maps.lua",
-	"workspace/test_default_config.lua",
-	"workspace/test_group_rule.lua",
-	"workspace/test_help_rule.lua",
-	"workspace/test_project_rule.lua",
-
-	-- Makefile C/C++ projects
-	"cpp/test_clang.lua",
-	"cpp/test_file_rules.lua",
-	"cpp/test_flags.lua",
-	"cpp/test_ldflags.lua",
-	"cpp/test_make_pch.lua",
-	"cpp/test_make_linking.lua",
-	"cpp/test_objects.lua",
-	"cpp/test_target_rules.lua",
-	"cpp/test_tools.lua",
-	"cpp/test_wiidev.lua",
-
-	-- Makefile C# projects
-	"cs/test_embed_files.lua",
-	"cs/test_flags.lua",
-	"cs/test_links.lua",
-	"cs/test_response.lua",
-	"cs/test_sources.lua",
+	"test_gmake_buildcmds.lua",
+	"test_gmake_clang.lua",
+	"test_gmake_file_rules.lua",
+	"test_gmake_flags.lua",
+	"test_gmake_includes.lua",
+	"test_gmake_ldflags.lua",
+	"test_gmake_linking.lua",
+	"test_gmake_makefile.lua",
+	"test_gmake_objects.lua",
+	"test_gmake_pch.lua",
+	"test_gmake_perfile_flags.lua",
+	"test_gmake_target_rules.lua",
+	"test_gmake_tools.lua",
+	"test_gmake_wks.lua"
 }

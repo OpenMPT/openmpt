@@ -1,15 +1,17 @@
 --
--- make_csharp.lua
+-- gmake_csharp.lua
 -- Generate a C# project makefile.
--- Copyright (c) 2002-2013 Jess Perkins and the Premake project
+-- (c) 2016-2017 Jess Perkins, Blizzard Entertainment and the Premake project
 --
 
 	local p = premake
-	p.make.cs = {}
-	local make = p.make
-	local cs = p.make.cs
-	local project = p.project
-	local config = p.config
+	local gmake = p.modules.gmake
+
+	gmake.cs        = {}
+	local cs         = gmake.cs
+
+	local project    = p.project
+	local config     = p.config
 	local fileconfig = p.fileconfig
 
 
@@ -26,24 +28,23 @@
 
 	cs.elements.makefile = function(prj)
 		return {
-			make.header,
-			make.phonyRules,
-			make.csConfigs,
-			make.csProjectConfig,
-			make.csSources,
-			make.csEmbedFiles,
-			make.csCopyFiles,
-			make.csResponseFile,
-			make.shellType,
-			make.csAllRules,
-			make.csTargetRules,
-			make.targetDirRules,
-			make.csResponseRules,
-			make.objDirRules,
-			make.csCleanRules,
-			make.preBuildRules,
-			make.preLinkRules,
-			make.csFileRules,
+			gmake.header,
+			gmake.phonyRules,
+			gmake.csConfigs,
+			gmake.csProjectConfig,
+			gmake.csSources,
+			gmake.csEmbedFiles,
+			gmake.csCopyFiles,
+			gmake.csResponseFile,
+			gmake.shellType,
+			gmake.csAllRules,
+			gmake.csTargetRules,
+			gmake.targetDirRules,
+			gmake.csResponseRules,
+			gmake.objDirRules,
+			gmake.csCleanRules,
+			gmake.preBuildRules,
+			gmake.csFileRules,
 		}
 	end
 
@@ -52,7 +53,7 @@
 -- Generate a GNU make C# project makefile, with support for the new platforms API.
 --
 
-	function make.cs.generate(prj)
+	function cs.generate(prj)
 		p.eol("\n")
 		local toolset = p.tools.dotnet
 		p.callArray(cs.elements.makefile, prj, toolset)
@@ -65,19 +66,19 @@
 
 	cs.elements.configuration = function(cfg)
 		return {
-			make.csTools,
-			make.target,
-			make.objdir,
-			make.csFlags,
-			make.csLinkCmd,
-			make.preBuildCmds,
-			make.preLinkCmds,
-			make.postBuildCmds,
-			make.settings,
+			gmake.csTools,
+			gmake.target,
+			gmake.objdir,
+			gmake.csFlags,
+			gmake.csLinkCmd,
+			gmake.preBuildCmds,
+			gmake.preLinkCmds,
+			gmake.postBuildCmds,
+			gmake.settings,
 		}
 	end
 
-	function make.csConfigs(prj, toolset)
+	function gmake.csConfigs(prj, toolset)
 		for cfg in project.eachconfig(prj) do
 			_x('ifeq ($(config),%s)', cfg.shortname)
 			p.callArray(cs.elements.configuration, cfg, toolset)
@@ -132,13 +133,13 @@
 --
 ---------------------------------------------------------------------------
 
-	function make.csAllRules(prj, toolset)
-		_p('all: $(TARGETDIR) $(OBJDIR) prebuild $(EMBEDFILES) $(COPYFILES) prelink $(TARGET)')
+	function gmake.csAllRules(prj, toolset)
+		_p('all: prebuild $(EMBEDFILES) $(COPYFILES) $(TARGET)')
 		_p('')
 	end
 
 
-	function make.csCleanRules(prj, toolset)
+	function gmake.csCleanRules(prj, toolset)
 		--[[
 		-- porting from 4.x
 		_p('clean:')
@@ -161,7 +162,7 @@
 	end
 
 
-	function make.csCopyFiles(prj, toolset)
+	function gmake.csCopyFiles(prj, toolset)
 		--[[
 		-- copied from 4.x; needs more porting
 		_p('COPYFILES += \\')
@@ -176,21 +177,21 @@
 	end
 
 
-	function make.cs.getresponsefilename(prj)
+	function cs.getresponsefilename(prj)
 		return '$(OBJDIR)/' .. prj.filename .. '.rsp'
 	end
 
 
-	function make.csResponseFile(prj, toolset)
-		_x('RESPONSE += ' .. make.cs.getresponsefilename(prj))
+	function gmake.csResponseFile(prj, toolset)
+		_x('RESPONSE += ' .. gmake.cs.getresponsefilename(prj))
 	end
 
 
-	function make.csResponseRules(prj)
+	function gmake.csResponseRules(prj)
 		local toolset = p.tools.dotnet
-		local ext = make.getmakefilename(prj, true)
+		local ext = gmake.getmakefilename(prj, true)
 		local makefile = path.getname(p.filename(prj, ext))
-		local response = make.cs.getresponsefilename(prj)
+		local response = gmake.cs.getresponsefilename(prj)
 
 		_p('$(RESPONSE): %s', makefile)
 		_p('\t@echo Generating response file', prj.name)
@@ -214,7 +215,7 @@
 	end
 
 
-	function make.csEmbedFiles(prj, toolset)
+	function gmake.csEmbedFiles(prj, toolset)
 		local cfg = project.getfirstconfig(prj)
 
 		_p('EMBEDFILES += \\')
@@ -229,7 +230,7 @@
 	end
 
 
-	function make.csFileRules(prj, toolset)
+	function gmake.csFileRules(prj, toolset)
 		--[[
 		-- porting from 4.x
 		_p('# Per-configuration copied file rules')
@@ -259,19 +260,19 @@
 	end
 
 
-	function make.csFlags(cfg, toolset)
-		_p('  FLAGS =%s', make.list(toolset.getflags(cfg)))
+	function gmake.csFlags(cfg, toolset)
+		_p('  FLAGS =%s', gmake.list(toolset.getflags(cfg)))
 	end
 
 
-	function make.csLinkCmd(cfg, toolset)
+	function gmake.csLinkCmd(cfg, toolset)
 		local deps = p.esc(config.getlinks(cfg, "dependencies", "fullpath"))
-		_p('  DEPENDS =%s', make.list(deps))
+		_p('  DEPENDS =%s', gmake.list(deps))
 		_p('  REFERENCES = %s', table.implode(deps, "/r:", "", " "))
 	end
 
 
-	function make.csProjectConfig(prj, toolset)
+	function gmake.csProjectConfig(prj, toolset)
 		-- To maintain compatibility with Visual Studio, these values must
 		-- be set on the project level, and not per-configuration.
 		local cfg = project.getfirstconfig(prj)
@@ -286,7 +287,7 @@
 	end
 
 
-	function make.csSources(prj, toolset)
+	function gmake.csSources(prj, toolset)
 		local cfg = project.getfirstconfig(prj)
 
 		_p('SOURCES += \\')
@@ -301,15 +302,16 @@
 	end
 
 
-	function make.csTargetRules(prj, toolset)
-		_p('$(TARGET): $(SOURCES) $(EMBEDFILES) $(DEPENDS) $(RESPONSE)')
+	function gmake.csTargetRules(prj, toolset)
+		_p('$(TARGET): $(SOURCES) $(EMBEDFILES) $(DEPENDS) $(RESPONSE) | $(TARGETDIR)')
+		_p('\t$(PRELINKCMDS)')
 		_p('\t$(SILENT) $(CSC) /nologo /out:$@ $(FLAGS) $(REFERENCES) @$(RESPONSE) $(patsubst %%,/resource:%%,$(EMBEDFILES))')
 		_p('\t$(POSTBUILDCMDS)')
 		_p('')
 	end
 
 
-	function make.csTools(cfg, toolset)
+	function gmake.csTools(cfg, toolset)
 		_p('  CSC = %s', toolset.gettoolname(cfg, "csc"))
 		_p('  RESGEN = %s', toolset.gettoolname(cfg, "resgen"))
 	end

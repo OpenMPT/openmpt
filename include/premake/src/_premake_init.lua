@@ -95,13 +95,6 @@
 	}
 
 	api.register {
-		name = "buildrule",     -- DEPRECATED
-		scope = "config",
-		kind = "table",
-		tokens = true,
-	}
-
-	api.register {
 		name = "characterset",
 		scope = "config",
 		kind = "string",
@@ -491,11 +484,13 @@
 			"C99",
 			"C11",
 			"C17",
+			"C23",
 			"gnu89",
 			"gnu90",
 			"gnu99",
 			"gnu11",
-			"gnu17"
+			"gnu17",
+			"gnu23",
 		}
 	}
 
@@ -1120,6 +1115,7 @@
 		}
 	}
 
+	--27 November 2024
 	api.deprecateValue("flags", "LinkTimeOptimization", "Use `linktimeoptimization` instead.",
 	function(value)
 		linktimeoptimization("On")
@@ -1128,6 +1124,14 @@
 		linktimeoptimization("Default")
 	end)
 
+	--25 November 2024
+	api.deprecateValue("flags", "WPF", 'Use `dotnetsdk "WindowsDesktop"` instead.',
+	function(value)
+		dotnetsdk "WindowsDesktop"
+	end,
+	function(value)
+		dotnetsdk "Default"
+	end)
 	api.deprecateValue("flags", "FatalWarnings", "Use `fatalwarnings { \"All\" }` instead.",
 	function(value)
 		fatalwarnings({ "All" })
@@ -1192,24 +1196,6 @@
 	api.alias("fileextension", "fileExtension")
 	api.alias("propertydefinition", "propertyDefinition")
 	api.alias("removefiles", "excludes")
-
-
------------------------------------------------------------------------------
---
--- Handlers for deprecated fields and values.
---
------------------------------------------------------------------------------
-
-	-- 13 Apr 2017
-
-	api.deprecateField("buildrule", 'Use `buildcommands`, `buildoutputs`, and `buildmessage` instead.',
-	function(value)
-		if value.description then
-			buildmessage(value.description)
-		end
-		buildcommands(value.commands)
-		buildoutputs(value.outputs)
-	end)
 
 -----------------------------------------------------------------------------
 --

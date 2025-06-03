@@ -191,11 +191,11 @@ if kind == "source" then
 		"package",
 		"self-test",
 		"test",
-		"gmake", -- deprecated
+		"gmakelegacy", -- deprecated
 	}
 
 	local perOSActions = {
-		"gmake2",
+		"gmake",
 		"codelite"
 	}
 

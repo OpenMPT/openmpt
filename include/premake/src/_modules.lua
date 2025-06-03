@@ -5,9 +5,9 @@
 --
 
 	return {
-		"gmake",
+		"gmakelegacy",
 		"vstudio",
 		"xcode",
 		"codelite",
-		"gmake2",
+		"gmake",
 	}
