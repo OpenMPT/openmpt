@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -56,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 			/>
 			<Tool
@@ -120,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -131,7 +131,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 			/>
 			<Tool
@@ -194,7 +194,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -205,7 +205,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 			/>
 			<Tool
@@ -269,7 +269,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -280,7 +280,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src;..\..\contrib\luashim;..\..\contrib\zlib;..\..\contrib\libzip;..\..\contrib\curl\include"
 			/>
 			<Tool
@@ -340,62 +340,6 @@
 		<Filter
 			Name="modules"
 			>
-			<Filter
-				Name="android"
-				>
-				<File
-					RelativePath="..\..\modules\android\LICENSE.txt"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\README.md"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\_manifest.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\_preload.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\android.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\vsandroid_androidproj.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\vsandroid_sln2005.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\vsandroid_vcxproj.lua"
-					>
-				</File>
-				<File
-					RelativePath="..\..\modules\android\vsandroid_vstudio.lua"
-					>
-				</File>
-				<Filter
-					Name="tests"
-					>
-					<File
-						RelativePath="..\..\modules\android\tests\_tests.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\android\tests\test_android_files.lua"
-						>
-					</File>
-					<File
-						RelativePath="..\..\modules\android\tests\test_android_project.lua"
-						>
-					</File>
-				</Filter>
-			</Filter>
 			<Filter
 				Name="codelite"
 				>
@@ -844,6 +788,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\modules\vstudio\vs2015_androidproj.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\modules\vstudio\vs2017.lua"
 					>
 				</File>
@@ -866,6 +814,18 @@
 						RelativePath="..\..\modules\vstudio\tests\_tests.lua"
 						>
 					</File>
+					<Filter
+						Name="android"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\android\test_android_files.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\android\test_android_project.lua"
+							>
+						</File>
+					</Filter>
 					<Filter
 						Name="cs2005"
 						>
@@ -971,6 +931,14 @@
 						>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\fs2005\projectsettings.lua"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="linux"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\linux\test_linux_files.lua"
 							>
 						</File>
 					</Filter>
@@ -1271,6 +1239,10 @@
 						>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\vc2022\test_link.lua"
 							>
 						</File>
 						<File
@@ -1660,6 +1632,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\host\os_linkdir.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\host\os_linkfile.c"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\host\os_listWindowsRegistry.c"
 					>
 				</File>
@@ -1801,6 +1781,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\tools\dotnet.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\tools\emcc.lua"
 					>
 				</File>
 				<File
@@ -2073,6 +2057,10 @@
 				</File>
 				<File
 					RelativePath="..\..\tests\tools\test_dotnet.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\tests\tools\test_emcc.lua"
 					>
 				</File>
 				<File

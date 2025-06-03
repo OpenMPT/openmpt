@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		78667B8C71CC7CFE6567D9CC /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E0F7DF4115B07262C2BD434 /* main.c */; };
-		995DE9658A555757F658D7A5 /* luashim-lib.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = BA7B720D52C857BF810F584D /* luashim-lib.lib */; };
+		E2FCED52D6FC36C45BE74B92 /* libluashim-lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -16,38 +16,38 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 4B8AF46571B12417D8B81AA5;
-			remoteInfo = "luashim-lib.lib";
+			remoteGlobalIDString = 92DEF9C67DCB1FB8C5B0E806;
+			remoteInfo = "libluashim-lib.a";
 		};
 		DFD038523B118BC40E6BD692 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CEB8B3CEE0E2908014D37A0E /* luashim-lib.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F4E353ABEE49551DE1E4B1EB;
-			remoteInfo = "luashim-lib.lib";
+			remoteGlobalIDString = 732BB0EC9951E09E0058D72C;
+			remoteInfo = "libluashim-lib.a";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3D2E8365AEB99BD75DBAC1A5 /* example.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = example.so; path = example.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E0F7DF4115B07262C2BD434 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = ../../binmodules/example/main.c; sourceTree = "<group>"; };
-		93D92EDF36C75591C5ED351F /* example.dll */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = example.dll; path = example.dll; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEB8B3CEE0E2908014D37A0E /* luashim-lib.lib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = luashim-lib.xcodeproj; path = "luashim-lib.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		CEB8B3CEE0E2908014D37A0E /* libluashim-lib.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = luashim-lib.xcodeproj; path = "luashim-lib.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		FC29401C449A244E8938F65C /* premake5.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = premake5.lua; path = ../../binmodules/example/premake5.lua; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C5E08CCF6A332A817C6B730F /* Frameworks */ = {
+		11A48E551E613DC7934BAC95 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				995DE9658A555757F658D7A5 /* luashim-lib.lib in Frameworks */,
+				E2FCED52D6FC36C45BE74B92 /* libluashim-lib.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		96024CFB99731F2D1ADFC33B /* Embed Libraries */ = {
+		E2CCC80111731BF36AB47641 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -63,7 +63,7 @@
 		9536FFD9B702AD0BF3B7D619 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BA7B720D52C857BF810F584D /* luashim-lib.lib */,
+				13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,7 +79,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				93D92EDF36C75591C5ED351F /* example.dll */,
+				3D2E8365AEB99BD75DBAC1A5 /* example.so */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,14 +98,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		82B726E5F4423F57A3436525 /* example */ = {
+		68D102AB6C41D4DDEDAE78EB /* example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B41BD52E586E72E06AA6BB6E /* Build configuration list for PBXNativeTarget "example" */;
+			buildConfigurationList = FFDFD6B40C9C86268186F4F4 /* Build configuration list for PBXNativeTarget "example" */;
 			buildPhases = (
-				35C80D6FDA1AAB21EC52F3AF /* Resources */,
-				9F7526C643C7C47856000D06 /* Sources */,
-				C5E08CCF6A332A817C6B730F /* Frameworks */,
-				96024CFB99731F2D1ADFC33B /* Embed Libraries */,
+				818C0EF58E48BE6703332D35 /* Resources */,
+				EB39284CF7F5D7BE6CE0468C /* Sources */,
+				11A48E551E613DC7934BAC95 /* Frameworks */,
+				E2CCC80111731BF36AB47641 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -114,7 +114,7 @@
 			);
 			name = example;
 			productName = example;
-			productReference = 93D92EDF36C75591C5ED351F /* example.dll */;
+			productReference = 3D2E8365AEB99BD75DBAC1A5 /* example.so */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -135,23 +135,23 @@
 			);
 			projectRoot = "";
 			targets = (
-				82B726E5F4423F57A3436525 /* example.dll */,
+				68D102AB6C41D4DDEDAE78EB /* example.so */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		BA7B720D52C857BF810F584D /* luashim-lib.lib */ = {
+		13AAE5DA57BEB70C4B903C1A /* libluashim-lib.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = "luashim-lib.lib";
+			path = "libluashim-lib.a";
 			remoteRef = 8D95C5B9E8D7192BBC3163F9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		35C80D6FDA1AAB21EC52F3AF /* Resources */ = {
+		818C0EF58E48BE6703332D35 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -161,7 +161,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		9F7526C643C7C47856000D06 /* Sources */ = {
+		EB39284CF7F5D7BE6CE0468C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -174,7 +174,7 @@
 /* Begin PBXTargetDependency section */
 		82EF3CE2A4BAEA14E1701322 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "luashim-lib.lib";
+			name = "libluashim-lib.a";
 			targetProxy = DFD038523B118BC40E6BD692 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -183,13 +183,13 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		525B1EF47A95D7A662316534 /* Debug */ = {
+		4EE7997AA57503EC7DEE17BA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CONFIGURATION_BUILD_DIR = ../../bin/debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = dll;
+				EXECUTABLE_EXTENSION = so;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = example;
@@ -199,19 +199,21 @@
 		6999E5F50DEC83A72024CC35 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					NDEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Release/example;
+				OBJROOT = obj/Release/example;
 				ONLY_ACTIVE_ARCH = NO;
 				SYMROOT = ../../bin/release;
 				USER_HEADER_SEARCH_PATHS = (
@@ -225,6 +227,7 @@
 		9035E0FB33816A2D4E52373B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -232,14 +235,15 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					_DEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Debug/example;
+				OBJROOT = obj/Debug/example;
 				ONLY_ACTIVE_ARCH = YES;
 				SYMROOT = ../../bin/debug;
 				USER_HEADER_SEARCH_PATHS = (
@@ -250,13 +254,13 @@
 			};
 			name = Debug;
 		};
-		9C61C6EEBE2D7420FAE29D2E /* Release */ = {
+		EDF6FAF41D88C9E6F8960934 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CONFIGURATION_BUILD_DIR = ../../bin/release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = dll;
+				EXECUTABLE_EXTENSION = so;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = example;
@@ -270,20 +274,16 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6999E5F50DEC83A72024CC35 /* Release */,
-				6999E5F50DEC83A72024CC35 /* Release */,
-				9035E0FB33816A2D4E52373B /* Debug */,
 				9035E0FB33816A2D4E52373B /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B41BD52E586E72E06AA6BB6E /* Build configuration list for PBXNativeTarget "example.dll" */ = {
+		FFDFD6B40C9C86268186F4F4 /* Build configuration list for PBXNativeTarget "example.so" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9C61C6EEBE2D7420FAE29D2E /* Release */,
-				9C61C6EEBE2D7420FAE29D2E /* Release */,
-				525B1EF47A95D7A662316534 /* Debug */,
-				525B1EF47A95D7A662316534 /* Debug */,
+				EDF6FAF41D88C9E6F8960934 /* Release */,
+				4EE7997AA57503EC7DEE17BA /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

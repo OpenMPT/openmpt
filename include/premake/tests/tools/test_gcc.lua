@@ -121,8 +121,14 @@
 		test.contains({ "-Weverything" }, gcc.getcflags(cfg))
 	end
 
-	function suite.cflags_onFatalWarnings()
+	function suite.cflags_onFatalWarningsViaFlag()
 		flags { "FatalWarnings" }
+		prepare()
+		test.contains({ "-Werror" }, gcc.getcflags(cfg))
+	end
+
+	function suite.cflags_onFatalWarningsViaAPI()
+		fatalwarnings { "All" }
 		prepare()
 		test.contains({ "-Werror" }, gcc.getcflags(cfg))
 	end
@@ -393,9 +399,31 @@
 		test.contains({ "-fsanitize=address" }, gcc.getldflags(cfg))
 	end
 
+	function suite.cxxflags_onSanitizeThread()
+		sanitize { "Thread" }
+		prepare()
+		test.contains({ "-fsanitize=thread" }, gcc.getcxxflags(cfg))
+		test.contains({ "-fsanitize=thread" }, gcc.getcflags(cfg))
+		test.contains({ "-fsanitize=thread" }, gcc.getldflags(cfg))
+	end
+
+	-- UBSan
+	function suite.cxxflags_onSanitizeUndefined()
+		sanitize { "UndefinedBehavior" }
+		prepare()
+		test.contains({ "-fsanitize=undefined" }, gcc.getcxxflags(cfg))
+		test.contains({ "-fsanitize=undefined" }, gcc.getcflags(cfg))
+		test.contains({ "-fsanitize=undefined" }, gcc.getldflags(cfg))
+	end
+
 --
 -- Check the basic translation of LDFLAGS for a Posix system.
 --
+	function suite.ldflags_onFatalLinkWarningsAPI()
+		linkerfatalwarnings { "All" }
+		prepare()
+		test.contains({ "-Wl,--fatal-warnings" }, gcc.getldflags(cfg))
+	end
 
 	function suite.ldflags_onNoSymbols()
 		prepare()
@@ -826,14 +854,26 @@ end
 -- Check handling of link time optimization flag.
 --
 
-	function suite.cflags_onLinkTimeOptimization()
+	function suite.cflags_onLinkTimeOptimizationViaFlag()
 		flags "LinkTimeOptimization"
 		prepare()
 		test.contains("-flto", gcc.getcflags(cfg))
 	end
 
-	function suite.ldflags_onLinkTimeOptimization()
+	function suite.cflags_onLinkTimeOptimizationViaAPI()
+		linktimeoptimization "On"
+		prepare()
+		test.contains("-flto", gcc.getcflags(cfg))
+	end
+
+	function suite.ldflags_onLinkTimeOptimizationViaFlag()
 		flags "LinkTimeOptimization"
+		prepare()
+		test.contains("-flto", gcc.getldflags(cfg))
+	end
+
+	function suite.ldflags_onLinkTimeOptimizationViaAPI()
+		linktimeoptimization "On"
 		prepare()
 		test.contains("-flto", gcc.getldflags(cfg))
 	end

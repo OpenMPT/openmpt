@@ -385,6 +385,7 @@
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="BUILDING_LIBCURL"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -393,6 +394,8 @@
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="_GNU_SOURCE"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
+        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
+        <Preprocessor Value="CURL_CA_PATH=&quot;/etc/ssl/certs&quot;"/>
       </Compiler>
       <Linker Options="" Required="yes">
       </Linker>
@@ -437,6 +440,7 @@
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="BUILDING_LIBCURL"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -445,6 +449,8 @@
         <Preprocessor Value="USE_MBEDTLS"/>
         <Preprocessor Value="_GNU_SOURCE"/>
         <Preprocessor Value="CURL_HIDDEN_SYMBOLS"/>
+        <Preprocessor Value="CURL_CA_BUNDLE=&quot;/etc/ssl/certs/ca-certificates.crt&quot;"/>
+        <Preprocessor Value="CURL_CA_PATH=&quot;/etc/ssl/certs&quot;"/>
       </Compiler>
       <Linker Options="" Required="yes">
       </Linker>

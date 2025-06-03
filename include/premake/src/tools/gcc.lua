@@ -12,6 +12,12 @@
 	local project = p.project
 	local config = p.config
 
+	p.api.register {
+		name = "gccprefix",
+		scope = "config",
+		kind = "string",
+		tokens = true,
+	}
 
 --
 -- Returns list of C preprocessor flags for a configuration.
@@ -51,15 +57,19 @@
 			x86 = "-m32",
 			x86_64 = "-m64",
 		},
+		fatalwarnings = {
+			All = "-Werror",
+		},
 		flags = {
-			FatalCompileWarnings = "-Werror",
-			LinkTimeOptimization = "-flto",
 			ShadowedVariables = "-Wshadow",
 			UndefinedIdentifiers = "-Wundef",
 		},
 		floatingpoint = {
 			Fast = "-ffast-math",
 			Strict = "-ffloat-store",
+		},
+		linktimeoptimization = {
+			On = "-flto",
 		},
 		strictaliasing = {
 			Off = "-fno-strict-aliasing",
@@ -141,6 +151,8 @@
 		},
 		sanitize = {
 			Address = "-fsanitize=address",
+			Thread = "-fsanitize=thread",
+			UndefinedBehavior = "-fsanitize=undefined",
 		},
 		visibility = {
 			Default = "-fvisibility=default",
@@ -184,7 +196,7 @@
 		for _, disable in ipairs(cfg.disablewarnings) do
 			table.insert(result, '-Wno-' .. disable)
 		end
-		for _, fatal in ipairs(cfg.fatalwarnings) do
+		for _, fatal in ipairs(p.filterFatalWarnings(cfg.fatalwarnings)) do
 			table.insert(result, '-Werror=' .. fatal)
 		end
 		return result
@@ -463,9 +475,10 @@
 			x86 = "-m32",
 			x86_64 = "-m64",
 		},
-		flags = {
-			LinkTimeOptimization = "-flto",
+		linkerfatalwarnings = {
+			All = "-Wl,--fatal-warnings",
 		},
+		linktimeoptimization = gcc.shared.linktimeoptimization,
 		kind = {
 			SharedLib = function(cfg)
 				local r = { gcc.getsharedlibarg(cfg) }
@@ -488,6 +501,8 @@
 		},
 		sanitize = {
 			Address = "-fsanitize=address",
+			Thread = "-fsanitize=thread",
+			UndefinedBehavior = "-fsanitize=undefined",
 		},
 		system = {
 			wii = "$(MACHDEP)",

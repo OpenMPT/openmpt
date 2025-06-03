@@ -22,6 +22,8 @@
 		63CA3136BF0B84A89265CF76 /* Grid.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = Grid.js; path = ../../website/src/components/Grid.js; sourceTree = "<group>"; };
 		69B166B42D1D28666BC0CCF4 /* support.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = support.md; path = ../../website/community/support.md; sourceTree = "<group>"; };
 		7153C427A0E593197BF2D267 /* authors.yml */ = {isa = PBXFileReference; lastKnownFileType = text; name = authors.yml; path = ../../website/blog/authors.yml; sourceTree = "<group>"; };
+		763CF0950C660287CDCC5ED5 /* 2024-11-09-community-update-11.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2024-11-09-community-update-11.md"; path = "../../website/blog/2024-11-09-community-update-11.md"; sourceTree = "<group>"; };
+		7B0584CF112E96C1D294F30F /* 2024-12-22-community-update-12.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2024-12-22-community-update-12.md"; path = "../../website/blog/2024-12-22-community-update-12.md"; sourceTree = "<group>"; };
 		8178444224666AF4B38C4A82 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = README.md; path = ../../website/README.md; sourceTree = "<group>"; };
 		884E2CB8CC9CD22A0EC40AF8 /* Sponsors.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = Sponsors.js; path = ../../website/src/components/Sponsors.js; sourceTree = "<group>"; };
 		91EBBFFD2A63AD6F564A9E3D /* 2019-08-31-community-update-1.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2019-08-31-community-update-1.md"; path = "../../website/blog/2019-08-31-community-update-1.md"; sourceTree = "<group>"; };
@@ -106,6 +108,8 @@
 				14696771ACE154E3D8C845B1 /* 2021-04-20-community-update-8.md */,
 				30F24FB9C96A3D2BF5512DF9 /* 2021-08-01-community-update-9.md */,
 				BD1C198153452B7314AB87C1 /* 2021-11-21-community-update-10.md */,
+				763CF0950C660287CDCC5ED5 /* 2024-11-09-community-update-11.md */,
+				7B0584CF112E96C1D294F30F /* 2024-12-22-community-update-12.md */,
 				7153C427A0E593197BF2D267 /* authors.yml */,
 			);
 			name = blog;
@@ -226,6 +230,7 @@
 		34A2412DE105015F9F8D776D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -233,16 +238,17 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					_DEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Debug/Web;
+				OBJROOT = obj/Debug/Web;
 				ONLY_ACTIVE_ARCH = YES;
-				SYMROOT = bin/x64/Debug;
+				SYMROOT = bin/Debug;
 				WARNING_CFLAGS = "-Wall -Wextra";
 			};
 			name = Debug;
@@ -251,7 +257,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Release;
+				CONFIGURATION_BUILD_DIR = bin/Release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_DYNAMIC_NO_PIC = NO;
 				PRODUCT_NAME = Web;
@@ -261,21 +267,23 @@
 		DA9F1AA72AB2AF59AD30E0E7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					NDEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Release/Web;
+				OBJROOT = obj/Release/Web;
 				ONLY_ACTIVE_ARCH = NO;
-				SYMROOT = bin/x64/Release;
+				SYMROOT = bin/Release;
 				WARNING_CFLAGS = "-Wall -Wextra";
 			};
 			name = Release;
@@ -284,7 +292,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_DYNAMIC_NO_PIC = NO;
 				PRODUCT_NAME = Web;
@@ -298,8 +306,6 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DA9F1AA72AB2AF59AD30E0E7 /* Release */,
-				DA9F1AA72AB2AF59AD30E0E7 /* Release */,
-				34A2412DE105015F9F8D776D /* Debug */,
 				34A2412DE105015F9F8D776D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -309,8 +315,6 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				71158BB6882826E8784421F6 /* Release */,
-				71158BB6882826E8784421F6 /* Release */,
-				FC4711BC9F35386E2E5B17FC /* Debug */,
 				FC4711BC9F35386E2E5B17FC /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;

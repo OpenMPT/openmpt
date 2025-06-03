@@ -46,7 +46,7 @@ ifeq ($(config),release)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/liblua-lib.a
 OBJDIR = obj/Release/lua-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
 ALL_LDFLAGS += $(LDFLAGS) -s
@@ -55,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/liblua-lib.a
 OBJDIR = obj/Debug/lua-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG -DLUA_USE_POSIX -DLUA_USE_DLOPEN
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_LDFLAGS += $(LDFLAGS)
@@ -73,6 +73,7 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/lapi.o
+GENERATED += $(OBJDIR)/lauxlib.o
 GENERATED += $(OBJDIR)/lbaselib.o
 GENERATED += $(OBJDIR)/lbitlib.o
 GENERATED += $(OBJDIR)/lcode.o
@@ -105,6 +106,7 @@ GENERATED += $(OBJDIR)/lutf8lib.o
 GENERATED += $(OBJDIR)/lvm.o
 GENERATED += $(OBJDIR)/lzio.o
 OBJECTS += $(OBJDIR)/lapi.o
+OBJECTS += $(OBJDIR)/lauxlib.o
 OBJECTS += $(OBJDIR)/lbaselib.o
 OBJECTS += $(OBJDIR)/lbitlib.o
 OBJECTS += $(OBJDIR)/lcode.o
@@ -200,6 +202,9 @@ endif
 # #############################################
 
 $(OBJDIR)/lapi.o: ../../contrib/lua/src/lapi.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/lauxlib.o: ../../contrib/lua/src/lauxlib.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/lbaselib.o: ../../contrib/lua/src/lbaselib.c

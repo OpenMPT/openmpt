@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -56,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
 			/>
 			<Tool
@@ -110,7 +110,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -121,7 +121,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
 			/>
 			<Tool
@@ -174,7 +174,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -185,7 +185,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
 			/>
 			<Tool
@@ -239,7 +239,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W4 /EHsc"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -250,7 +250,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				AdditionalIncludeDirectories="..\..\contrib\lua\src"
 			/>
 			<Tool

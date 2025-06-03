@@ -52,6 +52,7 @@
 				dotnetbase.bindingRedirects,
 				dotnetbase.netcore.useWpf,
 				dotnetbase.csversion,
+				dotnetbase.projectConfigurations,
 				dotnetbase.netcore.enableDefaultCompileItems,
 			}
 		else
@@ -83,7 +84,7 @@
 			dotnetbase.compilerProps,
 			dotnetbase.additionalProps,
 			dotnetbase.NoWarn,
-			dotnetbase.documentationFile,
+			dotnetbase.documentationfile,
 		}
 	end
 

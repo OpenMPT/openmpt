@@ -28,7 +28,7 @@ ifeq ($(origin AR), default)
   AR = ar
 endif
 RESCOMP = windres
-INCLUDES += -I../../contrib/mbedtls/include -I../../contrib/zlib
+INCLUDES += -I../../contrib/mbedtls/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -47,7 +47,7 @@ ifeq ($(config),release)
 TARGETDIR = bin/Release
 TARGET = $(TARGETDIR)/libmbedtls-lib.a
 OBJDIR = obj/Release/mbedtls-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DMBEDTLS_ZLIB_SUPPORT
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -w -fno-stack-protector
 
@@ -55,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = bin/Debug
 TARGET = $(TARGETDIR)/libmbedtls-lib.a
 OBJDIR = obj/Debug/mbedtls-lib
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DMBEDTLS_ZLIB_SUPPORT
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 
@@ -72,22 +72,25 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/aes.o
+GENERATED += $(OBJDIR)/aesce.o
 GENERATED += $(OBJDIR)/aesni.o
-GENERATED += $(OBJDIR)/arc4.o
 GENERATED += $(OBJDIR)/aria.o
 GENERATED += $(OBJDIR)/asn1parse.o
 GENERATED += $(OBJDIR)/asn1write.o
 GENERATED += $(OBJDIR)/base64.o
 GENERATED += $(OBJDIR)/bignum.o
-GENERATED += $(OBJDIR)/blowfish.o
+GENERATED += $(OBJDIR)/bignum_core.o
+GENERATED += $(OBJDIR)/bignum_mod.o
+GENERATED += $(OBJDIR)/bignum_mod_raw.o
+GENERATED += $(OBJDIR)/block_cipher.o
 GENERATED += $(OBJDIR)/camellia.o
 GENERATED += $(OBJDIR)/ccm.o
-GENERATED += $(OBJDIR)/certs.o
 GENERATED += $(OBJDIR)/chacha20.o
 GENERATED += $(OBJDIR)/chachapoly.o
 GENERATED += $(OBJDIR)/cipher.o
 GENERATED += $(OBJDIR)/cipher_wrap.o
 GENERATED += $(OBJDIR)/cmac.o
+GENERATED += $(OBJDIR)/constant_time.o
 GENERATED += $(OBJDIR)/ctr_drbg.o
 GENERATED += $(OBJDIR)/debug.o
 GENERATED += $(OBJDIR)/des.o
@@ -97,54 +100,73 @@ GENERATED += $(OBJDIR)/ecdsa.o
 GENERATED += $(OBJDIR)/ecjpake.o
 GENERATED += $(OBJDIR)/ecp.o
 GENERATED += $(OBJDIR)/ecp_curves.o
+GENERATED += $(OBJDIR)/ecp_curves_new.o
 GENERATED += $(OBJDIR)/entropy.o
 GENERATED += $(OBJDIR)/entropy_poll.o
 GENERATED += $(OBJDIR)/error.o
 GENERATED += $(OBJDIR)/gcm.o
-GENERATED += $(OBJDIR)/havege.o
 GENERATED += $(OBJDIR)/hkdf.o
 GENERATED += $(OBJDIR)/hmac_drbg.o
+GENERATED += $(OBJDIR)/lmots.o
+GENERATED += $(OBJDIR)/lms.o
 GENERATED += $(OBJDIR)/md.o
-GENERATED += $(OBJDIR)/md2.o
-GENERATED += $(OBJDIR)/md4.o
 GENERATED += $(OBJDIR)/md5.o
 GENERATED += $(OBJDIR)/memory_buffer_alloc.o
+GENERATED += $(OBJDIR)/mps_reader.o
+GENERATED += $(OBJDIR)/mps_trace.o
 GENERATED += $(OBJDIR)/net_sockets.o
 GENERATED += $(OBJDIR)/nist_kw.o
 GENERATED += $(OBJDIR)/oid.o
 GENERATED += $(OBJDIR)/padlock.o
 GENERATED += $(OBJDIR)/pem.o
 GENERATED += $(OBJDIR)/pk.o
+GENERATED += $(OBJDIR)/pk_ecc.o
 GENERATED += $(OBJDIR)/pk_wrap.o
-GENERATED += $(OBJDIR)/pkcs11.o
 GENERATED += $(OBJDIR)/pkcs12.o
 GENERATED += $(OBJDIR)/pkcs5.o
+GENERATED += $(OBJDIR)/pkcs7.o
 GENERATED += $(OBJDIR)/pkparse.o
 GENERATED += $(OBJDIR)/pkwrite.o
 GENERATED += $(OBJDIR)/platform.o
 GENERATED += $(OBJDIR)/platform_util.o
 GENERATED += $(OBJDIR)/poly1305.o
 GENERATED += $(OBJDIR)/psa_crypto.o
-GENERATED += $(OBJDIR)/psa_crypto_driver_wrappers.o
+GENERATED += $(OBJDIR)/psa_crypto_aead.o
+GENERATED += $(OBJDIR)/psa_crypto_cipher.o
+GENERATED += $(OBJDIR)/psa_crypto_client.o
+GENERATED += $(OBJDIR)/psa_crypto_driver_wrappers_no_static.o
+GENERATED += $(OBJDIR)/psa_crypto_ecp.o
+GENERATED += $(OBJDIR)/psa_crypto_ffdh.o
+GENERATED += $(OBJDIR)/psa_crypto_hash.o
+GENERATED += $(OBJDIR)/psa_crypto_mac.o
+GENERATED += $(OBJDIR)/psa_crypto_pake.o
+GENERATED += $(OBJDIR)/psa_crypto_rsa.o
 GENERATED += $(OBJDIR)/psa_crypto_se.o
 GENERATED += $(OBJDIR)/psa_crypto_slot_management.o
 GENERATED += $(OBJDIR)/psa_crypto_storage.o
 GENERATED += $(OBJDIR)/psa_its_file.o
+GENERATED += $(OBJDIR)/psa_util.o
 GENERATED += $(OBJDIR)/ripemd160.o
 GENERATED += $(OBJDIR)/rsa.o
-GENERATED += $(OBJDIR)/rsa_internal.o
+GENERATED += $(OBJDIR)/rsa_alt_helpers.o
 GENERATED += $(OBJDIR)/sha1.o
 GENERATED += $(OBJDIR)/sha256.o
+GENERATED += $(OBJDIR)/sha3.o
 GENERATED += $(OBJDIR)/sha512.o
 GENERATED += $(OBJDIR)/ssl_cache.o
 GENERATED += $(OBJDIR)/ssl_ciphersuites.o
-GENERATED += $(OBJDIR)/ssl_cli.o
+GENERATED += $(OBJDIR)/ssl_client.o
 GENERATED += $(OBJDIR)/ssl_cookie.o
+GENERATED += $(OBJDIR)/ssl_debug_helpers_generated.o
 GENERATED += $(OBJDIR)/ssl_msg.o
-GENERATED += $(OBJDIR)/ssl_srv.o
 GENERATED += $(OBJDIR)/ssl_ticket.o
 GENERATED += $(OBJDIR)/ssl_tls.o
+GENERATED += $(OBJDIR)/ssl_tls12_client.o
+GENERATED += $(OBJDIR)/ssl_tls12_server.o
+GENERATED += $(OBJDIR)/ssl_tls13_client.o
+GENERATED += $(OBJDIR)/ssl_tls13_generic.o
 GENERATED += $(OBJDIR)/ssl_tls13_keys.o
+GENERATED += $(OBJDIR)/ssl_tls13_server.o
 GENERATED += $(OBJDIR)/threading.o
 GENERATED += $(OBJDIR)/timing.o
 GENERATED += $(OBJDIR)/version.o
@@ -154,26 +176,29 @@ GENERATED += $(OBJDIR)/x509_create.o
 GENERATED += $(OBJDIR)/x509_crl.o
 GENERATED += $(OBJDIR)/x509_crt.o
 GENERATED += $(OBJDIR)/x509_csr.o
+GENERATED += $(OBJDIR)/x509write.o
 GENERATED += $(OBJDIR)/x509write_crt.o
 GENERATED += $(OBJDIR)/x509write_csr.o
-GENERATED += $(OBJDIR)/xtea.o
 OBJECTS += $(OBJDIR)/aes.o
+OBJECTS += $(OBJDIR)/aesce.o
 OBJECTS += $(OBJDIR)/aesni.o
-OBJECTS += $(OBJDIR)/arc4.o
 OBJECTS += $(OBJDIR)/aria.o
 OBJECTS += $(OBJDIR)/asn1parse.o
 OBJECTS += $(OBJDIR)/asn1write.o
 OBJECTS += $(OBJDIR)/base64.o
 OBJECTS += $(OBJDIR)/bignum.o
-OBJECTS += $(OBJDIR)/blowfish.o
+OBJECTS += $(OBJDIR)/bignum_core.o
+OBJECTS += $(OBJDIR)/bignum_mod.o
+OBJECTS += $(OBJDIR)/bignum_mod_raw.o
+OBJECTS += $(OBJDIR)/block_cipher.o
 OBJECTS += $(OBJDIR)/camellia.o
 OBJECTS += $(OBJDIR)/ccm.o
-OBJECTS += $(OBJDIR)/certs.o
 OBJECTS += $(OBJDIR)/chacha20.o
 OBJECTS += $(OBJDIR)/chachapoly.o
 OBJECTS += $(OBJDIR)/cipher.o
 OBJECTS += $(OBJDIR)/cipher_wrap.o
 OBJECTS += $(OBJDIR)/cmac.o
+OBJECTS += $(OBJDIR)/constant_time.o
 OBJECTS += $(OBJDIR)/ctr_drbg.o
 OBJECTS += $(OBJDIR)/debug.o
 OBJECTS += $(OBJDIR)/des.o
@@ -183,54 +208,73 @@ OBJECTS += $(OBJDIR)/ecdsa.o
 OBJECTS += $(OBJDIR)/ecjpake.o
 OBJECTS += $(OBJDIR)/ecp.o
 OBJECTS += $(OBJDIR)/ecp_curves.o
+OBJECTS += $(OBJDIR)/ecp_curves_new.o
 OBJECTS += $(OBJDIR)/entropy.o
 OBJECTS += $(OBJDIR)/entropy_poll.o
 OBJECTS += $(OBJDIR)/error.o
 OBJECTS += $(OBJDIR)/gcm.o
-OBJECTS += $(OBJDIR)/havege.o
 OBJECTS += $(OBJDIR)/hkdf.o
 OBJECTS += $(OBJDIR)/hmac_drbg.o
+OBJECTS += $(OBJDIR)/lmots.o
+OBJECTS += $(OBJDIR)/lms.o
 OBJECTS += $(OBJDIR)/md.o
-OBJECTS += $(OBJDIR)/md2.o
-OBJECTS += $(OBJDIR)/md4.o
 OBJECTS += $(OBJDIR)/md5.o
 OBJECTS += $(OBJDIR)/memory_buffer_alloc.o
+OBJECTS += $(OBJDIR)/mps_reader.o
+OBJECTS += $(OBJDIR)/mps_trace.o
 OBJECTS += $(OBJDIR)/net_sockets.o
 OBJECTS += $(OBJDIR)/nist_kw.o
 OBJECTS += $(OBJDIR)/oid.o
 OBJECTS += $(OBJDIR)/padlock.o
 OBJECTS += $(OBJDIR)/pem.o
 OBJECTS += $(OBJDIR)/pk.o
+OBJECTS += $(OBJDIR)/pk_ecc.o
 OBJECTS += $(OBJDIR)/pk_wrap.o
-OBJECTS += $(OBJDIR)/pkcs11.o
 OBJECTS += $(OBJDIR)/pkcs12.o
 OBJECTS += $(OBJDIR)/pkcs5.o
+OBJECTS += $(OBJDIR)/pkcs7.o
 OBJECTS += $(OBJDIR)/pkparse.o
 OBJECTS += $(OBJDIR)/pkwrite.o
 OBJECTS += $(OBJDIR)/platform.o
 OBJECTS += $(OBJDIR)/platform_util.o
 OBJECTS += $(OBJDIR)/poly1305.o
 OBJECTS += $(OBJDIR)/psa_crypto.o
-OBJECTS += $(OBJDIR)/psa_crypto_driver_wrappers.o
+OBJECTS += $(OBJDIR)/psa_crypto_aead.o
+OBJECTS += $(OBJDIR)/psa_crypto_cipher.o
+OBJECTS += $(OBJDIR)/psa_crypto_client.o
+OBJECTS += $(OBJDIR)/psa_crypto_driver_wrappers_no_static.o
+OBJECTS += $(OBJDIR)/psa_crypto_ecp.o
+OBJECTS += $(OBJDIR)/psa_crypto_ffdh.o
+OBJECTS += $(OBJDIR)/psa_crypto_hash.o
+OBJECTS += $(OBJDIR)/psa_crypto_mac.o
+OBJECTS += $(OBJDIR)/psa_crypto_pake.o
+OBJECTS += $(OBJDIR)/psa_crypto_rsa.o
 OBJECTS += $(OBJDIR)/psa_crypto_se.o
 OBJECTS += $(OBJDIR)/psa_crypto_slot_management.o
 OBJECTS += $(OBJDIR)/psa_crypto_storage.o
 OBJECTS += $(OBJDIR)/psa_its_file.o
+OBJECTS += $(OBJDIR)/psa_util.o
 OBJECTS += $(OBJDIR)/ripemd160.o
 OBJECTS += $(OBJDIR)/rsa.o
-OBJECTS += $(OBJDIR)/rsa_internal.o
+OBJECTS += $(OBJDIR)/rsa_alt_helpers.o
 OBJECTS += $(OBJDIR)/sha1.o
 OBJECTS += $(OBJDIR)/sha256.o
+OBJECTS += $(OBJDIR)/sha3.o
 OBJECTS += $(OBJDIR)/sha512.o
 OBJECTS += $(OBJDIR)/ssl_cache.o
 OBJECTS += $(OBJDIR)/ssl_ciphersuites.o
-OBJECTS += $(OBJDIR)/ssl_cli.o
+OBJECTS += $(OBJDIR)/ssl_client.o
 OBJECTS += $(OBJDIR)/ssl_cookie.o
+OBJECTS += $(OBJDIR)/ssl_debug_helpers_generated.o
 OBJECTS += $(OBJDIR)/ssl_msg.o
-OBJECTS += $(OBJDIR)/ssl_srv.o
 OBJECTS += $(OBJDIR)/ssl_ticket.o
 OBJECTS += $(OBJDIR)/ssl_tls.o
+OBJECTS += $(OBJDIR)/ssl_tls12_client.o
+OBJECTS += $(OBJDIR)/ssl_tls12_server.o
+OBJECTS += $(OBJDIR)/ssl_tls13_client.o
+OBJECTS += $(OBJDIR)/ssl_tls13_generic.o
 OBJECTS += $(OBJDIR)/ssl_tls13_keys.o
+OBJECTS += $(OBJDIR)/ssl_tls13_server.o
 OBJECTS += $(OBJDIR)/threading.o
 OBJECTS += $(OBJDIR)/timing.o
 OBJECTS += $(OBJDIR)/version.o
@@ -240,9 +284,9 @@ OBJECTS += $(OBJDIR)/x509_create.o
 OBJECTS += $(OBJDIR)/x509_crl.o
 OBJECTS += $(OBJDIR)/x509_crt.o
 OBJECTS += $(OBJDIR)/x509_csr.o
+OBJECTS += $(OBJDIR)/x509write.o
 OBJECTS += $(OBJDIR)/x509write_crt.o
 OBJECTS += $(OBJDIR)/x509write_csr.o
-OBJECTS += $(OBJDIR)/xtea.o
 
 # Rules
 # #############################################
@@ -309,10 +353,10 @@ endif
 $(OBJDIR)/aes.o: ../../contrib/mbedtls/library/aes.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/aesni.o: ../../contrib/mbedtls/library/aesni.c
+$(OBJDIR)/aesce.o: ../../contrib/mbedtls/library/aesce.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/arc4.o: ../../contrib/mbedtls/library/arc4.c
+$(OBJDIR)/aesni.o: ../../contrib/mbedtls/library/aesni.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/aria.o: ../../contrib/mbedtls/library/aria.c
@@ -330,16 +374,22 @@ $(OBJDIR)/base64.o: ../../contrib/mbedtls/library/base64.c
 $(OBJDIR)/bignum.o: ../../contrib/mbedtls/library/bignum.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/blowfish.o: ../../contrib/mbedtls/library/blowfish.c
+$(OBJDIR)/bignum_core.o: ../../contrib/mbedtls/library/bignum_core.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/bignum_mod.o: ../../contrib/mbedtls/library/bignum_mod.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/bignum_mod_raw.o: ../../contrib/mbedtls/library/bignum_mod_raw.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/block_cipher.o: ../../contrib/mbedtls/library/block_cipher.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/camellia.o: ../../contrib/mbedtls/library/camellia.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ccm.o: ../../contrib/mbedtls/library/ccm.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/certs.o: ../../contrib/mbedtls/library/certs.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/chacha20.o: ../../contrib/mbedtls/library/chacha20.c
@@ -355,6 +405,9 @@ $(OBJDIR)/cipher_wrap.o: ../../contrib/mbedtls/library/cipher_wrap.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cmac.o: ../../contrib/mbedtls/library/cmac.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/constant_time.o: ../../contrib/mbedtls/library/constant_time.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ctr_drbg.o: ../../contrib/mbedtls/library/ctr_drbg.c
@@ -384,6 +437,9 @@ $(OBJDIR)/ecp.o: ../../contrib/mbedtls/library/ecp.c
 $(OBJDIR)/ecp_curves.o: ../../contrib/mbedtls/library/ecp_curves.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ecp_curves_new.o: ../../contrib/mbedtls/library/ecp_curves_new.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/entropy.o: ../../contrib/mbedtls/library/entropy.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -396,28 +452,31 @@ $(OBJDIR)/error.o: ../../contrib/mbedtls/library/error.c
 $(OBJDIR)/gcm.o: ../../contrib/mbedtls/library/gcm.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/havege.o: ../../contrib/mbedtls/library/havege.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/hkdf.o: ../../contrib/mbedtls/library/hkdf.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/hmac_drbg.o: ../../contrib/mbedtls/library/hmac_drbg.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/lmots.o: ../../contrib/mbedtls/library/lmots.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/lms.o: ../../contrib/mbedtls/library/lms.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/md.o: ../../contrib/mbedtls/library/md.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/md2.o: ../../contrib/mbedtls/library/md2.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/md4.o: ../../contrib/mbedtls/library/md4.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/md5.o: ../../contrib/mbedtls/library/md5.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/memory_buffer_alloc.o: ../../contrib/mbedtls/library/memory_buffer_alloc.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mps_reader.o: ../../contrib/mbedtls/library/mps_reader.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mps_trace.o: ../../contrib/mbedtls/library/mps_trace.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/net_sockets.o: ../../contrib/mbedtls/library/net_sockets.c
@@ -438,16 +497,19 @@ $(OBJDIR)/pem.o: ../../contrib/mbedtls/library/pem.c
 $(OBJDIR)/pk.o: ../../contrib/mbedtls/library/pk.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/pk_wrap.o: ../../contrib/mbedtls/library/pk_wrap.c
+$(OBJDIR)/pk_ecc.o: ../../contrib/mbedtls/library/pk_ecc.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/pkcs11.o: ../../contrib/mbedtls/library/pkcs11.c
+$(OBJDIR)/pk_wrap.o: ../../contrib/mbedtls/library/pk_wrap.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/pkcs12.o: ../../contrib/mbedtls/library/pkcs12.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/pkcs5.o: ../../contrib/mbedtls/library/pkcs5.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/pkcs7.o: ../../contrib/mbedtls/library/pkcs7.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/pkparse.o: ../../contrib/mbedtls/library/pkparse.c
@@ -468,7 +530,34 @@ $(OBJDIR)/poly1305.o: ../../contrib/mbedtls/library/poly1305.c
 $(OBJDIR)/psa_crypto.o: ../../contrib/mbedtls/library/psa_crypto.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/psa_crypto_driver_wrappers.o: ../../contrib/mbedtls/library/psa_crypto_driver_wrappers.c
+$(OBJDIR)/psa_crypto_aead.o: ../../contrib/mbedtls/library/psa_crypto_aead.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_cipher.o: ../../contrib/mbedtls/library/psa_crypto_cipher.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_client.o: ../../contrib/mbedtls/library/psa_crypto_client.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_driver_wrappers_no_static.o: ../../contrib/mbedtls/library/psa_crypto_driver_wrappers_no_static.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_ecp.o: ../../contrib/mbedtls/library/psa_crypto_ecp.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_ffdh.o: ../../contrib/mbedtls/library/psa_crypto_ffdh.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_hash.o: ../../contrib/mbedtls/library/psa_crypto_hash.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_mac.o: ../../contrib/mbedtls/library/psa_crypto_mac.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_pake.o: ../../contrib/mbedtls/library/psa_crypto_pake.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_crypto_rsa.o: ../../contrib/mbedtls/library/psa_crypto_rsa.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/psa_crypto_se.o: ../../contrib/mbedtls/library/psa_crypto_se.c
@@ -483,19 +572,25 @@ $(OBJDIR)/psa_crypto_storage.o: ../../contrib/mbedtls/library/psa_crypto_storage
 $(OBJDIR)/psa_its_file.o: ../../contrib/mbedtls/library/psa_its_file.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/psa_util.o: ../../contrib/mbedtls/library/psa_util.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ripemd160.o: ../../contrib/mbedtls/library/ripemd160.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/rsa.o: ../../contrib/mbedtls/library/rsa.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/rsa_internal.o: ../../contrib/mbedtls/library/rsa_internal.c
+$(OBJDIR)/rsa_alt_helpers.o: ../../contrib/mbedtls/library/rsa_alt_helpers.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/sha1.o: ../../contrib/mbedtls/library/sha1.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/sha256.o: ../../contrib/mbedtls/library/sha256.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/sha3.o: ../../contrib/mbedtls/library/sha3.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/sha512.o: ../../contrib/mbedtls/library/sha512.c
@@ -507,16 +602,16 @@ $(OBJDIR)/ssl_cache.o: ../../contrib/mbedtls/library/ssl_cache.c
 $(OBJDIR)/ssl_ciphersuites.o: ../../contrib/mbedtls/library/ssl_ciphersuites.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/ssl_cli.o: ../../contrib/mbedtls/library/ssl_cli.c
+$(OBJDIR)/ssl_client.o: ../../contrib/mbedtls/library/ssl_client.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ssl_cookie.o: ../../contrib/mbedtls/library/ssl_cookie.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/ssl_msg.o: ../../contrib/mbedtls/library/ssl_msg.c
+$(OBJDIR)/ssl_debug_helpers_generated.o: ../../contrib/mbedtls/library/ssl_debug_helpers_generated.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/ssl_srv.o: ../../contrib/mbedtls/library/ssl_srv.c
+$(OBJDIR)/ssl_msg.o: ../../contrib/mbedtls/library/ssl_msg.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ssl_ticket.o: ../../contrib/mbedtls/library/ssl_ticket.c
@@ -525,7 +620,22 @@ $(OBJDIR)/ssl_ticket.o: ../../contrib/mbedtls/library/ssl_ticket.c
 $(OBJDIR)/ssl_tls.o: ../../contrib/mbedtls/library/ssl_tls.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ssl_tls12_client.o: ../../contrib/mbedtls/library/ssl_tls12_client.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ssl_tls12_server.o: ../../contrib/mbedtls/library/ssl_tls12_server.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ssl_tls13_client.o: ../../contrib/mbedtls/library/ssl_tls13_client.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ssl_tls13_generic.o: ../../contrib/mbedtls/library/ssl_tls13_generic.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/ssl_tls13_keys.o: ../../contrib/mbedtls/library/ssl_tls13_keys.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ssl_tls13_server.o: ../../contrib/mbedtls/library/ssl_tls13_server.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/threading.o: ../../contrib/mbedtls/library/threading.c
@@ -555,13 +665,13 @@ $(OBJDIR)/x509_crt.o: ../../contrib/mbedtls/library/x509_crt.c
 $(OBJDIR)/x509_csr.o: ../../contrib/mbedtls/library/x509_csr.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/x509write.o: ../../contrib/mbedtls/library/x509write.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/x509write_crt.o: ../../contrib/mbedtls/library/x509write_crt.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/x509write_csr.o: ../../contrib/mbedtls/library/x509write_csr.c
-	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/xtea.o: ../../contrib/mbedtls/library/xtea.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

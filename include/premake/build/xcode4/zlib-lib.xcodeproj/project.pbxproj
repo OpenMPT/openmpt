@@ -28,9 +28,9 @@
 		091C6462AC0A8B143B306AA2 /* gzwrite.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = gzwrite.c; path = ../../contrib/zlib/gzwrite.c; sourceTree = "<group>"; };
 		0E23AE70B111D5224037B4B0 /* inflate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = inflate.c; path = ../../contrib/zlib/inflate.c; sourceTree = "<group>"; };
 		1F0C1ECEC35EBC80D597050E /* crc32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = crc32.h; path = ../../contrib/zlib/crc32.h; sourceTree = "<group>"; };
-		212A056321DD025595BED3A3 /* zlib-lib.lib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "zlib-lib.lib"; path = "zlib-lib.lib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		27122BEACA00529C5926322A /* inffast.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inffast.h; path = ../../contrib/zlib/inffast.h; sourceTree = "<group>"; };
 		37A94CE4DBFBEA96EE343324 /* zutil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = zutil.h; path = ../../contrib/zlib/zutil.h; sourceTree = "<group>"; };
+		46B64AA45DC8E5D64DE4E0E4 /* libzlib-lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libzlib-lib.a"; path = "libzlib-lib.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E1FA596F16B2EC80C3BFBD6 /* zlib.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = zlib.h; path = ../../contrib/zlib/zlib.h; sourceTree = "<group>"; };
 		6DEA52F484FCEE267518E934 /* inftrees.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = inftrees.h; path = ../../contrib/zlib/inftrees.h; sourceTree = "<group>"; };
 		76FAF0FE19E917B0A90EF73E /* deflate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = deflate.h; path = ../../contrib/zlib/deflate.h; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6BE2C1539A891545F3CA6F93 /* Frameworks */ = {
+		0FC48E141335604694A20454 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -65,7 +65,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C563B27F36EECAF1E5EFF0BF /* Embed Libraries */ = {
+		E8EBB3808BD9DA321AFFB9C0 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -81,7 +81,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				212A056321DD025595BED3A3 /* zlib-lib.lib */,
+				46B64AA45DC8E5D64DE4E0E4 /* libzlib-lib.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,14 +123,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		9E453CE94133639BD0594329 /* zlib-lib */ = {
+		32CD5E0A33805AFCA7622C4A /* zlib-lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 5A1E09B288C45DA4E205B7F2 /* Build configuration list for PBXNativeTarget "zlib-lib" */;
+			buildConfigurationList = FDFFD6730170A8A582DD4CB3 /* Build configuration list for PBXNativeTarget "zlib-lib" */;
 			buildPhases = (
-				DBCA41F30A7095E563B1F033 /* Resources */,
-				45775B4A741DAF3CCD5F098A /* Sources */,
-				6BE2C1539A891545F3CA6F93 /* Frameworks */,
-				C563B27F36EECAF1E5EFF0BF /* Embed Libraries */,
+				7FAC0EB4831CE0E6048984F4 /* Resources */,
+				E959280BECC9FA3D6E369E4B /* Sources */,
+				0FC48E141335604694A20454 /* Frameworks */,
+				E8EBB3808BD9DA321AFFB9C0 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -138,7 +138,7 @@
 			);
 			name = "zlib-lib";
 			productName = "zlib-lib";
-			productReference = 212A056321DD025595BED3A3 /* zlib-lib.lib */;
+			productReference = 46B64AA45DC8E5D64DE4E0E4 /* libzlib-lib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -153,13 +153,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9E453CE94133639BD0594329 /* zlib-lib.lib */,
+				32CD5E0A33805AFCA7622C4A /* libzlib-lib.a */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		DBCA41F30A7095E563B1F033 /* Resources */ = {
+		7FAC0EB4831CE0E6048984F4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -169,7 +169,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		45775B4A741DAF3CCD5F098A /* Sources */ = {
+		E959280BECC9FA3D6E369E4B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -200,47 +200,47 @@
 		0D390FBE3BDF63B09520BDFE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					NDEBUG,
 					N_FSEEKO,
-					_WINDOWS,
+					HAVE_UNISTD_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Release/zlib-lib";
+				OBJROOT = "obj/Release/zlib-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				SYMROOT = bin/x64/Release;
+				SYMROOT = bin/Release;
 				WARNING_CFLAGS = "-w";
 			};
 			name = Release;
 		};
-		464C397875DE086A50EB47B8 /* Debug */ = {
+		55E62FB977B1DCEBB46705F9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "zlib-lib";
 			};
 			name = Debug;
 		};
-		51039272AC44E5E47F9F30B2 /* Release */ = {
+		AEF41CF3725FDEA5B1038333 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Release;
+				CONFIGURATION_BUILD_DIR = bin/Release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "zlib-lib";
@@ -250,6 +250,7 @@
 		D13E0484DDFAB3F652E522C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -257,18 +258,19 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					_DEBUG,
 					N_FSEEKO,
-					_WINDOWS,
+					HAVE_UNISTD_H,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Debug/zlib-lib";
+				OBJROOT = "obj/Debug/zlib-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				SYMROOT = bin/x64/Debug;
+				SYMROOT = bin/Debug;
 				WARNING_CFLAGS = "-w";
 			};
 			name = Debug;
@@ -280,20 +282,16 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0D390FBE3BDF63B09520BDFE /* Release */,
-				0D390FBE3BDF63B09520BDFE /* Release */,
-				D13E0484DDFAB3F652E522C4 /* Debug */,
 				D13E0484DDFAB3F652E522C4 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		5A1E09B288C45DA4E205B7F2 /* Build configuration list for PBXNativeTarget "zlib-lib.lib" */ = {
+		FDFFD6730170A8A582DD4CB3 /* Build configuration list for PBXNativeTarget "libzlib-lib.a" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				51039272AC44E5E47F9F30B2 /* Release */,
-				51039272AC44E5E47F9F30B2 /* Release */,
-				464C397875DE086A50EB47B8 /* Debug */,
-				464C397875DE086A50EB47B8 /* Debug */,
+				AEF41CF3725FDEA5B1038333 /* Release */,
+				55E62FB977B1DCEBB46705F9 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

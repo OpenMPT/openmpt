@@ -22,8 +22,9 @@
       <Compiler Options="-O3;-fPIC;-Wall;-Wextra;-fno-stack-protector" C_Options="-O3;-fPIC;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUA_USE_POSIX"/>
         <Preprocessor Value="LUA_USE_DLOPEN"/>
@@ -68,8 +69,9 @@
       <Compiler Options="-fPIC;-g;-Wall;-Wextra" C_Options="-fPIC;-g;-Wall;-Wextra" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUA_USE_POSIX"/>
         <Preprocessor Value="LUA_USE_DLOPEN"/>

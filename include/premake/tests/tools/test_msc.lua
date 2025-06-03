@@ -66,12 +66,6 @@
 		test.contains("/Od", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_onNoFramePointers()
-		flags "NoFramePointer"
-		prepare()
-		test.contains("/Oy", msc.getcflags(cfg))
-	end
-
 	function suite.cflags_onOmitFramePointer()
 		omitframepointer "On"
 		prepare()
@@ -84,14 +78,26 @@
 		test.excludes("/Oy", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_onLinkTimeOptimizations()
+	function suite.cflags_onLinkTimeOptimizationsViaFlag()
 		flags "LinkTimeOptimization"
 		prepare()
 		test.contains("/GL", msc.getcflags(cfg))
 	end
 
-	function suite.ldflags_onLinkTimeOptimizations()
+	function suite.cflags_onLinkTimeOptimizationsViaAPI()
+		linktimeoptimization "On"
+		prepare()
+		test.contains("/GL", msc.getcflags(cfg))
+	end
+
+	function suite.ldflags_onLinkTimeOptimizationsViaFlag()
 		flags "LinkTimeOptimization"
+		prepare()
+		test.contains("/LTCG", msc.getldflags(cfg))
+	end
+
+	function suite.ldflags_onLinkTimeOptimizationsViaAPI()
+		linktimeoptimization "On"
 		prepare()
 		test.contains("/LTCG", msc.getldflags(cfg))
 	end
@@ -236,8 +242,14 @@
 		test.contains("/Wall", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_OnFatalWarnings()
+	function suite.cflags_OnFatalWarningsViaFlag()
 		flags "FatalWarnings"
+		prepare()
+		test.contains("/WX", msc.getcflags(cfg))
+	end
+
+	function suite.cflags_OnFatalWarningsViaAPI()
+		fatalwarnings { "All" }
 		prepare()
 		test.contains("/WX", msc.getcflags(cfg))
 	end
@@ -250,12 +262,11 @@
 		test.contains({ '/w1"enable"', '/wd"disable"', '/we"fatal"' }, msc.getcflags(cfg))
 	end
 
-	function suite.ldflags_OnFatalWarnings()
-		flags "FatalWarnings"
+	function suite.ldflags_OnFatalWarningsViaAPI()
+		linkerfatalwarnings { "All" }
 		prepare()
 		test.contains("/WX", msc.getldflags(cfg))
 	end
-
 
 --
 -- Check handling externalwarnings.

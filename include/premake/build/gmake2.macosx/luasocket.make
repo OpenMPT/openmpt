@@ -45,7 +45,7 @@ ifeq ($(config),release)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/luasocket.dylib
 OBJDIR = obj/Release/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector
 LIBS += bin/Release/libluashim-lib.a
@@ -55,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/luasocket.dylib
 OBJDIR = obj/Debug/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG -DLUASOCKET_API=__attribute__\(\(visibility\(\"default\"\)\)\)
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
 LIBS += bin/Debug/libluashim-lib.a

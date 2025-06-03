@@ -74,8 +74,9 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>
@@ -120,8 +121,9 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__attribute__((visibility(&quot;default&quot;)))"/>
       </Compiler>

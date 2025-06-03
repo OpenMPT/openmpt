@@ -85,7 +85,14 @@
 		_p(1,'</PropertyGroup>')
 	end
 
-
+--
+-- Write the available configurations to have correct configuration mapping on vs2022 format and later.
+--
+	function dotnetbase.projectConfigurations(prj)
+		if _ACTION >= "vs2022" and #prj.configurations > 0 then
+			_p(2, '<Configurations>%s</Configurations>', table.implode(prj.configurations, "", "", ";"))
+		end
+	end
 --
 -- Write out the settings for the project configurations.
 --
@@ -279,7 +286,7 @@
 			dotnetbase.allowUnsafeBlocks(cfg)
 		end
 
-		if cfg.flags.FatalCompileWarnings then
+		if p.hasFatalCompileWarnings(cfg.fatalwarnings) then
 			_p(2,'<TreatWarningsAsErrors>true</TreatWarningsAsErrors>')
 		end
 
@@ -779,11 +786,11 @@
 	end
 
 	function dotnetbase.documentationfile(cfg)
-		if cfg.documentationFile then
-			if _ACTION > "vs2015" and cfg.documentationFile == true then
+		if cfg.documentationfile then
+			if _ACTION > "vs2015" and dotnetbase.isNewFormatProject(cfg) and cfg.documentationfile == true  then
 				_p(2,'<GenerateDocumentationFile>true</GenerateDocumentationFile>')
 			else
-				local documentationFile = iif(cfg.documentationFile ~= true, cfg.documentationFile, cfg.targetdir)
+				local documentationFile = iif(cfg.documentationfile ~= true, cfg.documentationfile, cfg.targetdir)
 				_p(2, string.format('<DocumentationFile>%s\\%s.xml</DocumentationFile>', vstudio.path(cfg, documentationFile),cfg.project.name))
 			end
 		end

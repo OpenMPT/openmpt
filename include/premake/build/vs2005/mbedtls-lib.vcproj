@@ -44,8 +44,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W0 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -56,8 +56,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -109,8 +109,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /GL /Ox /MD /W0 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -121,8 +121,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -173,8 +173,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W0 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -185,8 +185,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -238,8 +238,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP /MDd /Z7 /W0 /EHsc"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
 				UsePrecompiledHeader="0"
 				ProgramDataBaseFileName=""
 				DebugInformationFormat="0"
@@ -250,8 +250,8 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="PREMAKE_COMPRESSION;CURL_STATICLIB;PREMAKE_CURL;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MBEDTLS_ZLIB_SUPPORT"
-				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include;..\..\contrib\zlib"
+				PreprocessorDefinitions="PREMAKE_COMPRESSION;PREMAKE_CURL;CURL_STATICLIB;LUA_STATICLIB;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\contrib\mbedtls\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -292,14 +292,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\aesni.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\arc4.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\aria.h"
 					>
 				</File>
@@ -320,11 +312,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\blowfish.h"
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\block_cipher.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\bn_mul.h"
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\build_info.h"
 					>
 				</File>
 				<File
@@ -333,10 +325,6 @@
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\ccm.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\certs.h"
 					>
 				</File>
 				<File
@@ -356,23 +344,43 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\cipher_internal.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\cmac.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\compat-1.3.h"
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\compat-2.x.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config.h"
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_legacy_crypto.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_legacy_from_psa.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_psa_from_legacy.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_psa_superset_legacy.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_ssl.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_adjust_x509.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\config_psa.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\constant_time.h"
 					>
 				</File>
 				<File
@@ -408,15 +416,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\ecp_internal.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\entropy.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\entropy_poll.h"
 					>
 				</File>
 				<File
@@ -428,10 +428,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\havege.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\hkdf.h"
 					>
 				</File>
@@ -440,15 +436,15 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\lms.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\mbedtls_config.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\md.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\md2.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\md4.h"
 					>
 				</File>
 				<File
@@ -456,15 +452,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\md_internal.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\memory_buffer_alloc.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\net.h"
 					>
 				</File>
 				<File
@@ -480,10 +468,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\padlock.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pem.h"
 					>
 				</File>
@@ -492,19 +476,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pk_internal.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pkcs11.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pkcs12.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pkcs5.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\pkcs7.h"
 					>
 				</File>
 				<File
@@ -524,6 +504,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\private_access.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\psa_util.h"
 					>
 				</File>
@@ -536,15 +520,15 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\rsa_internal.h"
-					>
-				</File>
-				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\sha1.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\sha256.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\mbedtls\sha3.h"
 					>
 				</File>
 				<File
@@ -565,10 +549,6 @@
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\ssl_cookie.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\ssl_internal.h"
 					>
 				</File>
 				<File
@@ -603,20 +583,44 @@
 					RelativePath="..\..\contrib\mbedtls\include\mbedtls\x509_csr.h"
 					>
 				</File>
-				<File
-					RelativePath="..\..\contrib\mbedtls\include\mbedtls\xtea.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="psa"
 				>
 				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\build_info.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\contrib\mbedtls\include\psa\crypto.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_accel_driver.h"
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_adjust_auto_enabled.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_adjust_config_dependencies.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_adjust_config_key_pair_types.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_adjust_config_synonyms.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_builtin_composites.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_builtin_key_derivation.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_builtin_primitives.h"
 					>
 				</File>
 				<File
@@ -632,11 +636,23 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_entropy_driver.h"
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_driver_contexts_composites.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_driver_contexts_key_derivation.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_driver_contexts_primitives.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_extra.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\contrib\mbedtls\include\psa\crypto_legacy.h"
 					>
 				</File>
 				<File
@@ -673,11 +689,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\aesni.c"
+				RelativePath="..\..\contrib\mbedtls\library\aesce.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\arc4.c"
+				RelativePath="..\..\contrib\mbedtls\library\aesni.c"
 				>
 			</File>
 			<File
@@ -701,7 +717,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\blowfish.c"
+				RelativePath="..\..\contrib\mbedtls\library\bignum_core.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\bignum_mod.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\bignum_mod_raw.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\block_cipher.c"
 				>
 			</File>
 			<File
@@ -710,10 +738,6 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\ccm.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\mbedtls\library\certs.c"
 				>
 			</File>
 			<File
@@ -734,6 +758,10 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\cmac.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\constant_time.c"
 				>
 			</File>
 			<File
@@ -773,6 +801,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\mbedtls\library\ecp_curves_new.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\mbedtls\library\entropy.c"
 				>
 			</File>
@@ -789,10 +821,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\havege.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\contrib\mbedtls\library\hkdf.c"
 				>
 			</File>
@@ -801,15 +829,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\mbedtls\library\lmots.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\lms.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\mbedtls\library\md.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\mbedtls\library\md2.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\mbedtls\library\md4.c"
 				>
 			</File>
 			<File
@@ -818,6 +846,14 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\memory_buffer_alloc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\mps_reader.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\mps_trace.c"
 				>
 			</File>
 			<File
@@ -845,11 +881,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\pk_wrap.c"
+				RelativePath="..\..\contrib\mbedtls\library\pk_ecc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\pkcs11.c"
+				RelativePath="..\..\contrib\mbedtls\library\pk_wrap.c"
 				>
 			</File>
 			<File
@@ -858,6 +894,10 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\pkcs5.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\pkcs7.c"
 				>
 			</File>
 			<File
@@ -885,7 +925,43 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_driver_wrappers.c"
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_aead.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_cipher.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_client.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_driver_wrappers_no_static.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_ecp.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_ffdh.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_hash.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_mac.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_pake.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_crypto_rsa.c"
 				>
 			</File>
 			<File
@@ -905,6 +981,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\mbedtls\library\psa_util.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\mbedtls\library\ripemd160.c"
 				>
 			</File>
@@ -913,7 +993,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\rsa_internal.c"
+				RelativePath="..\..\contrib\mbedtls\library\rsa_alt_helpers.c"
 				>
 			</File>
 			<File
@@ -922,6 +1002,10 @@
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\sha256.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\sha3.c"
 				>
 			</File>
 			<File
@@ -937,7 +1021,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\ssl_cli.c"
+				RelativePath="..\..\contrib\mbedtls\library\ssl_client.c"
 				>
 			</File>
 			<File
@@ -945,11 +1029,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\ssl_msg.c"
+				RelativePath="..\..\contrib\mbedtls\library\ssl_debug_helpers_generated.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\contrib\mbedtls\library\ssl_srv.c"
+				RelativePath="..\..\contrib\mbedtls\library\ssl_msg.c"
 				>
 			</File>
 			<File
@@ -961,7 +1045,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\mbedtls\library\ssl_tls12_client.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\ssl_tls12_server.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\ssl_tls13_client.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\ssl_tls13_generic.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\mbedtls\library\ssl_tls13_keys.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\contrib\mbedtls\library\ssl_tls13_server.c"
 				>
 			</File>
 			<File
@@ -1001,15 +1105,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\contrib\mbedtls\library\x509write.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\contrib\mbedtls\library\x509write_crt.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\contrib\mbedtls\library\x509write_csr.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\contrib\mbedtls\library\xtea.c"
 				>
 			</File>
 		</Filter>

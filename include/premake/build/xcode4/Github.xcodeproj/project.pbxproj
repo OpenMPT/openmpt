@@ -126,6 +126,7 @@
 		3A42BA328CC8E5245F0D4872 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -133,16 +134,17 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					_DEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Debug/Github;
+				OBJROOT = obj/Debug/Github;
 				ONLY_ACTIVE_ARCH = YES;
-				SYMROOT = bin/x64/Debug;
+				SYMROOT = bin/Debug;
 				WARNING_CFLAGS = "-Wall -Wextra";
 			};
 			name = Debug;
@@ -151,7 +153,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Release;
+				CONFIGURATION_BUILD_DIR = bin/Release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_DYNAMIC_NO_PIC = NO;
 				PRODUCT_NAME = Github;
@@ -161,21 +163,23 @@
 		CA41E8ECD6FE985E4BE9072C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					NDEBUG,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = obj/x64/Release/Github;
+				OBJROOT = obj/Release/Github;
 				ONLY_ACTIVE_ARCH = NO;
-				SYMROOT = bin/x64/Release;
+				SYMROOT = bin/Release;
 				WARNING_CFLAGS = "-Wall -Wextra";
 			};
 			name = Release;
@@ -184,7 +188,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_DYNAMIC_NO_PIC = NO;
 				PRODUCT_NAME = Github;
@@ -198,8 +202,6 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CA41E8ECD6FE985E4BE9072C /* Release */,
-				CA41E8ECD6FE985E4BE9072C /* Release */,
-				3A42BA328CC8E5245F0D4872 /* Debug */,
 				3A42BA328CC8E5245F0D4872 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -209,8 +211,6 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5F0EB43B49FADA2D91E0A27B /* Release */,
-				5F0EB43B49FADA2D91E0A27B /* Release */,
-				F6625501EFC85673E363B341 /* Debug */,
 				F6625501EFC85673E363B341 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;

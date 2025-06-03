@@ -45,7 +45,7 @@ ifeq ($(config),release)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/example.so
 OBJDIR = obj/Release/example
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -fPIC -Wall -Wextra -fno-stack-protector
 LIBS += bin/Release/libluashim-lib.a
@@ -55,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/example.so
 OBJDIR = obj/Debug/example
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -fPIC -g -Wall -Wextra
 LIBS += bin/Debug/libluashim-lib.a

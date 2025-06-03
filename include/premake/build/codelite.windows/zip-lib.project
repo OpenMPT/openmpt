@@ -118,8 +118,9 @@
       <Compiler Options="-m32;-flto;-O3;-w;-fno-stack-protector;-include unistd.h" C_Options="-m32;-flto;-O3;-w;-include unistd.h" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>
@@ -166,8 +167,9 @@
       <Compiler Options="-m64;-flto;-O3;-w;-fno-stack-protector;-include unistd.h" C_Options="-m64;-flto;-O3;-w;-include unistd.h" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>
@@ -214,8 +216,9 @@
       <Compiler Options="-m32;-g;-w;-include unistd.h" C_Options="-m32;-g;-w;-include unistd.h" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>
@@ -262,8 +265,9 @@
       <Compiler Options="-m64;-g;-w;-include unistd.h" C_Options="-m64;-g;-w;-include unistd.h" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/libzip/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="HAVE_SSIZE_T_LIBZIP"/>

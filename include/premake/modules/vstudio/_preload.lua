@@ -1,6 +1,6 @@
 --
 -- _preload.lua
--- Define the makefile action(s).
+-- Define the Visual Studio action(s).
 -- Copyright (c) Jess Perkins and the Premake project
 --
 
@@ -29,6 +29,278 @@
 	p.api.addAllowed("debugger", "VisualStudioRemote")
 	p.api.addAllowed("debugger", "VisualStudioWebBrowser")
 	p.api.addAllowed("debugger", "VisualStudioWebService")
+
+	p.api.register {
+		name = "allmodulespublic",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "assemblydebug",
+		scope = "config",
+		kind  = "boolean"
+	}
+
+	p.api.register {
+		name = "atl",
+		scope = "config",
+		kind  = "string",
+		allowed = {
+			"Off",
+			"Dynamic",
+			"Static",
+		},
+	}
+
+	p.api.register {
+		name = "buildcustomizations",
+		scope = "project",
+		kind = "list:string",
+	}
+
+	p.api.register {
+		name = "builddependencies",
+		scope = { "rule" },
+		kind = "list:string",
+		tokens = true,
+		pathVars = true,
+	}
+	p.api.alias("builddependencies", "buildDependencies") -- for backward compatibility
+
+	p.api.register {
+		name = "buildlog",
+		scope = { "config" },
+		kind = "path",
+		tokens = true,
+		pathVars = true,
+	}
+
+	p.api.register {
+		name = "callingconvention",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Cdecl",
+			"FastCall",
+			"StdCall",
+			"VectorCall",
+		}
+	}
+
+	p.api.register {
+		name = "cleanextensions",
+		scope = "config",
+		kind = "list:string",
+	}
+	p.api.alias("cleanextensions", "cleanExtensions") -- for backward compatibility
+
+	p.api.register {
+		name = "conformancemode",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "consumewinrtextension",
+		scope = "config",
+		kind = "boolean",
+	}
+
+	p.api.register {
+		name = "customtoolnamespace",
+		scope = "config",
+		kind = "string",
+	}
+
+	p.api.register {
+		name = "debuggertype",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Mixed",
+			"NativeOnly",
+			"ManagedOnly",
+			"NativeWithManagedCore"
+		}
+	}
+
+	p.api.register {
+		name = "documentationfile",
+		scope = "project",
+		kind = "string",
+	}
+
+	p.api.register {
+		name = "dotnetframework",
+		scope = "config",
+		kind = "string",
+	}
+	p.api.alias("dotnetframework", "framework") -- for backward compatibility
+
+	p.api.register {
+		name = "dpiawareness",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"None",
+			"High",
+			"HighPerMonitor",
+		}
+	}
+
+	p.api.register {
+		name = "enabledefaultcompileitems",
+		scope = "config",
+		kind = "boolean",
+		default = false
+	}
+
+	p.api.register {
+		name = "externalanglebrackets",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off",
+		},
+	}
+
+	p.api.register {
+		name = "fastuptodate",
+		scope = "project",
+		kind = "boolean",
+	}
+
+	p.api.register {
+		name = "floatingpointexceptions",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "functionlevellinking",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "forceusings",
+		scope = "config",
+		kind = "list:file",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "ignoredefaultlibraries",
+		scope = "config",
+		kind = "list:mixed",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "imageoptions",
+		scope = "config",
+		kind = "list:string",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "imagepath",
+		scope = "config",
+		kind = "path",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "inheritdependencies",
+		scope = "config",
+		kind = "boolean",
+	}
+
+	p.api.register {
+		name = "inlining",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Disabled",
+			"Explicit",
+			"Auto"
+		}
+	}
+
+	p.api.register {
+		name = "intrinsics",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "justmycode",
+		scope = "project",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "largeaddressaware",
+		scope = "config",
+		kind = "boolean",
+	}
+
+	p.api.register {
+		name = "locale",
+		scope = "config",
+		kind = "string",
+		tokens = false,
+	}
+
+	p.api.register {
+		name = "namespace",
+		scope = "project",
+		kind = "string",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "nativewchar",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		}
+	}
+
+	p.api.register {
+		name = "pchsource",
+		scope = "config",
+		kind = "path",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "preferredtoolarchitecture",
+		scope = "workspace",
+		kind = "string",
+		allowed = {
+			"Default",
+			p.X86,
+			p.X86_64,
+		}
+	}
+
+	p.api.register {
+		name = "removeunreferencedcodedata",
+		scope = "config",
+		kind = "boolean"
+	}
 
 	p.api.register {
 		name = "shaderoptions",
@@ -145,13 +417,55 @@
 	}
 
 	p.api.register {
-		name = "externalanglebrackets",
+		name = "stringpooling",
 		scope = "config",
-		kind = "string",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "structmemberalign",
+		scope = "config",
+		kind = "integer",
 		allowed = {
-			"On",
-			"Off",
-		},
+			"1",
+			"2",
+			"4",
+			"8",
+			"16",
+		}
+	}
+
+	p.api.register {
+		name = "symbolspath",
+		scope = "config",
+		kind = "path",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "tailcalls",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "toolsversion",
+		scope = "project",
+		kind = "string",
+		tokens = true,
+	}
+
+	p.api.register {
+		name = "usefullpaths",
+		scope = "config",
+		kind = "boolean"
+	}
+
+	p.api.register {
+		name = "usingdirs",
+		scope = "config",
+		kind = "list:directory",
+		tokens = true,
 	}
 
 	p.api.register {   -- DEPRECATED 2019-10-21
@@ -293,6 +607,136 @@
 		kind = "string",
 		tokens = "true",
 	}
+
+	p.api.register {
+		name = "mfc",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Off",
+			"On",
+			"Static",
+			"Dynamic",
+		}
+	}
+
+	p.api.deprecateValue("flags", "MFC", 'Use `mfc` instead.',
+	function(value)
+		mfc("On")
+	end,
+	function(value)
+		mfc("Off")
+	end)
+
+--
+-- Register Android properties
+--
+
+	p.api.register {
+		name = "endian",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Little",
+			"Big",
+		},
+	}
+
+	p.api.register {
+		name = "fpu",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Software",
+			"Hardware",
+		}
+	}
+
+	p.api.addAllowed("toolchainversion", {
+		"4.6", -- NDK GCC versions
+		"4.8",
+		"4.9",
+		"3.4", -- NDK clang versions
+		"3.5",
+		"3.6",
+		"3.8",
+		"5.0", })
+
+	p.api.register {
+		name = "floatabi",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"soft",
+			"softfp",
+			"hard",
+		},
+	}
+
+	p.api.register {
+		name = "androidapilevel",
+		scope = "config",
+		kind = "integer",
+	}
+
+	p.api.register {
+		name = "stl",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"none",
+			"gabi++",
+			"stlport",
+			"gnu",
+			"libc++",
+		},
+	}
+
+	p.api.register {
+		name = "thumbmode",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"thumb",
+			"arm",
+			"disabled",
+		},
+	}
+
+	-- Emit each data item in a separate section. This help linker optimizations to remove unused data
+	p.api.register {
+		name = "linksectiondata",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "linksectionfunction",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.register {
+		name = "androidapplibname",
+		scope = "config",
+		kind = "string"
+	}
+
+	p.api.addAllowed("system", p.ANDROID)
+	p.api.addAllowed("architecture", { "armv5", "armv7", "aarch64", "mips", "mips64", "arm" })
+	p.api.addAllowed("vectorextensions", { "NEON", "MXU" })
+	p.api.addAllowed("exceptionhandling", {"UnwindTables"})
+	p.api.addAllowed("kind", p.PACKAGING)
 
 --
 -- Decide when the full module should be loaded.

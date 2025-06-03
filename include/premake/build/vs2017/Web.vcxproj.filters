@@ -63,6 +63,12 @@
     <None Include="..\..\website\blog\2021-11-21-community-update-10.md">
       <Filter>blog</Filter>
     </None>
+    <None Include="..\..\website\blog\2024-11-09-community-update-11.md">
+      <Filter>blog</Filter>
+    </None>
+    <None Include="..\..\website\blog\2024-12-22-community-update-12.md">
+      <Filter>blog</Filter>
+    </None>
     <None Include="..\..\website\blog\authors.yml">
       <Filter>blog</Filter>
     </None>

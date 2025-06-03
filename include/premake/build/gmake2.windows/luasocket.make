@@ -44,29 +44,29 @@ ifeq ($(config),release_x86)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x86/Release/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x86/Release/luashim-lib.lib -lws2_32
 LDDEPS += bin/x86/Release/luashim-lib.lib
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -flto -shared -Wl,--out-implib="../../bin/release/luasocket.lib" -s
+ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -shared -Wl,--out-implib="../../bin/release/luasocket.lib" -flto -s
 
 else ifeq ($(config),release_x64)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x64/Release/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x64/Release/luashim-lib.lib -lws2_32
 LDDEPS += bin/x64/Release/luashim-lib.lib
-ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -flto -shared -Wl,--out-implib="../../bin/release/luasocket.lib" -s
+ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -shared -Wl,--out-implib="../../bin/release/luasocket.lib" -flto -s
 
 else ifeq ($(config),debug_x86)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x86/Debug/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 LIBS += bin/x86/Debug/luashim-lib.lib -lws2_32
@@ -77,7 +77,7 @@ else ifeq ($(config),debug_x64)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/luasocket.dll
 OBJDIR = obj/x64/Debug/luasocket
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG -DLUASOCKET_API=__declspec\(dllexport\) -D_WINSOCK_DEPRECATED_NO_WARNINGS
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 LIBS += bin/x64/Debug/luashim-lib.lib -lws2_32

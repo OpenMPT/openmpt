@@ -44,7 +44,7 @@ ifeq ($(config),release_x86)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/premake5.exe
 OBJDIR = obj/x86/Release/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x86/Release/lua-lib.lib bin/x86/Release/zip-lib.lib bin/x86/Release/zlib-lib.lib bin/x86/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -55,7 +55,7 @@ else ifeq ($(config),release_x64)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/premake5.exe
 OBJDIR = obj/x64/Release/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -flto -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/x64/Release/lua-lib.lib bin/x64/Release/zip-lib.lib bin/x64/Release/zlib-lib.lib bin/x64/Release/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -66,7 +66,7 @@ else ifeq ($(config),debug_x86)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/premake5.exe
 OBJDIR = obj/x86/Debug/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
 LIBS += bin/x86/Debug/lua-lib.lib bin/x86/Debug/zip-lib.lib bin/x86/Debug/zlib-lib.lib bin/x86/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -77,7 +77,7 @@ else ifeq ($(config),debug_x64)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/premake5.exe
 OBJDIR = obj/x64/Debug/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
 LIBS += bin/x64/Debug/lua-lib.lib bin/x64/Debug/zip-lib.lib bin/x64/Debug/zlib-lib.lib bin/x64/Debug/curl-lib.lib -lole32 -lws2_32 -ladvapi32 -lversion
@@ -121,6 +121,8 @@ GENERATED += $(OBJDIR)/os_is64bit.o
 GENERATED += $(OBJDIR)/os_isdir.o
 GENERATED += $(OBJDIR)/os_isfile.o
 GENERATED += $(OBJDIR)/os_islink.o
+GENERATED += $(OBJDIR)/os_linkdir.o
+GENERATED += $(OBJDIR)/os_linkfile.o
 GENERATED += $(OBJDIR)/os_listWindowsRegistry.o
 GENERATED += $(OBJDIR)/os_locate.o
 GENERATED += $(OBJDIR)/os_match.o
@@ -175,6 +177,8 @@ OBJECTS += $(OBJDIR)/os_is64bit.o
 OBJECTS += $(OBJDIR)/os_isdir.o
 OBJECTS += $(OBJDIR)/os_isfile.o
 OBJECTS += $(OBJDIR)/os_islink.o
+OBJECTS += $(OBJDIR)/os_linkdir.o
+OBJECTS += $(OBJDIR)/os_linkfile.o
 OBJECTS += $(OBJDIR)/os_listWindowsRegistry.o
 OBJECTS += $(OBJDIR)/os_locate.o
 OBJECTS += $(OBJDIR)/os_match.o
@@ -338,6 +342,12 @@ $(OBJDIR)/os_isfile.o: ../../src/host/os_isfile.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_islink.o: ../../src/host/os_islink.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_linkdir.o: ../../src/host/os_linkdir.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_linkfile.o: ../../src/host/os_linkfile.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_listWindowsRegistry.o: ../../src/host/os_listWindowsRegistry.c

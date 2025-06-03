@@ -4,12 +4,6 @@
     <Filter Include="modules">
       <UniqueIdentifier>{FEAC8BD4-6A8C-0A70-73A4-9546DF0271D1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="modules\android">
-      <UniqueIdentifier>{4E56C0F1-BAE1-2DB6-C3F2-B0AA2FFD89B6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="modules\android\tests">
-      <UniqueIdentifier>{B043763C-1CB0-3137-E5A3-C99451CF539F}</UniqueIdentifier>
-    </Filter>
     <Filter Include="modules\codelite">
       <UniqueIdentifier>{56255C4E-421E-7BA0-6B50-602557A85AAC}</UniqueIdentifier>
     </Filter>
@@ -49,6 +43,9 @@
     <Filter Include="modules\vstudio\tests">
       <UniqueIdentifier>{DDA65563-4913-115E-1207-A9BB7E3233C6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\vstudio\tests\android">
+      <UniqueIdentifier>{2DBFD9BB-99D7-C0E5-6284-507FCE5B557F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="modules\vstudio\tests\cs2005">
       <UniqueIdentifier>{69C9B067-5584-A013-FE3B-195EEAD5EAA3}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,9 @@
     </Filter>
     <Filter Include="modules\vstudio\tests\fs2005">
       <UniqueIdentifier>{4C43B06E-38FE-9F1A-E1B5-1865CD4FEAAA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modules\vstudio\tests\linux">
+      <UniqueIdentifier>{DCDB00FC-48E9-2EE2-D1CF-2ACD3DDCFA98}</UniqueIdentifier>
     </Filter>
     <Filter Include="modules\vstudio\tests\sln2005">
       <UniqueIdentifier>{C07C5821-2C95-3F4B-F541-CFE46119D4E4}</UniqueIdentifier>
@@ -224,6 +224,12 @@
     <ClCompile Include="..\..\src\host\os_islink.c">
       <Filter>src\host</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\host\os_linkdir.c">
+      <Filter>src\host</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\host\os_linkfile.c">
+      <Filter>src\host</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\host\os_listWindowsRegistry.c">
       <Filter>src\host</Filter>
     </ClCompile>
@@ -318,42 +324,6 @@
     <None Include="..\..\CONTRIBUTORS.txt" />
     <None Include="..\..\LICENSE.txt" />
     <None Include="..\..\mobdebug.lua" />
-    <None Include="..\..\modules\android\LICENSE.txt">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\README.md">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\_manifest.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\_preload.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\android.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\tests\_tests.lua">
-      <Filter>modules\android\tests</Filter>
-    </None>
-    <None Include="..\..\modules\android\tests\test_android_files.lua">
-      <Filter>modules\android\tests</Filter>
-    </None>
-    <None Include="..\..\modules\android\tests\test_android_project.lua">
-      <Filter>modules\android\tests</Filter>
-    </None>
-    <None Include="..\..\modules\android\vsandroid_androidproj.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\vsandroid_sln2005.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\vsandroid_vcxproj.lua">
-      <Filter>modules\android</Filter>
-    </None>
-    <None Include="..\..\modules\android\vsandroid_vstudio.lua">
-      <Filter>modules\android</Filter>
-    </None>
     <None Include="..\..\modules\codelite\README.md">
       <Filter>modules\codelite</Filter>
     </None>
@@ -591,6 +561,12 @@
     <None Include="..\..\modules\vstudio\tests\_tests.lua">
       <Filter>modules\vstudio\tests</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\android\test_android_files.lua">
+      <Filter>modules\vstudio\tests\android</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\android\test_android_project.lua">
+      <Filter>modules\vstudio\tests\android</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\cs2005\projectsettings.lua">
       <Filter>modules\vstudio\tests\cs2005</Filter>
     </None>
@@ -662,6 +638,9 @@
     </None>
     <None Include="..\..\modules\vstudio\tests\fs2005\projectsettings.lua">
       <Filter>modules\vstudio\tests\fs2005</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\linux\test_linux_files.lua">
+      <Filter>modules\vstudio\tests\linux</Filter>
     </None>
     <None Include="..\..\modules\vstudio\tests\sln2005\test_dependencies.lua">
       <Filter>modules\vstudio\tests\sln2005</Filter>
@@ -870,6 +849,9 @@
     <None Include="..\..\modules\vstudio\tests\vc2022\test_compile_settings.lua">
       <Filter>modules\vstudio\tests\vc2022</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\vc2022\test_link.lua">
+      <Filter>modules\vstudio\tests\vc2022</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\vc2022\test_output_props.lua">
       <Filter>modules\vstudio\tests\vc2022</Filter>
     </None>
@@ -940,6 +922,9 @@
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vs2015.lua">
+      <Filter>modules\vstudio</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\vs2015_androidproj.lua">
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vs2017.lua">
@@ -1139,6 +1124,9 @@
     <None Include="..\..\src\tools\dotnet.lua">
       <Filter>src\tools</Filter>
     </None>
+    <None Include="..\..\src\tools\emcc.lua">
+      <Filter>src\tools</Filter>
+    </None>
     <None Include="..\..\src\tools\gcc.lua">
       <Filter>src\tools</Filter>
     </None>
@@ -1317,6 +1305,9 @@
       <Filter>tests\tools</Filter>
     </None>
     <None Include="..\..\tests\tools\test_dotnet.lua">
+      <Filter>tests\tools</Filter>
+    </None>
+    <None Include="..\..\tests\tools\test_emcc.lua">
       <Filter>tests\tools</Filter>
     </None>
     <None Include="..\..\tests\tools\test_gcc.lua">

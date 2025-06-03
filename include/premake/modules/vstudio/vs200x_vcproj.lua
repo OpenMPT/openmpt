@@ -1539,8 +1539,12 @@
 
 
 	function m.useOfMFC(cfg)
-		if (cfg.flags.MFC) then
+		if (cfg.mfc == "On") then
 			p.w('UseOfMFC="%d"', iif(cfg.staticruntime == "On", 1, 2))
+		elseif (cfg.mfc == "Static") then
+			p.w('UseOfMFC="1"')
+		elseif (cfg.mfc == "Dynamic") then
+			p.w('UseOfMFC="2"')
 		end
 	end
 
@@ -1581,7 +1585,7 @@
 
 
 	function m.warnAsError(cfg)
-		if cfg.flags.FatalCompileWarnings and cfg.warnings ~= p.OFF then
+		if p.hasFatalCompileWarnings(cfg.fatalwarnings) and cfg.warnings ~= p.OFF then
 			p.w('WarnAsError="true"')
 		end
 	end
@@ -1610,8 +1614,10 @@
 
 
 	function m.wholeProgramOptimization(cfg)
-		if cfg.flags.LinkTimeOptimization then
+		if cfg.linktimeoptimization == "On" then
 			p.x('WholeProgramOptimization="true"')
+		elseif cfg.linktimeoptimization == "Off" then
+			p.x('WholeProgramOptimization="false"')
 		end
 	end
 

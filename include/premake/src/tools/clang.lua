@@ -44,20 +44,16 @@
 
 	clang.shared = {
 		architecture = gcc.shared.architecture,
+		fatalwarnings = {
+			All = "-Werror"
+		},
 		flags = gcc.shared.flags,
 		floatingpoint = {
 			Fast = "-ffast-math",
 		},
 		strictaliasing = gcc.shared.strictaliasing,
 		openmp = gcc.shared.openmp,
-		optimize = {
-			Off = "-O0",
-			On = "-O2",
-			Debug = "-O0",
-			Full = "-O3",
-			Size = "-Os",
-			Speed = "-O3",
-		},
+		optimize = gcc.shared.optimize,
 		pic = gcc.shared.pic,
 		vectorextensions = gcc.shared.vectorextensions,
 		isaextensions = gcc.shared.isaextensions,
@@ -66,9 +62,12 @@
 		unsignedchar = gcc.shared.unsignedchar,
 		omitframepointer = gcc.shared.omitframepointer,
 		compileas = gcc.shared.compileas,
-		sanitize = gcc.shared.sanitize,
+		sanitize = table.merge(gcc.shared.sanitize, {
+			Fuzzer = "-fsanitize=fuzzer",
+		}),
 		visibility = gcc.shared.visibility,
-		inlinesvisibility = gcc.shared.inlinesvisibility
+		inlinesvisibility = gcc.shared.inlinesvisibility,
+		linktimeoptimization = gcc.shared.linktimeoptimization
 	}
 
 	clang.cflags = table.merge(gcc.cflags, {
@@ -118,9 +117,6 @@
 --
 
 	clang.cxxflags = table.merge(gcc.cxxflags, {
-		sanitize = {
-			Fuzzer = "-fsanitize=fuzzer",
-		},
 	})
 
 	function clang.getcxxflags(cfg)
@@ -233,10 +229,13 @@
 		architecture = {
 			x86 = "-m32",
 			x86_64 = "-m64",
+			WASM32 = "-m32",
+			WASM64 = "-m64",
 		},
-		flags = {
-			LinkTimeOptimization = "-flto",
+		linkerfatalwarnings = {
+			All = "-Wl,--fatal-warnings",
 		},
+		linktimeoptimization = clang.shared.linktimeoptimization,
 		kind = {
 			SharedLib = function(cfg)
 				local r = { clang.getsharedlibarg(cfg) }
@@ -254,9 +253,9 @@
 			end,
 		},
 		linker = gcc.ldflags.linker,
-		sanitize = {
-			Address = "-fsanitize=address",
-		},
+		sanitize = table.merge(gcc.ldflags.sanitize, {
+			Fuzzer = "-fsanitize=fuzzer",
+		}),
 		system = {
 			wii = "$(MACHDEP)",
 		}
@@ -344,7 +343,7 @@
 	clang.tools = {
 		cc = "clang",
 		cxx = "clang++",
-		ar = function(cfg) return iif(cfg.flags.LinkTimeOptimization, "llvm-ar", "ar") end,
+		ar = function(cfg) return iif(cfg.linktimeoptimization == "On", "llvm-ar", "ar") end,
 		rc = "windres"
 	}
 

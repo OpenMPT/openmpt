@@ -45,7 +45,7 @@ ifeq ($(config),release)
 TARGETDIR = ../../bin/release
 TARGET = $(TARGETDIR)/premake5
 OBJDIR = obj/Release/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -DNDEBUG -DLUA_USE_MACOSX
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -DNDEBUG -DLUA_USE_MACOSX
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O3 -Wall -Wextra -fno-stack-protector
 LIBS += bin/Release/liblua-lib.a bin/Release/libzip-lib.a bin/Release/libzlib-lib.a bin/Release/libcurl-lib.a -framework CoreServices -framework Foundation -framework Security -lreadline
@@ -55,7 +55,7 @@ else ifeq ($(config),debug)
 TARGETDIR = ../../bin/debug
 TARGET = $(TARGETDIR)/premake5
 OBJDIR = obj/Debug/Premake5
-DEFINES += -DPREMAKE_COMPRESSION -DCURL_STATICLIB -DPREMAKE_CURL -D_DEBUG -DLUA_USE_MACOSX
+DEFINES += -DPREMAKE_COMPRESSION -DPREMAKE_CURL -DCURL_STATICLIB -DLUA_STATICLIB -D_DEBUG -DLUA_USE_MACOSX
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -Wall -Wextra
 LIBS += bin/Debug/liblua-lib.a bin/Debug/libzip-lib.a bin/Debug/libzlib-lib.a bin/Debug/libcurl-lib.a -framework CoreServices -framework Foundation -framework Security -lreadline
@@ -97,6 +97,8 @@ GENERATED += $(OBJDIR)/os_is64bit.o
 GENERATED += $(OBJDIR)/os_isdir.o
 GENERATED += $(OBJDIR)/os_isfile.o
 GENERATED += $(OBJDIR)/os_islink.o
+GENERATED += $(OBJDIR)/os_linkdir.o
+GENERATED += $(OBJDIR)/os_linkfile.o
 GENERATED += $(OBJDIR)/os_listWindowsRegistry.o
 GENERATED += $(OBJDIR)/os_locate.o
 GENERATED += $(OBJDIR)/os_match.o
@@ -150,6 +152,8 @@ OBJECTS += $(OBJDIR)/os_is64bit.o
 OBJECTS += $(OBJDIR)/os_isdir.o
 OBJECTS += $(OBJDIR)/os_isfile.o
 OBJECTS += $(OBJDIR)/os_islink.o
+OBJECTS += $(OBJDIR)/os_linkdir.o
+OBJECTS += $(OBJDIR)/os_linkfile.o
 OBJECTS += $(OBJDIR)/os_listWindowsRegistry.o
 OBJECTS += $(OBJDIR)/os_locate.o
 OBJECTS += $(OBJDIR)/os_match.o
@@ -312,6 +316,12 @@ $(OBJDIR)/os_isfile.o: ../../src/host/os_isfile.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_islink.o: ../../src/host/os_islink.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_linkdir.o: ../../src/host/os_linkdir.c
+	@echo "$(notdir $<)"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/os_linkfile.o: ../../src/host/os_linkfile.c
 	@echo "$(notdir $<)"
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/os_listWindowsRegistry.o: ../../src/host/os_listWindowsRegistry.c

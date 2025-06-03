@@ -2318,7 +2318,7 @@
 
 
 	function suite.XCBuildConfigurationProject_OnStaticRuntime()
-		flags { "StaticRuntime" }
+		staticruntime "On"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[
@@ -2698,7 +2698,7 @@
 	end
 
 
-	function suite.XCBuildConfigurationProject_OnFatalWarnings()
+	function suite.XCBuildConfigurationProject_OnFatalWarningsViaFlag()
 		flags { "FatalWarnings" }
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
@@ -2724,8 +2724,35 @@
 	end
 
 
+	function suite.XCBuildConfigurationProject_OnFatalWarningsViaAPI()
+		fatalwarnings { "All" }
+		linkerfatalwarnings { "All" }
+		prepare()
+		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
+		test.capture [[
+		A14350AC4595EE5E57CE36EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/Debug;
+				ONLY_ACTIVE_ARCH = NO;
+				SYMROOT = bin/Debug;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+
 	function suite.XCBuildConfigurationProject_OnFloatFast()
-		flags { "FloatFast" }
+		floatingpoint "Fast"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[
@@ -2858,7 +2885,7 @@
 
 
 	function suite.XCBuildConfigurationProject_OnNoFramePointer()
-		flags { "NoFramePointer" }
+		omitframepointer "On"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[
@@ -3688,7 +3715,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++1z";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3740,7 +3767,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3974,7 +4001,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++1z";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -4026,7 +4053,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++2a";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = 0;

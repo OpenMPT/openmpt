@@ -4,6 +4,7 @@
   <VirtualDirectory Name="lua-lib">
     <File Name="../../contrib/lua/src/lapi.c"/>
     <File Name="../../contrib/lua/src/lapi.h"/>
+    <File Name="../../contrib/lua/src/lauxlib.c"/>
     <File Name="../../contrib/lua/src/lauxlib.h"/>
     <File Name="../../contrib/lua/src/lbaselib.c"/>
     <File Name="../../contrib/lua/src/lbitlib.c"/>
@@ -78,8 +79,9 @@
       <Compiler Options="-m32;-flto;-O3;-w;-fno-stack-protector" C_Options="-m32;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-m32;-flto" Required="yes">
@@ -122,8 +124,9 @@
       <Compiler Options="-m64;-flto;-O3;-w;-fno-stack-protector" C_Options="-m64;-flto;-O3;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-m64;-flto" Required="yes">
@@ -166,8 +169,9 @@
       <Compiler Options="-m32;-g;-w" C_Options="-m32;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
       <Linker Options="-m32" Required="yes">
@@ -210,8 +214,9 @@
       <Compiler Options="-m64;-g;-w" C_Options="-m64;-g;-w" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
         <IncludePath Value="../../contrib/lua/src"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
       <Linker Options="-m64" Required="yes">

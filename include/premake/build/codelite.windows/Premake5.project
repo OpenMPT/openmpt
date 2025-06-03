@@ -8,22 +8,6 @@
     <File Name="../../LICENSE.txt"/>
     <File Name="../../mobdebug.lua"/>
     <VirtualDirectory Name="modules">
-      <VirtualDirectory Name="android">
-        <File Name="../../modules/android/LICENSE.txt"/>
-        <File Name="../../modules/android/README.md"/>
-        <File Name="../../modules/android/_manifest.lua"/>
-        <File Name="../../modules/android/_preload.lua"/>
-        <File Name="../../modules/android/android.lua"/>
-        <VirtualDirectory Name="tests">
-          <File Name="../../modules/android/tests/_tests.lua"/>
-          <File Name="../../modules/android/tests/test_android_files.lua"/>
-          <File Name="../../modules/android/tests/test_android_project.lua"/>
-        </VirtualDirectory>
-        <File Name="../../modules/android/vsandroid_androidproj.lua"/>
-        <File Name="../../modules/android/vsandroid_sln2005.lua"/>
-        <File Name="../../modules/android/vsandroid_vcxproj.lua"/>
-        <File Name="../../modules/android/vsandroid_vstudio.lua"/>
-      </VirtualDirectory>
       <VirtualDirectory Name="codelite">
         <File Name="../../modules/codelite/README.md"/>
         <File Name="../../modules/codelite/_manifest.lua"/>
@@ -127,6 +111,10 @@
         <File Name="../../modules/vstudio/_preload.lua"/>
         <VirtualDirectory Name="tests">
           <File Name="../../modules/vstudio/tests/_tests.lua"/>
+          <VirtualDirectory Name="android">
+            <File Name="../../modules/vstudio/tests/android/test_android_files.lua"/>
+            <File Name="../../modules/vstudio/tests/android/test_android_project.lua"/>
+          </VirtualDirectory>
           <VirtualDirectory Name="cs2005">
             <File Name="../../modules/vstudio/tests/cs2005/projectsettings.lua"/>
             <File Name="../../modules/vstudio/tests/cs2005/test_additional_props.lua"/>
@@ -156,6 +144,9 @@
           </VirtualDirectory>
           <VirtualDirectory Name="fs2005">
             <File Name="../../modules/vstudio/tests/fs2005/projectsettings.lua"/>
+          </VirtualDirectory>
+          <VirtualDirectory Name="linux">
+            <File Name="../../modules/vstudio/tests/linux/test_linux_files.lua"/>
           </VirtualDirectory>
           <VirtualDirectory Name="sln2005">
             <File Name="../../modules/vstudio/tests/sln2005/test_dependencies.lua"/>
@@ -237,6 +228,7 @@
           </VirtualDirectory>
           <VirtualDirectory Name="vc2022">
             <File Name="../../modules/vstudio/tests/vc2022/test_compile_settings.lua"/>
+            <File Name="../../modules/vstudio/tests/vc2022/test_link.lua"/>
             <File Name="../../modules/vstudio/tests/vc2022/test_output_props.lua"/>
             <File Name="../../modules/vstudio/tests/vc2022/test_toolset_settings.lua"/>
           </VirtualDirectory>
@@ -263,6 +255,7 @@
         <File Name="../../modules/vstudio/vs2013.lua"/>
         <File Name="../../modules/vstudio/vs2013_vcxitems.lua"/>
         <File Name="../../modules/vstudio/vs2015.lua"/>
+        <File Name="../../modules/vstudio/vs2015_androidproj.lua"/>
         <File Name="../../modules/vstudio/vs2017.lua"/>
         <File Name="../../modules/vstudio/vs2019.lua"/>
         <File Name="../../modules/vstudio/vs2022.lua"/>
@@ -370,6 +363,8 @@
         <File Name="../../src/host/os_isdir.c"/>
         <File Name="../../src/host/os_isfile.c"/>
         <File Name="../../src/host/os_islink.c"/>
+        <File Name="../../src/host/os_linkdir.c"/>
+        <File Name="../../src/host/os_linkfile.c"/>
         <File Name="../../src/host/os_listWindowsRegistry.c"/>
         <File Name="../../src/host/os_locate.c"/>
         <File Name="../../src/host/os_match.c"/>
@@ -408,6 +403,7 @@
         <File Name="../../src/tools/clang.lua"/>
         <File Name="../../src/tools/cosmocc.lua"/>
         <File Name="../../src/tools/dotnet.lua"/>
+        <File Name="../../src/tools/emcc.lua"/>
         <File Name="../../src/tools/gcc.lua"/>
         <File Name="../../src/tools/mingw.lua"/>
         <File Name="../../src/tools/msc.lua"/>
@@ -484,6 +480,7 @@
       <VirtualDirectory Name="tools">
         <File Name="../../tests/tools/test_clang.lua"/>
         <File Name="../../tests/tools/test_dotnet.lua"/>
+        <File Name="../../tests/tools/test_emcc.lua"/>
         <File Name="../../tests/tools/test_gcc.lua"/>
         <File Name="../../tests/tools/test_msc.lua"/>
         <File Name="../../tests/tools/test_snc.lua"/>
@@ -537,13 +534,14 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-m32;-flto;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
       </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-DNDEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -591,13 +589,14 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="-m64;-flto;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
       </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-DNDEBUG;" Required="yes">
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-DNDEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -645,13 +644,14 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
       <Linker Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
       </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-D_DEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>
@@ -699,13 +699,14 @@
         <IncludePath Value="../../contrib/libzip"/>
         <IncludePath Value="../../contrib/curl/include"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
       <Linker Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
       </Linker>
-      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DCURL_STATICLIB;-DPREMAKE_CURL;-D_DEBUG;" Required="yes">
+      <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-D_DEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <IncludePath Value="../../contrib/zlib"/>

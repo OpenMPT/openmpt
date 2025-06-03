@@ -385,6 +385,7 @@
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="BUILDING_LIBCURL"/>
         <Preprocessor Value="CURL_STATICLIB"/>
@@ -435,6 +436,7 @@
         <IncludePath Value="../../contrib/zlib"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="BUILDING_LIBCURL"/>
         <Preprocessor Value="CURL_STATICLIB"/>

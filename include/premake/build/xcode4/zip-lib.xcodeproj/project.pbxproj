@@ -147,6 +147,7 @@
 		740C26348ED894E692A92C74 /* zip_get_archive_comment.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_get_archive_comment.c; path = ../../contrib/libzip/zip_get_archive_comment.c; sourceTree = "<group>"; };
 		761B79399E5631EB85F1BF79 /* zipconf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = zipconf.h; path = ../../contrib/libzip/include/zipconf.h; sourceTree = "<group>"; };
 		76E0ABE03A4C6D9278F01220 /* zip_error_get.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_error_get.c; path = ../../contrib/libzip/zip_error_get.c; sourceTree = "<group>"; };
+		7726FF6677D9FC58EBBBCDA6 /* libzip-lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libzip-lib.a"; path = "libzip-lib.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		79B9D222BDCDA354B19F2862 /* zip_unchange_archive.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_unchange_archive.c; path = ../../contrib/libzip/zip_unchange_archive.c; sourceTree = "<group>"; };
 		7B1D201A8D46FCCCC137E65A /* zip_source_function.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_source_function.c; path = ../../contrib/libzip/zip_source_function.c; sourceTree = "<group>"; };
 		7D1B6D5E9EE71A90DB9C439E /* zip_file_add.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_file_add.c; path = ../../contrib/libzip/zip_file_add.c; sourceTree = "<group>"; };
@@ -155,7 +156,6 @@
 		85FEB9CCA0CB287EA49BC00C /* zip_set_archive_comment.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_set_archive_comment.c; path = ../../contrib/libzip/zip_set_archive_comment.c; sourceTree = "<group>"; };
 		86CFFA6C2E45961ED70AA0AC /* zip_get_encryption_implementation.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_get_encryption_implementation.c; path = ../../contrib/libzip/zip_get_encryption_implementation.c; sourceTree = "<group>"; };
 		8900E3D0B13B9C8298D72A10 /* zip_err_str.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_err_str.c; path = ../../contrib/libzip/zip_err_str.c; sourceTree = "<group>"; };
-		8A4D95852D3BBC37BC619BC5 /* zip-lib.lib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "zip-lib.lib"; path = "zip-lib.lib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AF96E72591CC224E02B14B2 /* zip_file_strerror.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_file_strerror.c; path = ../../contrib/libzip/zip_file_strerror.c; sourceTree = "<group>"; };
 		8BA9981EBDA2E2D037821E5E /* zip_name_locate.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_name_locate.c; path = ../../contrib/libzip/zip_name_locate.c; sourceTree = "<group>"; };
 		8C665488D07A25BAC44BAAC8 /* zip_file_set_comment.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = zip_file_set_comment.c; path = ../../contrib/libzip/zip_file_set_comment.c; sourceTree = "<group>"; };
@@ -195,7 +195,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		9ACF90753F222E27515A76B5 /* Frameworks */ = {
+		1CE531D64B8B85C8A4CCE016 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -205,7 +205,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		62C0D2216631A453E79E4861 /* Embed Libraries */ = {
+		C0C44FC2324F6834E1508E02 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -231,7 +231,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8A4D95852D3BBC37BC619BC5 /* zip-lib.lib */,
+				7726FF6677D9FC58EBBBCDA6 /* libzip-lib.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -340,14 +340,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E74650CB58D1693D07D28F0B /* zip-lib */ = {
+		05B9828CA8A7A93E37CD88CC /* zip-lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 890AD8D42D5D76863F95BF14 /* Build configuration list for PBXNativeTarget "zip-lib" */;
+			buildConfigurationList = 0B207A3539C6CE2793082875 /* Build configuration list for PBXNativeTarget "zip-lib" */;
 			buildPhases = (
-				0AB71115AF09AEC7C141F755 /* Resources */,
-				74642A6C18B6C81E2AEF10AC /* Sources */,
-				9ACF90753F222E27515A76B5 /* Frameworks */,
-				62C0D2216631A453E79E4861 /* Embed Libraries */,
+				8CCCB276BB73066814B460B6 /* Resources */,
+				F679CBCD25201FBF7E617A0D /* Sources */,
+				1CE531D64B8B85C8A4CCE016 /* Frameworks */,
+				C0C44FC2324F6834E1508E02 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -355,7 +355,7 @@
 			);
 			name = "zip-lib";
 			productName = "zip-lib";
-			productReference = 8A4D95852D3BBC37BC619BC5 /* zip-lib.lib */;
+			productReference = 7726FF6677D9FC58EBBBCDA6 /* libzip-lib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -370,13 +370,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E74650CB58D1693D07D28F0B /* zip-lib.lib */,
+				05B9828CA8A7A93E37CD88CC /* libzip-lib.a */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		0AB71115AF09AEC7C141F755 /* Resources */ = {
+		8CCCB276BB73066814B460B6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -386,7 +386,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		74642A6C18B6C81E2AEF10AC /* Sources */ = {
+		F679CBCD25201FBF7E617A0D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -488,25 +488,26 @@
 		3C25DEE0E0787C92F2B0C520 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					NDEBUG,
 					N_FSEEKO,
 					HAVE_SSIZE_T_LIBZIP,
 					HAVE_CONFIG_H,
-					_WINDOWS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Release/zip-lib";
+				OBJROOT = "obj/Release/zip-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				SYMROOT = bin/x64/Release;
+				SYMROOT = bin/Release;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,
 				);
@@ -517,6 +518,7 @@
 		6308A32606542C582124F966 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -524,20 +526,20 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
-					CURL_STATICLIB,
 					PREMAKE_CURL,
+					CURL_STATICLIB,
+					LUA_STATICLIB,
 					_DEBUG,
 					N_FSEEKO,
 					HAVE_SSIZE_T_LIBZIP,
 					HAVE_CONFIG_H,
-					_WINDOWS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Debug/zip-lib";
+				OBJROOT = "obj/Debug/zip-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				SYMROOT = bin/x64/Debug;
+				SYMROOT = bin/Debug;
 				USER_HEADER_SEARCH_PATHS = (
 					../../contrib/libzip/include,
 				);
@@ -545,53 +547,47 @@
 			};
 			name = Debug;
 		};
-		9A86CB9AC2C1844CAA5D11DA /* Debug */ = {
+		6B172C35C6587FA799B2CA75 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
+				CONFIGURATION_BUILD_DIR = bin/Release;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "zip-lib";
-			};
-			name = Debug;
-		};
-		9E2B3514BFF6E246FCAC0B54 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Release;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
 				GCC_DYNAMIC_NO_PIC = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = "zip-lib";
 			};
 			name = Release;
 		};
+		BC18867BEBAA556DC6B794BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "zip-lib";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "zip-lib" */ = {
+		0B207A3539C6CE2793082875 /* Build configuration list for PBXNativeTarget "libzip-lib.a" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3C25DEE0E0787C92F2B0C520 /* Release */,
-				3C25DEE0E0787C92F2B0C520 /* Release */,
-				6308A32606542C582124F966 /* Debug */,
-				6308A32606542C582124F966 /* Debug */,
+				6B172C35C6587FA799B2CA75 /* Release */,
+				BC18867BEBAA556DC6B794BB /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		890AD8D42D5D76863F95BF14 /* Build configuration list for PBXNativeTarget "zip-lib.lib" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "zip-lib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9E2B3514BFF6E246FCAC0B54 /* Release */,
-				9E2B3514BFF6E246FCAC0B54 /* Release */,
-				9A86CB9AC2C1844CAA5D11DA /* Debug */,
-				9A86CB9AC2C1844CAA5D11DA /* Debug */,
+				3C25DEE0E0787C92F2B0C520 /* Release */,
+				6308A32606542C582124F966 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

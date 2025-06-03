@@ -11,12 +11,12 @@ flags { "flag_list" }
 | Flag                  | Description                                                         | Notes |
 |-----------------------|---------------------------------------------------------------------|----------------|
 | ExcludeFromBuild      | Exclude a source code file from the build, for the current configuration. |
-| FatalCompileWarnings  | Treat compiler warnings as errors.                                  |
-| FatalLinkWarnings     | Treat linker warnings as errors.                                    |
-| FatalWarnings         | Treat all warnings as errors; equivalent to FatalCompileWarnings, FatalLinkWarnings |
-| LinkTimeOptimization  | Enable link-time (i.e. whole program) optimizations.                |
+| FatalCompileWarnings  | Treat compiler warnings as errors. Deprecated in Premake 5.0.0-beta4. Use `fatalwarnings` API instead. |
+| FatalLinkWarnings     | Treat linker warnings as errors.  Deprecated in Premake 5.0.0-beta4. Use `fatalwarnings` API instead. |
+| FatalWarnings         | Treat all warnings as errors; equivalent to FatalCompileWarnings, FatalLinkWarnings.  Deprecated in Premake 5.0.0-beta4. Use `fatalwarnings` API instead. |
+| LinkTimeOptimization  | Enable link-time (i.e. whole program) optimizations. Deprecated in Premake 5.0.0-beta4. Use `linktimeoptimization` API instead. |
 | Maps                  | Enable Generate Map File for Visual Studio                          |
-| MFC                   | Enable support for Microsoft Foundation Classes.                    |
+| MFC                   | Enable support for Microsoft Foundation Classes. Deprecated in Premake 5.0.0-beta4. Use `mfc` API instead. |
 | MultiProcessorCompile | Enable Visual Studio to use multiple compiler processes when building. |
 | No64BitChecks         | Disable 64-bit portability warnings.                                |
 | NoBufferSecurityCheck | Turn off stack protection checks.                                   |
@@ -32,33 +32,10 @@ flags { "flag_list" }
 | OmitDefaultLibrary    | Omit the specification of a runtime library in object files.        |
 | RelativeLinks         | Forces the linker to use relative paths to libraries instead of absolute paths. |
 | ShadowedVariables     | Warn when a variable, type declaration, or function is shadowed.    |
-| StaticRuntime         | Perform a static link against the standard runtime libraries.       | Deprecated - use staticruntime "On" instead. |
 | UndefinedIdentifiers | Warn if an undefined identifier is evaluated in an #if directive.   |
-| WinMain               | Use `WinMain()` as entry point for Windows applications, rather than the default `main()`. |
 | WPF                   | Mark the project as using Windows Presentation Framework, rather than WinForms. |
-| C++11                 | Pass the c++11 flag to the gcc/clang compilers (msvc ignores this currently) |
-| C++14                 | Pass the c++14 flag to the gcc/clang compilers (msvc ignores this currently) |
-| C90                   | Pass the c90 flag to the gcc/clang compilers (msvc ignores this currently) |
-| C99                   | Pass the c99 flag to the gcc/clang compilers (msvc ignores this currently) |
-| Component             | Needs documentation                                                        |
 | DebugEnvsDontMerge    | Needs documentation                                                        |
 | DebugEnvsInherit      | Needs documentation                                                        |
-| EnableSSE             | Needs documentation                                                        |
-| EnableSSE2            | Needs documentation                                                        |
-| ExtraWarnings         | Needs documentation                                                        |
-| FloatFast             | Needs documentation                                                        |
-| FloatStrict           | Needs documentation                                                        |
-| Managed               | Needs documentation                                                        |
-| NoNativeWChar         | Needs documentation                                                        |
-| NoEditAndContinue     | Needs documentation                                                        |
-| NoWarnings            | Needs documentation                                                        |
-| Optimize              | Needs documentation                                                        |
-| OptimizeSize          | Needs documentation                                                        |
-| OptimizeSpeed         | Needs documentation                                                        |
-| ReleaseRuntime        | Needs documentation                                                        |
-| Symbols               | Needs documentation                                                        |
-| C11                   | Needs documentation                                                        |
-| Thumb                 | Needs documentation                                                        |
 
 ### Applies To ###
 
@@ -66,7 +43,7 @@ Project and file configurations, though not all flags are yet supported for file
 
 ### Availability ###
 
-Unless otherwise noted, Premake 5.0 or later.
+Flags are currently available in Premake 5.0 beta3, but are considered deprecated. Future releases will be deprecating and removing all flags in favor of dedicated APIs.
 
 ### Examples ###
 
@@ -78,3 +55,10 @@ flags { "LinkTimeOptimization" }
 
 [1]: https://docs.microsoft.com/en-us/cpp/build/reference/gm-enable-minimal-rebuild?view=vs-2017
 [2]: http://msdn.microsoft.com/en-us/library/8wtf2dfz.aspx
+
+### See Also ###
+
+* [fatalwarnings](fatalwarnings.md)
+* [linktimeoptimization](linktimeoptimization.md)
+* [mfc](mfc.md)
+

@@ -61,9 +61,10 @@
 			["C"] = "/TC",
 			["C++"] = "/TP",
 		},
+		fatalwarnings = {
+			All = "/WX"
+		},
 		flags = {
-			FatalCompileWarnings = "/WX",
-			LinkTimeOptimization = "/GL",
 			MultiProcessorCompile = "/MP",
 			NoMinimalRebuild = "/Gm-",
 			OmitDefaultLibrary = "/Zl"
@@ -88,6 +89,9 @@
 		},
 		intrinsics = {
 			On = "/Oi",
+		},
+		linktimeoptimization = {
+			On = "/GL",
 		},
 		optimize = {
 			Off = "/Od",
@@ -330,9 +334,10 @@
 --
 
 	msc.linkerFlags = {
+		linkerfatalwarnings = {
+			All = "/WX",
+		},
 		flags = {
-			FatalLinkWarnings = "/WX",
-			LinkTimeOptimization = "/LTCG",
 			NoIncrementalLink = "/INCREMENTAL:NO",
 			NoManifest = "/MANIFEST:NO",
 			OmitDefaultLibrary = "/NODEFAULTLIB",
@@ -341,14 +346,17 @@
 			SharedLib = "/DLL",
 			WindowedApp = "/SUBSYSTEM:WINDOWS"
 		},
+		linktimeoptimization = {
+			On = "/LTCG"
+		},
 		symbols = {
 			On = "/DEBUG"
 		}
 	}
 
 	msc.librarianFlags = {
-		flags = {
-			FatalLinkWarnings = "/WX",
+		linkerfatalwarnings = {
+			All = "/WX",
 		}
 	}
 
@@ -480,7 +488,7 @@
 			table.insert(result, '/wd"' .. disable .. '"')
 		end
 
-		for _, fatal in ipairs(cfg.fatalwarnings) do
+		for _, fatal in ipairs(p.filterFatalWarnings(cfg.fatalwarnings)) do
 			table.insert(result, '/we"' .. fatal .. '"')
 		end
 

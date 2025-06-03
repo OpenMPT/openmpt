@@ -73,13 +73,14 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
         <Preprocessor Value="_WINSOCK_DEPRECATED_NO_WARNINGS"/>
       </Compiler>
-      <Linker Options="-m32;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x86/Release/luashim-lib.lib;-lws2_32" Required="yes">
+      <Linker Options="-m32;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;-flto;bin/x86/Release/luashim-lib.lib;-lws2_32" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x86/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -120,13 +121,14 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
         <Preprocessor Value="_WINSOCK_DEPRECATED_NO_WARNINGS"/>
       </Compiler>
-      <Linker Options="-m64;-flto;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;bin/x64/Release/luashim-lib.lib;-lws2_32" Required="yes">
+      <Linker Options="-m64;-shared;-Wl,--out-implib=&quot;../../bin/release/luasocket.lib&quot;;-flto;bin/x64/Release/luashim-lib.lib;-lws2_32" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../../bin/release/luasocket.dll" IntermediateDirectory="obj/x64/Release/luasocket" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -167,8 +169,9 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
         <Preprocessor Value="_WINSOCK_DEPRECATED_NO_WARNINGS"/>
@@ -214,8 +217,9 @@
         <IncludePath Value="../../contrib/lua/src"/>
         <IncludePath Value="../../contrib/luashim"/>
         <Preprocessor Value="PREMAKE_COMPRESSION"/>
-        <Preprocessor Value="CURL_STATICLIB"/>
         <Preprocessor Value="PREMAKE_CURL"/>
+        <Preprocessor Value="CURL_STATICLIB"/>
+        <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
         <Preprocessor Value="LUASOCKET_API=__declspec(dllexport)"/>
         <Preprocessor Value="_WINSOCK_DEPRECATED_NO_WARNINGS"/>

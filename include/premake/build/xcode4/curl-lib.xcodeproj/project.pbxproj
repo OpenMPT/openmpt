@@ -231,7 +231,6 @@
 		2936B8C8404953FA30654F08 /* hostip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = hostip.h; path = ../../contrib/curl/lib/hostip.h; sourceTree = "<group>"; };
 		294D171C2CBDE94EAE2A8D5C /* mqtt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = mqtt.c; path = ../../contrib/curl/lib/mqtt.c; sourceTree = "<group>"; };
 		2A73080D509937BFB7A02E4D /* cram.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = cram.c; path = ../../contrib/curl/lib/vauth/cram.c; sourceTree = "<group>"; };
-		2B7ACA882C2DC77AA00F98C8 /* curl-lib.lib */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "curl-lib.lib"; path = "curl-lib.lib"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CFE754ECFEC9C005F127B8E /* if2ip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = if2ip.h; path = ../../contrib/curl/lib/if2ip.h; sourceTree = "<group>"; };
 		2EC5113656FFC9E83E9B5776 /* curl_hmac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = curl_hmac.h; path = ../../contrib/curl/lib/curl_hmac.h; sourceTree = "<group>"; };
 		2F924678330318AAB46FBCB8 /* krb5.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = krb5.c; path = ../../contrib/curl/lib/krb5.c; sourceTree = "<group>"; };
@@ -380,6 +379,7 @@
 		99302120F4717492C7CBBF60 /* schannel.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = schannel.c; path = ../../contrib/curl/lib/vtls/schannel.c; sourceTree = "<group>"; };
 		9A69CBD2CC63168446425212 /* curl_get_line.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = curl_get_line.h; path = ../../contrib/curl/lib/curl_get_line.h; sourceTree = "<group>"; };
 		9AFED1665E6A93189D0E37A6 /* http_chunks.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = http_chunks.c; path = ../../contrib/curl/lib/http_chunks.c; sourceTree = "<group>"; };
+		9B598289B26C1DBBA28818C9 /* libcurl-lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libcurl-lib.a"; path = "libcurl-lib.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BBAEBAC9F2BBDDE209861EC /* rtsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = rtsp.h; path = ../../contrib/curl/lib/rtsp.h; sourceTree = "<group>"; };
 		9BC518BCE435FCEE28D4CEFC /* curl_des.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = curl_des.h; path = ../../contrib/curl/lib/curl_des.h; sourceTree = "<group>"; };
 		9DEB90E6A15C631822C90726 /* mqtt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mqtt.h; path = ../../contrib/curl/lib/mqtt.h; sourceTree = "<group>"; };
@@ -533,7 +533,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		4A1CBBF878C30FEAD2046A38 /* Frameworks */ = {
+		79859B797CF66DABFE6311B9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -543,7 +543,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		1A06EA648B9202D63A9328A4 /* Embed Libraries */ = {
+		C725AE256A13D4D7F939B465 /* Embed Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -885,7 +885,7 @@
 		A6C936B49B3FADE6EA134CF4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2B7ACA882C2DC77AA00F98C8 /* curl-lib.lib */,
+				9B598289B26C1DBBA28818C9 /* libcurl-lib.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -980,14 +980,14 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		874F716E2A3D9820B96377AE /* curl-lib */ = {
+		D846AD4FD8F9AA414CDB7B8F /* curl-lib */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3858045766FE5849C03FB297 /* Build configuration list for PBXNativeTarget "curl-lib" */;
+			buildConfigurationList = 67C0E3D86B31B60AEC9E5A18 /* Build configuration list for PBXNativeTarget "curl-lib" */;
 			buildPhases = (
-				BA043C98E8AA908A41EBEAD8 /* Resources */,
-				23B155EF5257A9E1AB99042F /* Sources */,
-				4A1CBBF878C30FEAD2046A38 /* Frameworks */,
-				1A06EA648B9202D63A9328A4 /* Embed Libraries */,
+				E96D1C19ECDDEE4B6E4A9259 /* Resources */,
+				531A3570568B07A2D7F7ABB0 /* Sources */,
+				79859B797CF66DABFE6311B9 /* Frameworks */,
+				C725AE256A13D4D7F939B465 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -995,7 +995,7 @@
 			);
 			name = "curl-lib";
 			productName = "curl-lib";
-			productReference = 2B7ACA882C2DC77AA00F98C8 /* curl-lib.lib */;
+			productReference = 9B598289B26C1DBBA28818C9 /* libcurl-lib.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -1010,13 +1010,13 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				874F716E2A3D9820B96377AE /* curl-lib.lib */,
+				D846AD4FD8F9AA414CDB7B8F /* libcurl-lib.a */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BA043C98E8AA908A41EBEAD8 /* Resources */ = {
+		E96D1C19ECDDEE4B6E4A9259 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1026,7 +1026,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		23B155EF5257A9E1AB99042F /* Sources */ = {
+		531A3570568B07A2D7F7ABB0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1209,35 +1209,10 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		1D34C9D778761D494BD06817 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Release;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "curl-lib";
-			};
-			name = Release;
-		};
-		398E539D6920228F442D61DD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CONFIGURATION_BUILD_DIR = bin/x64/Debug;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				EXECUTABLE_EXTENSION = lib;
-				GCC_DYNAMIC_NO_PIC = NO;
-				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = "curl-lib";
-			};
-			name = Debug;
-		};
 		3AFF11E947BBC15BBCA63029 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -1246,24 +1221,24 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
 					PREMAKE_CURL,
+					LUA_STATICLIB,
 					_DEBUG,
 					BUILDING_LIBCURL,
 					CURL_STATICLIB,
 					HTTP_ONLY,
 					USE_ZLIB,
-					USE_SCHANNEL,
-					USE_WINDOWS_SSPI,
+					USE_MBEDTLS,
+					_GNU_SOURCE,
+					CURL_HIDDEN_SYMBOLS,
+					"CURL_CA_BUNDLE=\\\"/etc/ssl/certs/ca-certificates.crt\\\"",
+					"CURL_CA_PATH=\\\"/etc/ssl/certs\\\"",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Debug/curl-lib";
+				OBJROOT = "obj/Debug/curl-lib";
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"-lcrypt32",
-					"-lbcrypt",
-				);
-				SYMROOT = bin/x64/Debug;
+				SYMROOT = bin/Debug;
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/include,
 					"$(inherited)",
@@ -1277,33 +1252,58 @@
 			};
 			name = Debug;
 		};
+		8D217C9EAEED29D0EBA252DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "curl-lib";
+			};
+			name = Debug;
+		};
+		A236371865A1F8CAA4459D58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = bin/Release;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "curl-lib";
+			};
+			name = Release;
+		};
 		EB730A631A195E55735AB8A3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					PREMAKE_COMPRESSION,
 					PREMAKE_CURL,
+					LUA_STATICLIB,
 					NDEBUG,
 					BUILDING_LIBCURL,
 					CURL_STATICLIB,
 					HTTP_ONLY,
 					USE_ZLIB,
-					USE_SCHANNEL,
-					USE_WINDOWS_SSPI,
+					USE_MBEDTLS,
+					_GNU_SOURCE,
+					CURL_HIDDEN_SYMBOLS,
+					"CURL_CA_BUNDLE=\\\"/etc/ssl/certs/ca-certificates.crt\\\"",
+					"CURL_CA_PATH=\\\"/etc/ssl/certs\\\"",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "obj/x64/Release/curl-lib";
+				OBJROOT = "obj/Release/curl-lib";
 				ONLY_ACTIVE_ARCH = NO;
-				OTHER_LDFLAGS = (
-					"-lcrypt32",
-					"-lbcrypt",
-				);
-				SYMROOT = bin/x64/Release;
+				SYMROOT = bin/Release;
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					../../contrib/curl/include,
 					"$(inherited)",
@@ -1324,20 +1324,16 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EB730A631A195E55735AB8A3 /* Release */,
-				EB730A631A195E55735AB8A3 /* Release */,
-				3AFF11E947BBC15BBCA63029 /* Debug */,
 				3AFF11E947BBC15BBCA63029 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3858045766FE5849C03FB297 /* Build configuration list for PBXNativeTarget "curl-lib.lib" */ = {
+		67C0E3D86B31B60AEC9E5A18 /* Build configuration list for PBXNativeTarget "libcurl-lib.a" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1D34C9D778761D494BD06817 /* Release */,
-				1D34C9D778761D494BD06817 /* Release */,
-				398E539D6920228F442D61DD /* Debug */,
-				398E539D6920228F442D61DD /* Debug */,
+				A236371865A1F8CAA4459D58 /* Release */,
+				8D217C9EAEED29D0EBA252DE /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

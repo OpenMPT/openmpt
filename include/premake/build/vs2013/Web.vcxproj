@@ -94,6 +94,8 @@
     <None Include="..\..\website\blog\2021-04-20-community-update-8.md" />
     <None Include="..\..\website\blog\2021-08-01-community-update-9.md" />
     <None Include="..\..\website\blog\2021-11-21-community-update-10.md" />
+    <None Include="..\..\website\blog\2024-11-09-community-update-11.md" />
+    <None Include="..\..\website\blog\2024-12-22-community-update-12.md" />
     <None Include="..\..\website\blog\authors.yml" />
     <None Include="..\..\website\community\modules.md" />
     <None Include="..\..\website\community\showcase.md" />

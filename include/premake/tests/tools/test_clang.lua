@@ -110,25 +110,90 @@
 -- Check handling of linker flag.
 --
 
-function suite.ldflags_linker_lld()
-	linker "LLD"
-	prepare()
-	test.contains("-fuse-ld=lld", clang.getldflags(cfg))
-end
+	function suite.ldflags_linker_lld()
+		linker "LLD"
+		prepare()
+		test.contains("-fuse-ld=lld", clang.getldflags(cfg))
+	end
 
 --
 -- Check the translation of CXXFLAGS.
 --
 
-function suite.onSanitizeAddress()
-	sanitize { "Address" }
-	prepare()
-	test.contains({ "-fsanitize=address" }, clang.getcxxflags(cfg))
-	test.contains({ "-fsanitize=address" }, clang.getldflags(cfg))
-end
+	function suite.onSanitizeAddress()
+		sanitize { "Address" }
+		prepare()
+		test.contains({ "-fsanitize=address" }, clang.getcxxflags(cfg))
+		test.contains({ "-fsanitize=address" }, clang.getcflags(cfg))
+		test.contains({ "-fsanitize=address" }, clang.getldflags(cfg))
+	end
 
-function suite.cxxflags_onSanitizeFuzzer()
-	sanitize { "Fuzzer" }
-	prepare()
-	test.contains({ "-fsanitize=fuzzer" }, clang.getcxxflags(cfg))
-end
+	function suite.cxxflags_onSanitizeFuzzer()
+		sanitize { "Fuzzer" }
+		prepare()
+		test.contains({ "-fsanitize=fuzzer" }, clang.getcxxflags(cfg))
+		test.contains({ "-fsanitize=fuzzer" }, clang.getcflags(cfg))
+		test.contains({ "-fsanitize=fuzzer" }, clang.getldflags(cfg))
+	end
+
+	function suite.cxxflags_onSanitizeThread()
+		sanitize { "Thread" }
+		prepare()
+		test.contains({ "-fsanitize=thread" }, clang.getcxxflags(cfg))
+		test.contains({ "-fsanitize=thread" }, clang.getcflags(cfg))
+		test.contains({ "-fsanitize=thread" }, clang.getldflags(cfg))
+	end
+
+	-- UBSan
+	function suite.cxxflags_onSanitizeUndefined()
+		sanitize { "UndefinedBehavior" }
+		prepare()
+		test.contains({ "-fsanitize=undefined" }, clang.getcxxflags(cfg))
+		test.contains({ "-fsanitize=undefined" }, clang.getcflags(cfg))
+		test.contains({ "-fsanitize=undefined" }, clang.getldflags(cfg))
+	end
+
+--
+-- Test the optimization flags.
+--
+	function suite.onOptimizeDebug()
+		optimize "Debug"
+		prepare()
+		test.contains("-Og", clang.getcflags(cfg))
+		test.contains("-Og", clang.getcxxflags(cfg))
+	end
+
+	function suite.onOptimizeSize()
+		optimize "Size"
+		prepare()
+		test.contains("-Os", clang.getcflags(cfg))
+		test.contains("-Os", clang.getcxxflags(cfg))
+	end
+
+	function suite.onOptimizeSpeed()
+		optimize "Speed"
+		prepare()
+		test.contains("-O3", clang.getcflags(cfg))
+		test.contains("-O3", clang.getcxxflags(cfg))
+	end
+
+	function suite.onOptimizeOff()
+		optimize "Off"
+		prepare()
+		test.contains("-O0", clang.getcflags(cfg))
+		test.contains("-O0", clang.getcxxflags(cfg))
+	end
+
+	function suite.onOptimizeOn()
+		optimize "On"
+		prepare()
+		test.contains("-O2", clang.getcflags(cfg))
+		test.contains("-O2", clang.getcxxflags(cfg))
+	end
+
+	function suite.onOptimizeFull()
+		optimize "Full"
+		prepare()
+		test.contains("-O3", clang.getcflags(cfg))
+		test.contains("-O3", clang.getcxxflags(cfg))
+	end
