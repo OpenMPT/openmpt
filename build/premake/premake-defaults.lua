@@ -132,7 +132,7 @@
 	filter { "action:vs*", "action:vs2017" }
 		defines { "MPT_CHECK_CXX_IGNORE_PREPROCESSOR" }
 	filter { "action:vs*", "not action:vs2017" }
-		preprocessor "Standard"
+		usestandardpreprocessor "On"
 		conformancemode "On"
 	filter { "not action:vs*", "language:C++" }
 		buildoptions { "-std=c++17" }
