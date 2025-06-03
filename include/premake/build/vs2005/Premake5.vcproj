@@ -1516,6 +1516,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\base\usage.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\base\validation.lua"
 					>
 				</File>
@@ -2023,6 +2027,10 @@
 					RelativePath="..\..\tests\oven\test_objdirs.lua"
 					>
 				</File>
+				<File
+					RelativePath="..\..\tests\oven\test_usages.lua"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="project"
@@ -2111,6 +2119,10 @@
 		</File>
 		<File
 			RelativePath="..\..\LICENSE.txt"
+			>
+		</File>
+		<File
+			RelativePath="..\..\git-tags.txt"
 			>
 		</File>
 		<File

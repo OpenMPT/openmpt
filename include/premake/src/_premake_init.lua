@@ -1182,6 +1182,18 @@
 		end
 	end
 
+	api.register {
+		name = "uses",
+		scope = "config",
+		kind = "list:string",
+	}
+
+	p.api.register {
+		name = "profile",
+		scope = "config",
+		kind = "boolean"
+	}
+
 
 -----------------------------------------------------------------------------
 --

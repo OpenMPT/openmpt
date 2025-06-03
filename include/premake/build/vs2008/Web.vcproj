@@ -339,6 +339,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\website\docs\Usages-and-Uses.md"
+				>
+			</File>
+			<File
 				RelativePath="..\..\website\docs\Usages.md"
 				>
 			</File>
@@ -1007,6 +1011,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\website\docs\profile.md"
+				>
+			</File>
+			<File
 				RelativePath="..\..\website\docs\project.md"
 				>
 			</File>
@@ -1239,7 +1247,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\website\docs\usage.md"
+				>
+			</File>
+			<File
 				RelativePath="..\..\website\docs\usefullpaths.md"
+				>
+			</File>
+			<File
+				RelativePath="..\..\website\docs\uses.md"
 				>
 			</File>
 			<File

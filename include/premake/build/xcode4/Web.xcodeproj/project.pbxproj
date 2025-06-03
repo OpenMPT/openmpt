@@ -70,6 +70,7 @@
 		271DFE56E9DE5EC847133C96 /* Introducing-Modules.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "Introducing-Modules.md"; path = "../../website/docs/Introducing-Modules.md"; sourceTree = "<group>"; };
 		2752D3F46BA17966ADC8B234 /* systemversion.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = systemversion.md; path = ../../website/docs/systemversion.md; sourceTree = "<group>"; };
 		278946521B888FC4A073A492 /* debugextendedprotocol.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = debugextendedprotocol.md; path = ../../website/docs/debugextendedprotocol.md; sourceTree = "<group>"; };
+		28102C4821762DBA15118A88 /* usage.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = usage.md; path = ../../website/docs/usage.md; sourceTree = "<group>"; };
 		2817E00BC08FCD7DEC76BE4B /* 2020-01-08-community-update-3.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2020-01-08-community-update-3.md"; path = "../../website/blog/2020-01-08-community-update-3.md"; sourceTree = "<group>"; };
 		284F4702C63047B49DAE8D42 /* path.replaceextension.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = path.replaceextension.md; path = ../../website/docs/path/path.replaceextension.md; sourceTree = "<group>"; };
 		2947495580ACBC4732BAD795 /* table.implode.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = table.implode.md; path = ../../website/docs/table/table.implode.md; sourceTree = "<group>"; };
@@ -156,6 +157,7 @@
 		546B5FFF1AF9577188FB7E3F /* table.contains.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = table.contains.md; path = ../../website/docs/table/table.contains.md; sourceTree = "<group>"; };
 		547B68FC3F678EEE874D573C /* openmp.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = openmp.md; path = ../../website/docs/openmp.md; sourceTree = "<group>"; };
 		549100A033AE1AD20FB776E0 /* path.iscppheader.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = path.iscppheader.md; path = ../../website/docs/path/path.iscppheader.md; sourceTree = "<group>"; };
+		54A7895E555A8650C93C579E /* uses.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = uses.md; path = ../../website/docs/uses.md; sourceTree = "<group>"; };
 		5591997E99E03EF0DC0777BE /* enablemodules.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = enablemodules.md; path = ../../website/docs/enablemodules.md; sourceTree = "<group>"; };
 		55C8FCEAC6EB9DDC7CB24B2A /* debugcommand.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = debugcommand.md; path = ../../website/docs/debugcommand.md; sourceTree = "<group>"; };
 		55F3AF35EB6A6E675A06C575 /* os.istarget.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = os.istarget.md; path = ../../website/docs/os/os.istarget.md; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 		CB898B66FB1B5A58D62899A6 /* language.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = language.md; path = ../../website/docs/language.md; sourceTree = "<group>"; };
 		CBB62F718E768FE3EBAB6DB1 /* premake_OPTIONS.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = premake_OPTIONS.md; path = ../../website/docs/globals/premake_OPTIONS.md; sourceTree = "<group>"; };
 		CBD631F4E2E8CD26D304C834 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; name = .gitignore; path = ../../website/.gitignore; sourceTree = "<group>"; };
+		CC3C7E8022C9E8F2FB42FCC0 /* profile.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = profile.md; path = ../../website/docs/profile.md; sourceTree = "<group>"; };
 		CC86FE6EABA418A087AD74AE /* path.getabsolute.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = path.getabsolute.md; path = ../../website/docs/path/path.getabsolute.md; sourceTree = "<group>"; };
 		CDA61A039434117502363843 /* table.foreachi.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = table.foreachi.md; path = ../../website/docs/table/table.foreachi.md; sourceTree = "<group>"; };
 		CDE1406EFEC5386011DD6EAE /* targetname.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = targetname.md; path = ../../website/docs/targetname.md; sourceTree = "<group>"; };
@@ -386,6 +389,7 @@
 		D808B1FC492B52EEFEF2003C /* makesettings.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = makesettings.md; path = ../../website/docs/makesettings.md; sourceTree = "<group>"; };
 		D8186524257B5B569B9A5B64 /* download.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = download.js; path = ../../website/src/pages/download.js; sourceTree = "<group>"; };
 		D8B5567645DD64E8477054B6 /* dotnetframework.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = dotnetframework.md; path = ../../website/docs/dotnetframework.md; sourceTree = "<group>"; };
+		D8BBACC845E3BB3A4776AB08 /* Usages-and-Uses.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "Usages-and-Uses.md"; path = "../../website/docs/Usages-and-Uses.md"; sourceTree = "<group>"; };
 		D8BF1E2E45E72CA0477A1C6E /* remotedeploydir.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = remotedeploydir.md; path = ../../website/docs/remotedeploydir.md; sourceTree = "<group>"; };
 		D8C82A2CB7E5445E93EEA06C /* string.contains.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = string.contains.md; path = ../../website/docs/string/string.contains.md; sourceTree = "<group>"; };
 		D96019C634A16D3807FBB806 /* pchheader.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = pchheader.md; path = ../../website/docs/pchheader.md; sourceTree = "<group>"; };
@@ -523,6 +527,7 @@
 				F9AFA0528C3D6A44F5160E92 /* System-Scripts.md */,
 				D5429646C02EBC3808148486 /* Tokens.md */,
 				E1AB2142CC974734147D0F82 /* Topics.md */,
+				D8BBACC845E3BB3A4776AB08 /* Usages-and-Uses.md */,
 				CE8E62AEB97A88A0016050EE /* Usages.md */,
 				3E9EEC1682ED9188C514CA56 /* Using-Modules.md */,
 				E8FE15AE2D4CBB206F73F3EE /* Using-Premake.md */,
@@ -695,6 +700,7 @@
 				A45C96BE82FF323037E134FE /* preferredtoolarchitecture.md */,
 				601B38ACCD43471ECED636EC /* prelinkcommands.md */,
 				E483C65277119044DFEA3492 /* prelinkmessage.md */,
+				CC3C7E8022C9E8F2FB42FCC0 /* profile.md */,
 				2B92B20C82201C7E5A99304C /* project.md */,
 				EF836ABA916D06AC889418FA /* propertydefinition.md */,
 				A80182D01529914216BC8110 /* rebuildcommands.md */,
@@ -756,7 +762,9 @@
 				F3CCF14C64EF923E1AB63F8C /* toolsversion.md */,
 				C8A7746023E8C7D2F74312A0 /* undefines.md */,
 				588F7814C9B219067F78C654 /* unsignedchar.md */,
+				28102C4821762DBA15118A88 /* usage.md */,
 				C06A8F9E318D3090E753DDDE /* usefullpaths.md */,
+				54A7895E555A8650C93C579E /* uses.md */,
 				2013B1682C9E63DAA7832FA8 /* usestandardpreprocessor.md */,
 				869C9EAEE1DDF220B5383CEE /* usingdirs.md */,
 				45CBB18C467EAE7EBA607FCC /* uuid.md */,

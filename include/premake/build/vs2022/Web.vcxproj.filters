@@ -231,6 +231,9 @@
     <None Include="..\..\website\docs\Topics.md">
       <Filter>docs</Filter>
     </None>
+    <None Include="..\..\website\docs\Usages-and-Uses.md">
+      <Filter>docs</Filter>
+    </None>
     <None Include="..\..\website\docs\Usages.md">
       <Filter>docs</Filter>
     </None>
@@ -1002,6 +1005,9 @@
     <None Include="..\..\website\docs\prelinkmessage.md">
       <Filter>docs</Filter>
     </None>
+    <None Include="..\..\website\docs\profile.md">
+      <Filter>docs</Filter>
+    </None>
     <None Include="..\..\website\docs\project.md">
       <Filter>docs</Filter>
     </None>
@@ -1284,7 +1290,13 @@
     <None Include="..\..\website\docs\unsignedchar.md">
       <Filter>docs</Filter>
     </None>
+    <None Include="..\..\website\docs\usage.md">
+      <Filter>docs</Filter>
+    </None>
     <None Include="..\..\website\docs\usefullpaths.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\uses.md">
       <Filter>docs</Filter>
     </None>
     <None Include="..\..\website\docs\usestandardpreprocessor.md">

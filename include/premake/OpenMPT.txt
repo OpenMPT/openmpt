@@ -1,1 +1,1 @@
-Premake version 5.0.0-beta5 (2025-02-17)
+Premake version 5.0.0-beta6 (2025-03-30)

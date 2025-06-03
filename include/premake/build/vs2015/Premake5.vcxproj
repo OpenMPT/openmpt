@@ -261,6 +261,7 @@
     <None Include="..\..\CHANGES.txt" />
     <None Include="..\..\CONTRIBUTORS.txt" />
     <None Include="..\..\LICENSE.txt" />
+    <None Include="..\..\git-tags.txt" />
     <None Include="..\..\mobdebug.lua" />
     <None Include="..\..\modules\codelite\README.md" />
     <None Include="..\..\modules\codelite\_manifest.lua" />
@@ -526,6 +527,7 @@
     <None Include="..\..\src\base\term.lua" />
     <None Include="..\..\src\base\tools.lua" />
     <None Include="..\..\src\base\tree.lua" />
+    <None Include="..\..\src\base\usage.lua" />
     <None Include="..\..\src\base\validation.lua" />
     <None Include="..\..\src\base\workspace.lua" />
     <None Include="..\..\src\tools\clang.lua" />
@@ -577,6 +579,7 @@
     <None Include="..\..\tests\folder\premake5.lua" />
     <None Include="..\..\tests\oven\test_filtering.lua" />
     <None Include="..\..\tests\oven\test_objdirs.lua" />
+    <None Include="..\..\tests\oven\test_usages.lua" />
     <None Include="..\..\tests\pepperfish_profiler.lua" />
     <None Include="..\..\tests\project\test_config_maps.lua" />
     <None Include="..\..\tests\project\test_eachconfig.lua" />

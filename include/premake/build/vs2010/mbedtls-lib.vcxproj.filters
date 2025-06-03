@@ -306,6 +306,186 @@
     <ClInclude Include="..\..\contrib\mbedtls\include\psa\crypto_values.h">
       <Filter>include\psa</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\aesce.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\aesni.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\alignment.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\base64_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bignum_core.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bignum_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bignum_mod.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bignum_mod_raw.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bignum_mod_raw_invasive.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\block_cipher_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\bn_mul.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\check_crypto_config.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\cipher_wrap.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\common.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\constant_time_impl.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\constant_time_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ctr.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\debug_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ecp_internal_alt.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ecp_invasive.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\entropy_poll.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\lmots.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\md_psa.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\md_wrap.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\mps_common.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\mps_error.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\mps_reader.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\mps_trace.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\padlock.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\pk_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\pk_wrap.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\pkwrite.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_aead.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_cipher.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_core.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_core_common.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_driver_wrappers.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_driver_wrappers_no_static.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_ecp.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_ffdh.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_hash.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_invasive.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_its.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_mac.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_pake.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_random_impl.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_rsa.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_se.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_slot_management.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_crypto_storage.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\psa_util_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\rsa_alt_helpers.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\rsa_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_ciphersuites_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_client.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_debug_helpers.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_misc.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_tls13_invasive.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\ssl_tls13_keys.h">
+      <Filter>library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\contrib\mbedtls\library\x509_internal.h">
+      <Filter>library</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\contrib\mbedtls\library\aes.c">

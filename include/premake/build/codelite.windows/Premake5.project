@@ -6,6 +6,7 @@
     <File Name="../../CHANGES.txt"/>
     <File Name="../../CONTRIBUTORS.txt"/>
     <File Name="../../LICENSE.txt"/>
+    <File Name="../../git-tags.txt"/>
     <File Name="../../mobdebug.lua"/>
     <VirtualDirectory Name="modules">
       <VirtualDirectory Name="codelite">
@@ -333,6 +334,7 @@
         <File Name="../../src/base/term.lua"/>
         <File Name="../../src/base/tools.lua"/>
         <File Name="../../src/base/tree.lua"/>
+        <File Name="../../src/base/usage.lua"/>
         <File Name="../../src/base/validation.lua"/>
         <File Name="../../src/base/workspace.lua"/>
       </VirtualDirectory>
@@ -462,6 +464,7 @@
       <VirtualDirectory Name="oven">
         <File Name="../../tests/oven/test_filtering.lua"/>
         <File Name="../../tests/oven/test_objdirs.lua"/>
+        <File Name="../../tests/oven/test_usages.lua"/>
       </VirtualDirectory>
       <File Name="../../tests/pepperfish_profiler.lua"/>
       <VirtualDirectory Name="project">

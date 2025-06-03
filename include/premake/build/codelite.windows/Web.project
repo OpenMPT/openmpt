@@ -66,6 +66,7 @@
       <File Name="../../website/docs/System-Scripts.md"/>
       <File Name="../../website/docs/Tokens.md"/>
       <File Name="../../website/docs/Topics.md"/>
+      <File Name="../../website/docs/Usages-and-Uses.md"/>
       <File Name="../../website/docs/Usages.md"/>
       <File Name="../../website/docs/Using-Modules.md"/>
       <File Name="../../website/docs/Using-Premake.md"/>
@@ -333,6 +334,7 @@
       <File Name="../../website/docs/preferredtoolarchitecture.md"/>
       <File Name="../../website/docs/prelinkcommands.md"/>
       <File Name="../../website/docs/prelinkmessage.md"/>
+      <File Name="../../website/docs/profile.md"/>
       <File Name="../../website/docs/project.md"/>
       <File Name="../../website/docs/propertydefinition.md"/>
       <File Name="../../website/docs/rebuildcommands.md"/>
@@ -433,7 +435,9 @@
       <File Name="../../website/docs/toolsversion.md"/>
       <File Name="../../website/docs/undefines.md"/>
       <File Name="../../website/docs/unsignedchar.md"/>
+      <File Name="../../website/docs/usage.md"/>
       <File Name="../../website/docs/usefullpaths.md"/>
+      <File Name="../../website/docs/uses.md"/>
       <File Name="../../website/docs/usestandardpreprocessor.md"/>
       <File Name="../../website/docs/usingdirs.md"/>
       <File Name="../../website/docs/uuid.md"/>

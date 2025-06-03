@@ -139,6 +139,7 @@
     <None Include="..\..\website\docs\System-Scripts.md" />
     <None Include="..\..\website\docs\Tokens.md" />
     <None Include="..\..\website\docs\Topics.md" />
+    <None Include="..\..\website\docs\Usages-and-Uses.md" />
     <None Include="..\..\website\docs\Usages.md" />
     <None Include="..\..\website\docs\Using-Modules.md" />
     <None Include="..\..\website\docs\Using-Premake.md" />
@@ -396,6 +397,7 @@
     <None Include="..\..\website\docs\preferredtoolarchitecture.md" />
     <None Include="..\..\website\docs\prelinkcommands.md" />
     <None Include="..\..\website\docs\prelinkmessage.md" />
+    <None Include="..\..\website\docs\profile.md" />
     <None Include="..\..\website\docs\project.md" />
     <None Include="..\..\website\docs\propertydefinition.md" />
     <None Include="..\..\website\docs\rebuildcommands.md" />
@@ -490,7 +492,9 @@
     <None Include="..\..\website\docs\toolsversion.md" />
     <None Include="..\..\website\docs\undefines.md" />
     <None Include="..\..\website\docs\unsignedchar.md" />
+    <None Include="..\..\website\docs\usage.md" />
     <None Include="..\..\website\docs\usefullpaths.md" />
+    <None Include="..\..\website\docs\uses.md" />
     <None Include="..\..\website\docs\usestandardpreprocessor.md" />
     <None Include="..\..\website\docs\usingdirs.md" />
     <None Include="..\..\website\docs\uuid.md" />

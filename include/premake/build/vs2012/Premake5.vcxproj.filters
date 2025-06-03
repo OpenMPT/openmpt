@@ -323,6 +323,7 @@
     <None Include="..\..\CHANGES.txt" />
     <None Include="..\..\CONTRIBUTORS.txt" />
     <None Include="..\..\LICENSE.txt" />
+    <None Include="..\..\git-tags.txt" />
     <None Include="..\..\mobdebug.lua" />
     <None Include="..\..\modules\codelite\README.md">
       <Filter>modules\codelite</Filter>
@@ -1112,6 +1113,9 @@
     <None Include="..\..\src\base\tree.lua">
       <Filter>src\base</Filter>
     </None>
+    <None Include="..\..\src\base\usage.lua">
+      <Filter>src\base</Filter>
+    </None>
     <None Include="..\..\src\base\validation.lua">
       <Filter>src\base</Filter>
     </None>
@@ -1263,6 +1267,9 @@
       <Filter>tests\oven</Filter>
     </None>
     <None Include="..\..\tests\oven\test_objdirs.lua">
+      <Filter>tests\oven</Filter>
+    </None>
+    <None Include="..\..\tests\oven\test_usages.lua">
       <Filter>tests\oven</Filter>
     </None>
     <None Include="..\..\tests\pepperfish_profiler.lua">
