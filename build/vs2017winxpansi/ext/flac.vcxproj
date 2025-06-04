@@ -586,6 +586,7 @@
     <ClInclude Include="..\..\..\include\flac\include\FLAC\stream_encoder.h" />
     <ClInclude Include="..\..\..\include\flac\include\share\alloc.h" />
     <ClInclude Include="..\..\..\include\flac\include\share\compat.h" />
+    <ClInclude Include="..\..\..\include\flac\include\share\compat_threads.h" />
     <ClInclude Include="..\..\..\include\flac\include\share\endswap.h" />
     <ClInclude Include="..\..\..\include\flac\include\share\macros.h" />
     <ClInclude Include="..\..\..\include\flac\include\share\private.h" />

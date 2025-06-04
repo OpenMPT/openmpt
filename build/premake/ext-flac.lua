@@ -97,6 +97,7 @@
   files {
    "../../include/flac/include/share/alloc.h",
    "../../include/flac/include/share/compat.h",
+   "../../include/flac/include/share/compat_threads.h",
    "../../include/flac/include/share/endswap.h",
    "../../include/flac/include/share/macros.h",
    "../../include/flac/include/share/private.h",
@@ -131,6 +132,12 @@
 			"FLAC__HAS_X86INTRIN",
 			"FLAC__USE_AVX",
 		}
+	filter {}
+	filter {  "not configurations:DebugShared" }
+		-- Debug DLL runtime is missing a DLL when using C11 threads
+		if _ACTION >= "vs2022" then
+			defines { "HAVE_C11THREADS" }
+		end
 	filter {}
 
 function mpt_use_flac ()
