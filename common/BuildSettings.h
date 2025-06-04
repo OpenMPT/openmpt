@@ -177,8 +177,7 @@
 #else
 //#define MPT_ENABLE_CHARSET_LOCALE
 #endif
-// Do not use architecture-specifid intrinsics in library builds. There is just about no codepath which would use it anyway.
-//#define MPT_ENABLE_ARCH_INTRINSICS
+#define MPT_ENABLE_ARCH_INTRINSICS
 #if defined(MPT_BUILD_HACK_ARCHIVE_SUPPORT)
 //#define NO_ARCHIVE_SUPPORT
 #else
