@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.9.0-pre
 
+ *  libopenmpt now always uses architecture-specific SIMD intrinsics when
+    available. This currently only enables the SSE2 implementation for Reverb.
+
 ### libopenmpt 0.8.0 (2025-05-31)
 
  *  [**New**] Can now read PumaTracker (`PUMA`) modules.
