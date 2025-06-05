@@ -23,9 +23,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 {
-	FileReader *f = reinterpret_cast<FileReader*>(handle);
+	FileReader &f = *mpt::void_ptr<FileReader>(handle);
 	int read_len = mpt::saturate_cast<int>(buf_len);
-	int result = mpt::saturate_cast<int>(f->ReadRaw(mpt::span(mpt::void_cast<std::byte*>(buf), read_len)).size());
+	int result = mpt::saturate_cast<int>(f.ReadRaw(mpt::span(mpt::void_cast<std::byte*>(buf), read_len)).size());
 	if(result == 0)
 	{
 		return -1;
@@ -35,10 +35,10 @@ static int LHAreadFileReader(void *handle, void *buf, size_t buf_len)
 
 static int LHAskipFileReader(void *handle, size_t bytes)
 {
-	FileReader *f = reinterpret_cast<FileReader*>(handle);
-	if(f->CanRead(bytes))
+	FileReader &f = *mpt::void_ptr<FileReader>(handle);
+	if(f.CanRead(bytes))
 	{
-		f->Skip(bytes);
+		f.Skip(bytes);
 		return 1;
 	}
 	return 0;
