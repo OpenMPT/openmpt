@@ -9,6 +9,7 @@
 #include "mpt/base/namespace.hpp"
 
 #include <cstddef>
+#include <cstdint>
 
 
 
