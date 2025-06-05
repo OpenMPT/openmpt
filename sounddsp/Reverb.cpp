@@ -40,6 +40,7 @@ OPENMPT_NAMESPACE_BEGIN
 #ifndef NO_REVERB
 
 
+#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 #if defined(MPT_ARCH_QUIRK_SSE2_NO_UNALIGNED_LOAD_STORE)
 static MPT_FORCEINLINE __m128i mpt_mm_loadu_si64(void const *mem_addr) {
 	__m128i tmp;
@@ -57,6 +58,7 @@ static MPT_FORCEINLINE __m128i mpt_mm_loadu_si64(void const *mem_addr) {
 static MPT_FORCEINLINE void mpt_mm_storeu_si64(void *mem_addr, __m128i a) {
 	_mm_storeu_si64(mem_addr, a);
 }
+#endif
 #endif
 
 
