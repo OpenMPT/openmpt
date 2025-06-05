@@ -60,12 +60,12 @@ struct RARHandle // RAII
 static int CALLBACK RARCallback(unsigned int msg, LPARAM userData, LPARAM p1, LPARAM p2)
 {
 	int result = 0;
-	CRarArchive *that = reinterpret_cast<CRarArchive *>(userData);
+	CRarArchive &that = *mpt::void_ptr<CRarArchive>(mpt::pointer_cast<void*>(userData));
 	switch(msg)
 	{
 	case UCM_PROCESSDATA:
 		// Receive extracted data
-		that->RARCallbackProcessData(reinterpret_cast<const char *>(p1), p2);
+		that.RARCallbackProcessData(mpt::pointer_cast<const char*>(p1), p2);
 		result = 1;
 		break;
 	default:
@@ -209,7 +209,7 @@ bool CRarArchive::ExtractFile(std::size_t index)
 	ArchiveData.OpenMode = RAR_OM_EXTRACT;
 	ArchiveData.ArcNameW = ArcNameBuf.data();
 	ArchiveData.Callback = RARCallback;
-	ArchiveData.UserData = reinterpret_cast<LPARAM>(this);
+	ArchiveData.UserData = mpt::pointer_cast<LPARAM>(this);
 	RARHandle rar(RAROpenArchiveEx(&ArchiveData));
 	if(!rar)
 	{
