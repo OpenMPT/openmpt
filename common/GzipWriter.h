@@ -26,13 +26,13 @@ inline void WriteGzip(std::ostream &output, std::string &outData, const mpt::ust
 {
 	z_stream strm{};
 	strm.avail_in = static_cast<uInt>(outData.size());
-	strm.next_in = reinterpret_cast<Bytef *>(outData.data());
+	strm.next_in = mpt::byte_cast<Bytef *>(outData.data());
 	if(deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, 15 | 16, 9, Z_DEFAULT_STRATEGY) != Z_OK)
 		throw std::runtime_error{"zlib init failed"};
 	gz_header gzHeader{};
 	gzHeader.time = static_cast<uLong>(time(nullptr));
 	std::string filenameISO = mpt::ToCharset(mpt::Charset::ISO8859_1, fileName);
-	gzHeader.name = reinterpret_cast<Bytef *>(filenameISO.data());
+	gzHeader.name = mpt::byte_cast<Bytef *>(filenameISO.data());
 	deflateSetHeader(&strm, &gzHeader);
 	try
 	{
