@@ -21,25 +21,23 @@ inline constexpr std::size_t pointer_size = sizeof(void *);
 
 
 template <typename Tdst, typename Tsrc>
-struct pointer_cast_helper {
-	static constexpr Tdst cast(const Tsrc & src) noexcept {
-		return src;
-	}
-};
+struct pointer_cast_helper;
 
-template <typename Tdst, typename Tptr>
-struct pointer_cast_helper<Tdst, const Tptr *> {
-	static constexpr Tdst cast(const Tptr * const & src) noexcept {
-		return reinterpret_cast<const Tdst>(src);
-	}
-};
 template <typename Tdst, typename Tptr>
 struct pointer_cast_helper<Tdst, Tptr *> {
-	static constexpr Tdst cast(const Tptr * const & src) noexcept {
-		return reinterpret_cast<const Tdst>(src);
+	static constexpr Tdst cast(Tptr * const & src) noexcept {
+		static_assert(sizeof(Tdst) == sizeof(Tptr *));
+		return static_cast<Tdst>(reinterpret_cast<std::uintptr_t>(src));
 	}
 };
 
+template <typename Tptr, typename Tsrc>
+struct pointer_cast_helper<Tptr *, Tsrc> {
+	static constexpr Tptr * cast(const Tsrc & src) noexcept {
+		static_assert(sizeof(Tptr *) == sizeof(Tsrc));
+		return reinterpret_cast<Tptr *>(static_cast<std::uintptr_t>(src));
+	}
+};
 
 template <typename Tdst, typename Tsrc>
 constexpr Tdst pointer_cast(const Tsrc & src) noexcept {
