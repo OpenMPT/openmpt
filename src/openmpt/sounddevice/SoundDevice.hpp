@@ -10,6 +10,7 @@
 #include "SoundDeviceCallback.hpp"
 
 #include "mpt/base/detect.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/osinfo/class.hpp"
 #include "mpt/osinfo/windows_version.hpp"
@@ -384,12 +385,12 @@ struct AppInfo
 #if MPT_OS_WINDOWS
 	AppInfo &SetHWND(HWND hwnd)
 	{
-		UIHandle = reinterpret_cast<uintptr_t>(hwnd);
+		UIHandle = mpt::pointer_cast<std::uintptr_t>(hwnd);
 		return *this;
 	}
 	HWND GetHWND() const
 	{
-		return reinterpret_cast<HWND>(UIHandle);
+		return mpt::pointer_cast<HWND>(UIHandle);
 	}
 #endif  // MPT_OS_WINDOWS
 };

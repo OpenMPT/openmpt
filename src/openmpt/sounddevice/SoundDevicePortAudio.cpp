@@ -678,7 +678,7 @@ bool CPortaudioDevice::OpenDriverSettings()
 		controlEXE += TEXT("\\");
 	}
 	controlEXE += TEXT("control.exe");
-	return (reinterpret_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
+	return (mpt::pointer_cast<INT_PTR>(ShellExecute(NULL, TEXT("open"), controlEXE.c_str(), (hasVista ? TEXT("/name Microsoft.Sound") : TEXT("mmsys.cpl")), NULL, SW_SHOW)) >= 32);
 #else   // !MPT_OS_WINDOWS
 	return false;
 #endif  // MPT_OS_WINDOWS

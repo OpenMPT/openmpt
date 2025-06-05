@@ -17,6 +17,7 @@
 #include "mpt/base/bit.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_round.hpp"
 #include "mpt/base/utility.hpp"
 #include "mpt/exception/exception_text.hpp"
@@ -1206,7 +1207,7 @@ ASIO::Long CASIODevice::MessageMMCCommand(ASIO::Long value, const void *message,
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")(value, reinterpret_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: MMCCommand(value={}, message={}, opt={}) => result={}")(value, mpt::pointer_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
 	return result;
 }
 
@@ -1220,7 +1221,7 @@ ASIO::Long CASIODevice::MessageUnknown(ASIO::MessageSelector selector, ASIO::Lon
 {
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	ASIO::Long result = 0;
-	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")(mpt::to_underlying(selector), value, reinterpret_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
+	MPT_LOG(GetLogger(), LogDebug, "sounddev", MPT_UFORMAT_MESSAGE("ASIO: AsioMessage(selector={}, value={}, message={}, opt={}) => result={}")(mpt::to_underlying(selector), value, mpt::pointer_cast<std::uintptr_t>(message), opt ? mpt::format<mpt::ustring>::val(*opt) : MPT_USTRING("NULL"), result));
 	return result;
 }
 
