@@ -59,13 +59,30 @@ static constexpr uint8 sideInfoSize[2][2] =
 };
 
 
-bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[3])
+static inline bool IsMPEGHeaderImpl(const uint8 * header)
 {
 	return header[0] == 0xFF && (header[1] & 0xE0) == 0xE0	// Sync
 		&& (header[1] & 0x18) != 0x08	// Invalid MPEG version
 		&& (header[1] & 0x06) != 0x00	// Invalid MPEG layer
 		&& (header[2] & 0x0C) != 0x0C	// Invalid frequency
 		&& (header[2] & 0xF0) != 0xF0;	// Invalid bitrate
+}
+
+template <std::size_t N>
+static inline bool IsMPEGHeaderTemplate(const uint8 (&header)[N])
+{
+	static_assert(N >= 3);
+	return IsMPEGHeaderImpl(header);
+}
+
+bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[3])
+{
+	return IsMPEGHeaderTemplate(header);
+}
+
+bool MPEGFrame::IsMPEGHeader(const uint8 (&header)[4])
+{
+	return IsMPEGHeaderTemplate(header);
 }
 
 
@@ -78,11 +95,11 @@ MPEGFrame::MPEGFrame(FileCursor &file)
 	uint8 header[4] = {};
 	mpt::FR::ReadArray(file, header);
 	
-	if(!IsMPEGHeader(reinterpret_cast<const uint8(&)[3]>(header)))
+	if(!IsMPEGHeader(header))
 	{
 		return;
 	}
-		
+
 	uint8 version = (header[1] & 0x18) >> 3;
 	uint8 mpeg1 = (version == 3) ? 0 : 1;
 	uint8 layer = 3 - ((header[1] & 0x06) >> 1);

@@ -26,6 +26,7 @@ public:
 
 	MPEGFrame(FileCursor &file);
 	static bool IsMPEGHeader(const uint8 (&header)[3]);
+	static bool IsMPEGHeader(const uint8 (&header)[4]);
 };
 
 OPENMPT_NAMESPACE_END
