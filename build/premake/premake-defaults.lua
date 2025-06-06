@@ -49,7 +49,11 @@
 			kind "StaticLib"
 		elseif mykind == "GUI" then
 			kind "WindowedApp"
-			if _OPTIONS["windows-version"] == "win10" then
+			if _OPTIONS["windows-version"] == "win11" then
+				files {
+					"../../build/vs/win10.manifest",
+				}
+			elseif _OPTIONS["windows-version"] == "win10" then
 				files {
 					"../../build/vs/win10.manifest",
 				}
@@ -68,7 +72,11 @@
 			end
 		elseif mykind == "Console" then
 			kind "ConsoleApp"
-			if _OPTIONS["windows-version"] == "win10" then
+			if _OPTIONS["windows-version"] == "win11" then
+				files {
+					"../../build/vs/win10.manifest",
+				}
+			elseif _OPTIONS["windows-version"] == "win10" then
 				files {
 					"../../build/vs/win10.manifest",
 				}
