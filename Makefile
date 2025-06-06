@@ -2191,7 +2191,9 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./build/vs2022win81                bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win81                --native-eol CRLF
 	svn export ./build/vs2022win10                bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10                --native-eol CRLF
 	svn export ./build/vs2022win10uwp             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10uwp             --native-eol CRLF
-	svn export ./build/vs2022win10clang           bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win10clang           --native-eol CRLF
+	svn export ./build/vs2022win11                bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win11                --native-eol CRLF
+	svn export ./build/vs2022win11uwp             bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win11uwp             --native-eol CRLF
+	svn export ./build/vs2022win11clang           bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/vs2022win11clang           --native-eol CRLF
 	svn export ./build/download_externals.cmd     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/build/download_externals.cmd     --native-eol CRLF
 	svn export ./common                           bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/common                           --native-eol CRLF
 	svn export ./doc/contributing.md              bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/doc/contributing.md              --native-eol CRLF
