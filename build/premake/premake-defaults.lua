@@ -385,49 +385,31 @@
 		filter { "action:vs2019" }
 			systemversion "10.0.20348.0"
 		filter {}
-		filter { "action:vs2022", "architecture:ARM" }
+		filter { "action:vs2022" }
 			if _OPTIONS["windows-version"] == "win7" then
 				systemversion "10.0.20348.0"
 			elseif _OPTIONS["windows-version"] == "win8" then
 				systemversion "10.0.20348.0"
 			elseif _OPTIONS["windows-version"] == "win81" then
 				systemversion "10.0.20348.0"
-			else
+			elseif _OPTIONS["windows-version"] == "win10" then
 				systemversion "10.0.22621.0"
-			end
-		filter {}
-		filter { "action:vs2022", "not architecture:ARM" }
-			if _OPTIONS["windows-version"] == "win7" then
-				systemversion "10.0.20348.0"
-			elseif _OPTIONS["windows-version"] == "win8" then
-				systemversion "10.0.20348.0"
-			elseif _OPTIONS["windows-version"] == "win81" then
-				systemversion "10.0.20348.0"
+			elseif _OPTIONS["windows-version"] == "win11" then
+				systemversion "10.0.26100.0"
 			else
 				systemversion "10.0.26100.0"
 			end
 		filter {}
 	end
 
-	if _OPTIONS["windows-version"] == "win10" then
+	if _OPTIONS["windows-version"] == "win11" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0A00" }
+		defines { "NTDDI_VERSION=0x0A000010" } -- Windows 11 23H2 Build 22631
+	elseif _OPTIONS["windows-version"] == "win10" then
 		filter {}
-		filter { "architecture:x86" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
-		filter {}
-		filter { "architecture:x86_64" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
-		filter {}
-		filter { "architecture:ARM" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
-		filter {}
-		filter { "architecture:ARM64" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
-		filter {}
-		filter { "architecture:ARM64EC" }
-			defines { "NTDDI_VERSION=0x0A00000E" } -- Windows 11 Build 22000
-		filter {}
+		defines { "_WIN32_WINNT=0x0A00" }
+		defines { "NTDDI_VERSION=0x0A00000D" } -- Windows 10 22H2 Build 19045
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0603" }

@@ -31,6 +31,7 @@ newoption {
 		{ "win8", "Windows 8" },
 		{ "win81", "Windows 8.1" },
 		{ "win10", "Wiondows 10" }
+		{ "win11", "Wiondows 11" }
 	}
 }
 
@@ -172,16 +173,16 @@ end)
 mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
 mpt_bindirsuffix = _OPTIONS["windows-version"]
 
-if _OPTIONS["windows-version"] == "win10" then
+if _OPTIONS["windows-version"] == "win11" then
 	if _OPTIONS["clang"] then
-		allplatforms = { "x86", "x86_64", "arm", "arm64" }
+		allplatforms = { "x86", "x86_64", "arm64" }
+	elseif _OPTIONS["windows-family"] == "uwp" then
+		allplatforms = { "x86", "x86_64", "arm64" }
 	else
-		if _OPTIONS["windows-family"] == "uwp" then
-			allplatforms = { "x86", "x86_64", "arm", "arm64" }
-		else
-			allplatforms = { "x86", "x86_64", "arm", "arm64", "arm64ec" }
-		end
+		allplatforms = { "x86", "x86_64", "arm64", "arm64ec" }
 	end
+elseif _OPTIONS["windows-version"] == "win10" then
+	allplatforms = { "x86", "x86_64", "arm", "arm64" }
 elseif _OPTIONS["windows-version"] == "win81" then
 	allplatforms = { "x86", "x86_64", "arm" }
 elseif _OPTIONS["windows-version"] == "win8" then

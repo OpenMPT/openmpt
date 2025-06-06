@@ -3,7 +3,7 @@
 
 
 
-#define BuildFolder "release\vs2022-win10-static"
+#define BuildFolder "release\vs2022-win11-static"
 #define BuildFolderLegacyarm "release\vs2022-win8-static"
 #define BuildFolderLegacyx86 "release\vs2022-win7-static"
 #define BuildFolderLegacyamd64 "release\vs2022-win7-static"
@@ -86,27 +86,27 @@ Name: en; MessagesFile: compiler:Default.isl
 ; note: packageTemplate\ contains files specific for the "install package".
 ; for files that are common with the "zip package", use ..\packageTemplate\
 
-Source: ..\bin\{#BuildFolder}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyx86}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.19044
+Source: ..\bin\{#BuildFolder}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\OpenMPT.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridge-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\PluginBridgeLegacy-x86.exe; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-lame.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyx86}\x86\openmpt-mpg123.dll; DestDir: {app}\bin\x86; Flags: ignoreversion; Components: archx86; OnlyBelowVersion: 10.0.22631
 
-Source: ..\bin\{#BuildFolder}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.19044
-Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.19044
+Source: ..\bin\{#BuildFolder}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\OpenMPT.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridge-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\PluginBridgeLegacy-amd64.exe; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-lame.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.22631
+Source: ..\bin\{#BuildFolderLegacyamd64}\amd64\openmpt-mpg123.dll; DestDir: {app}\bin\amd64; Flags: ignoreversion; Components: archamd64; OnlyBelowVersion: 10.0.22631
 
 Source: ..\bin\{#BuildFolderLegacyarm}\arm\OpenMPT.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm; MinVersion: 6.2
 Source: ..\bin\{#BuildFolderLegacyarm}\arm\PluginBridge-arm.exe; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm; MinVersion: 6.2
@@ -114,17 +114,17 @@ Source: ..\bin\{#BuildFolderLegacyarm}\arm\PluginBridgeLegacy-arm.exe; DestDir: 
 Source: ..\bin\{#BuildFolderLegacyarm}\arm\openmpt-lame.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm; MinVersion: 6.2
 Source: ..\bin\{#BuildFolderLegacyarm}\arm\openmpt-mpg123.dll; DestDir: {app}\bin\arm; Flags: ignoreversion; Components: archarm; MinVersion: 6.2
 
-Source: ..\bin\{#BuildFolder}\arm64\OpenMPT.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
-Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.19044
+Source: ..\bin\{#BuildFolder}\arm64\OpenMPT.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
 
-Source: ..\bin\{#BuildFolder}\arm64ec\OpenMPT.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
-Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridge-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
-Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridgeLegacy-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
-Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-lame.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
-Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-mpg123.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22000
+Source: ..\bin\{#BuildFolder}\arm64ec\OpenMPT.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridge-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridgeLegacy-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-lame.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
+Source: ..\bin\{#BuildFolder}\arm64ec\openmpt-mpg123.dll; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.22631
 
 Source: "..\mptrack\res\MPTRACK.ICO"; DestName: "OpenMPT App Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\packageTemplate\OpenMPT File Icon.ico"; DestName: "OpenMPT File Icon.ico"; DestDir: "{app}"; Flags: ignoreversion
@@ -166,8 +166,8 @@ Name: {group}\OpenMPT; Filename: {app}\bin\arm64\OpenMPT.exe; Check: CheckDefaul
 Name: {group}\OpenMPT (x86); Filename: {app}\bin\x86\OpenMPT.exe; Components: archx86
 Name: {group}\OpenMPT (amd64); Filename: {app}\bin\amd64\OpenMPT.exe; Components: archamd64
 Name: {group}\OpenMPT (arm); Filename: {app}\bin\arm\OpenMPT.exe; Components: archarm; MinVersion: 6.2
-Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.19044
-Name: {group}\OpenMPT (arm64ec); Filename: {app}\bin\arm64ec\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.22000
+Name: {group}\OpenMPT (arm64); Filename: {app}\bin\arm64\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.22631
+Name: {group}\OpenMPT (arm64ec); Filename: {app}\bin\arm64ec\OpenMPT.exe; Components: archarm64; MinVersion: 10.0.22631
 
 Name: {group}\Manual; Filename: {app}\OpenMPT Manual.chm
 Name: {group}\Support and Community Forum; Filename: {app}\OpenMPT Support and Community Forum.url

@@ -167,7 +167,7 @@ if singleThreaded:
 		raise Exception("Something went wrong during manual creation!")
 
 
-sourcePathModern    = "bin/release/vs2022-win10-static/"
+sourcePathModern    = "bin/release/vs2022-win11-static/"
 sourcePathLegacyARM = "bin/release/vs2022-win8-static/"
 sourcePathLegacy    = "bin/release/vs2022-win7-static/"
 
