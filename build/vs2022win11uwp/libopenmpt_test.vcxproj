@@ -437,7 +437,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -470,7 +470,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -501,7 +501,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -540,7 +540,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -578,7 +578,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -616,7 +616,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -655,7 +655,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -693,7 +693,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -731,7 +731,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -762,7 +762,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -794,7 +794,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -825,7 +825,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -864,7 +864,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -902,7 +902,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -940,7 +940,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -979,7 +979,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1017,7 +1017,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1055,7 +1055,7 @@
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1548,6 +1548,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\libopenmpt\libopenmpt_test\libopenmpt_test.manifest" />
+    <None Include="..\vs\win10.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="ext\mpg123.vcxproj">

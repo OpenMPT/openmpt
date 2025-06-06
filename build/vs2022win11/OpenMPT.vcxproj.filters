@@ -2776,6 +2776,9 @@
     <None Include="..\..\mptrack\res\nodrag.cur">
       <Filter>mptrack\res</Filter>
     </None>
+    <None Include="..\vs\win10.manifest">
+      <Filter>build\vs</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc">
