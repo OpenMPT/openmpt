@@ -9,6 +9,7 @@ is just a high-level summary.
 
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
     UTF8.
+ *  [**Bug**] libopenmpt_test did not build from the MSVC source packages.
 
  *  [**Change**] TCB was added to the list of supported file extensions. ModLand
     and Fujiology use this extension for TCB Tracker modules, instead of the
