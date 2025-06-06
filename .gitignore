@@ -49,14 +49,17 @@
 /build/vs2022win10/*.user
 /build/vs2022win10/.vs
 /build/vs2022win10/ext/*.user
-/build/vs2022win10clang/*.user
-/build/vs2022win10clang/.vs
-/build/vs2022win10clang/ext/*.user
 /build/vs2022win10uwp/*.user
 /build/vs2022win10uwp/.vs
 /build/vs2022win10uwp/Generated Files
 /build/vs2022win10uwp/ext/.vs
 /build/vs2022win10uwp/ext/Generated Files
+/build/vs2022win11/*.user
+/build/vs2022win11/.vs
+/build/vs2022win11/ext/*.user
+/build/vs2022win11clang/*.user
+/build/vs2022win11clang/.vs
+/build/vs2022win11clang/ext/*.user
 /build/vs2022win7/*.user
 /build/vs2022win7/.vs
 /build/vs2022win7/ext/*.user
