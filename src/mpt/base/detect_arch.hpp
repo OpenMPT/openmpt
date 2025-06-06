@@ -237,6 +237,20 @@
 		#define MPT_ARCH_X86_I386
 	#endif
 #endif
+#if defined(MPT_BUILD_MSVC_REQUIRE_SSE42)
+	#ifndef MPT_ARCH_X86_SSE3
+	#define MPT_ARCH_X86_SSE3
+	#endif
+	#ifndef MPT_ARCH_X86_SSSE3
+	#define MPT_ARCH_X86_SSSE3
+	#endif
+	#ifndef MPT_ARCH_X86_SSE4_1
+	#define MPT_ARCH_X86_SSE4_1
+	#endif
+	#ifndef MPT_ARCH_X86_SSE4_2
+	#define MPT_ARCH_X86_SSE4_2
+	#endif
+#endif
 #if defined(__AVX__)
 	#define MPT_ARCH_X86_3DNOWPREFETCH
 	#ifndef MPT_ARCH_X86_XSAVE

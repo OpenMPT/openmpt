@@ -362,6 +362,23 @@
 	
 	end
 
+	if _OPTIONS["windows-version"] == "win11" then
+
+		filter {}
+
+		filter { "architecture:x86_64" }
+			if _OPTIONS["clang"] then
+				-- not supported at the moment for clang-cl
+				--vectorextensions "SSE4.2"
+			elseif _ACTION >= "vs2022" then
+				buildoptions { "/arch:SSE4.2" }
+				defines { "MPT_BUILD_MSVC_REQUIRE_SSE42" }
+			end
+
+		filter {}
+
+	end
+
   filter {}
 	defines { "MPT_BUILD_MSVC" }
 

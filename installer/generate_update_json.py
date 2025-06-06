@@ -230,7 +230,7 @@ update = {
 				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":22631, "wine_major":1, "wine_minor":8, "wine_update":0 },
 				"required_architectures": {},
 				"supported_architectures": { "amd64":True },
-				"required_processor_features": { "amd64":{"sse2":True} }
+				"required_processor_features": { "amd64":{"sse4.2":True} }
 			},
 			"portable-amd64-legacy": {
 				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-amd64-legacy.update.json",
