@@ -1717,8 +1717,6 @@
     <ClInclude Include="..\..\test\TestToolsLib.h" />
     <ClInclude Include="..\..\test\TestToolsTracker.h" />
     <ClInclude Include="..\..\test\test.h" />
-    <ClInclude Include="..\..\unarchiver\archive.h" />
-    <ClInclude Include="..\..\unarchiver\ungzip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp" />
@@ -1885,7 +1883,6 @@
     <ClCompile Include="..\..\test\mpt_tests_string_transcode.cpp" />
     <ClCompile Include="..\..\test\mpt_tests_uuid.cpp" />
     <ClCompile Include="..\..\test\test.cpp" />
-    <ClCompile Include="..\..\unarchiver\ungzip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\libopenmpt\libopenmpt_test\libopenmpt_test.manifest" />

@@ -187,9 +187,6 @@
     <Filter Include="test">
       <UniqueIdentifier>{65689E7C-519F-9F0D-FA8B-8510E6A11B0F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="unarchiver">
-      <UniqueIdentifier>{DCBADFD6-C872-2124-317A-FA7F1D51BC14}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\BuildSettings.h">
@@ -1143,12 +1140,6 @@
     <ClInclude Include="..\..\test\test.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\unarchiver\archive.h">
-      <Filter>unarchiver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\unarchiver\ungzip.h">
-      <Filter>unarchiver</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\ComponentManager.cpp">
@@ -1642,9 +1633,6 @@
     </ClCompile>
     <ClCompile Include="..\..\test\test.cpp">
       <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\unarchiver\ungzip.cpp">
-      <Filter>unarchiver</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
