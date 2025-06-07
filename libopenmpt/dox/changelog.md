@@ -11,6 +11,8 @@ is just a high-level summary.
     `openmpt_get_string("source_has_mixed_revisions")` always returned an empty
     string.
 
+ *  mpg123: Update to v1.33.0 (2025-06-07).
+ *  miniz: Update to v3.0.2 (2023-01-15).
  *  pugixml: Update to v1.15 (2025-01-10).
 
 ### libopenmpt 0.5.36 (2025-01-06)
