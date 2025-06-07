@@ -50,7 +50,7 @@ inline bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *fi
 					ExInfo.ClientPointers = NULL;
 				}
 
-				pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
+				BOOL DumpResult = pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
 					fullMemDump ?
 					(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo
 #if MPT_COMPILER_MSVC
@@ -62,12 +62,12 @@ inline bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *fi
 					pExceptionInfo ? &ExInfo : NULL, NULL, NULL);
 				::CloseHandle(hFile);
 
-				result = true;
+				result = (DumpResult == TRUE);
 			}
 		}
 		::FreeLibrary(hDll);
 	}
-	return  result;
+	return result;
 }
 
 OPENMPT_NAMESPACE_END
