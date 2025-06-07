@@ -24,11 +24,13 @@
    "../../libopenmpt/plugin-common/resource.h",
   }
 
+	filter {}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
 			"MPT_BUILD_VER_FILENAME=\"" .. "xmp-openmpt" .. ".dll\"",
 			"MPT_BUILD_VER_FILEDESC=\"" .. "xmp-openmpt" .. "\"",
 		}
+	filter {}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resincludedirs {
 			"$(IntDir)/svn_version",
@@ -38,8 +40,10 @@
 		files {
 			"../../libopenmpt/libopenmpt_version.rc",
 		}
+	filter {}
 	filter { "action:vs*", "kind:SharedLib" }
 		resdefines { "MPT_BUILD_VER_DLL" }
+	filter {}
 	filter { "action:vs*", "kind:ConsoleApp or WindowedApp" }
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}

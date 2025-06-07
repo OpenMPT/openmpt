@@ -395,6 +395,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -418,6 +422,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -441,6 +449,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -469,6 +481,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -498,6 +514,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -527,6 +547,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -558,6 +582,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -588,6 +616,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -618,6 +650,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -643,6 +679,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -666,6 +706,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -689,6 +733,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -717,6 +765,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -746,6 +798,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -775,6 +831,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -806,6 +866,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -836,6 +900,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -866,6 +934,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;LIBOPENMPT_USE_DLL;VER_ARCHNAME=\"arm64\";MPT_BUILD_VER_FILENAME=\"libopenmpt_example_c_probe.dll\";MPT_BUILD_VER_FILEDESC=\"libopenmpt_example_c_probe\";MPT_BUILD_VER_EXE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -882,6 +954,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\vs\win10.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="libopenmpt.vcxproj">

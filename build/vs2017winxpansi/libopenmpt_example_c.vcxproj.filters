@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libopenmpt">
+      <UniqueIdentifier>{FFE9848F-EBA1-C6DC-54A9-9F38408061CD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\examples\libopenmpt_example_c.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\libopenmpt\libopenmpt_version.rc">
+      <Filter>libopenmpt</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

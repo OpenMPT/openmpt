@@ -85,6 +85,30 @@
 		"../../src/openmpt/streamencoder/**.hpp",
 	}
 
+	filter {}
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
+		resdefines {
+			"MPT_BUILD_VER_FILENAME=\"" .. "libopenmpt_test" .. ".exe\"",
+			"MPT_BUILD_VER_FILEDESC=\"" .. "libopenmpt_test" .. "\"",
+		}
+	filter {}
+	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
+		resincludedirs {
+			"$(IntDir)/svn_version",
+			"../../build/svn_version",
+			"$(ProjDir)/../../build/svn_version",
+		}
+		files {
+			"../../libopenmpt/libopenmpt_version.rc",
+		}
+	filter {}
+	filter { "action:vs*", "kind:SharedLib" }
+		resdefines { "MPT_BUILD_VER_DLL" }
+	filter {}
+	filter { "action:vs*", "kind:ConsoleApp or WindowedApp" }
+		resdefines { "MPT_BUILD_VER_EXE" }
+	filter {}
+
 	if _OPTIONS["charset"] ~= "Unicode" then
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	end
