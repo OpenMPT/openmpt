@@ -110,6 +110,7 @@
 
 typedef unsigned char byte;
 
+#ifndef NO_STRTOK  /* OpenMPT */
 // Annoying hackery to select a safe strtok variant. MS decided to call their strtok_r strtok_s, while
 // C11 declares another strtok_s with different prototype. Thanks to you all.
 #ifdef HAVE_STRTOK_R
@@ -122,6 +123,7 @@ typedef unsigned char byte;
 #define INT123_compat_strtok(a, b, c) strtok_s((a), (b), (c))
 #endif
 #endif
+#endif  /* OpenMPT */
 
 #if defined(MPG123_COMPAT_MSVCRT_IO)
 #if defined(_UCRT)
@@ -159,10 +161,12 @@ typedef unsigned char byte;
 #include <io.h>
 #endif
 
+#ifndef NO_STRTOK  /* OpenMPT */
 #ifndef INT123_compat_strtok
 #warning "no safe strtok found"
 #define INT123_compat_strtok(a, b, c) strtok((a), (b))
 #endif
+#endif  /* OpenMPT */
 
 /* A safe realloc also for very old systems where realloc(NULL, size) returns NULL. */
 void *INT123_safe_realloc(void *ptr, size_t size);
