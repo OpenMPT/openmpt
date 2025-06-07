@@ -20,6 +20,7 @@
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -479,6 +480,14 @@ public:
 	}
 
 #endif
+
+	static library load(mpt::library::path path) {
+		std::optional<library> result = load_optional(path);
+		if (!result) {
+			throw std::runtime_error("library not loadable");
+		}
+		return std::move(result.value());
+	}
 
 	template <typename Tfunc>
 	bool bind_function(Tfunc *& f, const std::string & symbol) const {
