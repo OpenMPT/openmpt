@@ -1,9 +1,9 @@
-libmpg123 library version 1.32.10 (2024-12-14).
+libmpg123 library version 1.33.0 (2025-06-07).
 The following changes have been made:
  *  `ports/generic/config.h` has been added for build system independent builds.
  *  `src/compat/compat.c` has been modified to silence MSVC static analyzer
     warnings.
- *  `src/compat/compat.c` and `src/compat/compat.c` have been modified for to
+ *  `src/compat/compat.c` and `src/compat/compat.c` have been modified to
     exclude unneeded functionality.
  *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
