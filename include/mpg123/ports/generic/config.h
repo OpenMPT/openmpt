@@ -99,6 +99,9 @@
 /* libmpg123 does not care about file mode */
 #define NO_FILEMODE
 
+/* libmpg123 does not care about strtok */
+#define NO_STRTOK
+
 /* We want some frame index, eh? */
 #define FRAME_INDEX 1
 #define INDEX_SIZE 1000
