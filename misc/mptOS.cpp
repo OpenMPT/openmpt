@@ -377,25 +377,19 @@ Architecture GetHostArchitecture() noexcept
 	SYSTEM_INFO systemInfo = {};
 	mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
 	if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack(0, 0), 16299, 0))) {
-		std::optional<mpt::library> kernel32{mpt::library::load_optional({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("kernel32.dll"), mpt::library::path_suffix::none })};
-		if(kernel32.has_value())
+		std::optional<mpt::library> kernel32{mpt::library::load_optional({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("kernel32.dll"), mpt::library::path_suffix::none})};
+		mpt::library::optional_function<BOOL WINAPI(HANDLE, USHORT *, USHORT *)> IsWow64Process2{kernel32, "IsWow64Process2"};
+		USHORT ProcessMachine = 0;
+		USHORT NativeMachine = 0;
+		if(IsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine).value_or(FALSE) != FALSE)
 		{
-			BOOL (WINAPI * fIsWow64Process2)(HANDLE hProcess, USHORT *pProcessMachine, USHORT *pNativeMachine) = NULL;
-			if(kernel32->bind_function(fIsWow64Process2, "IsWow64Process2"))
+			for(const auto &arch : machinearchitectures)
 			{
-				USHORT ProcessMachine = 0;
-				USHORT NativeMachine = 0;
-				if(fIsWow64Process2(GetCurrentProcess(), &ProcessMachine, &NativeMachine) != FALSE)
+				if(NativeMachine == arch.ImageFileMachine)
 				{
-					for(const auto &arch : machinearchitectures)
+					if(arch.Host != Architecture::unknown)
 					{
-						if(NativeMachine == arch.ImageFileMachine)
-						{
-							if(arch.Host != Architecture::unknown)
-							{
-								return arch.Host;
-							}
-						}
+						return arch.Host;
 					}
 				}
 			}
@@ -612,29 +606,20 @@ VersionContext::VersionContext()
 			return;
 		}
 		std::optional<mpt::library> NTDLL = mpt::library::load_optional({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
-		if(NTDLL)
-		{
-			const char * (__cdecl * wine_get_version)(void) = nullptr;
-			const char * (__cdecl * wine_get_build_id)(void) = nullptr;
-			void (__cdecl * wine_get_host_version)(const char * *, const char * *) = nullptr;
-			NTDLL->bind_function(wine_get_version, "wine_get_version");
-			NTDLL->bind_function(wine_get_build_id, "wine_get_build_id");
-			NTDLL->bind_function(wine_get_host_version, "wine_get_host_version");
-			const char * wine_version = nullptr;
-			const char * wine_build_id = nullptr;
-			const char * wine_host_sysname = nullptr;
-			const char * wine_host_release = nullptr;
-			wine_version = wine_get_version ? wine_get_version() : "";
-			wine_build_id = wine_get_build_id ? wine_get_build_id() : "";
-			if(wine_get_host_version)
-			{
-				wine_get_host_version(&wine_host_sysname, &wine_host_release);
-			}
-			m_RawVersion = wine_version ? wine_version : "";
-			m_RawBuildID = wine_build_id ? wine_build_id : "";
-			m_RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
-			m_RawHostRelease = wine_host_release ? wine_host_release : "";
-		}
+		mpt::library::optional_function<const char * __cdecl(void)> wine_get_version{NTDLL, "wine_get_version"};
+		mpt::library::optional_function<const char * __cdecl(void)> wine_get_build_id{NTDLL, "wine_get_build_id"};
+		mpt::library::optional_function<void __cdecl(const char * *, const char * *)> wine_get_host_version{NTDLL, "wine_get_host_version"};
+		const char * wine_version = nullptr;
+		const char * wine_build_id = nullptr;
+		const char * wine_host_sysname = nullptr;
+		const char * wine_host_release = nullptr;
+		wine_version = wine_get_version().value_or("");
+		wine_build_id = wine_get_build_id().value_or("");
+		wine_get_host_version(&wine_host_sysname, &wine_host_release);
+		m_RawVersion = wine_version ? wine_version : "";
+		m_RawBuildID = wine_build_id ? wine_build_id : "";
+		m_RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
+		m_RawHostRelease = wine_host_release ? wine_host_release : "";
 		m_Version = mpt::OS::Wine::Version(mpt::ToUnicode(mpt::Charset::UTF8, m_RawVersion));
 		m_HostClass = mpt::osinfo::get_class_from_sysname(m_RawHostSysName);
 	#endif // MPT_OS_WINDOWS
