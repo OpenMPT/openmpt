@@ -13,7 +13,8 @@ is just a high-level summary.
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
     UTF8.
 
- *  miniz: v3.0.2 (2023-01-15).
+ *  mpg123: Update to v1.33.0 (2025-06-07).
+ *  miniz: Update to v3.0.2 (2023-01-15).
  *  pugixml: Update to v1.15 (2025-01-10).
 
 ### libopenmpt 0.7.13 (2025-01-06)
