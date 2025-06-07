@@ -30,7 +30,7 @@ newoption {
 		{ "win7", "Windows 7" },
 		{ "win8", "Windows 8" },
 		{ "win81", "Windows 8.1" },
-		{ "win10", "Wiondows 10" }
+		{ "win10", "Windows 10" }
 	}
 }
 
