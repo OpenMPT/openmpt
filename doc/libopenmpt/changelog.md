@@ -17,7 +17,8 @@ is just a high-level summary.
 
  *  Building with libmpg123 1.33.0 in PORTABLE_API mode now works.
 
- *  miniz: v3.0.2 (2023-01-15).
+ *  mpg123: Update to v1.33.0 (2025-06-07).
+ *  miniz: Update to v3.0.2 (2023-01-15).
 
 ### libopenmpt 0.8.0 (2025-05-31)
 
