@@ -180,7 +180,7 @@ public:
 	}
 
 public:
-	static std::optional<library> load(mpt::library::path path) {
+	static std::optional<library> load_optional(mpt::library::path path) {
 
 		HMODULE hModule = NULL;
 
@@ -351,7 +351,7 @@ public:
 	}
 
 public:
-	static std::optional<library> load(mpt::library::path path) {
+	static std::optional<library> load_optional(mpt::library::path path) {
 		std::optional<mpt::native_path> optionalfilename = path.get_effective_filename();
 		if (!optionalfilename) {
 			return std::nullopt;
@@ -406,7 +406,7 @@ public:
 	}
 
 public:
-	static std::optional<library> load(mpt::library::path path) {
+	static std::optional<library> load_optional(mpt::library::path path) {
 		if (lt_dlinit() != 0) {
 			return std::nullopt;
 		}
@@ -464,7 +464,7 @@ public:
 	}
 
 public:
-	static std::optional<library> load(mpt::library::path path) {
+	static std::optional<library> load_optional(mpt::library::path path) {
 		MPT_UNUSED(path);
 		return std::nullopt;
 	}

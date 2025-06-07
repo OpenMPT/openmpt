@@ -377,7 +377,7 @@ Architecture GetHostArchitecture() noexcept
 	SYSTEM_INFO systemInfo = {};
 	mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
 	if(WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version(mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::Version::ServicePack(0, 0), 16299, 0))) {
-		std::optional<mpt::library> kernel32{mpt::library::load({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("kernel32.dll"), mpt::library::path_suffix::none })};
+		std::optional<mpt::library> kernel32{mpt::library::load_optional({ mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("kernel32.dll"), mpt::library::path_suffix::none })};
 		if(kernel32.has_value())
 		{
 			BOOL (WINAPI * fIsWow64Process2)(HANDLE hProcess, USHORT *pProcessMachine, USHORT *pNativeMachine) = NULL;
@@ -611,7 +611,7 @@ VersionContext::VersionContext()
 		{
 			return;
 		}
-		std::optional<mpt::library> NTDLL = mpt::library::load({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
+		std::optional<mpt::library> NTDLL = mpt::library::load_optional({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
 		if(NTDLL)
 		{
 			const char * (__cdecl * wine_get_version)(void) = nullptr;

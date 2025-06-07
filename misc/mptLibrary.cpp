@@ -92,7 +92,7 @@ private:
 public:
 
 	LibraryHandle(const mpt::LibraryPath &path)
-		: lib(mpt::library::load(convert_path(path)))
+		: lib(mpt::library::load_optional(convert_path(path)))
 	{
 		return;
 	}
