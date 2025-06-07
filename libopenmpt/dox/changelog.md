@@ -11,6 +11,8 @@ is just a high-level summary.
     `openmpt_get_string("source_has_mixed_revisions")` always returned an empty
     string.
 
+ *  mpg123: Update to v1.33.0 (2025-06-07).
+
 ### libopenmpt 0.4.48 (2025-01-06)
 
  *  The internal LFO plugin could misbehave in Tempo Sync mode when rows per
