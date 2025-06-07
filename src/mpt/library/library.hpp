@@ -555,7 +555,7 @@ public:
 			return f == nullptr;
 		}
 		template <typename... Targs>
-		auto operator()(Targs &&... args) const -> std::conditional<std::is_same<void, decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>::value, bool, std::optional<decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>>::type {
+		auto operator()(Targs &&... args) const -> typename std::conditional<std::is_same<void, decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>::value, bool, std::optional<decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>>::type {
 			if constexpr (std::is_same<void, decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>::value) {
 				if (!f) {
 					return false;
