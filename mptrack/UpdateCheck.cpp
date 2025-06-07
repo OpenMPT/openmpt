@@ -608,6 +608,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 {
 	nlohmann::json j;
 	j["OpenMPT"]["Version"] = mpt::ufmt::val(Version::Current());
+	j["OpenMPT"]["InstallationMode"] = theApp.GetInstallationMode();
 	j["OpenMPT"]["BuildVariant"] = mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_VARIANT);
 	j["OpenMPT"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetProcessArchitecture());
 	j["Update"]["PeriodDays"] = settings.periodDays;

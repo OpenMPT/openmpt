@@ -260,6 +260,22 @@ public:
 	{
 		return m_bSourceTreeMode;
 	}
+	mpt::ustring GetInstallationMode() const
+	{
+		if(IsInstallerMode())
+		{
+			return MPT_USTRING("installer");
+		}
+		if(IsPortableMode())
+		{
+			return MPT_USTRING("portable");
+		}
+		if(IsSourceTreeMode())
+		{
+			return MPT_USTRING("sourcetree");
+		}
+		return MPT_USTRING("unknown");
+	}
 
 	SettingsContainer &GetPluginCache();
 	SettingsContainer &GetSongSettings();
