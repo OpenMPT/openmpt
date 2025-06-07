@@ -15,6 +15,8 @@ is just a high-level summary.
     and Fujiology use this extension for TCB Tracker modules, instead of the
     canonical .MOD extension.
 
+ *  Building with libmpg123 1.33.0 in PORTABLE_API mode now works.
+
  *  miniz: v3.0.2 (2023-01-15).
 
 ### libopenmpt 0.8.0 (2025-05-31)
