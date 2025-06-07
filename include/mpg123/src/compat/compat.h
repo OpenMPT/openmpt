@@ -116,14 +116,16 @@ typedef unsigned char byte;
 #ifdef HAVE_STRTOK_R
 #define INT123_compat_strtok(a, b, c) strtok_r((a), (b), (c))
 #endif
+#endif  /* OpenMPT */
 
 #if (defined(_UCRT) || defined(_MSC_VER) || (defined(__MINGW32__) || defined(__MINGW64__)) || (defined(__WATCOMC__) && defined(__NT__))) && !defined(__CYGWIN__)
 #define MPG123_COMPAT_MSVCRT_IO
+#ifndef NO_STRTOK  /* OpenMPT */
 #ifndef INT123_compat_strtok
 #define INT123_compat_strtok(a, b, c) strtok_s((a), (b), (c))
 #endif
-#endif
 #endif  /* OpenMPT */
+#endif
 
 #if defined(MPG123_COMPAT_MSVCRT_IO)
 #if defined(_UCRT)
