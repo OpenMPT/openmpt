@@ -535,7 +535,7 @@ public:
 	private:
 		Tfunc * f = nullptr;
 	public:
-		optional_function(const std::optional<library> & library, const std::string & symbol) { 
+		optional_function(const std::optional<library> & library, const std::string & symbol) {
 			if (!library.has_value()) {
 				return;
 			}
@@ -543,7 +543,7 @@ public:
 				return;
 			}
 		}
-		optional_function(const library & library, const std::string & symbol) { 
+		optional_function(const library & library, const std::string & symbol) {
 			if (!library.bind_function(f, symbol)) {
 				return;
 			}
@@ -554,9 +554,9 @@ public:
 		bool operator!() const {
 			return f == nullptr;
 		}
-		template <typename ... Targs>
-		auto operator() (Targs && ... args) const -> std::conditional<std::is_same<void, decltype(std::declval<Tfunc*>()(std::forward<Targs>(args)...))>::value, bool, std::optional<decltype(std::declval<Tfunc*>()(std::forward<Targs>(args)...))>>::type {
-			if constexpr (std::is_same<void, decltype(std::declval<Tfunc*>()(std::forward<Targs>(args)...))>::value) {
+		template <typename... Targs>
+		auto operator()(Targs &&... args) const -> std::conditional<std::is_same<void, decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>::value, bool, std::optional<decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>>::type {
+			if constexpr (std::is_same<void, decltype(std::declval<Tfunc *>()(std::forward<Targs>(args)...))>::value) {
 				if (!f) {
 					return false;
 				}
@@ -571,18 +571,18 @@ public:
 		}
 	};
 
-	template <typename Tfunc, typename ... Targs>
-	auto optional_call(const std::string & symbol, Targs && ... args) const {
+	template <typename Tfunc, typename... Targs>
+	auto optional_call(const std::string & symbol, Targs &&... args) const {
 		return optional_function<Tfunc>{*this, symbol}(std::forward<Targs>(args)...);
 	}
 
-	template <typename Tfunc, typename ... Targs>
-	static inline auto optional_call(const std::optional<library> & lib, const std::string & symbol, Targs && ... args) {
+	template <typename Tfunc, typename... Targs>
+	static inline auto optional_call(const std::optional<library> & lib, const std::string & symbol, Targs &&... args) {
 		return optional_function<Tfunc>{lib, symbol}(std::forward<Targs>(args)...);
 	}
 
-	template <typename Tfunc, typename ... Targs>
-	static inline auto optional_call(const library::path & path, const std::string & symbol, Targs && ... args) {
+	template <typename Tfunc, typename... Targs>
+	static inline auto optional_call(const library::path & path, const std::string & symbol, Targs &&... args) {
 		return optional_call<Tfunc>(library::load_optional(path), symbol, std::forward<Targs>(args)...);
 	}
 };
