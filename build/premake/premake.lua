@@ -29,7 +29,7 @@ newoption {
 		{ "winxp", "Windows XP" },
 		{ "win7", "Windows 7" },
 		{ "win81", "Windows 8.1" },
-		{ "win10", "Wiondows 10" }
+		{ "win10", "Windows 10" }
 	}
 }
 
