@@ -106,7 +106,7 @@ private:
 					switch ( match_mode ) {
 					case match_print:
 						log << MPT_USTRING("sndfile: ")
-						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.name ? format_info.name : "" ) ) << MPT_USTRING(" (.") << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.extension ? format_info.extension : "" ) ) << MPT_USTRING(")")
+						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( format_info.name ? format_info.name : "" ) ) << MPT_USTRING(" (.") << mpt::transcode<mpt::ustring>( sndfile_encoding, ( subformat_info.extension ? subformat_info.extension : format_info.extension ? format_info.extension : "" ) ) << MPT_USTRING(")")
 						    << MPT_USTRING(" / ")
 						    << mpt::transcode<mpt::ustring>( sndfile_encoding, ( subformat_info.name ? subformat_info.name : "" ) )
 						    << MPT_USTRING(" [")
@@ -117,6 +117,14 @@ private:
 					case match_recurse:
 						break;
 					case match_exact:
+						if ( subformat_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == subformat_info.extension ) ) {
+							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT ) ) {
+								return matched_result( format, format_info, subformat_info, match_mode );
+							} else if ( !flags.use_float && ( subformat_info.format == SF_FORMAT_PCM_16 ) ) {
+								return matched_result( format, format_info, subformat_info, match_mode );
+							}
+						}
+						break;
 						if ( format_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == format_info.extension ) ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT ) ) {
 								return matched_result( format, format_info, subformat_info, match_mode );
@@ -126,6 +134,14 @@ private:
 						}
 						break;
 					case match_better:
+						if ( subformat_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == subformat_info.extension ) ) {
+							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
+								return matched_result( format, format_info, subformat_info, match_mode );
+							} else if ( !flags.use_float && ( subformat_info.format & ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) ) {
+								return matched_result( format, format_info, subformat_info, match_mode );
+							}
+						}
+						break;
 						if ( format_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == format_info.extension ) ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
 								return matched_result( format, format_info, subformat_info, match_mode );
@@ -135,6 +151,9 @@ private:
 						}
 						break;
 					case match_any:
+						if ( subformat_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == subformat_info.extension ) ) {
+							return matched_result( format, format_info, subformat_info, match_mode );
+						}
 						if ( format_info.extension && ( mpt::transcode<std::string>( sndfile_encoding, extension ) == format_info.extension ) ) {
 							return matched_result( format, format_info, subformat_info, match_mode );
 						}
