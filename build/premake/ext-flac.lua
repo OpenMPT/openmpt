@@ -112,7 +112,7 @@
     buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4334" }
   filter {}
   filter { "action:vs*" }
-    buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd28182" } -- /analyze
+    buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd26110", "/wd28182" } -- /analyze
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
