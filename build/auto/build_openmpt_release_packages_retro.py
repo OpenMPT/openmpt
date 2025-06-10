@@ -169,6 +169,7 @@ copy_binaries(sourcePathModern + "x86/", openmpt_zip_x86_path)
 copy_pluginbridge(sourcePathModern, "x86", openmpt_zip_x86_path)
 copy_pluginbridge(sourcePathModern, "amd64", openmpt_zip_x86_path)
 Path(openmpt_zip_x86_path + "OpenMPT.portable").touch()
+
 print("Copying amd64 binaries...")
 shutil.rmtree(openmpt_zip_amd64_basepath, ignore_errors=True)
 copy_binaries(sourcePathModern + "amd64/", openmpt_zip_amd64_path)
