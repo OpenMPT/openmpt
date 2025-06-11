@@ -7,6 +7,7 @@
 
 #include "openmpt/streamencoder/StreamEncoder.hpp"
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/base/bit.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/span.hpp"
