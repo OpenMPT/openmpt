@@ -10,8 +10,9 @@ is just a high-level summary.
  *  [**Bug**] `openmpt::string::get("source_has_mixed_revisions")` and
     `openmpt_get_string("source_has_mixed_revisions")` always returned an empty
     string.
- *  [**Bug**] openmpt123: Allow for converting to formats which list the file
-    extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or later).
+ *  [**Bug**] openmpt123: Allow for converting to libsndfile formats which list
+    the file extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or
+    later).
 
  *  mpg123: Update to v1.33.0 (2025-06-07).
  *  miniz: Update to v3.0.2 (2023-01-15).
