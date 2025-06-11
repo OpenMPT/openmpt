@@ -10,8 +10,9 @@ is just a high-level summary.
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
     UTF8.
  *  [**Bug**] libopenmpt_test did not build from the MSVC source packages.
- *  [**Bug**] openmpt123: Allow for converting to formats which list the file
-    extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or later).
+ *  [**Bug**] openmpt123: Allow for converting to libsndfile formats which list
+    the file extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or
+    later).
 
  *  [**Change**] TCB was added to the list of supported file extensions. ModLand
     and Fujiology use this extension for TCB Tracker modules, instead of the
