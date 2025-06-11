@@ -100,7 +100,7 @@ Optional dependencies
 ### openmpt123
 
  *  Rendering to PCM files can use:
-     *  **FLAC 1.2** or higher
+     *  **FLAC 1.3** or higher
      *  **libsndfile**
      *  **Win32** for WAVE
      *  raw PCM has no external dependencies
