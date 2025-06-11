@@ -9,6 +9,7 @@
 
 #include "mpt/base/alloc.hpp"
 #include "mpt/base/memory.hpp"
+#include "mpt/base/pointer.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
@@ -32,6 +33,7 @@
 #include <cstddef>
 
 #if defined(MPT_WITH_OPUS) && defined(MPT_WITH_OPUSENC)
+#include <opus.h>
 #include <opusenc.h>
 #endif
 

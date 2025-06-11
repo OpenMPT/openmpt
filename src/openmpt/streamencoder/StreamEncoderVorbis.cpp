@@ -9,6 +9,10 @@
 
 #include "mpt/base/alloc.hpp"
 #include "mpt/base/saturate_cast.hpp"
+#include "mpt/base/saturate_round.hpp"
+#include "mpt/format/message.hpp"
+#include "mpt/format/message_macros.hpp"
+#include "mpt/format/simple.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 #include "mpt/path/native_path.hpp"
@@ -21,6 +25,7 @@
 #include "openmpt/soundfile_data/tags.hpp"
 #include "openmpt/streamencoder/StreamEncoder.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <ostream>
 
@@ -266,8 +271,8 @@ bool VorbisEncoder::IsBitrateSupported(int samplerate, int channels, int bitrate
 mpt::ustring VorbisEncoder::DescribeQuality(float quality) const
 {
 	static constexpr int q_table[11] = {64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 500};  // http://wiki.hydrogenaud.io/index.php?title=Recommended_Ogg_Vorbis
-	int q = Clamp(mpt::saturate_round<int>(quality * 10.0f), 0, 10);
-	return MPT_UFORMAT("Q{} (~{} kbit)")(mpt::ufmt::fix(quality * 10.0f, 1), q_table[q]);
+	int q = std::clamp(mpt::saturate_round<int>(quality * 10.0f), 0, 10);
+	return MPT_UFORMAT_MESSAGE("Q{} (~{} kbit)")(mpt::format<mpt::ustring>::fix(quality * 10.0f, 1), q_table[q]);
 }
 
 
