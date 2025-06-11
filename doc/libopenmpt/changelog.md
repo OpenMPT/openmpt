@@ -12,8 +12,9 @@ is just a high-level summary.
     string.
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
     UTF8.
- *  [**Bug**] openmpt123: Allow for converting to formats which list the file
-    extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or later).
+ *  [**Bug**] openmpt123: Allow for converting to libsndfile formats which list
+    the file extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or
+    later).
 
  *  mpg123: Update to v1.33.0 (2025-06-07).
  *  miniz: Update to v3.0.2 (2023-01-15).
