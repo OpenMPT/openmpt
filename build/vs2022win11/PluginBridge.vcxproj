@@ -373,169 +373,169 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\Debug\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\Debug\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-static\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\Debug\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-static\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-static\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\Debug\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\Release\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\Release\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-static\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\Release\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-static\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-static\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\Release\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\Checked\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\Checked\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-static\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-static\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\Checked\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64EC'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-static\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-static\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\Checked\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\DebugShared\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\DebugShared\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-shared\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\DebugShared\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64EC'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win11-shared\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win11-shared\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\DebugShared\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\ReleaseShared\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\ReleaseShared\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-shared\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\ReleaseShared\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64EC'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win11-shared\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win11-shared\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\ReleaseShared\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86\CheckedShared\</IntDir>
     <TargetName>PluginBridge-x86</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\x86_64\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\x86_64\CheckedShared\</IntDir>
     <TargetName>PluginBridge-amd64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-shared\arm64\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-shared\arm64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64\CheckedShared\</IntDir>
     <TargetName>PluginBridge-arm64</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64EC'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win11-shared\arm64ec\</OutDir>
-    <IntDir>..\obj\vs2022win11\PluginBridge\arm64ec\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win11-shared\arm64ec\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win11\PluginBridge\arm64ec\CheckedShared\</IntDir>
     <TargetName>PluginBridge-arm64ec</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>

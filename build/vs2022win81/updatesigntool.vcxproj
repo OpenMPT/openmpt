@@ -281,127 +281,127 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\Debug\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\Debug\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-static\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-static\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\Debug\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\Release\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\Release\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-static\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-static\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\Release\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-static\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\Checked\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-static\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\Checked\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-static\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-static\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\Checked\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\DebugShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\DebugShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\vs2022-win81-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win81-shared\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\DebugShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\ReleaseShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\ReleaseShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\vs2022-win81-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win81-shared\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\ReleaseShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-shared\x86\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86\CheckedShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-shared\amd64\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\x86_64\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\x86_64\CheckedShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\checked\vs2022-win81-shared\arm\</OutDir>
-    <IntDir>..\obj\vs2022win81\updatesigntool\arm\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win81-shared\arm\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2022win81\updatesigntool\arm\CheckedShared\</IntDir>
     <TargetName>updatesigntool</TargetName>
     <TargetExt>.exe</TargetExt>
   </PropertyGroup>

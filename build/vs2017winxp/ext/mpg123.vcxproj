@@ -214,85 +214,85 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-winxp-static\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\debug\vs2017-winxp-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\Debug\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-winxp-static\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\Debug\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\debug\vs2017-winxp-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\Debug\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-winxp-static\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\release\vs2017-winxp-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\Release\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-winxp-static\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\Release\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\release\vs2017-winxp-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\Release\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-winxp-static\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\checked\vs2017-winxp-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\Checked\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-winxp-static\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\Checked\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\checked\vs2017-winxp-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\Checked\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-winxp-shared\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\debug\vs2017-winxp-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\DebugShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\..\bin\debug\vs2017-winxp-shared\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\DebugShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\debug\vs2017-winxp-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\DebugShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-winxp-shared\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\release\vs2017-winxp-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\ReleaseShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\release\vs2017-winxp-shared\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\ReleaseShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\release\vs2017-winxp-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\ReleaseShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-winxp-shared\x86\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\checked\vs2017-winxp-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86\CheckedShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\..\bin\checked\vs2017-winxp-shared\amd64\</OutDir>
-    <IntDir>..\..\obj\vs2017winxp\mpg123\x86_64\CheckedShared\</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\checked\vs2017-winxp-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\..\obj\vs2017winxp\mpg123\x86_64\CheckedShared\</IntDir>
     <TargetName>openmpt-mpg123</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
