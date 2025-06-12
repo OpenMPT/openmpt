@@ -67,26 +67,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\mbedtls-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\mbedtls-lib\</IntDir>
     <TargetName>mbedtls-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\mbedtls-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\mbedtls-lib\</IntDir>
     <TargetName>mbedtls-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>bin\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\mbedtls-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\mbedtls-lib\</IntDir>
     <TargetName>mbedtls-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\mbedtls-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\mbedtls-lib\</IntDir>
     <TargetName>mbedtls-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>

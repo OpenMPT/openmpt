@@ -67,26 +67,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\zlib-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\zlib-lib\</IntDir>
     <TargetName>zlib-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\zlib-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\zlib-lib\</IntDir>
     <TargetName>zlib-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>bin\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\zlib-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\zlib-lib\</IntDir>
     <TargetName>zlib-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\zlib-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\zlib-lib\</IntDir>
     <TargetName>zlib-lib</TargetName>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>

@@ -248,6 +248,7 @@
 		87FBBF507BFB08C200E61D90 /* externalanglebrackets.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = externalanglebrackets.md; path = ../../website/docs/externalanglebrackets.md; sourceTree = "<group>"; };
 		884E2CB8CC9CD22A0EC40AF8 /* Sponsors.js */ = {isa = PBXFileReference; lastKnownFileType = text; name = Sponsors.js; path = ../../website/src/components/Sponsors.js; sourceTree = "<group>"; };
 		885DA7664EEB9ED8BCEDC5A6 /* Adding-Unit-Tests.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "Adding-Unit-Tests.md"; path = "../../website/docs/Adding-Unit-Tests.md"; sourceTree = "<group>"; };
+		89116DFA7D10B76C01FBCC3A /* targetbundleextension.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = targetbundleextension.md; path = ../../website/docs/targetbundleextension.md; sourceTree = "<group>"; };
 		8930C300B8C291F293CFD140 /* optimize.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = optimize.md; path = ../../website/docs/optimize.md; sourceTree = "<group>"; };
 		8A3A556A8AED525CFECF23AA /* kind.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = kind.md; path = ../../website/docs/kind.md; sourceTree = "<group>"; };
 		8ABE621E1D4C2C108624D05E /* resincludedirs.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = resincludedirs.md; path = ../../website/docs/resincludedirs.md; sourceTree = "<group>"; };
@@ -260,6 +261,7 @@
 		8F83CC06FCABDA78FE3ECA46 /* Removing-Values.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "Removing-Values.md"; path = "../../website/docs/Removing-Values.md"; sourceTree = "<group>"; };
 		8F9AD14600BD7238B6841F86 /* buildoutputs.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = buildoutputs.md; path = ../../website/docs/buildoutputs.md; sourceTree = "<group>"; };
 		903F81A1D48E271316B55FE1 /* table.join.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = table.join.md; path = ../../website/docs/table/table.join.md; sourceTree = "<group>"; };
+		904F4ABA25C609EC946260FA /* extensions.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = extensions.md; path = ../../website/community/extensions.md; sourceTree = "<group>"; };
 		906D4D3256FB44A4C4FD6B72 /* inlinesvisibility.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = inlinesvisibility.md; path = ../../website/docs/inlinesvisibility.md; sourceTree = "<group>"; };
 		91EBBFFD2A63AD6F564A9E3D /* 2019-08-31-community-update-1.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = "2019-08-31-community-update-1.md"; path = "../../website/blog/2019-08-31-community-update-1.md"; sourceTree = "<group>"; };
 		9249DD02C1DBABF49CE8EB42 /* buildlog.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = buildlog.md; path = ../../website/docs/buildlog.md; sourceTree = "<group>"; };
@@ -378,7 +380,6 @@
 		CDA61A039434117502363843 /* table.foreachi.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = table.foreachi.md; path = ../../website/docs/table/table.foreachi.md; sourceTree = "<group>"; };
 		CDE1406EFEC5386011DD6EAE /* targetname.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = targetname.md; path = ../../website/docs/targetname.md; sourceTree = "<group>"; };
 		CE27807424B4EAE6FD2DFEB4 /* bindirs.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = bindirs.md; path = ../../website/docs/bindirs.md; sourceTree = "<group>"; };
-		CE8E62AEB97A88A0016050EE /* Usages.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = Usages.md; path = ../../website/docs/Usages.md; sourceTree = "<group>"; };
 		CED532881323D7FA554B10C8 /* shaderdefines.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = shaderdefines.md; path = ../../website/docs/shaderdefines.md; sourceTree = "<group>"; };
 		CF802BAA410B441CF00C69EA /* mfc.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = mfc.md; path = ../../website/docs/mfc.md; sourceTree = "<group>"; };
 		D0413A6AFFD3095CDAE048AA /* debugdir.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = debugdir.md; path = ../../website/docs/debugdir.md; sourceTree = "<group>"; };
@@ -528,7 +529,6 @@
 				D5429646C02EBC3808148486 /* Tokens.md */,
 				E1AB2142CC974734147D0F82 /* Topics.md */,
 				D8BBACC845E3BB3A4776AB08 /* Usages-and-Uses.md */,
-				CE8E62AEB97A88A0016050EE /* Usages.md */,
 				3E9EEC1682ED9188C514CA56 /* Using-Modules.md */,
 				E8FE15AE2D4CBB206F73F3EE /* Using-Premake.md */,
 				80B9AE3CEDE1BCAEEF74AC7C /* What-Is-Premake.md */,
@@ -750,6 +750,7 @@
 				ED2540F01BCB94E2750CEF30 /* table */,
 				63CC783C647F752ED861467C /* tags.md */,
 				3602FC9091445002649E9AD0 /* tailcalls.md */,
+				89116DFA7D10B76C01FBCC3A /* targetbundleextension.md */,
 				529DE84AADDF3BBC8139868A /* targetdir.md */,
 				1E5F46068B8754788D1A4446 /* targetextension.md */,
 				CDE1406EFEC5386011DD6EAE /* targetname.md */,
@@ -933,6 +934,7 @@
 		88A1EC722B901324BAB5F2B2 /* community */ = {
 			isa = PBXGroup;
 			children = (
+				904F4ABA25C609EC946260FA /* extensions.md */,
 				BCB79DEC80235F9EBEC7042C /* modules.md */,
 				17CEEBF46531E226DB50E234 /* showcase.md */,
 				69B166B42D1D28666BC0CCF4 /* support.md */,

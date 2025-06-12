@@ -29,30 +29,30 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <OutDir>bin\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\Web\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\Web\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <OutDir>bin\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\Web\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\Web\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <OutDir>bin\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\Web\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\Web\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <OutDir>bin\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\Web\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\Web\</IntDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -101,6 +101,7 @@
     <None Include="..\..\website\blog\2024-11-09-community-update-11.md" />
     <None Include="..\..\website\blog\2024-12-22-community-update-12.md" />
     <None Include="..\..\website\blog\authors.yml" />
+    <None Include="..\..\website\community\extensions.md" />
     <None Include="..\..\website\community\modules.md" />
     <None Include="..\..\website\community\showcase.md" />
     <None Include="..\..\website\community\support.md" />
@@ -145,7 +146,6 @@
     <None Include="..\..\website\docs\Tokens.md" />
     <None Include="..\..\website\docs\Topics.md" />
     <None Include="..\..\website\docs\Usages-and-Uses.md" />
-    <None Include="..\..\website\docs\Usages.md" />
     <None Include="..\..\website\docs\Using-Modules.md" />
     <None Include="..\..\website\docs\Using-Premake.md" />
     <None Include="..\..\website\docs\What-Is-Premake.md" />
@@ -480,6 +480,7 @@
     <None Include="..\..\website\docs\table\table.translate.md" />
     <None Include="..\..\website\docs\tags.md" />
     <None Include="..\..\website\docs\tailcalls.md" />
+    <None Include="..\..\website\docs\targetbundleextension.md" />
     <None Include="..\..\website\docs\targetdir.md" />
     <None Include="..\..\website\docs\targetextension.md" />
     <None Include="..\..\website\docs\targetname.md" />

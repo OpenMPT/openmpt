@@ -100,6 +100,7 @@
 			SSSE3 = "-mssse3",
 			["SSE4.1"] = "-msse4.1",
 			["SSE4.2"] = "-msse4.2",
+			ALTIVEC = "-maltivec",
 		},
 		isaextensions = {
 			MOVBE = "-mmovbe",
@@ -153,6 +154,13 @@
 			Address = "-fsanitize=address",
 			Thread = "-fsanitize=thread",
 			UndefinedBehavior = "-fsanitize=undefined",
+		},
+		structmemberalign = {
+			[1] = "-fpack-struct=1",
+			[2] = "-fpack-struct=2",
+			[4] = "-fpack-struct=4",
+			[8] = "-fpack-struct=8",
+			[16] = "-fpack-struct=16",
 		},
 		visibility = {
 			Default = "-fvisibility=default",

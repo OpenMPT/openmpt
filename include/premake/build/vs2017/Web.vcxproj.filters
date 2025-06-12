@@ -102,6 +102,9 @@
     <None Include="..\..\website\blog\authors.yml">
       <Filter>blog</Filter>
     </None>
+    <None Include="..\..\website\community\extensions.md">
+      <Filter>community</Filter>
+    </None>
     <None Include="..\..\website\community\modules.md">
       <Filter>community</Filter>
     </None>
@@ -232,9 +235,6 @@
       <Filter>docs</Filter>
     </None>
     <None Include="..\..\website\docs\Usages-and-Uses.md">
-      <Filter>docs</Filter>
-    </None>
-    <None Include="..\..\website\docs\Usages.md">
       <Filter>docs</Filter>
     </None>
     <None Include="..\..\website\docs\Using-Modules.md">
@@ -1237,6 +1237,9 @@
       <Filter>docs</Filter>
     </None>
     <None Include="..\..\website\docs\tailcalls.md">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\..\website\docs\targetbundleextension.md">
       <Filter>docs</Filter>
     </None>
     <None Include="..\..\website\docs\targetdir.md">

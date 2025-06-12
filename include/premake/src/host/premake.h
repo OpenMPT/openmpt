@@ -19,7 +19,7 @@
 #include <stdlib.h>
 
 #ifndef PREMAKE_VERSION
-# define PREMAKE_VERSION "5.0.0-beta6"
+# define PREMAKE_VERSION "5.0.0-dev"
 #endif
 
 #define PREMAKE_COPYRIGHT      "Copyright (C) 2002-2025 Jess Perkins and the Premake Project"
@@ -75,6 +75,10 @@
 #define PLATFORM_ARCHITECTURE "loongarch64"
 #elif defined(__e2k__)
 #define PLATFORM_ARCHITECTURE "e2k"
+#elif defined(__ppc64__) || defined(__powerpc64__)
+#define PLATFORM_ARCHITECTURE "ppc64"
+#elif defined(__ppc__) || defined(__powerpc__)
+#define PLATFORM_ARCHITECTURE "ppc"
 #elif !defined(RC_INVOKED)
 #error Unknown architecture detected
 #endif

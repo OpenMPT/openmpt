@@ -70,29 +70,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\</OutDir>
-    <IntDir>obj\x86\Release\luasocket\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\luasocket\</IntDir>
     <TargetName>luasocket</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\..\bin\release\</OutDir>
-    <IntDir>obj\x64\Release\luasocket\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\luasocket\</IntDir>
     <TargetName>luasocket</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\</OutDir>
-    <IntDir>obj\x86\Debug\luasocket\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\luasocket\</IntDir>
     <TargetName>luasocket</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\..\bin\debug\</OutDir>
-    <IntDir>obj\x64\Debug\luasocket\</IntDir>
+    <OutDir>$(ProjectDir)..\..\bin\debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\luasocket\</IntDir>
     <TargetName>luasocket</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>

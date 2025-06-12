@@ -67,7 +67,6 @@
 				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /DLL /LTCG"
 				OutputFile="$(OutDir)\example.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -141,7 +140,6 @@
 				AdditionalOptions="/NOLOGO /INCREMENTAL:NO /DLL /LTCG"
 				OutputFile="$(OutDir)\example.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -214,7 +212,6 @@
 				AdditionalOptions="/NOLOGO /DLL /DEBUG"
 				OutputFile="$(OutDir)\example.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -288,7 +285,6 @@
 				AdditionalOptions="/NOLOGO /DLL /DEBUG"
 				OutputFile="$(OutDir)\example.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool

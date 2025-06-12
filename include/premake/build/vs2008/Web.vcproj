@@ -163,6 +163,10 @@
 			Name="community"
 			>
 			<File
+				RelativePath="..\..\website\community\extensions.md"
+				>
+			</File>
+			<File
 				RelativePath="..\..\website\community\modules.md"
 				>
 			</File>
@@ -340,10 +344,6 @@
 			</File>
 			<File
 				RelativePath="..\..\website\docs\Usages-and-Uses.md"
-				>
-			</File>
-			<File
-				RelativePath="..\..\website\docs\Usages.md"
 				>
 			</File>
 			<File
@@ -1200,6 +1200,10 @@
 			</File>
 			<File
 				RelativePath="..\..\website\docs\tailcalls.md"
+				>
+			</File>
+			<File
+				RelativePath="..\..\website\docs\targetbundleextension.md"
 				>
 			</File>
 			<File

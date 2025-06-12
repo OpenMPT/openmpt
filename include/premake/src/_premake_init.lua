@@ -30,6 +30,8 @@
 			p.ARM64,
 			p.RISCV64,
 			p.LOONGARCH64,
+			p.PPC,
+			p.PPC64,
 			p.WASM32,
 			p.WASM64,
 			p.E2K
@@ -823,6 +825,19 @@
 	}
 
 	api.register {
+		name = "structmemberalign",
+		scope = "config",
+		kind = "integer",
+		allowed = {
+			"1",
+			"2",
+			"4",
+			"8",
+			"16",
+		}
+	}
+
+	api.register {
 		name = "symbols",
 		scope = "config",
 		kind = "string",
@@ -855,6 +870,7 @@
 			"linux",
 			"macosx",
 			"solaris",
+			"tvos",
 			"uwp",
 			"wii",
 			"windows",
@@ -967,6 +983,7 @@
 			"SSSE3",
 			"SSE4.1",
 			"SSE4.2",
+			"ALTIVEC",
 		}
 	}
 
@@ -1194,6 +1211,12 @@
 		kind = "boolean"
 	}
 
+	p.api.register {
+		name = "targetbundleextension",
+		scope = "config",
+		kind = "string"
+	}
+
 
 -----------------------------------------------------------------------------
 --
@@ -1306,6 +1329,7 @@
 			{ "linux",      "Linux" },
 			{ "macosx",     "Apple Mac OS X" },
 			{ "solaris",    "Solaris" },
+			{ "tvos",       "tvOS" },
 			{ "uwp",        "Microsoft Universal Windows Platform"},
 			{ "windows",    "Microsoft Windows" },
 		}
@@ -1400,22 +1424,22 @@
 	-- Add variations for other Posix-like systems.
 
 	filter { "system:darwin", "kind:WindowedApp" }
-		targetextension ".app"
+		targetbundleextension ".app"
 
 	filter { "system:darwin", "kind:SharedLib" }
 		targetextension ".dylib"
 
 	filter { "system:darwin", "kind:SharedLib", "sharedlibtype:OSXBundle" }
 		targetprefix ""
-		targetextension ".bundle"
+		targetbundleextension ".bundle"
 
 	filter { "system:darwin", "kind:SharedLib", "sharedlibtype:OSXFramework" }
 		targetprefix ""
-		targetextension ".framework"
+		targetbundleextension ".framework"
 
 	filter { "system:darwin", "kind:SharedLib", "sharedlibtype:XCTest" }
 		targetprefix ""
-		targetextension ".xctest"
+		targetbundleextension ".xctest"
 
 	-- Windows and friends.
 

@@ -1255,7 +1255,7 @@
 			settings['EXECUTABLE_PREFIX'] = cfg.buildtarget.prefix
 		end
 
-		if cfg.buildtarget.extension then
+		if cfg.buildtarget.bundleextension then
 			local exts = {
 				WindowedApp  = "app",
 				SharedLib    = "dylib",
@@ -1264,7 +1264,7 @@
 				OSXFramework = "framework",
 				XCTest       = "xctest",
 			}
-			local ext = cfg.buildtarget.extension:sub(2)
+			local ext = iif(cfg.kind == "WindowedApp" or (cfg.kind == "SharedLib" and cfg.sharedlibtype), cfg.buildtarget.bundleextension:sub(2), cfg.buildtarget.extension:sub(2))
 			if ext ~= exts[iif(cfg.kind == "SharedLib" and cfg.sharedlibtype, cfg.sharedlibtype, cfg.kind)] then
 				if cfg.kind == "WindowedApp" or (cfg.kind == "SharedLib" and cfg.sharedlibtype) then
 					settings['WRAPPER_EXTENSION'] = ext
@@ -1340,6 +1340,15 @@
 			local family = families[cfg.iosfamily]
 			if family then
 				settings['TARGETED_DEVICE_FAMILY'] = family
+			end
+		elseif os.istarget(p.TVOS) then
+			settings['SDKROOT'] = 'appletvos'
+
+			settings['CODE_SIGN_IDENTITY[sdk=appletvos*]'] = cfg.xcodecodesigningidentity or 'Apple Developer'
+
+			local minOSVersion = project.systemversion(cfg)
+			if minOSVersion ~= nil then
+				settings['TVOS_DEPLOYMENT_TARGET'] = minOSVersion
 			end
 		else
 			local minOSVersion = project.systemversion(cfg)
@@ -1490,7 +1499,7 @@
 			settings['GCC_ENABLE_OBJC_EXCEPTIONS'] = 'NO'
 		end
 
-		local optimizeMap = { On = 3, Size = 's', Speed = 3, Full = 'fast', Debug = 1 }
+		local optimizeMap = { On = 3, Size = 's', Speed = 3, Full = 'fast', Debug = 'g' }
 		settings['GCC_OPTIMIZATION_LEVEL'] = optimizeMap[cfg.optimize] or 0
 
 		if cfg.pchheader and not cfg.flags.NoPCH then
@@ -1578,6 +1587,10 @@
 		]]
 
 		settings['OTHER_CFLAGS'] = table.join(flags, cfg.buildoptions)
+
+		if cfg.structmemberalign then
+			table.insert(settings['OTHER_CFLAGS'], "-fpack-struct=" .. tostring(cfg.structmemberalign))
+		end
 
 		-- build list of "other" linked flags.
 		flags = { }

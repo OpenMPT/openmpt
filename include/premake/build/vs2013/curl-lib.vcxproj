@@ -68,29 +68,29 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\curl-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\curl-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>bin\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\curl-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\curl-lib\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\curl-lib\</IntDir>
     <TargetName>curl-lib</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>..\..\contrib\curl\include;$(IncludePath)</IncludePath>

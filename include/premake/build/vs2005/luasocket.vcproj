@@ -68,7 +68,6 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -143,7 +142,6 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -217,7 +215,6 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -292,7 +289,6 @@
 				AdditionalDependencies="ws2_32.lib"
 				OutputFile="$(OutDir)\luasocket.dll"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool

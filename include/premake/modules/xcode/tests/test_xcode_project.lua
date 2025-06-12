@@ -256,6 +256,19 @@
 	end
 
 
+	function suite.PBXFileReference_ListsTVOSWindowedTarget()
+		_TARGET_OS = "tvos"
+		kind "WindowedApp"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		E5FB9875FD0E33A7ED2A2EB5 /* MyProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MyProject.app; path = MyProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
+
+
 	function suite.PBXFileReference_ListsStaticLibTarget()
 		kind "StaticLib"
 		prepare()
@@ -281,6 +294,19 @@
 	end
 
 
+	function suite.PBXFileReference_ListsTVOSStaticLibTarget()
+		_TARGET_OS = "tvos"
+		kind "StaticLib"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		FDCF31ACF735331EEAD08FEC /* libMyProject.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libMyProject.a; path = libMyProject.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
+
+
 	function suite.PBXFileReference_ListsSharedLibTarget()
 		kind "SharedLib"
 		prepare()
@@ -295,6 +321,19 @@
 
 	function suite.PBXFileReference_ListsIOSSharedLibTarget()
 		_TARGET_OS = "ios"
+		kind "SharedLib"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		2781AF7F7E0F19F156882DBF /* libMyProject.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libMyProject.dylib; path = libMyProject.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
+
+
+	function suite.PBXFileReference_ListsTVOSSharedLibTarget()
+		_TARGET_OS = "tvos"
 		kind "SharedLib"
 		prepare()
 		xcode.PBXFileReference(tr)
@@ -332,6 +371,19 @@
 		]]
 	end
 
+	function suite.PBXFileReference_ListsTVOSOSXBundleTarget()
+		_TARGET_OS = "tvos"
+		kind "SharedLib"
+		sharedlibtype "OSXBundle"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		8AD066EE75BC8CE0BDA2552E /* MyProject.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MyProject.bundle; path = MyProject.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
+
 	function suite.PBXFileReference_ListsXCTestTarget()
 		kind "SharedLib"
 		sharedlibtype "XCTest"
@@ -346,6 +398,19 @@
 
 	function suite.PBXFileReference_ListsIOSXCTestTarget()
 		_TARGET_OS = "ios"
+		kind "SharedLib"
+		sharedlibtype "XCTest"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		F573990FE05FBF012845874F /* MyProject.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MyProject.xctest; path = MyProject.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
+
+	function suite.PBXFileReference_ListsTVOSXCTestTarget()
+		_TARGET_OS = "tvos"
 		kind "SharedLib"
 		sharedlibtype "XCTest"
 		prepare()
@@ -383,6 +448,19 @@
 		]]
 	end
 
+
+	function suite.PBXFileReference_ListsTVOSOSXFrameworkTarget()
+		_TARGET_OS = "tvos"
+		kind "SharedLib"
+		sharedlibtype "OSXFramework"
+		prepare()
+		xcode.PBXFileReference(tr)
+		test.capture [[
+/* Begin PBXFileReference section */
+		2D914F2255CC07D43D679562 /* MyProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MyProject.framework; path = MyProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+		]]
+	end
 
 
 	function suite.PBXFileReference_ListsSourceFiles()
@@ -1830,9 +1908,9 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnWindowedAppTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnWindowedAppTargetBundleExtension()
 		kind "WindowedApp"
-		targetextension ".xyz"
+		targetbundleextension ".xyz"
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1853,9 +1931,9 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnWindowedAppNoTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnWindowedAppNoTargetBundleExtension()
 		kind "WindowedApp"
-		targetextension ""
+		targetbundleextension ""
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1876,10 +1954,10 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnOSXBundleTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnOSXBundleTargetBundleExtension()
 		kind "SharedLib"
 		sharedlibtype "OSXBundle"
-		targetextension ".xyz"
+		targetbundleextension ".xyz"
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1900,10 +1978,10 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnOSXBundleNoTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnOSXBundleNoTargetBundleExtension()
 		kind "SharedLib"
 		sharedlibtype "OSXBundle"
-		targetextension ""
+		targetbundleextension ""
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1924,10 +2002,10 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnOSXFrameworkTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnOSXFrameworkTargetBundleExtension()
 		kind "SharedLib"
 		sharedlibtype "OSXFramework"
-		targetextension ".xyz"
+		targetbundleextension ".xyz"
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1948,10 +2026,10 @@
 	end
 
 
-	function suite.XCBuildConfigurationTarget_OnOSXFrameworkNoTargetExtension()
+	function suite.XCBuildConfigurationTarget_OnOSXFrameworkNoTargetBundleExtension()
 		kind "SharedLib"
 		sharedlibtype "OSXFramework"
-		targetextension ""
+		targetbundleextension ""
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -2238,6 +2316,99 @@
 		]]
 	end
 
+	function suite.XCBuildConfigurationTarget_OnTVOS()
+		_TARGET_OS = "tvos"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "Apple Developer";
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = MyProject;
+				SDKROOT = appletvos;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+	function suite.XCBuildConfigurationTarget_OnTVOSMinVersion()
+		_TARGET_OS = "tvos"
+		systemversion "8.3"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "Apple Developer";
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = MyProject;
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 8.3;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+	function suite.XCBuildConfigurationTarget_OnTVOSMinMaxVersion()
+		_TARGET_OS = "tvos"
+		systemversion "8.3:9.1"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "Apple Developer";
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = MyProject;
+				SDKROOT = appletvos;
+				TVOS_DEPLOYMENT_TARGET = 8.3;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
+	function suite.XCBuildConfigurationTarget_OnTVOSCodeSigningIdentity()
+		_TARGET_OS = "tvos"
+		xcodecodesigningidentity "Premake Developers"
+		prepare()
+		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
+		test.capture [[
+		FDC4CBFB4635B02D8AD4823B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "Premake Developers";
+				CONFIGURATION_BUILD_DIR = bin/Debug;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = MyProject;
+				SDKROOT = appletvos;
+			};
+			name = Debug;
+		};
+		]]
+	end
+
 
 ---------------------------------------------------------------------------
 -- XCBuildConfiguration_Project tests
@@ -2266,6 +2437,29 @@
 		]]
 	end
 
+	function suite.XCBuildConfigurationProject_OnOptimizeDebug()
+		optimize "Debug"
+		prepare()
+		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
+		test.capture [[
+		A14350AC4595EE5E57CE36EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = g;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/Debug;
+				ONLY_ACTIVE_ARCH = NO;
+				SYMROOT = bin/Debug;
+			};
+			name = Debug;
+		};
+		]]
+	end
 
 	function suite.XCBuildConfigurationProject_OnOptimizeSize()
 		optimize "Size"
@@ -3020,6 +3214,32 @@
 		]]
 	end
 
+	function suite.XCBuildConfigurationProject_OnStructmemberalign()
+		structmemberalign(2)
+		prepare()
+		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
+		test.capture [[
+		A14350AC4595EE5E57CE36EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = obj/Debug;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-fpack-struct=2",
+				);
+				SYMROOT = bin/Debug;
+			};
+			name = Debug;
+		};
+		]]
+	end
 
 	function suite.XCBuildConfigurationProject_OnNoPCH()
 		pchheader "MyProject_Prefix.pch"

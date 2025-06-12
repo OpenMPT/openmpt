@@ -68,7 +68,6 @@
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -143,7 +142,6 @@
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -217,7 +215,6 @@
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool
@@ -292,7 +289,6 @@
 				AdditionalDependencies="ole32.lib ws2_32.lib advapi32.lib version.lib"
 				OutputFile="$(OutDir)\premake5.exe"
 				LinkIncremental="0"
-				GenerateManifest="false"
 				ProgramDatabaseFile=""
 			/>
 			<Tool

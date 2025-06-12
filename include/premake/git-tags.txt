@@ -1,1 +1,1 @@
-%(describe:tags=true)
+v5.0.0-beta6-23-g3b2ef094

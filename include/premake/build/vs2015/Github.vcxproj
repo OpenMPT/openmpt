@@ -29,30 +29,30 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <OutDir>bin\x86\Release\</OutDir>
-    <IntDir>obj\x86\Release\Github\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Release\Github\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <OutDir>bin\x64\Release\</OutDir>
-    <IntDir>obj\x64\Release\Github\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Release\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Release\Github\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <OutDir>bin\x86\Debug\</OutDir>
-    <IntDir>obj\x86\Debug\Github\</IntDir>
+    <OutDir>$(ProjectDir)bin\x86\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x86\Debug\Github\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <OutDir>bin\x64\Debug\</OutDir>
-    <IntDir>obj\x64\Debug\Github\</IntDir>
+    <OutDir>$(ProjectDir)bin\x64\Debug\</OutDir>
+    <IntDir>$(ProjectDir)obj\x64\Debug\Github\</IntDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

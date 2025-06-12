@@ -65,6 +65,7 @@
 		sanitize = table.merge(gcc.shared.sanitize, {
 			Fuzzer = "-fsanitize=fuzzer",
 		}),
+		structmemberalign = gcc.shared.structmemberalign,
 		visibility = gcc.shared.visibility,
 		inlinesvisibility = gcc.shared.inlinesvisibility,
 		linktimeoptimization = gcc.shared.linktimeoptimization,
@@ -95,10 +96,15 @@
 	function clang.getsystemversionflags(cfg)
 		local flags = {}
 
-		if cfg.system == p.MACOSX or cfg.system == p.IOS then
+		if cfg.system == p.MACOSX or cfg.system == p.IOS or cfg.system == p.TVOS then
 			local minVersion = p.project.systemversion(cfg)
 			if minVersion ~= nil then
-				local name = iif(cfg.system == p.MACOSX, "macosx", "iphoneos")
+				local name = "macosx"
+				if cfg.system == p.IOS then
+					name = "iphoneos"
+				elseif cfg.system == p.TVOS then
+					name = "appletvos"
+				end
 				table.insert (flags, "-m" .. name .. "-version-min=" .. p.project.systemversion(cfg))
 			end
 		end

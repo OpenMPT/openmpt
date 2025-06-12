@@ -21,6 +21,7 @@
       <File Name="../../website/blog/authors.yml"/>
     </VirtualDirectory>
     <VirtualDirectory Name="community">
+      <File Name="../../website/community/extensions.md"/>
       <File Name="../../website/community/modules.md"/>
       <File Name="../../website/community/showcase.md"/>
       <File Name="../../website/community/support.md"/>
@@ -67,7 +68,6 @@
       <File Name="../../website/docs/Tokens.md"/>
       <File Name="../../website/docs/Topics.md"/>
       <File Name="../../website/docs/Usages-and-Uses.md"/>
-      <File Name="../../website/docs/Usages.md"/>
       <File Name="../../website/docs/Using-Modules.md"/>
       <File Name="../../website/docs/Using-Premake.md"/>
       <File Name="../../website/docs/What-Is-Premake.md"/>
@@ -416,6 +416,7 @@
       </VirtualDirectory>
       <File Name="../../website/docs/tags.md"/>
       <File Name="../../website/docs/tailcalls.md"/>
+      <File Name="../../website/docs/targetbundleextension.md"/>
       <File Name="../../website/docs/targetdir.md"/>
       <File Name="../../website/docs/targetextension.md"/>
       <File Name="../../website/docs/targetname.md"/>
