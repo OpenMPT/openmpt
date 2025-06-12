@@ -14,9 +14,9 @@ is just a high-level summary.
     the file extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or
     later).
 
- *  [**Change**] TCB was added to the list of supported file extensions. ModLand
-    and Fujiology use this extension for TCB Tracker modules, instead of the
-    canonical .MOD extension.
+ *  [**Change**] `TCB` was added to the list of supported file extensions.
+    ModLand and Fujiology use this extension for TCB Tracker modules, instead of
+    the canonical `MOD` extension.
 
  *  Building with libmpg123 1.33.0 in PORTABLE_API mode now works.
 
