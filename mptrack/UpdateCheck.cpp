@@ -579,7 +579,8 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 
 
 CUpdateCheck::Settings::Settings()
-	: periodDays(TrackerSettings::Instance().UpdateIntervalDays)
+	: previousVersion(TrackerSettings::Instance().PreviousSettingsVersion)
+	, periodDays(TrackerSettings::Instance().UpdateIntervalDays)
 	, channel(static_cast<UpdateChannel>(TrackerSettings::Instance().UpdateChannel.Get()))
 	, persistencePath(theApp.GetConfigPath())
 	, apiURL(TrackerSettings::Instance().UpdateAPIURL)
@@ -770,18 +771,26 @@ mpt::PathString CUpdateCheck::GetUpdateTempDirectory(bool portable)
 	if(portable)
 	{
 		return theApp.GetInstallPath().WithTrailingSlash() + P_("Temp") + mpt::PathString::FromNative(mpt::RawPathString(1, mpt::PathString::GetDefaultPathSeparator()));
+	} else
+	{
+		return mpt::common_directories::get_temp_directory();
 	}
-	return mpt::common_directories::get_temp_directory();
 }
 
 
-void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & /* settings */ , const CUpdateCheck::Context & /* context */ )
+void CUpdateCheck::CleanOldUpdates(const CUpdateCheck::Settings & settings, const CUpdateCheck::Context & /* context */ )
 {
 	if(theApp.IsPortableMode())
 	{
 		CleanOldUpdates(GetUpdateTempDirectory(true));
+		if(settings.previousVersion < MPT_V("1.31.02.02"))
+		{
+			CleanOldUpdates(GetUpdateTempDirectory(false));
+		}
+	} else
+	{
+		CleanOldUpdates(GetUpdateTempDirectory(false));
 	}
-	CleanOldUpdates(GetUpdateTempDirectory(false));
 }
 
 
