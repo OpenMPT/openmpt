@@ -393,7 +393,7 @@ static Encoder::Traits BuildTraits(bool compatible)
 	traits.samplerates = (compatible ? mpt::make_vector(mpeg1layer3_samplerates) : mpt::make_vector(layer3_samplerates));
 	traits.modes = (compatible ? Encoder::ModeCBR : (Encoder::ModeABR | Encoder::ModeQuality));
 	traits.bitrates = (compatible ? mpt::make_vector(mpeg1layer3_bitrates) : mpt::make_vector(layer3_bitrates));
-	traits.defaultSamplerate = 44100;
+	traits.defaultSamplerate = (compatible ? 44100 : 48000);
 	traits.defaultChannels = 2;
 	traits.defaultMode = (compatible ? Encoder::ModeCBR : Encoder::ModeQuality);
 	traits.defaultBitrate = 256;
