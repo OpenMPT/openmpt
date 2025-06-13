@@ -494,6 +494,8 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 						);
 					text += MPT_UFORMAT("Windows version: {}\n")
 						( 
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win10, 22000) ? UV_("Windows 11") :
+						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win10) ? UV_("Windows 10") :
 						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win81) ? UV_("Windows 8.1") :
 						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win8) ? UV_("Windows 8") :
 						mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win7) ? UV_("Windows 7") :
