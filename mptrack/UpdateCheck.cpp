@@ -937,7 +937,7 @@ const CUpdateCheck::Error &CUpdateCheck::MessageAsError(WPARAM /* wparam */ , LP
 
 
 
-static const char updateScript[] = R"vbs(
+static const char updateScript_vbs[] = R"vbs(
 
 Wscript.Echo
 Wscript.Echo "OpenMPT portable Update"
@@ -1015,6 +1015,58 @@ WScript.Quit
 
 )vbs";
 
+
+static const char updateScript_ps1[] = R"ps1(
+
+param(
+	[String]$zip="",
+	[String]$subfolder="",
+	[String]$dst="",
+	[String]$restartbinary="")
+
+Write-Output ""
+Write-Output "OpenMPT portable Update"
+Write-Output "======================="
+
+Write-Output "[  0%] Waiting for OpenMPT to close..."
+Start-Sleep -Seconds 2
+
+Write-Output "[ 10%] Changing to temporary directory..."
+Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
+
+Write-Output "[ 20%] Decompressing update..."
+Expand-Archive -Path $zip -DestinationPath (Join-Path -Path (Resolve-Path -Path ".") -ChildPath "tmp") -Force
+
+Write-Output "[ 40%] Installing update..."
+if (($subfolder -eq "") -or ($subfolder -eq ".")) {
+	Copy-Item -Path (Join-Path -Path (Join-Path -Path (Resolve-Path -Path ".") -ChildPath "tmp") -ChildPath "*") -Destination $dst -Recurse -Force
+} else {
+	Copy-Item -Path (Join-Path -Path (Join-Path -Path (Join-Path -Path (Resolve-Path -Path ".") -ChildPath "tmp") -ChildPath $subfolder) -ChildPath "*") -Destination $dst -Recurse -Force
+}
+
+Write-Output "[ 60%] Deleting temporary directory..."
+Remove-Item -Path (Join-Path -Path (Resolve-Path -Path ".") -ChildPath "tmp") -Recurse -Force
+
+Write-Output "[ 80%] Restarting OpenMPT..."
+Start-Process -FilePath (Join-Path -Path (Resolve-Path -Path $dst) -ChildPath $restartbinary)  -WorkingDirectory $dst
+
+Write-Output "[100%] Update successful!"
+Write-Output ""
+Start-Sleep -Seconds 1
+
+Write-Output "Closing update window in 5 seconds..."
+Start-Sleep -Seconds 1
+Write-Output "Closing update window in 4 seconds..."
+Start-Sleep -Seconds 1
+Write-Output "Closing update window in 3 seconds..."
+Start-Sleep -Seconds 1
+Write-Output "Closing update window in 2 seconds..."
+Start-Sleep -Seconds 1
+Write-Output "Closing update window in 1 seconds..."
+Start-Sleep -Seconds 1
+Write-Output "Closing update window..."
+
+)ps1";
 
 
 class CDoUpdate: public CProgressDialog
@@ -1306,33 +1358,82 @@ public:
 					}
 				} else if(download.type == U_("archive") && downloadinfo.autoupdate_archive)
 				{
-					try
+					bool usePowerShell = mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win10, 22000);
+					switch(TrackerSettings::Instance().UpdatePortableBackend)
 					{
-						mpt::IO::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.vbs"), std::ios::binary);
-						file.stream().imbue(std::locale::classic());
-						file.stream().exceptions(std::ios::failbit | std::ios::badbit);
-						mpt::IO::WriteRaw(file.stream(), mpt::as_span(std::string(updateScript)));
-					} catch(...)
-					{
-						throw Error(U_("Error creating update script."));
+						case 1:
+							usePowerShell = false;
+							break;
+						case 2:
+							usePowerShell = true;
+							break;
+						default:
+							// nothing
+							break;
 					}
-					std::vector<mpt::ustring> arguments;
-					arguments.push_back(U_("\"") + (dirTempOpenMPTUpdates + P_("update.vbs")).ToUnicode() + U_("\""));
-					arguments.push_back(U_("\"") + updateFilename.ToUnicode() + U_("\""));
-					arguments.push_back(U_("\"") + (downloadinfo.autoupdate_archive->subfolder.empty() ? U_(".") : downloadinfo.autoupdate_archive->subfolder) + U_("\""));
-					arguments.push_back(U_("\"") + theApp.GetInstallPath().WithoutTrailingSlash().ToUnicode() + U_("\""));
-					arguments.push_back(U_("\"") + downloadinfo.autoupdate_archive->restartbinary + U_("\""));
-					if(theApp.IsSourceTreeMode())
+					if(usePowerShell)
 					{
-						throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::join_format(arguments, U_(" "))));
-					}
-					if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
-						P_("cscript.exe").AsNative().c_str(),
-						mpt::ToWin(mpt::join_format(arguments, U_(" "))).c_str(),
-						dirTempOpenMPTUpdates.AsNative().c_str(),
-						SW_SHOWDEFAULT)) < 32)
+						try
+						{
+							mpt::IO::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.ps1"), std::ios::binary);
+							file.stream().imbue(std::locale::classic());
+							file.stream().exceptions(std::ios::failbit | std::ios::badbit);
+							mpt::IO::WriteRaw(file.stream(), mpt::as_span(std::string(updateScript_ps1)));
+						} catch(...)
+						{
+							throw Error(U_("Error creating update script."));
+						}
+						std::vector<mpt::ustring> arguments = {
+							U_("-NoLogo"),
+							U_("-ExecutionPolicy"), U_("Unrestricted"),
+							U_("\"") + (dirTempOpenMPTUpdates + P_("update.ps1")).ToUnicode() + U_("\""),
+							U_("-zip"), U_("\"") + updateFilename.ToUnicode() + U_("\""),
+							U_("-subfolder"), U_("\"") + (downloadinfo.autoupdate_archive->subfolder.empty() ? U_(".") : downloadinfo.autoupdate_archive->subfolder) + U_("\""),
+							U_("-dst"), U_("\"") + theApp.GetInstallPath().WithoutTrailingSlash().ToUnicode() + U_("\""),
+							U_("-restartbinary"), U_("\"") + downloadinfo.autoupdate_archive->restartbinary + U_("\"")
+						};
+						if(theApp.IsSourceTreeMode())
+						{
+							throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::join_format(arguments, U_(" "))));
+						}
+						if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
+							P_("PowerShell.exe").AsNative().c_str(),
+							mpt::ToWin(mpt::join_format(arguments, U_(" "))).c_str(),
+							dirTempOpenMPTUpdates.AsNative().c_str(),
+							SW_SHOWDEFAULT)) < 32)
+						{
+							throw Error(U_("Error launching update."));
+						}
+					} else
 					{
-						throw Error(U_("Error launching update."));
+						try
+						{
+							mpt::IO::SafeOutputFile file(dirTempOpenMPTUpdates + P_("update.vbs"), std::ios::binary);
+							file.stream().imbue(std::locale::classic());
+							file.stream().exceptions(std::ios::failbit | std::ios::badbit);
+							mpt::IO::WriteRaw(file.stream(), mpt::as_span(std::string(updateScript_vbs)));
+						} catch(...)
+						{
+							throw Error(U_("Error creating update script."));
+						}
+						std::vector<mpt::ustring> arguments;
+						arguments.push_back(U_("\"") + (dirTempOpenMPTUpdates + P_("update.vbs")).ToUnicode() + U_("\""));
+						arguments.push_back(U_("\"") + updateFilename.ToUnicode() + U_("\""));
+						arguments.push_back(U_("\"") + (downloadinfo.autoupdate_archive->subfolder.empty() ? U_(".") : downloadinfo.autoupdate_archive->subfolder) + U_("\""));
+						arguments.push_back(U_("\"") + theApp.GetInstallPath().WithoutTrailingSlash().ToUnicode() + U_("\""));
+						arguments.push_back(U_("\"") + downloadinfo.autoupdate_archive->restartbinary + U_("\""));
+						if(theApp.IsSourceTreeMode())
+						{
+							throw Warning(MPT_UFORMAT("Refusing to launch update '{} {}' when running from source tree.")(P_("cscript.exe"), mpt::join_format(arguments, U_(" "))));
+						}
+						if(reinterpret_cast<INT_PTR>(ShellExecute(NULL, NULL,
+							P_("cscript.exe").AsNative().c_str(),
+							mpt::ToWin(mpt::join_format(arguments, U_(" "))).c_str(),
+							dirTempOpenMPTUpdates.AsNative().c_str(),
+							SW_SHOWDEFAULT)) < 32)
+						{
+							throw Error(U_("Error launching update."));
+						}
 					}
 					wantClose = true;
 				} else

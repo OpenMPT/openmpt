@@ -358,6 +358,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateIgnoreVersion(conf, UL_("Update"), UL_("IgnoreVersion"), _T(""))
 	, UpdateSkipSignatureVerificationUNSECURE(conf, UL_("Update"), UL_("SkipSignatureVerification"), false)
 	, UpdateSigningKeysRootAnchors(conf, UL_("Update"), UL_("SigningKeysRootAnchors"), CUpdateCheck::GetDefaultUpdateSigningKeysRootAnchors())
+	, UpdatePortableBackend(conf, UL_("Update"), UL_("PortableBackend"), 0)
 #endif // MPT_ENABLE_UPDATE
 	// Wine suppport
 	, WineSupportEnabled(conf, UL_("WineSupport"), UL_("Enabled"), false)

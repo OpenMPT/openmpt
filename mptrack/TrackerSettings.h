@@ -1002,6 +1002,7 @@ public:
 	Setting<CString> UpdateIgnoreVersion;
 	Setting<bool> UpdateSkipSignatureVerificationUNSECURE;
 	Setting<std::vector<mpt::ustring>> UpdateSigningKeysRootAnchors;
+	Setting<int32> UpdatePortableBackend;
 
 #endif // MPT_ENABLE_UPDATE
 
