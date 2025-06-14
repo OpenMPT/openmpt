@@ -18,6 +18,12 @@ is just a high-level summary.
     ModLand and Fujiology use this extension for TCB Tracker modules, instead of
     the canonical `MOD` extension.
 
+ *  IT: Fixed various interactions between Note Cut effect and portamentos.
+ *  MED: When triggering a synth note with a Synth Jump command on the same row,
+    the initial speed command was not executed.
+ *  S3M: Old ModPlug Tracker versions allowed to use the 28th character of
+    sample names to be used. Such sample names are now read correctly again.
+
  *  Building with libmpg123 1.33.0 in PORTABLE_API mode now works.
 
  *  mpg123: Update to v1.33.0 (2025-06-07).
