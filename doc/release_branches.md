@@ -55,3 +55,8 @@ branching release branches
 13. update https://builds.openmpt.org/builds/
 14. update buildbot scripts that copy OpenMPT update information into place
 15. update branch release date on libopenmpt trunk changelog
+16. reduce libopenmpt release packages to only include source and modern Windows
+    builds for old stable branch:
+     1. Buildbot config
+     2. release script
+     3. Website download page
