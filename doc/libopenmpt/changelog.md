@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.8.2-pre
+
 ### libopenmpt 0.8.1 (2025-06-14)
 
  *  [**Bug**] Work-around broken user locale support on Haiku by always assuming
