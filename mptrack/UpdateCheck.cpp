@@ -833,9 +833,9 @@ void CUpdateCheck::SendStatistics(HTTP::InternetSession &internet, const CUpdate
 		std::string jsondata = statistics;
 		MPT_LOG_GLOBAL(LogInformation, "Update", mpt::ToUnicode(mpt::Charset::UTF8, jsondata));
 		requestStatistics.data = mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(jsondata));
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 		requestStatistics.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 		internet(requestStatistics);
 	}
 }
@@ -850,9 +850,9 @@ UpdateCheckResult CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &intern
 	request.acceptMimeTypes = HTTP::MimeTypes::JSON();
 	request.flags = HTTP::NoCache;
 
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 	request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 	HTTP::Result resultHTTP = internet(request);
 
 	// Retrieve HTTP status code.
@@ -1134,9 +1134,9 @@ public:
 					request.SetURI(ParseURI(download.url));
 					request.method = HTTP::Method::Get;
 					request.acceptMimeTypes = HTTP::MimeTypes::JSON();
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 					request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 					HTTP::Result resultHTTP = internet(request);
 					if(resultHTTP.Status != 200)
 					{
@@ -1154,9 +1154,9 @@ public:
 						request.SetURI(ParseURI(download.url + U_(".jws.json")));
 						request.method = HTTP::Method::Get;
 						request.acceptMimeTypes = HTTP::MimeTypes::JSON();
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 						request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 						HTTP::Result resultHTTP = internet(request);
 						if(resultHTTP.Status != 200)
 						{
@@ -1181,9 +1181,9 @@ public:
 							request.acceptMimeTypes = HTTP::MimeTypes::JSON();
 							try
 							{
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 								request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 								HTTP::Result resultHTTP = internet(request);
 								resultHTTP.CheckStatus(200);
 								mpt::append(keys, mpt::crypto::asymmetric::rsassa_pss<>::parse_jwk_set(mpt::ToUnicode(mpt::Charset::UTF8, mpt::buffer_cast<std::string>(resultHTTP.Data))));
@@ -1285,9 +1285,9 @@ public:
 							throw HTTP::Abort();
 						}
 					};
-#if defined(MPT_BUILD_RETRO)
+#if MPT_WIN_BEFORE(MPT_WIN_VISTA)
 					request.InsecureTLSDowngradeWindowsXP();
-#endif // MPT_BUILD_RETRO
+#endif // < MPT_WIN_VISTA
 					HTTP::Result resultHTTP = internet(request);
 					if(resultHTTP.Status != 200)
 					{
