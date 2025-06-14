@@ -14,6 +14,8 @@ is just a high-level summary.
     the file extension only in the subformat (i.e. MP3 with libsndfile 1.1.0 or
     later).
 
+ *  MED: Command FFF no longer stops a note if it was triggered on the same row.
+
  *  mpg123: Update to v1.33.0 (2025-06-07).
  *  miniz: Update to v3.0.2 (2023-01-15).
  *  pugixml: Update to v1.15 (2025-01-10).
