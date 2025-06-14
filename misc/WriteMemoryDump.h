@@ -47,11 +47,7 @@ inline MPT_NOINLINE bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, co
 			if((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
 			{
 				const MINIDUMP_TYPE flags = fullMemDump ?
-						(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo
-#if MPT_COMPILER_MSVC
-							| MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation
-#endif
-						)
+						(MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithHandleData | MiniDumpWithThreadInfo | MiniDumpWithProcessThreadData | MiniDumpWithFullMemoryInfo | MiniDumpIgnoreInaccessibleMemory | MiniDumpWithTokenInformation)
 					:
 						MiniDumpNormal
 					;
