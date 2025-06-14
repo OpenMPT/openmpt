@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.24-pre
+
 ### libopenmpt 0.6.23 (2025-06-14)
 
  *  [**Bug**] `openmpt::string::get("source_has_mixed_revisions")` and
