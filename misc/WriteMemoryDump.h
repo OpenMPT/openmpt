@@ -13,7 +13,6 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/base/macros.hpp"
-#include "mpt/base/utility.hpp"
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -35,7 +34,7 @@ inline MPT_NOINLINE bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, co
 	HMODULE hDll = ::LoadLibrary(_T("DBGHELP.DLL"));
 	if(hDll)
 	{
-		MINIDUMPWRITEDUMP pDump = mpt::function_pointer_cast<MINIDUMPWRITEDUMP>(::GetProcAddress(hDll, "MiniDumpWriteDump"));
+		MINIDUMPWRITEDUMP pDump = reinterpret_cast<MINIDUMPWRITEDUMP>(::GetProcAddress(hDll, "MiniDumpWriteDump"));
 		if(pDump)
 		{
 
