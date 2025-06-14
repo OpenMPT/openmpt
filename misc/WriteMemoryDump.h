@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
 
 #if MPT_COMPILER_MSVC
@@ -32,7 +33,14 @@ inline MPT_NOINLINE bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, co
 	if(hDll)
 	{
 		using MINIDUMPWRITEDUMP = BOOL(WINAPI *)(HANDLE hProcess, DWORD dwPid, HANDLE hFile, MINIDUMP_TYPE DumpType, CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, CONST PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam, CONST PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
+#if (MPT_CLANG_AT_LEAST(19, 0, 0) && !MPT_OS_ANDROID) || MPT_CLANG_AT_LEAST(20, 0, 0)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+#endif
 		MINIDUMPWRITEDUMP pDump = reinterpret_cast<MINIDUMPWRITEDUMP>(::GetProcAddress(hDll, "MiniDumpWriteDump"));
+#if (MPT_CLANG_AT_LEAST(19, 0, 0) && !MPT_OS_ANDROID) || MPT_CLANG_AT_LEAST(20, 0, 0)
+#pragma clang diagnostic pop
+#endif
 		if(pDump)
 		{
 			HANDLE hFile = ::CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
