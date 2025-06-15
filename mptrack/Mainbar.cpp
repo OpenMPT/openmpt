@@ -191,12 +191,11 @@ enum ToolbarItemIndex
 #define TOOLBAR_IMAGE_PLAY  13
 
 #define SCALEPIXELS(x)      (HighDPISupport::ScalePixels(x, m_hWnd))
-#define TEXTFIELD_HEIGHT    SCALEPIXELS(20)
 #define SPINNER_WIDTH       SCALEPIXELS(16)
 #define SPINNER_HEIGHT      SCALEPIXELS(20)
 #define VUMETER_WIDTH       SCALEPIXELS(255)
 #define VUMETER_HEIGHT      SCALEPIXELS(19)
-#define TREEVIEW_PADDING    SCALEPIXELS(3)
+
 
 static UINT MainButtons[] =
 {
@@ -952,8 +951,8 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	m_pModTreeData->SubclassDlgItem(IDC_TREEDATA, this);
 	m_pModTree = new CModTree(m_pModTreeData);
 	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
-	m_dwStatus = 0;
-	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + TREEVIEW_PADDING;
+	m_status.reset();
+	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + Padding();
 	m_sizeDefault.cy = 32767;
 	return l;
 }
@@ -1045,6 +1044,12 @@ void CModTreeBar::OnOptionsChanged()
 }
 
 
+int CModTreeBar::Padding() const
+{
+	return HighDPISupport::ScalePixels(3, m_hWnd);
+}
+
+
 void CModTreeBar::RecalcLayout()
 {
 	CRect rect;
@@ -1054,7 +1059,7 @@ void CModTreeBar::RecalcLayout()
 		int cytree, cydata, cyavail;
 
 		GetClientRect(&rect);
-		const int padding = TREEVIEW_PADDING;
+		const int padding = Padding();
 		cyavail = rect.Height() - padding;
 		if(cyavail < 0) cyavail = 0;
 		cytree = (cyavail * m_nTreeSplitRatio) >> 8;
@@ -1088,7 +1093,7 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 	CSize sz;
 	m_sizeDefault.cx = width;
 	m_sizeDefault.cy = 32767;
-	const int padding = TREEVIEW_PADDING;
+	const int padding = Padding();
 	sz.cx = width + padding;
 	if(sz.cx < padding + 1)
 		sz.cx = padding + 1;
@@ -1102,13 +1107,13 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 	CRect rect;
 	GetClientRect(&rect);
 
-	if((m_dwStatus & (MTB_CAPTURE|MTB_DRAGGING)) && (::GetCapture() != m_hWnd))
+	if(m_status[MTB_CAPTURE | MTB_DRAGGING] && (::GetCapture() != m_hWnd))
 	{
 		CancelTracking();
 	}
-	if(m_dwStatus & MTB_DRAGGING)
+	if(m_status[MTB_DRAGGING])
 	{
-		if(m_dwStatus & MTB_VERTICAL)
+		if(m_status[MTB_VERTICAL])
 		{
 			if(m_pModTree)
 			{
@@ -1118,36 +1123,36 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 			}
 			pt.y -= ptDragging.y;
 			pt.y = std::clamp(static_cast<int>(pt.y), 0, rect.Height());
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.y != static_cast<int>(m_nTrackPos)))
+			if(!m_status[MTB_TRACKER] || (pt.y != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER)
+				if(m_status[MTB_TRACKER])
 					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.y;
 				OnInvertTracker(m_nTrackPos);
-				m_dwStatus |= MTB_TRACKER;
+				m_status.set(MTB_TRACKER);
 			}
 		} else
 		{
 			pt.x -= ptDragging.x;
 			if(BarOnLeft())
-				pt.x += (m_cxOriginal - TREEVIEW_PADDING);
+				pt.x += (m_cxOriginal - Padding());
 			else
 				pt.x = m_cxOriginal - pt.x;
 			pt.x = std::max(pt.x, LONG(0));
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.x != static_cast<int>(m_nTrackPos)))
+			if(!m_status[MTB_TRACKER] || (pt.x != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER)
+				if(m_status[MTB_TRACKER])
 					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.x;
 				OnInvertTracker(m_nTrackPos);
-				m_dwStatus |= MTB_TRACKER;
+				m_status.set(MTB_TRACKER);
 			}
 		}
 	} else
 	{
 		UINT nCursor = 0;
 
-		const int padding = TREEVIEW_PADDING;
+		const int padding = Padding();
 		const int extraPadding = HighDPISupport::ScalePixels(2, m_hWnd);
 		if(BarOnLeft())
 		{
@@ -1176,27 +1181,27 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 		}
 		if(nCursor)
 		{
-			UINT nDir = (nCursor == AFX_IDC_VSPLITBAR) ? MTB_VERTICAL : 0;
-			bool load = false;
-			if(!(m_dwStatus & MTB_CAPTURE))
+			const bool wasVertical = m_status[MTB_VERTICAL];
+			bool vertical = (nCursor == AFX_IDC_VSPLITBAR);
+			bool setCursor = false;
+			if(!m_status[MTB_CAPTURE])
 			{
-				m_dwStatus |= MTB_CAPTURE;
+				m_status.set(MTB_CAPTURE);
 				SetCapture();
-				load = true;
+				setCursor = true;
 			} else
 			{
-				if(nDir != (m_dwStatus & MTB_VERTICAL))
-					load = true;
+				if(vertical != wasVertical)
+					setCursor = true;
 			}
-			m_dwStatus &= ~MTB_VERTICAL;
-			m_dwStatus |= nDir;
-			if(load)
+			m_status.set(MTB_VERTICAL, vertical);
+			if(setCursor)
 				SetCursor(theApp.LoadCursor(nCursor));
 		} else
 		{
-			if(m_dwStatus & MTB_CAPTURE)
+			if(m_status[MTB_CAPTURE])
 			{
-				m_dwStatus &= ~MTB_CAPTURE;
+				m_status.reset(MTB_CAPTURE);
 				ReleaseCapture();
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 			}
@@ -1207,14 +1212,14 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 
 void CModTreeBar::DoLButtonDown(CPoint pt)
 {
-	if((m_dwStatus & MTB_CAPTURE) && (!(m_dwStatus & MTB_DRAGGING)))
+	if(m_status[MTB_CAPTURE] && !m_status[MTB_DRAGGING])
 	{
 		CRect rect;
 		GetWindowRect(&rect);
 		m_cxOriginal = rect.Width();
 		m_cyOriginal = rect.Height();
 		ptDragging = pt;
-		m_dwStatus |= MTB_DRAGGING;
+		m_status.set(MTB_DRAGGING);
 		DoMouseMove(pt);
 	}
 }
@@ -1222,18 +1227,18 @@ void CModTreeBar::DoLButtonDown(CPoint pt)
 
 void CModTreeBar::DoLButtonUp()
 {
-	if(m_dwStatus & MTB_DRAGGING)
+	if(m_status[MTB_DRAGGING])
 	{
 		CRect rect;
 
-		m_dwStatus &= ~MTB_DRAGGING;
-		if(m_dwStatus & MTB_TRACKER)
+		m_status.reset(MTB_DRAGGING);
+		if(m_status[MTB_TRACKER])
 		{
 			OnInvertTracker(m_nTrackPos);
-			m_dwStatus &= ~MTB_TRACKER;
+			m_status.reset(MTB_TRACKER);
 		}
-		const int padding = TREEVIEW_PADDING;
-		if(m_dwStatus & MTB_VERTICAL)
+		const int padding = Padding();
+		if(m_status[MTB_VERTICAL])
 		{
 			GetClientRect(&rect);
 			int cyavail = rect.Height() - padding;
@@ -1264,15 +1269,15 @@ void CModTreeBar::DoLButtonUp()
 
 void CModTreeBar::CancelTracking()
 {
-	if(m_dwStatus & MTB_TRACKER)
+	if(m_status[MTB_TRACKER])
 	{
 		OnInvertTracker(m_nTrackPos);
-		m_dwStatus &= ~MTB_TRACKER;
+		m_status.reset(MTB_TRACKER);
 	}
-	m_dwStatus &= ~MTB_DRAGGING;
-	if(m_dwStatus & MTB_CAPTURE)
+	m_status.reset(MTB_DRAGGING);
+	if(m_status[MTB_CAPTURE])
 	{
-		m_dwStatus &= ~MTB_CAPTURE;
+		m_status.reset(MTB_CAPTURE);
 		ReleaseCapture();
 	}
 }
@@ -1287,8 +1292,8 @@ void CModTreeBar::OnInvertTracker(UINT x)
 		CRect rect;
 
 		GetClientRect(&rect);
-		const int padding = TREEVIEW_PADDING + 1;
-		if(m_dwStatus & MTB_VERTICAL)
+		const int padding = Padding() + 1;
+		if(m_status[MTB_VERTICAL])
 		{
 			rect.top = x;
 			rect.bottom = rect.top + padding;
@@ -1358,9 +1363,9 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 	if(lpncsp)
 	{
 		if(BarOnLeft())
-			lpncsp->rgrc[0].right -= TREEVIEW_PADDING;
+			lpncsp->rgrc[0].right -= Padding();
 		else
-			lpncsp->rgrc[0].left += TREEVIEW_PADDING;
+			lpncsp->rgrc[0].left += Padding();
 		lpncsp->rgrc[0].right = std::max(lpncsp->rgrc[0].left, lpncsp->rgrc[0].right);
 	}
 }
@@ -1373,9 +1378,9 @@ LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 	GetWindowRect(&rect);
 	rect.DeflateRect(1, 1);
 	if(BarOnLeft())
-		rect.right -= TREEVIEW_PADDING;
+		rect.right -= Padding();
 	else
-		rect.left += TREEVIEW_PADDING;
+		rect.left += Padding();
 	if(!rect.PtInRect(point))
 		return HTBORDER;
 	return CDialogBar::OnNcHitTest(point);
@@ -1394,9 +1399,9 @@ void CModTreeBar::OnNcPaint()
 	rect.left = 0;
 	rect.top = 0;
 	if(BarOnLeft())
-		rect.left = rect.right - TREEVIEW_PADDING;
+		rect.left = rect.right - Padding();
 	else
-		rect.right = rect.left + TREEVIEW_PADDING;
+		rect.right = rect.left + Padding();
 	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();
