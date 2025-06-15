@@ -38,7 +38,7 @@ struct UpdateCheckResult;
 struct UpdateHint;
 struct MODPLUGDIB;
 enum class MidiSetup: int32;
-enum class MainToolBarItem : uint8;
+enum class MainToolBarItem : uint32;
 enum SoundDeviceStopMode : int;
 namespace SoundDevice {
 class Base;
@@ -465,6 +465,10 @@ protected:
 	afx_msg void OnToggleMainBarShowRowsPerBeat();
 	afx_msg void OnToggleMainBarShowGlobalVolume();
 	afx_msg void OnToggleMainBarShowVUMeter();
+	afx_msg void OnToggleMainBarShowFileIcons();
+	afx_msg void OnToggleMainBarShowEditIcons();
+	afx_msg void OnToggleMainBarShowPlayIcons();
+	afx_msg void OnToggleMainBarShowMiscIcons();
 	afx_msg void OnToggleMainBarItem(MainToolBarItem item, UINT menuID);
 	afx_msg void OnToggleTreeViewOnLeft();
 

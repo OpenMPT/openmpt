@@ -163,32 +163,61 @@ void CToolBarEx::SetButtonVisibility(int index, bool visible)
 
 enum ToolbarItemIndex
 {
-	PLAYCMD_INDEX = 10,                             // Play / Pause
-	EDITOCTAVE_INDEX = 13,                          // Base Octave
-	SPINOCTAVE_INDEX = EDITOCTAVE_INDEX + 1,        // Spin Base Octave
-	DIVOCTAVE_INDEX = SPINOCTAVE_INDEX + 1,         // Divider for vertical mode
-	TEMPOTEXT_INDEX = DIVOCTAVE_INDEX + 1,          // Static "Tempo:"
-	EDITTEMPO_INDEX = TEMPOTEXT_INDEX + 1,          // Edit Tempo
-	SPINTEMPO_INDEX = EDITTEMPO_INDEX + 1,          // Spin Tempo
-	DIVTEMPO_INDEX = SPINTEMPO_INDEX + 1,           // Divider for vertical mode
-	SPEEDTEXT_INDEX = DIVTEMPO_INDEX + 1,           // Static "Speed:"
-	EDITSPEED_INDEX = SPEEDTEXT_INDEX + 1,          // Edit Speed
-	SPINSPEED_INDEX = EDITSPEED_INDEX + 1,          // Spin Speed
-	DIVSPEED_INDEX = SPINSPEED_INDEX + 1,           // Divider for vertical mode
-	RPBTEXT_INDEX = DIVSPEED_INDEX + 1,             // Static "Rows/Beat:"
-	EDITRPB_INDEX = RPBTEXT_INDEX + 1,              // Edit Speed
-	SPINRPB_INDEX = EDITRPB_INDEX + 1,              // Spin Speed
-	DIVRPB_INDEX = SPINRPB_INDEX + 1,               // Divider for vertical mode
-	GLOBALVOLTEXT_INDEX = DIVRPB_INDEX + 1,         // Static "Rows/Beat:"
-	EDITGLOBALVOL_INDEX = GLOBALVOLTEXT_INDEX + 1,  // Edit Speed
-	SPINGLOBALVOL_INDEX = EDITGLOBALVOL_INDEX + 1,  // Spin Speed
-	DIVGLOBALVOL_INDEX = SPINGLOBALVOL_INDEX + 1,   // Divider at end
-	DIVVUMETER_INDEX = SPINGLOBALVOL_INDEX + 5,     // Divider before VU Meters
-	VUMETER_INDEX = DIVVUMETER_INDEX + 1,           // VU Meters
+	FILE_NEW_INDEX = 0,
+	FILE_OPEN_INDEX,
+	FILE_SAVE_INDEX,
+	FILE_DIVIDER_INDEX,
+
+	EDIT_CUT_INDEX,
+	EDIT_COPY_INDEX,
+	EDIT_PASTE_INDEX,
+	EDIT_DIVIDER_INDEX,
+
+	PLAY_MIDIRECORD_INDEX,
+	PLAY_STOP_INDEX,
+	PLAY_STARTPAUSE_INDEX,
+	PLAY_RESTART_INDEX,
+	PLAY_DIVIDER_INDEX,
+
+	EDITOCTAVE_INDEX,
+	SPINOCTAVE_INDEX,
+	OCTAVE_DIVIDER_INDEX,
+
+	TEMPOTEXT_INDEX,
+	EDITTEMPO_INDEX,
+	SPINTEMPO_INDEX,
+	TEMPO_DIVIDER_INDEX,
+
+	SPEEDTEXT_INDEX,
+	EDITSPEED_INDEX,
+	SPINSPEED_INDEX,
+	SPEED_DIVIDER_INDEX,
+
+	RPBTEXT_INDEX,
+	EDITRPB_INDEX,
+	SPINRPB_INDEX,
+	RPB_DIVIDER_INDEX,
+
+	GLOBALVOLTEXT_INDEX,
+	EDITGLOBALVOL_INDEX,
+	SPINGLOBALVOL_INDEX,
+	GLOBALVOL_DIVIDER_INDEX,
+
+	MISC_OPTIONS_INDEX,
+	MISC_PANIC_INDEX,
+	MISC_UPDATE_INDEX,
+	MISC_DIVIDER_INDEX,
+	
+	VUMETER_INDEX,
+
+	NUM_TOOLBAR_INDEX
 };
 
-#define TOOLBAR_IMAGE_PAUSE 8
-#define TOOLBAR_IMAGE_PLAY  13
+enum
+{
+	TOOLBAR_IMAGE_PAUSE = 8,
+	TOOLBAR_IMAGE_PLAY = 13,
+};
 
 #define SCALEPIXELS(x)      (HighDPISupport::ScalePixels(x, m_hWnd))
 #define SPINNER_WIDTH       SCALEPIXELS(16)
@@ -238,6 +267,8 @@ static UINT MainButtons[] =
 		ID_SEPARATOR,
 	ID_SEPARATOR,  // VU Meter
 };
+
+static_assert(std::size(MainButtons) == NUM_TOOLBAR_INDEX);
 
 
 enum { MAX_MIDI_DEVICES = 256 };
@@ -431,31 +462,50 @@ void CMainToolBar::UpdateControls()
 {
 	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 
+	SetButtonVisibility(FILE_NEW_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_OPEN_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_SAVE_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+
+	SetButtonVisibility(EDIT_CUT_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_COPY_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_PASTE_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+
+	SetButtonVisibility(PLAY_MIDIRECORD_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_STOP_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_STARTPAUSE_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_RESTART_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+
+	SetButtonVisibility(MISC_OPTIONS_INDEX, visibleItems[MainToolBarItem::IconsMisc]);
+	SetButtonVisibility(MISC_PANIC_INDEX, visibleItems[MainToolBarItem::IconsMisc]);
+	SetButtonVisibility(MISC_DIVIDER_INDEX, visibleItems.test_all(MainToolBarItem::IconsMisc | MainToolBarItem::VUMeter));
+
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_EditOctave, EDITOCTAVE_INDEX, IDC_EDIT_BASEOCTAVE);
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_SpinOctave, SPINOCTAVE_INDEX, IDC_SPIN_BASEOCTAVE);
-	SetButtonVisibility(DIVOCTAVE_INDEX, m_bVertical && visibleItems[MainToolBarItem::Octave]);
+	SetButtonVisibility(OCTAVE_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Octave]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_StaticTempo, TEMPOTEXT_INDEX, IDC_TEXT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_EditTempo, EDITTEMPO_INDEX, IDC_EDIT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_SpinTempo, SPINTEMPO_INDEX, IDC_SPIN_CURRENTTEMPO);
-	SetButtonVisibility(DIVTEMPO_INDEX, m_bVertical && visibleItems[MainToolBarItem::Tempo]);
+	SetButtonVisibility(TEMPO_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Tempo]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_StaticSpeed, SPEEDTEXT_INDEX, IDC_TEXT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_EditSpeed, EDITSPEED_INDEX, IDC_EDIT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_SpinSpeed, SPINSPEED_INDEX, IDC_SPIN_CURRENTSPEED);
-	SetButtonVisibility(DIVSPEED_INDEX, m_bVertical && visibleItems[MainToolBarItem::Speed]);
+	SetButtonVisibility(SPEED_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Speed]);
 
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_StaticRowsPerBeat, RPBTEXT_INDEX, IDC_TEXT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_EditRowsPerBeat, EDITRPB_INDEX, IDC_EDIT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_SpinRowsPerBeat, SPINRPB_INDEX, IDC_SPIN_RPB);
-	SetButtonVisibility(DIVRPB_INDEX, m_bVertical && visibleItems[MainToolBarItem::RowsPerBeat]);
+	SetButtonVisibility(RPB_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::RowsPerBeat]);
 
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_StaticGlobalVolume, GLOBALVOLTEXT_INDEX, IDC_TEXT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_EditGlobalVolume, EDITGLOBALVOL_INDEX, IDC_EDIT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_SpinGlobalVolume, SPINGLOBALVOL_INDEX, IDC_SPIN_GLOBALVOL);
-	SetButtonVisibility(DIVGLOBALVOL_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
+	SetButtonVisibility(GLOBALVOL_DIVIDER_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
 
-	SetButtonVisibility(DIVVUMETER_INDEX, visibleItems[MainToolBarItem::VUMeter]);
 	m_VuMeter.SetOrientation(!m_bVertical);
 	if(m_bVertical)
 		m_VuMeter.SetWindowPos(nullptr, 0, 0, VUMETER_HEIGHT, VUMETER_HEIGHT, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -469,6 +519,9 @@ bool CMainToolBar::ToggleVisibility(MainToolBarItem item)
 {
 	FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 	visibleItems.flip(item);
+	// At least one icon group must be visible, otherwise the toolbar collapses
+	if(!visibleItems[MainToolBarItem::AllIcons])
+		visibleItems.flip(item);
 	TrackerSettings::Instance().mainToolBarVisibleItems = visibleItems.value().as_enum();
 	RefreshToolbar();
 	return visibleItems[item];
@@ -551,7 +604,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	{
 		// Update play/pause button
 		if(m_currentTempo == TEMPO(0, 0))
-			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
+			SetButtonInfo(PLAY_STARTPAUSE_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
 		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed && visibleItems[MainToolBarItem::Speed])
@@ -595,7 +648,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(m_currentTempo > TEMPO(0, 0))
 		{
 			EnableEdit(m_EditTempo, m_SpinTempo, false);
-			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
+			SetButtonInfo(PLAY_STARTPAUSE_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
 		if(m_currentSpeed != -1)
 			EnableEdit(m_EditSpeed, m_SpinSpeed, false);

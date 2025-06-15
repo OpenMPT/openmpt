@@ -19,7 +19,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum class MainToolBarItem : uint8;
+enum class MainToolBarItem : uint32;
 class CMainToolBar;
 
 class CStereoVU: public CStatic
