@@ -362,6 +362,7 @@ public:
 		, m_modDoc{modDoc}
 		, m_subSongs{modDoc.GetSoundFile().GetAllSubSongs()}
 	{
+		m_selectedSong = m_modDoc.GetSubsongForCurrentEditPos(m_subSongs);
 	}
 
 	BOOL OnInitDialog() override

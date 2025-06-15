@@ -75,11 +75,11 @@ BEGIN_MESSAGE_MAP(CWaveConvert, DialogBase)
 END_MESSAGE_MAP()
 
 
-CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase*> &encFactories)
+CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CModDoc &modDoc, const std::vector<EncoderFactoryBase*> &encFactories)
 	: DialogBase(IDD_WAVECONVERT, parent)
 	, m_Settings(theApp.GetSettings(), encFactories)
-	, m_SndFile(sndFile)
-	, m_subSongs{sndFile.GetAllSubSongs()}
+	, m_SndFile(modDoc.GetSoundFile())
+	, m_subSongs{ modDoc.GetSoundFile().GetAllSubSongs()}
 	, m_nNumOrders{numOrders}
 {
 	MPT_ASSERT(!encFactories.empty());
@@ -90,6 +90,7 @@ CWaveConvert::CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrde
 		m_Settings.minOrder = minOrder;
 		m_Settings.maxOrder = maxOrder;
 	}
+	m_selectedSong = modDoc.GetSubsongForCurrentEditPos(m_subSongs);
 }
 
 
@@ -206,6 +207,7 @@ BOOL CWaveConvert::OnInitDialog()
 
 	UpdateDialog();
 	
+	m_locked = false;
 	return TRUE;
 }
 
@@ -570,6 +572,9 @@ void CWaveConvert::OnFormatChanged()
 
 void CWaveConvert::OnSubsongChanged()
 {
+	if(m_locked)
+		return;
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO1);
 	BOOL ok = FALSE;
 	const auto newSubSong = std::clamp(static_cast<size_t>(GetDlgItemInt(IDC_EDIT12, &ok, FALSE)), size_t(1), m_subSongs.size()) - 1;
 	if(m_selectedSong == newSubSong || !ok)
@@ -600,9 +605,6 @@ void CWaveConvert::UpdateDialog()
 	GetDlgItem(IDC_EDIT4)->EnableWindow(sel == IDC_RADIO2);
 	m_SpinMinOrder.EnableWindow(sel == IDC_RADIO2);
 	m_SpinMaxOrder.EnableWindow(sel == IDC_RADIO2);
-
-	GetDlgItem(IDC_EDIT12)->EnableWindow(sel == IDC_RADIO1);
-	m_SpinSubsongIndex.EnableWindow(sel == IDC_RADIO1);
 
 	// No free slots => Cannot do instrument- or channel-based export to sample
 	BOOL canDoMultiExport = (IsDlgButtonChecked(IDC_RADIO4) != BST_UNCHECKED /* normal export */ || m_CbnSampleSlot.GetItemData(0) == 0 /* "free slot" is in list */) ? TRUE : FALSE;

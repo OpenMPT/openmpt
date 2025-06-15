@@ -407,6 +407,8 @@ public:
 	ModCommand::NOTE GetNoteWithBaseOctave(int noteOffset, INSTRUMENTINDEX instr) const;
 	INSTRUMENTINDEX GetParentInstrumentWithSameName(SAMPLEINDEX smp) const;
 
+	size_t GetSubsongForCurrentEditPos(const std::vector<SubSong> &subsongs) const;
+
 	// Convert a linear volume property to decibels, and format the value as a readable string
 	static CString LinearToDecibelsString(double value, double valueAtZeroDB);
 	// Convert a linear volume property to decibels
