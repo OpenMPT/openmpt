@@ -622,7 +622,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["System"]["Windows"]["Build"] = mpt::osinfo::windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::OS::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_AFORMAT("0x{}")(mpt::afmt::HEX0<8>(mpt::osinfo::windows::Version::Current().GetTypeId()));
+	j["System"]["Windows"]["TypeRaw"] = MPT_UFORMAT("0x{}")(mpt::ufmt::HEX0<8>(mpt::osinfo::windows::Version::Current().GetTypeId()));
 	std::vector<mpt::OS::Windows::Architecture> architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
@@ -633,14 +633,14 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	if(mpt::OS::Windows::IsWine())
 	{
 		mpt::OS::Wine::VersionContext v;
-		j["System"]["Windows"]["Wine"]["Version"]["Raw"] = v.RawVersion();
+		j["System"]["Windows"]["Wine"]["Version"]["Raw"] = mpt::ToUnicode(mpt::Charset::UTF8, v.RawVersion());
 		if(v.Version().IsValid())
 		{
 			j["System"]["Windows"]["Wine"]["Version"]["Major"] = v.Version().GetMajor();
 			j["System"]["Windows"]["Wine"]["Version"]["Minor"] = v.Version().GetMinor();
 			j["System"]["Windows"]["Wine"]["Version"]["Update"] = v.Version().GetUpdate();
 		}
-		j["System"]["Windows"]["Wine"]["HostSysName"] = v.RawHostSysName();
+		j["System"]["Windows"]["Wine"]["HostSysName"] = mpt::ToUnicode(mpt::Charset::UTF8, v.RawHostSysName());
 	}
 	const SoundDevice::Identifier deviceIdentifier = TrackerSettings::Instance().GetSoundDeviceIdentifier();
 	const SoundDevice::Info deviceInfo = theApp.GetSoundDevicesManager()->FindDeviceInfo(deviceIdentifier);
@@ -658,9 +658,9 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	#ifdef MPT_ENABLE_ARCH_INTRINSICS
 		#if MPT_ARCH_X86 || MPT_ARCH_AMD64
 			const mpt::arch::current::cpu_info CPUInfo = mpt::arch::get_cpu_info();
-			j["System"]["Processor"]["Vendor"] = CPUInfo.get_vendor_string();
-			j["System"]["Processor"]["Brand"] = CPUInfo.get_brand_string();
-			j["System"]["Processor"]["CpuidRaw"] = mpt::afmt::hex0<8>(CPUInfo.get_cpuid());
+			j["System"]["Processor"]["Vendor"] = mpt::ToUnicode(mpt::Charset::ASCII, CPUInfo.get_vendor_string());
+			j["System"]["Processor"]["Brand"] = mpt::ToUnicode(mpt::Charset::ASCII, CPUInfo.get_brand_string());
+			j["System"]["Processor"]["CpuidRaw"] = mpt::ufmt::hex0<8>(CPUInfo.get_cpuid());
 			j["System"]["Processor"]["Id"]["Family"] = CPUInfo.get_family();
 			j["System"]["Processor"]["Id"]["Model"] = CPUInfo.get_model();
 			j["System"]["Processor"]["Id"]["Stepping"] = CPUInfo.get_stepping();
