@@ -163,40 +163,68 @@ void CToolBarEx::SetButtonVisibility(int index, bool visible)
 
 enum ToolbarItemIndex
 {
-	PLAYCMD_INDEX = 10,                             // Play / Pause
-	EDITOCTAVE_INDEX = 13,                          // Base Octave
-	SPINOCTAVE_INDEX = EDITOCTAVE_INDEX + 1,        // Spin Base Octave
-	DIVOCTAVE_INDEX = SPINOCTAVE_INDEX + 1,         // Divider for vertical mode
-	TEMPOTEXT_INDEX = DIVOCTAVE_INDEX + 1,          // Static "Tempo:"
-	EDITTEMPO_INDEX = TEMPOTEXT_INDEX + 1,          // Edit Tempo
-	SPINTEMPO_INDEX = EDITTEMPO_INDEX + 1,          // Spin Tempo
-	DIVTEMPO_INDEX = SPINTEMPO_INDEX + 1,           // Divider for vertical mode
-	SPEEDTEXT_INDEX = DIVTEMPO_INDEX + 1,           // Static "Speed:"
-	EDITSPEED_INDEX = SPEEDTEXT_INDEX + 1,          // Edit Speed
-	SPINSPEED_INDEX = EDITSPEED_INDEX + 1,          // Spin Speed
-	DIVSPEED_INDEX = SPINSPEED_INDEX + 1,           // Divider for vertical mode
-	RPBTEXT_INDEX = DIVSPEED_INDEX + 1,             // Static "Rows/Beat:"
-	EDITRPB_INDEX = RPBTEXT_INDEX + 1,              // Edit Speed
-	SPINRPB_INDEX = EDITRPB_INDEX + 1,              // Spin Speed
-	DIVRPB_INDEX = SPINRPB_INDEX + 1,               // Divider for vertical mode
-	GLOBALVOLTEXT_INDEX = DIVRPB_INDEX + 1,         // Static "Rows/Beat:"
-	EDITGLOBALVOL_INDEX = GLOBALVOLTEXT_INDEX + 1,  // Edit Speed
-	SPINGLOBALVOL_INDEX = EDITGLOBALVOL_INDEX + 1,  // Spin Speed
-	DIVGLOBALVOL_INDEX = SPINGLOBALVOL_INDEX + 1,   // Divider at end
-	DIVVUMETER_INDEX = SPINGLOBALVOL_INDEX + 5,     // Divider before VU Meters
-	VUMETER_INDEX = DIVVUMETER_INDEX + 1,           // VU Meters
+	FILE_NEW_INDEX = 0,
+	FILE_OPEN_INDEX,
+	FILE_SAVE_INDEX,
+	FILE_DIVIDER_INDEX,
+
+	EDIT_CUT_INDEX,
+	EDIT_COPY_INDEX,
+	EDIT_PASTE_INDEX,
+	EDIT_DIVIDER_INDEX,
+
+	PLAY_MIDIRECORD_INDEX,
+	PLAY_STOP_INDEX,
+	PLAY_STARTPAUSE_INDEX,
+	PLAY_RESTART_INDEX,
+	PLAY_DIVIDER_INDEX,
+
+	EDITOCTAVE_INDEX,
+	SPINOCTAVE_INDEX,
+	OCTAVE_DIVIDER_INDEX,
+
+	TEMPOTEXT_INDEX,
+	EDITTEMPO_INDEX,
+	SPINTEMPO_INDEX,
+	TEMPO_DIVIDER_INDEX,
+
+	SPEEDTEXT_INDEX,
+	EDITSPEED_INDEX,
+	SPINSPEED_INDEX,
+	SPEED_DIVIDER_INDEX,
+
+	RPBTEXT_INDEX,
+	EDITRPB_INDEX,
+	SPINRPB_INDEX,
+	RPB_DIVIDER_INDEX,
+
+	GLOBALVOLTEXT_INDEX,
+	EDITGLOBALVOL_INDEX,
+	SPINGLOBALVOL_INDEX,
+	GLOBALVOL_DIVIDER_INDEX,
+
+	MISC_OPTIONS_INDEX,
+	MISC_PANIC_INDEX,
+	MISC_UPDATE_INDEX,
+	MISC_DIVIDER_INDEX,
+	
+	VUMETER_INDEX,
+
+	NUM_TOOLBAR_INDEX
 };
 
-#define TOOLBAR_IMAGE_PAUSE 8
-#define TOOLBAR_IMAGE_PLAY  13
+enum
+{
+	TOOLBAR_IMAGE_PAUSE = 8,
+	TOOLBAR_IMAGE_PLAY = 13,
+};
 
 #define SCALEPIXELS(x)      (HighDPISupport::ScalePixels(x, m_hWnd))
-#define TEXTFIELD_HEIGHT    SCALEPIXELS(20)
 #define SPINNER_WIDTH       SCALEPIXELS(16)
 #define SPINNER_HEIGHT      SCALEPIXELS(20)
 #define VUMETER_WIDTH       SCALEPIXELS(255)
 #define VUMETER_HEIGHT      SCALEPIXELS(19)
-#define TREEVIEW_PADDING    SCALEPIXELS(3)
+
 
 static UINT MainButtons[] =
 {
@@ -239,6 +267,8 @@ static UINT MainButtons[] =
 		ID_SEPARATOR,
 	ID_SEPARATOR,  // VU Meter
 };
+
+static_assert(std::size(MainButtons) == NUM_TOOLBAR_INDEX);
 
 
 enum { MAX_MIDI_DEVICES = 256 };
@@ -432,31 +462,50 @@ void CMainToolBar::UpdateControls()
 {
 	const FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 
+	SetButtonVisibility(FILE_NEW_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_OPEN_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_SAVE_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+	SetButtonVisibility(FILE_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsFile]);
+
+	SetButtonVisibility(EDIT_CUT_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_COPY_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_PASTE_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+	SetButtonVisibility(EDIT_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsEdit]);
+
+	SetButtonVisibility(PLAY_MIDIRECORD_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_STOP_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_STARTPAUSE_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_RESTART_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+	SetButtonVisibility(PLAY_DIVIDER_INDEX, visibleItems[MainToolBarItem::IconsPlayback]);
+
+	SetButtonVisibility(MISC_OPTIONS_INDEX, visibleItems[MainToolBarItem::IconsMisc]);
+	SetButtonVisibility(MISC_PANIC_INDEX, visibleItems[MainToolBarItem::IconsMisc]);
+	SetButtonVisibility(MISC_DIVIDER_INDEX, visibleItems.test_all(MainToolBarItem::IconsMisc | MainToolBarItem::VUMeter));
+
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_EditOctave, EDITOCTAVE_INDEX, IDC_EDIT_BASEOCTAVE);
 	UpdateControl(visibleItems[MainToolBarItem::Octave], m_SpinOctave, SPINOCTAVE_INDEX, IDC_SPIN_BASEOCTAVE);
-	SetButtonVisibility(DIVOCTAVE_INDEX, m_bVertical && visibleItems[MainToolBarItem::Octave]);
+	SetButtonVisibility(OCTAVE_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Octave]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_StaticTempo, TEMPOTEXT_INDEX, IDC_TEXT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_EditTempo, EDITTEMPO_INDEX, IDC_EDIT_CURRENTTEMPO);
 	UpdateControl(visibleItems[MainToolBarItem::Tempo], m_SpinTempo, SPINTEMPO_INDEX, IDC_SPIN_CURRENTTEMPO);
-	SetButtonVisibility(DIVTEMPO_INDEX, m_bVertical && visibleItems[MainToolBarItem::Tempo]);
+	SetButtonVisibility(TEMPO_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Tempo]);
 
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_StaticSpeed, SPEEDTEXT_INDEX, IDC_TEXT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_EditSpeed, EDITSPEED_INDEX, IDC_EDIT_CURRENTSPEED);
 	UpdateControl(visibleItems[MainToolBarItem::Speed], m_SpinSpeed, SPINSPEED_INDEX, IDC_SPIN_CURRENTSPEED);
-	SetButtonVisibility(DIVSPEED_INDEX, m_bVertical && visibleItems[MainToolBarItem::Speed]);
+	SetButtonVisibility(SPEED_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::Speed]);
 
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_StaticRowsPerBeat, RPBTEXT_INDEX, IDC_TEXT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_EditRowsPerBeat, EDITRPB_INDEX, IDC_EDIT_RPB);
 	UpdateControl(visibleItems[MainToolBarItem::RowsPerBeat], m_SpinRowsPerBeat, SPINRPB_INDEX, IDC_SPIN_RPB);
-	SetButtonVisibility(DIVRPB_INDEX, m_bVertical && visibleItems[MainToolBarItem::RowsPerBeat]);
+	SetButtonVisibility(RPB_DIVIDER_INDEX, m_bVertical && visibleItems[MainToolBarItem::RowsPerBeat]);
 
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_StaticGlobalVolume, GLOBALVOLTEXT_INDEX, IDC_TEXT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_EditGlobalVolume, EDITGLOBALVOL_INDEX, IDC_EDIT_GLOBALVOL);
 	UpdateControl(visibleItems[MainToolBarItem::GlobalVolume], m_SpinGlobalVolume, SPINGLOBALVOL_INDEX, IDC_SPIN_GLOBALVOL);
-	SetButtonVisibility(DIVGLOBALVOL_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
+	SetButtonVisibility(GLOBALVOL_DIVIDER_INDEX, visibleItems.test_any_except(MainToolBarItem::VUMeter));
 
-	SetButtonVisibility(DIVVUMETER_INDEX, visibleItems[MainToolBarItem::VUMeter]);
 	m_VuMeter.SetOrientation(!m_bVertical);
 	if(m_bVertical)
 		m_VuMeter.SetWindowPos(nullptr, 0, 0, VUMETER_HEIGHT, VUMETER_HEIGHT, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -470,6 +519,9 @@ bool CMainToolBar::ToggleVisibility(MainToolBarItem item)
 {
 	FlagSet<MainToolBarItem> visibleItems = TrackerSettings::Instance().mainToolBarVisibleItems.Get();
 	visibleItems.flip(item);
+	// At least one icon group must be visible, otherwise the toolbar collapses
+	if(!visibleItems[MainToolBarItem::AllIcons])
+		visibleItems.flip(item);
 	TrackerSettings::Instance().mainToolBarVisibleItems = visibleItems.value().as_enum();
 	RefreshToolbar();
 	return visibleItems[item];
@@ -552,7 +604,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 	{
 		// Update play/pause button
 		if(m_currentTempo == TEMPO(0, 0))
-			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
+			SetButtonInfo(PLAY_STARTPAUSE_INDEX, ID_PLAYER_PAUSE, TBBS_BUTTON, TOOLBAR_IMAGE_PAUSE);
 		// Update Speed
 		int nSpeed = pSndFile->m_PlayState.m_nMusicSpeed;
 		if(nSpeed != m_currentSpeed && focus != &m_EditSpeed && visibleItems[MainToolBarItem::Speed])
@@ -596,7 +648,7 @@ void CMainToolBar::SetCurrentSong(CSoundFile *pSndFile)
 		if(m_currentTempo > TEMPO(0, 0))
 		{
 			EnableEdit(m_EditTempo, m_SpinTempo, false);
-			SetButtonInfo(PLAYCMD_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
+			SetButtonInfo(PLAY_STARTPAUSE_INDEX, ID_PLAYER_PLAY, TBBS_BUTTON, TOOLBAR_IMAGE_PLAY);
 		}
 		if(m_currentSpeed != -1)
 			EnableEdit(m_EditSpeed, m_SpinSpeed, false);
@@ -952,8 +1004,8 @@ LRESULT CModTreeBar::OnInitDialog(WPARAM wParam, LPARAM lParam)
 	m_pModTreeData->SubclassDlgItem(IDC_TREEDATA, this);
 	m_pModTree = new CModTree(m_pModTreeData);
 	m_pModTree->SubclassDlgItem(IDC_TREEVIEW, this);
-	m_dwStatus = 0;
-	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + TREEVIEW_PADDING;
+	m_status.reset();
+	m_sizeDefault.cx = HighDPISupport::ScalePixels(TrackerSettings::Instance().glTreeWindowWidth, m_hWnd) + Padding();
 	m_sizeDefault.cy = 32767;
 	return l;
 }
@@ -1045,6 +1097,12 @@ void CModTreeBar::OnOptionsChanged()
 }
 
 
+int CModTreeBar::Padding() const
+{
+	return HighDPISupport::ScalePixels(3, m_hWnd);
+}
+
+
 void CModTreeBar::RecalcLayout()
 {
 	CRect rect;
@@ -1054,7 +1112,7 @@ void CModTreeBar::RecalcLayout()
 		int cytree, cydata, cyavail;
 
 		GetClientRect(&rect);
-		const int padding = TREEVIEW_PADDING;
+		const int padding = Padding();
 		cyavail = rect.Height() - padding;
 		if(cyavail < 0) cyavail = 0;
 		cytree = (cyavail * m_nTreeSplitRatio) >> 8;
@@ -1088,7 +1146,7 @@ CSize CModTreeBar::CalcFixedLayout(BOOL, BOOL)
 	CSize sz;
 	m_sizeDefault.cx = width;
 	m_sizeDefault.cy = 32767;
-	const int padding = TREEVIEW_PADDING;
+	const int padding = Padding();
 	sz.cx = width + padding;
 	if(sz.cx < padding + 1)
 		sz.cx = padding + 1;
@@ -1102,13 +1160,13 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 	CRect rect;
 	GetClientRect(&rect);
 
-	if((m_dwStatus & (MTB_CAPTURE|MTB_DRAGGING)) && (::GetCapture() != m_hWnd))
+	if(m_status[MTB_CAPTURE | MTB_DRAGGING] && (::GetCapture() != m_hWnd))
 	{
 		CancelTracking();
 	}
-	if(m_dwStatus & MTB_DRAGGING)
+	if(m_status[MTB_DRAGGING])
 	{
-		if(m_dwStatus & MTB_VERTICAL)
+		if(m_status[MTB_VERTICAL])
 		{
 			if(m_pModTree)
 			{
@@ -1118,36 +1176,36 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 			}
 			pt.y -= ptDragging.y;
 			pt.y = std::clamp(static_cast<int>(pt.y), 0, rect.Height());
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.y != static_cast<int>(m_nTrackPos)))
+			if(!m_status[MTB_TRACKER] || (pt.y != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER)
+				if(m_status[MTB_TRACKER])
 					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.y;
 				OnInvertTracker(m_nTrackPos);
-				m_dwStatus |= MTB_TRACKER;
+				m_status.set(MTB_TRACKER);
 			}
 		} else
 		{
 			pt.x -= ptDragging.x;
 			if(BarOnLeft())
-				pt.x += (m_cxOriginal - TREEVIEW_PADDING);
+				pt.x += (m_cxOriginal - Padding());
 			else
 				pt.x = m_cxOriginal - pt.x;
 			pt.x = std::max(pt.x, LONG(0));
-			if((!(m_dwStatus & MTB_TRACKER)) || (pt.x != static_cast<int>(m_nTrackPos)))
+			if(!m_status[MTB_TRACKER] || (pt.x != static_cast<int>(m_nTrackPos)))
 			{
-				if(m_dwStatus & MTB_TRACKER)
+				if(m_status[MTB_TRACKER])
 					OnInvertTracker(m_nTrackPos);
 				m_nTrackPos = pt.x;
 				OnInvertTracker(m_nTrackPos);
-				m_dwStatus |= MTB_TRACKER;
+				m_status.set(MTB_TRACKER);
 			}
 		}
 	} else
 	{
 		UINT nCursor = 0;
 
-		const int padding = TREEVIEW_PADDING;
+		const int padding = Padding();
 		const int extraPadding = HighDPISupport::ScalePixels(2, m_hWnd);
 		if(BarOnLeft())
 		{
@@ -1176,27 +1234,27 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 		}
 		if(nCursor)
 		{
-			UINT nDir = (nCursor == AFX_IDC_VSPLITBAR) ? MTB_VERTICAL : 0;
-			bool load = false;
-			if(!(m_dwStatus & MTB_CAPTURE))
+			const bool wasVertical = m_status[MTB_VERTICAL];
+			bool vertical = (nCursor == AFX_IDC_VSPLITBAR);
+			bool setCursor = false;
+			if(!m_status[MTB_CAPTURE])
 			{
-				m_dwStatus |= MTB_CAPTURE;
+				m_status.set(MTB_CAPTURE);
 				SetCapture();
-				load = true;
+				setCursor = true;
 			} else
 			{
-				if(nDir != (m_dwStatus & MTB_VERTICAL))
-					load = true;
+				if(vertical != wasVertical)
+					setCursor = true;
 			}
-			m_dwStatus &= ~MTB_VERTICAL;
-			m_dwStatus |= nDir;
-			if(load)
+			m_status.set(MTB_VERTICAL, vertical);
+			if(setCursor)
 				SetCursor(theApp.LoadCursor(nCursor));
 		} else
 		{
-			if(m_dwStatus & MTB_CAPTURE)
+			if(m_status[MTB_CAPTURE])
 			{
-				m_dwStatus &= ~MTB_CAPTURE;
+				m_status.reset(MTB_CAPTURE);
 				ReleaseCapture();
 				SetCursor(LoadCursor(NULL, IDC_ARROW));
 			}
@@ -1207,14 +1265,14 @@ void CModTreeBar::DoMouseMove(CPoint pt)
 
 void CModTreeBar::DoLButtonDown(CPoint pt)
 {
-	if((m_dwStatus & MTB_CAPTURE) && (!(m_dwStatus & MTB_DRAGGING)))
+	if(m_status[MTB_CAPTURE] && !m_status[MTB_DRAGGING])
 	{
 		CRect rect;
 		GetWindowRect(&rect);
 		m_cxOriginal = rect.Width();
 		m_cyOriginal = rect.Height();
 		ptDragging = pt;
-		m_dwStatus |= MTB_DRAGGING;
+		m_status.set(MTB_DRAGGING);
 		DoMouseMove(pt);
 	}
 }
@@ -1222,18 +1280,18 @@ void CModTreeBar::DoLButtonDown(CPoint pt)
 
 void CModTreeBar::DoLButtonUp()
 {
-	if(m_dwStatus & MTB_DRAGGING)
+	if(m_status[MTB_DRAGGING])
 	{
 		CRect rect;
 
-		m_dwStatus &= ~MTB_DRAGGING;
-		if(m_dwStatus & MTB_TRACKER)
+		m_status.reset(MTB_DRAGGING);
+		if(m_status[MTB_TRACKER])
 		{
 			OnInvertTracker(m_nTrackPos);
-			m_dwStatus &= ~MTB_TRACKER;
+			m_status.reset(MTB_TRACKER);
 		}
-		const int padding = TREEVIEW_PADDING;
-		if(m_dwStatus & MTB_VERTICAL)
+		const int padding = Padding();
+		if(m_status[MTB_VERTICAL])
 		{
 			GetClientRect(&rect);
 			int cyavail = rect.Height() - padding;
@@ -1264,15 +1322,15 @@ void CModTreeBar::DoLButtonUp()
 
 void CModTreeBar::CancelTracking()
 {
-	if(m_dwStatus & MTB_TRACKER)
+	if(m_status[MTB_TRACKER])
 	{
 		OnInvertTracker(m_nTrackPos);
-		m_dwStatus &= ~MTB_TRACKER;
+		m_status.reset(MTB_TRACKER);
 	}
-	m_dwStatus &= ~MTB_DRAGGING;
-	if(m_dwStatus & MTB_CAPTURE)
+	m_status.reset(MTB_DRAGGING);
+	if(m_status[MTB_CAPTURE])
 	{
-		m_dwStatus &= ~MTB_CAPTURE;
+		m_status.reset(MTB_CAPTURE);
 		ReleaseCapture();
 	}
 }
@@ -1287,8 +1345,8 @@ void CModTreeBar::OnInvertTracker(UINT x)
 		CRect rect;
 
 		GetClientRect(&rect);
-		const int padding = TREEVIEW_PADDING + 1;
-		if(m_dwStatus & MTB_VERTICAL)
+		const int padding = Padding() + 1;
+		if(m_status[MTB_VERTICAL])
 		{
 			rect.top = x;
 			rect.bottom = rect.top + padding;
@@ -1358,9 +1416,9 @@ void CModTreeBar::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS* lpncsp)
 	if(lpncsp)
 	{
 		if(BarOnLeft())
-			lpncsp->rgrc[0].right -= TREEVIEW_PADDING;
+			lpncsp->rgrc[0].right -= Padding();
 		else
-			lpncsp->rgrc[0].left += TREEVIEW_PADDING;
+			lpncsp->rgrc[0].left += Padding();
 		lpncsp->rgrc[0].right = std::max(lpncsp->rgrc[0].left, lpncsp->rgrc[0].right);
 	}
 }
@@ -1373,9 +1431,9 @@ LRESULT CModTreeBar::OnNcHitTest(CPoint point)
 	GetWindowRect(&rect);
 	rect.DeflateRect(1, 1);
 	if(BarOnLeft())
-		rect.right -= TREEVIEW_PADDING;
+		rect.right -= Padding();
 	else
-		rect.left += TREEVIEW_PADDING;
+		rect.left += Padding();
 	if(!rect.PtInRect(point))
 		return HTBORDER;
 	return CDialogBar::OnNcHitTest(point);
@@ -1394,9 +1452,9 @@ void CModTreeBar::OnNcPaint()
 	rect.left = 0;
 	rect.top = 0;
 	if(BarOnLeft())
-		rect.left = rect.right - TREEVIEW_PADDING;
+		rect.left = rect.right - Padding();
 	else
-		rect.right = rect.left + TREEVIEW_PADDING;
+		rect.right = rect.left + Padding();
 	if((rect.left < rect.right) && (rect.top < rect.bottom))
 	{
 		CDC *pDC = GetWindowDC();

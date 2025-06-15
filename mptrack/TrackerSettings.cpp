@@ -912,6 +912,15 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	// Migrate Tuning data
 	MigrateTunings(storedVersion);
 
+	// At least one icon group must be visible, otherwise the toolbar collapses.
+	// If all icon groups are gone, just re-activate them all. This also serves as an upgrade path from older versions where icons were always visible.
+	FlagSet<MainToolBarItem> toolbarItems = mainToolBarVisibleItems.Get();
+	if(!toolbarItems[MainToolBarItem::AllIcons])
+	{
+		toolbarItems.set(MainToolBarItem::AllIcons);
+		mainToolBarVisibleItems = toolbarItems.value().as_enum();
+	}
+
 	// Sanitize MIDI import data
 	if(midiImportPatternLen < ModSpecs::mptm.patternRowsMin || midiImportPatternLen > ModSpecs::mptm.patternRowsMax)
 		midiImportPatternLen = 128;

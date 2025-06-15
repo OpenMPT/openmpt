@@ -19,7 +19,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-enum class MainToolBarItem : uint8;
+enum class MainToolBarItem : uint32;
 class CMainToolBar;
 
 class CStereoVU: public CStatic
@@ -165,7 +165,7 @@ protected:
 
 class CModTreeBar: public CDialogBar
 {
-protected:
+public:
 	enum Status
 	{
 		MTB_VERTICAL = 0x01,
@@ -174,7 +174,8 @@ protected:
 		MTB_TRACKER = 0x08,
 	};
 
-	DWORD m_dwStatus = 0; // MTB_XXXX
+protected:
+	FlagSet<Status> m_status;
 	UINT m_nCursorDrag = 0;
 	CPoint ptDragging;
 	UINT m_cxOriginal = 0, m_cyOriginal = 0, m_nTrackPos = 0;
@@ -223,6 +224,8 @@ protected:
 	void CloseTreeFilter();
 	void CancelTimer();
 
+	int Padding() const;
+
 protected:
 	//{{AFX_MSG(CModTreeBar)
 	afx_msg void OnNcPaint();
@@ -244,6 +247,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+DECLARE_FLAGSET(CModTreeBar::Status)
 
 
 OPENMPT_NAMESPACE_END

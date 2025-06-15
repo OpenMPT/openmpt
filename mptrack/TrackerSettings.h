@@ -406,7 +406,7 @@ template<> inline Resampling::AmigaFilter FromSettingValue(const SettingValue &v
 template<> inline SettingValue ToSettingValue(const NewFileAction &val) { return SettingValue(int32(val)); }
 template<> inline NewFileAction FromSettingValue(const SettingValue &val) { return NewFileAction(val.as<int32>()); }
 
-enum class MainToolBarItem : uint8
+enum class MainToolBarItem : uint32
 {
 	Octave = 0x01,
 	Tempo = 0x02,
@@ -414,8 +414,13 @@ enum class MainToolBarItem : uint8
 	RowsPerBeat = 0x08,
 	GlobalVolume = 0x10,
 	VUMeter = 0x20,
+	IconsFile = 0x40,
+	IconsEdit = 0x80,
+	IconsPlayback = 0x100,
+	IconsMisc = 0x200,
 
-	Default = Octave | Tempo | Speed | RowsPerBeat | GlobalVolume | VUMeter
+	AllIcons = IconsFile | IconsEdit | IconsPlayback | IconsMisc,
+	Default = Octave | Tempo | Speed | RowsPerBeat | GlobalVolume | VUMeter | AllIcons
 };
 DECLARE_FLAGSET(MainToolBarItem)
 

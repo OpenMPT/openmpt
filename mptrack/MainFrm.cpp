@@ -136,12 +136,18 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 #endif // MPT_ENABLE_UPDATE
 	ON_COMMAND(ID_HELP_SHOWSETTINGSFOLDER,   &CMainFrame::OnShowSettingsFolder)
 	ON_COMMAND(ID_HELPSHOW,                  &CMainFrame::OnHelp)
+
 	ON_COMMAND(ID_MAINBAR_SHOW_OCTAVE,       &CMainFrame::OnToggleMainBarShowOctave)
 	ON_COMMAND(ID_MAINBAR_SHOW_TEMPO,        &CMainFrame::OnToggleMainBarShowTempo)
 	ON_COMMAND(ID_MAINBAR_SHOW_SPEED,        &CMainFrame::OnToggleMainBarShowSpeed)
 	ON_COMMAND(ID_MAINBAR_SHOW_ROWSPERBEAT,  &CMainFrame::OnToggleMainBarShowRowsPerBeat)
 	ON_COMMAND(ID_MAINBAR_SHOW_GLOBALVOLUME, &CMainFrame::OnToggleMainBarShowGlobalVolume)
 	ON_COMMAND(ID_MAINBAR_SHOW_VUMETER,      &CMainFrame::OnToggleMainBarShowVUMeter)
+	ON_COMMAND(ID_MAINBAR_SHOW_FILE_ICONS,   &CMainFrame::OnToggleMainBarShowFileIcons)
+	ON_COMMAND(ID_MAINBAR_SHOW_EDIT_ICONS,   &CMainFrame::OnToggleMainBarShowEditIcons)
+	ON_COMMAND(ID_MAINBAR_SHOW_PLAY_ICONS,   &CMainFrame::OnToggleMainBarShowPlayIcons)
+	ON_COMMAND(ID_MAINBAR_SHOW_MISC_ICONS,   &CMainFrame::OnToggleMainBarShowMiscIcons)
+
 	ON_COMMAND(ID_TREEVIEW_ON_LEFT,          &CMainFrame::OnToggleTreeViewOnLeft)
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
@@ -2629,11 +2635,16 @@ void CMainFrame::AddToolBarMenuEntries(CMenu &menu) const
 
 	CMenu subMenu;
 	VERIFY(subMenu.CreatePopupMenu());
+
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::IconsFile] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_FILE_ICONS, _T("&File Icons"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::IconsEdit] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_EDIT_ICONS, _T("&Edit Icons"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::IconsPlayback] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_PLAY_ICONS, _T("&Play / Record Icons"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Octave] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_OCTAVE, _T("Base &Octave"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Tempo] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_TEMPO, _T("&Tempo"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::Speed] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_SPEED, _T("Ticks/&Row"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::RowsPerBeat] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_ROWSPERBEAT, _T("Rows Per &Beat"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::GlobalVolume] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_GLOBALVOLUME, _T("&Global Volume"));
+	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::IconsMisc] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_MISC_ICONS, _T("&Misc Icons"));
 	subMenu.AppendMenu(MF_STRING | (visibleItems[MainToolBarItem::VUMeter] ? MF_CHECKED : 0), ID_MAINBAR_SHOW_VUMETER, _T("&VU Meters"));
 	menu.AppendMenu(MF_POPUP, reinterpret_cast<UINT_PTR>(subMenu.Detach()), _T("Main Toolbar &Items"));
 }
@@ -2645,6 +2656,10 @@ void CMainFrame::OnToggleMainBarShowSpeed() { OnToggleMainBarItem(MainToolBarIte
 void CMainFrame::OnToggleMainBarShowRowsPerBeat() { OnToggleMainBarItem(MainToolBarItem::RowsPerBeat, ID_MAINBAR_SHOW_ROWSPERBEAT); }
 void CMainFrame::OnToggleMainBarShowGlobalVolume() { OnToggleMainBarItem(MainToolBarItem::GlobalVolume, ID_MAINBAR_SHOW_GLOBALVOLUME); }
 void CMainFrame::OnToggleMainBarShowVUMeter() { OnToggleMainBarItem(MainToolBarItem::VUMeter, ID_MAINBAR_SHOW_VUMETER); }
+void CMainFrame::OnToggleMainBarShowFileIcons() { OnToggleMainBarItem(MainToolBarItem::IconsFile, ID_MAINBAR_SHOW_FILE_ICONS); }
+void CMainFrame::OnToggleMainBarShowEditIcons() { OnToggleMainBarItem(MainToolBarItem::IconsEdit, ID_MAINBAR_SHOW_EDIT_ICONS); }
+void CMainFrame::OnToggleMainBarShowPlayIcons() { OnToggleMainBarItem(MainToolBarItem::IconsPlayback, ID_MAINBAR_SHOW_PLAY_ICONS); }
+void CMainFrame::OnToggleMainBarShowMiscIcons() { OnToggleMainBarItem(MainToolBarItem::IconsMisc, ID_MAINBAR_SHOW_MISC_ICONS); }
 
 void CMainFrame::OnToggleMainBarItem(MainToolBarItem item, UINT menuID)
 {
@@ -2916,7 +2931,7 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight)
 {
 	m_updateCheckResult = std::make_unique<UpdateCheckResult>(result);
-	if(m_wndToolBar.IsVisible())
+	if(m_wndToolBar.IsVisible() && (TrackerSettings::Instance().mainToolBarVisibleItems & MainToolBarItem::IconsMisc))
 	{
 		return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, showHighlight);
 	} else
