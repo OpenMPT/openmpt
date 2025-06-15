@@ -62,12 +62,10 @@ inline MPT_NOINLINE bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, co
 				{
 					result = (pDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, flags, NULL, NULL, NULL) == TRUE);
 				}
+				::CloseHandle(hFile);
 			}
-			::CloseHandle(hFile);
-			hFile = NULL;
 		}
 		::FreeLibrary(hDll);
-		hDll = NULL;
 	}
 	return result;
 }
