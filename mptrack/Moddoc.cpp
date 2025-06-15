@@ -1690,7 +1690,7 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder, cons
 
 	if ((!pMainFrm) || (!m_SndFile.GetType()) || encFactories.empty()) return;
 
-	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order().GetLengthTailTrimmed() - 1, m_SndFile, encFactories);
+	CWaveConvert wsdlg(pMainFrm, nMinOrder, nMaxOrder, m_SndFile.Order().GetLengthTailTrimmed() - 1, *this, encFactories);
 	{
 		BypassInputHandler bih;
 		wsdlg.m_Settings.normalize = TrackerSettings::Instance().ExportNormalize;
@@ -3234,6 +3234,34 @@ void CModDoc::UpdateOPLInstrument(SAMPLEINDEX smp)
 			m_SndFile.m_opl->Patch(chn, patch);
 		}
 	}
+}
+
+
+size_t CModDoc::GetSubsongForCurrentEditPos(const std::vector<SubSong> &subsongs) const
+{
+	const SEQUENCEINDEX seq = m_SndFile.Order.GetCurrentSequenceIndex();
+	ORDERINDEX ord = 0;
+	if(auto *lastActiveFrame = CChildFrame::LastActiveFrame(); lastActiveFrame != nullptr && lastActiveFrame->GetActiveDocument() == this)
+	{
+		if(lastActiveFrame->IsPatternView())
+			lastActiveFrame->SaveAllViewStates();
+		ord = lastActiveFrame->GetPatternViewState().nOrder;
+	}
+
+	// Note: This is just an estimation. If subsongs have overlapping order ranges
+	// (like in Unreal Engine modules where the first pattern of each subsong is found at the start of the order list),
+	// then we may return the wrong subsong index.
+	size_t candidate = subsongs.size();
+	for(size_t i = 0; i < subsongs.size(); i++)
+	{
+		const SubSong &subsong = subsongs[i];
+		if(subsong.sequence != seq)
+			continue;
+		if(mpt::is_in_range(ord, subsong.startOrder, subsong.endOrder))
+			return i;
+		candidate = i;
+	}
+	return candidate;
 }
 
 

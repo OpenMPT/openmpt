@@ -671,6 +671,7 @@ CModToMidi::CModToMidi(CModDoc &modDoc, CWnd *parent)
 			}
 		}
 	}
+	m_selectedSong = m_modDoc.GetSubsongForCurrentEditPos(m_subSongs);
 }
 
 

@@ -22,6 +22,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+class CModDoc;
 class CSoundFile;
 struct SubSong;
 
@@ -77,9 +78,10 @@ private:
 	CEdit m_EditGenre;
 	size_t m_selectedSong = 0;
 	const ORDERINDEX m_nNumOrders;
+	bool m_locked = true; 
 
 public:
-	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CSoundFile &sndFile, const std::vector<EncoderFactoryBase *> &encFactories);
+	CWaveConvert(CWnd *parent, ORDERINDEX minOrder, ORDERINDEX maxOrder, ORDERINDEX numOrders, CModDoc &modDoc, const std::vector<EncoderFactoryBase *> &encFactories);
 	~CWaveConvert();
 
 private:
