@@ -39,9 +39,18 @@ public:
 	static inline mpt::native_path get_application_directory() {
 		std::vector<TCHAR> exeFileName(MAX_PATH);
 		while (::GetModuleFileName(0, exeFileName.data(), mpt::saturate_cast<DWORD>(exeFileName.size())) >= exeFileName.size()) {
+#if MPT_WIN_AT_LEAST(MPT_WIN_VISTA)
 			if (::GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
 				return mpt::native_path();
 			}
+#else
+			// Windows XP and earlier return ERROR_SUCCESS even when the string does not fit.
+			// See <https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulefilenamea>.
+			DWORD errc = ::GetLastError();
+			if ((errc != ERROR_INSUFFICIENT_BUFFER) && (errc != ERROR_SUCCESS)) {
+				return mpt::native_path();
+			}
+#endif
 			exeFileName.resize(exeFileName.size() * 2);
 		}
 		return mpt::native_fs{}.absolute(mpt::native_path::FromNative(exeFileName.data()).GetDirectoryWithDrive());
