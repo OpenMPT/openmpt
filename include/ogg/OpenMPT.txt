@@ -1,9 +1,7 @@
-libogg library version 1.3.5 (2021-06-04).
+libogg library version 1.3.6 (2025-06-16).
 The following changes have been made:
  *  Obviously, unnecessary folders and files (documentation, makefiles, etc.)
     have been removed.
- *  The following commits have been applied:
-     * https://gitlab.xiph.org/xiph/ogg/-/commit/7cf42ea17aef7bc1b7b21af70724840a96c2e7d0
  *  win32/ogg.def has been modified to not override the linker library name.
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.

@@ -1107,19 +1107,26 @@ void print_header(ogg_page *og){
   fprintf(stderr,")\n\n");
 }
 
-void copy_page(ogg_page *og){
+static int copy_page(ogg_page *og){
   unsigned char *temp=_ogg_malloc(og->header_len);
+  if (!temp)
+    return -1;
   memcpy(temp,og->header,og->header_len);
   og->header=temp;
 
   temp=_ogg_malloc(og->body_len);
+  if (!temp)
+    return -1;
   memcpy(temp,og->body,og->body_len);
   og->body=temp;
+  return 0;
 }
 
-void free_page(ogg_page *og){
+static void free_page(ogg_page *og){
   _ogg_free (og->header);
+  og->header=NULL;
   _ogg_free (og->body);
+  og->body=NULL;
 }
 
 void error(void){
@@ -1502,6 +1509,11 @@ void test_pack(const int *pl, const int **headers, int byteskip,
 
   int byteskipcount=0;
 
+  if (!data) {
+    fprintf(stderr,"unable to allocate requried data buffer!\n");
+    exit(1);
+  }
+
   ogg_stream_reset(&os_en);
   ogg_stream_reset(&os_de);
   ogg_sync_reset(&oy);
@@ -1813,6 +1825,11 @@ int main(void){
     int inptr=0,i,j;
     ogg_page og[5];
 
+    if (!data) {
+      fprintf(stderr,"unable to allocate requried packet data buffer!\n");
+      exit(1);
+    }
+
     ogg_stream_reset(&os_en);
 
     for(i=0;pl[i]!=-1;i++){
@@ -1836,7 +1853,10 @@ int main(void){
         fprintf(stderr,"Too few pages output building sync tests!\n");
         exit(1);
       }
-      copy_page(&og[i]);
+      if (-1 == copy_page(&og[i])) {
+        fprintf(stderr,"unable to copy page building sync tests!\n");
+        exit(1);
+      }
     }
 
     /* Test lost pages on pagein/packetout: no rollback */
