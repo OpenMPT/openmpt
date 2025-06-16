@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.24-pre
 
+ *  ogg: Update to v1.3.6 (2025-06-16).
+
 ### libopenmpt 0.6.23 (2025-06-14)
 
  *  [**Bug**] `openmpt::string::get("source_has_mixed_revisions")` and
