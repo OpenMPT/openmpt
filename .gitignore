@@ -493,6 +493,7 @@
 /include/ogg/ogg-uninstalled.pc.in
 /include/ogg/ogg.m4
 /include/ogg/ogg.pc.in
+/include/ogg/test-driver
 /include/ogg/include/Makefile.am
 /include/ogg/include/Makefile.in
 /include/ogg/include/ogg/Makefile.am
