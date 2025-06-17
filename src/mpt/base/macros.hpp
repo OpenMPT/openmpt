@@ -16,7 +16,11 @@
 
 
 #if MPT_COMPILER_MSVC
+#if MPT_MSVC_AT_LEAST(2022, 0)
 #define MPT_ATTR_FLATTEN [[msvc::flatten]]
+#else
+#define MPT_ATTR_FLATTEN
+#endif
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_ATTR_FLATTEN [[gnu::flatten]]
 #else
@@ -26,7 +30,11 @@
 
 
 #if MPT_COMPILER_MSVC
+#if MPT_MSVC_AT_LEAST(2019, 1) && MPT_CXX_AT_LEAST(20)
 #define MPT_ATTR_NOINLINE [[msvc::noinline]]
+#else
+#define MPT_ATTR_NOINLINE
+#endif
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_ATTR_NOINLINE [[gnu::noinline]]
 #else
@@ -36,7 +44,11 @@
 
 
 #if MPT_COMPILER_MSVC
+#if MPT_MSVC_AT_LEAST(2019, 1) && MPT_CXX_AT_LEAST(20)
 #define MPT_ATTR_ALWAYSINLINE [[msvc::forceinline]]
+#else
+#define MPT_ATTR_ALWAYSINLINE
+#endif
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 #define MPT_ATTR_ALWAYSINLINE [[gnu::always_inline]]
 #else
