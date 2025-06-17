@@ -16,11 +16,11 @@
 
 
 #if MPT_COMPILER_MSVC
-#define MPT_ATTR_NOINLINE [[msvc::flatten]]
+#define MPT_ATTR_FLATTEN [[msvc::flatten]]
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define MPT_ATTR_NOINLINE [[gnu::flatten]]
+#define MPT_ATTR_FLATTEN [[gnu::flatten]]
 #else
-#define MPT_ATTR_NOINLINE
+#define MPT_ATTR_FLATTEN
 #endif
 
 
