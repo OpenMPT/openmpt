@@ -15,7 +15,36 @@
 
 
 
-// Advanced inline attributes
+#if MPT_COMPILER_MSVC
+#define MPT_ATTR_NOINLINE [[msvc::flatten]]
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_ATTR_NOINLINE [[gnu::flatten]]
+#else
+#define MPT_ATTR_NOINLINE
+#endif
+
+
+
+#if MPT_COMPILER_MSVC
+#define MPT_ATTR_NOINLINE [[msvc::noinline]]
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_ATTR_NOINLINE [[gnu::noinline]]
+#else
+#define MPT_ATTR_NOINLINE
+#endif
+
+
+
+#if MPT_COMPILER_MSVC
+#define MPT_ATTR_ALWAYSINLINE [[msvc::forceinline]]
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#define MPT_ATTR_ALWAYSINLINE [[gnu::always_inline]]
+#else
+#define MPT_ATTR_ALWAYSINLINE
+#endif
+
+
+
 #if MPT_COMPILER_MSVC
 #define MPT_FORCEINLINE __forceinline
 #define MPT_NOINLINE    __declspec(noinline)
@@ -28,8 +57,6 @@
 #endif
 
 
-
-// constexpr
 
 #define MPT_CONSTEXPRINLINE constexpr MPT_FORCEINLINE
 
