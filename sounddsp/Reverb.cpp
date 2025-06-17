@@ -157,7 +157,7 @@ struct REFLECTIONPRESET
 	int16 sGainLL, sGainRR, sGainLR, sGainRL;
 };
 
-const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
+static const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
 {
 	// %Delay, ll,    rr,   lr,    rl
 	{0,    9830,   6554,	  0,     0},
