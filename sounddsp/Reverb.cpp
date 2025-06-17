@@ -159,7 +159,7 @@ const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
 // Implementation
 //
 
-MPT_FORCEINLINE int32 ftol(float f) { return static_cast<int32>(f); }
+static MPT_FORCEINLINE int32 ftol(float f) { return static_cast<int32>(f); }
 
 static void I3dl2_to_Generic(
 				const SNDMIX_REVERB_PROPERTIES *pReverb,
