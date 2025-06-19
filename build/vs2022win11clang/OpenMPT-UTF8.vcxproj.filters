@@ -19,6 +19,15 @@
     <Filter Include="include">
       <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\SignalsmithStretch">
+      <UniqueIdentifier>{58A08AD3-44B0-36A4-AD69-9BC29998253D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SignalsmithStretch\SignalsmithStretch">
+      <UniqueIdentifier>{C71027C1-3381-293A-FC9F-A3C268CF613B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SignalsmithStretch\signalsmith-linear">
+      <UniqueIdentifier>{12DE7E03-7E4E-817C-476D-FB04B39CB97D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\nlohmann-json">
       <UniqueIdentifier>{5A0436C9-C670-F1C3-8F64-8921FB8F132C}</UniqueIdentifier>
     </Filter>
@@ -353,6 +362,15 @@
     </ClInclude>
     <ClInclude Include="..\..\common\zlib_helper.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SignalsmithStretch\SignalsmithStretch\signalsmith-stretch.h">
+      <Filter>include\SignalsmithStretch\SignalsmithStretch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SignalsmithStretch\signalsmith-linear\fft.h">
+      <Filter>include\SignalsmithStretch\signalsmith-linear</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SignalsmithStretch\signalsmith-linear\stft.h">
+      <Filter>include\SignalsmithStretch\signalsmith-linear</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\adl_serializer.hpp">
       <Filter>include\nlohmann-json\include\nlohmann</Filter>
