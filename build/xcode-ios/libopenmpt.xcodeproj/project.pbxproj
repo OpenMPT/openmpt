@@ -525,7 +525,6 @@
 		B517EB3DCFE459EFD3B4F17D /* exception.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = exception.hpp; path = ../../src/mpt/exception/exception.hpp; sourceTree = "<group>"; };
 		B5449C6B226CAADD23FF9AAB /* ModSequence.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ModSequence.h; path = ../../soundlib/ModSequence.h; sourceTree = "<group>"; };
 		B547A5AF29A1EAA1A78573EF /* type_traits.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = type_traits.hpp; path = ../../src/mpt/endian/type_traits.hpp; sourceTree = "<group>"; };
-		B55D7A70F9AC1FE23BD358B0 /* GzipWriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GzipWriter.h; path = ../../common/GzipWriter.h; sourceTree = "<group>"; };
 		B569F9F747F7C3E9B0D06837 /* Load_669.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_669.cpp; path = ../../soundlib/Load_669.cpp; sourceTree = "<group>"; };
 		B6BBD03FFB0A75B13D31AE7F /* Load_fc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_fc.cpp; path = ../../soundlib/Load_fc.cpp; sourceTree = "<group>"; };
 		B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MixerLoops.cpp; path = ../../soundlib/MixerLoops.cpp; sourceTree = "<group>"; };
@@ -1077,7 +1076,6 @@
 				0A20B0FECCE111702A15EF3E /* ComponentManager.h */,
 				6D2350A8B171F61AF3992EE8 /* FileReader.h */,
 				C6F2110A1E5783FCD0659F4A /* FileReaderFwd.h */,
-				B55D7A70F9AC1FE23BD358B0 /* GzipWriter.h */,
 				830F3566F431D658A9F883A6 /* Logging.cpp */,
 				6303157093E70D62A6FF43B0 /* Logging.h */,
 				8F52A05ED3A145D015C87E9E /* Profiler.cpp */,

@@ -63,7 +63,7 @@
 
 #ifdef MPT_ENABLE_PLAYBACK_TEST_MENU
 #include "../unarchiver/ungzip.h"
-#include "../common/GzipWriter.h"
+#include "../misc/GzipWriter.h"
 #endif
 
 #include <HtmlHelp.h>

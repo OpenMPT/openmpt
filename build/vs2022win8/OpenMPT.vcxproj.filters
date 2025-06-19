@@ -297,9 +297,6 @@
     <ClInclude Include="..\..\common\FileReaderFwd.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\GzipWriter.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\Logging.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -533,6 +530,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley_undef.hpp">
       <Filter>include\nlohmann-json\include\nlohmann\thirdparty\hedley</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\misc\GzipWriter.h">
+      <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\misc\WriteMemoryDump.h">
       <Filter>misc</Filter>

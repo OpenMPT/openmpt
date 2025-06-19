@@ -928,7 +928,6 @@
     <ClInclude Include="..\..\common\ComponentManager.h" />
     <ClInclude Include="..\..\common\FileReader.h" />
     <ClInclude Include="..\..\common\FileReaderFwd.h" />
-    <ClInclude Include="..\..\common\GzipWriter.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\misc_util.h" />

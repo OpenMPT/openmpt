@@ -766,7 +766,6 @@
     <ClInclude Include="..\..\common\ComponentManager.h" />
     <ClInclude Include="..\..\common\FileReader.h" />
     <ClInclude Include="..\..\common\FileReaderFwd.h" />
-    <ClInclude Include="..\..\common\GzipWriter.h" />
     <ClInclude Include="..\..\common\Logging.h" />
     <ClInclude Include="..\..\common\Profiler.h" />
     <ClInclude Include="..\..\common\misc_util.h" />
@@ -835,6 +834,7 @@
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\ordered_map.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="..\..\misc\GzipWriter.h" />
     <ClInclude Include="..\..\misc\WriteMemoryDump.h" />
     <ClInclude Include="..\..\misc\mptClock.h" />
     <ClInclude Include="..\..\misc\mptColor.h" />

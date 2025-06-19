@@ -16,8 +16,8 @@
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
-#include "mptString.h"
-#include "zlib_helper.h"
+#include "../common/mptString.h"
+#include "../common/zlib_helper.h"
 
 #include <ctime>
 

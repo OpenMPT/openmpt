@@ -17,7 +17,7 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "TrackerSettings.h"
-#include "../common/GzipWriter.h"
+#include "../misc/GzipWriter.h"
 #include "../soundlib/OPL.h"
 #include "../soundlib/Tagging.h"
 #include "mpt/io_file/outputfile.hpp"
