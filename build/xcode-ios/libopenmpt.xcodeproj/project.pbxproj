@@ -602,6 +602,7 @@
 		E38574ABA645D51D037AB2EB /* any_engine.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = any_engine.hpp; path = ../../src/mpt/random/any_engine.hpp; sourceTree = "<group>"; };
 		E438935FD53001514133819F /* mod_specifications.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mod_specifications.h; path = ../../soundlib/mod_specifications.h; sourceTree = "<group>"; };
 		E4C0ABA9F677EB9B6BE5D9E9 /* libopenmpt_ext_impl.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = libopenmpt_ext_impl.hpp; path = ../../libopenmpt/libopenmpt_ext_impl.hpp; sourceTree = "<group>"; };
+		E57D6E02780B37F4E0E3DC42 /* zlib_helper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = zlib_helper.h; path = ../../common/zlib_helper.h; sourceTree = "<group>"; };
 		E59C6F4DDF5E2BBF195D2D8D /* Loaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Loaders.h; path = ../../soundlib/Loaders.h; sourceTree = "<group>"; };
 		E64FF33AA9BBB4ECE85F597A /* openmpt-ogg.lib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "ogg.xcodeproj"; path = ext/ogg.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E6905433791E1E25E1F6C273 /* SampleCopy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SampleCopy.h; path = ../../soundlib/SampleCopy.h; sourceTree = "<group>"; };
@@ -1107,6 +1108,7 @@
 				3E2FDF24AF52801665192D64 /* version.cpp */,
 				7523D3EEA607CBE0B920022E /* version.h */,
 				DC234F403388C232E596DD80 /* versionNumber.h */,
+				E57D6E02780B37F4E0E3DC42 /* zlib_helper.h */,
 			);
 			name = common;
 			sourceTree = "<group>";

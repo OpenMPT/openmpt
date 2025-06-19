@@ -363,6 +363,7 @@ MPT_FILES_COMMON += common/stdafx.h
 MPT_FILES_COMMON += common/version.cpp
 MPT_FILES_COMMON += common/version.h
 MPT_FILES_COMMON += common/versionNumber.h
+MPT_FILES_COMMON += common/zlib_helper.h
 MPT_FILES_SOUNDLIB = 
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.cpp
 MPT_FILES_SOUNDLIB += soundlib/AudioCriticalSection.h

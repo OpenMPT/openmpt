@@ -249,6 +249,9 @@
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\zlib_helper.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\libopenmpt\libopenmpt.h">
       <Filter>libopenmpt</Filter>
     </ClInclude>

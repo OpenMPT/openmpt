@@ -16,6 +16,10 @@
 
 #include "mpt/io/base.hpp"
 
+#if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
+#include "../common/zlib_helper.h"
+#endif
+
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
@@ -1016,17 +1020,11 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 	}
 
 	// Header is valid, now unpack the RIFF AM file using inflate
-	z_stream strm{};
-	int zlib_errc = Z_OK;
-	zlib_errc = inflateInit(&strm);
-	if(zlib_errc == Z_MEM_ERROR)
-	{
-		mpt::throw_out_of_memory();
-	} else if(zlib_errc < Z_OK)
+	zlib::z_inflate_stream strm{};
+	if(!zlib::is_Z_OK(inflateInit(&*strm)))
 	{
 		return false;
 	}
-
 	uint32 remainRead = fileHeader.packedLength, remainWrite = fileHeader.unpackedLength, totalWritten = 0;
 	uint32 crc = 0;
 	std::vector<Bytef> amFileData;
@@ -1041,46 +1039,34 @@ bool CSoundFile::ReadJ2B(FileReader &file, ModLoadingFlags loadFlags)
 			file.ReadRaw(mpt::span(buffer, readSize));
 			crc = static_cast<uint32>(crc32(crc, buffer, readSize));
 
-			strm.avail_in = readSize;
-			strm.next_in = buffer;
+			strm->avail_in = readSize;
+			strm->next_in = buffer;
 			do
 			{
-				strm.avail_out = remainWrite;
-				strm.next_out = amFileData.data() + totalWritten;
-				zlib_errc = inflate(&strm, Z_NO_FLUSH);
-				if(zlib_errc == Z_BUF_ERROR)
+				strm->avail_out = remainWrite;
+				strm->next_out = amFileData.data() + totalWritten;
+				retVal = inflate(&*strm, Z_NO_FLUSH);
+				if(!zlib::is_Z_OK_or_Z_BUF_ERROR(retVal))
 				{
-					// expected
-				} else if(zlib_errc == Z_MEM_ERROR)
-				{
-					mpt::throw_out_of_memory();
-				} else if(zlib_errc < Z_OK)
-				{
-					inflateEnd(&strm);
 					return false;
 				}
-				retVal = zlib_errc;
-				uint32 written = remainWrite - strm.avail_out;
+				uint32 written = remainWrite - strm->avail_out;
 				totalWritten += written;
 				remainWrite -= written;
-			} while(remainWrite && strm.avail_out == 0);
+			} while(remainWrite && strm->avail_out == 0);
 
 			remainRead -= readSize;
 		}
 	} catch(mpt::out_of_memory e)
 	{
-		inflateEnd(&strm);
 		mpt::rethrow_out_of_memory(e);	
 	} catch(const std::exception &)
 	{
-		inflateEnd(&strm);
 		return false;
 	} catch(...)
 	{
-		inflateEnd(&strm);
 		return false;
 	}
-	inflateEnd(&strm);
 
 	bool result = false;
 #ifndef MPT_BUILD_FUZZER

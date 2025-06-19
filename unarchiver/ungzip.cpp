@@ -14,6 +14,8 @@
 
 #if defined(MPT_WITH_ZLIB) || defined(MPT_WITH_MINIZ)
 
+#include "../common/zlib_helper.h"
+
 #if defined(MPT_WITH_ZLIB)
 #include <zlib.h>
 #elif defined(MPT_WITH_MINIZ)
@@ -122,64 +124,52 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 	try
 	{
 		data.reserve(inFile.BytesLeft());
-	} catch(...)
-	{
-		return false;
-	}
 
-	// Inflate!
-	z_stream strm{};
-	int zlib_errc = Z_OK;
-	strm.zalloc = Z_NULL;
-	strm.zfree = Z_NULL;
-	strm.opaque = Z_NULL;
-	strm.avail_in = 0;
-	strm.next_in = Z_NULL;
-	zlib_errc = inflateInit2(&strm, -15);
-	if(zlib_errc == Z_MEM_ERROR)
-	{
-		return false;
-	} else if(zlib_errc < Z_OK)
-	{
-		return false;
-	}
-	int retVal = Z_OK;
-	uint32 crc = 0;
-	auto bytesLeft = inFile.BytesLeft() - sizeof(GZtrailer);
-	do
-	{
-		std::array<char, mpt::IO::BUFFERSIZE_SMALL> inBuffer, outBuffer;
-		strm.avail_in = static_cast<uInt>(std::min(static_cast<FileReader::pos_type>(inBuffer.size()), bytesLeft));
-		inFile.ReadStructPartial(inBuffer, strm.avail_in);
-		strm.next_in = mpt::byte_cast<Bytef *>(inBuffer.data());
-		bytesLeft -= strm.avail_in;
+		// Inflate!
+		zlib::z_inflate_stream strm{};
+		strm->zalloc = Z_NULL;
+		strm->zfree = Z_NULL;
+		strm->opaque = Z_NULL;
+		strm->avail_in = 0;
+		strm->next_in = Z_NULL;
+		if(!zlib::is_Z_OK(inflateInit2(&*strm, -15)))
+		{
+			return false;
+		}
+		int retVal = Z_OK;
+		uint32 crc = 0;
+		auto bytesLeft = inFile.BytesLeft() - sizeof(GZtrailer);
 		do
 		{
-			strm.avail_out = static_cast<uInt>(outBuffer.size());
-			strm.next_out = mpt::byte_cast<Bytef *>(outBuffer.data());
-			zlib_errc = inflate(&strm, Z_NO_FLUSH);
-			if(zlib_errc == Z_BUF_ERROR)
+			std::array<char, mpt::IO::BUFFERSIZE_SMALL> inBuffer, outBuffer;
+			strm->avail_in = static_cast<uInt>(std::min(static_cast<FileReader::pos_type>(inBuffer.size()), bytesLeft));
+			inFile.ReadStructPartial(inBuffer, strm->avail_in);
+			strm->next_in = mpt::byte_cast<Bytef *>(inBuffer.data());
+			bytesLeft -= strm->avail_in;
+			do
 			{
-				// expected
-			} else if(zlib_errc == Z_MEM_ERROR)
-			{
-				inflateEnd(&strm);
-				return false;
-			} else if(zlib_errc < Z_OK)
-			{
-				inflateEnd(&strm);
-				return false;
-			}
-			retVal = zlib_errc;
-			const auto output = mpt::as_span(outBuffer.data(), outBuffer.data() + outBuffer.size() - strm.avail_out);
-			crc = crc32(crc, mpt::byte_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
-			data.insert(data.end(), output.begin(), output.end());
-		} while(strm.avail_out == 0);
-	} while((retVal == Z_OK || retVal == Z_BUF_ERROR) && bytesLeft);
-	inflateEnd(&strm);
+				strm->avail_out = static_cast<uInt>(outBuffer.size());
+				strm->next_out = mpt::byte_cast<Bytef *>(outBuffer.data());
+				retVal = inflate(&*strm, Z_NO_FLUSH);
+				if(!zlib::is_Z_OK_or_Z_BUF_ERROR(retVal))
+				{
+					return false;
+				}
+				const auto output = mpt::as_span(outBuffer.data(), outBuffer.data() + outBuffer.size() - strm->avail_out);
+				crc = crc32(crc, mpt::byte_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
+				data.insert(data.end(), output.begin(), output.end());
+			} while(strm->avail_out == 0);
+		} while((retVal == Z_OK || retVal == Z_BUF_ERROR) && bytesLeft);
 
-	// Everything went OK? Check return code, number of written bytes and CRC32.
-	return retVal == Z_STREAM_END && trailer.isize == static_cast<uint32>(strm.total_out) && trailer.crc32_ == crc;
+		// Everything went OK? Check return code, number of written bytes and CRC32.
+		return retVal == Z_STREAM_END && trailer.isize == static_cast<uint32>(strm->total_out) && trailer.crc32_ == crc;
+
+	} catch(mpt::out_of_memory e)
+	{
+		mpt::delete_out_of_memory(e);
+		return false;
+	}
+
 }
 
 

@@ -817,6 +817,7 @@
     <ClInclude Include="..\..\common\stdafx.h" />
     <ClInclude Include="..\..\common\version.h" />
     <ClInclude Include="..\..\common\versionNumber.h" />
+    <ClInclude Include="..\..\common\zlib_helper.h" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIO.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOConfig.hpp" />
     <ClInclude Include="..\..\include\asiomodern\include\ASIOModern\ASIOCore.hpp" />

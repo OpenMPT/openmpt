@@ -354,6 +354,9 @@
     <ClInclude Include="..\..\common\versionNumber.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\common\zlib_helper.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\include\nlohmann-json\include\nlohmann\adl_serializer.hpp">
       <Filter>include\nlohmann-json\include\nlohmann</Filter>
     </ClInclude>
