@@ -12,11 +12,14 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "mptString.h"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
 
+#include "mptString.h"
+
 #ifdef MPT_WITH_ZLIB
+
+#include <ctime>
 
 #include <zlib.h>
 
@@ -30,7 +33,7 @@ inline void WriteGzip(std::ostream &output, std::string &outData, const mpt::ust
 	strm.avail_in = static_cast<uInt>(outData.size());
 	strm.next_in = mpt::byte_cast<Bytef *>(outData.data());
 	gz_header gzHeader{};
-	gzHeader.time = static_cast<uLong>(time(nullptr));
+	gzHeader.time = static_cast<uLong>(std::time(nullptr));
 	std::string filenameISO = mpt::ToCharset(mpt::Charset::ISO8859_1, fileName);
 	gzHeader.name = mpt::byte_cast<Bytef *>(filenameISO.data());
 	deflateSetHeader(&strm, &gzHeader);
