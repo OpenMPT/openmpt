@@ -13,13 +13,20 @@
 
 #ifdef MPT_WITH_ZLIB
 
+#include "mpt/base/memory.hpp"
+#include "mpt/base/namespace.hpp"
+#include "mpt/base/saturate_cast.hpp"
 #include "mpt/io/io.hpp"
 #include "mpt/io/io_stdstream.hpp"
+#include "mpt/string/types.hpp"
+#include "mpt/string_transcode/transcode.hpp"
 
-#include "../common/mptString.h"
+#include "../common/mptTime.h"
 #include "../common/zlib_helper.h"
 
-#include <ctime>
+#include <array>
+#include <ostream>
+#include <string>
 
 #include <zlib.h>
 
@@ -32,8 +39,8 @@ inline void WriteGzip(std::ostream &output, std::string &outData, const mpt::ust
 	strm->next_in = mpt::byte_cast<Bytef *>(outData.data());
 	zlib::expect_Z_OK(deflateInit2(&*strm, Z_BEST_COMPRESSION, Z_DEFLATED, 15 | 16, 9, Z_DEFAULT_STRATEGY), "deflateInit2() failed");
 	gz_header gzHeader{};
-	gzHeader.time = static_cast<uLong>(std::time(nullptr));
-	std::string filenameISO = mpt::ToCharset(mpt::Charset::ISO8859_1, fileName);
+	gzHeader.time = mpt::saturate_cast<uLong>(mpt::Date::UnixAsSeconds(mpt::Date::UnixNow()));
+	std::string filenameISO = mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, fileName);
 	gzHeader.name = mpt::byte_cast<Bytef *>(filenameISO.data());
 	zlib::expect_Z_OK(deflateSetHeader(&*strm, &gzHeader), "deflateSetHeader() failed");
 	do
