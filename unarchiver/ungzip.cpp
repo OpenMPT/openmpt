@@ -129,13 +129,20 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 
 	// Inflate!
 	z_stream strm{};
+	int zlib_errc = Z_OK;
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
 	strm.avail_in = 0;
 	strm.next_in = Z_NULL;
-	if(inflateInit2(&strm, -15) != Z_OK)
+	zlib_errc = inflateInit2(&strm, -15);
+	if(zlib_errc == Z_MEM_ERROR)
+	{
 		return false;
+	} else if(zlib_errc < Z_OK)
+	{
+		return false;
+	}
 	int retVal = Z_OK;
 	uint32 crc = 0;
 	auto bytesLeft = inFile.BytesLeft() - sizeof(GZtrailer);
@@ -150,7 +157,20 @@ bool CGzipArchive::ExtractFile(std::size_t index)
 		{
 			strm.avail_out = static_cast<uInt>(outBuffer.size());
 			strm.next_out = mpt::byte_cast<Bytef *>(outBuffer.data());
-			retVal = inflate(&strm, Z_NO_FLUSH);
+			zlib_errc = inflate(&strm, Z_NO_FLUSH);
+			if(zlib_errc == Z_BUF_ERROR)
+			{
+				// expected
+			} else if(zlib_errc == Z_MEM_ERROR)
+			{
+				inflateEnd(&strm);
+				return false;
+			} else if(zlib_errc < Z_OK)
+			{
+				inflateEnd(&strm);
+				return false;
+			}
+			retVal = zlib_errc;
 			const auto output = mpt::as_span(outBuffer.data(), outBuffer.data() + outBuffer.size() - strm.avail_out);
 			crc = crc32(crc, mpt::byte_cast<Bytef *>(output.data()), static_cast<uInt>(output.size()));
 			data.insert(data.end(), output.begin(), output.end());
