@@ -175,8 +175,6 @@ static const REFLECTIONPRESET gReflectionsPreset[ENVIRONMENT_NUMREFLECTIONS] =
 // Implementation
 //
 
-static MPT_FORCEINLINE int32 ftol(float f) { return static_cast<int32>(f); }
-
 static void I3dl2_to_Generic(
 				const SNDMIX_REVERB_PROPERTIES *pReverb,
 				EnvironmentReverb *pRvb,
@@ -205,20 +203,20 @@ static void I3dl2_to_Generic(
 	}
 
 	// Pre-Diffusion factor (for both reflections and late reverb)
-	lDensity = 8192 + ftol(79.31f * pReverb->flDensity);
+	lDensity = 8192 + static_cast<int32>(79.31f * pReverb->flDensity);
 	pRvb->PreDiffusion = lDensity;
 
 	// Late reverb diffusion
-	lTailDiffusion = ftol((0.15f + pReverb->flDiffusion * (0.36f*0.01f)) * 32767.0f);
+	lTailDiffusion = static_cast<int32>((0.15f + pReverb->flDiffusion * (0.36f*0.01f)) * 32767.0f);
 	if (lTailDiffusion > 0x7f00) lTailDiffusion = 0x7f00;
 	pRvb->TankDiffusion = lTailDiffusion;
 
 	// Verify reflections and reverb delay parameters
 	float flRefDelay = pReverb->flReflectionsDelay;
 	if (flRefDelay > 0.100f) flRefDelay = 0.100f;
-	int32 lReverbDelay = ftol(pReverb->flReverbDelay * flOutputFreq);
-	int32 lReflectionsDelay = ftol(flRefDelay * flOutputFreq);
-	int32 lReverbDecayTime = ftol(pReverb->flDecayTime * flOutputFreq);
+	int32 lReverbDelay = static_cast<int32>(pReverb->flReverbDelay * flOutputFreq);
+	int32 lReflectionsDelay = static_cast<int32>(flRefDelay * flOutputFreq);
+	int32 lReverbDecayTime = static_cast<int32>(pReverb->flDecayTime * flOutputFreq);
 	if (lReflectionsDelay < lMinRefDelay)
 	{
 		lReverbDelay -= (lMinRefDelay - lReflectionsDelay);
@@ -256,7 +254,7 @@ static void I3dl2_to_Generic(
 	// Late reverb decay time
 	if (lTankLength < 10) lTankLength = 10;
 	flDelayFactor = (lReverbDecayTime <= lTankLength) ? 1.0f : ((float)lTankLength / (float)lReverbDecayTime);
-	pRvb->ReverbDecay = ftol(std::pow(0.001f, flDelayFactor) * 32768.0f);
+	pRvb->ReverbDecay = static_cast<int32>(std::pow(0.001f, flDelayFactor) * 32768.0f);
 
 	// Late Reverb Decay HF
 	flDecayTimeHF = (float)lReverbDecayTime * pReverb->flDecayHFRatio;
