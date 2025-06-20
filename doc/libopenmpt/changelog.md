@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.2-pre
 
+ *  openmpt123: FLAC multithreaded encoding has been enabled for Windows builds
+    (<https://github.com/xiph/flac/pull/822/>).
+
  *  ogg: Update to v1.3.6 (2025-06-16).
 
 ### libopenmpt 0.8.1 (2025-06-14)
