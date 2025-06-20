@@ -790,6 +790,8 @@
     <ClInclude Include="..\..\src\mpt\check\libcxx.hpp" />
     <ClInclude Include="..\..\src\mpt\check\mfc.hpp" />
     <ClInclude Include="..\..\src\mpt\check\windows.hpp" />
+    <ClInclude Include="..\..\src\mpt\chrono\system_clock.hpp" />
+    <ClInclude Include="..\..\src\mpt\chrono\unix_clock.hpp" />
     <ClInclude Include="..\..\src\mpt\crc\crc.hpp" />
     <ClInclude Include="..\..\src\mpt\crc\tests\tests_crc.hpp" />
     <ClInclude Include="..\..\src\mpt\crypto\config.hpp" />

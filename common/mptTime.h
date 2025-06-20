@@ -12,15 +12,14 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "mpt/chrono/system_clock.hpp"
+#include "mpt/chrono/unix_clock.hpp"
+
 #if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <chrono>
 #endif
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 #include <exception>
-#endif
-
-#if defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-#include <ctime>
 #endif
 
 
@@ -38,13 +37,10 @@
 
 
 
-OPENMPT_NAMESPACE_BEGIN
-
-
-
 #if defined(MODPLUG_TRACKER) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 
 namespace mpt {
+inline namespace MPT_INLINE_NS {
 namespace chrono {
 #if MPT_CXX_AT_LEAST(20)
 using days = std::chrono::days;
@@ -59,8 +55,13 @@ using months = std::chrono::duration<int, std::ratio_divide<mpt::chrono::years::
 #endif
 }
 }
+}
 
 #endif // !MPT_LIBCXX_QUIRK_NO_CHRONO
+
+
+
+OPENMPT_NAMESPACE_BEGIN
 
 
 
@@ -149,116 +150,6 @@ inline Gregorian<LogicalTimezone::Unspecified> forget_timezone(Gregorian<TZ> gre
 
 
 } // namespace Date
-
-
-
-namespace chrono
-{
-
-
-
-struct unix_clock
-{
-
-	// int64 counts 1s since 1970-01-01T00:00Z
-	struct time_point
-	{
-		int64 seconds = 0;
-		int32 nanoseconds = 0;
-		friend bool operator==(const time_point &a, const time_point &b)
-		{
-			return a.seconds == b.seconds && a.nanoseconds == b.nanoseconds;
-		}
-		friend bool operator!=(const time_point &a, const time_point &b)
-		{
-			return a.seconds != b.seconds || a.nanoseconds != b.nanoseconds;
-		}
-	};
-
-	using duration = int64;
-
-	static int64 to_unix_seconds(time_point tp)
-	{
-		return tp.seconds;
-	}
-
-	static int64 to_unix_nanoseconds(time_point tp)
-	{
-		return (tp.seconds * 1'000'000'000) + tp.nanoseconds;
-	}
-
-	static time_point from_unix_seconds(int64 seconds)
-	{
-		return time_point{static_cast<int64>(seconds), static_cast<int32>(0)};
-	}
-
-	static time_point from_unix_nanoseconds(int64 nanoseconds)
-	{
-		return time_point{static_cast<int64>(nanoseconds / 1'000'000'000ll), static_cast<int32>(nanoseconds % 1'000'000'000ll)};
-	}
-
-	static time_point now()
-	{
-#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-		return from_unix_nanoseconds(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
-#else
-		return from_unix_seconds(static_cast<int64>(std::time(nullptr)));
-#endif
-	}
-
-}; // unix_clock
-
-
-
-#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-
-struct system_clock
-{
-
-	using time_point = std::chrono::system_clock::time_point;
-
-	using duration = std::chrono::system_clock::duration;
-
-	static int64 to_unix_seconds(time_point tp)
-	{
-		return static_cast<int64>(std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count());
-	}
-
-	static int64 to_unix_nanoseconds(time_point tp)
-	{
-		return static_cast<int64>(std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch()).count());
-	}
-
-	static time_point from_unix_seconds(int64 seconds)
-	{
-		return std::chrono::system_clock::time_point{std::chrono::seconds{seconds}};
-	}
-
-	static time_point from_unix_nanoseconds(int64 nanoseconds)
-	{
-		return std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds{nanoseconds})};
-	}
-
-	static time_point now()
-	{
-		return std::chrono::system_clock::now();
-	}
-
-}; // system_clock
-
-#endif
-
-
-
-#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-using default_system_clock = system_clock;
-#else
-using default_system_clock = unix_clock;
-#endif
-
-
-
-} // namespace chrono
 
 
 

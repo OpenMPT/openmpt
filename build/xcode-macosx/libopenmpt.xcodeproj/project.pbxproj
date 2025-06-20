@@ -363,6 +363,7 @@
 		54393E69E6C7085B4F9FACA9 /* Load_uax.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_uax.cpp; path = ../../soundlib/Load_uax.cpp; sourceTree = "<group>"; };
 		54F2D0191B80C78B8982EE59 /* algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = algorithm.hpp; path = ../../src/mpt/base/algorithm.hpp; sourceTree = "<group>"; };
 		55356226EAAC215859487866 /* span.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = span.hpp; path = ../../src/mpt/audio/span.hpp; sourceTree = "<group>"; };
+		558965D71849C649757EA417 /* unix_clock.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = unix_clock.hpp; path = ../../src/mpt/chrono/unix_clock.hpp; sourceTree = "<group>"; };
 		55C6E46D9A1589DFDC3CC2AD /* Dlsbank.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Dlsbank.cpp; path = ../../soundlib/Dlsbank.cpp; sourceTree = "<group>"; };
 		55EF6B83EC187D75AD7ED9C3 /* tests_endian_int24.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_endian_int24.hpp; path = ../../src/mpt/endian/tests/tests_endian_int24.hpp; sourceTree = "<group>"; };
 		5609DBF3C331EA65C4C4DA33 /* utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = utility.hpp; path = ../../src/mpt/base/utility.hpp; sourceTree = "<group>"; };
@@ -388,6 +389,7 @@
 		666A8F1BF8F8590D61D0FD5B /* Load_stp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_stp.cpp; path = ../../soundlib/Load_stp.cpp; sourceTree = "<group>"; };
 		6687823BDAE1C72D58C5507B /* tuningcollection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tuningcollection.h; path = ../../soundlib/tuningcollection.h; sourceTree = "<group>"; };
 		66CA3B04BE2FADF6703DC944 /* mptBaseMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = mptBaseMacros.h; path = ../../common/mptBaseMacros.h; sourceTree = "<group>"; };
+		66CFB1F95ACEFB6BDFBA1039 /* system_clock.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = system_clock.hpp; path = ../../src/mpt/chrono/system_clock.hpp; sourceTree = "<group>"; };
 		681E06B9AC6CAC2BEE93E4F9 /* Message.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Message.cpp; path = ../../soundlib/Message.cpp; sourceTree = "<group>"; };
 		6858F8CA2EE6F03C9CE9170A /* LFOPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LFOPlugin.h; path = ../../soundlib/plugins/LFOPlugin.h; sourceTree = "<group>"; };
 		68FC5709D624657BD7B75549 /* concat.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = concat.hpp; path = ../../src/mpt/format/concat.hpp; sourceTree = "<group>"; };
@@ -995,6 +997,7 @@
 				ADCB9F55B13C718732A91595 /* base */,
 				B88D0869CF9FA39BBFBB9EA9 /* binary */,
 				63D3103B06C136ED95E7167B /* check */,
+				AC0C66B1C31F01E3B33AFCF1 /* chrono */,
 				A3AF43EF4801E1A15A3A2A2F /* crc */,
 				02978A9119AA25C309C620D1 /* detect */,
 				2AB619BD41C8B4EF31E4AFFD /* endian */,
@@ -1136,6 +1139,15 @@
 				9B95674D94FB68BF8896C58D /* libopenmpt.dll */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AC0C66B1C31F01E3B33AFCF1 /* chrono */ = {
+			isa = PBXGroup;
+			children = (
+				66CFB1F95ACEFB6BDFBA1039 /* system_clock.hpp */,
+				558965D71849C649757EA417 /* unix_clock.hpp */,
+			);
+			name = chrono;
 			sourceTree = "<group>";
 		};
 		ADB520ED1ED7C1DFD49E6F2D /* tests */ = {

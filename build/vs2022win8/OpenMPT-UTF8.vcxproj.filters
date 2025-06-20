@@ -127,6 +127,9 @@
     <Filter Include="src\mpt\check">
       <UniqueIdentifier>{7A65E07D-E625-5CB4-AF60-A5311BE0A090}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\chrono">
+      <UniqueIdentifier>{8569F439-7137-E83F-5ACB-58664638C4A4}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\crc">
       <UniqueIdentifier>{94D615E1-008C-8ED6-8980-88ADF53485DA}</UniqueIdentifier>
     </Filter>
@@ -1331,6 +1334,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\check\windows.hpp">
       <Filter>src\mpt\check</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\chrono\system_clock.hpp">
+      <Filter>src\mpt\chrono</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\chrono\unix_clock.hpp">
+      <Filter>src\mpt\chrono</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\crc\crc.hpp">
       <Filter>src\mpt\crc</Filter>

@@ -27,6 +27,7 @@
   }
   files {
    "../../src/mpt/base/*.hpp",
+   "../../src/mpt/chrono/*.hpp",
    "../../src/mpt/detect/*.hpp",
    "../../src/mpt/exception/*.hpp",
    "../../src/mpt/format/*.hpp",
