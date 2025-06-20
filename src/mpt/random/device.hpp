@@ -11,6 +11,7 @@
 #include "mpt/base/math.hpp"
 #include "mpt/base/integer.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/chrono/system_clock.hpp"
 #include "mpt/crc/crc.hpp"
 #include "mpt/endian/integer.hpp"
 #include "mpt/mutex/mutex.hpp"
@@ -30,9 +31,6 @@
 
 #include <cmath>
 #include <cstring>
-#if defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-#include <ctime>
-#endif // MPT_LIBCXX_QUIRK_NO_CHRONO
 
 
 
@@ -81,15 +79,14 @@ public:
 		// really need here is whitening of the bits.
 		typename mpt::default_random_seed_hash<T>::type hash;
 
-#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 		{
 			uint64be time;
-			time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock().now().time_since_epoch()).count();
+			time = mpt::chrono::default_system_clock::to_unix_nanoseconds(mpt::chrono::default_system_clock::now());
 			std::byte bytes[sizeof(time)];
 			std::memcpy(bytes, &time, sizeof(time));
 			hash(std::begin(bytes), std::end(bytes));
 		}
-#if !defined(MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK)
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK)
 		// Avoid std::chrono::high_resolution_clock on Emscripten because availability is problematic in AudioWorklet context.
 		{
 			uint64be time;
@@ -99,15 +96,6 @@ public:
 			hash(std::begin(bytes), std::end(bytes));
 		}
 #endif // !MPT_COMPILER_QUIRK_CHRONO_NO_HIGH_RESOLUTION_CLOCK
-#else  // MPT_LIBCXX_QUIRK_NO_CHRONO
-		{
-			uint64be time;
-			time = static_cast<uint64>(std::time(nullptr));
-			std::byte bytes[sizeof(time)];
-			std::memcpy(bytes, &time, sizeof(time));
-			hash(std::begin(bytes), std::end(bytes));
-		}
-#endif // !MPT_LIBCXX_QUIRK_NO_CHRONO
 
 		return static_cast<T>(hash.result());
 	}
