@@ -253,7 +253,7 @@ inline mpt::Date::Unix UnixFromUTC(UTC utc)
 			std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds{ utc.nanoseconds })};
 	} catch(const std::exception &)
 	{
-		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromUTC(utc)));
+		return mpt::Date::UnixFromNanoseconds(mpt::Date::nochrono::UnixAsNanoseconds(mpt::Date::nochrono::UnixFromUTC(utc)));
 	}
 }
 
@@ -275,7 +275,7 @@ inline mpt::Date::UTC UnixAsUTC(Unix tp)
 		return result;
 	} catch(const std::exception &)
 	{
-		return mpt::Date::nochrono::UnixAsUTC(mpt::Date::nochrono::UnixFromSeconds(mpt::Date::UnixAsSeconds(tp)));
+		return mpt::Date::nochrono::UnixAsUTC(mpt::Date::nochrono::UnixFromNanoseconds(mpt::Date::UnixAsNanoseconds(tp)));
 	}
 }
 
@@ -304,7 +304,7 @@ inline mpt::Date::Unix UnixFromLocal(Local local)
 	} catch(const std::exception &)
 #endif
 	{
-		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromLocal(local)));
+		return mpt::Date::UnixFromNanoseconds(mpt::Date::nochrono::UnixAsNanoseconds(mpt::Date::nochrono::UnixFromLocal(local)));
 	}
 }
 
@@ -329,7 +329,7 @@ inline mpt::Date::Local UnixAsLocal(Unix tp)
 	} catch(const std::exception &)
 #endif
 	{
-		return mpt::Date::nochrono::UnixAsLocal(mpt::Date::nochrono::UnixFromSeconds(mpt::Date::UnixAsSeconds(tp)));
+		return mpt::Date::nochrono::UnixAsLocal(mpt::Date::nochrono::UnixFromNanoseconds(mpt::Date::UnixAsNanoseconds(tp)));
 	}
 }
 

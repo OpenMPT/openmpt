@@ -138,7 +138,7 @@ Unix UnixFromLocal(Local timeLocal)
 		ULARGE_INTEGER time_value{};
 		time_value.LowPart = ft.dwLowDateTime;
 		time_value.HighPart = ft.dwHighDateTime;
-		return UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+		return UnixFromNanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
 	} catch(const tz_error &)
 	{
 		// nothing
@@ -168,7 +168,7 @@ Unix UnixFromLocal(Local timeLocal)
 		ULARGE_INTEGER time_value{};
 		time_value.LowPart = ft.dwLowDateTime;
 		time_value.HighPart = ft.dwHighDateTime;
-		return UnixFromSeconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) / 10000000LL));
+		return UnixFromNanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
 	} catch(const tz_error &)
 	{
 		// nothing
@@ -196,7 +196,7 @@ Local UnixAsLocal(Unix tp)
 			throw tz_error{};
 		}
 		ULARGE_INTEGER time_value{};
-		time_value.QuadPart = static_cast<int64>(UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+		time_value.QuadPart = (static_cast<int64>(UnixAsNanoseconds(tp)) / 100LL) + 116444736000000000LL;
 		FILETIME ft{};
 		ft.dwLowDateTime = time_value.LowPart;
 		ft.dwHighDateTime = time_value.HighPart;
@@ -233,7 +233,7 @@ Local UnixAsLocal(Unix tp)
 	try
 	{
 		ULARGE_INTEGER time_value{};
-		time_value.QuadPart = static_cast<int64>(UnixAsSeconds(tp)) * 10000000LL + 116444736000000000LL;
+		time_value.QuadPart = (static_cast<int64>(UnixAsNanoseconds(tp)) / 100LL) + 116444736000000000LL;
 		FILETIME ft{};
 		ft.dwLowDateTime = time_value.LowPart;
 		ft.dwHighDateTime = time_value.HighPart;
