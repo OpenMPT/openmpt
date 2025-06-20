@@ -163,7 +163,7 @@ struct Unix
 
 inline Unix UnixNow()
 {
-	return Unix{static_cast<int64>(std::time(nullptr))};
+	return Unix{static_cast<int64>(std::time(nullptr)), static_cast<int32>(0)};
 }
 
 #endif
