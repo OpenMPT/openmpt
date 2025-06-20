@@ -1476,19 +1476,19 @@ static uint32 SaveITEditHistory(const CSoundFile &sndFile, std::ostream *file)
 		} else if(pModDoc != nullptr)
 		{
 			// Current ("new") timestamp
-			const mpt::Date::Unix creationTime = pModDoc->GetCreationTime();
+			const mpt::chrono::default_system_clock::time_point creationTime = pModDoc->GetCreationTime();
 			if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::UTC)
 			{
-				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(creationTime));
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UTC_from_default(creationTime));
 			} else if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::Local)
 			{
-				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(creationTime));
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::local_from_default(creationTime));
 			} else
 			{
 				// assume UTC
-				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(creationTime));
+				mptHistory.loadDate = mpt::Date::forget_timezone(mpt::Date::UTC_from_default(creationTime));
 			}
-			mptHistory.openTime = static_cast<uint32>(mpt::round((mpt::Date::UnixAsSeconds(mpt::Date::UnixNow()) - mpt::Date::UnixAsSeconds(creationTime)) * HISTORY_TIMER_PRECISION));
+			mptHistory.openTime = static_cast<uint32>(mpt::round((mpt::chrono::default_system_clock::to_unix_seconds(mpt::chrono::default_system_clock::now()) - mpt::chrono::default_system_clock::to_unix_seconds(creationTime)) * HISTORY_TIMER_PRECISION));
 #endif // MODPLUG_TRACKER
 		}
 

@@ -125,8 +125,8 @@ void GlobalLogger::SendLogMessage(const mpt::source_location &loc, LogLevel leve
 	#if defined(MODPLUG_TRACKER) && !defined(MPT_BUILD_WINESUPPORT)
 #if MPT_OS_WINDOWS
 		static uint64 s_lastlogtime = 0;
-		mpt::Date::Unix cur = mpt::Date::UnixNow();
-		int64 cur_ms = mpt::Date::UnixAsNanoseconds(cur) / 1'000'000;
+		mpt::chrono::default_system_clock::time_point cur = mpt::chrono::default_system_clock::now();
+		int64 cur_ms = mpt::chrono::default_system_clock::to_unix_nanoseconds(cur) / 1'000'000;
 		uint64 diff = cur_ms - s_lastlogtime;
 		s_lastlogtime = cur_ms ;
 #else
@@ -143,7 +143,7 @@ void GlobalLogger::SendLogMessage(const mpt::source_location &loc, LogLevel leve
 			if(s_logfile)
 			{
 				mpt::IO::WriteText(*s_logfile, mpt::transcode<std::string>(mpt::logfile_encoding, MPT_UFORMAT("{}+{} {}({}): {} [{}]\n")
-					( mpt::Date::ToISO8601(mpt::Date::UnixAsUTC(cur))
+					( mpt::Date::ToISO8601(mpt::Date::UTC_from_default(cur))
 					, mpt::ufmt::right(6, mpt::ufmt::dec(diff))
 					, file
 					, line
@@ -320,8 +320,8 @@ bool Dump(const mpt::PathString &filename)
 	LARGE_INTEGER qpcNow;
 	qpcNow.QuadPart = 0;
 	QueryPerformanceCounter(&qpcNow);
-	mpt::Date::Unix time_unix = mpt::Date::UnixNow();
-	uint64 time_unix_ns = mpt::Date::UnixAsNanoseconds(time_unix);
+	mpt::chrono::default_system_clock::time_point time_system = mpt::chrono::default_system_clock::now();
+	uint64 time_unix_ns = mpt::chrono::default_system_clock::to_unix_nanoseconds(time_system);
 
 	// sort according to index in case of overflows
 	std::stable_sort(Entries.begin(), Entries.end());
@@ -340,7 +340,7 @@ bool Dump(const mpt::PathString &filename)
 		qpcValid = true;
 	}
 
-	f << "Dump: " << mpt::transcode<std::string>(mpt::logfile_encoding, mpt::Date::ToISO8601(mpt::Date::UnixAsUTC(time_unix))) << std::endl;
+	f << "Dump: " << mpt::transcode<std::string>(mpt::logfile_encoding, mpt::Date::ToISO8601(mpt::Date::UTC_from_default(time_system))) << std::endl;
 	f << "Captured events: " << Entries.size() << std::endl;
 	if(qpcValid && (Entries.size() > 0))
 	{
@@ -357,7 +357,7 @@ bool Dump(const mpt::PathString &filename)
 		std::string time;
 		if(qpcValid)
 		{
-			time = mpt::transcode<std::string>(mpt::logfile_encoding, mpt::Date::ToISO8601( mpt::Date::UnixAsUTC( mpt::Date::UnixFromNanoseconds( time_unix_ns - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (1'000'000'000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) ) ) );
+			time = mpt::transcode<std::string>(mpt::logfile_encoding, mpt::Date::ToISO8601( mpt::Date::UTC_from_default( mpt::chrono::default_system_clock::from_unix_nanoseconds( time_unix_ns - static_cast<int64>( static_cast<double>(qpcNow.QuadPart - entry.Timestamp) * (1'000'000'000.0 / static_cast<double>(qpcFreq.QuadPart) ) ) ) ) ) );
 		} else
 		{
 			time = MPT_AFORMAT("0x{}")(mpt::afmt::hex0<16>(entry.Timestamp));

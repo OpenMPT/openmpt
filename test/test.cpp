@@ -1044,7 +1044,7 @@ static MPT_NOINLINE void TestStringFormatting()
 
 
 static int64 TestDate1(int s, int m, int h, unsigned int D, unsigned int M, int Y) {
-	return mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::UTC{Y,M,D,h,m,s}));
+	return mpt::chrono::default_system_clock::to_unix_seconds(mpt::Date::default_from_UTC(mpt::Date::UTC{Y,M,D,h,m,s}));
 }
 
 static mpt::Date::UTC TestDate2(int s, int m, int h, unsigned int D, unsigned int M, int Y) {
@@ -1317,30 +1317,30 @@ static MPT_NOINLINE void TestMisc2()
 	VERIFY_EQUAL(    1413064016, TestDate1( 56, 46, 21, 11, 10, 2014 ));
 	VERIFY_EQUAL(    1413064100, TestDate1( 20, 48, 21, 11, 10, 2014 ));
 
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(             0)), TestDate2(  0,  0,  0,  1,  1, 1970 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(          3600)), TestDate2(  0,  0,  1,  1,  1, 1970 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(         86400)), TestDate2(  0,  0,  0,  2,  1, 1970 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(      31536000)), TestDate2(  0,  0,  0,  1,  1, 1971 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(     100000000)), TestDate2( 40, 46,  9,  3,  3, 1973 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(     951782400)), TestDate2(  0,  0,  0, 29,  2, 2000 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1000000000)), TestDate2( 40, 46,  1,  9,  9, 2001 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1044057600)), TestDate2(  0,  0,  0,  1,  2, 2003 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1044144000)), TestDate2(  0,  0,  0,  2,  2, 2003 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1046476800)), TestDate2(  0,  0,  0,  1,  3, 2003 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1064966400)), TestDate2(  0,  0,  0,  1, 10, 2003 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926399)), TestDate2( 59, 59, 23, 27,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926400)), TestDate2(  0,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1077926410)), TestDate2( 10,  0,  0, 28,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012799)), TestDate2( 59, 59, 23, 28,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012800)), TestDate2(  0,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078012820)), TestDate2( 20,  0,  0, 29,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099199)), TestDate2( 59, 59, 23, 29,  2, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099200)), TestDate2(  0,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078099230)), TestDate2( 30,  0,  0,  1,  3, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1078185599)), TestDate2( 59, 59, 23,  1,  3, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1096588800)), TestDate2(  0,  0,  0,  1, 10, 2004 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1413064016)), TestDate2( 56, 46, 21, 11, 10, 2014 ));
-	VERIFY_EQUAL(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(    1413064100)), TestDate2( 20, 48, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(             0)), TestDate2(  0,  0,  0,  1,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(          3600)), TestDate2(  0,  0,  1,  1,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(         86400)), TestDate2(  0,  0,  0,  2,  1, 1970 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(      31536000)), TestDate2(  0,  0,  0,  1,  1, 1971 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(     100000000)), TestDate2( 40, 46,  9,  3,  3, 1973 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(     951782400)), TestDate2(  0,  0,  0, 29,  2, 2000 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1000000000)), TestDate2( 40, 46,  1,  9,  9, 2001 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1044057600)), TestDate2(  0,  0,  0,  1,  2, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1044144000)), TestDate2(  0,  0,  0,  2,  2, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1046476800)), TestDate2(  0,  0,  0,  1,  3, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1064966400)), TestDate2(  0,  0,  0,  1, 10, 2003 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1077926399)), TestDate2( 59, 59, 23, 27,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1077926400)), TestDate2(  0,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1077926410)), TestDate2( 10,  0,  0, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078012799)), TestDate2( 59, 59, 23, 28,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078012800)), TestDate2(  0,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078012820)), TestDate2( 20,  0,  0, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078099199)), TestDate2( 59, 59, 23, 29,  2, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078099200)), TestDate2(  0,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078099230)), TestDate2( 30,  0,  0,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1078185599)), TestDate2( 59, 59, 23,  1,  3, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1096588800)), TestDate2(  0,  0,  0,  1, 10, 2004 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1413064016)), TestDate2( 56, 46, 21, 11, 10, 2014 ));
+	VERIFY_EQUAL(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(    1413064100)), TestDate2( 20, 48, 21, 11, 10, 2014 ));
 
 
 #ifdef MODPLUG_TRACKER
@@ -2966,24 +2966,24 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 #ifdef MODPLUG_TRACKER
 	if(sndFile.GetTimezoneInternal() == mpt::Date::LogicalTimezone::UTC)
 	{
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).year, 2011);
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).month, 6);
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).day, 14);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).year, 2011);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).month, 6);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).day, 14);
 #if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
 #else
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
 #elif defined(MPT_FALLBACK_TIMEZONE_WINDOWS_CURRENT)
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 21);
 #elif defined(MPT_FALLBACK_TIMEZONE_C)
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
 #else
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).hours, 22);
 #endif
 #endif
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).minutes, 8);
-		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::UnixAsLocal(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).seconds, 32);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).minutes, 8);
+		VERIFY_EQUAL_NONCONT(mpt::Date::forget_timezone(mpt::Date::local_from_default(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(fh.loadDate)))).seconds, 32);
 	} else
 #endif // MODPLUG_TRACKER
 	{

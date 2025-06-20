@@ -39,11 +39,11 @@ enum UpdateChannel : uint32
 
 struct UpdateCheckResult
 {
-	mpt::Date::Unix CheckTime = mpt::Date::Unix{};
+	mpt::chrono::default_system_clock::time_point CheckTime = mpt::chrono::default_system_clock::time_point{};
 	std::vector<std::byte> json;
 	bool IsFromCache() const noexcept
 	{
-		return CheckTime == mpt::Date::Unix{};
+		return CheckTime == mpt::chrono::default_system_clock::time_point{};
 	}
 };
 

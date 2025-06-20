@@ -3071,7 +3071,7 @@ LRESULT CMainFrame::OnUpdateCheckSuccess(WPARAM wparam, LPARAM lparam)
 	const bool isAutoUpdate = CUpdateCheck::IsAutoUpdateFromMessage(wparam, lparam);
 	const UpdateCheckResult &result = CUpdateCheck::MessageAsResult(wparam, lparam);
 	CUpdateCheck::AcknowledgeSuccess(result);
-	if(result.CheckTime != mpt::Date::Unix{})
+	if(result.CheckTime != mpt::chrono::default_system_clock::time_point{})
 	{
 		TrackerSettings::Instance().UpdateLastUpdateCheck = result.CheckTime;
 	}

@@ -68,22 +68,22 @@ mpt::ustring FileHistory::AsISO8601(mpt::Date::LogicalTimezone internalTimezone)
 		mpt::Date::AnyGregorian tmpLoadDate = loadDate;
 		if (internalTimezone == mpt::Date::LogicalTimezone::UTC)
 		{
-			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
+			int64 loadDateSinceEpoch = mpt::chrono::default_system_clock::to_unix_seconds(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
 			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
-			return mpt::Date::ToShortenedISO8601(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(saveDateSinceEpoch)));
+			return mpt::Date::ToShortenedISO8601(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(saveDateSinceEpoch)));
 #ifdef MODPLUG_TRACKER
 		} else if(internalTimezone == mpt::Date::LogicalTimezone::Local)
 		{
-			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromLocal(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(tmpLoadDate)));
+			int64 loadDateSinceEpoch = mpt::chrono::default_system_clock::to_unix_seconds(mpt::Date::default_from_local(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(tmpLoadDate)));
 			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
-			return mpt::Date::ToShortenedISO8601(mpt::Date::UnixAsLocal(mpt::Date::UnixFromSeconds(saveDateSinceEpoch)));
+			return mpt::Date::ToShortenedISO8601(mpt::Date::local_from_default(mpt::chrono::default_system_clock::from_unix_seconds(saveDateSinceEpoch)));
 #endif // MODPLUG_TRACKER
 		} else
 		{
 			// assume UTC for unspecified timezone when calculating
-			int64 loadDateSinceEpoch = mpt::Date::UnixAsSeconds(mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
+			int64 loadDateSinceEpoch = mpt::chrono::default_system_clock::to_unix_seconds(mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(tmpLoadDate)));
 			int64 saveDateSinceEpoch = loadDateSinceEpoch + mpt::saturate_round<int64>(openSeconds);
-			return mpt::Date::ToShortenedISO8601(mpt::Date::forget_timezone(mpt::Date::UnixAsUTC(mpt::Date::UnixFromSeconds(saveDateSinceEpoch))));
+			return mpt::Date::ToShortenedISO8601(mpt::Date::forget_timezone(mpt::Date::UTC_from_default(mpt::chrono::default_system_clock::from_unix_seconds(saveDateSinceEpoch))));
 		}
 	} else
 	{

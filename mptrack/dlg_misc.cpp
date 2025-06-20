@@ -1387,11 +1387,11 @@ BOOL CEditHistoryDlg::OnInitDialog()
 		CString sDate = CString(_T("<unknown date>"));
 		if(entry.HasValidDate())
 		{
-			const mpt::Date::Unix unixdate = ((m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Local) || (m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Unspecified))
-				? mpt::Date::UnixFromLocal(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(entry.loadDate))
-				: mpt::Date::UnixFromUTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(entry.loadDate));
+			const mpt::chrono::default_system_clock::time_point unixdate = ((m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Local) || (m_modDoc.GetSoundFile().GetTimezoneInternal() == mpt::Date::LogicalTimezone::Unspecified))
+				? mpt::Date::default_from_local(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::Local>(entry.loadDate))
+				: mpt::Date::default_from_UTC(mpt::Date::interpret_as_timezone<mpt::Date::LogicalTimezone::UTC>(entry.loadDate));
 				;
-			sDate = CTime(mpt::Date::UnixAsSeconds(unixdate)).Format(_T("%d %b %Y, %H:%M:%S"));
+			sDate = CTime(mpt::chrono::default_system_clock::to_unix_seconds(unixdate)).Format(_T("%d %b %Y, %H:%M:%S"));
 		}
 		// Time + stuff
 		uint32 duration = mpt::saturate_round<uint32>(entry.openTime / HISTORY_TIMER_PRECISION);

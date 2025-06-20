@@ -130,7 +130,7 @@ protected:
 	CSampleUndo m_SampleUndo;
 	CInstrumentUndo m_InstrumentUndo;
 	SplitKeyboardSettings m_SplitKeyboardSettings;	// this is maybe not the best place to keep them, but it should do the job
-	mpt::Date::Unix m_creationTime;
+	mpt::chrono::default_system_clock::time_point m_creationTime;
 
 	std::atomic<bool> m_modifiedAutosave = false; // Modified since last autosave?
 
@@ -220,7 +220,7 @@ public:
 	CInstrumentUndo &GetInstrumentUndo() { return m_InstrumentUndo; }
 	SplitKeyboardSettings &GetSplitKeyboardSettings() { return m_SplitKeyboardSettings; }
 
-	mpt::Date::Unix GetCreationTime() const { return m_creationTime; }
+	mpt::chrono::default_system_clock::time_point GetCreationTime() const { return m_creationTime; }
 
 // operations
 public:

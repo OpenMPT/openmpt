@@ -564,14 +564,14 @@ template<> inline ProcessPriorityClass FromSettingValue(const SettingValue &val)
 }
 
 
-template<> inline SettingValue ToSettingValue(const mpt::Date::Unix &val)
+template<> inline SettingValue ToSettingValue(const mpt::chrono::default_system_clock::time_point &val)
 {
-	return SettingValue(mpt::ufmt::val(mpt::Date::UnixAsSeconds(val)), "UnixTime");
+	return SettingValue(mpt::ufmt::val(mpt::chrono::default_system_clock::to_unix_seconds(val)), "UnixTime");
 }
-template<> inline mpt::Date::Unix FromSettingValue(const SettingValue &val)
+template<> inline mpt::chrono::default_system_clock::time_point FromSettingValue(const SettingValue &val)
 {
 	MPT_ASSERT(val.GetTypeTag() == "UnixTime");
-	return mpt::Date::UnixFromSeconds(mpt::parse<int64>(val.as<mpt::ustring>()));
+	return mpt::chrono::default_system_clock::from_unix_seconds(mpt::parse<int64>(val.as<mpt::ustring>()));
 }
 
 struct FontSetting
@@ -994,7 +994,7 @@ public:
 
 	Setting<bool> UpdateEnabled;
 	Setting<bool> UpdateInstallAutomatically;
-	Setting<mpt::Date::Unix> UpdateLastUpdateCheck;
+	Setting<mpt::chrono::default_system_clock::time_point> UpdateLastUpdateCheck;
 	Setting<int32> UpdateUpdateCheckPeriod_DEPRECATED;
 	Setting<int32> UpdateIntervalDays;
 	Setting<uint32> UpdateChannel;

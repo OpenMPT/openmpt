@@ -503,10 +503,10 @@ void CUpdateCheck::StartUpdateCheckAsync(bool isAutoUpdate)
 			return;
 		}
 		// Do we actually need to run the update check right now?
-		const mpt::Date::Unix now = mpt::Date::UnixNow();
-		const mpt::Date::Unix lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		const mpt::chrono::default_system_clock::time_point now = mpt::chrono::default_system_clock::now();
+		const mpt::chrono::default_system_clock::time_point lastCheck = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
 		// Check update interval. Note that we always check for updates when the system time had gone backwards (i.e. when the last update check supposedly happened in the future).
-		const int64 secsSinceLastCheck = mpt::Date::UnixAsSeconds(now) - mpt::Date::UnixAsSeconds(lastCheck);
+		const int64 secsSinceLastCheck = mpt::chrono::default_system_clock::to_unix_seconds(now) - mpt::chrono::default_system_clock::to_unix_seconds(lastCheck);
 		if(secsSinceLastCheck > 0 && secsSinceLastCheck < updateCheckPeriod * 86400)
 		{
 			loadPersisted = true;
@@ -705,7 +705,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdate(const CUpdateCheck::Context &contex
 				{
 					std::vector<std::byte> data = GetFileReader(f).ReadRawDataAsByteVector();
 					nlohmann::json::parse(mpt::buffer_cast<std::string>(data)).get<Update::versions>();
-					result.CheckTime = mpt::Date::Unix{};
+					result.CheckTime = mpt::chrono::default_system_clock::time_point{};
 					result.json = data;
 					loaded = true;
 				}
@@ -863,7 +863,7 @@ UpdateCheckResult CUpdateCheck::SearchUpdateModern(HTTP::InternetSession &intern
 
 	// Now, evaluate the downloaded data.
 	UpdateCheckResult result;
-	result.CheckTime = mpt::Date::UnixNow();
+	result.CheckTime = mpt::chrono::default_system_clock::now();
 	try
 	{
 		nlohmann::json::parse(mpt::buffer_cast<std::string>(resultHTTP.Data)).get<Update::versions>();
@@ -1796,10 +1796,10 @@ void CUpdateSetupDlg::SettingChanged(const SettingPath &changedPath)
 	if(changedPath == TrackerSettings::Instance().UpdateLastUpdateCheck.GetPath())
 	{
 		CString updateText;
-		const mpt::Date::Unix t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
-		if(t != mpt::Date::Unix{})
+		const mpt::chrono::default_system_clock::time_point t = TrackerSettings::Instance().UpdateLastUpdateCheck.Get();
+		if(t != mpt::chrono::default_system_clock::time_point{})
 		{
-			updateText += CTime(mpt::Date::UnixAsSeconds(t)).Format(_T("The last successful update check was run on %F, %R."));
+			updateText += CTime(mpt::chrono::default_system_clock::to_unix_seconds(t)).Format(_T("The last successful update check was run on %F, %R."));
 		}
 		updateText += _T("\r\n");
 		SetDlgItemText(IDC_LASTUPDATE, updateText);

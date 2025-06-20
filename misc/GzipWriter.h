@@ -39,7 +39,7 @@ inline void WriteGzip(std::ostream &output, std::string &outData, const mpt::ust
 	strm->next_in = mpt::byte_cast<Bytef *>(outData.data());
 	zlib::expect_Z_OK(deflateInit2(&*strm, Z_BEST_COMPRESSION, Z_DEFLATED, 15 | 16, 9, Z_DEFAULT_STRATEGY), "deflateInit2() failed");
 	gz_header gzHeader{};
-	gzHeader.time = mpt::saturate_cast<uLong>(mpt::Date::UnixAsSeconds(mpt::Date::UnixNow()));
+	gzHeader.time = mpt::saturate_cast<uLong>(mpt::chrono::default_system_clock::to_unix_seconds(mpt::chrono::default_system_clock::now()));
 	std::string filenameISO = mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, fileName);
 	gzHeader.name = mpt::byte_cast<Bytef *>(filenameISO.data());
 	zlib::expect_Z_OK(deflateSetHeader(&*strm, &gzHeader), "deflateSetHeader() failed");

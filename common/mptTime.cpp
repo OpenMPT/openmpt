@@ -15,7 +15,7 @@
 #include "mpt/osinfo/windows_wine_version.hpp"
 #endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <chrono>
 #endif
 
@@ -31,15 +31,16 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+
 namespace mpt
 {
+
+
+
 namespace Date
 {
 
 
-
-namespace nochrono
-{
 
 static int32 ToDaynum(int32 year, int32 month, int32 day)
 {
@@ -71,14 +72,14 @@ static void FromDaynum(int32 d, int32 & year, int32 & month, int32 & day)
 	day = static_cast<int32>(dd);
 }
 
-Unix UnixFromUTC(UTC timeUtc)
+mpt::chrono::unix_clock::time_point unix_from_UTC(mpt::Date::UTC timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.year, timeUtc.month, timeUtc.day);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970, 1, 1)) * 24 * 60 * 60 + timeUtc.hours * 60 * 60 + timeUtc.minutes * 60 + timeUtc.seconds;
-	return Unix{seconds, timeUtc.nanoseconds};
+	return mpt::chrono::unix_clock::time_point{seconds, timeUtc.nanoseconds};
 }
 
-UTC UnixAsUTC(Unix tp)
+mpt::Date::UTC UTC_from_unix(mpt::chrono::unix_clock::time_point tp)
 {
 	int64 tmp = tp.seconds;
 	int64 seconds = tmp % 60; tmp /= 60;
@@ -86,7 +87,7 @@ UTC UnixAsUTC(Unix tp)
 	int64 hours   = tmp % 24; tmp /= 24;
 	int32 year = 0, month = 0, day = 0;
 	FromDaynum(static_cast<int32>(tmp) + ToDaynum(1970,1,1), year, month, day);
-	UTC result = {};
+	mpt::Date::UTC result = {};
 	result.year = year;
 	result.month = month;
 	result.day = day;
@@ -103,7 +104,7 @@ struct tz_error
 {
 };
 
-Unix UnixFromLocal(Local timeLocal)
+mpt::chrono::unix_clock::time_point unix_from_local(mpt::Date::Local timeLocal)
 {
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
@@ -138,7 +139,7 @@ Unix UnixFromLocal(Local timeLocal)
 		ULARGE_INTEGER time_value{};
 		time_value.LowPart = ft.dwLowDateTime;
 		time_value.HighPart = ft.dwHighDateTime;
-		return UnixFromNanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
+		return mpt::chrono::unix_clock::from_unix_nanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
 	} catch(const tz_error &)
 	{
 		// nothing
@@ -168,7 +169,7 @@ Unix UnixFromLocal(Local timeLocal)
 		ULARGE_INTEGER time_value{};
 		time_value.LowPart = ft.dwLowDateTime;
 		time_value.HighPart = ft.dwHighDateTime;
-		return UnixFromNanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
+		return mpt::chrono::unix_clock::from_unix_nanoseconds(static_cast<int64>((time_value.QuadPart - 116444736000000000LL) * 100LL));
 	} catch(const tz_error &)
 	{
 		// nothing
@@ -182,11 +183,11 @@ Unix UnixFromLocal(Local timeLocal)
 	tmp.tm_hour = timeLocal.hours;
 	tmp.tm_min = timeLocal.minutes;
 	tmp.tm_sec = static_cast<int>(timeLocal.seconds);
-	return UnixFromSeconds(static_cast<int64>(std::mktime(&tmp)));
+	return mpt::chrono::unix_clock::from_unix_seconds(static_cast<int64>(std::mktime(&tmp)));
 #endif
 }
 
-Local UnixAsLocal(Unix tp)
+mpt::Date::Local local_from_unix(mpt::chrono::unix_clock::time_point tp)
 {
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
@@ -196,7 +197,7 @@ Local UnixAsLocal(Unix tp)
 			throw tz_error{};
 		}
 		ULARGE_INTEGER time_value{};
-		time_value.QuadPart = (static_cast<int64>(UnixAsNanoseconds(tp)) / 100LL) + 116444736000000000LL;
+		time_value.QuadPart = (static_cast<int64>(mpt::chrono::unix_clock::to_unix_nanoseconds(tp)) / 100LL) + 116444736000000000LL;
 		FILETIME ft{};
 		ft.dwLowDateTime = time_value.LowPart;
 		ft.dwHighDateTime = time_value.HighPart;
@@ -215,7 +216,7 @@ Local UnixAsLocal(Unix tp)
 		{
 			throw tz_error{};
 		}
-		Local result{};
+		mpt::Date::Local result{};
 		result.year = sys_local.wYear;
 		result.month = sys_local.wMonth;
 		result.day = sys_local.wDay;
@@ -233,7 +234,7 @@ Local UnixAsLocal(Unix tp)
 	try
 	{
 		ULARGE_INTEGER time_value{};
-		time_value.QuadPart = (static_cast<int64>(UnixAsNanoseconds(tp)) / 100LL) + 116444736000000000LL;
+		time_value.QuadPart = (static_cast<int64>(mpt::chrono::unix_clock::to_unix_nanoseconds(tp)) / 100LL) + 116444736000000000LL;
 		FILETIME ft{};
 		ft.dwLowDateTime = time_value.LowPart;
 		ft.dwHighDateTime = time_value.HighPart;
@@ -247,7 +248,7 @@ Local UnixAsLocal(Unix tp)
 		{
 			throw tz_error{};
 		}
-		Local result{};
+		mpt::Date::Local result{};
 		result.year = sys_local.wYear;
 		result.month = sys_local.wMonth;
 		result.day = sys_local.wDay;
@@ -262,14 +263,14 @@ Local UnixAsLocal(Unix tp)
 	}
 #endif
 #if defined(MPT_FALLBACK_TIMEZONE_C)
-	std::time_t time_tp = static_cast<std::time_t>(UnixAsSeconds(tp));
+	std::time_t time_tp = static_cast<std::time_t>(mpt::chrono::unix_clock::to_unix_seconds(tp));
 	std::tm *tmp = std::localtime(&time_tp);
 	if(!tmp)
 	{
-		return Local{};
+		return mpt::Date::Local{};
 	}
 	std::tm local = *tmp;
-	Local result{};
+	mpt::Date::Local result{};
 	result.year = local.tm_year + 1900;
 	result.month = local.tm_mon + 1;
 	result.day = local.tm_mday;
@@ -283,7 +284,16 @@ Local UnixAsLocal(Unix tp)
 
 #endif // MODPLUG_TRACKER
 
-} // namespace nochrono
+
+
+} // namespace Date
+
+
+
+namespace Date
+{
+
+
 
 template <LogicalTimezone TZ>
 static mpt::ustring ToISO8601Impl(mpt::Date::Gregorian<TZ> date, bool shorten)
@@ -361,7 +371,12 @@ mpt::ustring ToISO8601(Local date)
 }
 #endif // MODPLUG_TRACKER
 
+
+
 } // namespace Date
+
+
+
 } // namespace mpt
 
 
