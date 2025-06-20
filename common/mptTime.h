@@ -228,13 +228,7 @@ inline Unix UnixFromSeconds(int64 seconds)
 
 inline Unix UnixFromNanoseconds(int64 nanoseconds)
 {
-	try
-	{
-		return std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds{nanoseconds})};
-	} catch(const std::exception &)
-	{
-		return mpt::Date::UnixFromSeconds(mpt::Date::nochrono::UnixAsSeconds(mpt::Date::nochrono::UnixFromNanoseconds(nanoseconds)));
-	}
+	return std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds{nanoseconds})};
 }
 
 inline mpt::Date::Unix UnixFromUTC(UTC utc)
