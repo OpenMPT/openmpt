@@ -431,6 +431,8 @@ inline mpt::Date::Local local_from_default(mpt::chrono::default_system_clock::ti
 	return mpt::Date::local_from_unix(mpt::chrono::unix_clock::from_unix_nanoseconds(mpt::chrono::default_system_clock::to_unix_nanoseconds(tp)));
 }
 
+#endif // MODPLUG_TRACKER
+
 #else
 
 inline mpt::chrono::default_system_clock::time_point default_from_UTC(mpt::Date::UTC timeUtc)
