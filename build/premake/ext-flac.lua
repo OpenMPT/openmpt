@@ -97,6 +97,7 @@
   files {
    "../../include/flac/include/share/alloc.h",
    "../../include/flac/include/share/compat.h",
+   "../../include/flac/include/share/compat_threads.h",
    "../../include/flac/include/share/endswap.h",
    "../../include/flac/include/share/macros.h",
    "../../include/flac/include/share/private.h",
@@ -111,7 +112,7 @@
     buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4334" }
   filter {}
   filter { "action:vs*" }
-    buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd28182" } -- /analyze
+    buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd26110", "/wd28182" } -- /analyze
   filter {}
   defines { "FLAC__HAS_OGG=1" }
   links { "ogg" }
@@ -131,6 +132,12 @@
 			"FLAC__HAS_X86INTRIN",
 			"FLAC__USE_AVX",
 		}
+	filter {}
+	filter {  "not configurations:DebugShared" }
+		-- Debug DLL runtime is missing a DLL when using C11 threads
+		if _ACTION >= "vs2022" then
+			defines { "HAVE_C11THREADS" }
+		end
 	filter {}
 
 function mpt_use_flac ()

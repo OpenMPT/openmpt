@@ -66,6 +66,9 @@
     <ClInclude Include="..\..\..\include\flac\include\share\compat.h">
       <Filter>include\share</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\flac\include\share\compat_threads.h">
+      <Filter>include\share</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\flac\include\share\endswap.h">
       <Filter>include\share</Filter>
     </ClInclude>
