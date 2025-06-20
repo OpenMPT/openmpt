@@ -385,7 +385,7 @@ inline mpt::Date::Local local_from_system(mpt::chrono::system_clock::time_point 
 
 
 
-#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE) && 0
 
 inline mpt::chrono::default_system_clock::time_point default_from_UTC(mpt::Date::UTC timeUtc)
 {
@@ -408,6 +408,28 @@ inline mpt::Date::Local local_from_default(mpt::chrono::default_system_clock::ti
 }
 
 #endif // MODPLUG_TRACKER
+
+#elif !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
+
+inline mpt::chrono::default_system_clock::time_point default_from_UTC(mpt::Date::UTC timeUtc)
+{
+	return mpt::chrono::default_system_clock::from_unix_nanoseconds(mpt::chrono::unix_clock::to_unix_nanoseconds(mpt::Date::unix_from_UTC(timeUtc)));
+}
+inline mpt::Date::UTC UTC_from_default(mpt::chrono::default_system_clock::time_point tp)
+{
+	return mpt::Date::UTC_from_unix(mpt::chrono::unix_clock::from_unix_nanoseconds(mpt::chrono::default_system_clock::to_unix_nanoseconds(tp)));
+}
+
+#if defined(MODPLUG_TRACKER)
+
+inline mpt::chrono::default_system_clock::time_point default_from_local(mpt::Date::Local timeLocal)
+{
+	return mpt::chrono::default_system_clock::from_unix_nanoseconds(mpt::chrono::unix_clock::to_unix_nanoseconds(mpt::Date::unix_from_local(timeLocal)));
+}
+inline mpt::Date::Local local_from_default(mpt::chrono::default_system_clock::time_point tp)
+{
+	return mpt::Date::local_from_unix(mpt::chrono::unix_clock::from_unix_nanoseconds(mpt::chrono::default_system_clock::to_unix_nanoseconds(tp)));
+}
 
 #else
 
