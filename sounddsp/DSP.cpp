@@ -11,8 +11,9 @@
 
 #include "stdafx.h"
 #include "DSP.h"
+#include "mpt/base/numbers.hpp"
 #include "openmpt/soundbase/MixSample.hpp"
-#include <math.h>
+#include <cmath>
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -36,8 +37,8 @@ static void X86_MonoDCRemoval(int *, uint32 count, int32 &nDCRFlt_Y1l, int32 &nD
 //
 
 
-#define PI	3.14159265358979323f
 static inline float Sgn(float x) { return (x >= 0) ? 1.0f : -1.0f; }
+
 static void ShelfEQ(int32 scale,
 	int32 &outA1, int32 &outB0, int32 &outB1,
 	int32 F_c, int32 F_s, float gainDC, float gainFT, float gainPI)
@@ -47,7 +48,7 @@ static void ShelfEQ(int32 scale,
 	float alpha, beta0, beta1, rho;
 	float wT, quad;
 
-	wT = PI * F_c / F_s;
+	wT = mpt::numbers::pi_v<float> * F_c / F_s;
 	gainPI2 = gainPI * gainPI;
 	gainFT2 = gainFT * gainFT;
 	gainDC2 = gainDC * gainDC;
@@ -59,12 +60,12 @@ static void ShelfEQ(int32 scale,
 	if (quad != 0)
 	{
 		float lambda = (gainPI2 - gainDC2) / quad;
-		alpha  = (float)(lambda - Sgn(lambda)*sqrt(lambda*lambda - 1.0f));
+		alpha  = lambda - Sgn(lambda)*std::sqrt(lambda*lambda - 1.0f);
 	}
 
 	beta0 = 0.5f * ((gainDC + gainPI) + (gainDC - gainPI) * alpha);
 	beta1 = 0.5f * ((gainDC - gainPI) + (gainDC + gainPI) * alpha);
-	rho   = (float)((sin((wT*0.5f) - (PI/4.0f))) / (sin((wT*0.5f) + (PI/4.0f))));
+	rho   = std::sin((wT*0.5f) - (mpt::numbers::pi_v<float>/4.0f)) / std::sin((wT*0.5f) + (mpt::numbers::pi_v<float>/4.0f));
 
 	quad  = 1.0f / (1.0f + rho*alpha);
 
