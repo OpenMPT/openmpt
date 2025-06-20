@@ -21,10 +21,6 @@
 #include <chrono>
 #endif
 
-#if defined(MODPLUG_TRACKER) && MPT_OS_WINDOWS
-#include <optional>
-#endif // MODPLUG_TRACKER && MPT_OS_WINDOWS
-
 #if defined(MPT_FALLBACK_TIMEZONE_C)
 #include <ctime>
 #endif // MPT_FALLBACK_TIMEZONE_C
@@ -41,62 +37,6 @@ namespace mpt
 {
 namespace Date
 {
-
-
-
-#if defined(MODPLUG_TRACKER)
-
-#if MPT_OS_WINDOWS
-
-namespace ANSI
-{
-
-uint64 Now()
-{
-	FILETIME filetime;
-#if MPT_WIN_AT_LEAST(MPT_WIN_8)
-	GetSystemTimePreciseAsFileTime(&filetime);
-#else
-	GetSystemTimeAsFileTime(&filetime);
-#endif
-	return ((uint64)filetime.dwHighDateTime << 32 | filetime.dwLowDateTime);
-}
-
-mpt::ustring ToUString(uint64 time100ns)
-{
-	constexpr std::size_t bufsize = 256;
-
-	mpt::ustring result;
-
-	FILETIME filetime;
-	SYSTEMTIME systime;
-	filetime.dwHighDateTime = (DWORD)(((uint64)time100ns) >> 32);
-	filetime.dwLowDateTime = (DWORD)((uint64)time100ns);
-	FileTimeToSystemTime(&filetime, &systime);
-
-	TCHAR buf[bufsize];
-
-	GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, &systime, TEXT("yyyy-MM-dd"), buf, bufsize);
-	result.append(mpt::ToUnicode(mpt::String::ReadWinBuf(buf)));
-
-	result.append(U_(" "));
-
-	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, TIME_FORCE24HOURFORMAT, &systime, TEXT("HH:mm:ss"), buf, bufsize);
-	result.append(mpt::ToUnicode(mpt::String::ReadWinBuf(buf)));
-
-	result.append(U_("."));
-
-	result.append(mpt::ufmt::dec0<3>((unsigned)systime.wMilliseconds));
-
-	return result;
-
-}
-
-} // namespace ANSI
-
-#endif // MPT_OS_WINDOWS
-
-#endif // MODPLUG_TRACKER
 
 
 
@@ -137,12 +77,12 @@ Unix UnixFromUTC(UTC timeUtc)
 {
 	int32 daynum = ToDaynum(timeUtc.year, timeUtc.month, timeUtc.day);
 	int64 seconds = static_cast<int64>(daynum - ToDaynum(1970, 1, 1)) * 24 * 60 * 60 + timeUtc.hours * 60 * 60 + timeUtc.minutes * 60 + timeUtc.seconds;
-	return Unix{seconds};
+	return Unix{seconds, timeUtc.nanoseconds};
 }
 
 UTC UnixAsUTC(Unix tp)
 {
-	int64 tmp = tp.value;
+	int64 tmp = tp.seconds;
 	int64 seconds = tmp % 60; tmp /= 60;
 	int64 minutes = tmp % 60; tmp /= 60;
 	int64 hours   = tmp % 24; tmp /= 24;
@@ -154,7 +94,8 @@ UTC UnixAsUTC(Unix tp)
 	result.day = day;
 	result.hours = static_cast<int32>(hours);
 	result.minutes = static_cast<int32>(minutes);
-	result.seconds = seconds;
+	result.seconds = static_cast<int32>(seconds);
+	result.nanoseconds = tp.nanoseconds;
 	return result;
 }
 
@@ -180,7 +121,7 @@ Unix UnixFromLocal(Local timeLocal)
 		sys_local.wHour = static_cast<uint16>(timeLocal.hours);
 		sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
 		sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
-		sys_local.wMilliseconds = 0;
+		sys_local.wMilliseconds = static_cast<uint16>(timeLocal.nanoseconds / 1'000'000);
 		DYNAMIC_TIME_ZONE_INFORMATION dtzi{};
 		if(GetDynamicTimeZoneInformation(&dtzi) == TIME_ZONE_ID_INVALID) // WinVista
 		{
@@ -215,7 +156,7 @@ Unix UnixFromLocal(Local timeLocal)
 		sys_local.wHour = static_cast<uint16>(timeLocal.hours);
 		sys_local.wMinute = static_cast<uint16>(timeLocal.minutes);
 		sys_local.wSecond = static_cast<uint16>(timeLocal.seconds);
-		sys_local.wMilliseconds = 0;
+		sys_local.wMilliseconds = static_cast<uint16>(timeLocal.nanoseconds / 1'000'000);
 		SYSTEMTIME sys_utc{};
 		if(TzSpecificLocalTimeToSystemTime(NULL, &sys_local, &sys_utc) == FALSE) // WinXP
 		{
@@ -283,6 +224,7 @@ Local UnixAsLocal(Unix tp)
 		result.hours = sys_local.wHour;
 		result.minutes = sys_local.wMinute;
 		result.seconds = sys_local.wSecond;
+		result.nanoseconds = static_cast<int32>(sys_local.wMilliseconds) * 1'000'000;
 		return result;
 	} catch(const tz_error&)
 	{
@@ -314,6 +256,7 @@ Local UnixAsLocal(Unix tp)
 		result.hours = sys_local.wHour;
 		result.minutes = sys_local.wMinute;
 		result.seconds = sys_local.wSecond;
+		result.nanoseconds = static_cast<int32>(sys_local.wMilliseconds) * 1'000'000;
 		return result;
 	} catch(const tz_error&)
 	{
@@ -335,6 +278,7 @@ Local UnixAsLocal(Unix tp)
 	result.hours = local.tm_hour;
 	result.minutes = local.tm_min;
 	result.seconds = local.tm_sec;
+	result.nanoseconds = 0;
 	return result;
 #endif
 }
@@ -344,7 +288,7 @@ Local UnixAsLocal(Unix tp)
 } // namespace nochrono
 
 template <LogicalTimezone TZ>
-static mpt::ustring ToShortenedISO8601Impl(mpt::Date::Gregorian<TZ> date)
+static mpt::ustring ToISO8601Impl(mpt::Date::Gregorian<TZ> date, bool shorten)
 {
 	mpt::ustring result;
 	mpt::ustring tz;
@@ -358,42 +302,64 @@ static mpt::ustring ToShortenedISO8601Impl(mpt::Date::Gregorian<TZ> date)
 	{
 		tz = U_("");
 	}
-	if(date.year == 0)
+	if(shorten && (date.year == 0))
 	{
 		return result;
 	}
 	result += mpt::ufmt::dec0<4>(date.year);
 	result += U_("-") + mpt::ufmt::dec0<2>(date.month);
 	result += U_("-") + mpt::ufmt::dec0<2>(date.day);
-	if(date.hours == 0 && date.minutes == 0 && date.seconds)
+	if(shorten && (date.hours == 0 && date.minutes == 0 && date.seconds))
 	{
 		return result;
 	}
 	result += U_("T");
 	result += mpt::ufmt::dec0<2>(date.hours) + U_(":") + mpt::ufmt::dec0<2>(date.minutes);
-	if(date.seconds == 0)
+	if(shorten && (date.seconds == 0))
 	{
 		return result + tz;
 	}
 	result += U_(":") + mpt::ufmt::dec0<2>(date.seconds);
+	if(shorten)
+	{
+		return result + tz;
+	}
+	result += U_(".") + mpt::ufmt::dec0<9>(date.nanoseconds);
 	result += tz;
 	return result;
 }
 
 mpt::ustring ToShortenedISO8601(mpt::Date::AnyGregorian date)
 {
-	return ToShortenedISO8601Impl(date);
+	return ToISO8601Impl(date, true);
 }
 
 mpt::ustring ToShortenedISO8601(mpt::Date::UTC date)
 {
-	return ToShortenedISO8601Impl(date);
+	return ToISO8601Impl(date, true);
 }
 
 #ifdef MODPLUG_TRACKER
 mpt::ustring ToShortenedISO8601(Local date)
 {
-	return ToShortenedISO8601Impl(date);
+	return ToISO8601Impl(date, true);
+}
+#endif // MODPLUG_TRACKER
+
+mpt::ustring ToISO8601(mpt::Date::AnyGregorian date)
+{
+	return ToISO8601Impl(date, false);
+}
+
+mpt::ustring ToISO8601(mpt::Date::UTC date)
+{
+	return ToISO8601Impl(date, false);
+}
+
+#ifdef MODPLUG_TRACKER
+mpt::ustring ToISO8601(Local date)
+{
+	return ToISO8601Impl(date, false);
 }
 #endif // MODPLUG_TRACKER
 
