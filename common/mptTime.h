@@ -385,7 +385,7 @@ inline mpt::Date::Local local_from_system(mpt::chrono::system_clock::time_point 
 
 
 
-#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
+#if MPT_CXX_AT_LEAST(20) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO) && !defined(MPT_LIBCXX_QUIRK_NO_CHRONO_DATE)
 
 inline mpt::chrono::default_system_clock::time_point default_from_UTC(mpt::Date::UTC timeUtc)
 {
