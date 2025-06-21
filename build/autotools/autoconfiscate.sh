@@ -108,6 +108,7 @@ svn export ./src/mpt/audio                            bin/dist-autotools/src/mpt
 svn export ./src/mpt/base                             bin/dist-autotools/src/mpt/base
 svn export ./src/mpt/binary                           bin/dist-autotools/src/mpt/binary
 svn export ./src/mpt/check                            bin/dist-autotools/src/mpt/check
+svn export ./src/mpt/chrono                           bin/dist-autotools/src/mpt/chrono
 svn export ./src/mpt/crc                              bin/dist-autotools/src/mpt/crc
 #svn export ./src/mpt/crypto                           bin/dist-autotools/src/mpt/crypto
 svn export ./src/mpt/detect                           bin/dist-autotools/src/mpt/detect
@@ -184,6 +185,7 @@ cp -r ./src/mpt/audio                                 bin/dist-autotools/src/mpt
 cp -r ./src/mpt/base                                  bin/dist-autotools/src/mpt/base
 cp -r ./src/mpt/binary                                bin/dist-autotools/src/mpt/binary
 cp -r ./src/mpt/check                                 bin/dist-autotools/src/mpt/check
+cp -r ./src/mpt/chrono                                bin/dist-autotools/src/mpt/chrono
 cp -r ./src/mpt/crc                                   bin/dist-autotools/src/mpt/crc
 #cp -r ./src/mpt/crypto                                bin/dist-autotools/src/mpt/crypto
 cp -r ./src/mpt/detect                                bin/dist-autotools/src/mpt/detect
