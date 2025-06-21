@@ -1,4 +1,4 @@
-name: FreeBSD 14.2 Makefile
+name: FreeBSD 14.3 Makefile
 
 on:
   push:
@@ -17,23 +17,23 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v0.28.0
+      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.2'
+        version: '14.3'
         shell: bash
         sync_files: runner-to-vm
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v0.28.0
+      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.2'
+        version: '14.3'
         shell: bash
         sync_files: false
         shutdown_vm: false
@@ -41,36 +41,36 @@ jobs:
           sudo pkg upgrade -y
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@v0.28.0
+      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.2'
+        version: '14.3'
         shell: bash
         sync_files: false
         shutdown_vm: false
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1
     - name: Test
-      uses: cross-platform-actions/action@v0.28.0
+      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.2'
+        version: '14.3'
         shell: bash
         sync_files: false
         shutdown_vm: false
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1 check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v0.28.0
+      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.2'
+        version: '14.3'
         shell: bash
         sync_files: false
         shutdown_vm: true
