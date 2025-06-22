@@ -4385,6 +4385,9 @@ void CModTree::OnKillFocus(CWnd *pNewWnd)
 	}
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
+	// Required to immediately redirect MIDI input focus after drag&drop from tree view to editor
+	if(pNewWnd != nullptr)
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
 }
 
 
