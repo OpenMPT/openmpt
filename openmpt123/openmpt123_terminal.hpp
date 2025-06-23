@@ -193,6 +193,11 @@ public:
 class textout_ostream : public textout_backend {
 private:
 	std::ostream & s;
+	void write_raw( const std::string & chars ) {
+		if ( chars.size() > 0 ) {
+			s.write( chars.data(), chars.size() );
+		}
+	}
 #if MPT_OS_DJGPP
 	mpt::common_encoding codepage;
 #endif
@@ -213,11 +218,11 @@ public:
 	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
 			#if MPT_OS_DJGPP
-				s << mpt::transcode<std::string>( codepage, text );
+				write_raw( mpt::transcode<std::string>( codepage, text ) );
 			#elif MPT_OS_EMSCRIPTEN
-				s << mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) ;
+				write_raw( mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) );
 			#else
-				s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
+				write_raw( mpt::transcode<std::string>( mpt::logical_encoding::locale, text ) );
 			#endif
 			s.flush();
 		}	
@@ -225,7 +230,7 @@ public:
 	void cursor_up( std::size_t lines ) override {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
-			s << std::string("\x1b[1A");
+			write_raw( std::string("\x1b[1A") );
 		}
 	}
 };
@@ -235,6 +240,11 @@ public:
 class textout_wostream : public textout_backend {
 private:
 	std::wostream & s;
+	void write_raw( const std::wstring & wchars ) {
+		if ( wchars.size() > 0 ) {
+			s.write( wchars.data(), wchars.size() );
+		}
+	}
 public:
 	textout_wostream( std::wostream & s_ )
 		: s(s_)
@@ -245,14 +255,14 @@ public:
 public:
 	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
-			s << mpt::transcode<std::wstring>( text );
+			write_raw( mpt::transcode<std::wstring>( text ) );
 			s.flush();
 		}	
 	}
 	void cursor_up( std::size_t lines ) override {
 		s.flush();
 		for ( std::size_t line = 0; line < lines; ++line ) {
-			s << std::wstring(L"\x1b[1A");
+			write_raw( std::wstring(L"\x1b[1A") );
 		}
 	}
 };
@@ -265,8 +275,18 @@ class textout_ostream_console : public textout_backend {
 private:
 #if defined(UNICODE)
 	std::wostream & s;
+	void write_raw( const std::wstring & wchars ) {
+		if ( wchars.size() > 0 ) {
+			s.write( wchars.data(), wchars.size() );
+		}
+	}
 #else
 	std::ostream & s;
+	void write_raw( const std::string & chars ) {
+		if ( chars.size() > 0 ) {
+			s.write( chars.data(), chars.size() );
+		}
+	}
 #endif
 	HANDLE handle;
 	bool console;
@@ -297,9 +317,9 @@ public:
 				#endif
 			} else {
 				#if defined(UNICODE)
-					s << mpt::transcode<std::wstring>( text );
+					write_raw( mpt::transcode<std::wstring>( text ) );
 				#else
-					s << mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
+					write_raw( mpt::transcode<std::string>( mpt::logical_encoding::locale, text ) );
 				#endif
 				s.flush();
 			}
