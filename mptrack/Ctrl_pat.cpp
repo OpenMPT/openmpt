@@ -1400,8 +1400,8 @@ CString CCtrlPatterns::GetToolTipText(UINT id, HWND) const
 		cmd = kcEditUndo;
 		break;
 	case ID_PATTERN_PROPERTIES: s = _T("Pattern Properties"); cmd = kcShowPatternProperties; break;
-	case ID_PATTERN_EXPAND: s = _T("Expand Pattern"); break;
-	case ID_PATTERN_SHRINK: s = _T("Shrink Pattern"); break;
+	case ID_PATTERN_EXPAND: s = _T("Expand Pattern"); cmd = kcPatternExpand; break;
+	case ID_PATTERN_SHRINK: s = _T("Shrink Pattern"); cmd = kcPatternShrink; break;
 	case ID_PATTERNDETAIL_DROPDOWN: s = _T("Change Pattern Detail Level"); break;
 	case ID_OVERFLOWPASTE: s = _T("Toggle Overflow Paste"); cmd = kcToggleOverflowPaste; break;
 	case IDC_PATTERN_LOOP: s = _T("Toggle Loop Pattern"); cmd = kcChangeLoopStatus; break;
