@@ -336,7 +336,7 @@ public:
 	// [in] bIncludeIndex: True to include instrument index in front of the instrument name, false otherwise.
 	CString GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr, bool bEmptyInsteadOfNoName = false, bool bIncludeIndex = true) const;
 
-	mpt::tstring FormatSubsongName(const SubSong &song);
+	mpt::tstring FormatSubsongName(const std::vector<SubSong> &songs, size_t subSong);
 
 	// Check if a given channel contains data.
 	bool IsChannelUnused(CHANNELINDEX nChn) const;

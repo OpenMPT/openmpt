@@ -589,7 +589,7 @@ void CWaveConvert::UpdateSubsongName()
 	const auto subsongText = GetDlgItem(IDC_SUBSONG);
 	if(subsongText == nullptr || m_selectedSong >= m_subSongs.size())
 		return;
-	subsongText->SetWindowText(m_SndFile.GetpModDoc()->FormatSubsongName(m_subSongs[m_selectedSong]).c_str());
+	subsongText->SetWindowText(m_SndFile.GetpModDoc()->FormatSubsongName(m_subSongs, m_selectedSong).c_str());
 }
 
 
