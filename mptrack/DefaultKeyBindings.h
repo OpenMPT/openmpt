@@ -159,6 +159,8 @@ constexpr DefaultKeybinding DefaultKeybindings[] =
 	{kcPatternSetInstrument,                   'I',                ModCtrl,            kKeyEventDown,                   MPT_V("1.31")},
 	{kcPatternGrowSelection,                   'E',                ModAlt,             kKeyEventDown | kKeyEventRepeat, MPT_V("1.31")},
 	{kcPatternShrinkSelection,                 'D',                ModAlt,             kKeyEventDown | kKeyEventRepeat, MPT_V("1.31")},
+	{kcPatternExpand,                          'E',                ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, MPT_V("1.32.01.05")},
+	{kcPatternShrink,                          'D',                ModCtrl | ModAlt,   kKeyEventDown | kKeyEventRepeat, MPT_V("1.32.01.05")},
 	{kcClearField,                             VK_DELETE,          ModNone,            kKeyEventDown,                   MPT_V("1.31")},
 	{kcClearFieldITStyle,                      VK_OEM_PERIOD,      ModShift,           kKeyEventDown,                   MPT_V("1.31")},
 	{kcClearRowStep,                           VK_DELETE,          ModCtrl,            kKeyEventDown | kKeyEventRepeat, MPT_V("1.31")},
