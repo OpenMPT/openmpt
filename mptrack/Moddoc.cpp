@@ -3070,14 +3070,26 @@ CString CModDoc::GetPatternViewInstrumentName(INSTRUMENTINDEX nInstr,
 }
 
 
-mpt::tstring CModDoc::FormatSubsongName(const SubSong &song)
+mpt::tstring CModDoc::FormatSubsongName(const std::vector<SubSong> &songs, size_t subSong)
 {
+	if(subSong >= songs.size())
+		return {};
+	const SubSong &song = songs[subSong];
+	size_t subsongInSequence = 1;
+	for(size_t i = 1; i <= subSong; i++)
+	{
+		if(songs[subSong - i].sequence == song.sequence)
+			subsongInSequence++;
+		else
+			break;
+	}
 	const auto sequenceName = m_SndFile.Order(song.sequence).GetName();
 	const auto startPattern = m_SndFile.Order(song.sequence).PatternAt(song.startOrder);
 	const auto orderName = startPattern ? startPattern->GetName() : std::string{};
-	return MPT_TFORMAT("Sequence {}{}\nOrder {} to {}{}")(
+	return MPT_TFORMAT("Sequence {}{}, Song {}\nOrder {} to {}{}")(
 		song.sequence + 1,
 		sequenceName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(sequenceName),
+		subsongInSequence,
 		song.startOrder,
 		song.endOrder,
 		orderName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(mpt::ToWin(m_SndFile.GetCharsetInternal(), orderName)));
