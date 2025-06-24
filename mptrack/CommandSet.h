@@ -411,7 +411,9 @@ enum CommandID : int
 	kcPatternSetInstrumentNotEmpty,
 	kcPatternGrowSelection,
 	kcPatternShrinkSelection,
-	kcEndPatternEditMisc = kcPatternShrinkSelection,
+	kcPatternExpand,
+	kcPatternShrink,
+	kcEndPatternEditMisc = kcPatternShrink,
 
 	//	kcClearSelection,
 	kcClearRow,

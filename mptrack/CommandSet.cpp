@@ -954,6 +954,8 @@ static constexpr struct
 	{2117, kcToggleRecordMIDIPitchBend, _T("Toggle Record MIDI Pitch Bend")},
 	{2118, kcToggleRecordMIDICCs, _T("Toggle Record MIDI CCs")},
 	{2119, kcToggleMetronome, _T("Toggle Metronome")},
+	{2120, kcPatternExpand, _T("Expand Pattern")},
+	{2121, kcPatternShrink, _T("Shrink Pattern")},
 };
 // clang-format on
 

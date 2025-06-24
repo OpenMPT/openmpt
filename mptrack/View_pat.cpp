@@ -4502,6 +4502,8 @@ LRESULT CViewPattern::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcPatternVisualizeEffect:   OnVisualizeEffect(); return wParam;
 		case kcPatternGrowSelection:     OnGrowSelection(); return wParam;
 		case kcPatternShrinkSelection:   OnShrinkSelection(); return wParam;
+		case kcPatternExpand:            OnModViewMsg(VIEWMSG_EXPANDPATTERN, 0); return wParam;
+		case kcPatternShrink:            OnModViewMsg(VIEWMSG_SHRINKPATTERN, 0); return wParam;
 
 		case kcPatternScrollLeft:
 		case kcPatternScrollRight:
