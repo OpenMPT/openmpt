@@ -67,9 +67,8 @@ struct string_transcoder<mpt::native_path> {
 namespace openmpt123 {
 
 struct show_help_exception {
-	mpt::ustring message;
 	bool longhelp;
-	show_help_exception( const mpt::ustring & msg = MPT_USTRING(""), bool longhelp_ = true ) : message(msg), longhelp(longhelp_) { }
+	show_help_exception( bool longhelp_ = true ) : longhelp(longhelp_) { }
 };
 
 struct args_nofiles_exception {
