@@ -199,8 +199,10 @@
 
 
 
-#if MPT_COMPILER_GCC && !defined(__arm__)
+#if MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
 #if defined(_SOFT_FLOAT)
+#ifndef MPT_COMPILER_QUIRK_FLOAT_EMULATED
 #define MPT_COMPILER_QUIRK_FLOAT_EMULATED 1
 #endif
 #endif
@@ -208,9 +210,9 @@
 #if defined(__arm__)
 
 #if defined(__SOFTFP__)
+#ifndef MPT_COMPILER_QUIRK_FLOAT_EMULATED
 #define MPT_COMPILER_QUIRK_FLOAT_EMULATED 1
-#else
-#define MPT_COMPILER_QUIRK_FLOAT_EMULATED 0
+#endif
 #endif
 #if defined(__VFP_FP__)
 // native-endian IEEE754
@@ -229,9 +231,11 @@
 #elif defined(__mips__)
 
 #if defined(__mips_soft_float)
+#ifndef MPT_COMPILER_QUIRK_FLOAT_EMULATED
 #define MPT_COMPILER_QUIRK_FLOAT_EMULATED 1
-#else
-#define MPT_COMPILER_QUIRK_FLOAT_EMULATED 0
+#endif
+#endif
+
 #endif
 
 #endif
