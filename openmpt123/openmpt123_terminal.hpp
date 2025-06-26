@@ -303,7 +303,7 @@ public:
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				DWORD chars_written = 0;
-				std::wstring wtext = mpt::transcode<mpt::winstring>( text );
+				mpt::winstring wtext = mpt::transcode<mpt::winstring>( text );
 				WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 			} else {
 				write_raw( mpt::transcode<mpt::winstring>( text ) );
