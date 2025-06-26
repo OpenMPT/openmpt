@@ -275,19 +275,14 @@ class textout_ostream_console : public textout_backend {
 private:
 #if defined(UNICODE)
 	std::wostream & s;
-	void write_raw( const std::wstring & wchars ) {
+#else
+	std::ostream & s;
+#endif
+	void write_raw( const mpt::winstring & wchars ) {
 		if ( wchars.size() > 0 ) {
 			s.write( wchars.data(), wchars.size() );
 		}
 	}
-#else
-	std::ostream & s;
-	void write_raw( const std::string & chars ) {
-		if ( chars.size() > 0 ) {
-			s.write( chars.data(), chars.size() );
-		}
-	}
-#endif
 	HANDLE handle;
 	bool console;
 public:
@@ -308,19 +303,10 @@ public:
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				DWORD chars_written = 0;
-				#if defined(UNICODE)
-					std::wstring wtext = mpt::transcode<std::wstring>( text );
-					WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
-				#else
-					std::string ltext = mpt::transcode<std::string>( mpt::logical_encoding::locale, text );
-					WriteConsole( handle, ltext.data(), static_cast<DWORD>( ltext.size() ), &chars_written, NULL );
-				#endif
+				std::wstring wtext = mpt::transcode<mpt::winstring>( text );
+				WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 			} else {
-				#if defined(UNICODE)
-					write_raw( mpt::transcode<std::wstring>( text ) );
-				#else
-					write_raw( mpt::transcode<std::string>( mpt::logical_encoding::locale, text ) );
-				#endif
+				write_raw( mpt::transcode<mpt::winstring>( text ) );
 				s.flush();
 			}
 		}
