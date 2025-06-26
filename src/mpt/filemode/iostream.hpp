@@ -35,7 +35,6 @@ namespace filemode {
 
 class istream_guard {
 private:
-	std::istream * stream;
 	std::optional<mpt::filemode::FILE_guard> guard;
 private:
 	static std::FILE * get_FILE(std::istream & stream) {
@@ -48,8 +47,7 @@ private:
 		return result;
 	}
 public:
-	istream_guard(std::istream & stream, mpt::filemode::mode mode)
-		: stream(&stream) {
+	istream_guard(std::istream & stream, mpt::filemode::mode mode) {
 		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
 	}
 	istream_guard(const istream_guard &) = delete;
@@ -104,7 +102,6 @@ public:
 
 class wistream_guard {
 private:
-	std::wistream * stream;
 	std::optional<mpt::filemode::FILE_guard> guard;
 private:
 	static std::FILE * get_FILE(std::wistream & stream) {
@@ -117,8 +114,7 @@ private:
 		return result;
 	}
 public:
-	wistream_guard(std::wistream & stream, mpt::filemode::mode mode)
-		: stream(&stream) {
+	wistream_guard(std::wistream & stream, mpt::filemode::mode mode) {
 		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
 	}
 	wistream_guard(const wistream_guard &) = delete;
