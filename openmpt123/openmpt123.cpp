@@ -2223,6 +2223,22 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard> stdin_text_guard{ stdin_text ? std::make_optional<mpt::filemode::stdio_guard>( mpt::filemode::stdio::input, mpt::filemode::mode::text ) : std::nullopt };
 		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
+		// untie stdin and stdout
+		if ( stdin_data || stdout_data ) {
+			std::cin.tie( nullptr );
+			#if MPT_OS_WINDOWS && defined(UNICODE)
+				std::wcin.tie( nullptr );
+			#endif
+		}
+
+		// untie stderr and stdout
+		if ( stdout_data ) {
+			std::cerr.tie( nullptr );
+			#if MPT_OS_WINDOWS && defined(UNICODE)
+				std::wcerr.tie( nullptr );
+			#endif
+		}
+
 		// choose text output between quiet/stdout/stderr
 		textout_dummy dummy_log;
 		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : stdout_text ? static_cast<textout&>( std_out ) : static_cast<textout&>( std_err );
