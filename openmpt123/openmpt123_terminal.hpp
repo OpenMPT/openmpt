@@ -285,6 +285,9 @@ private:
 	}
 	HANDLE handle;
 	bool console;
+#if MPT_WIN_AT_LEAST(MPT_WIN_10_1809)
+	DWORD mode;
+#endif
 public:
 #if defined(UNICODE)
 	textout_ostream_console( std::wostream & s_, DWORD stdHandle_ )
@@ -295,6 +298,12 @@ public:
 		, handle(GetStdHandle( stdHandle_ ))
 		, console(IsConsole( stdHandle_ ))
 	{
+		s.flush();
+#if MPT_WIN_AT_LEAST(MPT_WIN_10_1809)
+		if ( GetConsoleMode( handle, &mode ) == FALSE ) {
+			mode = 0;
+		}
+#endif
 		return;
 	}
 	~textout_ostream_console() override = default;
@@ -313,7 +322,16 @@ public:
 	}
 	void cursor_up( std::size_t lines ) override {
 		if ( console ) {
-			s.flush();
+			#if MPT_WIN_AT_LEAST(MPT_WIN_10_1809)
+				if ( ( mode & (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) ) == (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) ) {
+					for ( std::size_t line = 0; line < lines; ++line ) {
+						DWORD chars_written = 0;
+						mpt::winstring wtext = std::wstring(TEXT("\x1b[A"));
+						WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
+					}
+					return;
+				}
+			#endif
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
 			ZeroMemory( &csbi, sizeof( CONSOLE_SCREEN_BUFFER_INFO ) );
 			COORD coord_cursor = COORD();
