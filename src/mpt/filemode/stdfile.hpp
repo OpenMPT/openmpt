@@ -38,18 +38,17 @@ private:
 	std::FILE * file;
 	std::optional<mpt::filemode::fd_guard> guard;
 public:
-	FILE_guard( std::FILE * file, mpt::filemode::mode new_mode )
-		: file(file)
-	{
-		std::fflush( file );
-		guard = std::make_optional<mpt::filemode::fd_guard>( fileno( file ), new_mode );
+	FILE_guard(std::FILE * file, mpt::filemode::mode new_mode)
+		: file(file) {
+		std::fflush(file);
+		guard = std::make_optional<mpt::filemode::fd_guard>(fileno(file), new_mode);
 	}
-	FILE_guard( const FILE_guard & ) = delete;
-	FILE_guard( FILE_guard && ) = default;
-	FILE_guard & operator=( const FILE_guard & ) = delete;
-	FILE_guard & operator=( FILE_guard && ) = default;
+	FILE_guard(const FILE_guard &) = delete;
+	FILE_guard(FILE_guard &&) = default;
+	FILE_guard & operator=(const FILE_guard &) = delete;
+	FILE_guard & operator=(FILE_guard &&) = default;
 	~FILE_guard() {
-		std::fflush( file );
+		std::fflush(file);
 		guard = std::nullopt;
 	}
 };
@@ -61,18 +60,17 @@ private:
 	std::FILE * file;
 	std::optional<mpt::filemode::fd_guard> guard;
 public:
-	FILE_guard( std::FILE * file, mpt::filemode::mode new_mode )
-		: file(file)
-	{
-		std::fflush( file );
-		guard = std::make_optional<mpt::filemode::fd_guard>( _fileno( file ), new_mode );
+	FILE_guard(std::FILE * file, mpt::filemode::mode new_mode)
+		: file(file) {
+		std::fflush(file);
+		guard = std::make_optional<mpt::filemode::fd_guard>(_fileno(file), new_mode);
 	}
-	FILE_guard( const FILE_guard & ) = delete;
-	FILE_guard( FILE_guard && ) = default;
-	FILE_guard & operator=( const FILE_guard & ) = delete;
-	FILE_guard & operator=( FILE_guard && ) = default;
+	FILE_guard(const FILE_guard &) = delete;
+	FILE_guard(FILE_guard &&) = default;
+	FILE_guard & operator=(const FILE_guard &) = delete;
+	FILE_guard & operator=(FILE_guard &&) = default;
 	~FILE_guard() {
-		std::fflush( file );
+		std::fflush(file);
 		guard = std::nullopt;
 	}
 };
@@ -81,13 +79,13 @@ public:
 
 class FILE_guard {
 public:
-	FILE_guard( std::FILE * /* file */, mpt::filemode::mode /* new_mode */ ) {
+	FILE_guard(std::FILE * /* file */, mpt::filemode::mode /* new_mode */) {
 		return;
 	}
-	FILE_guard( const FILE_guard & ) = delete;
-	FILE_guard( FILE_guard && ) = default;
-	FILE_guard & operator=( const FILE_guard & ) = delete;
-	FILE_guard & operator=( FILE_guard && ) = default;
+	FILE_guard(const FILE_guard &) = delete;
+	FILE_guard(FILE_guard &&) = default;
+	FILE_guard & operator=(const FILE_guard &) = delete;
+	FILE_guard & operator=(FILE_guard &&) = default;
 	~FILE_guard() = default;
 };
 
