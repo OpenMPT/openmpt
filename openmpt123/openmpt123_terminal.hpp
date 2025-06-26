@@ -323,6 +323,11 @@ public:
 				coord_cursor.Y -= static_cast<SHORT>( lines );
 				SetConsoleCursorPosition( handle, coord_cursor );
 			}
+		} else {
+			s.flush();
+			for ( std::size_t line = 0; line < lines; ++line ) {
+				write_raw( mpt::winstring(TEXT("\x1b[1A")) );
+			}
 		}
 	}
 };
