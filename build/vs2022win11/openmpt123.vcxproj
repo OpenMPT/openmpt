@@ -1511,7 +1511,6 @@
     <ClInclude Include="..\..\openmpt123\openmpt123_raw.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sdl2.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_sndfile.hpp" />
-    <ClInclude Include="..\..\openmpt123\openmpt123_stdio.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_stdout.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_terminal.hpp" />
     <ClInclude Include="..\..\openmpt123\openmpt123_waveout.hpp" />
@@ -1563,6 +1562,11 @@
     <ClInclude Include="..\..\src\mpt\exception\exception_text.hpp" />
     <ClInclude Include="..\..\src\mpt\exception\logic_error.hpp" />
     <ClInclude Include="..\..\src\mpt\exception\runtime_error.hpp" />
+    <ClInclude Include="..\..\src\mpt\filemode\fd.hpp" />
+    <ClInclude Include="..\..\src\mpt\filemode\filemode.hpp" />
+    <ClInclude Include="..\..\src\mpt\filemode\iostream.hpp" />
+    <ClInclude Include="..\..\src\mpt\filemode\stdfile.hpp" />
+    <ClInclude Include="..\..\src\mpt\filemode\stdio.hpp" />
     <ClInclude Include="..\..\src\mpt\format\concat.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_floatingpoint.hpp" />
     <ClInclude Include="..\..\src\mpt\format\default_formatter.hpp" />

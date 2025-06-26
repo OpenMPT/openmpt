@@ -119,6 +119,8 @@ end
    "../../pluginBridge/BridgeWrapper.h",
   }
 	excludes {
+		"../../src/mpt/filemode/**.cpp",
+		"../../src/mpt/filemode/**.hpp",
 		"../../src/mpt/main/**.cpp",
 		"../../src/mpt/main/**.hpp",
 	}

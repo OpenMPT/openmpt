@@ -35,6 +35,8 @@
   }
   excludes {
    "../../mptrack/wine/WineWrapper.cpp",
+		"../../src/mpt/filemode/**.cpp",
+		"../../src/mpt/filemode/**.hpp",
 		"../../src/mpt/main/**.cpp",
 		"../../src/mpt/main/**.hpp",
 		"../../src/openmpt/fileformat_base/**.cpp",

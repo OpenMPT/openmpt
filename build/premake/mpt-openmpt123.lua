@@ -30,6 +30,7 @@
    "../../src/mpt/chrono/*.hpp",
    "../../src/mpt/detect/*.hpp",
    "../../src/mpt/exception/*.hpp",
+   "../../src/mpt/filemode/*.hpp",
    "../../src/mpt/format/*.hpp",
    "../../src/mpt/io/*.hpp",
    "../../src/mpt/io_file/*.hpp",

@@ -47,8 +47,9 @@ static const char * const license =
 
 #include "mpt/base/algorithm.hpp"
 #include "mpt/base/detect.hpp"
+#include "mpt/filemode/filemode.hpp"
+#include "mpt/filemode/stdio.hpp"
 #include "mpt/main/main.hpp"
-
 #include "mpt/random/crand.hpp"
 #include "mpt/random/default_engines.hpp"
 #include "mpt/random/device.hpp"
@@ -74,7 +75,6 @@ static const char * const license =
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
@@ -87,7 +87,6 @@ static const char * const license =
 
 #include "openmpt123.hpp"
 #include "openmpt123_exception.hpp"
-#include "openmpt123_stdio.hpp"
 #include "openmpt123_terminal.hpp"
 
 #include "openmpt123_flac.hpp"
@@ -2116,8 +2115,9 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
-	FILE_mode_guard stdout_text_guard( stdout, FILE_mode::text );
-	FILE_mode_guard stderr_text_guard( stderr, FILE_mode::text );
+	mpt::filemode::stdio_guard stdout_text_guard( mpt::filemode::stdio::output, mpt::filemode::mode::text );
+	mpt::filemode::stdio_guard stderr_text_guard( mpt::filemode::stdio::error, mpt::filemode::mode::text );
+	mpt::filemode::stdio_guard stdlog_text_guard( mpt::filemode::stdio::log, mpt::filemode::mode::text );
 
 	textout_wrapper<textout_destination::destination_stdout> std_out;
 	textout_wrapper<textout_destination::destination_stderr> std_err;
@@ -2207,20 +2207,20 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
 	try {
 
-		const FILE_mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? FILE_mode::binary : FILE_mode::text;
-		const FILE_mode stdout_mode = flags.use_stdout ? FILE_mode::binary : FILE_mode::text;
+		const mpt::filemode::mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
+		const mpt::filemode::mode stdout_mode = flags.use_stdout ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
 
-		const bool stdin_text = ( stdin_mode == FILE_mode::text );
-		const bool stdin_data = ( stdin_mode == FILE_mode::binary );
-		const bool stdout_text = ( stdout_mode == FILE_mode::text );
-		const bool stdout_data = ( stdout_mode == FILE_mode::binary );
+		const bool stdin_text = ( stdin_mode == mpt::filemode::mode::text );
+		const bool stdin_data = ( stdin_mode == mpt::filemode::mode::binary );
+		const bool stdout_text = ( stdout_mode == mpt::filemode::mode::text );
+		const bool stdout_data = ( stdout_mode == mpt::filemode::mode::binary );
 
 		// set stdin/stdout to binary for data input/output
-		[[maybe_unused]] std::optional<FILE_mode_guard> stdin_guard{ stdin_data ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::binary ) : std::nullopt };
-		[[maybe_unused]] std::optional<FILE_mode_guard> stdout_guard{ stdout_data ? std::make_optional<FILE_mode_guard>( stdout, FILE_mode::binary ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard> stdin_guard{ stdin_data ? std::make_optional<mpt::filemode::stdio_guard>( mpt::filemode::stdio::input, mpt::filemode::mode::binary ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard> stdout_guard{ stdout_data ? std::make_optional<mpt::filemode::stdio_guard>( mpt::filemode::stdio::output, mpt::filemode::mode::binary ) : std::nullopt };
 
 		// setup terminal input
-		[[maybe_unused]] std::optional<FILE_mode_guard> stdin_text_guard{ stdin_text ? std::make_optional<FILE_mode_guard>( stdin, FILE_mode::text ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard> stdin_text_guard{ stdin_text ? std::make_optional<mpt::filemode::stdio_guard>( mpt::filemode::stdio::input, mpt::filemode::mode::text ) : std::nullopt };
 		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
 		// choose text output between quiet/stdout/stderr

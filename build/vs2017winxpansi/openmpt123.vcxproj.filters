@@ -25,6 +25,9 @@
     <Filter Include="src\mpt\exception">
       <UniqueIdentifier>{2B7E92B2-9794-9048-E00B-1C6A4C6161D0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\filemode">
+      <UniqueIdentifier>{4132C08B-2D2B-DFDD-565D-C46242B5BEE9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\format">
       <UniqueIdentifier>{C5847241-B152-6647-9AE6-D66D865342AC}</UniqueIdentifier>
     </Filter>
@@ -85,9 +88,6 @@
       <Filter>openmpt123</Filter>
     </ClInclude>
     <ClInclude Include="..\..\openmpt123\openmpt123_sndfile.hpp">
-      <Filter>openmpt123</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\openmpt123\openmpt123_stdio.hpp">
       <Filter>openmpt123</Filter>
     </ClInclude>
     <ClInclude Include="..\..\openmpt123\openmpt123_stdout.hpp">
@@ -242,6 +242,21 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\exception\runtime_error.hpp">
       <Filter>src\mpt\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\filemode\fd.hpp">
+      <Filter>src\mpt\filemode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\filemode\filemode.hpp">
+      <Filter>src\mpt\filemode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\filemode\iostream.hpp">
+      <Filter>src\mpt\filemode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\filemode\stdfile.hpp">
+      <Filter>src\mpt\filemode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\filemode\stdio.hpp">
+      <Filter>src\mpt\filemode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\format\concat.hpp">
       <Filter>src\mpt\format</Filter>
