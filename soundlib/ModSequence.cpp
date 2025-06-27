@@ -21,7 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 ModSequence::ModSequence(CSoundFile &sndFile)
-	: m_sndFile(sndFile)
+	: m_sndFile{sndFile}
 {
 }
 
@@ -43,7 +43,9 @@ bool ModSequence::operator== (const ModSequence &other) const noexcept
 {
 	return static_cast<const std::vector<PATTERNINDEX> &>(*this) == other
 		&& m_name == other.m_name
-		&& m_restartPos == other.m_restartPos;
+		&& m_restartPos == other.m_restartPos
+		&& m_defaultTempo == other.m_defaultTempo
+		&& m_defaultSpeed == other.m_defaultSpeed;
 }
 
 
