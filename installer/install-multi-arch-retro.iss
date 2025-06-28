@@ -201,7 +201,14 @@ begin
 			end;
 		paX64:
 			begin
-				Result := 'amd64';
+				if (GetWindowsVersion >= $05020ECE) then
+				begin
+					Result := 'amd64';
+				end
+				else
+				begin
+					Result := 'x86';
+				end;
 			end;
 		paIA64:
 			begin
