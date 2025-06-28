@@ -543,6 +543,7 @@
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -883,6 +884,7 @@
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/wd4018 /wd4091 /wd4267 /wd4312 /wd6001 /wd6011 /wd6053 /wd6216 /wd6217 /wd6255 /wd6258 /wd6385 /wd6386 /wd6387 /wd28159 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>

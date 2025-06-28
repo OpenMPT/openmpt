@@ -390,6 +390,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 -Wno-unused-function %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
@@ -638,6 +639,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4018 /wd4244 /wd4267 /wd4305 /wd4334 /wd6011 /wd6285 /wd6297 /wd6305 /wd6385 /wd6386 -Wno-unused-function %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
