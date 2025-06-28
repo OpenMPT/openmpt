@@ -174,25 +174,7 @@
 				"OPUS_X86_MAY_HAVE_SSE4_1=1",
 			}
 			filter {}
-			filter { "architecture:x86", "configurations:Checked" }
-				defines {
-					"OPUS_X86_PRESUME_SSE",
-					"OPUS_X86_PRESUME_SSE2",
-				}
-			filter {}
-			filter { "architecture:x86", "configurations:CheckedShared" }
-				defines {
-					"OPUS_X86_PRESUME_SSE",
-					"OPUS_X86_PRESUME_SSE2",
-				}
-			filter {}
-			filter { "architecture:x86", "configurations:Release" }
-				defines {
-					"OPUS_X86_PRESUME_SSE",
-					"OPUS_X86_PRESUME_SSE2",
-				}
-			filter {}
-			filter { "architecture:x86", "configurations:ReleaseShared" }
+			filter { "architecture:x86" }
 				defines {
 					"OPUS_X86_PRESUME_SSE",
 					"OPUS_X86_PRESUME_SSE2",

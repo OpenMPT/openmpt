@@ -72,22 +72,7 @@
 	if _OPTIONS["windows-version"] ~= "winxp" then
 		-- WinXP builds do not use SSE2 by default
 		filter {}
-		filter { "architecture:x86", "configurations:Checked" }
-			defines {
-				"HAVE_XMMINTRIN_H",
-				"MIN_ARCH_SSE",
-			}
-		filter { "architecture:x86", "configurations:CheckedShared" }
-			defines {
-				"HAVE_XMMINTRIN_H",
-				"MIN_ARCH_SSE",
-			}
-		filter { "architecture:x86", "configurations:Release" }
-			defines {
-				"HAVE_XMMINTRIN_H",
-				"MIN_ARCH_SSE",
-			}
-		filter { "architecture:x86", "configurations:ReleaseShared" }
+		filter { "architecture:x86" }
 			defines {
 				"HAVE_XMMINTRIN_H",
 				"MIN_ARCH_SSE",

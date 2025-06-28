@@ -345,29 +345,15 @@
 		end
 
 	if _OPTIONS["windows-version"] == "winxp" then
-
+		filter {}
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
 		filter {}
-
 	else
-
 		filter {}
-
-		filter { "architecture:x86", "configurations:Checked" }
+		filter { "architecture:x86" }
 			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:CheckedShared" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:Release" }
-			vectorextensions "SSE2"
-
-		filter { "architecture:x86", "configurations:ReleaseShared" }
-			vectorextensions "SSE2"
-
 		filter {}
-	
 	end
 
 	if _OPTIONS["windows-version"] == "win11" then
