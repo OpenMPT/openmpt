@@ -179,6 +179,13 @@ Type: files; Name: {app}\bin\arm64\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm64\openmpt-mpg123.dll
 Type: files; Name: {app}\bin\arm64\openmpt-soundtouch.dll
 
+Type: files; Name: {app}\bin\arm64ec\OpenMPT.exe
+Type: files; Name: {app}\bin\arm64ec\PluginBridge-arm64ec.exe
+Type: files; Name: {app}\bin\arm64ec\PluginBridgeLegacy-arm64ec.exe
+Type: files; Name: {app}\bin\arm64ec\openmpt-lame.dll
+Type: files; Name: {app}\bin\arm64ec\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm64ec\openmpt-soundtouch.dll
+
 
 
 #include "uninstall-single-arch.iss"
