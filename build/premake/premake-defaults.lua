@@ -398,11 +398,11 @@
 		filter {}
 		filter { "action:vs2022" }
 			if _OPTIONS["windows-version"] == "win7" then
-				systemversion "10.0.19041.0"
+				systemversion "10.0.22621.0"
 			elseif _OPTIONS["windows-version"] == "win8" then
-				systemversion "10.0.19041.0"
+				systemversion "10.0.22621.0"
 			elseif _OPTIONS["windows-version"] == "win81" then
-				systemversion "10.0.19041.0"
+				systemversion "10.0.22621.0"
 			elseif _OPTIONS["windows-version"] == "win10" then
 				systemversion "10.0.22621.0"
 			elseif _OPTIONS["windows-version"] == "win11" then
