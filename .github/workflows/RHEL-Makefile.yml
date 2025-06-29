@@ -11,18 +11,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: 'almalinux:8' , deps: sys   }
-          - { version: 'almalinux:8' , deps: local }
-          - { version: 'almalinux:8' , deps: small }
-          - { version: 'almalinux:9' , deps: sys   }
-          - { version: 'almalinux:9' , deps: local }
-          - { version: 'almalinux:9' , deps: small }
-          - { version: 'rockylinux:8', deps: sys   }
-          - { version: 'rockylinux:8', deps: local }
-          - { version: 'rockylinux:8', deps: small }
-          - { version: 'rockylinux:9', deps: sys   }
-          - { version: 'rockylinux:9', deps: local }
-          - { version: 'rockylinux:9', deps: small }
+          - { version: 'almalinux:8'  , deps: sys   }
+          - { version: 'almalinux:8'  , deps: local }
+          - { version: 'almalinux:8'  , deps: small }
+          - { version: 'almalinux:9'  , deps: sys   }
+          - { version: 'almalinux:9'  , deps: local }
+          - { version: 'almalinux:9'  , deps: small }
+          - { version: 'almalinux:10' , deps: sys   }
+          - { version: 'almalinux:10' , deps: local }
+          - { version: 'almalinux:10' , deps: small }
+          - { version: 'rockylinux:8' , deps: sys   }
+          - { version: 'rockylinux:8' , deps: local }
+          - { version: 'rockylinux:8' , deps: small }
+          - { version: 'rockylinux:9' , deps: sys   }
+          - { version: 'rockylinux:9' , deps: local }
+          - { version: 'rockylinux:9' , deps: small }
+        #  - { version: 'rockylinux:10', deps: sys   }
+        #  - { version: 'rockylinux:10', deps: local }
+        #  - { version: 'rockylinux:10', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
@@ -42,10 +48,16 @@ jobs:
       if: ${{ matrix.version == 'almalinux:9' }}
       run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y install almalinux-release-devel && dnf -y clean all && dnf -y upgrade --refresh
     - name: Setup repositories
+      if: ${{ matrix.version == 'almalinux:10' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y install almalinux-release-devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Setup repositories
       if: ${{ matrix.version == 'rockylinux:8' }}
       run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled powertools && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
     - name: Setup repositories
       if: ${{ matrix.version == 'rockylinux:9' }}
+      run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
+    - name: Setup repositories
+      if: ${{ matrix.version == 'rockylinux:10' }}
       run: dnf -y install 'dnf-command(config-manager)' && dnf -y config-manager --set-enabled crb && dnf -y config-manager --set-enabled devel && dnf -y clean all && dnf -y upgrade --refresh
     - name: Install dependencies
       run: dnf -y install --allowerasing subversion perl-XML-XPath git gawk zip unzip xz make binutils gcc gcc-c++ clang pkgconf help2man doxygen autoconf autoconf-archive automake libtool zlib-devel mpg123-devel libogg-devel libvorbis-devel pulseaudio-libs-devel SDL2-devel flac-devel libsndfile-devel libtool-ltdl-devel
