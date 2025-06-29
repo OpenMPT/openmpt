@@ -29,9 +29,11 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#ifdef MPT_WITH_FLAC
 #if MPT_PLATFORM_MULTITHREADED && !defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD)
 #include <thread>
 #endif
+#endif  // MPT_WITH_FLAC
 #include <vector>
 
 #include <cassert>
