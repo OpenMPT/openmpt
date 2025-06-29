@@ -468,16 +468,16 @@ if _OPTIONS["windows-family"] == "uwp" then
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')
 			premake.w('<ApplicationType>Windows Store</ApplicationType>')
 			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
-			premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22000.0</WindowsTargetPlatformVersion>')
-			premake.w('<WindowsTargetPlatformMinVersion>10.0.17134.0</WindowsTargetPlatformMinVersion>')
+			premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22621.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformMinVersion>10.0.19045.0</WindowsTargetPlatformMinVersion>')
 		elseif _ACTION == 'vs2019' then
 			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')
 			premake.w('<MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>')
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')
 			premake.w('<ApplicationType>Windows Store</ApplicationType>')
 			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
-			premake.w('<WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>')
-			premake.w('<WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>')
+			premake.w('<WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformMinVersion>10.0.19045.0</WindowsTargetPlatformMinVersion>')
 		end
 	end
 
