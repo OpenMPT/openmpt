@@ -35,11 +35,13 @@
 //#include "mpt/crc/crc.hpp"
 #include "OggStream.h"
 #include <algorithm>
+#ifdef MPT_WITH_FLAC
 #if MPT_PLATFORM_MULTITHREADED && !defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD)
 #include <thread>
 #endif
 #if MPT_PLATFORM_MULTITHREADED && defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD) && defined(MPT_WITH_PTHREAD)
 #include <pthread.h>
+#endif
 #endif
 #ifdef MPT_WITH_OGG
 #if MPT_COMPILER_CLANG
