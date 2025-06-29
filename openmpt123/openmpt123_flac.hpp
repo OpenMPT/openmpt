@@ -19,11 +19,11 @@
 #include "mpt/base/saturate_round.hpp"
 
 #include <algorithm>
-#if MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+#if MPT_PLATFORM_MULTITHREADED && !defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD)
 #include <thread>
 #endif
 
-#if MPT_PLATFORM_MULTITHREADED && defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS) && defined(MPT_WITH_PTHREAD)
+#if MPT_PLATFORM_MULTITHREADED && defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD) && defined(MPT_WITH_PTHREAD)
 #include <pthread.h>
 #endif
 
@@ -76,7 +76,7 @@ public:
 		FLAC__stream_encoder_set_sample_rate( encoder, flags.samplerate );
 		FLAC__stream_encoder_set_compression_level( encoder, 8 );
 #if (FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED
-#if !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+#if !defined(MPT_LIBCXX_QUIRK_NO_STD_THREAD)
 		std::uint32_t threads = static_cast<std::uint32_t>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1)));
 #elif defined(MPT_WITH_PTHREAD)
 		std::uint32_t threads = static_cast<std::uint32_t>(std::max(pthread_num_processors_np(), static_cast<int>(1)));
