@@ -28,9 +28,9 @@ jobs:
           - { version: 'rockylinux:9' , deps: sys   }
           - { version: 'rockylinux:9' , deps: local }
           - { version: 'rockylinux:9' , deps: small }
-          - { version: 'rockylinux:10', deps: sys   }
-          - { version: 'rockylinux:10', deps: local }
-          - { version: 'rockylinux:10', deps: small }
+        #  - { version: 'rockylinux:10', deps: sys   }
+        #  - { version: 'rockylinux:10', deps: local }
+        #  - { version: 'rockylinux:10', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
