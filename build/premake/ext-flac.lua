@@ -133,10 +133,17 @@
 			"FLAC__USE_AVX",
 		}
 	filter {}
-	filter {  "not configurations:DebugShared" }
-		-- Debug DLL runtime is missing a DLL when using C11 threads
 		if _ACTION >= "vs2022" then
-			defines { "HAVE_C11THREADS" }
+			filter {}
+			filter {  "not configurations:DebugShared" }
+				-- Debug DLL runtime is missing a DLL when using C11 threads
+				if _ACTION >= "vs2022" then
+					defines { "HAVE_C11THREADS" }
+				end
+			filter {}
+		else
+			mpt_use_pthread_win32()
+			defines { "HAVE_PTHREAD" }
 		end
 	filter {}
 

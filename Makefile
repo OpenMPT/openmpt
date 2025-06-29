@@ -2264,6 +2264,7 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./include/flac                     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/flac                     --native-eol CRLF
 	svn export ./include/portaudio                bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/portaudio                --native-eol CRLF
 	svn export ./include/ogg                      bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/ogg                      --native-eol CRLF
+	svn export ./include/pthread-win32            bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/pthread-win32            --native-eol CRLF
 	svn export ./include/pugixml                  bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/pugixml                  --native-eol CRLF
 	svn export ./include/stb_vorbis               bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/stb_vorbis               --native-eol CRLF
 	svn export ./include/vorbis                   bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/include/vorbis                   --native-eol CRLF

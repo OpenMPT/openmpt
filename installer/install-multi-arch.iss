@@ -201,6 +201,7 @@ Type: files; Name: {app}\bin\x86\PluginBridge-x86.exe
 Type: files; Name: {app}\bin\x86\PluginBridgeLegacy-x86.exe
 Type: files; Name: {app}\bin\x86\openmpt-lame.dll
 Type: files; Name: {app}\bin\x86\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\x86\openmpt-pthread-win32.dll
 Type: files; Name: {app}\bin\x86\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\amd64\OpenMPT.exe
@@ -208,6 +209,7 @@ Type: files; Name: {app}\bin\amd64\PluginBridge-amd64.exe
 Type: files; Name: {app}\bin\amd64\PluginBridgeLegacy-amd64.exe
 Type: files; Name: {app}\bin\amd64\openmpt-lame.dll
 Type: files; Name: {app}\bin\amd64\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\amd64\openmpt-pthread-win32.dll
 Type: files; Name: {app}\bin\amd64\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\arm\OpenMPT.exe
@@ -215,6 +217,7 @@ Type: files; Name: {app}\bin\arm\PluginBridge-arm.exe
 Type: files; Name: {app}\bin\arm\PluginBridgeLegacy-arm.exe
 Type: files; Name: {app}\bin\arm\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm\openmpt-pthread-win32.dll
 Type: files; Name: {app}\bin\arm\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\arm64\OpenMPT.exe
@@ -222,6 +225,7 @@ Type: files; Name: {app}\bin\arm64\PluginBridge-arm64.exe
 Type: files; Name: {app}\bin\arm64\PluginBridgeLegacy-arm64.exe
 Type: files; Name: {app}\bin\arm64\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm64\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm64\openmpt-pthread-win32.dll
 Type: files; Name: {app}\bin\arm64\openmpt-soundtouch.dll
 
 Type: files; Name: {app}\bin\arm64ec\OpenMPT.exe
@@ -229,6 +233,7 @@ Type: files; Name: {app}\bin\arm64ec\PluginBridge-arm64ec.exe
 Type: files; Name: {app}\bin\arm64ec\PluginBridgeLegacy-arm64ec.exe
 Type: files; Name: {app}\bin\arm64ec\openmpt-lame.dll
 Type: files; Name: {app}\bin\arm64ec\openmpt-mpg123.dll
+Type: files; Name: {app}\bin\arm64ec\openmpt-pthread-win32.dll
 Type: files; Name: {app}\bin\arm64ec\openmpt-soundtouch.dll
 
 

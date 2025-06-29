@@ -63,6 +63,10 @@ end
 	defines { "MPT_WITH_OPUSFILE" }
 	mpt_use_portaudio()
 	defines { "MPT_WITH_PORTAUDIO" }
+	if _ACTION < "vs2022" then
+		mpt_use_pthread_win32()
+		defines { "MPT_WITH_PTHREAD" }
+	end
 	mpt_use_r8brain()
 	defines { "MPT_WITH_R8BRAIN" }
 	mpt_use_rtaudio()

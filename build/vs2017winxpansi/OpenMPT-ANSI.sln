@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "opusfile", "ext\opusfile.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "portaudio", "ext\portaudio.vcxproj", "{189B867F-FF4B-45A1-B741-A97492EE69AF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pthread-win32", "ext\pthread-win32.vcxproj", "{2F5B53AA-AB47-4B76-9913-87210353D8E4}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "r8brain", "ext\r8brain.vcxproj", "{BC116B29-9958-4389-B294-7529BB7C7D37}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rtaudio", "ext\rtaudio.vcxproj", "{4886456B-1342-4EC8-AD3F-D92AEB8C1097}"
@@ -497,6 +499,30 @@ Global
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|Win32.Build.0 = Release|Win32
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.ActiveCfg = Release|x64
 		{189B867F-FF4B-45A1-B741-A97492EE69AF}.Release|x64.Build.0 = Release|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.CheckedShared|Win32.ActiveCfg = CheckedShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.CheckedShared|Win32.Build.0 = CheckedShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.CheckedShared|x64.ActiveCfg = CheckedShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.CheckedShared|x64.Build.0 = CheckedShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Checked|Win32.ActiveCfg = Checked|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Checked|Win32.Build.0 = Checked|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Checked|x64.ActiveCfg = Checked|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Checked|x64.Build.0 = Checked|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.DebugShared|Win32.ActiveCfg = DebugShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.DebugShared|Win32.Build.0 = DebugShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.DebugShared|x64.ActiveCfg = DebugShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.DebugShared|x64.Build.0 = DebugShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Debug|Win32.Build.0 = Debug|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Debug|x64.ActiveCfg = Debug|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Debug|x64.Build.0 = Debug|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.ReleaseShared|Win32.ActiveCfg = ReleaseShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.ReleaseShared|Win32.Build.0 = ReleaseShared|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.ReleaseShared|x64.ActiveCfg = ReleaseShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.ReleaseShared|x64.Build.0 = ReleaseShared|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Release|Win32.ActiveCfg = Release|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Release|Win32.Build.0 = Release|Win32
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Release|x64.ActiveCfg = Release|x64
+		{2F5B53AA-AB47-4B76-9913-87210353D8E4}.Release|x64.Build.0 = Release|x64
 		{BC116B29-9958-4389-B294-7529BB7C7D37}.CheckedShared|Win32.ActiveCfg = CheckedShared|Win32
 		{BC116B29-9958-4389-B294-7529BB7C7D37}.CheckedShared|Win32.Build.0 = CheckedShared|Win32
 		{BC116B29-9958-4389-B294-7529BB7C7D37}.CheckedShared|x64.ActiveCfg = CheckedShared|x64

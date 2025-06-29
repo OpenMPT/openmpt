@@ -37,6 +37,10 @@
 #include <cassert>
 #include <cstddef>
 
+#if MPT_PLATFORM_MULTITHREADED && defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS) && defined(MPT_WITH_PTHREAD)
+#include <pthread.h>
+#endif
+
 #ifdef MPT_WITH_FLAC
 #include <FLAC/metadata.h>
 #include <FLAC/format.h>
@@ -129,7 +133,11 @@ public:
 		FLAC__stream_encoder_set_compression_level(encoder, compressionLevel);
 
 #if(FLAC_API_VERSION_CURRENT >= 14) && MPT_PLATFORM_MULTITHREADED && !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
+#if !defined(MPT_COMPILER_QUIRK_NO_STDCPP_THREADS)
 		uint32 threads = settings.Details.FLACMultithreading ? static_cast<uint32>(std::max(std::thread::hardware_concurrency(), static_cast<unsigned int>(1))) : static_cast<uint32>(1);
+#elif defined(MPT_WITH_PTHREAD)
+		uint32 threads = settings.Details.FLACMultithreading ? static_cast<uint32>(std::max(pthread_num_processors_np(), static_cast<int>(1))) : static_cast<uint32>(1);
+#endif
 		// Work-around <https://github.com/xiph/flac/issues/823>.
 		//FLAC__stream_encoder_set_num_threads(encoder, threads);
 		while((FLAC__stream_encoder_set_num_threads(encoder, threads) == FLAC__STREAM_ENCODER_SET_NUM_THREADS_TOO_MANY_THREADS) && (threads > 1))

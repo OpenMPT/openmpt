@@ -15,7 +15,12 @@
 		"MPT_WITH_FLAC",
 		"MPT_WITH_PORTAUDIO",
 	}
-	
+
+	if _ACTION < "vs2022" then
+		mpt_use_pthread_win32()
+		defines { "MPT_WITH_PTHREAD" }
+	end
+
 	files {
 		"../../openmpt123/openmpt123.manifest",
 	}

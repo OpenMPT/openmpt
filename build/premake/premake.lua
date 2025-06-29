@@ -298,6 +298,9 @@ if _OPTIONS["group"] == "openmpt123" then
 solution "openmpt123"
 	startproject "openmpt123"
 
+if _ACTION < "vs2022" then
+ dofile "../../build/premake/ext-pthread-win32.lua"
+end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-ogg.lua"
@@ -330,6 +333,9 @@ solution "OpenMPT-UTF8"
  dofile "../../build/premake/ext-asiomodern.lua"
 if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
+end
+if _ACTION < "vs2022" then
+ dofile "../../build/premake/ext-pthread-win32.lua"
 end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"
@@ -366,6 +372,9 @@ solution "OpenMPT-ANSI"
 if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
+if _ACTION < "vs2022" then
+ dofile "../../build/premake/ext-pthread-win32.lua"
+end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
@@ -400,6 +409,9 @@ solution "OpenMPT"
  dofile "../../build/premake/ext-asiomodern.lua"
 if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
+end
+if _ACTION < "vs2022" then
+ dofile "../../build/premake/ext-pthread-win32.lua"
 end
  dofile "../../build/premake/ext-flac.lua"
  dofile "../../build/premake/ext-lame.lua"

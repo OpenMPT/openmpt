@@ -60,6 +60,9 @@ rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Li
 rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
 copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
 copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+copy /y ..\..\include\pthread-win32\docs\COPYING.md                     .\Licenses\License.PThread-Win32.txt || goto error
+copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licenses\License.PThread-Win32.FSF.txt || goto error
+copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
@@ -76,8 +79,10 @@ copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-pthread-win32.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt-pthread-Win32.dll .\openmpt123\amd64\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\in_openmpt.dll .\Winamp\ || goto error
@@ -144,6 +149,9 @@ rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Li
 rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
 rem copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.md                     .\Licenses\License.PThread-Win32.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licenses\License.PThread-Win32.FSF.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 rem copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error

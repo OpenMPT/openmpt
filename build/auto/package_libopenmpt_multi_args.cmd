@@ -67,6 +67,9 @@ rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Li
 rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
 copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
 copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.md                     .\Licenses\License.PThread-Win32.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licenses\License.PThread-Win32.FSF.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
@@ -193,6 +196,9 @@ rem copy /y ..\..\include\opusenc\AUTHORS                                   .\Li
 rem copy /y ..\..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
 rem copy /y ..\..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.md                     .\Licenses\License.PThread-Win32.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licenses\License.PThread-Win32.FSF.txt || goto error
+rem copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 rem copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
 rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error

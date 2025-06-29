@@ -1,0 +1,9 @@
+pthread-win32 (<https://github.com/GerHobbelt/pthread-win32> commit
+c66d2aa85adb31a38326ea90f5bb6f6410c348d3 (2024-10-18).
+The following changes have been made:
+ *  Warnings in `sched_getscheduler.c` and `sched_setscheduler.c` have been
+    fixed.
+ *  Modifications are marked by `/* OpenMPT */`.
+ *  Obviously, unnecessary folders and files have been removed.
+ *  For building, premake is used to generate Visual Studio project files.
+    See ../build/premake/ for details.
