@@ -33,6 +33,7 @@ del /f /q "%OUTDIR%\openmpt-wine-support.zip"
  src\mpt\binary\*.hpp ^
  src\mpt\binary\tests\*.hpp ^
  src\mpt\check\*.hpp ^
+ src\mpt\chrono\*.hpp ^
  src\mpt\crc\*.hpp ^
  src\mpt\crc\tests\*.hpp ^
  src\mpt\crypto\*.hpp ^
