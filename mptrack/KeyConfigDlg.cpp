@@ -895,6 +895,8 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 		event |= kKeyEventRepeat;
 	if(m_bKeyUp.GetCheck() != BST_UNCHECKED)
 		event |= kKeyEventUp;
+	if(event == kKeyEventNone)
+		event = kKeyEventDown;
 
 	KeyCombination kc(CCommandSet::ContextFromCommand(cmd), m_eCustHotKey.mod, m_eCustHotKey.code, event);
 	//detect invalid input
@@ -902,11 +904,6 @@ void COptionsKeyboard::OnSetKeyChoice(const CWnd *source)
 	{
 		Reporting::Warning("You need to say to which key you'd like to map this command to.", "Invalid key data", this);
 		return;
-	}
-	if(!kc.EventType())
-	{
-		::MessageBeep(MB_ICONWARNING);
-		kc.EventType(kKeyEventDown);
 	}
 
 	bool add = true, updateAll = false;
