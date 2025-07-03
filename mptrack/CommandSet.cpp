@@ -62,7 +62,7 @@ std::vector<HKL> GetKeyboardLayouts()
 #endif
 
 #ifdef MPT_COMMANDSET_LOGGING
-#define LOG_COMMANDSET(x) MPT_LOG_GLOBAL(LogDebug, "CommandSet", x)
+#define LOG_COMMANDSET(x) MPT_LOG_GLOBAL(LogDebug, "CommandSet", (x))
 #else
 #define LOG_COMMANDSET(x) do { } while(0)
 #endif
