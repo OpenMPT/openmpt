@@ -372,6 +372,10 @@
 #if MPT_LIBCXX_GNU_BEFORE(13)
 #define MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME
 #endif
+#if MPT_LIBCXX_LLVM
+// See <https://github.com/llvm/llvm-project/issues/99982>
+#define MPT_LIBCXX_QUIRK_CHRONO_DATE_NO_ZONED_TIME
+#endif
 #if MPT_MSVC_AT_LEAST(2022, 6) && MPT_MSVC_BEFORE(2022, 7)
 // std::chrono triggers ICE in VS2022 17.6.0, see <https://developercommunity.visualstudio.com/t/INTERNAL-COMPILER-ERROR-when-compiling-s/10366948>.
 #define MPT_LIBCXX_QUIRK_CHRONO_DATE_BROKEN_ZONED_TIME
