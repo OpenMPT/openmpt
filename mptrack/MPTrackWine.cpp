@@ -168,6 +168,13 @@ bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion)
 		}
 	}
 	if(!wineVersion.Version().IsValid()) supported = false;
+	if(wineVersion.Version().IsAtLeast(mpt::osinfo::windows::wine::version{10, 11, 0}) && wineVersion.Version().IsBefore(mpt::osinfo::windows::wine::version{10, 12, 0}))
+	{
+		// Blacklisted due to <https://bugs.openmpt.org/view.php?id=1904>.
+		// Probably caused by <https://gitlab.winehq.org/wine/wine/-/commit/96cd811903e3d3f227c39e12235725baf793f4b9>,
+		// and maybe fixed by <https://gitlab.winehq.org/wine/wine/-/commit/aae0f624d48d1e4f79e6947798e61b4d1006bf76>.
+		supported = false;
+	}
 	return supported;
 }
 
