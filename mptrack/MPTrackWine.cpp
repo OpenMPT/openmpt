@@ -153,10 +153,14 @@ mpt::ustring WineGetSystemInfoString(mpt::OS::Wine::VersionContext & wineVersion
 }
 
 
-bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion)
+bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion, std::vector<mpt::ustring> & reasons)
 {
 	bool supported = true;
-	if(wineVersion.RawBuildID().empty()) supported = false;
+	if(wineVersion.RawBuildID().empty())
+	{
+		supported = false;
+		reasons.push_back(MPT_USTRING("Empty result from wine_get_build_id()."));
+	}
 	if(!TrackerSettings::Instance().WineSupportAllowUnknownHost)
 	{
 		if((wineVersion.HostClass() == mpt::osinfo::osclass::Linux) || ((wineVersion.HostClass() == mpt::osinfo::osclass::BSD_) && wineVersion.RawHostSysName() == "FreeBSD"))
@@ -165,33 +169,64 @@ bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion)
 		} else
 		{
 			supported = false;
+			reasons.push_back(MPT_UFORMAT("Unsupported host OS type: {}")(mpt::ToUnicode(mpt::Charset::UTF8, wineVersion.RawHostSysName())));
 		}
 	}
-	if(!wineVersion.Version().IsValid()) supported = false;
+	if(!wineVersion.Version().IsValid())
+	{
+		supported = false;
+		reasons.push_back(MPT_UFORMAT("Failed to parse Wine version: {}")(mpt::ToUnicode(mpt::Charset::UTF8, wineVersion.RawVersion())));
+	}
 	if(wineVersion.Version().IsAtLeast(mpt::osinfo::windows::wine::version{10, 11, 0}) && wineVersion.Version().IsBefore(mpt::osinfo::windows::wine::version{10, 12, 0}))
 	{
 		// Blacklisted due to <https://bugs.openmpt.org/view.php?id=1904>.
 		// Probably caused by <https://gitlab.winehq.org/wine/wine/-/commit/96cd811903e3d3f227c39e12235725baf793f4b9>,
 		// and maybe fixed by <https://gitlab.winehq.org/wine/wine/-/commit/aae0f624d48d1e4f79e6947798e61b4d1006bf76>.
+		// Upstream bug: <https://bugs.winehq.org/show_bug.cgi?id=58435>.
 		supported = false;
+		reasons.push_back(MPT_USTRING("Buggy Wine version 10.11.x: https://bugs.openmpt.org/view.php?id=1904"));
 	}
 	return supported;
 }
 
-bool WineSetupIsSupported(mpt::Wine::Context & wine)
+bool WineSetupIsSupported(mpt::Wine::Context & wine, std::vector<mpt::ustring> & reasons)
 {
 	bool supported = true;
-	if(theApp.GetInstallPath().empty()) supported = false;
-	if(wine.PathToPosix(theApp.GetInstallPath()).empty()) supported = false;
-	if(wine.PathToPosix(theApp.GetConfigPath()).empty()) supported = false;
-	if(wine.PathToWindows("/").empty()) supported = false;
-	if(supported)
+	if(theApp.GetInstallPath().empty())
 	{
-		if(wine.HOME().empty()) supported = false;
+		supported = false;
+		reasons.push_back(MPT_USTRING("Empty OpenMPT install path."));
+	}
+	if(wine.PathToPosix(theApp.GetInstallPath()).empty())
+	{
+		supported = false;
+		reasons.push_back(MPT_USTRING("Empty Unix OpenMPT install path."));
+	}
+	if(wine.PathToPosix(theApp.GetConfigPath()).empty())
+	{
+		supported = false;
+		reasons.push_back(MPT_USTRING("Empty Unix OpenMPT config path."));
+	}
+	if(wine.PathToWindows("/").empty())
+	{
+		supported = false;
+		reasons.push_back(MPT_USTRING("Empty Windows root path."));
 	}
 	if(supported)
 	{
-		if(wine.Uname_m() == "x86_64" && mpt::pointer_size != 8) supported = false;
+		if(wine.HOME().empty())
+		{
+			supported = false;
+			reasons.push_back(MPT_USTRING("Empty $HOME path."));
+		}
+	}
+	if(supported)
+	{
+		if(wine.Uname_m() == "x86_64" && mpt::pointer_size != 8)
+		{
+			supported = false;
+			reasons.push_back(MPT_USTRING("Architecture mismatch."));
+		}
 	}
 	return supported;
 }
@@ -269,18 +304,19 @@ void Initialize()
 	}
 
 	mpt::OS::Wine::VersionContext wineVersion = *theApp.GetWineVersion();
-	if(!WineSetupIsSupported(wineVersion))
+	std::vector<mpt::ustring> reasons;
+	if(!WineSetupIsSupported(wineVersion, reasons))
 	{
-		Reporting::Notification(U_("OpenMPT does not support Wine integration on your current Wine setup."), WineGetWindowTitle());
+		Reporting::Notification(MPT_UFORMAT("OpenMPT does not support Wine integration on your current Wine setup.\nReasons:\n{}")(mpt::join(reasons, MPT_USTRING("\n"))), WineGetWindowTitle());
 		return;
 	}
 
 	try
 	{
 		mpt::Wine::Context wine = mpt::Wine::Context(wineVersion);
-		if(!WineSetupIsSupported(wine))
+		if(!WineSetupIsSupported(wine, reasons))
 		{
-			Reporting::Notification(U_("OpenMPT does not support Wine integration on your current Wine setup."), WineGetWindowTitle());
+			Reporting::Notification(MPT_UFORMAT("OpenMPT does not support Wine integration on your current Wine setup.\nReasons:\n{}")(mpt::join(reasons, MPT_USTRING("\n"))), WineGetWindowTitle());
 			return;
 		}
 		theApp.SetWine(std::make_shared<mpt::Wine::Context>(wine));
