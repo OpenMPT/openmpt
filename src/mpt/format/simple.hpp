@@ -120,12 +120,20 @@ struct format : format_simple_base {
 	template <typename T>
 	static inline Tstring ptr(const T & x) {
 		static_assert(std::is_pointer<T>::value || std::is_same<T, std::uintptr_t>::value || std::is_same<T, std::intptr_t>::value, "");
-		return hex0<mpt::pointer_size * 2>(mpt::pointer_cast<std::uintptr_t>(x));
+		if constexpr (std::is_pointer<T>::value) {
+			return hex0<mpt::pointer_size * 2>(mpt::pointer_cast<std::uintptr_t>(x));
+		} else {
+			return hex0<mpt::pointer_size * 2>(static_cast<std::uintptr_t>(x));
+		}
 	}
 	template <typename T>
 	static inline Tstring PTR(const T & x) {
 		static_assert(std::is_pointer<T>::value || std::is_same<T, std::uintptr_t>::value || std::is_same<T, std::intptr_t>::value, "");
-		return HEX0<mpt::pointer_size * 2>(mpt::pointer_cast<std::uintptr_t>(x));
+		if constexpr (std::is_pointer<T>::value) {
+			return HEX0<mpt::pointer_size * 2>(mpt::pointer_cast<std::uintptr_t>(x));
+		} else {
+			return HEX0<mpt::pointer_size * 2>(static_cast<std::uintptr_t>(x));
+		}
 	}
 
 	static inline Tstring pad_left(std::size_t width_, const Tstring & str) {
