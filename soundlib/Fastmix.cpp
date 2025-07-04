@@ -93,7 +93,7 @@ struct MixLoopState
 	// Check how many samples can be rendered without encountering loop or sample end, and also update loop position / direction
 	MPT_FORCEINLINE uint32 GetSampleCount(ModChannel &chn, uint32 nSamples, bool ITPingPongMode) const
 	{
-		int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
+		const int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
 		SamplePosition nInc = chn.increment;
 
 		if(nSamples <= 0 || nInc.IsZero() || !chn.nLength || !samplePointer)
@@ -203,35 +203,24 @@ struct MixLoopState
 		{
 			if(nPos.GetUInt() >= lookaheadStart)
 			{
-#if 0
-				const uint32 oldCount = nSmpCount;
-
-				// When going backwards - we can only go back up to lookaheadStart.
-				// When going forwards - read through the whole pre-computed wrap-around buffer if possible.
-				// TODO: ProTracker sample swapping needs hard cut at sample end.
-				int32 samplesToRead = nInc.IsNegative()
-					? (nPosInt - lookaheadStart)
-					//: 2 * InterpolationMaxLookahead - (nPosInt - mixLoopState.lookaheadStart);
-					: (chn.nLoopEnd - nPosInt);
-				//LimitMax(samplesToRead, chn.nLoopEnd - chn.nLoopStart);
-				nSmpCount = SamplesToBufferLength(samplesToRead, chn);
-				Limit(nSmpCount, 1u, oldCount);
-#else
-				if (nInc.IsNegative())
+				if(nInc.IsNegative())
 				{
 					nSmpCount = DistanceToBufferLength(SamplePosition(lookaheadStart, 0), nPos, nInv);
-				} else
+					chn.pCurrentSample = lookaheadPointer;
+				} else if(nPosInt <= chn.nLoopEnd)
 				{
 					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, 0), nInv);
+					chn.pCurrentSample = lookaheadPointer;
+				} else
+				{
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, 0), nInv);
 				}
-#endif
-				chn.pCurrentSample = lookaheadPointer;
 				checkDest = false;
 			} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
 			{
 				// We just restarted the loop, so interpolate correctly after wrapping around
 				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationMaxLookahead, 0), nInv);
-				chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
+				chn.pCurrentSample = lookaheadPointer + (chn.nLength - nLoopStart) * chn.pModSample->GetBytesPerSample();
 				checkDest = false;
 			} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
 			{
