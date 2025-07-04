@@ -5689,6 +5689,8 @@ void CSoundFile::ProcessSampleOffset(ModChannel &chn, CHANNELINDEX nChn, const P
 
 void CSoundFile::SampleOffset(ModChannel &chn, SmpLength param) const
 {
+	LimitMax(param, MAX_SAMPLE_LENGTH);
+
 	// ST3 compatibility: Instrument-less note recalls previous note's offset
 	// Test case: OxxMemory.s3m
 	if(m_playBehaviour[kST3OffsetWithoutInstrument] || GetType() == MOD_TYPE_MED)
