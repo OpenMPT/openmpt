@@ -4399,18 +4399,12 @@ void CModTree::OnSetFocus(CWnd *pOldWnd)
 }
 
 
-bool CModTree::IsItemExpanded(HTREEITEM hItem)
+bool CModTree::IsItemExpanded(HTREEITEM hItem) const
 {
 	// checks if a treeview item is expanded.
-	if(hItem == NULL)
+	if(hItem == nullptr)
 		return false;
-	TVITEM tvi;
-	tvi.mask = TVIF_HANDLE | TVIF_STATE;
-	tvi.state = 0;
-	tvi.stateMask = TVIS_EXPANDED;
-	tvi.hItem = hItem;
-	GetItem(&tvi);
-	return (tvi.state & TVIS_EXPANDED) != 0;
+	return GetItemState(hItem, TVIS_EXPANDED) != 0;
 }
 
 

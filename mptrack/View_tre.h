@@ -249,7 +249,7 @@ public:
 	void OnUpdate(CModDoc *pModDoc, UpdateHint hint, CObject *pHint);
 	bool CanDrop(HTREEITEM hItem, bool bDoDrop);
 	void UpdatePlayPos(CModDoc &modDoc, Notification *pNotify);
-	bool IsItemExpanded(HTREEITEM hItem);
+	bool IsItemExpanded(HTREEITEM hItem) const;
 	void DeleteChildren(HTREEITEM hItem);
 	HTREEITEM GetNthChildItem(HTREEITEM hItem, int index) const;
 	HTREEITEM GetParentRootItem(HTREEITEM hItem) const;
