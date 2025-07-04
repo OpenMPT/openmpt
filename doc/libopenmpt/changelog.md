@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.2-pre
 
+ *  [**New**] `Makefile` now supports DragonFly BSD.
+
  *  openmpt123: FLAC multithreaded encoding has been enabled for Windows builds
     (<https://github.com/xiph/flac/pull/822/>).
 
