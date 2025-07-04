@@ -38,24 +38,34 @@ public:
 class CModControlDlg : public DialogBase
 {
 protected:
+	enum class InputDevice : uint8
+	{
+		Unknown,
+		Mouse,
+		Keyboard,
+	};
+
 	CModDoc &m_modDoc;
 	CSoundFile &m_sndFile;
 	CModControlView &m_parent;
 	HWND m_hWndView = nullptr;
 	HWND m_lastFocusItem = nullptr;
 	int m_nLockCount = 0;
+	InputDevice m_lastInputDevice = InputDevice::Unknown;
 	bool m_initialized = false;
 
 public:
 	CModControlDlg(CModControlView &parent, CModDoc &document);
-	virtual ~CModControlDlg();
+	~CModControlDlg() override;
 	
 public:
 	void SetViewWnd(HWND hwndView) { m_hWndView = hwndView; }
 	HWND GetViewWnd() const { return m_hWndView; }
 	LRESULT SendViewMessage(UINT uMsg, LPARAM lParam = 0) const;
 	BOOL PostViewMessage(UINT uMsg, LPARAM lParam = 0) const;
-	LRESULT SwitchToView() const;
+	void SwitchToView() const;
+	// Switch focus to lower view, but only if last interaction with the upper view was through the mouse
+	void SwitchToViewIfMouse() const;
 	void LockControls() { m_nLockCount++; }
 	void UnlockControls();
 	bool IsLocked() const { return (m_nLockCount > 0); }
@@ -77,6 +87,7 @@ public:
 	afx_msg void OnSwitchToView();
 
 	//{{AFX_VIRTUAL(CModControlDlg)
+	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnOK() override {}
 	void OnCancel() override {}
 	void OnDPIChanged() override { RecalcLayout(); }

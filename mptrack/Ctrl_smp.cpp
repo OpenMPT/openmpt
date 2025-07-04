@@ -1163,7 +1163,7 @@ void CCtrlSamples::OnSampleChanged()
 void CCtrlSamples::OnZoomChanged()
 {
 	if (!IsLocked()) SetCurrentSample(m_nSample);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1205,7 +1205,7 @@ void CCtrlSamples::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 void CCtrlSamples::OnSampleNew()
 {
 	InsertSample(CInputHandler::ShiftPressed());
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1262,7 +1262,7 @@ void CCtrlSamples::OnSampleOpen()
 	TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 
 	OpenSamples(dlg.GetFilenames(), OpenSampleKnown | OpenSampleRaw);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1318,7 +1318,7 @@ void CCtrlSamples::OpenSamples(const std::vector<mpt::PathString> &files, FlagSe
 		else
 			ErrorBox(IDS_ERR_FILEOPEN, this);
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1340,7 +1340,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 		const ModSample &sample = m_sndFile.GetSample(m_nSample);
 		if((!m_nSample) || (!sample.HasSampleData()))
 		{
-			SwitchToView();
+			SwitchToViewIfMouse();
 			return;
 		}
 		if(m_sndFile.SampleHasPath(m_nSample))
@@ -1513,7 +1513,7 @@ void CCtrlSamples::SaveSample(bool doBatchSave)
 	{
 		TrackerSettings::Instance().PathSamples.SetWorkingDir(dlg.GetWorkingDirectory());
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1526,7 +1526,7 @@ void CCtrlSamples::OnSamplePlay()
 	{
 		m_modDoc.PlayNote(PlayNoteParam(NOTE_MIDDLEC).Sample(m_nSample));
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1586,7 +1586,7 @@ void CCtrlSamples::Normalize(bool allSamples)
 	}
 
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1646,7 +1646,7 @@ void CCtrlSamples::RemoveDCOffset(bool allSamples)
 	}
 
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 
 	// fill the statusbar with some nice information
 
@@ -1707,7 +1707,7 @@ void CCtrlSamples::ApplyAmplify(const double amp, const double fadeInStart, cons
 	sample.PrecomputeLoops(m_sndFile, false);
 	SetModified(SampleHint().Data(), false, true);
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1831,7 +1831,7 @@ void CCtrlSamples::ApplyResample(SAMPLEINDEX smp, uint32 newRate, ResamplingMode
 	}
 
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1946,7 +1946,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	{
 		// Update sample view
 		SetModified(SampleHint().Info().Data(), true, true);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -1976,7 +1976,7 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 			break;
 		}
 		Reporting::Error(str);
-		SwitchToView();
+		SwitchToViewIfMouse();
 	}
 }
 
@@ -1996,7 +1996,7 @@ void CCtrlSamples::OnReverse()
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	}
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2015,7 +2015,7 @@ void CCtrlSamples::OnInvert()
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	}
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2036,7 +2036,7 @@ void CCtrlSamples::OnSignUnSign()
 		m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	}
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2059,7 +2059,7 @@ void CCtrlSamples::OnSilence()
 	}
 
 	EndWaitCursor();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2576,7 +2576,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 		m_SpinFineTune.SetPos(0);
 	}
 	if(nCode == SB_ENDSCROLL)
-		SwitchToView();
+		SwitchToViewIfMouse();
 	if(redraw)
 	{
 		SetModified(SampleHint().Info().Data(), false, false);
@@ -2746,7 +2746,7 @@ void CCtrlSamples::OnXFade()
 	if(!sample.HasSampleData())
 	{
 		MessageBeep(MB_ICONWARNING);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 	bool resetLoopOnCancel = false;
@@ -2761,14 +2761,14 @@ void CCtrlSamples::OnXFade()
 		} else
 		{
 			Reporting::Error("Crossfade requires a sample loop to work.", this);
-			SwitchToView();
+			SwitchToViewIfMouse();
 			return;
 		}
 	}
 	if(sample.nLoopStart == 0 && sample.nSustainStart == 0)
 	{
 		Reporting::Error("Crossfade requires the sample to have data before the loop start.", this);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -2796,7 +2796,7 @@ void CCtrlSamples::OnXFade()
 	{
 		sample.SetLoop(0, 0, false, false, m_sndFile);
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2809,7 +2809,7 @@ void CCtrlSamples::OnStereoSeparation()
 		|| sample.uFlags[CHN_ADLIB])
 	{
 		MessageBeep(MB_ICONWARNING);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -2831,7 +2831,7 @@ void CCtrlSamples::OnStereoSeparation()
 			m_modDoc.GetSampleUndo().RemoveLastUndoStep(m_nSample);
 		}
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2868,7 +2868,7 @@ void CCtrlSamples::OnAutotune()
 			EndWaitCursor();
 		}
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -2948,7 +2948,7 @@ void CCtrlSamples::OnInitOPLInstrument()
 		// Initialize with instant attack, release and enabled sustain for carrier and instant attack for modulator
 		sample.SetAdlib(true, { 0x00, 0x20, 0x00, 0x00, 0xF0, 0xF0, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00 });
 		SetModified(SampleHint().Info().Data().Names(), true, true);
-		SwitchToView();
+		SwitchToViewIfMouse();
 	}
 }
 
