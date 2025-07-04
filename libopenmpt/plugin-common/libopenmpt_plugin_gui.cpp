@@ -310,10 +310,17 @@ protected:
 
 };
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-local-typedef"
+#endif
 BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, &CSettingsDialog::OnToolTipText)
 	ON_COMMAND( IDC_CHECK_AMIGA_RESAMPLER, &CSettingsDialog::OnAmigaResamplerChanged )
 END_MESSAGE_MAP()
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 
 

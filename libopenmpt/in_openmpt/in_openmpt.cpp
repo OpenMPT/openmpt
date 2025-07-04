@@ -42,7 +42,14 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #ifndef _MSC_VER
 #define _MSC_VER 1300
 #endif
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonportable-include-path"
+#endif
 #include "winamp/Winamp/IN2.H"
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #include "winamp/Winamp/wa_ipc.h"
 
 #include <algorithm>
@@ -65,6 +72,11 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #define SHORT_TITLE "in_openmpt"
 
 static void apply_options();
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 
 static std::string StringEncode( const std::wstring &src, UINT codepage )
 {
@@ -89,6 +101,10 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), decoded_string.size() );
 	return decoded_string.data();
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 #if defined(UNICODE)
 
@@ -142,7 +158,7 @@ struct self_winamp_t {
 		for ( std::vector<std::string>::iterator ext = extensions.begin(); ext != extensions.end(); ++ext ) {
 			std::copy( (*ext).begin(), (*ext).end(), std::back_inserter( filetypes_string ) );
 			filetypes_string.push_back('\0');
-			std::copy( SHORT_TITLE, SHORT_TITLE + std::strlen(SHORT_TITLE), std::back_inserter( filetypes_string ) );
+			std::copy( SHORT_TITLE, &(SHORT_TITLE[std::strlen(SHORT_TITLE)]), std::back_inserter( filetypes_string ) );
 			filetypes_string.push_back('\0');
 		}
 		filetypes_string.push_back('\0');
