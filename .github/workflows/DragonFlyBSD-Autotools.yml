@@ -1,0 +1,41 @@
+name: DragonFlyBSD Autotools
+
+on:
+  push:
+    branches: [ OpenMPT-1.32 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '6.4.0', lang: 'C'           }
+          - { version: '6.4.0', lang: 'en_US.UTF-8' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.lang}}-auotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Build and Test
+      uses: vmactions/dragonflybsd-vm@v1.1.0
+      env:
+        LANG: ${{matrix.lang}}
+      with:
+        envs: 'LANG'
+        release: ${{matrix.version}}
+        usesh: true
+        sync: rsync
+        copyback: false
+        prepare: |
+          pkg upgrade -y
+          pkg install -y bash subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile portaudio sdl2
+        run: |
+          chown -R $(id -u):$(id -g) $(pwd)
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
