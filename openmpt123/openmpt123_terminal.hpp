@@ -326,7 +326,7 @@ public:
 				if ( ( mode & (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) ) == (ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING) ) {
 					for ( std::size_t line = 0; line < lines; ++line ) {
 						DWORD chars_written = 0;
-						mpt::winstring wtext = std::wstring(TEXT("\x1b[A"));
+						mpt::winstring wtext = mpt::winstring(TEXT("\x1b[A"));
 						WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 					}
 					return;
