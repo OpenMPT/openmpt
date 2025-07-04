@@ -12,6 +12,7 @@
 
 #include "openmpt123_config.hpp"
 
+#include "mpt/base/alloc.hpp"
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/format/simple.hpp"
@@ -56,6 +57,8 @@
 #endif
 
 namespace openmpt123 {
+
+
 
 template <typename Tstring>
 struct concat_stream {
@@ -138,6 +141,7 @@ inline bool IsTerminal( int fd ) {
 }
 
 
+
 class textout : public string_concat_stream<mpt::ustring> {
 protected:
 	textout() = default;
@@ -173,10 +177,128 @@ public:
 
 
 
+enum class transliterate_c0 {
+	none,
+	remove,
+	ascii_replacement,
+	ascii,
+	unicode_replacement,
+	unicode,
+};
+
+enum class transliterate_del {
+	none,
+	remove,
+	ascii_replacement,
+	ascii,
+	unicode_replacement,
+	unicode,
+};
+
+enum class transliterate_c1 {
+	none,
+	remove,
+	ascii_replacement,
+	unicode_replacement,
+};
+
+struct transliterate_mode {
+	transliterate_c0 c0;
+	transliterate_del del;
+	transliterate_c1 c1;
+};
+
+inline mpt::ustring transliterate_control_codes( mpt::ustring str, transliterate_mode mode ) {
+	mpt::ustring result;
+	result.reserve( str.length() );
+	for ( const auto c : str ) {
+		if ( mpt::char_value( c ) < 0x20u ) {
+			switch ( mode.c0 ) {
+				case transliterate_c0::none:
+					result.push_back( mpt::char_value( c ) );
+					break;
+				case transliterate_c0::remove:
+					// nothing;
+					break;
+				case transliterate_c0::ascii_replacement:
+					result.push_back( MPT_UCHAR('?') );
+					break;
+				case transliterate_c0::ascii:
+					result.push_back( MPT_UCHAR('^') );
+					result.push_back( static_cast<mpt::uchar>( mpt::char_value( c ) + 0x40u ) );
+					break;
+				case transliterate_c0::unicode_replacement:
+					mpt::append( result, mpt::transcode<mpt::ustring>( std::u32string( 1, 0xfffdu ) ) );
+					break;
+				case transliterate_c0::unicode:
+					mpt::append( result, mpt::transcode<mpt::ustring>( std::u32string( 1, mpt::char_value( c ) + 0x2400u ) ) );
+					break;
+			}
+		} else if ( mpt::char_value( c ) == 0x7fu ) {
+			switch ( mode.del ) {
+				case transliterate_del::none:
+					result.push_back( mpt::char_value( c ) );
+					break;
+				case transliterate_del::remove:
+					// nothing;
+					break;
+				case transliterate_del::ascii_replacement:
+					result.push_back( MPT_UCHAR('?') );
+					break;
+				case transliterate_del::ascii:
+					result.push_back( MPT_UCHAR('^') );
+					result.push_back( static_cast<mpt::uchar>( mpt::char_value( c ) - 0x40u ) );
+					break;
+				case transliterate_del::unicode_replacement:
+					mpt::append( result, mpt::transcode<mpt::ustring>( std::u32string( 1, 0xfffdu ) ) );
+					break;
+				case transliterate_del::unicode:
+					mpt::append( result, mpt::transcode<mpt::ustring>( std::u32string( 1, 0x2421u ) ) );
+					break;
+			}
+		} else if ( ( 0x80u <= mpt::char_value( c ) ) && ( mpt::char_value( c ) <= 0x9f ) ) {
+			switch ( mode.c1 ) {
+				case transliterate_c1::none:
+					result.push_back( mpt::char_value( c ) );
+					break;
+				case transliterate_c1::remove:
+					// nothing;
+					break;
+				case transliterate_c1::ascii_replacement:
+					result.push_back( MPT_UCHAR('?') );
+					break;
+				case transliterate_c1::unicode_replacement:
+					mpt::append( result, mpt::transcode<mpt::ustring>( std::u32string( 1, 0xfffdu ) ) );
+					break;
+			}
+		} else {
+			result.push_back( mpt::char_value( c ) );
+		}
+	}
+	return result;
+}
+
+
+
+inline mpt::ustring transliterate_control_codes_multiline( mpt::ustring str, transliterate_mode mode ) {
+	if ( !str.empty() ) {
+		std::vector<mpt::ustring> lines = mpt::split( str, MPT_USTRING("\n") );
+		for ( auto & line : lines ) {
+			line = transliterate_control_codes( line, mode );
+		}
+		str = mpt::join( lines, MPT_USTRING("\n") );
+	}
+	return str;
+}
+
+
+
 enum class textout_destination {
 	destination_stdout,
 	destination_stderr,
 };
+
+
 
 class textout_backend {
 protected:
@@ -218,11 +340,11 @@ public:
 	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
 			#if MPT_OS_DJGPP
-				write_raw( mpt::transcode<std::string>( codepage, text ) );
+				write_raw( mpt::transcode<std::string>( codepage, transliterate_control_codes_multiline( text, { transliterate_c0::ascii, transliterate_del::ascii, transliterate_c1::ascii_replacement } ) ) );
 			#elif MPT_OS_EMSCRIPTEN
-				write_raw( mpt::transcode<std::string>( mpt::common_encoding::utf8, text ) );
+				write_raw( mpt::transcode<std::string>( mpt::common_encoding::utf8, transliterate_control_codes_multiline( text, { transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement } ) ) );
 			#else
-				write_raw( mpt::transcode<std::string>( mpt::logical_encoding::locale, text ) );
+				write_raw( mpt::transcode<std::string>( mpt::logical_encoding::locale, transliterate_control_codes_multiline( text, { transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement } ) ) );
 			#endif
 			s.flush();
 		}	
@@ -255,7 +377,7 @@ public:
 public:
 	void write( const mpt::ustring & text ) override {
 		if ( text.length() > 0 ) {
-			write_raw( mpt::transcode<std::wstring>( text ) );
+			write_raw( mpt::transcode<std::wstring>( transliterate_control_codes_multiline( text, { transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement } ) ) );
 			s.flush();
 		}	
 	}
@@ -312,10 +434,10 @@ public:
 		if ( text.length() > 0 ) {
 			if ( console ) {
 				DWORD chars_written = 0;
-				mpt::winstring wtext = mpt::transcode<mpt::winstring>( text );
+				mpt::winstring wtext = mpt::transcode<mpt::winstring>( transliterate_control_codes_multiline( text, { transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement } ) );
 				WriteConsole( handle, wtext.data(), static_cast<DWORD>( wtext.size() ), &chars_written, NULL );
 			} else {
-				write_raw( mpt::transcode<mpt::winstring>( text ) );
+				write_raw( mpt::transcode<mpt::winstring>( transliterate_control_codes_multiline( text, { transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement } ) ) );
 				s.flush();
 			}
 		}
