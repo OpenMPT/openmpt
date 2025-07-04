@@ -330,6 +330,9 @@ std::int32_t module::get_current_tempo() const {
 double module::get_current_tempo2() const {
 	return impl->get_current_tempo2();
 }
+std::int32_t module::get_current_sequence() const {
+	return impl->get_current_sequence();
+}
 std::int32_t module::get_current_order() const {
 	return impl->get_current_order();
 }

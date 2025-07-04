@@ -1344,6 +1344,9 @@ std::int32_t module_impl::get_current_tempo() const {
 double module_impl::get_current_tempo2() const {
 	return m_sndFile->m_PlayState.m_nMusicTempo.ToDouble();
 }
+std::int32_t module_impl::get_current_sequence() const {
+	return m_sndFile->Order.GetCurrentSequenceIndex();
+}
 std::int32_t module_impl::get_current_order() const {
 	return m_sndFile->GetCurrentOrder();
 }

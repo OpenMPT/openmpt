@@ -1119,6 +1119,16 @@ Declare Function openmpt_module_get_current_tempo(ByVal module As openmpt_module
 '/
 Declare Function openmpt_module_get_current_tempo2(ByVal module As openmpt_module Ptr) As Long
 
+/'* \brief Get the current sequence
+
+  \param module The module handle to work on.
+  \return The sequence (order list) in which the currently playing subsong is located.
+  \remarks There is no corresponding setter function. The current sequence is adjusted automatically by selecting a different subsong.
+  \remarks One sequence list can contain multiple subsongs. Most module formats only support a single sequence, hence the return value of this function will often be 0 even in modules that contain multiple subsongs.
+  \since 0.9.0
+'/
+Declare Function openmpt_module_get_current_sequence(ByVal module As openmpt_module Ptr) As Long
+
 /'* \brief Get the current order
 
   \param module The module handle to work on.

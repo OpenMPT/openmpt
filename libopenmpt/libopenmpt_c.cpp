@@ -1011,6 +1011,15 @@ double openmpt_module_get_current_tempo2( openmpt_module * mod ) {
 	}
 	return 0;
 }
+int32_t openmpt_module_get_current_sequence( openmpt_module * mod ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_current_sequence();
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
 int32_t openmpt_module_get_current_order( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );

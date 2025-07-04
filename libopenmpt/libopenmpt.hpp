@@ -885,6 +885,14 @@ public:
 	  \since 0.7.0
 	*/
 	LIBOPENMPT_CXX_API_MEMBER double get_current_tempo2() const;
+	//! Get the current sequence
+	/*!
+	  \return The sequence (order list) in which the currently playing subsong is located.
+	  \remarks There is no corresponding setter function. The current sequence is adjusted automatically by selecting a different subsong.
+	  \remarks One sequence can contain multiple subsongs. Most module formats only support a single sequence, hence the return value of this function will often be 0 even in modules that contain multiple subsongs.
+	  \since 0.9.0
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::int32_t get_current_sequence() const;
 	//! Get the current order
 	/*!
 	  \return The current order at which the module is being played back.
