@@ -67,6 +67,17 @@ CModControlDlg::~CModControlDlg()
 }
 
 
+BOOL CModControlDlg::PreTranslateMessage(MSG *pMsg)
+{
+	if(pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST)
+		m_lastInputDevice = InputDevice::Keyboard;
+	else if(pMsg->message >= WM_MOUSEFIRST && pMsg->message <= WM_MOUSELAST)
+		m_lastInputDevice = InputDevice::Mouse;
+
+	return DialogBase::PreTranslateMessage(pMsg);
+}
+
+
 void CModControlDlg::OnSize(UINT nType, int cx, int cy)
 {
 	DialogBase::OnSize(nType, cx, cy);
@@ -143,8 +154,21 @@ BOOL CModControlDlg::PostViewMessage(UINT uMsg, LPARAM lParam) const
 	return FALSE;
 }
 
-LRESULT CModControlDlg::SwitchToView() const { return SendViewMessage(VIEWMSG_SETACTIVE); }
-void CModControlDlg::UnlockControls() { PostMessage(WM_MOD_UNLOCKCONTROLS); }
+void CModControlDlg::SwitchToView() const
+{
+	SendViewMessage(VIEWMSG_SETACTIVE);
+}
+
+void CModControlDlg::SwitchToViewIfMouse() const
+{
+	if(m_lastInputDevice == InputDevice::Mouse)
+		SendViewMessage(VIEWMSG_SETACTIVE);
+}
+
+void CModControlDlg::UnlockControls()
+{
+	PostMessage(WM_MOD_UNLOCKCONTROLS);
+}
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -766,7 +766,7 @@ void CCtrlPatterns::OnPrevInstrument()
 			pos = n - 1;
 		m_CbnInstrument.SetCurSel(pos);
 		OnInstrumentChanged();
-		SwitchToView();
+		SwitchToViewIfMouse();
 	}
 }
 
@@ -781,7 +781,7 @@ void CCtrlPatterns::OnNextInstrument()
 			pos = 0;
 		m_CbnInstrument.SetCurSel(pos);
 		OnInstrumentChanged();
-		SwitchToView();
+		SwitchToViewIfMouse();
 	}
 }
 
@@ -832,7 +832,7 @@ void CCtrlPatterns::OnPatternNew()
 		m_modDoc.SetModified();
 		m_modDoc.UpdateAllViews(nullptr, PatternHint(newPat).Names(), this);
 		m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
-		SwitchToView();
+		SwitchToViewIfMouse();
 	}
 }
 
@@ -916,7 +916,7 @@ void CCtrlPatterns::OnPatternDuplicate()
 		const auto &specs = m_sndFile.GetModSpecifications();
 		Reporting::Error(MPT_UFORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(specs.GetFileExtensionUpper(), specs.patternsMax), U_("Duplicate Patterns"));
 	}
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -944,7 +944,7 @@ void CCtrlPatterns::OnPatternMerge()
 	if(!numRows || !numOrders)
 	{
 		MessageBeep(MB_ICONWARNING);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -956,7 +956,7 @@ void CCtrlPatterns::OnPatternMerge()
 	if(minRows > specs.patternRowsMax)
 	{
 		Reporting::Error(U_("There are not enough empty orders left to merge the selected patterns into."), U_("Merge Patterns"));
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -964,14 +964,14 @@ void CCtrlPatterns::OnPatternMerge()
 	if(!remainingPatterns)
 	{
 		Reporting::Error(MPT_UFORMAT("Pattern limit of the {} format ({} patterns) has been reached.")(format, specs.patternsMax), U_("Merge Patterns"));
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 	minRows = std::max(minRows, (numRows + (remainingPatterns - 1)) / remainingPatterns);
 	if(minRows > specs.patternRowsMax)
 	{
 		Reporting::Error(U_("There are not enough empty patterns left to merge the selected patterns into."), U_("Merge Patterns"));
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -981,7 +981,7 @@ void CCtrlPatterns::OnPatternMerge()
 		CInputDlg dlg(this, _T("New pattern length:"), static_cast<int32>(minRows), static_cast<int32>(specs.patternRowsMax), static_cast<int32>(std::clamp(numRows, minRows, specs.patternRowsMax)));
 		if(dlg.DoModal() != IDOK)
 		{
-			SwitchToView();
+			SwitchToViewIfMouse();
 			return;
 		}
 		patternSize = static_cast<ROWINDEX>(dlg.resultAsInt);
@@ -989,7 +989,7 @@ void CCtrlPatterns::OnPatternMerge()
 	if(minPatternSize == maxPatternSize && minPatternSize == patternSize)
 	{
 		MessageBeep(MB_ICONWARNING);
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -1001,7 +1001,7 @@ void CCtrlPatterns::OnPatternMerge()
 	{
 		cs.Leave();
 		Reporting::Error(U_("There are not enough empty patterns or order lists for this operation."), U_("Merge Patterns"));
-		SwitchToView();
+		SwitchToViewIfMouse();
 		return;
 	}
 
@@ -1043,7 +1043,7 @@ void CCtrlPatterns::OnPatternMerge()
 	m_modDoc.UpdateAllViews(nullptr, SequenceHint().Data(), this);
 	m_modDoc.UpdateAllViews(nullptr, PatternHint(PATTERNINDEX_INVALID).Names(), this);
 
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1053,7 +1053,7 @@ void CCtrlPatterns::OnPatternStop()
 	if(pMainFrm)
 		pMainFrm->PauseMod(&m_modDoc);
 	m_sndFile.ResetChannels();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1063,7 +1063,7 @@ void CCtrlPatterns::OnPatternPlay()
 		m_modDoc.OnPatternPlayNoLoop();
 	else
 		m_modDoc.OnPatternPlay();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1073,7 +1073,7 @@ void CCtrlPatterns::OnPatternPlayFromStart()
 		m_modDoc.OnPatternRestart(false);
 	else
 		m_modDoc.OnPatternRestart();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1083,7 +1083,7 @@ void CCtrlPatterns::OnPatternRecord()
 	TrackerSettings::Instance().gbPatternRecord = m_bRecord;
 	m_ToolBar.CheckButton(IDC_PATTERN_RECORD, m_bRecord ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETRECORD, m_bRecord);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1093,7 +1093,7 @@ void CCtrlPatterns::OnPatternVUMeters()
 	TrackerSettings::Instance().gbPatternVUMeters = m_bVUMeters;
 	m_ToolBar.CheckButton(ID_PATTERN_VUMETERS, m_bVUMeters ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETVUMETERS, m_bVUMeters);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1103,7 +1103,7 @@ void CCtrlPatterns::OnPatternViewPlugNames()
 	TrackerSettings::Instance().gbPatternPluginNames = m_bPluginNames;
 	m_ToolBar.CheckButton(ID_VIEWPLUGNAMES, m_bPluginNames ? TRUE : FALSE);
 	SendViewMessage(VIEWMSG_SETPLUGINNAMES, m_bPluginNames);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1111,7 +1111,7 @@ void CCtrlPatterns::OnToggleOverflowPaste()
 {
 	TrackerSettings::Instance().patternSetup ^= PatternSetup::OverflowPaste;
 	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1120,7 +1120,7 @@ void CCtrlPatterns::OnToggleMetronome()
 	TrackerSettings::Instance().metronomeEnabled = !TrackerSettings::Instance().metronomeEnabled;
 	CMainFrame::GetMainFrame()->UpdateMetronomeSamples();
 	theApp.PostMessageToAllViews(WM_MOD_CTRLMSG, CTRLMSG_PAT_UPDATE_TOOLBAR);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1128,56 +1128,56 @@ void CCtrlPatterns::OnMetronomeSettings()
 {
 	MetronomeSettingsDlg dlg{this};
 	dlg.DoModal();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternProperties()
 {
 	SendViewMessage(VIEWMSG_PATTERNPROPERTIES, PATTERNINDEX_INVALID);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternExpand()
 {
 	SendViewMessage(VIEWMSG_EXPANDPATTERN);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternCopy()
 {
 	SendViewMessage(VIEWMSG_COPYPATTERN);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternPaste()
 {
 	SendViewMessage(VIEWMSG_PASTEPATTERN);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternShrink()
 {
 	SendViewMessage(VIEWMSG_SHRINKPATTERN);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternAmplify()
 {
 	SendViewMessage(VIEWMSG_AMPLIFYPATTERN);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnPatternPlayRow()
 {
 	::SendMessage(m_hWndView, WM_COMMAND, ID_PATTERN_PLAYROW, 0);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1191,14 +1191,14 @@ void CCtrlPatterns::OnUpdateRecord(CCmdUI *pCmdUI)
 void CCtrlPatterns::OnFollowSong()
 {
 	SendViewMessage(VIEWMSG_FOLLOWSONG, IsDlgButtonChecked(IDC_PATTERN_FOLLOWSONG));
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
 void CCtrlPatterns::OnChangeLoopStatus()
 {
 	OnModCtrlMsg(CTRLMSG_PAT_LOOP, IsDlgButtonChecked(IDC_PATTERN_LOOP));
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1206,7 +1206,7 @@ void CCtrlPatterns::OnEditUndo()
 {
 	if(m_hWndView)
 		::SendMessage(m_hWndView, WM_COMMAND, ID_EDIT_UNDO, 0);
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1259,7 +1259,7 @@ void CCtrlPatterns::OnChordEditor()
 {
 	CChordEditor dlg(this);
 	dlg.DoModal();
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1308,7 +1308,7 @@ void CCtrlPatterns::OnDetailSwitch()
 	visibleColumns.set(PatternCursor::noteColumn);
 	visibleColumns.set(PatternCursor::paramColumn, visibleColumns[PatternCursor::effectColumn]);
 	SendViewMessage(VIEWMSG_SETDETAIL, visibleColumns.to_ulong());
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1317,7 +1317,7 @@ void CCtrlPatterns::OnDetailInstr()
 	auto visibleColumns = std::bitset<PatternCursor::numColumns>{static_cast<unsigned long>(SendViewMessage(VIEWMSG_GETDETAIL))};
 	visibleColumns.flip(PatternCursor::instrColumn);
 	SendViewMessage(VIEWMSG_SETDETAIL, visibleColumns.to_ulong());
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1326,7 +1326,7 @@ void CCtrlPatterns::OnDetailVolume()
 	auto visibleColumns = std::bitset<PatternCursor::numColumns>{static_cast<unsigned long>(SendViewMessage(VIEWMSG_GETDETAIL))};
 	visibleColumns.flip(PatternCursor::volumeColumn);
 	SendViewMessage(VIEWMSG_SETDETAIL, visibleColumns.to_ulong());
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
@@ -1336,7 +1336,7 @@ void CCtrlPatterns::OnDetailEffect()
 	visibleColumns.flip(PatternCursor::effectColumn);
 	visibleColumns.flip(PatternCursor::paramColumn);
 	SendViewMessage(VIEWMSG_SETDETAIL, visibleColumns.to_ulong());
-	SwitchToView();
+	SwitchToViewIfMouse();
 }
 
 
