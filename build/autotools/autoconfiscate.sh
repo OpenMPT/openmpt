@@ -57,6 +57,10 @@ case $UNAME_S in
     ;;
   esac
   ;;
+ *DragonFly*)
+  TAR_FLAVOUR=libarchive
+  MAKE=gmake
+  ;;
  *BSD*)
   TAR_FLAVOUR=libarchive
   MAKE=gmake

@@ -1,0 +1,38 @@
+name: DragonFlyBSD Autotools
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '6.4' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Build and Test
+      uses: vmactions/dragonflybsd-vm@v1.1.0
+      with:
+        release: ${{matrix.version}}
+        usesh: true
+        sync: rsync
+        copyback: false
+        prepare: |
+          pkg upgrade -y
+          pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile portaudio sdl2
+        run: |
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
