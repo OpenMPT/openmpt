@@ -35,4 +35,5 @@ jobs:
           pkg upgrade -y
           pkg install -y bash subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile portaudio sdl2
         run: |
+          chown -R $(id -u):$(id -g) $(pwd)
           export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
