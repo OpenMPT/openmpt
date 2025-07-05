@@ -23,9 +23,6 @@ jobs:
 
     runs-on: ubuntu-24.04
 
-    # disable due to <https://github.com/cross-platform-actions/action/issues/103> and <https://github.com/cross-platform-actions/action/issues/104>
-    if: false
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -37,9 +34,33 @@ jobs:
         operating_system: haiku
         version: ${{matrix.version}}
         shell: bash
-        sync_files: runner-to-vm
+        sync_files: false
         shutdown_vm: false
         run: true
+    - name: Fixup VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          mv '/home/runner/work' '/boot/home/work'
+          ln -sf '/boot/home/work' '/home/runner/work'
+    - name: Sync files to VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: chown -R $(id -u):$(id -g) $(pwd)
     - name: Install dependencies
       uses: cross-platform-actions/action@v0.28.0
       with:
@@ -52,7 +73,6 @@ jobs:
         shutdown_vm: false
         run: |
           pkgman refresh
-          pkgman full-sync -y
           pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
     - name: Build
       uses: cross-platform-actions/action@v0.28.0
