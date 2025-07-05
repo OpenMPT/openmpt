@@ -53,7 +53,7 @@ private:
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr explicit enum_value_type(store_type x) noexcept
 		: bits(x)
 	{
-	}                                                                          // private in order to prevent accidental conversions. use from_bits.
+	}                                                                                                       // private in order to prevent accidental conversions. use from_bits.
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr operator store_type() const noexcept { return bits; }  // private in order to prevent accidental conversions. use as_bits.
 public:
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static enum_value_type from_bits(store_type bits) noexcept { return value_type(bits); }
