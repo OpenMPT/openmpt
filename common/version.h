@@ -44,15 +44,15 @@ public:
 
 public:
 
-	MPT_CONSTEXPRINLINE Version() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr Version() noexcept
 		: m_Version(0)
 	{}
 
-	explicit MPT_CONSTEXPRINLINE Version(uint32 version) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr explicit Version(uint32 version) noexcept
 		: m_Version(version)
 	{}
 
-	explicit MPT_CONSTEXPRINLINE Version(uint8 v1, uint8 v2, uint8 v3, uint8 v4) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr explicit Version(uint8 v1, uint8 v2, uint8 v3, uint8 v4) noexcept
 		: m_Version((static_cast<uint32>(v1) << 24) | (static_cast<uint32>(v2) << 16) | (static_cast<uint32>(v3) << 8) | (static_cast<uint32>(v4) << 0))
 	{}
 
@@ -65,26 +65,26 @@ public:
 
 public:
 
-	explicit MPT_CONSTEXPRINLINE operator bool () const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr explicit operator bool () const noexcept
 	{
 		return m_Version != 0;
 	}
-	MPT_CONSTEXPRINLINE bool operator ! () const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator ! () const noexcept
 	{
 		return m_Version == 0;
 	}
 
-	MPT_CONSTEXPRINLINE uint32 GetRawVersion() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint32 GetRawVersion() const noexcept
 	{
 		return m_Version;
 	}
 
-	MPT_CONSTEXPRINLINE Version Masked(uint32 mask) const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr Version Masked(uint32 mask) const noexcept
 	{
 		return Version(m_Version & mask);
 	}
 
-	MPT_CONSTEXPRINLINE uint8 GetField(Field field) const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetField(Field field) const noexcept
 	{
 		return
 			(field == Field::Major) ? static_cast<uint8>((m_Version >> 24) & 0xffu) :
@@ -121,7 +121,7 @@ public:
 
 	private:
 
-		static MPT_CONSTEXPRINLINE uint8 NibbleFromChar(char x)
+		MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static uint8 NibbleFromChar(char x)
 		{
 			return
 				('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' +  0) :
@@ -132,7 +132,7 @@ public:
 
 	public:
 
-		static MPT_CONSTEXPRINLINE Version Parse(const char * str, std::size_t len)
+		MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static Version Parse(const char * str, std::size_t len)
 		{
 			// 0123456789
 			// 1.23.45.67
@@ -179,33 +179,33 @@ public:
 
 };
 
-MPT_CONSTEXPRINLINE bool operator == (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator == (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() == b.GetRawVersion();
 }
-MPT_CONSTEXPRINLINE bool operator != (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator != (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() != b.GetRawVersion();
 }
-MPT_CONSTEXPRINLINE bool operator <= (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator <= (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() <= b.GetRawVersion();
 }
-MPT_CONSTEXPRINLINE bool operator >= (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator >= (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() >= b.GetRawVersion();
 }
-MPT_CONSTEXPRINLINE bool operator < (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator < (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() < b.GetRawVersion();
 }
-MPT_CONSTEXPRINLINE bool operator > (const Version &a, const Version &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator > (const Version &a, const Version &b) noexcept
 {
 	return a.GetRawVersion() > b.GetRawVersion();
 }
 
 
-MPT_CONSTEVAL Version operator ""_LiteralVersionImpl (const char * str, std::size_t len)
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL Version operator ""_LiteralVersionImpl (const char * str, std::size_t len)
 {
 	return Version::LiteralParser::Parse(str, len);
 }

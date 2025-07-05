@@ -107,7 +107,7 @@ struct is_character<char32_t> : public std::true_type { };
 
 
 template <typename T, typename std::enable_if<mpt::is_character<T>::value, bool>::type = true>
-MPT_CONSTEXPRINLINE typename std::make_unsigned<T>::type char_value(T x) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr typename std::make_unsigned<T>::type char_value(T x) noexcept {
 	return static_cast<typename std::make_unsigned<T>::type>(x);
 }
 

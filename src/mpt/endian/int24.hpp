@@ -107,7 +107,7 @@ struct packed_int_type<uint24> {
 
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode24(base_type val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, sizeof(base_type)> EndianEncode24(base_type val) noexcept {
 	static_assert(std::is_same<base_type, int24>::value || std::is_same<base_type, uint24>::value);
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
@@ -123,7 +123,7 @@ MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode24(base
 }
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE base_type EndianDecode24(std::array<std::byte, sizeof(base_type)> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr base_type EndianDecode24(std::array<std::byte, sizeof(base_type)> data) noexcept {
 	static_assert(std::is_same<base_type, int24>::value || std::is_same<base_type, uint24>::value);
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
@@ -141,36 +141,36 @@ MPT_CONSTEXPRINLINE base_type EndianDecode24(std::array<std::byte, sizeof(base_t
 
 
 template <>
-MPT_CONSTEXPRINLINE std::array<std::byte, 3> EndianEncode<int24, mpt::endian::little, int32>(int24 val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, 3> EndianEncode<int24, mpt::endian::little, int32>(int24 val) noexcept {
 	return mpt::EndianEncode24<int24, mpt::endian::little, int32>(val);
 }
 template <>
-MPT_CONSTEXPRINLINE int24 EndianDecode<int24, mpt::endian::little, int32>(std::array<std::byte, 3> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr int24 EndianDecode<int24, mpt::endian::little, int32>(std::array<std::byte, 3> data) noexcept {
 	return mpt::EndianDecode24<int24, mpt::endian::little, int32>(data);
 }
 template <>
-MPT_CONSTEXPRINLINE std::array<std::byte, 3> EndianEncode<int24, mpt::endian::big, int32>(int24 val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, 3> EndianEncode<int24, mpt::endian::big, int32>(int24 val) noexcept {
 	return mpt::EndianEncode24<int24, mpt::endian::big, int32>(val);
 }
 template <>
-MPT_CONSTEXPRINLINE int24 EndianDecode<int24, mpt::endian::big, int32>(std::array<std::byte, 3> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr int24 EndianDecode<int24, mpt::endian::big, int32>(std::array<std::byte, 3> data) noexcept {
 	return mpt::EndianDecode24<int24, mpt::endian::big, int32>(data);
 }
 
 template <>
-MPT_CONSTEXPRINLINE std::array<std::byte, 3> EndianEncode<uint24, mpt::endian::little, uint32>(uint24 val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, 3> EndianEncode<uint24, mpt::endian::little, uint32>(uint24 val) noexcept {
 	return mpt::EndianEncode24<uint24, mpt::endian::little, uint32>(val);
 }
 template <>
-MPT_CONSTEXPRINLINE uint24 EndianDecode<uint24, mpt::endian::little, uint32>(std::array<std::byte, 3> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint24 EndianDecode<uint24, mpt::endian::little, uint32>(std::array<std::byte, 3> data) noexcept {
 	return mpt::EndianDecode24<uint24, mpt::endian::little, uint32>(data);
 }
 template <>
-MPT_CONSTEXPRINLINE std::array<std::byte, 3> EndianEncode<uint24, mpt::endian::big, uint32>(uint24 val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, 3> EndianEncode<uint24, mpt::endian::big, uint32>(uint24 val) noexcept {
 	return mpt::EndianEncode24<uint24, mpt::endian::big, uint32>(val);
 }
 template <>
-MPT_CONSTEXPRINLINE uint24 EndianDecode<uint24, mpt::endian::big, uint32>(std::array<std::byte, 3> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint24 EndianDecode<uint24, mpt::endian::big, uint32>(std::array<std::byte, 3> data) noexcept {
 	return mpt::EndianDecode24<uint24, mpt::endian::big, uint32>(data);
 }
 

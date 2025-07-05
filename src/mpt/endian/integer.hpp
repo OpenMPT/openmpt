@@ -29,7 +29,7 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncodeImpl(base_type val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, sizeof(base_type)> EndianEncodeImpl(base_type val) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
 	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
@@ -48,12 +48,12 @@ MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncodeImpl(ba
 }
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE std::array<std::byte, sizeof(base_type)> EndianEncode(base_type val) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::array<std::byte, sizeof(base_type)> EndianEncode(base_type val) noexcept {
 	return EndianEncodeImpl<base_type, endian, int_type>(val);
 }
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE base_type EndianDecodeImpl(std::array<std::byte, sizeof(base_type)> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr base_type EndianDecodeImpl(std::array<std::byte, sizeof(base_type)> data) noexcept {
 	static_assert(endian == mpt::endian::little || endian == mpt::endian::big);
 	static_assert(std::numeric_limits<int_type>::is_integer);
 	using unsigned_int_type = typename std::make_unsigned<int_type>::type;
@@ -73,7 +73,7 @@ MPT_CONSTEXPRINLINE base_type EndianDecodeImpl(std::array<std::byte, sizeof(base
 }
 
 template <typename base_type, mpt::endian endian, typename int_type = base_type>
-MPT_CONSTEXPRINLINE base_type EndianDecode(std::array<std::byte, sizeof(base_type)> data) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr base_type EndianDecode(std::array<std::byte, sizeof(base_type)> data) noexcept {
 	return EndianDecodeImpl<base_type, endian, int_type>(data);
 }
 
@@ -99,7 +99,7 @@ public:
 	std::array<std::byte, sizeof(base_type)> data;
 
 public:
-	MPT_CONSTEXPR20_FUN void set(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN void set(base_type val) noexcept {
 		static_assert(std::numeric_limits<int_type>::is_integer);
 		MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
@@ -124,7 +124,7 @@ public:
 			}
 		}
 	}
-	MPT_CONSTEXPR20_FUN base_type get() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN base_type get() const noexcept {
 		static_assert(std::numeric_limits<int_type>::is_integer);
 		MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 			if constexpr (endian == mpt::endian::big) {
@@ -153,61 +153,61 @@ public:
 			}
 		}
 	}
-	MPT_CONSTEXPR20_FUN packed & operator=(const base_type & val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator=(const base_type & val) noexcept {
 		set(val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN operator base_type() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN operator base_type() const noexcept {
 		return get();
 	}
 
 public:
-	MPT_CONSTEXPR20_FUN packed & operator&=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator&=(base_type val) noexcept {
 		set(get() & val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator|=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator|=(base_type val) noexcept {
 		set(get() | val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator^=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator^=(base_type val) noexcept {
 		set(get() ^ val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator+=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator+=(base_type val) noexcept {
 		set(get() + val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator-=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator-=(base_type val) noexcept {
 		set(get() - val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator*=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator*=(base_type val) noexcept {
 		set(get() * val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator/=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator/=(base_type val) noexcept {
 		set(get() / val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator%=(base_type val) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator%=(base_type val) noexcept {
 		set(get() % val);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator++() noexcept { // prefix
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator++() noexcept { // prefix
 		set(get() + 1);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN packed & operator--() noexcept { // prefix
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN packed & operator--() noexcept { // prefix
 		set(get() - 1);
 		return *this;
 	}
-	MPT_CONSTEXPR20_FUN base_type operator++(int) noexcept { // postfix
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN base_type operator++(int) noexcept { // postfix
 		base_type old = get();
 		set(old + 1);
 		return old;
 	}
-	MPT_CONSTEXPR20_FUN base_type operator--(int) noexcept { // postfix
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN base_type operator--(int) noexcept { // postfix
 		base_type old = get();
 		set(old - 1);
 		return old;
@@ -315,14 +315,14 @@ struct make_endian<mpt::endian::big, T> {
 
 
 template <typename T>
-MPT_CONSTEXPR20_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN auto as_le(T v) noexcept -> typename mpt::make_le<typename std::remove_const<T>::type>::type {
 	typename mpt::make_le<typename std::remove_const<T>::type>::type res{};
 	res = v;
 	return res;
 }
 
 template <typename T>
-MPT_CONSTEXPR20_FUN auto as_be(T v) noexcept -> typename mpt::make_be<typename std::remove_const<T>::type>::type {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN auto as_be(T v) noexcept -> typename mpt::make_be<typename std::remove_const<T>::type>::type {
 	typename mpt::make_be<typename std::remove_const<T>::type>::type res{};
 	res = v;
 	return res;
@@ -331,7 +331,7 @@ MPT_CONSTEXPR20_FUN auto as_be(T v) noexcept -> typename mpt::make_be<typename s
 
 
 template <typename Tpacked>
-MPT_CONSTEXPR20_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN Tpacked as_endian(typename Tpacked::base_type v) noexcept {
 	Tpacked res{};
 	res = v;
 	return res;

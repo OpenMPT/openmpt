@@ -328,7 +328,7 @@ struct SymTranswaveInst
 		return true;
 	}
 
-	static MPT_FORCEINLINE double TranswaveInterpolate(const ModSample &smp, double offset)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static double TranswaveInterpolate(const ModSample &smp, double offset)
 	{
 		if(!smp.HasSampleData())
 			return 0.0;

@@ -89,13 +89,13 @@ struct MixLoopState
 	}
 
 	// Returns the buffer length required to render a certain amount of samples, based on the channel's playback speed.
-	static MPT_FORCEINLINE uint32 DistanceToBufferLength(SamplePosition from, SamplePosition to, SamplePosition inc)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint32 DistanceToBufferLength(SamplePosition from, SamplePosition to, SamplePosition inc)
 	{
 		return static_cast<uint32>((to - from - SamplePosition(1)) / inc) + 1;
 	}
 
 	// Check how many samples can be rendered without encountering loop or sample end, and also update loop position / direction
-	MPT_FORCEINLINE uint32 GetSampleCount(ModChannel &chn, uint32 nSamples) const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE uint32 GetSampleCount(ModChannel &chn, uint32 nSamples) const
 	{
 		const int32 nLoopStart = chn.dwFlags[CHN_LOOP] ? chn.nLoopStart : 0;
 		SamplePosition nInc = chn.increment;

@@ -103,7 +103,7 @@ public:
 	DECLARE_SERIAL(CViewSample)
 
 protected:
-	MPT_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void SetModified(SampleHint hint, bool updateAll, bool waveformModified);
 	void UpdateScrollSize() { UpdateScrollSize(m_nZoom, true); }
 	void UpdateScrollSize(int newZoom, bool forceRefresh, SmpLength centeredSample = SmpLength(-1));
 	void UpdateOPLEditor();

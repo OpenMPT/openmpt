@@ -48,12 +48,12 @@ public:
 		return DitherChannels.size();
 	}
 	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleInt process(std::size_t channel, MixSampleInt sample)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt process(std::size_t channel, MixSampleInt sample)
 	{
 		return DitherChannels[channel].template process<targetbits>(sample, prng);
 	}
 	template <uint32 targetbits>
-	MPT_FORCEINLINE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat process(std::size_t channel, MixSampleFloat sample)
 	{
 		return DitherChannels[channel].template process<targetbits>(sample, prng);
 	}

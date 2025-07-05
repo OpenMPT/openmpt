@@ -217,7 +217,7 @@ struct Entry {
 	Direction    Direction;
 };
 
-static MPT_FORCEINLINE bool operator < (const Entry &a, const Entry &b) noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool operator < (const Entry &a, const Entry &b) noexcept
 {
 /*
 	return false
@@ -268,7 +268,7 @@ void Disable()
 	g_Enabled = false;
 }
 
-MPT_NOINLINE void Trace(const mpt::source_location & loc, Direction direction) noexcept
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void Trace(const mpt::source_location & loc, Direction direction) noexcept
 {
 	// This will get called in realtime contexts and hot paths.
 	// No blocking allowed here.

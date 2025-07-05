@@ -26,7 +26,7 @@ struct Clip<uint8, clipOutput>
 {
 	using input_t = uint8;
 	using output_t = uint8;
-	MPT_FORCEINLINE uint8 operator()(uint8 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE uint8 operator()(uint8 val)
 	{
 		return val;
 	}
@@ -37,7 +37,7 @@ struct Clip<int8, clipOutput>
 {
 	using input_t = int8;
 	using output_t = int8;
-	MPT_FORCEINLINE int8 operator()(int8 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int8 operator()(int8 val)
 	{
 		return val;
 	}
@@ -48,7 +48,7 @@ struct Clip<int16, clipOutput>
 {
 	using input_t = int16;
 	using output_t = int16;
-	MPT_FORCEINLINE int16 operator()(int16 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int16 operator()(int16 val)
 	{
 		return val;
 	}
@@ -59,7 +59,7 @@ struct Clip<int24, clipOutput>
 {
 	using input_t = int24;
 	using output_t = int24;
-	MPT_FORCEINLINE int24 operator()(int24 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int24 operator()(int24 val)
 	{
 		return val;
 	}
@@ -70,7 +70,7 @@ struct Clip<int32, clipOutput>
 {
 	using input_t = int32;
 	using output_t = int32;
-	MPT_FORCEINLINE int32 operator()(int32 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int32 operator()(int32 val)
 	{
 		return val;
 	}
@@ -81,7 +81,7 @@ struct Clip<int64, clipOutput>
 {
 	using input_t = int64;
 	using output_t = int64;
-	MPT_FORCEINLINE int64 operator()(int64 val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int64 operator()(int64 val)
 	{
 		return val;
 	}
@@ -92,7 +92,7 @@ struct Clip<float, clipOutput>
 {
 	using input_t = float;
 	using output_t = float;
-	MPT_FORCEINLINE float operator()(float val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE float operator()(float val)
 	{
 		if constexpr(clipOutput)
 		{
@@ -111,7 +111,7 @@ struct Clip<double, clipOutput>
 {
 	using input_t = double;
 	using output_t = double;
-	MPT_FORCEINLINE double operator()(double val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE double operator()(double val)
 	{
 		if constexpr(clipOutput)
 		{

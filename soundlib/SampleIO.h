@@ -131,7 +131,7 @@ public:
 	}
 
 	// Return 0 in case of variable-length encoded samples.
-	MPT_CONSTEXPRINLINE uint8 GetEncodedBitsPerSample() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetEncodedBitsPerSample() const
 	{
 		switch(GetEncoding())
 		{
@@ -168,7 +168,7 @@ public:
 	}
 
 	// Return the static header size additional to the raw encoded sample data.
-	MPT_CONSTEXPRINLINE std::size_t GetEncodedHeaderSize() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::size_t GetEncodedHeaderSize() const
 	{
 		switch(GetEncoding())
 		{
@@ -180,13 +180,13 @@ public:
 	}
 
 	// Returns true if the encoded size cannot be calculated apriori from the encoding format and the sample length.
-	MPT_CONSTEXPRINLINE bool IsVariableLengthEncoded() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsVariableLengthEncoded() const
 	{
 		return GetEncodedBitsPerSample() == 0;
 	}
 
 	// Returns true if the decoder for a given format uses FileReader interface and thus do not need to call GetPinnedView()
-	MPT_CONSTEXPRINLINE bool UsesFileReaderForDecoding() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool UsesFileReaderForDecoding() const
 	{
 		switch(GetEncoding())
 		{

@@ -66,51 +66,51 @@ private:
 	uint64 Data4;
 
 public:
-	MPT_CONSTEXPRINLINE uint32 GetData1() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint32 GetData1() const noexcept {
 		return Data1;
 	}
-	MPT_CONSTEXPRINLINE uint16 GetData2() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint16 GetData2() const noexcept {
 		return Data2;
 	}
-	MPT_CONSTEXPRINLINE uint16 GetData3() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint16 GetData3() const noexcept {
 		return Data3;
 	}
-	MPT_CONSTEXPRINLINE uint64 GetData4() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint64 GetData4() const noexcept {
 		return Data4;
 	}
 
 public:
-	MPT_CONSTEXPRINLINE uint64 GetData64_1() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint64 GetData64_1() const noexcept {
 		return (static_cast<uint64>(Data1) << 32) | (static_cast<uint64>(Data2) << 16) | (static_cast<uint64>(Data3) << 0);
 	}
-	MPT_CONSTEXPRINLINE uint64 GetData64_2() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint64 GetData64_2() const noexcept {
 		return Data4;
 	}
 
 public:
 	// xxxxxxxx-xxxx-Mmxx-Nnxx-xxxxxxxxxxxx
 	// <--32-->-<16>-<16>-<-------64------>
-	MPT_CONSTEXPRINLINE bool IsNil() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsNil() const noexcept {
 		return (Data1 == 0) && (Data2 == 0) && (Data3 == 0) && (Data4 == 0);
 	}
-	MPT_CONSTEXPRINLINE bool IsValid() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsValid() const noexcept {
 		return (Data1 != 0) || (Data2 != 0) || (Data3 != 0) || (Data4 != 0);
 	}
-	MPT_CONSTEXPRINLINE uint8 Variant() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 Variant() const noexcept {
 		return Nn() >> 4u;
 	}
-	MPT_CONSTEXPRINLINE uint8 Version() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 Version() const noexcept {
 		return Mm() >> 4u;
 	}
-	MPT_CONSTEXPRINLINE bool IsRFC4122() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsRFC4122() const noexcept {
 		return (Variant() & 0xcu) == 0x8u;
 	}
 
 private:
-	MPT_CONSTEXPRINLINE uint8 Mm() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 Mm() const noexcept {
 		return static_cast<uint8>((Data3 >> 8) & 0xffu);
 	}
-	MPT_CONSTEXPRINLINE uint8 Nn() const noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 Nn() const noexcept {
 		return static_cast<uint8>((Data4 >> 56) & 0xffu);
 	}
 #if MPT_COMPILER_GCC
@@ -165,23 +165,23 @@ public:
 	}
 #endif // MPT_OS_WINDOWS
 private:
-	static MPT_CONSTEXPRINLINE uint8 NibbleFromChar(char x) {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static uint8 NibbleFromChar(char x) {
 		return ('0' <= x && x <= '9') ? static_cast<uint8>(x - '0' + 0) : ('a' <= x && x <= 'z') ? static_cast<uint8>(x - 'a' + 10)
 																	: ('A' <= x && x <= 'Z')     ? static_cast<uint8>(x - 'A' + 10)
 																								 : mpt::constexpr_throw<uint8>(std::domain_error(""));
 	}
-	static MPT_CONSTEXPRINLINE uint8 ByteFromHex(char x, char y) {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static uint8 ByteFromHex(char x, char y) {
 		return static_cast<uint8>(uint8(0) | (NibbleFromChar(x) << 4) | (NibbleFromChar(y) << 0));
 	}
-	static MPT_CONSTEXPRINLINE uint16 ParseHex16(const char * str) {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static uint16 ParseHex16(const char * str) {
 		return static_cast<uint16>(uint16(0) | (static_cast<uint16>(ByteFromHex(str[0], str[1])) << 8) | (static_cast<uint16>(ByteFromHex(str[2], str[3])) << 0));
 	}
-	static MPT_CONSTEXPRINLINE uint32 ParseHex32(const char * str) {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static uint32 ParseHex32(const char * str) {
 		return static_cast<uint32>(uint32(0) | (static_cast<uint32>(ByteFromHex(str[0], str[1])) << 24) | (static_cast<uint32>(ByteFromHex(str[2], str[3])) << 16) | (static_cast<uint32>(ByteFromHex(str[4], str[5])) << 8) | (static_cast<uint32>(ByteFromHex(str[6], str[7])) << 0));
 	}
 
 public:
-	static MPT_CONSTEXPRINLINE UUID ParseLiteral(const char * str, std::size_t len) {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static UUID ParseLiteral(const char * str, std::size_t len) {
 		return (len == 36 && str[8] == '-' && str[13] == '-' && str[18] == '-' && str[23] == '-') ? mpt::UUID(
 				   ParseHex32(str + 0),
 				   ParseHex16(str + 9),
@@ -194,14 +194,14 @@ public:
 	}
 
 public:
-	MPT_CONSTEXPRINLINE UUID() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr UUID() noexcept
 		: Data1(0)
 		, Data2(0)
 		, Data3(0)
 		, Data4(0) {
 		return;
 	}
-	MPT_CONSTEXPRINLINE explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr explicit UUID(uint32 Data1, uint16 Data2, uint16 Data3, uint64 Data4) noexcept
 		: Data1(Data1)
 		, Data2(Data2)
 		, Data3(Data3)
@@ -365,18 +365,18 @@ public:
 	}
 };
 
-MPT_CONSTEXPRINLINE bool operator==(const mpt::UUID & a, const mpt::UUID & b) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator==(const mpt::UUID & a, const mpt::UUID & b) noexcept {
 	return (a.GetData1() == b.GetData1()) && (a.GetData2() == b.GetData2()) && (a.GetData3() == b.GetData3()) && (a.GetData4() == b.GetData4());
 }
 
-MPT_CONSTEXPRINLINE bool operator!=(const mpt::UUID & a, const mpt::UUID & b) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator!=(const mpt::UUID & a, const mpt::UUID & b) noexcept {
 	return (a.GetData1() != b.GetData1()) || (a.GetData2() != b.GetData2()) || (a.GetData3() != b.GetData3()) || (a.GetData4() != b.GetData4());
 }
 
 
 namespace uuid_literals {
 
-MPT_CONSTEVAL mpt::UUID operator""_uuid(const char * str, std::size_t len) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL mpt::UUID operator""_uuid(const char * str, std::size_t len) {
 	return mpt::UUID::ParseLiteral(str, len);
 }
 

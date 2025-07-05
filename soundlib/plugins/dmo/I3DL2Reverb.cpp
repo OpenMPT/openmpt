@@ -51,7 +51,7 @@ void I3DL2Reverb::DelayLine::Advance()
 }
 
 
-MPT_FORCEINLINE void I3DL2Reverb::DelayLine::Set(float value)
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void I3DL2Reverb::DelayLine::Set(float value)
 {
 	at(m_position) = value;
 }
@@ -66,7 +66,7 @@ float I3DL2Reverb::DelayLine::Get(int32 offset) const
 }
 
 
-MPT_FORCEINLINE float I3DL2Reverb::DelayLine::Get() const
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE float I3DL2Reverb::DelayLine::Get() const
 {
 	return at(m_delayPosition);
 }

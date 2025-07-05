@@ -21,7 +21,7 @@ struct ClipFixed
 {
 	using input_t = Tfixed;
 	using output_t = Tfixed;
-	MPT_FORCEINLINE Tfixed operator()(Tfixed val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tfixed operator()(Tfixed val)
 	{
 		static_assert(fractionalBits >= 0 && fractionalBits <= sizeof(output_t) * 8 - 1);
 		if constexpr(clipOutput)

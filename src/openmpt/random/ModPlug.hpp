@@ -50,15 +50,15 @@ public:
 	}
 
 public:
-	static MPT_CONSTEXPRINLINE result_type min()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type min()
 	{
 		return static_cast<result_type>(0);
 	}
-	static MPT_CONSTEXPRINLINE result_type max()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type max()
 	{
 		return std::numeric_limits<result_type>::max();
 	}
-	static MPT_CONSTEXPRINLINE int result_bits()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits()
 	{
 		static_assert(std::is_integral<result_type>::value);
 		static_assert(std::is_unsigned<result_type>::value);

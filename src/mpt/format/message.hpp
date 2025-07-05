@@ -43,7 +43,7 @@ private:
 	Tstring format;
 
 private:
-	MPT_NOINLINE Tstring do_format(const mpt::span<const Tstring> vals) const {
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE Tstring do_format(const mpt::span<const Tstring> vals) const {
 		using traits = typename mpt::string_traits<Tstring>;
 		using char_type = typename traits::char_type;
 		using size_type = typename traits::size_type;
@@ -161,13 +161,13 @@ private:
 	}
 
 public:
-	MPT_FORCEINLINE message_formatter(Tstring format_)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE message_formatter(Tstring format_)
 		: format(std::move(format_)) {
 	}
 
 public:
 	template <typename... Ts>
-	MPT_NOINLINE Tstring operator()(Ts &&... xs) const {
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE Tstring operator()(Ts &&... xs) const {
 		const std::array<Tstring, sizeof...(xs)> vals{{Tformatter::template format<Tstring>(std::forward<Ts>(xs))...}};
 		return do_format(mpt::as_span(vals));
 	}
@@ -202,7 +202,7 @@ public:
 
 
 template <typename Tchar>
-MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count_impl(const Tchar * const format, const std::size_t len) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::ptrdiff_t parse_format_string_argument_count_impl(const Tchar * const format, const std::size_t len) {
 	std::size_t max_arg = 0;
 	std::size_t args = 0;
 	bool success = true;
@@ -309,7 +309,7 @@ MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count_impl(const
 
 
 template <typename Tchar, std::size_t literal_length>
-MPT_CONSTEXPRINLINE std::ptrdiff_t parse_format_string_argument_count(const Tchar (&format)[literal_length]) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::ptrdiff_t parse_format_string_argument_count(const Tchar (&format)[literal_length]) {
 	return parse_format_string_argument_count_impl(format, literal_length - 1);
 }
 

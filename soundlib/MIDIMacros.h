@@ -120,12 +120,12 @@ struct MIDIMacroConfigData
 			return {m_data.data(), Length()};
 		}
 
-		MPT_CONSTEXPR20_FUN size_t Length() const noexcept
+		MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN size_t Length() const noexcept
 		{
 			return static_cast<size_t>(std::distance(m_data.begin(), std::find(m_data.begin(), m_data.end(), '\0')));
 		}
 
-		MPT_CONSTEXPR20_FUN void Clear() noexcept
+		MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN void Clear() noexcept
 		{
 			m_data.fill('\0');
 		}

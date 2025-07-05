@@ -57,35 +57,38 @@
 
 
 
-#if MPT_COMPILER_MSVC
-#define MPT_FORCEINLINE __forceinline
-#define MPT_NOINLINE    __declspec(noinline)
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define MPT_FORCEINLINE __attribute__((always_inline)) inline
-#define MPT_NOINLINE    __attribute__((noinline))
+// for compilers that do not support C++ attribute syntax for noinline
+#if MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20)
+#define MPT_DECL_NOINLINE __declspec(noinline)
 #else
-#define MPT_FORCEINLINE inline
-#define MPT_NOINLINE
+#define MPT_DECL_NOINLINE
 #endif
 
 
 
-#define MPT_CONSTEXPRINLINE constexpr MPT_FORCEINLINE
+// for compilers that do not support C++ attribute syntax for forced inline
+#if MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20)
+#define MPT_INLINE_FORCE __forceinline
+#else
+#define MPT_INLINE_FORCE inline
+#endif
+
+
 
 #if MPT_CXX_AT_LEAST(23)
-#define MPT_CONSTEXPR20_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_FUN MPT_INLINE_FORCE constexpr
 #define MPT_CONSTEXPR20_VAR constexpr
-#define MPT_CONSTEXPR23_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_FUN MPT_INLINE_FORCE constexpr
 #define MPT_CONSTEXPR23_VAR constexpr
 #elif MPT_CXX_AT_LEAST(20)
-#define MPT_CONSTEXPR20_FUN constexpr MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_FUN MPT_INLINE_FORCE constexpr
 #define MPT_CONSTEXPR20_VAR constexpr
-#define MPT_CONSTEXPR23_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_FUN MPT_INLINE_FORCE
 #define MPT_CONSTEXPR23_VAR const
 #else // C++
-#define MPT_CONSTEXPR20_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR20_FUN MPT_INLINE_FORCE
 #define MPT_CONSTEXPR20_VAR const
-#define MPT_CONSTEXPR23_FUN MPT_FORCEINLINE
+#define MPT_CONSTEXPR23_FUN MPT_INLINE_FORCE
 #define MPT_CONSTEXPR23_VAR const
 #endif // C++
 
@@ -111,7 +114,7 @@
 #define MPT_CONSTEVAL consteval
 #else // !C++20
 // fallback to constexpr
-#define MPT_CONSTEVAL MPT_CONSTEXPRINLINE
+#define MPT_CONSTEVAL MPT_INLINE_FORCE constexpr
 #endif // C++20
 
 

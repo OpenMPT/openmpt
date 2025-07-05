@@ -55,8 +55,8 @@ public:
 public:
 	constexpr uint32 Width() const noexcept { return width; }
 	constexpr uint32 Height() const noexcept { return height; }
-	MPT_FORCEINLINE Pixel &operator()(uint32 x, uint32 y) noexcept { return pixels[y * width + x]; }
-	MPT_FORCEINLINE const Pixel &operator()(uint32 x, uint32 y) const noexcept { return pixels[y * width + x]; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Pixel &operator()(uint32 x, uint32 y) noexcept { return pixels[y * width + x]; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const Pixel &operator()(uint32 x, uint32 y) const noexcept { return pixels[y * width + x]; }
 	std::vector<Pixel> &Pixels() { return pixels; }
 	const std::vector<Pixel> &Pixels() const { return pixels; }
 };

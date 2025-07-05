@@ -21,7 +21,7 @@ struct ConvertMixSample;
 template <>
 struct ConvertMixSample<MixSampleInt, MixSampleInt>
 {
-	MPT_FORCEINLINE MixSampleInt conv(MixSampleInt src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt conv(MixSampleInt src)
 	{
 		return src;
 	}
@@ -30,7 +30,7 @@ struct ConvertMixSample<MixSampleInt, MixSampleInt>
 template <>
 struct ConvertMixSample<MixSampleFloat, MixSampleFloat>
 {
-	MPT_FORCEINLINE MixSampleFloat conv(MixSampleFloat src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat conv(MixSampleFloat src)
 	{
 		return src;
 	}
@@ -39,7 +39,7 @@ struct ConvertMixSample<MixSampleFloat, MixSampleFloat>
 template <typename Tsrc>
 struct ConvertMixSample<MixSampleInt, Tsrc>
 {
-	MPT_FORCEINLINE MixSampleInt conv(Tsrc src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt conv(Tsrc src)
 	{
 		return SC::ConvertToFixedPoint<MixSampleInt, Tsrc, MixSampleIntTraits::mix_fractional_bits>{}(src);
 	}
@@ -48,7 +48,7 @@ struct ConvertMixSample<MixSampleInt, Tsrc>
 template <typename Tdst>
 struct ConvertMixSample<Tdst, MixSampleInt>
 {
-	MPT_FORCEINLINE Tdst conv(MixSampleInt src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tdst conv(MixSampleInt src)
 	{
 		return SC::ConvertFixedPoint<Tdst, MixSampleInt, MixSampleIntTraits::mix_fractional_bits>{}(src);
 	}
@@ -57,7 +57,7 @@ struct ConvertMixSample<Tdst, MixSampleInt>
 template <typename Tsrc>
 struct ConvertMixSample<MixSampleFloat, Tsrc>
 {
-	MPT_FORCEINLINE MixSampleFloat conv(Tsrc src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat conv(Tsrc src)
 	{
 		return SC::Convert<MixSampleFloat, Tsrc>{}(src);
 	}
@@ -66,7 +66,7 @@ struct ConvertMixSample<MixSampleFloat, Tsrc>
 template <typename Tdst>
 struct ConvertMixSample<Tdst, MixSampleFloat>
 {
-	MPT_FORCEINLINE Tdst conv(MixSampleFloat src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tdst conv(MixSampleFloat src)
 	{
 		return SC::Convert<Tdst, MixSampleFloat>{}(src);
 	}
@@ -75,7 +75,7 @@ struct ConvertMixSample<Tdst, MixSampleFloat>
 template <>
 struct ConvertMixSample<MixSampleInt, MixSampleFloat>
 {
-	MPT_FORCEINLINE MixSampleInt conv(MixSampleFloat src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt conv(MixSampleFloat src)
 	{
 		return SC::ConvertToFixedPoint<MixSampleInt, MixSampleFloat, MixSampleIntTraits::mix_fractional_bits>{}(src);
 	}
@@ -84,7 +84,7 @@ struct ConvertMixSample<MixSampleInt, MixSampleFloat>
 template <>
 struct ConvertMixSample<MixSampleFloat, MixSampleInt>
 {
-	MPT_FORCEINLINE MixSampleFloat conv(MixSampleInt src)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat conv(MixSampleInt src)
 	{
 		return SC::ConvertFixedPoint<MixSampleFloat, MixSampleInt, MixSampleIntTraits::mix_fractional_bits>{}(src);
 	}
@@ -92,7 +92,7 @@ struct ConvertMixSample<MixSampleFloat, MixSampleInt>
 
 
 template <typename Tdst, typename Tsrc>
-MPT_FORCEINLINE Tdst mix_sample_cast(Tsrc src)
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tdst mix_sample_cast(Tsrc src)
 {
 	return ConvertMixSample<Tdst, Tsrc>{}.conv(src);
 }

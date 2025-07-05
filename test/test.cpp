@@ -136,24 +136,24 @@ namespace Test {
 
 
 
-static MPT_NOINLINE void TestVersion();
-static MPT_NOINLINE void TestTypes();
-static MPT_NOINLINE void TestMisc1();
-static MPT_NOINLINE void TestMisc2();
-static MPT_NOINLINE void TestRandom();
-static MPT_NOINLINE void TestCharsets();
-static MPT_NOINLINE void TestPathNative();
-static MPT_NOINLINE void TestPathForeign();
-static MPT_NOINLINE void TestStringFormatting();
-static MPT_NOINLINE void TestSettings();
-static MPT_NOINLINE void TestStringIO();
-static MPT_NOINLINE void TestMIDIEvents();
-static MPT_NOINLINE void TestSampleConversion();
-static MPT_NOINLINE void TestITCompression();
-static MPT_NOINLINE void TestPCnoteSerialization();
-static MPT_NOINLINE void TestLoadSaveFile();
-static MPT_NOINLINE void TestEditing();
-static MPT_NOINLINE void TestMIDIMacroParser();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestVersion();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestTypes();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc1();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc2();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestRandom();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestCharsets();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathNative();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeign();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringFormatting();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringIO();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMIDIEvents();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestITCompression();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPCnoteSerialization();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestLoadSaveFile();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestEditing();
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMIDIMacroParser();
 
 
 
@@ -512,7 +512,7 @@ static void RemoveFile(const mpt::PathString &filename)
 
 
 // Test if functions related to program version data work
-static MPT_NOINLINE void TestVersion()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestVersion()
 {
 	//Verify that macros and functions work.
 	{
@@ -666,7 +666,7 @@ static MPT_NOINLINE void TestVersion()
 
 
 // Test if data types are interpreted correctly
-static MPT_NOINLINE void TestTypes()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestTypes()
 {
 
 	static_assert(sizeof(std::uintptr_t) == sizeof(void*));
@@ -784,7 +784,7 @@ static void TestFloatFormats(Tfloat x)
 
 
 
-static MPT_NOINLINE void TestStringFormatting()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringFormatting()
 {
 	VERIFY_EQUAL(mpt::afmt::val(1.5f), "1.5");
 	VERIFY_EQUAL(mpt::afmt::val(true), "1");
@@ -1052,7 +1052,7 @@ static mpt::Date::UTC TestDate2(int s, int m, int h, unsigned int D, unsigned in
 }
 
 
-static MPT_NOINLINE void TestMisc1()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc1()
 {
 
 	VERIFY_EQUAL(ModCommand::IsPcNote(NOTE_MAX), false);
@@ -1173,7 +1173,7 @@ static MPT_NOINLINE void TestMisc1()
 }
 
 
-static MPT_NOINLINE void TestMisc2()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc2()
 {
 
 	// Check for completeness of supported effect list in mod specifications
@@ -1551,7 +1551,7 @@ static MPT_NOINLINE void TestMisc2()
 }
 
 
-static MPT_NOINLINE void TestRandom()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestRandom()
 {
 
 	#ifdef FLAKY_TESTS
@@ -1604,7 +1604,7 @@ static MPT_NOINLINE void TestRandom()
 }
 
 
-static MPT_NOINLINE void TestPathNative()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathNative()
 {
 
 	// Path splitting
@@ -1865,7 +1865,7 @@ static MPT_NOINLINE void TestPathNative()
 
 #if !defined(MPT_EMSCRIPTEN_TEST_PATH_CRASH)
 
-static MPT_NOINLINE void TestPathForeignWindowsNT()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeignWindowsNT()
 {
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::WindowsNT>>>;
@@ -2028,7 +2028,7 @@ static MPT_NOINLINE void TestPathForeignWindowsNT()
 	}
 }
 
-static MPT_NOINLINE void TestPathForeignWindows9x()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeignWindows9x()
 {
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Windows9x>>>;
@@ -2175,7 +2175,7 @@ static MPT_NOINLINE void TestPathForeignWindows9x()
 	}
 }
 
-static MPT_NOINLINE void TestPathForeignDOSDJGPP()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeignDOSDJGPP()
 {
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::DOS_DJGPP>>>;
@@ -2282,7 +2282,7 @@ static MPT_NOINLINE void TestPathForeignDOSDJGPP()
 	}
 }
 
-static MPT_NOINLINE void TestPathForeignPOSIX()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeignPOSIX()
 {
 	{
 		using P = mpt::BasicPathString<mpt::PathTraits<std::string, mpt::PathStyleTag<mpt::PathStyle::Posix>>>;
@@ -2343,7 +2343,7 @@ static MPT_NOINLINE void TestPathForeignPOSIX()
 #endif // !MPT_EMSCRIPTEN_TEST_PATH_CRASH
 
 
-static MPT_NOINLINE void TestPathForeign()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPathForeign()
 {
 
 #if !defined(MPT_EMSCRIPTEN_TEST_PATH_CRASH)
@@ -2423,7 +2423,7 @@ static MPT_NOINLINE void TestPathForeign()
 
 
 
-static MPT_NOINLINE void TestCharsets()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestCharsets()
 {
 
 	// Path conversions
@@ -2599,7 +2599,7 @@ namespace Test {
 #endif // MODPLUG_TRACKER
 
 
-static MPT_NOINLINE void TestSettings()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 {
 
 #ifdef MODPLUG_TRACKER
@@ -2679,7 +2679,7 @@ static MPT_NOINLINE void TestSettings()
 
 
 // Test MIDI Event generating / reading
-static MPT_NOINLINE void TestMIDIEvents()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMIDIEvents()
 {
 	uint32 midiEvent;
 
@@ -3690,7 +3690,7 @@ static void SaveMOD(const TSoundFileContainer &sndFile, const mpt::PathString &f
 
 
 // Test file loading and saving
-static MPT_NOINLINE void TestLoadSaveFile()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestLoadSaveFile()
 {
 	if(!ShouldRunTests())
 	{
@@ -3925,7 +3925,7 @@ static MPT_NOINLINE void TestLoadSaveFile()
 
 
 // Test various editing features
-static MPT_NOINLINE void TestEditing()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestEditing()
 {
 #ifdef MODPLUG_TRACKER
 	auto modDoc = static_cast<CModDoc *>(theApp.GetModDocTemplate()->CreateNewDocument());
@@ -4025,7 +4025,7 @@ static void RunITCompressionTest(const std::vector<int8> &sampleData, FlagSet<Ch
 }
 
 
-static MPT_NOINLINE void TestITCompression()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestITCompression()
 {
 	// Test loading / saving of IT-compressed samples
 	constexpr int sampleDataSize = 131072;
@@ -4132,7 +4132,7 @@ static void GenerateCommands(CPattern& pat, const double dProbPcs, const double 
 
 
 // Test PC note serialization
-static MPT_NOINLINE void TestPCnoteSerialization()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestPCnoteSerialization()
 {
 	FileReader file;
 	mpt::heap_value<CSoundFile> pSndFile;
@@ -4195,7 +4195,7 @@ static inline std::size_t strnlen(const char *str, std::size_t n)
 
 // Test String I/O functionality
 
-static MPT_NOINLINE void TestStringIO1()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringIO1()
 {
 
 #if MPT_COMPILER_MSVC
@@ -4453,7 +4453,7 @@ static MPT_NOINLINE void TestStringIO1()
 	}
 }
 
-static MPT_NOINLINE void TestStringIO2()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringIO2()
 {
 	{
 	
@@ -4567,13 +4567,13 @@ static MPT_NOINLINE void TestStringIO2()
 	}
 }
 
-static MPT_NOINLINE void TestStringIO()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestStringIO()
 {
 	TestStringIO1();
 	TestStringIO2();
 }
 
-static MPT_NOINLINE void TestSampleConversion()
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 {
 	// Signed 8-Bit Integer PCM
 	// Unsigned 8-Bit Integer PCM

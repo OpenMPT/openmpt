@@ -64,46 +64,46 @@ struct ModSample
 		return pData.pSample != nullptr && nLength != 0;
 	}
 
-	MPT_FORCEINLINE const void *samplev() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const void *samplev() const noexcept
 	{
 		return pData.pSample;
 	}
-	MPT_FORCEINLINE void *samplev() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void *samplev() noexcept
 	{
 		return pData.pSample;
 	}
-	MPT_FORCEINLINE const std::byte *sampleb() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const std::byte *sampleb() const noexcept
 	{
 		return mpt::void_cast<const std::byte*>(pData.pSample);
 	}
-	MPT_FORCEINLINE std::byte *sampleb() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE std::byte *sampleb() noexcept
 	{
 		return mpt::void_cast<std::byte*>(pData.pSample);
 	}
-	MPT_FORCEINLINE const int8 *sample8() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const int8 *sample8() const noexcept
 	{
 		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
 		return pData.pSample8;
 	}
-	MPT_FORCEINLINE int8 *sample8() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int8 *sample8() noexcept
 	{
 		MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
 		return pData.pSample8;
 	}
-	MPT_FORCEINLINE const int16 *sample16() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const int16 *sample16() const noexcept
 	{
 		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
 		return pData.pSample16;
 	}
-	MPT_FORCEINLINE int16 *sample16() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int16 *sample16() noexcept
 	{
 		MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
 		return pData.pSample16;
 	}
 	template <typename Tsample>
-	MPT_FORCEINLINE const Tsample *sample() const noexcept = delete;
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const Tsample *sample() const noexcept = delete;
 	template <typename Tsample>
-	MPT_FORCEINLINE Tsample *sample() noexcept = delete;
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tsample *sample() noexcept = delete;
 
 	// Return the size of one (elementary) sample in bytes.
 	uint8 GetElementarySampleSize() const noexcept { return (uFlags & CHN_16BIT) ? 2 : 1; }
@@ -188,25 +188,25 @@ struct ModSample
 };
 
 template <>
-MPT_FORCEINLINE const int8 *ModSample::sample<int8>() const noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const int8 *ModSample::sample<int8>() const noexcept
 {
 	MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
 	return pData.pSample8;
 }
 template <>
-MPT_FORCEINLINE int8 *ModSample::sample<int8>() noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int8 *ModSample::sample<int8>() noexcept
 {
 	MPT_ASSERT(GetElementarySampleSize() == sizeof(int8));
 	return pData.pSample8;
 }
 template <>
-MPT_FORCEINLINE const int16 *ModSample::sample<int16>() const noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE const int16 *ModSample::sample<int16>() const noexcept
 {
 	MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
 	return pData.pSample16;
 }
 template <>
-MPT_FORCEINLINE int16 *ModSample::sample<int16>() noexcept
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int16 *ModSample::sample<int16>() noexcept
 {
 	MPT_ASSERT(GetElementarySampleSize() == sizeof(int16));
 	return pData.pSample16;

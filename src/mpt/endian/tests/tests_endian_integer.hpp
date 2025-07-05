@@ -62,7 +62,7 @@ MPT_TEST_GROUP_INLINE("mpt/endian/integer")
 	static_assert(std::numeric_limits<uint64le>::max() == std::numeric_limits<uint64>::max());
 
 	struct test_endian_constexpr {
-		static MPT_CONSTEXPR20_FUN int32le test(uint32 x) {
+		MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN static int32le test(uint32 x) {
 			int32le foo{};
 			foo = x;
 			return foo;

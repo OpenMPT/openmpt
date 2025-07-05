@@ -26,13 +26,13 @@ public:
 protected:
 	any_engine() = default;
 public:
-	static MPT_CONSTEXPRINLINE result_type min() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type min() {
 		return static_cast<result_type>(std::numeric_limits<result_type>::min());
 	}
-	static MPT_CONSTEXPRINLINE result_type max() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type max() {
 		return static_cast<result_type>(std::numeric_limits<result_type>::max());
 	}
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return static_cast<int>(sizeof(result_type) * 8);
 	}
 public:

@@ -83,8 +83,8 @@ struct CModSpecifications
 	bool hasFractionalTempo;         // Are fractional tempos allowed?
 	const char *commands;            // An array holding all commands this format supports; commands that are not supported are marked with "?"
 	const char *volcommands;         // Ditto, but for volume column
-	MPT_CONSTEXPRINLINE TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
-	MPT_CONSTEXPRINLINE TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr TEMPO GetTempoMin() const { return TEMPO(tempoMinInt, 0); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr TEMPO GetTempoMax() const { return TEMPO(tempoMaxInt, 0); }
 };
 
 

@@ -31,7 +31,7 @@ struct MixerTraits
 	using input_t = in;                                 // Input buffer sample type
 	using outbuf_t = out[channelsOut];                  // Output buffer sampling point type
 	// To perform sample conversion, add a function with the following signature to your derived classes:
-	// static MPT_CONSTEXPRINLINE output_t Convert(const input_t x)
+	// MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static output_t Convert(const input_t x)
 };
 
 
@@ -43,7 +43,7 @@ struct NoInterpolation
 {
 	ModChannel &channel;
 
-	MPT_FORCEINLINE NoInterpolation(ModChannel &c, const CResampler &, unsigned int)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE NoInterpolation(ModChannel &c, const CResampler &, unsigned int)
 		: channel{c}
 	{
 		// Adding 0.5 to the sample position before the interpolation loop starts
@@ -51,12 +51,12 @@ struct NoInterpolation
 		// This gives us more consistent behaviour between forward and reverse playing of a sample.
 		c.position += SamplePosition::Ratio(1, 2);
 	}
-	MPT_FORCEINLINE ~NoInterpolation()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ~NoInterpolation()
 	{
 		channel.position -= SamplePosition::Ratio(1, 2);
 	}
 
-	MPT_FORCEINLINE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void operator() (typename Traits::outbuf_t &outSample, const typename Traits::input_t * const inBuffer, const int32)
 	{
 		static_assert(static_cast<int>(Traits::numChannelsIn) <= static_cast<int>(Traits::numChannelsOut), "Too many input channels");
 

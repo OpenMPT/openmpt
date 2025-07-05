@@ -51,13 +51,13 @@ namespace HighDPISupport
 	bool GetWindowPlacement(HWND hwnd, WINDOWPLACEMENT &wpl);
 
 	// Applies DPI scaling factor to some given size
-	MPT_FORCEINLINE int ScalePixels(int pixels, HWND hwnd)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int ScalePixels(int pixels, HWND hwnd)
 	{
 		return MulDiv(pixels, HighDPISupport::GetDpiForWindow(hwnd), 96);
 	}
 
 	// Removes DPI scaling factor from some given size
-	MPT_FORCEINLINE int ScalePixelsInv(int pixels, HWND hwnd)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE int ScalePixelsInv(int pixels, HWND hwnd)
 	{
 		return MulDiv(pixels, 96, HighDPISupport::GetDpiForWindow(hwnd));
 	}

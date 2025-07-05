@@ -207,7 +207,7 @@ inline Tdst void_cast(Tsrc src) noexcept {
 
 
 template <typename T>
-MPT_CONSTEXPRINLINE std::byte as_byte(T src) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr std::byte as_byte(T src) noexcept {
 	static_assert(std::is_integral<T>::value);
 	return static_cast<std::byte>(static_cast<uint8>(src));
 }

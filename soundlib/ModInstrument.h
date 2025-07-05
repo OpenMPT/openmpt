@@ -128,7 +128,7 @@ struct ModInstrument
 	// WHEN adding new members here, ALSO update InstrumentExtensions.cpp
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	MPT_CONSTEXPR20_CONTAINER_FUN explicit ModInstrument(SAMPLEINDEX sample = 0)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_CONTAINER_FUN explicit ModInstrument(SAMPLEINDEX sample = 0)
 		: NoteMap{mpt::generate_array<uint8, 128>([](std::size_t i){ return static_cast<uint8>(NOTE_MIN + i); })}
 		, Keyboard{mpt::init_array<SAMPLEINDEX, 128>(sample)}
 	{
@@ -136,13 +136,13 @@ struct ModInstrument
 	}
 
 	// Assign all notes to a given sample.
-	MPT_CONSTEXPR20_ALGORITHM_FUN void AssignSample(SAMPLEINDEX sample)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_ALGORITHM_FUN void AssignSample(SAMPLEINDEX sample)
 	{
 		Keyboard.fill(sample);
 	}
 
 	// Reset note mapping (i.e. every note is mapped to itself)
-	MPT_CONSTEXPR20_ALGORITHM_FUN void ResetNoteMap()
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_ALGORITHM_FUN void ResetNoteMap()
 	{
 		std::iota(NoteMap.begin(), NoteMap.end(), static_cast<uint8>(NOTE_MIN));
 	}
@@ -154,23 +154,23 @@ struct ModInstrument
 	// Transpose entire note mapping by given number of semitones
 	void Transpose(int8 amount);
 
-	MPT_CONSTEXPRINLINE bool IsCutoffEnabled() const { return (nIFC & 0x80) != 0; }
-	MPT_CONSTEXPRINLINE bool IsResonanceEnabled() const { return (nIFR & 0x80) != 0; }
-	MPT_CONSTEXPRINLINE uint8 GetCutoff() const { return (nIFC & 0x7F); }
-	MPT_CONSTEXPRINLINE uint8 GetResonance() const { return (nIFR & 0x7F); }
-	MPT_CONSTEXPRINLINE void SetCutoff(uint8 cutoff, bool enable) { nIFC = std::min(cutoff, uint8(0x7F)) | (enable ? 0x80 : 0x00); }
-	MPT_CONSTEXPRINLINE void SetResonance(uint8 resonance, bool enable) { nIFR = std::min(resonance, uint8(0x7F)) | (enable ? 0x80 : 0x00); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsCutoffEnabled() const { return (nIFC & 0x80) != 0; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsResonanceEnabled() const { return (nIFR & 0x80) != 0; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetCutoff() const { return (nIFC & 0x7F); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetResonance() const { return (nIFR & 0x7F); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr void SetCutoff(uint8 cutoff, bool enable) { nIFC = std::min(cutoff, uint8(0x7F)) | (enable ? 0x80 : 0x00); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr void SetResonance(uint8 resonance, bool enable) { nIFR = std::min(resonance, uint8(0x7F)) | (enable ? 0x80 : 0x00); }
 
-	MPT_CONSTEXPRINLINE bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool HasValidMIDIChannel() const { return (nMidiChannel >= 1 && nMidiChannel <= 17); }
 	uint8 GetMIDIChannel(const ModChannel &channel, CHANNELINDEX chn) const;
 
-	MPT_CONSTEXPRINLINE void SetTuning(CTuning *pT)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr void SetTuning(CTuning *pT)
 	{
 		pTuning = pT;
 	}
 
 	// Get a reference to a specific envelope of this instrument
-	MPT_CONSTEXPRINLINE const InstrumentEnvelope &GetEnvelope(EnvelopeType envType) const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr const InstrumentEnvelope &GetEnvelope(EnvelopeType envType) const
 	{
 		switch(envType)
 		{

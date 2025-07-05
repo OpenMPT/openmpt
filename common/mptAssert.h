@@ -131,7 +131,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_ASSERT_HANDLER_NEEDED)
 // custom assert handler needed
-MPT_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg=nullptr);
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void AssertHandler(const mpt::source_location &loc, const char *expr, const char *msg=nullptr);
 #endif // MPT_ASSERT_HANDLER_NEEDED
 
 

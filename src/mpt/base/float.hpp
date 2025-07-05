@@ -27,7 +27,7 @@ inline namespace MPT_INLINE_NS {
 // fp single
 using single_float = float;
 namespace float_literals {
-MPT_CONSTEVAL single_float operator""_fs(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL single_float operator""_fs(long double lit) noexcept {
 	return static_cast<single_float>(lit);
 }
 } // namespace float_literals
@@ -35,7 +35,7 @@ MPT_CONSTEVAL single_float operator""_fs(long double lit) noexcept {
 // fp double
 using double_float = float;
 namespace float_literals {
-MPT_CONSTEVAL double_float operator""_fd(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL double_float operator""_fd(long double lit) noexcept {
 	return static_cast<double_float>(lit);
 }
 } // namespace float_literals
@@ -43,7 +43,7 @@ MPT_CONSTEVAL double_float operator""_fd(long double lit) noexcept {
 // fp extended
 using extended_float = long double;
 namespace float_literals {
-MPT_CONSTEVAL extended_float operator""_fe(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL extended_float operator""_fe(long double lit) noexcept {
 	return static_cast<extended_float>(lit);
 }
 } // namespace float_literals
@@ -110,16 +110,16 @@ using stdfloat128 = std::conditional<sizeof(float) == 16, float, std::conditiona
 #undef MPT_BASE_STDFLOAT_FLOAT128
 
 namespace float_literals {
-MPT_CONSTEVAL stdfloat16 operator""_stdf16(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL stdfloat16 operator""_stdf16(long double lit) noexcept {
 	return static_cast<stdfloat16>(lit);
 }
-MPT_CONSTEVAL stdfloat32 operator""_stdf32(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL stdfloat32 operator""_stdf32(long double lit) noexcept {
 	return static_cast<stdfloat32>(lit);
 }
-MPT_CONSTEVAL stdfloat64 operator""_stdf64(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL stdfloat64 operator""_stdf64(long double lit) noexcept {
 	return static_cast<stdfloat64>(lit);
 }
-MPT_CONSTEVAL stdfloat128 operator""_stdf128(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL stdfloat128 operator""_stdf128(long double lit) noexcept {
 	return static_cast<stdfloat128>(lit);
 }
 } // namespace float_literals
@@ -128,14 +128,14 @@ MPT_CONSTEVAL stdfloat128 operator""_stdf128(long double lit) noexcept {
 
 using fastfloat32 = std::conditional<sizeof(float) == 4, float, std::conditional<sizeof(double) == 4, double, std::conditional<sizeof(long double) == 4, long double, float>::type>::type>::type;
 namespace float_literals {
-MPT_CONSTEVAL fastfloat32 operator""_ff32(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL fastfloat32 operator""_ff32(long double lit) noexcept {
 	return static_cast<fastfloat32>(lit);
 }
 } // namespace float_literals
 
 using fastfloat64 = std::conditional<sizeof(float) == 8, float, std::conditional<sizeof(double) == 8, double, std::conditional<sizeof(long double) == 8, long double, double>::type>::type>::type;
 namespace float_literals {
-MPT_CONSTEVAL fastfloat64 operator""_ff64(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL fastfloat64 operator""_ff64(long double lit) noexcept {
 	return static_cast<fastfloat64>(lit);
 }
 } // namespace float_literals
@@ -144,14 +144,14 @@ MPT_CONSTEVAL fastfloat64 operator""_ff64(long double lit) noexcept {
 
 using somefloat32 = std::conditional<sizeof(fastfloat32) == 4, fastfloat32, std::conditional<sizeof(stdfloat32) == 4, stdfloat32, float>::type>::type;
 namespace float_literals {
-MPT_CONSTEVAL somefloat32 operator""_sf32(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL somefloat32 operator""_sf32(long double lit) noexcept {
 	return static_cast<somefloat32>(lit);
 }
 } // namespace float_literals
 
 using somefloat64 = std::conditional<sizeof(fastfloat64) == 8, fastfloat64, std::conditional<sizeof(stdfloat64) == 8, stdfloat64, double>::type>::type;
 namespace float_literals {
-MPT_CONSTEVAL somefloat64 operator""_sf64(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL somefloat64 operator""_sf64(long double lit) noexcept {
 	return static_cast<somefloat64>(lit);
 }
 } // namespace float_literals
@@ -174,7 +174,7 @@ struct float_traits {
 using nativefloat =
 	std::conditional<mpt::float_traits<somefloat32>::is_preferred, somefloat32, std::conditional<mpt::float_traits<somefloat64>::is_preferred, somefloat64, std::conditional<std::numeric_limits<float>::is_iec559, float, std::conditional<std::numeric_limits<double>::is_iec559, double, std::conditional<std::numeric_limits<long double>::is_iec559, long double, float>::type>::type>::type>::type>::type;
 namespace float_literals {
-MPT_CONSTEVAL nativefloat operator""_nf(long double lit) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL nativefloat operator""_nf(long double lit) noexcept {
 	return static_cast<nativefloat>(lit);
 }
 } // namespace float_literals

@@ -115,7 +115,7 @@ namespace Util {
 
 	// Multiply two 32-bit integers, receive 64-bit result.
 	// MSVC generates unnecessarily complicated code for the unoptimized variant using _allmul.
-	MPT_CONSTEXPR20_FUN int64 mul32to64(int32 a, int32 b)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int64 mul32to64(int32 a, int32 b)
 	{
 		#if MPT_COMPILER_MSVC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
 			MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20())
@@ -130,7 +130,7 @@ namespace Util {
 		#endif
 	}
 
-	MPT_CONSTEXPR20_FUN uint64 mul32to64_unsigned(uint32 a, uint32 b)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint64 mul32to64_unsigned(uint32 a, uint32 b)
 	{
 		#if MPT_COMPILER_MSVC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
 			MPT_MAYBE_CONSTANT_IF(MPT_IS_CONSTANT_EVALUATED20())
@@ -145,27 +145,27 @@ namespace Util {
 		#endif
 	}
 
-	MPT_CONSTEXPR20_FUN int32 muldiv(int32 a, int32 b, int32 c)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int32 muldiv(int32 a, int32 b, int32 c)
 	{
 		return mpt::saturate_cast<int32>( mul32to64( a, b ) / c );
 	}
 
-	MPT_CONSTEXPR20_FUN int32 muldivr(int32 a, int32 b, int32 c)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int32 muldivr(int32 a, int32 b, int32 c)
 	{
 		return mpt::saturate_cast<int32>( ( mul32to64( a, b ) + ( c / 2 ) ) / c );
 	}
 
 	// Do not use overloading because catching unsigned version by accident results in slower X86 code.
-	MPT_CONSTEXPR20_FUN uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint32 muldiv_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return mpt::saturate_cast<uint32>( mul32to64_unsigned( a, b ) / c );
 	}
-	MPT_CONSTEXPR20_FUN uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint32 muldivr_unsigned(uint32 a, uint32 b, uint32 c)
 	{
 		return mpt::saturate_cast<uint32>( ( mul32to64_unsigned( a, b ) + ( c / 2u ) ) / c );
 	}
 
-	constexpr MPT_FORCEINLINE int32 muldivrfloor(int64 a, uint32 b, uint32 c)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr int32 muldivrfloor(int64 a, uint32 b, uint32 c)
 	{
 		a *= b;
 		a += c / 2u;

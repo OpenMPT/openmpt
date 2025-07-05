@@ -26,7 +26,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-inline MPT_NOINLINE bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *filename, bool fullMemDump)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline bool WriteMemoryDump(_EXCEPTION_POINTERS *pExceptionInfo, const TCHAR *filename, bool fullMemDump)
 {
 	bool result = false;
 	HMODULE hDll = ::LoadLibrary(_T("DBGHELP.DLL"));

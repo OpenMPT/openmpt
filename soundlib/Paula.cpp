@@ -25,7 +25,7 @@ namespace Paula
 namespace
 {
 
-MPT_NOINLINE std::vector<double> KaiserFIR(int numTaps, double cutoff, double beta)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE std::vector<double> KaiserFIR(int numTaps, double cutoff, double beta)
 {
 	const double izeroBeta = Izero(beta);
 	const double kPi = 4.0 * std::atan(1.0) * cutoff;
@@ -52,7 +52,7 @@ MPT_NOINLINE std::vector<double> KaiserFIR(int numTaps, double cutoff, double be
 }
 
 
-MPT_NOINLINE void FIR_MinPhase(std::vector<double> &table, const TinyFFT &fft)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void FIR_MinPhase(std::vector<double> &table, const TinyFFT &fft)
 {
 	std::vector<std::complex<double>> cepstrum(fft.Size());
 	MPT_ASSERT(cepstrum.size() >= table.size());
@@ -166,7 +166,7 @@ BiquadFilter MakeButterworth(double fs, double fc, double res_dB = 0)
 }
 
 
-MPT_NOINLINE void Integrate(std::vector<double> &table)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void Integrate(std::vector<double> &table)
 {
 	const double total = std::accumulate(table.begin(), table.end(), 0.0);
 	double startVal = -total;
@@ -179,7 +179,7 @@ MPT_NOINLINE void Integrate(std::vector<double> &table)
 }
 
 
-MPT_NOINLINE void Quantize(const std::vector<double> &in, Paula::BlepArray &quantized)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void Quantize(const std::vector<double> &in, Paula::BlepArray &quantized)
 {
 	MPT_ASSERT(in.size() == Paula::BLEP_SIZE);
 	constexpr int fact = 1 << Paula::BLEP_SCALE;

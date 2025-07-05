@@ -71,15 +71,15 @@ public:
 		return;
 	}
 public:
-	static MPT_CONSTEXPRINLINE typename engine_traits<Trng>::result_type min()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static typename engine_traits<Trng>::result_type min()
 	{
 		return Trng::min();
 	}
-	static MPT_CONSTEXPRINLINE typename engine_traits<Trng>::result_type max()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static typename engine_traits<Trng>::result_type max()
 	{
 		return Trng::max();
 	}
-	static MPT_CONSTEXPRINLINE int result_bits()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits()
 	{
 		return engine_traits<Trng>::result_bits();
 	}

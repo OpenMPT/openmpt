@@ -203,7 +203,7 @@ enum class vendor : uint8 {
 
 
 // clang-format off
-[[nodiscard]] MPT_CONSTEVAL feature_flags assumed_features() noexcept {
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL feature_flags assumed_features() noexcept {
 	feature_flags flags{};
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 	#ifdef MPT_ARCH_X86_I386
@@ -309,7 +309,7 @@ enum class vendor : uint8 {
 
 
 // clang-format off
-[[nodiscard]] MPT_CONSTEVAL mode_flags assumed_modes() noexcept {
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL mode_flags assumed_modes() noexcept {
 	mode_flags flags{};
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 	#ifdef MPT_ARCH_X86_SSE
@@ -363,7 +363,7 @@ struct fixed_string {
 #endif
 	}
 	template <std::size_t M>
-	[[nodiscard]] friend MPT_CONSTEXPR20_FUN auto operator+(fixed_string<N> a, fixed_string<M> b) -> fixed_string<N + M> {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE friend MPT_CONSTEXPR20_FUN auto operator+(fixed_string<N> a, fixed_string<M> b) -> fixed_string<N + M> {
 		fixed_string<N + M> result;
 		std::copy(a.begin(), a.end(), result.data() + 0);
 		std::copy(b.begin(), b.end(), result.data() + N);
@@ -397,47 +397,47 @@ private:
 
 public:
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator[](feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool has_features(feature_flags query_features) const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool has_features(feature_flags query_features) const noexcept {
 		return ((Features & query_features) == query_features);
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE feature_flags get_features() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr feature_flags get_features() const noexcept {
 		return Features;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool operator[](mode_flags query_modes) const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator[](mode_flags query_modes) const noexcept {
 		return ((Modes & query_modes) == query_modes);
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool enabled_modes(mode_flags query_modes) const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool enabled_modes(mode_flags query_modes) const noexcept {
 		return ((Modes & query_modes) == query_modes);
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE mode_flags get_modes() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr mode_flags get_modes() const noexcept {
 		return Modes;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE uint32 get_cpuid() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint32 get_cpuid() const noexcept {
 		return CPUID;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE vendor get_vendor() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr vendor get_vendor() const noexcept {
 		return Vendor;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE uint16 get_family() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint16 get_family() const noexcept {
 		return Family;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE uint8 get_model() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 get_model() const noexcept {
 		return Model;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE uint8 get_stepping() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 get_stepping() const noexcept {
 		return Stepping;
 	}
 
@@ -449,11 +449,11 @@ public:
 		return std::string(BrandID);
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool is_virtual() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool is_virtual() const noexcept {
 		return Virtualized;
 	}
 
-	[[nodiscard]] MPT_CONSTEXPRINLINE bool can_long_mode() const noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool can_long_mode() const noexcept {
 #if !MPT_ARCH_AMD64
 		return LongMode;
 #else  // MPT_ARCH_AMD64
@@ -472,7 +472,7 @@ private:
 		uint32 c = 0;
 		uint32 d = 0;
 
-		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<4> as_text4() const noexcept {
+		[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN fixed_string<4> as_text4() const noexcept {
 			fixed_string<4> result;
 			result[0 + 0] = static_cast<char>((a >> 0) & 0xff);
 			result[0 + 1] = static_cast<char>((a >> 8) & 0xff);
@@ -481,7 +481,7 @@ private:
 			return result;
 		}
 
-		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bcd() const noexcept {
+		[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bcd() const noexcept {
 			fixed_string<12> result;
 			result[0 + 0] = static_cast<char>((b >> 0) & 0xff);
 			result[0 + 1] = static_cast<char>((b >> 8) & 0xff);
@@ -498,7 +498,7 @@ private:
 			return result;
 		}
 
-		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bdc() const noexcept {
+		[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN fixed_string<12> as_text12bdc() const noexcept {
 			fixed_string<12> result;
 			result[0 + 0] = static_cast<char>((b >> 0) & 0xff);
 			result[0 + 1] = static_cast<char>((b >> 8) & 0xff);
@@ -515,7 +515,7 @@ private:
 			return result;
 		}
 
-		[[nodiscard]] MPT_CONSTEXPR20_FUN fixed_string<16> as_text16() const noexcept {
+		[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN fixed_string<16> as_text16() const noexcept {
 			fixed_string<16> result;
 			result[0 + 0] = static_cast<char>((a >> 0) & 0xff);
 			result[0 + 1] = static_cast<char>((a >> 8) & 0xff);
@@ -1608,7 +1608,7 @@ public:
 
 #if MPT_COMPILER_MSVC
 
-	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint16 get_x87fcw() noexcept {
 		uint16 tmp = 0;
 		// clang-format off
 		_asm {
@@ -1619,7 +1619,7 @@ public:
 		return tmp;
 	}
 
-	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_x87fcw(uint16 fcw) noexcept {
 		// clang-format off
 		_asm {
 			fldcw fcw
@@ -1627,25 +1627,25 @@ public:
 		// clang-format on
 	}
 
-	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint32 get_mxcsr() noexcept {
 		return _mm_getcsr();
 	}
 
-	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_mxcsr(uint32 csr) noexcept {
 		_mm_setcsr(csr);
 	}
 
-	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxsave(fxsave_state * state) noexcept {
 		_fxsave(state);
 	}
 
-	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxrstor(const fxsave_state * state) noexcept {
 		_fxrstor(state);
 	}
 
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint16 get_x87fcw() noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = 0;
 		// clang-format off
@@ -1654,7 +1654,7 @@ public:
 		return static_cast<uint16>(tmp);
 	}
 
-	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_x87fcw(uint16 fcw) noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = fcw;
 		// clang-format off
@@ -1662,7 +1662,7 @@ public:
 		// clang-format on
 	}
 
-	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint32 get_mxcsr() noexcept {
 #ifdef MPT_ARCH_X86_SSE
 		return __builtin_ia32_stmxcsr();
 #else
@@ -1674,7 +1674,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_mxcsr(uint32 csr) noexcept {
 #ifdef MPT_ARCH_X86_SSE
 #if MPT_COMPILER_GCC
 		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
@@ -1692,7 +1692,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxsave(fxsave_state * state) noexcept {
 #ifdef MPT_ARCH_X86_FXSR
 		__builtin_ia32_fxsave(state);
 #else
@@ -1702,7 +1702,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxrstor(const fxsave_state * state) noexcept {
 #ifdef MPT_ARCH_X86_FXSR
 		__builtin_ia32_fxrstor(const_cast<fxsave_state *>(state));
 #else
@@ -1714,7 +1714,7 @@ public:
 
 #endif // MPT_COMPILER
 
-	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_fxsr() noexcept {
 #ifdef MPT_ARCH_X86_FXSR
 		return true;
 #else
@@ -1722,7 +1722,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE bool have_sse() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_sse() noexcept {
 #ifdef MPT_ARCH_X86_SSE
 		return true;
 #else
@@ -1731,7 +1731,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE uint8 get_fpu_level() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint8 get_fpu_level() noexcept {
 #ifdef MPT_ARCH_X86_FSIN
 		return 3;
 #elif defined(MPT_ARCH_X86_FPU)
@@ -1743,7 +1743,7 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE control_state get_state() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static control_state get_state() noexcept {
 		control_state result;
 #ifdef MPT_ARCH_X86_FXSR
 		fxsave_state tmp = {};
@@ -1770,7 +1770,7 @@ public:
 		return result;
 	}
 
-	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_state(control_state state) noexcept {
 #ifdef MPT_ARCH_X86_SSE
 		if (state.x87_level) {
 			set_x87fcw(state.x87fcw);
@@ -1822,40 +1822,40 @@ public:
 
 #if MPT_COMPILER_MSVC
 
-	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint16 get_x87fcw() noexcept {
 		fxsave_state state = {};
 		fxsave(&state);
 		return state.fcw;
 	}
 
-	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_x87fcw(uint16 fcw) noexcept {
 		fxsave_state state = {};
 		fxsave(&state);
 		state.fcw = fcw;
 		fxrstor(&state);
 	}
 
-	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint32 get_mxcsr() noexcept {
 		return _mm_getcsr();
 	}
 
-	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_mxcsr(uint32 csr) noexcept {
 		_mm_setcsr(csr);
 	}
 
-	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxsave(fxsave_state * state) noexcept {
 		_fxsave(state);
 	}
 
-	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxrstor(const fxsave_state * state) noexcept {
 		_fxrstor(state);
 	}
 
-	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_fxsr() noexcept {
 		return true;
 	}
 
-	static MPT_FORCEINLINE control_state get_state() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static control_state get_state() noexcept {
 		control_state result;
 		fxsave_state tmp = {};
 		fxsave(&tmp);
@@ -1866,7 +1866,7 @@ public:
 		return result;
 	}
 
-	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_state(control_state state) noexcept {
 		fxsave_state tmp = {};
 		fxsave(&tmp);
 		tmp.fcw = state.x87fcw;
@@ -1877,7 +1877,7 @@ public:
 
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	[[nodiscard]] static MPT_FORCEINLINE uint16 get_x87fcw() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint16 get_x87fcw() noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = 0;
 		// clang-format off
@@ -1886,7 +1886,7 @@ public:
 		return static_cast<uint16>(tmp);
 	}
 
-	static MPT_FORCEINLINE void set_x87fcw(uint16 fcw) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_x87fcw(uint16 fcw) noexcept {
 		typedef unsigned int fpu_control_t __attribute__((__mode__(__HI__)));
 		fpu_control_t tmp = fcw;
 		// clang-format off
@@ -1894,11 +1894,11 @@ public:
 		// clang-format on
 	}
 
-	[[nodiscard]] static MPT_FORCEINLINE uint32 get_mxcsr() noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint32 get_mxcsr() noexcept {
 		return __builtin_ia32_stmxcsr();
 	}
 
-	static MPT_FORCEINLINE void set_mxcsr(uint32 csr) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_mxcsr(uint32 csr) noexcept {
 #if MPT_COMPILER_GCC
 		// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55752
 		std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -1910,19 +1910,19 @@ public:
 #endif
 	}
 
-	static MPT_FORCEINLINE void fxsave(fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxsave(fxsave_state * state) noexcept {
 		__builtin_ia32_fxsave(state);
 	}
 
-	static MPT_FORCEINLINE void fxrstor(const fxsave_state * state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void fxrstor(const fxsave_state * state) noexcept {
 		__builtin_ia32_fxrstor(const_cast<fxsave_state *>(state));
 	}
 
-	static MPT_FORCEINLINE bool have_fxsr() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_fxsr() noexcept {
 		return true;
 	}
 
-	static MPT_FORCEINLINE control_state get_state() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static control_state get_state() noexcept {
 		control_state result;
 		result.x87_level = 3;
 		result.x87fcw = get_x87fcw();
@@ -1931,7 +1931,7 @@ public:
 		return result;
 	}
 
-	static MPT_FORCEINLINE void set_state(control_state state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_state(control_state state) noexcept {
 		set_x87fcw(state.x87fcw);
 		set_mxcsr(state.mxcsr);
 	}
@@ -1946,7 +1946,7 @@ public:
 
 	public:
 
-		MPT_FORCEINLINE guard(std::optional<rounding> rounding, std::optional<bool> denormals_as_zero, std::optional<precision> precision, std::optional<bool> infinity_projective) noexcept
+		MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE guard(std::optional<rounding> rounding, std::optional<bool> denormals_as_zero, std::optional<precision> precision, std::optional<bool> infinity_projective) noexcept
 			: m_oldstate(get_state()) {
 			control_state state = m_oldstate;
 			if (rounding) {
@@ -1975,7 +1975,7 @@ public:
 			set_state(state);
 		}
 
-		MPT_FORCEINLINE ~guard() {
+		MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ~guard() {
 			set_state(m_oldstate);
 		}
 	};

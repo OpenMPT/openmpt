@@ -66,7 +66,7 @@ public:
 	};
 	void SetSelection(ORDERINDEX firstOrd, ORDERINDEX lastOrd = ORDERINDEX_INVALID);
 	// Why VC wants to inline this huge function is beyond my understanding...
-	MPT_NOINLINE bool SetCurSel(ORDERINDEX sel, bool setPlayPos = true, bool shiftClick = false, bool ignoreCurSel = false);
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE bool SetCurSel(ORDERINDEX sel, bool setPlayPos = true, bool shiftClick = false, bool ignoreCurSel = false);
 	void UpdateScrollInfo();
 	void UpdateInfoText();
 	int GetFontWidth();

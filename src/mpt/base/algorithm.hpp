@@ -73,22 +73,22 @@ public:
 };
 
 template <typename Tcontainer, typename Tval>
-MPT_CONSTEXPR20_FUN bool contains_class_find_impl(const Tcontainer & container, const Tval & value, std::true_type) noexcept(noexcept(container.find(value) != container.end())) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN bool contains_class_find_impl(const Tcontainer & container, const Tval & value, std::true_type) noexcept(noexcept(container.find(value) != container.end())) {
 	return container.find(value) != container.end();
 }
 
 template <typename Tcontainer, typename Tval>
-MPT_CONSTEXPR20_FUN bool contains_class_find_impl(const Tcontainer & container, const Tval & value, std::false_type) noexcept(noexcept(std::find(std::begin(container), std::end(container), value))) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN bool contains_class_find_impl(const Tcontainer & container, const Tval & value, std::false_type) noexcept(noexcept(std::find(std::begin(container), std::end(container), value))) {
 	return std::find(std::begin(container), std::end(container), value) != std::end(container);
 }
 
 template <typename Tcontainer, typename Tval>
-MPT_CONSTEXPR20_FUN bool contains_class_impl(const Tcontainer & container, const Tval & value, std::true_type) noexcept(noexcept(mpt::detail::contains::contains_class_find_impl<Tcontainer, Tval>(container, value, typename mpt::detail::contains::has_find<Tcontainer, typename Tcontainer::iterator(Tval)>::type{}))) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN bool contains_class_impl(const Tcontainer & container, const Tval & value, std::true_type) noexcept(noexcept(mpt::detail::contains::contains_class_find_impl<Tcontainer, Tval>(container, value, typename mpt::detail::contains::has_find<Tcontainer, typename Tcontainer::iterator(Tval)>::type{}))) {
 	return mpt::detail::contains::contains_class_find_impl<Tcontainer, Tval>(container, value, typename mpt::detail::contains::has_find<Tcontainer, typename Tcontainer::iterator(Tval)>::type{});
 }
 
 template <typename Tcontainer, typename Tval>
-MPT_CONSTEXPR20_FUN bool contains_class_impl(const Tcontainer & container, const Tval & value, std::false_type) noexcept(noexcept(std::find(std::begin(container), std::end(container), value))) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN bool contains_class_impl(const Tcontainer & container, const Tval & value, std::false_type) noexcept(noexcept(std::find(std::begin(container), std::end(container), value))) {
 	return std::find(std::begin(container), std::end(container), value) != std::end(container);
 }
 
@@ -96,7 +96,7 @@ MPT_CONSTEXPR20_FUN bool contains_class_impl(const Tcontainer & container, const
 } // namespace detail
 
 template <typename Tcontainer, typename Tval>
-MPT_CONSTEXPR20_FUN bool contains(const Tcontainer & container, const Tval & value) noexcept(noexcept(mpt::detail::contains::contains_class_impl<Tcontainer, Tval>(container, value, typename std::is_class<Tcontainer>::type{}))) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN bool contains(const Tcontainer & container, const Tval & value) noexcept(noexcept(mpt::detail::contains::contains_class_impl<Tcontainer, Tval>(container, value, typename std::is_class<Tcontainer>::type{}))) {
 	return mpt::detail::contains::contains_class_impl<Tcontainer, Tval>(container, value, typename std::is_class<Tcontainer>::type{});
 }
 

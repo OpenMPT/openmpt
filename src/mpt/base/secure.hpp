@@ -23,7 +23,7 @@ inline namespace MPT_INLINE_NS {
 
 
 // C23 memset_explicit
-inline MPT_NOINLINE void * memset_explicit(void * const dst, int const value, std::size_t const len) noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void * memset_explicit(void * const dst, int const value, std::size_t const len) noexcept {
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 	volatile unsigned char * volatile p = static_cast<volatile unsigned char *>(dst);
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -40,7 +40,7 @@ namespace secure {
 
 
 
-inline MPT_NOINLINE void memzero(std::byte * const dst, std::size_t const len) noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void memzero(std::byte * const dst, std::size_t const len) noexcept {
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 	volatile std::byte * volatile p = static_cast<volatile std::byte *>(dst);
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -50,7 +50,7 @@ inline MPT_NOINLINE void memzero(std::byte * const dst, std::size_t const len) n
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 }
 
-inline MPT_NOINLINE void memzero(void * const dst, std::size_t const len) noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void memzero(void * const dst, std::size_t const len) noexcept {
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 	volatile std::byte * volatile p = static_cast<volatile std::byte *>(dst);
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -60,7 +60,7 @@ inline MPT_NOINLINE void memzero(void * const dst, std::size_t const len) noexce
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 }
 
-inline MPT_NOINLINE void memzero(char * const dst, std::size_t const len) noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void memzero(char * const dst, std::size_t const len) noexcept {
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 	volatile std::byte * volatile p = reinterpret_cast<volatile std::byte *>(dst);
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -70,7 +70,7 @@ inline MPT_NOINLINE void memzero(char * const dst, std::size_t const len) noexce
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 }
 
-inline MPT_NOINLINE void memzero(uint8 * const dst, std::size_t const len) noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void memzero(uint8 * const dst, std::size_t const len) noexcept {
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 	volatile std::byte * volatile p = reinterpret_cast<volatile std::byte *>(dst);
 	std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -83,7 +83,7 @@ inline MPT_NOINLINE void memzero(uint8 * const dst, std::size_t const len) noexc
 
 
 template <typename T>
-inline MPT_NOINLINE void clear(T & val) {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline void clear(T & val) {
 	std::atomic_signal_fence(std::memory_order_seq_cst);
 	volatile T * volatile v = &val;
 	std::atomic_thread_fence(std::memory_order_seq_cst);

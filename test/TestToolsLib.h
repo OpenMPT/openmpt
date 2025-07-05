@@ -219,7 +219,7 @@ public:
 private:
 
 	template <typename Tx, typename Ty>
-	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y)
 	{
 		if(!IsEqual(x, y, std::is_integral<Tx>(), std::is_integral<Ty>()))
 		{
@@ -229,7 +229,7 @@ private:
 	}
 
 	template <typename Tx, typename Ty, typename Teps>
-	MPT_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y, const Teps &eps)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void TypeCompareHelper(const Tx &x, const Ty &y, const Teps &eps)
 	{
 		if(!IsEqualEpsilon(x, y, eps))
 		{
@@ -241,7 +241,7 @@ private:
 public:
 
 	template <typename Tfx, typename Tfy>
-	MPT_NOINLINE void operator () (const Tfx &fx, const Tfy &fy)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void operator () (const Tfx &fx, const Tfy &fy)
 	{
 		ShowStart();
 		try
@@ -260,7 +260,7 @@ public:
 	}
 
 	template <typename Tfx, typename Tfy, typename Teps>
-	MPT_NOINLINE void operator () (const Tfx &fx, const Tfy &fy, const Teps &eps)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void operator () (const Tfx &fx, const Tfy &fy, const Teps &eps)
 	{
 		ShowStart();
 		try
@@ -289,7 +289,7 @@ public:
 public:
 
 	template <typename Tx, typename Ty>
-	MPT_NOINLINE void operator () (const Tx &x, const Ty &y)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void operator () (const Tx &x, const Ty &y)
 	{
 		ShowStart();
 		try
@@ -307,7 +307,7 @@ public:
 	}
 
 	template <typename Tx, typename Ty, typename Teps>
-	MPT_NOINLINE void operator () (const Tx &x, const Ty &y, const Teps &eps)
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void operator () (const Tx &x, const Ty &y, const Teps &eps)
 	{
 		ShowStart();
 		try

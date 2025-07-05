@@ -132,13 +132,13 @@ public:
 		init_fallback();
 #endif // !MPT_COMPILER_QUIRK_RANDOM_NO_RANDOM_DEVICE
 	}
-	static MPT_CONSTEXPRINLINE result_type min() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type min() {
 		return std::numeric_limits<result_type>::min();
 	}
-	static MPT_CONSTEXPRINLINE result_type max() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type max() {
 		return std::numeric_limits<result_type>::max();
 	}
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return sizeof(result_type) * 8;
 	}
 	result_type operator()() {
@@ -226,13 +226,13 @@ public:
 		: rng(seeder::template generate_seed<typename Trng::state_type>()) {
 		return;
 	}
-	static MPT_CONSTEXPRINLINE result_type min() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type min() {
 		return std::numeric_limits<unsigned int>::min();
 	}
-	static MPT_CONSTEXPRINLINE result_type max() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type max() {
 		return std::numeric_limits<unsigned int>::max();
 	}
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return sizeof(unsigned int) * 8;
 	}
 	result_type operator()() {

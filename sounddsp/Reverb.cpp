@@ -42,20 +42,20 @@ OPENMPT_NAMESPACE_BEGIN
 
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 #if defined(MPT_ARCH_QUIRK_SSE2_NO_UNALIGNED_LOAD_STORE)
-static MPT_FORCEINLINE __m128i mpt_mm_loadu_si64(void const *mem_addr) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static __m128i mpt_mm_loadu_si64(void const *mem_addr) {
 	__m128i tmp;
 	std::memset(&tmp, 0, sizeof(__m128i));
 	std::memcpy(&tmp, mem_addr, 8);
 	return _mm_loadl_epi64(&tmp);
 }
-static MPT_FORCEINLINE void mpt_mm_storeu_si64(void *mem_addr, __m128i a) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void mpt_mm_storeu_si64(void *mem_addr, __m128i a) {
 	std::memcpy(mem_addr, &a, 8);
 }
 #else
-static MPT_FORCEINLINE __m128i mpt_mm_loadu_si64(void const *mem_addr) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static __m128i mpt_mm_loadu_si64(void const *mem_addr) {
 	return _mm_loadu_si64(mem_addr);
 }
-static MPT_FORCEINLINE void mpt_mm_storeu_si64(void *mem_addr, __m128i a) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void mpt_mm_storeu_si64(void *mem_addr, __m128i a) {
 	_mm_storeu_si64(mem_addr, a);
 }
 #endif
@@ -729,7 +729,7 @@ void CReverb::ReverbDCRemoval(int32 * MPT_RESTRICT pBuffer, uint32 nSamples)
 //
 
 // Save some typing
-static MPT_FORCEINLINE int32 Clamp16(int32 x) { return Clamp(x, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max()); }
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static int32 Clamp16(int32 x) { return Clamp(x, std::numeric_limits<int16>::min(), std::numeric_limits<int16>::max()); }
 
 void CReverb::ProcessPreDelay(SWRvbRefDelay * MPT_RESTRICT pPreDelay, const int32 * MPT_RESTRICT pIn, uint32 nSamples)
 {

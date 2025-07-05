@@ -113,7 +113,7 @@ extern bool ConsoleEnabled;
 void SetFacilities(const std::string &solo, const std::string &blocked);
 bool IsFacilityActive(const char *facility) noexcept;
 #else
-MPT_FORCEINLINE bool IsFacilityActive(const char * /*facility*/ ) noexcept { return true; }
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool IsFacilityActive(const char * /*facility*/ ) noexcept { return true; }
 #endif
 
 
@@ -162,7 +162,7 @@ enum class Direction : int8
 	Leave   = -1,
 };
 
-MPT_NOINLINE void Trace(const mpt::source_location & loc, Direction direction = Direction::Unknown) noexcept;
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE void Trace(const mpt::source_location & loc, Direction direction = Direction::Unknown) noexcept;
 
 enum ThreadKind {
 	ThreadKindGUI,
@@ -185,7 +185,7 @@ class Scope
 private:
 	const mpt::source_location loc;
 public:
-	MPT_FORCEINLINE Scope(mpt::source_location loc) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Scope(mpt::source_location loc) noexcept
 		: loc(loc)
 	{
 		if(mpt::log::Trace::g_Enabled)
@@ -193,7 +193,7 @@ public:
 			mpt::log::Trace::Trace(loc, mpt::log::Trace::Direction::Enter);
 		}
 	}
-	MPT_FORCEINLINE ~Scope() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ~Scope() noexcept
 	{
 		if(mpt::log::Trace::g_Enabled)
 		{

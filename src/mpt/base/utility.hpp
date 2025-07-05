@@ -30,14 +30,14 @@ inline namespace MPT_INLINE_NS {
 
 
 template <typename Tdst, typename Tsrc>
-MPT_CONSTEXPRINLINE Tdst c_cast(Tsrc && x) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr Tdst c_cast(Tsrc && x) {
 	return (Tdst)std::forward<Tsrc>(x);
 }
 
 
 
 template <typename Tdst, typename Tsrc>
-MPT_CONSTEXPRINLINE Tdst function_pointer_cast(Tsrc f) {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr Tdst function_pointer_cast(Tsrc f) {
 #if !defined(MPT_LIBCXX_QUIRK_INCOMPLETE_IS_FUNCTION)
 	// MinGW64 std::is_function is always false for non __cdecl functions.
 	// Issue is similar to <https://connect.microsoft.com/VisualStudio/feedback/details/774720/stl-is-function-bug>.

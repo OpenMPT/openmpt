@@ -35,7 +35,7 @@ private:
 
 public:
 	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &prng)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt process(MixSampleInt sample, Trng &prng)
 	{
 		if constexpr(targetbits == 0)
 		{
@@ -81,7 +81,7 @@ public:
 		}
 	}
 	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat process(MixSampleFloat sample, Trng &prng)
 	{
 		return mix_sample_cast<MixSampleFloat>(process<targetbits>(mix_sample_cast<MixSampleInt>(sample), prng));
 	}

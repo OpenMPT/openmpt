@@ -62,7 +62,7 @@ inline bool is_debugger_present() noexcept {
 	return (IsDebuggerPresent() != FALSE);
 }
 
-MPT_FORCEINLINE void breakpoint() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void breakpoint() noexcept {
 #if MPT_COMPILER_MSVC
 	__debugbreak();
 #elif MPT_COMPILER_CLANG
@@ -178,11 +178,11 @@ inline bool parse_proc_status() noexcept {
 } // namespace debugging
 } // namespace detail
 
-inline MPT_NOINLINE bool is_debugger_present() noexcept {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline bool is_debugger_present() noexcept {
 	return mpt::detail::debugging::parse_proc_status();
 }
 
-MPT_FORCEINLINE void breakpoint() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void breakpoint() noexcept {
 #if MPT_COMPILER_CLANG
 	__builtin_debugtrap();
 #elif MPT_COMPILER_GCC && (MPT_ARCH_X86 || MPT_ARCH_AMD64)
@@ -198,7 +198,7 @@ inline bool is_debugger_present() noexcept {
 	return false;
 }
 
-MPT_FORCEINLINE void breakpoint() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void breakpoint() noexcept {
 #if MPT_COMPILER_MSVC
 	__debugbreak();
 #elif MPT_COMPILER_CLANG
@@ -210,7 +210,7 @@ MPT_FORCEINLINE void breakpoint() noexcept {
 
 #endif
 
-MPT_FORCEINLINE void breakpoint_if_debugging() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void breakpoint_if_debugging() noexcept {
 	if (mpt::is_debugger_present()) {
 		mpt::breakpoint();
 	}

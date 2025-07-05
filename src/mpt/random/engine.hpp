@@ -25,7 +25,7 @@ struct engine_seed_traits {
 template <typename Trng>
 struct engine_traits {
 	using result_type = typename Trng::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return Trng::result_bits();
 	}
 };
@@ -43,7 +43,7 @@ template <>
 struct engine_traits<std::mt19937> {
 	using rng_type = std::mt19937;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return rng_type::word_size;
 	}
 };
@@ -57,7 +57,7 @@ template <>
 struct engine_traits<std::mt19937_64> {
 	using rng_type = std::mt19937_64;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return rng_type::word_size;
 	}
 };
@@ -71,7 +71,7 @@ template <>
 struct engine_traits<std::ranlux24_base> {
 	using rng_type = std::ranlux24_base;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return rng_type::word_size;
 	}
 };
@@ -85,7 +85,7 @@ template <>
 struct engine_traits<std::ranlux48_base> {
 	using rng_type = std::ranlux48_base;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return rng_type::word_size;
 	}
 };
@@ -99,7 +99,7 @@ template <>
 struct engine_traits<std::ranlux24> {
 	using rng_type = std::ranlux24;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return std::ranlux24_base::word_size;
 	}
 };
@@ -113,7 +113,7 @@ template <>
 struct engine_traits<std::ranlux48> {
 	using rng_type = std::ranlux48;
 	using result_type = rng_type::result_type;
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return std::ranlux48_base::word_size;
 	}
 };

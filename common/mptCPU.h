@@ -46,22 +46,22 @@ inline void EnableAvailableFeatures() noexcept
 }
 
 // enabled processor features for inline asm and intrinsics
-[[nodiscard]] MPT_FORCEINLINE mpt::arch::current::feature_flags GetEnabledFeatures() noexcept
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE mpt::arch::current::feature_flags GetEnabledFeatures() noexcept
 {
 	return CPU::detail::EnabledFeatures;
 }
-[[nodiscard]] MPT_FORCEINLINE mpt::arch::current::mode_flags GetEnabledModes() noexcept
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE mpt::arch::current::mode_flags GetEnabledModes() noexcept
 {
 	return CPU::detail::EnabledModes;
 }
 
 struct Info
 {
-	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
 		return features == (GetEnabledFeatures() & features);
 	}
-	[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
 	{
 		return modes == (GetEnabledModes() & modes);
 	}
@@ -76,11 +76,11 @@ struct Info
 private:
 	const mpt::arch::flags_cache m_flags{mpt::arch::get_cpu_info()};
 public:
-	[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
 		return m_flags[features];
 	}
-	[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
 	{
 		return m_flags[modes];
 	}
@@ -93,12 +93,12 @@ public:
 namespace feature = mpt::arch::current::feature;
 namespace mode = mpt::arch::current::mode;
 
-[[nodiscard]] MPT_FORCEINLINE bool HasFeatureSet(mpt::arch::current::feature_flags features) noexcept
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasFeatureSet(mpt::arch::current::feature_flags features) noexcept
 {
 	return CPU::Info{}.HasFeatureSet(features);
 }
 
-[[nodiscard]] MPT_FORCEINLINE bool HasModesEnabled(mpt::arch::current::mode_flags modes) noexcept
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasModesEnabled(mpt::arch::current::mode_flags modes) noexcept
 {
 	return CPU::Info{}.HasModesEnabled(modes);
 }

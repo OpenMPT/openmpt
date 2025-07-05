@@ -44,7 +44,7 @@ private:
 	SampleFormat::Enum value;
 
 	template <typename T>
-	static MPT_CONSTEXPRINLINE SampleFormat::Enum Sanitize(T x) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat::Enum Sanitize(T x) noexcept
 	{
 		using uT = typename std::make_unsigned<T>::type;
 		uT val = static_cast<uT>(x);
@@ -181,53 +181,53 @@ private:
 	}
 
 public:
-	MPT_CONSTEXPRINLINE SampleFormat() noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr SampleFormat() noexcept
 		: value(SampleFormat::Default)
 	{
 	}
 
-	MPT_CONSTEXPRINLINE SampleFormat(SampleFormat::Enum v) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr SampleFormat(SampleFormat::Enum v) noexcept
 		: value(Sanitize(v))
 	{
 	}
 
-	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat &a, const SampleFormat &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator==(const SampleFormat &a, const SampleFormat &b) noexcept
 	{
 		return a.value == b.value;
 	}
-	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat &a, const SampleFormat &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator!=(const SampleFormat &a, const SampleFormat &b) noexcept
 	{
 		return a.value != b.value;
 	}
-	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator==(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
 	{
 		return a == b.value;
 	}
-	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator!=(const SampleFormat::Enum &a, const SampleFormat &b) noexcept
 	{
 		return a != b.value;
 	}
-	friend MPT_CONSTEXPRINLINE bool operator==(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator==(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
 	{
 		return a.value == b;
 	}
-	friend MPT_CONSTEXPRINLINE bool operator!=(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
+	MPT_ATTR_ALWAYSINLINE friend MPT_INLINE_FORCE constexpr bool operator!=(const SampleFormat &a, const SampleFormat::Enum &b) noexcept
 	{
 		return a.value != b;
 	}
 
-	MPT_CONSTEXPRINLINE bool IsUnsigned() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsUnsigned() const noexcept
 	{
 		return false
 			|| (value == SampleFormat::Unsigned8);
 	}
-	MPT_CONSTEXPRINLINE bool IsFloat() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsFloat() const noexcept
 	{
 		return false
 			|| (value == SampleFormat::Float32)
 			|| (value == SampleFormat::Float64);
 	}
-	MPT_CONSTEXPRINLINE bool IsInt() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool IsInt() const noexcept
 	{
 		return false
 			|| (value == SampleFormat::Unsigned8)
@@ -236,7 +236,7 @@ public:
 			|| (value == SampleFormat::Int24)
 			|| (value == SampleFormat::Int32);
 	}
-	MPT_CONSTEXPRINLINE uint8 GetSampleSize() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetSampleSize() const noexcept
 	{
 		return false                              ? 0
 			 : (value == SampleFormat::Unsigned8) ? 1
@@ -248,7 +248,7 @@ public:
 			 : (value == SampleFormat::Float64)   ? 8
 												  : 0;
 	}
-	MPT_CONSTEXPRINLINE uint8 GetBitsPerSample() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint8 GetBitsPerSample() const noexcept
 	{
 		return false                              ? 0
 			 : (value == SampleFormat::Unsigned8) ? 8
@@ -261,17 +261,17 @@ public:
 												  : 0;
 	}
 
-	MPT_CONSTEXPRINLINE operator SampleFormat::Enum() const noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr operator SampleFormat::Enum() const noexcept
 	{
 		return value;
 	}
 
 	// backward compatibility, conversion to/from integers
-	static MPT_CONSTEXPRINLINE SampleFormat FromInt(int x) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat FromInt(int x) noexcept
 	{
 		return SampleFormat(Sanitize(x));
 	}
-	static MPT_CONSTEXPRINLINE int ToInt(SampleFormat x) noexcept
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int ToInt(SampleFormat x) noexcept
 	{
 		return mpt::to_underlying(x.value);
 	}
@@ -295,37 +295,37 @@ struct SampleFormatTraits;
 template <>
 struct SampleFormatTraits<uint8>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Unsigned8; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Unsigned8; }
 };
 template <>
 struct SampleFormatTraits<int8>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Int8; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Int8; }
 };
 template <>
 struct SampleFormatTraits<int16>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Int16; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Int16; }
 };
 template <>
 struct SampleFormatTraits<int24>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Int24; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Int24; }
 };
 template <>
 struct SampleFormatTraits<int32>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Int32; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Int32; }
 };
 template <>
 struct SampleFormatTraits<float>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Float32; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Float32; }
 };
 template <>
 struct SampleFormatTraits<double>
 {
-	static MPT_CONSTEXPRINLINE SampleFormat sampleFormat() { return SampleFormat::Float64; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static SampleFormat sampleFormat() { return SampleFormat::Float64; }
 };
 
 template <SampleFormat::Enum sampleFormat>

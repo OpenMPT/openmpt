@@ -44,7 +44,7 @@ inline namespace MPT_INLINE_NS {
 // causing an ICE with LTCG turned on.
 // We try to work-around this problem by placing signal fences as an optimization barrier around the (presumably) confused operation.
 template <typename Tdst, typename Tsrc>
-MPT_FORCEINLINE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::is_trivially_copyable<Tsrc>::value && std::is_trivially_copyable<Tdst>::value, Tdst>::type bit_cast(const Tsrc & src) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::is_trivially_copyable<Tsrc>::value && std::is_trivially_copyable<Tdst>::value, Tdst>::type bit_cast(const Tsrc & src) noexcept {
 	Tdst dst{};
 	std::atomic_signal_fence(std::memory_order_seq_cst);
 	std::memcpy(&dst, &src, sizeof(Tdst));
@@ -57,7 +57,7 @@ using std::bit_cast;
 // C++2a compatible bit_cast.
 // Not implementing constexpr because this is not easily possible pre C++20.
 template <typename Tdst, typename Tsrc>
-MPT_FORCEINLINE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::is_trivially_copyable<Tsrc>::value && std::is_trivially_copyable<Tdst>::value, Tdst>::type bit_cast(const Tsrc & src) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE typename std::enable_if<(sizeof(Tdst) == sizeof(Tsrc)) && std::is_trivially_copyable<Tsrc>::value && std::is_trivially_copyable<Tdst>::value, Tdst>::type bit_cast(const Tsrc & src) noexcept {
 	Tdst dst{};
 	std::memcpy(&dst, &src, sizeof(Tdst));
 	return dst;
@@ -117,7 +117,7 @@ enum class endian {
 
 static_assert(mpt::endian::big != mpt::endian::little, "platform with all scalar types having size 1 is not supported");
 
-MPT_FORCEINLINE mpt::endian endian_probe() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE mpt::endian endian_probe() noexcept {
 	using endian_probe_type = uint32;
 	static_assert(sizeof(endian_probe_type) == 4);
 	constexpr endian_probe_type endian_probe_big = 0x12345678u;
@@ -141,7 +141,7 @@ MPT_FORCEINLINE mpt::endian endian_probe() noexcept {
 	return result;
 }
 
-MPT_FORCEINLINE mpt::endian get_endian() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE mpt::endian get_endian() noexcept {
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 6285) // false-positive: (<non-zero constant> || <non-zero constant>) is always a non-zero constant.
@@ -156,15 +156,15 @@ MPT_FORCEINLINE mpt::endian get_endian() noexcept {
 #endif // MPT_COMPILER_MSVC
 }
 
-MPT_FORCEINLINE bool endian_is_little() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool endian_is_little() noexcept {
 	return get_endian() == mpt::endian::little;
 }
 
-MPT_FORCEINLINE bool endian_is_big() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool endian_is_big() noexcept {
 	return get_endian() == mpt::endian::big;
 }
 
-MPT_FORCEINLINE bool endian_is_weird() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool endian_is_weird() noexcept {
 	return !endian_is_little() && !endian_is_big();
 }
 
@@ -418,7 +418,7 @@ constexpr inline uint64 byteswap_impl_constexpr64(uint64 x) noexcept {
 #define MPT_byteswap_impl64(x) byteswap_impl_constexpr64(x)
 #endif
 
-MPT_CONSTEXPR20_FUN uint64 byteswap_impl(uint64 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint64 byteswap_impl(uint64 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
 	} else {
@@ -426,7 +426,7 @@ MPT_CONSTEXPR20_FUN uint64 byteswap_impl(uint64 value) noexcept {
 	}
 }
 
-MPT_CONSTEXPR20_FUN uint32 byteswap_impl(uint32 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint32 byteswap_impl(uint32 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
 	} else {
@@ -434,7 +434,7 @@ MPT_CONSTEXPR20_FUN uint32 byteswap_impl(uint32 value) noexcept {
 	}
 }
 
-MPT_CONSTEXPR20_FUN uint16 byteswap_impl(uint16 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN uint16 byteswap_impl(uint16 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
 	} else {
@@ -442,7 +442,7 @@ MPT_CONSTEXPR20_FUN uint16 byteswap_impl(uint16 value) noexcept {
 	}
 }
 
-MPT_CONSTEXPR20_FUN int64 byteswap_impl(int64 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int64 byteswap_impl(int64 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr64(value);
 	} else {
@@ -450,7 +450,7 @@ MPT_CONSTEXPR20_FUN int64 byteswap_impl(int64 value) noexcept {
 	}
 }
 
-MPT_CONSTEXPR20_FUN int32 byteswap_impl(int32 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int32 byteswap_impl(int32 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr32(value);
 	} else {
@@ -458,7 +458,7 @@ MPT_CONSTEXPR20_FUN int32 byteswap_impl(int32 value) noexcept {
 	}
 }
 
-MPT_CONSTEXPR20_FUN int16 byteswap_impl(int16 value) noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int16 byteswap_impl(int16 value) noexcept {
 	MPT_MAYBE_CONSTANT_IF (MPT_IS_CONSTANT_EVALUATED20()) {
 		return byteswap_impl_constexpr16(value);
 	} else {

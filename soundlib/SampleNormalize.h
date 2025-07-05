@@ -31,9 +31,9 @@ struct Normalize<int32>
 	using output_t = int32;
 	using peak_t = uint32;
 	uint32 maxVal;
-	MPT_FORCEINLINE Normalize()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Normalize()
 		: maxVal(0) {}
-	MPT_FORCEINLINE void FindMax(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void FindMax(input_t val)
 	{
 		if(val < 0)
 		{
@@ -49,15 +49,15 @@ struct Normalize<int32>
 			maxVal = static_cast<uint32>(val);
 		}
 	}
-	MPT_FORCEINLINE bool IsSilent() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool IsSilent() const
 	{
 		return maxVal == 0;
 	}
-	MPT_FORCEINLINE output_t operator()(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
 	{
 		return Util::muldivrfloor(val, static_cast<uint32>(1) << 31, maxVal);
 	}
-	MPT_FORCEINLINE peak_t GetSrcPeak() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -71,9 +71,9 @@ struct Normalize<somefloat32>
 	using peak_t = somefloat32;
 	float maxVal;
 	float maxValInv;
-	MPT_FORCEINLINE Normalize()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Normalize()
 		: maxVal(0.0f), maxValInv(1.0f) {}
-	MPT_FORCEINLINE void FindMax(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void FindMax(input_t val)
 	{
 		float absval = std::fabs(val);
 		if(absval > maxVal)
@@ -81,7 +81,7 @@ struct Normalize<somefloat32>
 			maxVal = absval;
 		}
 	}
-	MPT_FORCEINLINE bool IsSilent()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool IsSilent()
 	{
 		if(maxVal == 0.0f)
 		{
@@ -93,11 +93,11 @@ struct Normalize<somefloat32>
 			return false;
 		}
 	}
-	MPT_FORCEINLINE output_t operator()(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
 	{
 		return val * maxValInv;
 	}
-	MPT_FORCEINLINE peak_t GetSrcPeak() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -111,9 +111,9 @@ struct Normalize<somefloat64>
 	using peak_t = somefloat64;
 	double maxVal;
 	double maxValInv;
-	MPT_FORCEINLINE Normalize()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Normalize()
 		: maxVal(0.0), maxValInv(1.0) {}
-	MPT_FORCEINLINE void FindMax(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void FindMax(input_t val)
 	{
 		double absval = std::fabs(val);
 		if(absval > maxVal)
@@ -121,7 +121,7 @@ struct Normalize<somefloat64>
 			maxVal = absval;
 		}
 	}
-	MPT_FORCEINLINE bool IsSilent()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool IsSilent()
 	{
 		if(maxVal == 0.0)
 		{
@@ -133,11 +133,11 @@ struct Normalize<somefloat64>
 			return false;
 		}
 	}
-	MPT_FORCEINLINE output_t operator()(input_t val)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
 	{
 		return val * maxValInv;
 	}
-	MPT_FORCEINLINE peak_t GetSrcPeak() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE peak_t GetSrcPeak() const
 	{
 		return maxVal;
 	}
@@ -159,23 +159,23 @@ struct NormalizationChain
 	Func1 func1;
 	Normalize<normalize_t> normalize;
 	Func2 func2;
-	MPT_FORCEINLINE void FindMax(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void FindMax(const input_t *inBuf)
 	{
 		normalize.FindMax(func1(inBuf));
 	}
-	MPT_FORCEINLINE bool IsSilent()
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool IsSilent()
 	{
 		return normalize.IsSilent();
 	}
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return func2(normalize(func1(inBuf)));
 	}
-	MPT_FORCEINLINE peak_t GetSrcPeak() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE peak_t GetSrcPeak() const
 	{
 		return normalize.GetSrcPeak();
 	}
-	MPT_FORCEINLINE NormalizationChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE NormalizationChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
 		, func2(f2)
 	{

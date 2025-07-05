@@ -28,12 +28,12 @@ public:
 
 public:
 	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleInt process(MixSampleInt sample, Trng &)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleInt process(MixSampleInt sample, Trng &)
 	{
 		return sample;
 	}
 	template <uint32 targetbits, typename Trng>
-	MPT_FORCEINLINE MixSampleFloat process(MixSampleFloat sample, Trng &)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE MixSampleFloat process(MixSampleFloat sample, Trng &)
 	{
 		return sample;
 	}

@@ -49,7 +49,7 @@ struct DecodeInt8
 	using input_t = std::byte;
 	using output_t = int8;
 	static constexpr std::size_t input_inc = 1;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return mpt::byte_cast<int8>(*inBuf);
 	}
@@ -60,7 +60,7 @@ struct DecodeUint8
 	using input_t = std::byte;
 	using output_t = int8;
 	static constexpr std::size_t input_inc = 1;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return static_cast<int8>(static_cast<int>(mpt::byte_cast<uint8>(*inBuf)) - 128);
 	}
@@ -76,7 +76,7 @@ struct DecodeInt8Delta
 		: delta(0)
 	{
 	}
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		delta += mpt::byte_cast<uint8>(*inBuf);
 		return static_cast<int8>(delta);
@@ -125,7 +125,7 @@ struct DecodeInt16uLaw
 		    56,    48,    40,    32,    24,    16,     8,     0
 	};
 	// clang-format on
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return uLawTable[mpt::byte_cast<uint8>(*inBuf)];
 	}
@@ -173,7 +173,7 @@ struct DecodeInt16ALaw
 		   944,   912,  1008,   976,   816,   784,   880,   848
 	};
 	// clang-format on
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return ALawTable[mpt::byte_cast<uint8>(*inBuf)];
 	}
@@ -185,7 +185,7 @@ struct DecodeInt16
 	using input_t = std::byte;
 	using output_t = int16;
 	static constexpr std::size_t input_inc = 2;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return static_cast<int16>((mpt::byte_cast<uint8>(inBuf[loByteIndex]) | (mpt::byte_cast<uint8>(inBuf[hiByteIndex]) << 8)) - offset);
 	}
@@ -202,7 +202,7 @@ struct DecodeInt16Delta
 		: delta(0)
 	{
 	}
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		delta += static_cast<uint16>(static_cast<uint16>(mpt::byte_cast<uint8>(inBuf[loByteIndex])) | static_cast<uint16>(mpt::byte_cast<uint8>(inBuf[hiByteIndex]) << 8));
 		return static_cast<int16>(delta);
@@ -219,7 +219,7 @@ struct DecodeInt16Delta8
 		: delta(0)
 	{
 	}
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		delta += mpt::byte_cast<uint8>(inBuf[0]);
 		int16 result = delta & 0xFF;
@@ -235,7 +235,7 @@ struct DecodeInt24
 	using input_t = std::byte;
 	using output_t = int32;
 	static constexpr std::size_t input_inc = 3;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		const uint32 tmp = (uint32(0)
 							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[loByteIndex])) << 8)
@@ -252,7 +252,7 @@ struct DecodeInt32
 	using input_t = std::byte;
 	using output_t = int32;
 	static constexpr std::size_t input_inc = 4;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		const uint32 tmp = (uint32(0)
 							| (static_cast<uint32>(mpt::byte_cast<uint8>(inBuf[loLoByteIndex])) << 0)
@@ -270,7 +270,7 @@ struct DecodeInt64
 	using input_t = std::byte;
 	using output_t = int64;
 	static constexpr std::size_t input_inc = 8;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		const uint64 tmp = (uint64(0)
 							| (static_cast<uint64>(mpt::byte_cast<uint8>(inBuf[b0])) << 0)
@@ -292,7 +292,7 @@ struct DecodeFloat32
 	using input_t = std::byte;
 	using output_t = somefloat32;
 	static constexpr std::size_t input_inc = 4;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		somefloat32 val = IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
 		val = mpt::sanitize_nan(val);
@@ -317,7 +317,7 @@ struct DecodeScaledFloat32
 	using output_t = somefloat32;
 	static constexpr std::size_t input_inc = 4;
 	float factor;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		somefloat32 val = IEEE754binary32LE(inBuf[loLoByteIndex], inBuf[loHiByteIndex], inBuf[hiLoByteIndex], inBuf[hiHiByteIndex]);
 		val = mpt::sanitize_nan(val);
@@ -333,7 +333,7 @@ struct DecodeScaledFloat32
 		}
 		return factor * val;
 	}
-	MPT_FORCEINLINE DecodeScaledFloat32(float scaleFactor)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE DecodeScaledFloat32(float scaleFactor)
 		: factor(scaleFactor)
 	{
 		return;
@@ -346,7 +346,7 @@ struct DecodeFloat64
 	using input_t = std::byte;
 	using output_t = somefloat64;
 	static constexpr std::size_t input_inc = 8;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		somefloat64 val = IEEE754binary64LE(inBuf[b0], inBuf[b1], inBuf[b2], inBuf[b3], inBuf[b4], inBuf[b5], inBuf[b6], inBuf[b7]);
 		val = mpt::sanitize_nan(val);
@@ -370,7 +370,7 @@ struct DecodeIdentity
 	using input_t = Tsample;
 	using output_t = Tsample;
 	static constexpr std::size_t input_inc = 1;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return *inBuf;
 	}
@@ -387,11 +387,11 @@ struct ConversionChain
 	static constexpr std::size_t input_inc = Func1::input_inc;
 	Func1 func1;
 	Func2 func2;
-	MPT_FORCEINLINE output_t operator()(const input_t *inBuf)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
 	{
 		return func2(func1(inBuf));
 	}
-	MPT_FORCEINLINE ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
 		, func2(f2)
 	{

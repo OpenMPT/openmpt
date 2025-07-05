@@ -223,7 +223,7 @@ static mpt::ustring ReadMPG123String(const char (&str)[N])
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wframe-larger-than"
 #endif // MPT_COMPILER_CLANG
-static MPT_NOINLINE int mp3dec_decode_frame_no_inline(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_sample_t *pcm, mp3dec_frame_info_t *info)
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static int mp3dec_decode_frame_no_inline(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_sample_t *pcm, mp3dec_frame_info_t *info)
 {
 	return mp3dec_decode_frame(dec, mp3, mp3_bytes, pcm, info);
 }

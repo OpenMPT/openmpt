@@ -51,20 +51,20 @@ class void_ptr {
 private:
 	T * m_ptr = nullptr;
 public:
-	MPT_FORCEINLINE explicit void_ptr(void * ptr)
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE explicit void_ptr(void * ptr)
 		: m_ptr(reinterpret_cast<T *>(ptr)) {
 		return;
 	}
-	MPT_FORCEINLINE T & operator*() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE T & operator*() {
 		return *m_ptr;
 	}
-	MPT_FORCEINLINE T * operator->() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE T * operator->() {
 		return m_ptr;
 	}
-	MPT_FORCEINLINE operator void *() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE operator void *() {
 		return m_ptr;
 	}
-	MPT_FORCEINLINE operator T *() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE operator T *() {
 		return m_ptr;
 	}
 };

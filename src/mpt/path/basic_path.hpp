@@ -32,19 +32,19 @@ template <typename Tchar>
 struct literals;
 
 template <typename Tchar>
-MPT_CONSTEVAL Tchar L(char x) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL Tchar L(char x) {
 	return path_literals::literals<Tchar>::L(x);
 }
 
 template <typename Tchar, std::size_t N>
-MPT_CONSTEVAL const Tchar * L(const char (&x)[N]) {
+MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL const Tchar * L(const char (&x)[N]) {
 	return path_literals::literals<Tchar>::L(x);
 }
 
 template <>
 struct literals<char> {
 	using char_type = char;
-	static MPT_CONSTEVAL char_type L(char c) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static char_type L(char c) {
 		if (c == '\0')
 			return '\0';
 		if (c == '\\')
@@ -77,7 +77,7 @@ struct literals<char> {
 #endif
 	}
 	template <std::size_t N>
-	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static const char_type * L(const char (&s)[N]) {
 		if (std::string_view(s) == std::string_view(""))
 			return "";
 		if (std::string_view(s) == std::string_view("/"))
@@ -119,7 +119,7 @@ struct literals<char> {
 template <>
 struct literals<wchar_t> {
 	using char_type = wchar_t;
-	static MPT_CONSTEVAL char_type L(char c) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static char_type L(char c) {
 		if (c == '\0')
 			return L'\0';
 		if (c == '\\')
@@ -152,7 +152,7 @@ struct literals<wchar_t> {
 #endif
 	}
 	template <std::size_t N>
-	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static const char_type * L(const char (&s)[N]) {
 		if (std::string_view(s) == std::string_view(""))
 			return L"";
 		if (std::string_view(s) == std::string_view("/"))
@@ -195,7 +195,7 @@ struct literals<wchar_t> {
 template <>
 struct literals<char8_t> {
 	using char_type = char8_t;
-	static MPT_CONSTEVAL char_type L(char c) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static char_type L(char c) {
 		if (c == '\0')
 			return u8'\0';
 		if (c == '\\')
@@ -228,7 +228,7 @@ struct literals<char8_t> {
 #endif
 	}
 	template <std::size_t N>
-	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static const char_type * L(const char (&s)[N]) {
 		if (std::string_view(s) == std::string_view(""))
 			return u8"";
 		if (std::string_view(s) == std::string_view("/"))
@@ -270,7 +270,7 @@ struct literals<char8_t> {
 template <>
 struct literals<char16_t> {
 	using char_type = char16_t;
-	static MPT_CONSTEVAL char_type L(char c) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static char_type L(char c) {
 		if (c == '\0')
 			return u'\0';
 		if (c == '\\')
@@ -303,7 +303,7 @@ struct literals<char16_t> {
 #endif
 	}
 	template <std::size_t N>
-	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static const char_type * L(const char (&s)[N]) {
 		if (std::string_view(s) == std::string_view(""))
 			return u"";
 		if (std::string_view(s) == std::string_view("/"))
@@ -344,7 +344,7 @@ struct literals<char16_t> {
 template <>
 struct literals<char32_t> {
 	using char_type = char32_t;
-	static MPT_CONSTEVAL char_type L(char c) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static char_type L(char c) {
 		if (c == '\0')
 			return U'\0';
 		if (c == '\\')
@@ -377,7 +377,7 @@ struct literals<char32_t> {
 #endif
 	}
 	template <std::size_t N>
-	static MPT_CONSTEVAL const char_type * L(const char (&s)[N]) {
+	MPT_ATTR_ALWAYSINLINE MPT_CONSTEVAL static const char_type * L(const char (&s)[N]) {
 		if (std::string_view(s) == std::string_view(""))
 			return U"";
 		if (std::string_view(s) == std::string_view("/"))

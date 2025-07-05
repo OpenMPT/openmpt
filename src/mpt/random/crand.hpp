@@ -41,13 +41,13 @@ public:
 	}
 
 public:
-	static MPT_CONSTEXPRINLINE result_type min() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type min() {
 		return 0;
 	}
-	static MPT_CONSTEXPRINLINE result_type max() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static result_type max() {
 		return RAND_MAX;
 	}
-	static MPT_CONSTEXPRINLINE int result_bits() {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr static int result_bits() {
 		return mpt::lower_bound_entropy_bits(RAND_MAX);
 	}
 	result_type operator()() {

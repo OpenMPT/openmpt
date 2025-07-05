@@ -97,24 +97,24 @@ protected:
 	}
 
 	template<typename T>
-	MPT_FORCEINLINE T GetData() const { return static_cast<T>(item); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE T GetData() const { return static_cast<T>(item); }
 
 public:
 	UpdateHint() : type(HINT_NONE), category(HINTCAT_GLOBAL), item(0) { }
 
 	template<typename T>
-	MPT_FORCEINLINE UpdateHint &SetData(T i) { item = i; MPT_ASSERT(item == i); return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE UpdateHint &SetData(T i) { item = i; MPT_ASSERT(item == i); return *this; }
 
-	MPT_FORCEINLINE HintCategory GetCategory() const { return static_cast<HintCategory>(category); }
-	MPT_FORCEINLINE FlagSet<HintType> GetType() const { return FlagSet<HintType>(static_cast<FlagSet<HintType>::store_type>(type)); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE HintCategory GetCategory() const { return static_cast<HintCategory>(category); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE FlagSet<HintType> GetType() const { return FlagSet<HintType>(static_cast<FlagSet<HintType>::store_type>(type)); }
 
 	// CModDoc hint tunnelling
-	static MPT_FORCEINLINE UpdateHint FromLPARAM(LPARAM rawData) { UpdateHint hint; hint.rawData = static_cast<store_t>(rawData); return hint; }
-	MPT_FORCEINLINE LPARAM AsLPARAM() const { return rawData; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static UpdateHint FromLPARAM(LPARAM rawData) { UpdateHint hint; hint.rawData = static_cast<store_t>(rawData); return hint; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE LPARAM AsLPARAM() const { return rawData; }
 
 	// Discard any hints that don't belong to class T.
 	template<typename T>
-	MPT_FORCEINLINE T ToType() const
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE T ToType() const
 	{
 		T hint = static_cast<const T &>(*this);
 		if(T::classCategory != static_cast<HintCategory>(category))
@@ -126,9 +126,9 @@ public:
 	}
 
 	// Set global hint flags
-	MPT_FORCEINLINE UpdateHint &ModType() { type |= HINT_MODTYPE; return *this; }
-	MPT_FORCEINLINE UpdateHint &MPTOptions() { type |= HINT_MPTOPTIONS; return *this; }
-	MPT_FORCEINLINE UpdateHint &Undo() { type |= HINT_UNDO; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE UpdateHint &ModType() { type |= HINT_MODTYPE; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE UpdateHint &MPTOptions() { type |= HINT_MPTOPTIONS; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE UpdateHint &Undo() { type |= HINT_UNDO; return *this; }
 };
 
 struct GeneralHint : public UpdateHint
@@ -136,19 +136,19 @@ struct GeneralHint : public UpdateHint
 	static constexpr HintCategory classCategory = HINTCAT_GENERAL;
 	GeneralHint() : UpdateHint(classCategory, 0) { }
 	GeneralHint(CHANNELINDEX channel) : UpdateHint(classCategory, 1 + channel) { }
-	MPT_FORCEINLINE GeneralHint &General() { type |= HINT_MODGENERAL; return *this; }
-	MPT_FORCEINLINE GeneralHint &Channels() { type |= HINT_MODCHANNELS; return *this; }
-	MPT_FORCEINLINE GeneralHint &Tunings() { type |= HINT_TUNINGS; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE GeneralHint &General() { type |= HINT_MODGENERAL; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE GeneralHint &Channels() { type |= HINT_MODCHANNELS; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE GeneralHint &Tunings() { type |= HINT_TUNINGS; return *this; }
 
-	MPT_FORCEINLINE CHANNELINDEX GetChannel() const { return item ? static_cast<CHANNELINDEX>(item - 1) : CHANNELINDEX_INVALID; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE CHANNELINDEX GetChannel() const { return item ? static_cast<CHANNELINDEX>(item - 1) : CHANNELINDEX_INVALID; }
 };
 
 struct PatternHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_PATTERNS;
 	PatternHint(PATTERNINDEX item = 0) : UpdateHint(classCategory, item) { }
-	MPT_FORCEINLINE PatternHint &Data() { type |= HINT_PATTERNDATA; return *this; }
-	MPT_FORCEINLINE PatternHint &Names() { type |= HINT_PATNAMES; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PatternHint &Data() { type |= HINT_PATTERNDATA; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PatternHint &Names() { type |= HINT_PATNAMES; return *this; }
 
 	PATTERNINDEX GetPattern() const { return GetData<PATTERNINDEX>(); }
 };
@@ -158,51 +158,51 @@ struct RowHint : public UpdateHint
 	static constexpr HintCategory classCategory = HINTCAT_PATTERNS;
 	RowHint(ROWINDEX item = 0) : UpdateHint(classCategory, item) { type = HINT_PATTERNROW; }
 
-	MPT_FORCEINLINE ROWINDEX GetRow() const { return GetData<ROWINDEX>(); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ROWINDEX GetRow() const { return GetData<ROWINDEX>(); }
 };
 
 struct SampleHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_SAMPLES;
 	SampleHint(SAMPLEINDEX item = 0) : UpdateHint(classCategory, item) { }
-	MPT_FORCEINLINE SampleHint &Info() { type |= HINT_SAMPLEINFO; return *this; }
-	MPT_FORCEINLINE SampleHint &Data() { type |= HINT_SAMPLEDATA; return *this; }
-	MPT_FORCEINLINE SampleHint &Names() { type |= HINT_SMPNAMES; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SampleHint &Info() { type |= HINT_SAMPLEINFO; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SampleHint &Data() { type |= HINT_SAMPLEDATA; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SampleHint &Names() { type |= HINT_SMPNAMES; return *this; }
 
-	MPT_FORCEINLINE SAMPLEINDEX GetSample() const { return GetData<SAMPLEINDEX>(); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SAMPLEINDEX GetSample() const { return GetData<SAMPLEINDEX>(); }
 };
 
 struct InstrumentHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_INSTRUMENTS;
 	InstrumentHint(INSTRUMENTINDEX item = 0) : UpdateHint(classCategory, item) { }
-	MPT_FORCEINLINE InstrumentHint &Info() { type |= HINT_INSTRUMENT; return *this; }
-	MPT_FORCEINLINE InstrumentHint &Envelope() { type |= HINT_ENVELOPE; return *this; }
-	MPT_FORCEINLINE InstrumentHint &Names() { type |= HINT_INSNAMES; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE InstrumentHint &Info() { type |= HINT_INSTRUMENT; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE InstrumentHint &Envelope() { type |= HINT_ENVELOPE; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE InstrumentHint &Names() { type |= HINT_INSNAMES; return *this; }
 
-	MPT_FORCEINLINE INSTRUMENTINDEX GetInstrument() const { return GetData<INSTRUMENTINDEX>(); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE INSTRUMENTINDEX GetInstrument() const { return GetData<INSTRUMENTINDEX>(); }
 };
 
 struct SequenceHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_SEQUENCE;
 	SequenceHint(SEQUENCEINDEX item = 0) : UpdateHint(classCategory, item) { }
-	MPT_FORCEINLINE SequenceHint &Data() { type |= HINT_MODSEQUENCE; return *this; }
-	MPT_FORCEINLINE SequenceHint &Names() { type |= HINT_SEQNAMES; return *this; }
-	MPT_FORCEINLINE SequenceHint &RestartPos() { type |= HINT_RESTARTPOS; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SequenceHint &Data() { type |= HINT_MODSEQUENCE; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SequenceHint &Names() { type |= HINT_SEQNAMES; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SequenceHint &RestartPos() { type |= HINT_RESTARTPOS; return *this; }
 
-	MPT_FORCEINLINE SEQUENCEINDEX GetSequence() const { return GetData<SEQUENCEINDEX>(); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE SEQUENCEINDEX GetSequence() const { return GetData<SEQUENCEINDEX>(); }
 };
 
 struct PluginHint : public UpdateHint
 {
 	static constexpr HintCategory classCategory = HINTCAT_PLUGINS;
 	PluginHint(PLUGINDEX item = 0) : UpdateHint(classCategory, item) { }
-	MPT_FORCEINLINE PluginHint &Info() { type |= HINT_MIXPLUGINS; return *this; }
-	MPT_FORCEINLINE PluginHint &Names() { type |= HINT_PLUGINNAMES; return *this; }
-	MPT_FORCEINLINE PluginHint &Parameter() { type |= HINT_PLUGINPARAM; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PluginHint &Info() { type |= HINT_MIXPLUGINS; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PluginHint &Names() { type |= HINT_PLUGINNAMES; return *this; }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PluginHint &Parameter() { type |= HINT_PLUGINPARAM; return *this; }
 
-	MPT_FORCEINLINE PLUGINDEX GetPlugin() const { return GetData<PLUGINDEX>(); }
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE PLUGINDEX GetPlugin() const { return GetData<PLUGINDEX>(); }
 };
 
 struct CommentHint : public UpdateHint
