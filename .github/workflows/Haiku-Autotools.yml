@@ -1,0 +1,95 @@
+name: Haiku Autotools
+
+on:
+  push:
+    branches: [ OpenMPT-1.32 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: 'r1beta5' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: true
+    - name: Fixup VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          mv '/home/runner/work' '/boot/home/work'
+          ln -sf '/boot/home/work' '/home/runner/work'
+    - name: Sync files to VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: chown -R $(id -u):$(id -g) $(pwd)
+    - name: Install dependencies
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          pkgman refresh
+          pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
+    - name: Build
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@v0.28.0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: haiku
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
