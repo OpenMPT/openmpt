@@ -58,7 +58,7 @@
 
 
 // for compilers that do not support C++ attribute syntax for noinline
-#if MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20)
+#if MPT_COMPILER_MSVC && (MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20))
 #define MPT_DECL_NOINLINE __declspec(noinline)
 #else
 #define MPT_DECL_NOINLINE
@@ -67,7 +67,7 @@
 
 
 // for compilers that do not support C++ attribute syntax for forced inline
-#if MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20)
+#if MPT_COMPILER_MSVC && (MPT_MSVC_BEFORE(2019, 1) || MPT_CXX_BEFORE(20))
 #define MPT_INLINE_FORCE __forceinline
 #else
 #define MPT_INLINE_FORCE inline
