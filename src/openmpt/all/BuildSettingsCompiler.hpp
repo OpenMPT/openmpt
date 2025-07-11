@@ -28,6 +28,6 @@
 #else
 #pragma GCC optimize("no-ipa-ra")
 #endif
-#endif // MPT_COMPILER_SETTING_QUIRK_GCC_BROKEN_IPA
+#endif  // MPT_COMPILER_SETTING_QUIRK_GCC_BROKEN_IPA
 
-#endif // MPT_COMPILER_GCC
+#endif  // MPT_COMPILER_GCC
