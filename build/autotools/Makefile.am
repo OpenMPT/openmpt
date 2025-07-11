@@ -304,6 +304,7 @@ MPT_FILES_SRC_MPT += src/mpt/uuid/tests/tests_uuid.hpp
 #MPT_FILES_SRC_MPT += src/mpt/uuid_namespace/tests/tests_uuid_namespace.hpp
 MPT_FILES_SRC_OPENMPT = 
 MPT_FILES_SRC_OPENMPT += src/openmpt/all/BuildSettings.hpp
+MPT_FILES_SRC_OPENMPT += src/openmpt/all/BuildSettingsCompiler.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/all/PlatformFixes.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/base/Endian.hpp
 MPT_FILES_SRC_OPENMPT += src/openmpt/base/FlagSet.hpp

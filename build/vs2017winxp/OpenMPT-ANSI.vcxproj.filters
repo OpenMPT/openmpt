@@ -1650,6 +1650,9 @@
     <ClInclude Include="..\..\src\openmpt\all\BuildSettings.hpp">
       <Filter>src\openmpt\all</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\openmpt\all\BuildSettingsCompiler.hpp">
+      <Filter>src\openmpt\all</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\openmpt\all\PlatformFixes.hpp">
       <Filter>src\openmpt\all</Filter>
     </ClInclude>
