@@ -1312,7 +1312,9 @@ std::vector<GetLengthType> CSoundFile::GetLength(enmGetLengthResetMode adjustMod
 							for(uint32 i = 0; i < numTicks; i++)
 							{
 								chn.isFirstTick = (i == 0);
-								VolumeSlide(chn, vol);
+								// IT Compatibility: Volume column volume slides must not propagate their memory to the regular effect column
+								// Test case: VolColNoSlideMemoryPropagation.it
+								VolumeSlide(chn, vol, m_playBehaviour[kITVolColNoSlidePropagation]);
 							}
 						}
 						break;
@@ -3298,7 +3300,9 @@ bool CSoundFile::ProcessEffects()
 					{
 						chn.nOldVolParam = vol;
 					}
-					VolumeSlide(chn, static_cast<ModCommand::PARAM>(volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol));
+					// IT Compatibility: Volume column volume slides must not propagate their memory to the regular effect column
+					// Test case: VolColNoSlideMemoryPropagation.it
+					VolumeSlide(chn, static_cast<ModCommand::PARAM>(volcmd == VOLCMD_VOLSLIDEUP ? (vol << 4) : vol), m_playBehaviour[kITVolColNoSlidePropagation]);
 					break;
 
 				case VOLCMD_FINEVOLUP:
@@ -4835,12 +4839,15 @@ void CSoundFile::VolumeDownETX(const PlayState &playState, ModChannel &chn, ModC
 }
 
 
-void CSoundFile::VolumeSlide(ModChannel &chn, ModCommand::PARAM param) const
+void CSoundFile::VolumeSlide(ModChannel &chn, ModCommand::PARAM param, bool volCol) const
 {
-	if (param)
-		chn.nOldVolumeSlide = param;
-	else
-		param = chn.nOldVolumeSlide;
+	if(!volCol)
+	{
+		if(param)
+			chn.nOldVolumeSlide = param;
+		else
+			param = chn.nOldVolumeSlide;
+	}
 
 	if((GetType() & (MOD_TYPE_MOD | MOD_TYPE_XM | MOD_TYPE_MT2 | MOD_TYPE_MED | MOD_TYPE_DIGI | MOD_TYPE_STP | MOD_TYPE_DTM)))
 	{
@@ -6289,6 +6296,9 @@ void CSoundFile::SetTempo(PlayState &playState, TEMPO param, bool setFromUI) con
 	} else if(param < minTempo && !playState.m_flags[SONG_FIRSTTICK])
 	{
 		// Tempo Slide
+		// Very old MPT versions (last confirmed version: 1.09.066) add/subtract the param only on the first tick.
+		// Newer MPT versions (first confirmed version: 1.09.090), add/subtract the param multiplied by 2 only on the first tick.
+		// In SVN r26, the behaviour was adjusted to match Impulse Tracker. This change is part of OpenMPT 1.17 RC1 but not the MPT Wild pre-beta.
 		TEMPO tempDiff(param.GetInt() & 0x0F, 0);
 		if((param.GetInt() & 0xF0) == 0x10)
 			playState.m_nMusicTempo += tempDiff;
