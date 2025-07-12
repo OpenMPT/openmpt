@@ -3077,6 +3077,8 @@ bool CSoundFile::ProcessEffects()
 			// Instrument Change ?
 			if(instr)
 			{
+				auto [oldChnOfsL, oldChnOfsR] = GetChannelOffsets(chn, nChn);
+
 				const ModSample *oldSample = chn.pModSample;
 				//const ModInstrument *oldInstrument = chn.pModInstrument;
 
@@ -3101,8 +3103,8 @@ bool CSoundFile::ProcessEffects()
 				// When swapping samples without explicit note change (e.g. during portamento), avoid clicks at end of sample (as there won't be an NNA channel to fade the sample out)
 				if(oldSample != nullptr && oldSample != chn.pModSample)
 				{
-					m_dryLOfsVol += chn.nLOfs;
-					m_dryROfsVol += chn.nROfs;
+					*oldChnOfsL += chn.nLOfs;
+					*oldChnOfsR += chn.nROfs;
 					chn.nLOfs = 0;
 					chn.nROfs = 0;
 				}

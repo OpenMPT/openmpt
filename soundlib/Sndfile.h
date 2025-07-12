@@ -989,6 +989,7 @@ public:
 private:
 	void CreateStereoMix(int count);
 	bool MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bool doMix);
+	std::pair<mixsample_t *, mixsample_t *> GetChannelOffsets(const ModChannel &chn, CHANNELINDEX channel);
 public:
 	bool FadeSong(uint32 msec);
 private:
