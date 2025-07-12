@@ -6297,7 +6297,7 @@ void CSoundFile::SetTempo(PlayState &playState, TEMPO param, bool setFromUI) con
 	{
 		// Tempo Slide
 		// Very old MPT versions (last confirmed version: 1.09.066) add/subtract the param only on the first tick.
-		// Newer MPT versions (first confirmed version: 1.09.090), add/subtract the param multiplied by 2 only on the first tick.
+		// Newer MPT versions (first confirmed version: 1.09.082), add/subtract the param multiplied by 2 only on the first tick.
 		// In SVN r26, the behaviour was adjusted to match Impulse Tracker. This change is part of OpenMPT 1.17 RC1 but not the MPT Wild pre-beta.
 		TEMPO tempDiff(param.GetInt() & 0x0F, 0);
 		if((param.GetInt() & 0xF0) == 0x10)

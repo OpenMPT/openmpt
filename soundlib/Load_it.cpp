@@ -508,7 +508,7 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 				m_dwLastSavedWithVersion = MPT_V("1.17.00.00");
 			} else if(fileHeader.cwtv == 0x0214 && fileHeader.cmwt == 0x0202 && fileHeader.reserved == 0)
 			{
-				// ModPlug Tracker b3.2 - 1.09, instruments 557 bytes apart
+				// ModPlug Tracker b3.2 - 1.09 build 66 (possibly up to build 77), instruments 557 bytes apart
 				m_dwLastSavedWithVersion = MPT_V("1.09.00.00");
 				madeWithTracker = UL_("ModPlug Tracker b3.2 - 1.09");
 				interpretModPlugMade = true;
