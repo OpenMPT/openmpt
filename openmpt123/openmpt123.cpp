@@ -2132,7 +2132,11 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 }
 
-static mpt::uint8 main( std::vector<mpt::ustring> args ) {
+static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token token_in, mpt::main::stdout_token token_out, mpt::main::stderr_token token_err ) {
+
+	MPT_UNUSED(token_in);
+	MPT_UNUSED(token_out);
+	MPT_UNUSED(token_err);
 
 	mpt::filemode::stdio_guard stdout_text_guard( mpt::filemode::stdio::output, mpt::filemode::mode::text );
 	mpt::filemode::stdio_guard stderr_text_guard( mpt::filemode::stdio::error, mpt::filemode::mode::text );

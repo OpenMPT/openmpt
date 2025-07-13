@@ -10,6 +10,7 @@
 #include "mpt/base/integer.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
+#include "mpt/main/stdio_tokens.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
@@ -161,8 +162,8 @@ inline std::vector<mpt::ustring> transcode_argv(int argc, Tchar * argv[]) {
 	MPT_MAIN_DECL \
 	MPT_MAIN_DEF_PREFIX int MPT_MAIN_NAME(int argc, MPT_MAIN_ARGV_TYPE * argv[]) { \
 		MPT_MAIN_PROLOG(); \
-		static_assert(std::is_same<decltype(ns::main), mpt::uint8(std::vector<mpt::ustring>)>::value); \
-		return static_cast<int>(ns::main(mpt::main::transcode_argv(argc, argv))); \
+		static_assert(std::is_same<decltype(ns::main), mpt::uint8(std::vector<mpt::ustring>, mpt::main::stdin_token, mpt::main::stdout_token, mpt::main::stderr_token)>::value); \
+		return static_cast<int>(ns::main(mpt::main::transcode_argv(argc, argv), mpt::main::detail::make_stdin_token(), mpt::main::detail::make_stdout_token(), mpt::main::detail::make_stderr_token())); \
 	} \
 	MPT_MAIN_POSTFIX \
 /**/

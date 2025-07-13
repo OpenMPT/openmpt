@@ -1386,6 +1386,7 @@
     <ClInclude Include="..\..\src\mpt\io_read\filereader.hpp" />
     <ClInclude Include="..\..\src\mpt\io_write\buffer.hpp" />
     <ClInclude Include="..\..\src\mpt\main\main.hpp" />
+    <ClInclude Include="..\..\src\mpt\main\stdio_tokens.hpp" />
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\dos_memory.hpp" />

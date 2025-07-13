@@ -936,6 +936,9 @@
     <ClInclude Include="..\..\src\mpt\main\main.hpp">
       <Filter>src\mpt\main</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\main\stdio_tokens.hpp">
+      <Filter>src\mpt\main</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\mutex\mutex.hpp">
       <Filter>src\mpt\mutex</Filter>
     </ClInclude>

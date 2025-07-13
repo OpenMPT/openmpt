@@ -327,6 +327,9 @@
     <ClInclude Include="..\..\src\mpt\main\main.hpp">
       <Filter>src\mpt\main</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\main\stdio_tokens.hpp">
+      <Filter>src\mpt\main</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp">
       <Filter>src\mpt\parse</Filter>
     </ClInclude>

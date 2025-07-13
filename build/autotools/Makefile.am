@@ -246,6 +246,7 @@ MPT_FILES_SRC_MPT += src/mpt/io_write/buffer.hpp
 #MPT_FILES_SRC_MPT += src/mpt/json/json.hpp
 #MPT_FILES_SRC_MPT += src/mpt/library/library.hpp
 MPT_FILES_SRC_MPT += src/mpt/main/main.hpp
+MPT_FILES_SRC_MPT += src/mpt/main/stdio_tokens.hpp
 MPT_FILES_SRC_MPT += src/mpt/mutex/mutex.hpp
 MPT_FILES_SRC_MPT += src/mpt/osinfo/class.hpp
 MPT_FILES_SRC_MPT += src/mpt/osinfo/dos_memory.hpp
