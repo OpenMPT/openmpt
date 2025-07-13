@@ -414,7 +414,7 @@ static concat_stream<mpt::ustring> & operator << ( concat_stream<mpt::ustring> &
 	s << MPT_USTRING("Repeat count: ") << flags.repeatcount << lf;
 	s << MPT_USTRING("Seek target: ") << flags.seek_target << lf;
 	s << MPT_USTRING("End time: ") << flags.end_time << lf;
-	s << MPT_USTRING("Standard output: ") << flags.use_stdout << lf;
+	s << MPT_USTRING("Standard output: ") << flags.stdout_data << lf;
 	s << MPT_USTRING("Output filename: ") << mpt::transcode<mpt::ustring>( flags.output_filename ) << lf;
 	s << MPT_USTRING("Force overwrite output file: ") << flags.force_overwrite << lf;
 	s << MPT_USTRING("Ctls: ") << ctls_to_string( flags.ctls ) << lf;
@@ -684,7 +684,7 @@ static void show_help( textout & log, bool longhelp = false, bool man_version = 
 		log << MPT_USTRING("                            use --device help to show available devices") << lf;
 		log << MPT_USTRING("     --buffer n             Set output buffer size to n ms [default: ") << commandlineflags().buffer << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --period n             Set output period size to n ms [default: ") << commandlineflags().period  << MPT_USTRING("]") << lf;
-		log << MPT_USTRING("     --stdout               Write raw audio data to stdout [default: ") << commandlineflags().use_stdout << MPT_USTRING("]") << lf;
+		log << MPT_USTRING("     --stdout               Write raw audio data to stdout [default: ") << commandlineflags().stdout_data << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --output-type t        Use output format t when writing to a individual PCM files (only applies to --render mode) [default: ") << mpt::transcode<mpt::ustring>( commandlineflags().output_extension ) << MPT_USTRING("]") << lf;
 		log << MPT_USTRING(" -o, --output f             Write PCM output to file f instead of streaming to audio device (only applies to --ui and --batch modes) [default: ") << mpt::transcode<mpt::ustring>( commandlineflags().output_filename ) << MPT_USTRING("]") << lf;
 		log << MPT_USTRING("     --force                Force overwriting of output file [default: ") << commandlineflags().force_overwrite << MPT_USTRING("]") << lf;
@@ -2005,7 +2005,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 				mpt::parse_into( flags.ui_redraw_interval, nextarg );
 				++i;
 			} else if ( arg == MPT_USTRING("--stdout") ) {
-				flags.use_stdout = true;
+				flags.stdout_data = true;
 			} else if ( ( arg == MPT_USTRING("-o") || arg == MPT_USTRING("--output") ) && nextarg != MPT_USTRING("") ) {
 				flags.output_filename = mpt::transcode<mpt::native_path>( nextarg );
 				++i;
@@ -2227,7 +2227,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 	try {
 
 		const mpt::filemode::mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
-		const mpt::filemode::mode stdout_mode = flags.use_stdout ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
+		const mpt::filemode::mode stdout_mode = flags.stdout_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
 
 		const bool stdin_text = ( stdin_mode == mpt::filemode::mode::text );
 		const bool stdin_data = ( stdin_mode == mpt::filemode::mode::binary );
@@ -2291,7 +2291,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 			} break;
 			case Mode::UI:
 			case Mode::Batch: {
-				if ( flags.use_stdout ) {
+				if ( flags.stdout_data ) {
 					flags.apply_default_buffer_sizes();
 					stdout_stream_raii stdout_audio_stream;
 					render_files( flags, log, stdout_audio_stream, prng );
