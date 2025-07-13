@@ -203,6 +203,7 @@ struct commandlineflags {
 	bool show_channel_meters = false;
 	bool show_pattern = false;
 	bool use_float = MPT_OS_DJGPP ? false : mpt::float_traits<float>::is_hard && mpt::float_traits<float>::is_ieee754_binary;
+	bool stdin_data = false;
 	bool stdout_data = false;
 	bool randomize = false;
 	bool shuffle = false;
@@ -249,6 +250,7 @@ struct commandlineflags {
 		if ( filenames.size() == 0 ) {
 			throw args_nofiles_exception();
 		}
+		stdin_data = mpt::contains( filenames, MPT_NATIVE_PATH("-") );
 		if ( stdout_data && ( device != commandlineflags().device || !output_filename.empty() ) ) {
 			throw args_error_exception();
 		}

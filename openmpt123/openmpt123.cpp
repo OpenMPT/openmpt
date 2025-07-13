@@ -2226,7 +2226,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args ) {
 
 	try {
 
-		const mpt::filemode::mode stdin_mode = mpt::contains( flags.filenames, MPT_NATIVE_PATH("-") ) ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
+		const mpt::filemode::mode stdin_mode = flags.stdin_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
 		const mpt::filemode::mode stdout_mode = flags.stdout_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text;
 
 		const bool stdin_text = ( stdin_mode == mpt::filemode::mode::text );
