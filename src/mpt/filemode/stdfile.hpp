@@ -12,13 +12,10 @@
 
 #include <optional>
 
+#include <cstddef>
 #include <cstdio>
 
-#if MPT_OS_DJGPP
 #include <stdio.h>
-#elif MPT_OS_WINDOWS && MPT_LIBC_MS
-#include <stdio.h>
-#endif
 
 
 
@@ -31,65 +28,43 @@ namespace filemode {
 
 
 
-#if MPT_OS_DJGPP
-
+template <mpt::filemode::stdio which>
 class FILE_guard {
 private:
-	std::FILE * file;
-	std::optional<mpt::filemode::fd_guard> guard;
+	std::optional<mpt::filemode::fd_guard<which>> guard;
 public:
-	FILE_guard(std::FILE * file, mpt::filemode::mode new_mode)
-		: file(file) {
-		std::fflush(file);
-		guard = std::make_optional<mpt::filemode::fd_guard>(fileno(file), new_mode);
+	constexpr static std::FILE * get_FILE() {
+		std::FILE * file = NULL;
+		switch (which) {
+			case mpt::filemode::stdio::input:
+				file = stdin;
+				break;
+			case mpt::filemode::stdio::output:
+				file = stdout;
+				break;
+			case mpt::filemode::stdio::error:
+				file = stderr;
+				break;
+			case mpt::filemode::stdio::log:
+				file = stderr;
+				break;
+		}
+		return file;
+	}
+public:
+	FILE_guard(mpt::filemode::mode new_mode) {
+		std::fflush(get_FILE());
+		guard = std::make_optional<mpt::filemode::fd_guard<which>>(new_mode);
 	}
 	FILE_guard(const FILE_guard &) = delete;
 	FILE_guard(FILE_guard &&) = default;
 	FILE_guard & operator=(const FILE_guard &) = delete;
 	FILE_guard & operator=(FILE_guard &&) = default;
 	~FILE_guard() {
-		std::fflush(file);
+		std::fflush(get_FILE());
 		guard = std::nullopt;
 	}
 };
-
-#elif MPT_OS_WINDOWS && MPT_LIBC_MS
-
-class FILE_guard {
-private:
-	std::FILE * file;
-	std::optional<mpt::filemode::fd_guard> guard;
-public:
-	FILE_guard(std::FILE * file, mpt::filemode::mode new_mode)
-		: file(file) {
-		std::fflush(file);
-		guard = std::make_optional<mpt::filemode::fd_guard>(_fileno(file), new_mode);
-	}
-	FILE_guard(const FILE_guard &) = delete;
-	FILE_guard(FILE_guard &&) = default;
-	FILE_guard & operator=(const FILE_guard &) = delete;
-	FILE_guard & operator=(FILE_guard &&) = default;
-	~FILE_guard() {
-		std::fflush(file);
-		guard = std::nullopt;
-	}
-};
-
-#else
-
-class FILE_guard {
-public:
-	FILE_guard(std::FILE * /* file */, mpt::filemode::mode /* new_mode */) {
-		return;
-	}
-	FILE_guard(const FILE_guard &) = delete;
-	FILE_guard(FILE_guard &&) = default;
-	FILE_guard & operator=(const FILE_guard &) = delete;
-	FILE_guard & operator=(FILE_guard &&) = default;
-	~FILE_guard() = default;
-};
-
-#endif
 
 
 

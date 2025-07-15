@@ -19,16 +19,16 @@ namespace filemode {
 
 
 
-enum class stdio : uint8 {
-	input = 0,
-	output = 1,
-	error = 2,
-	log = 3,
+enum class stdio {
+	input,
+	output,
+	error,
+	log,
 };
 
-enum class mode : uint8 {
-	binary = 0,
-	text = 1,
+enum class mode {
+	binary,
+	text,
 };
 
 

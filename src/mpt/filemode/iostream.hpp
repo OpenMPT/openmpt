@@ -9,18 +9,9 @@
 #include "mpt/base/namespace.hpp"
 #include "mpt/filemode/filemode.hpp"
 #include "mpt/filemode/stdfile.hpp"
-#include "mpt/exception/runtime_error.hpp"
-#include "mpt/string/types.hpp"
 
 #include <iostream>
-#include <istream>
 #include <optional>
-#include <ostream>
-
-#include <cstdio>
-#include <cstddef>
-
-#include <stdio.h>
 
 
 
@@ -33,137 +24,56 @@ namespace filemode {
 
 
 
-class istream_guard {
+template <mpt::filemode::stdio which>
+class iostream_guard {
 private:
-	std::optional<mpt::filemode::FILE_guard> guard;
+	std::optional<mpt::filemode::FILE_guard<which>> guard;
 private:
-	static std::FILE * get_FILE(std::istream & stream) {
-		std::FILE * result = NULL;
-		if (&stream == &std::cin) {
-			result = stdin;
-		} else {
-			throw mpt::runtime_error(MPT_USTRING("invalid iostream"));
+	MPT_CONSTEVAL static auto & get_stream() {
+		if constexpr (which == mpt::filemode::stdio::input) {
+#if MPT_OS_WINDOWS && defined(UNICODE)
+			return std::wcin;
+#else
+			return std::cin;
+#endif
 		}
-		return result;
+		if constexpr (which == mpt::filemode::stdio::output) {
+#if MPT_OS_WINDOWS && defined(UNICODE)
+			return std::wcout;
+#else
+			return std::cout;
+#endif
+		}
+		if constexpr (which == mpt::filemode::stdio::error) {
+#if MPT_OS_WINDOWS && defined(UNICODE)
+			return std::wcerr;
+#else
+			return std::cerr;
+#endif
+		}
+		if constexpr (which == mpt::filemode::stdio::log) {
+#if MPT_OS_WINDOWS && defined(UNICODE)
+			return std::wclog;
+#else
+			return std::clog;
+#endif
+		}
 	}
 public:
-	istream_guard(std::istream & stream, mpt::filemode::mode mode) {
-		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
+	iostream_guard(mpt::filemode::mode mode) {
+		guard = std::make_optional<mpt::filemode::FILE_guard<which>>(mode);
 	}
-	istream_guard(const istream_guard &) = delete;
-	istream_guard(istream_guard &&) = default;
-	istream_guard & operator=(const istream_guard &) = delete;
-	istream_guard & operator=(istream_guard &&) = default;
-	~istream_guard() {
+	iostream_guard(const iostream_guard &) = delete;
+	iostream_guard(iostream_guard &&) = default;
+	iostream_guard & operator=(const iostream_guard &) = delete;
+	iostream_guard & operator=(iostream_guard &&) = default;
+	~iostream_guard() {
+		if constexpr (which != mpt::filemode::stdio::input) {
+			get_stream().flush();
+		}
 		guard = std::nullopt;
 	}
 };
-
-
-
-class ostream_guard {
-private:
-	std::ostream * stream;
-	std::optional<mpt::filemode::FILE_guard> guard;
-private:
-	static std::FILE * get_FILE(std::ostream & stream) {
-		std::FILE * result = NULL;
-		if (&stream == &std::cout) {
-			result = stdout;
-		} else if (&stream == &std::cerr) {
-			result = stderr;
-		} else if (&stream == &std::clog) {
-			result = stderr;
-		} else {
-			throw mpt::runtime_error(MPT_USTRING("invalid iostream"));
-		}
-		return result;
-	}
-public:
-	ostream_guard(std::ostream & stream, mpt::filemode::mode mode)
-		: stream(&stream) {
-		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
-	}
-	ostream_guard(const ostream_guard &) = delete;
-	ostream_guard(ostream_guard &&) = default;
-	ostream_guard & operator=(const ostream_guard &) = delete;
-	ostream_guard & operator=(ostream_guard &&) = default;
-	~ostream_guard() {
-		stream->flush();
-		guard = std::nullopt;
-	}
-};
-
-
-
-#if !defined(MPT_COMPILER_QUIRK_NO_WCHAR)
-
-
-
-class wistream_guard {
-private:
-	std::optional<mpt::filemode::FILE_guard> guard;
-private:
-	static std::FILE * get_FILE(std::wistream & stream) {
-		std::FILE * result = NULL;
-		if (&stream == &std::wcin) {
-			result = stdin;
-		} else {
-			throw mpt::runtime_error(MPT_USTRING("invalid iostream"));
-		}
-		return result;
-	}
-public:
-	wistream_guard(std::wistream & stream, mpt::filemode::mode mode) {
-		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
-	}
-	wistream_guard(const wistream_guard &) = delete;
-	wistream_guard(wistream_guard &&) = default;
-	wistream_guard & operator=(const wistream_guard &) = delete;
-	wistream_guard & operator=(wistream_guard &&) = default;
-	~wistream_guard() {
-		guard = std::nullopt;
-	}
-};
-
-
-
-class wostream_guard {
-private:
-	std::wostream * stream;
-	std::optional<mpt::filemode::FILE_guard> guard;
-private:
-	static std::FILE * get_FILE(std::wostream & stream) {
-		std::FILE * result = NULL;
-		if (&stream == &std::wcout) {
-			result = stdout;
-		} else if (&stream == &std::wcerr) {
-			result = stderr;
-		} else if (&stream == &std::wclog) {
-			result = stderr;
-		} else {
-			throw mpt::runtime_error(MPT_USTRING("invalid iostream"));
-		}
-		return result;
-	}
-public:
-	wostream_guard(std::wostream & stream, mpt::filemode::mode mode)
-		: stream(&stream) {
-		guard = std::make_optional<mpt::filemode::FILE_guard>(get_FILE(stream), mode);
-	}
-	wostream_guard(const wostream_guard &) = delete;
-	wostream_guard(wostream_guard &&) = default;
-	wostream_guard & operator=(const wostream_guard &) = delete;
-	wostream_guard & operator=(wostream_guard &&) = default;
-	~wostream_guard() {
-		stream->flush();
-		guard = std::nullopt;
-	}
-};
-
-
-
-#endif // !MPT_COMPILER_QUIRK_NO_WCHAR
 
 
 

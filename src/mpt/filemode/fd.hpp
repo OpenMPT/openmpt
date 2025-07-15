@@ -32,23 +32,39 @@ namespace filemode {
 
 #if MPT_OS_DJGPP
 
+template <mpt::filemode::stdio which>
 class fd_guard {
 private:
-	int fd;
 	int old_mode;
 public:
-	fd_guard(int fd, mpt::filemode::mode new_mode)
-		: fd(fd)
-		, old_mode(-1) {
+	constexpr static int get_fd() {
+		switch (which) {
+			case mpt::filemode::stdio::input:
+				return STDIN_FILENO;
+				break;
+			case mpt::filemode::stdio::output:
+				return STDOUT_FILENO;
+				break;
+			case mpt::filemode::stdio::error:
+				return STDERR_FILENO;
+				break;
+			case mpt::filemode::stdio::log:
+				return STDERR_FILENO;
+				break;
+		}
+	}
+public:
+	fd_guard(mpt::filemode::mode new_mode)
+		: old_mode(-1) {
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
-				old_mode = setmode(fd, O_TEXT);
+				old_mode = setmode(get_fd(), O_TEXT);
 				if (old_mode == -1) {
 					throw mpt::runtime_error(MPT_USTRING("failed to set TEXT mode on file descriptor"));
 				}
 				break;
 			case mpt::filemode::mode::binary:
-				old_mode = setmode(fd, O_BINARY);
+				old_mode = setmode(get_fd(), O_BINARY);
 				if (old_mode == -1) {
 					throw mpt::runtime_error(MPT_USTRING("failed to set BINARY mode on file descriptor"));
 				}
@@ -61,34 +77,52 @@ public:
 	fd_guard & operator=(fd_guard &&) = default;
 	~fd_guard() {
 		if (old_mode != -1) {
-			old_mode = setmode(fd, old_mode);
+			old_mode = setmode(get_fd(), old_mode);
 		}
 	}
 };
 
 #elif MPT_OS_WINDOWS && MPT_LIBC_MS
 
+template <mpt::filemode::stdio which>
 class fd_guard {
 private:
-	int fd;
 	int old_mode;
 public:
-	fd_guard(int fd, mpt::filemode::mode new_mode)
-		: fd(fd)
-		, old_mode(-1) {
+	static int get_fd() {
+		int fd = -1;
+		switch (which) {
+			case mpt::filemode::stdio::input:
+				fd = _fileno(stdin);
+				break;
+			case mpt::filemode::stdio::output:
+				fd = _fileno(stdout);
+				break;
+			case mpt::filemode::stdio::error:
+				fd = _fileno(stderr);
+				break;
+			case mpt::filemode::stdio::log:
+				fd = _fileno(stderr);
+				break;
+		}
+		return fd;
+	}
+public:
+	fd_guard(mpt::filemode::mode new_mode)
+		: old_mode(-1) {
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
 #if defined(UNICODE) && MPT_LIBC_MS_AT_LEAST(MPT_LIBC_MS_VER_UCRT)
-				old_mode = _setmode(fd, _O_U8TEXT);
+				old_mode = _setmode(get_fd(), _O_U8TEXT);
 #else
-				old_mode = _setmode(fd, _O_TEXT);
+				old_mode = _setmode(get_fd(), _O_TEXT);
 #endif
 				if (old_mode == -1) {
 					throw mpt::runtime_error(MPT_USTRING("failed to set TEXT mode on file descriptor"));
 				}
 				break;
 			case mpt::filemode::mode::binary:
-				old_mode = _setmode(fd, _O_BINARY);
+				old_mode = _setmode(get_fd(), _O_BINARY);
 				if (old_mode == -1) {
 					throw mpt::runtime_error(MPT_USTRING("failed to set BINARY mode on file descriptor"));
 				}
@@ -101,16 +135,34 @@ public:
 	fd_guard & operator=(fd_guard &&) = default;
 	~fd_guard() {
 		if (old_mode != -1) {
-			old_mode = _setmode(fd, old_mode);
+			old_mode = _setmode(get_fd(), old_mode);
 		}
 	}
 };
 
 #else
 
+template <mpt::filemode::stdio which>
 class fd_guard {
 public:
-	fd_guard(int * /* fd */, mpt::filemode::mode /* new_mode */) {
+	constexpr static int get_fd() {
+		switch (which) {
+			case mpt::filemode::stdio::input:
+				return 0;
+				break;
+			case mpt::filemode::stdio::output:
+				return 1;
+				break;
+			case mpt::filemode::stdio::error:
+				return 2;
+				break;
+			case mpt::filemode::stdio::log:
+				return 2;
+				break;
+		}
+	}
+public:
+	fd_guard(mpt::filemode::mode /* new_mode */) {
 		return;
 	}
 	fd_guard(const fd_guard &) = delete;
