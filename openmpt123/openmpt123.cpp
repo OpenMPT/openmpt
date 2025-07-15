@@ -2138,9 +2138,9 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 	MPT_UNUSED(token_out);
 	MPT_UNUSED(token_err);
 
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::mode::text );
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::mode::text );
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::mode::text );
+	mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+	mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+	mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 
 	textout_wrapper<textout_destination::destination_stdout> std_out;
 	textout_wrapper<textout_destination::destination_stderr> std_err;
@@ -2239,11 +2239,11 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		const bool stdout_data = ( stdout_mode == mpt::filemode::mode::binary );
 
 		// set stdin/stdout to binary for data input/output
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_guard{ stdin_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( mpt::filemode::mode::binary ) : std::nullopt };
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>> stdout_guard{ stdout_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>>( mpt::filemode::mode::binary ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_guard{ stdin_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( mpt::filemode::api::iostream, mpt::filemode::mode::binary ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>> stdout_guard{ stdout_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>>( mpt::filemode::api::iostream, mpt::filemode::mode::binary ) : std::nullopt };
 
 		// setup terminal input
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_text_guard{ stdin_text ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( mpt::filemode::mode::text ) : std::nullopt };
+		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_text_guard{ stdin_text ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( ( flags.mode == Mode::UI ) ? mpt::filemode::api::fd : mpt::filemode::api::none, mpt::filemode::mode::text ) : std::nullopt };
 		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ stdin_text && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
 
 		// untie stdin and stdout
