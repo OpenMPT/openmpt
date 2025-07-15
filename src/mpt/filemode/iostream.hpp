@@ -29,7 +29,7 @@ class iostream_guard {
 private:
 	std::optional<mpt::filemode::FILE_guard<which>> guard;
 private:
-	MPT_CONSTEVAL static auto & get_stream() {
+	static auto & get_stream() {
 		if constexpr (which == mpt::filemode::stdio::input) {
 #if MPT_OS_WINDOWS && defined(UNICODE)
 			return std::wcin;
