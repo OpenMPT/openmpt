@@ -2135,7 +2135,7 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token token_in, mpt::main::stdout_token token_out, mpt::main::stderr_token token_err ) {
 
-#if 1
+#if 0
 	MPT_UNUSED( token_in );
 	MPT_UNUSED( token_out );
 	MPT_UNUSED( token_err );
@@ -2146,7 +2146,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		parse_openmpt123( flags, args );
 		flags.check_and_sanitize();
 	} catch ( ... ) {
-#if 1
+#if 0
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
@@ -2242,7 +2242,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		}
 	}
 
-#if 1
+#if 0
 
 	// set stdin/stdout to binary for data input/output
 	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::input> stdin_guard( ( !flags.stdin_data && ( flags.mode == Mode::UI ) ) ? mpt::filemode::api::fd : mpt::filemode::api::iostream, flags.stdin_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text );
