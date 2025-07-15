@@ -2208,11 +2208,11 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 			realtime_audio_stream::show_devices( devices, std_err );
 			show_help( std_out, false, false, devices.str() );
 			return 0;
-	} catch ( mpt::out_of_memory e ) {
-		std_err << MPT_USTRING("not enough memory") << lf;
-		std_err.writeout();
-		mpt::delete_out_of_memory( e );
-		return 1;
+		} catch ( mpt::out_of_memory e ) {
+			std_err << MPT_USTRING("not enough memory") << lf;
+			std_err.writeout();
+			mpt::delete_out_of_memory( e );
+			return 1;
 		} catch ( exception & e ) {
 			std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 			std_err.writeout();
