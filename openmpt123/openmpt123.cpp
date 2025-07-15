@@ -2135,133 +2135,136 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token token_in, mpt::main::stdout_token token_out, mpt::main::stderr_token token_err ) {
 
-	MPT_UNUSED(token_in);
-	MPT_UNUSED(token_out);
-	MPT_UNUSED(token_err);
-
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
-	mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
-
-	textout_wrapper<textout_destination::destination_stdout> std_out;
-	textout_wrapper<textout_destination::destination_stderr> std_err;
-	textout_wrapper<textout_destination::destination_stdlog> std_log;
+	MPT_UNUSED( token_in );
+	MPT_UNUSED( token_out );
+	MPT_UNUSED( token_err );
 
 	commandlineflags flags;
-
 	try {
-
 		parse_openmpt123( flags, args );
-
 		flags.check_and_sanitize();
-
-	} catch ( args_nofiles_exception & ) {
-		show_banner( std_out, flags.banner );
-		show_help( std_out );
-		std_out.writeout();
-		return 0;
-	} catch ( args_error_exception & ) {
-		show_banner( std_out, flags.banner );
-		show_help( std_out );
-		std_out.writeout();
-		if ( args.size() > 1 ) {
-			std_err << MPT_USTRING("Error parsing command line.") << lf;
-			std_err.writeout();
-		}
-		return 1;
-	} catch ( show_man_help_exception & ) {
-		show_banner( std_out, flags.banner );
-		show_help( std_out, true, true );
-		return 0;
-	} catch ( show_man_version_exception & ) {
-		show_man_version( std_out );
-		return 0;
-	} catch ( show_help_exception & e ) {
-		show_banner( std_out, flags.banner );
-		show_help( std_out, e.longhelp, false );
-		if ( flags.verbose ) {
-			show_credits( std_out, verbosity_hidden );
-		}
-		return 0;
-	} catch ( show_help_keyboard_exception & ) {
-		show_banner( std_out, flags.banner );
-		show_help_keyboard( std_out );
-		return 0;
-	} catch ( show_long_version_number_exception & ) {
-		show_long_version( std_out );
-		return 0;
-	} catch ( show_version_number_exception & ) {
-		show_version( std_out );
-		return 0;
-	} catch ( show_short_version_number_exception & ) {
-		show_short_version( std_out );
-		return 0;
-	} catch ( show_credits_exception & ) {
-		show_credits( std_out, flags.banner );
-		return 0;
-	} catch ( show_license_exception & ) {
-		show_license( std_out, flags.banner );
-		return 0;
-	} catch ( show_drivers_exception & ) {
-		show_banner( std_out, flags.banner );
-		string_concat_stream<mpt::ustring> drivers;
-		realtime_audio_stream::show_drivers( drivers );
-		show_help( std_out, false, false, drivers.str() );
-		return 0;
-	} catch ( show_devices_exception & ) {
-		show_banner( std_out, flags.banner );
-		string_concat_stream<mpt::ustring> devices;
-		realtime_audio_stream::show_devices( devices, std_err );
-		show_help( std_out, false, false, devices.str() );
-		return 0;
+	} catch ( ... ) {
+		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+		textout_wrapper<textout_destination::destination_stdout> std_out;
+		textout_wrapper<textout_destination::destination_stderr> std_err;
+		try {
+			throw;
+		} catch ( args_nofiles_exception & ) {
+			show_banner( std_out, flags.banner );
+			show_help( std_out );
+			std_out.writeout();
+			return 0;
+		} catch ( args_error_exception & ) {
+			show_banner( std_out, flags.banner );
+			show_help( std_out );
+			std_out.writeout();
+			if ( args.size() > 1 ) {
+				std_err << MPT_USTRING("Error parsing command line.") << lf;
+				std_err.writeout();
+			}
+			return 1;
+		} catch ( show_man_help_exception & ) {
+			show_banner( std_out, flags.banner );
+			show_help( std_out, true, true );
+			return 0;
+		} catch ( show_man_version_exception & ) {
+			show_man_version( std_out );
+			return 0;
+		} catch ( show_help_exception & e ) {
+			show_banner( std_out, flags.banner );
+			show_help( std_out, e.longhelp, false );
+			if ( flags.verbose ) {
+				show_credits( std_out, verbosity_hidden );
+			}
+			return 0;
+		} catch ( show_help_keyboard_exception & ) {
+			show_banner( std_out, flags.banner );
+			show_help_keyboard( std_out );
+			return 0;
+		} catch ( show_long_version_number_exception & ) {
+			show_long_version( std_out );
+			return 0;
+		} catch ( show_version_number_exception & ) {
+			show_version( std_out );
+			return 0;
+		} catch ( show_short_version_number_exception & ) {
+			show_short_version( std_out );
+			return 0;
+		} catch ( show_credits_exception & ) {
+			show_credits( std_out, flags.banner );
+			return 0;
+		} catch ( show_license_exception & ) {
+			show_license( std_out, flags.banner );
+			return 0;
+		} catch ( show_drivers_exception & ) {
+			show_banner( std_out, flags.banner );
+			string_concat_stream<mpt::ustring> drivers;
+			realtime_audio_stream::show_drivers( drivers );
+			show_help( std_out, false, false, drivers.str() );
+			return 0;
+		} catch ( show_devices_exception & ) {
+			show_banner( std_out, flags.banner );
+			string_concat_stream<mpt::ustring> devices;
+			realtime_audio_stream::show_devices( devices, std_err );
+			show_help( std_out, false, false, devices.str() );
+			return 0;
 	} catch ( mpt::out_of_memory e ) {
 		std_err << MPT_USTRING("not enough memory") << lf;
 		std_err.writeout();
 		mpt::delete_out_of_memory( e );
 		return 1;
-	} catch ( exception & e ) {
-		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-	} catch ( std::exception & e ) {
-		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
-		return 1;
-	} catch ( ... ) {
-		std_err << MPT_USTRING("unknown error") << lf;
-		std_err.writeout();
-		return 1;
+		} catch ( exception & e ) {
+			std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+			std_err.writeout();
+			return 1;
+		} catch ( std::exception & e ) {
+			std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+			std_err.writeout();
+			return 1;
+		} catch ( ... ) {
+			std_err << MPT_USTRING("unknown error") << lf;
+			std_err.writeout();
+			return 1;
+		}
 	}
 
+	// set stdin/stdout to binary for data input/output
+	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::input> stdin_guard( ( !flags.stdin_data && ( flags.mode == Mode::UI ) ) ? mpt::filemode::api::fd : mpt::filemode::api::iostream, flags.stdin_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text );
+	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_guard( mpt::filemode::api::iostream, flags.stdout_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text );
+	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
+
+	// setup terminal input
+	[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ ( !flags.stdin_data && ( flags.mode == Mode::UI ) ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
+
+	// untie stdin and stdout
+	if ( flags.stdin_data || flags.stdout_data ) {
+		std::cin.tie( nullptr );
+		#if MPT_OS_WINDOWS && defined(UNICODE)
+			std::wcin.tie( nullptr );
+		#endif
+	}
+
+	// untie stderr and stdout
+	if ( flags.stdout_data ) {
+		std::cerr.tie( nullptr );
+		#if MPT_OS_WINDOWS && defined(UNICODE)
+			std::wcerr.tie( nullptr );
+		#endif
+	}
+
+	textout_wrapper<textout_destination::destination_stdout> std_out;
+	textout_wrapper<textout_destination::destination_stderr> std_err;
+	textout_wrapper<textout_destination::destination_stdlog> std_log;
+
+	// choose text output between quiet/stdout/stderr
+	textout_dummy dummy_log;
+	textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_out );
+	textout & log_err = flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_err );
+
 	try {
-
-		// set stdin/stdout to binary for data input/output
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_guard{ flags.stdin_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( mpt::filemode::api::iostream, mpt::filemode::mode::binary ) : std::nullopt };
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>> stdout_guard{ flags.stdout_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::output>>( mpt::filemode::api::iostream, mpt::filemode::mode::binary ) : std::nullopt };
-
-		// setup terminal input
-		[[maybe_unused]] std::optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>> stdin_text_guard{ !flags.stdin_data ? std::make_optional<mpt::filemode::stdio_guard<mpt::filemode::stdio::input>>( ( flags.mode == Mode::UI ) ? mpt::filemode::api::fd : mpt::filemode::api::none, mpt::filemode::mode::text ) : std::nullopt };
-		[[maybe_unused]] std::optional<terminal_ui_guard> input_guard{ !flags.stdin_data && ( flags.mode == Mode::UI ) ? std::make_optional<terminal_ui_guard>() : std::nullopt };
-
-		// untie stdin and stdout
-		if ( flags.stdin_data || flags.stdout_data ) {
-			std::cin.tie( nullptr );
-			#if MPT_OS_WINDOWS && defined(UNICODE)
-				std::wcin.tie( nullptr );
-			#endif
-		}
-
-		// untie stderr and stdout
-		if ( flags.stdout_data ) {
-			std::cerr.tie( nullptr );
-			#if MPT_OS_WINDOWS && defined(UNICODE)
-				std::wcerr.tie( nullptr );
-			#endif
-		}
-
-		// choose text output between quiet/stdout/stderr
-		textout_dummy dummy_log;
-		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_out );
 
 		show_banner( log, flags.banner );
 
@@ -2317,24 +2320,29 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 			break;
 		}
 
-	} catch ( silent_exit_exception & ) {
-		return 0;
+	} catch ( args_error_exception & ) {
+		show_banner( log, flags.banner );
+		show_help( log );
+		log.writeout();
+		log_err << MPT_USTRING("Error parsing command line.") << lf;
+		log_err.writeout();
+		return 1;
 	} catch ( mpt::out_of_memory e ) {
-		std_err << MPT_USTRING("not enough memory") << lf;
-		std_err.writeout();
+		log_err << MPT_USTRING("not enough memory") << lf;
+		log_err.writeout();
 		mpt::delete_out_of_memory( e );
 		return 1;
 	} catch ( exception & e ) {
-		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
+		log_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+		log_err.writeout();
 		return 1;
 	} catch ( std::exception & e ) {
-		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
-		std_err.writeout();
+		log_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
+		log_err.writeout();
 		return 1;
 	} catch ( ... ) {
-		std_err << MPT_USTRING("unknown error") << lf;
-		std_err.writeout();
+		log_err << MPT_USTRING("unknown error") << lf;
+		log_err.writeout();
 		return 1;
 	}
 
