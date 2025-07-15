@@ -69,6 +69,7 @@ static const char * const license =
 #include "mpt/filemode/filemode.hpp"
 #include "mpt/filemode/stdio.hpp"
 #include "mpt/main/main.hpp"
+#include "mpt/out_of_memory/out_of_memory.hpp"
 #include "mpt/random/crand.hpp"
 #include "mpt/random/default_engines.hpp"
 #include "mpt/random/device.hpp"
@@ -2212,8 +2213,11 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		realtime_audio_stream::show_devices( devices, std_err );
 		show_help( std_out, false, false, devices.str() );
 		return 0;
-	} catch ( silent_exit_exception & ) {
-		return 0;
+	} catch ( mpt::out_of_memory e ) {
+		std_err << MPT_USTRING("not enough memory") << lf;
+		std_err.writeout();
+		mpt::delete_out_of_memory( e );
+		return 1;
 	} catch ( exception & e ) {
 		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();
@@ -2320,14 +2324,13 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 			break;
 		}
 
-	} catch ( args_error_exception & ) {
-		show_banner( std_out, flags.banner );
-		show_help( std_out );
-		std_err << MPT_USTRING("Error parsing command line.") << lf;
-		std_err.writeout();
-		return 1;
 	} catch ( silent_exit_exception & ) {
 		return 0;
+	} catch ( mpt::out_of_memory e ) {
+		std_err << MPT_USTRING("not enough memory") << lf;
+		std_err.writeout();
+		mpt::delete_out_of_memory( e );
+		return 1;
 	} catch ( exception & e ) {
 		std_err << MPT_USTRING("error: ") << mpt::get_exception_text<mpt::ustring>( e ) << lf;
 		std_err.writeout();

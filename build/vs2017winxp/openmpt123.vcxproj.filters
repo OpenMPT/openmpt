@@ -40,6 +40,9 @@
     <Filter Include="src\mpt\main">
       <UniqueIdentifier>{C1DDD503-AD40-65A8-56C6-9D5E4208312B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\out_of_memory">
+      <UniqueIdentifier>{208F8479-8CFB-3F74-55EF-D7D1C11A62DC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\parse">
       <UniqueIdentifier>{B706C87E-23C7-43B5-EC01-8D3258818891}</UniqueIdentifier>
     </Filter>
@@ -329,6 +332,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\main\stdio_tokens.hpp">
       <Filter>src\mpt\main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp">
+      <Filter>src\mpt\out_of_memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp">
       <Filter>src\mpt\parse</Filter>
