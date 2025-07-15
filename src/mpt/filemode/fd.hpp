@@ -14,6 +14,7 @@
 #if MPT_OS_DJGPP
 #include <fcntl.h>
 #include <io.h>
+#include <unistd.h>
 #elif MPT_OS_WINDOWS && MPT_LIBC_MS
 #include <fcntl.h>
 #include <io.h>
