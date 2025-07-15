@@ -60,7 +60,7 @@ private:
 		}
 	}
 public:
-	iostream_guard(mpt::filemode::mode mode) {
+	explicit iostream_guard(mpt::filemode::mode mode) {
 		guard = std::make_optional<mpt::filemode::FILE_guard<which>>(mode);
 	}
 	iostream_guard(const iostream_guard &) = delete;

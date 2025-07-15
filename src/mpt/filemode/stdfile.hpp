@@ -52,7 +52,7 @@ public:
 		return file;
 	}
 public:
-	FILE_guard(mpt::filemode::mode new_mode) {
+	explicit FILE_guard(mpt::filemode::mode new_mode) {
 		std::fflush(get_FILE());
 		guard = std::make_optional<mpt::filemode::fd_guard<which>>(new_mode);
 	}

@@ -28,7 +28,7 @@ class stdio_guard {
 private:
 	std::optional<mpt::filemode::iostream_guard<which>> guard;
 public:
-	stdio_guard(mpt::filemode::mode mode) {
+	explicit stdio_guard(mpt::filemode::mode mode) {
 		guard = std::make_optional<mpt::filemode::iostream_guard<which>>(mode);
 	}
 	stdio_guard(const stdio_guard &) = delete;

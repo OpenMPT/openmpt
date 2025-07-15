@@ -55,7 +55,7 @@ public:
 		}
 	}
 public:
-	fd_guard(mpt::filemode::mode new_mode)
+	explicit fd_guard(mpt::filemode::mode new_mode)
 		: old_mode(-1) {
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
@@ -109,7 +109,7 @@ public:
 		return fd;
 	}
 public:
-	fd_guard(mpt::filemode::mode new_mode)
+	explicit fd_guard(mpt::filemode::mode new_mode)
 		: old_mode(-1) {
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
@@ -163,7 +163,7 @@ public:
 		}
 	}
 public:
-	fd_guard(mpt::filemode::mode /* new_mode */) {
+	explicit fd_guard(mpt::filemode::mode /* new_mode */) {
 		return;
 	}
 	fd_guard(const fd_guard &) = delete;
