@@ -2135,20 +2135,32 @@ static void parse_openmpt123( commandlineflags & flags, const std::vector<mpt::u
 
 static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token token_in, mpt::main::stdout_token token_out, mpt::main::stderr_token token_err ) {
 
+#if 1
 	MPT_UNUSED( token_in );
 	MPT_UNUSED( token_out );
 	MPT_UNUSED( token_err );
+#endif
 
 	commandlineflags flags;
 	try {
 		parse_openmpt123( flags, args );
 		flags.check_and_sanitize();
 	} catch ( ... ) {
+#if 1
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::error> stderr_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 		[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::log> stdlog_text_guard( mpt::filemode::api::iostream, mpt::filemode::mode::text );
 		textout_wrapper<textout_destination::destination_stdout> std_out;
 		textout_wrapper<textout_destination::destination_stderr> std_err;
+#else
+		stdio_manager stdio{
+			std::move( token_in ), stdio_manager::api::unused, stdio_manager::stdin_mode::unused,
+			std::move( token_out ), stdio_manager::api::stdiostream, stdio_manager::stdout_mode::text,
+			std::move( token_err ), stdio_manager::api::stdiostream, stdio_manager::stderr_mode::text
+		};
+		textout & std_out = stdio.output_text();
+		textout & std_err = stdio.error_text();
+#endif
 		try {
 			throw;
 		} catch ( args_nofiles_exception & ) {
@@ -2230,6 +2242,8 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		}
 	}
 
+#if 1
+
 	// set stdin/stdout to binary for data input/output
 	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::input> stdin_guard( ( !flags.stdin_data && ( flags.mode == Mode::UI ) ) ? mpt::filemode::api::fd : mpt::filemode::api::iostream, flags.stdin_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text );
 	[[maybe_unused]] mpt::filemode::stdio_guard<mpt::filemode::stdio::output> stdout_guard( mpt::filemode::api::iostream, flags.stdout_data ? mpt::filemode::mode::binary : mpt::filemode::mode::text );
@@ -2263,6 +2277,20 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 	textout_dummy dummy_log;
 	textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_out );
 	textout & log_err = flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_err );
+
+#else
+
+	stdio_manager stdio{
+		std::move( token_in ),
+			flags.stdin_data ? stdio_manager::api::stdiostream : ( flags.mode == Mode::UI ) ? stdio_manager::api::crt : stdio_manager::api::unused,
+			flags.stdin_data ? stdio_manager::stdin_mode::binary : ( flags.mode == Mode::UI ) ? stdio_manager::stdin_mode::terminal : stdio_manager::stdin_mode::unused,
+		std::move( token_out ), stdio_manager::api::stdiostream, flags.stdout_data ? stdio_manager::stdout_mode::binary : stdio_manager::stdout_mode::text,
+		std::move( token_err ), stdio_manager::api::stdiostream, stdio_manager::stderr_mode::text
+	};
+	textout & log = flags.quiet ? stdio.silent_text() : stdio.output_text();
+	textout & log_err = stdio.error_text();
+
+#endif
 
 	try {
 
