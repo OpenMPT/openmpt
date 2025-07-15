@@ -296,6 +296,7 @@ inline mpt::ustring transliterate_control_codes_multiline( mpt::ustring str, tra
 enum class textout_destination {
 	destination_stdout,
 	destination_stderr,
+	destination_stdlog,
 };
 
 
@@ -481,18 +482,18 @@ class textout_wrapper : public textout {
 private:
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 #if defined(UNICODE)
-	textout_ostream_console out{ dest == textout_destination::destination_stdout ? std::wcout : std::wclog, dest == textout_destination::destination_stdout ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::wcout : ( dest == textout_destination::destination_stderr ) ? std::wcerr : std::wclog, ( dest == textout_destination::destination_stdout ) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
 #else
-	textout_ostream_console out{ dest == textout_destination::destination_stdout ? std::cout : std::clog, dest == textout_destination::destination_stdout ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::cout : ( dest == textout_destination::destination_stderr ) ? std::cerr : std::clog, ( dest == textout_destination::destination_stdout ) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
 #endif
 #elif MPT_OS_WINDOWS
 #if defined(UNICODE)
-	textout_wostream out{ dest == textout_destination::destination_stdout ? std::wcout : std::wclog };
+	textout_wostream out{ ( dest == textout_destination::destination_stdout ) ? std::wcout : ( dest == textout_destination::destination_stderr ) ? std::wcerr : std::wclog };
 #else
-	textout_ostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+	textout_ostream out{ ( dest == textout_destination::destination_stdout ) ? std::cout : ( dest == textout_destination::destination_stderr ) ? std::cerr : std::clog };
 #endif
 #else
-	textout_ostream out{ dest == textout_destination::destination_stdout ? std::cout : std::clog };
+	textout_ostream out{ ( dest == textout_destination::destination_stdout ) ? std::cout : ( dest == textout_destination::destination_stderr ) ? std::cerr : std::clog };
 #endif
 public:
 	textout_wrapper() = default;
@@ -622,12 +623,13 @@ public:
 	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
 	~terminal_ui_guard() {
 		if ( changed ) {
-			tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
+			tcsetattr( STDIN_FILENO, TCSANOW, &saved_attributes );
 		}
 	}
 };
 
 #endif
+
 
 
 class terminal_input {
@@ -669,6 +671,7 @@ public:
 #endif
 	}
 };
+
 
 
 } // namespace openmpt123

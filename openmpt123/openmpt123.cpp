@@ -2145,6 +2145,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 
 	textout_wrapper<textout_destination::destination_stdout> std_out;
 	textout_wrapper<textout_destination::destination_stderr> std_err;
+	textout_wrapper<textout_destination::destination_stdlog> std_log;
 
 	commandlineflags flags;
 
@@ -2260,7 +2261,7 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 
 		// choose text output between quiet/stdout/stderr
 		textout_dummy dummy_log;
-		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : !flags.stdout_data ? static_cast<textout&>( std_out ) : static_cast<textout&>( std_err );
+		textout & log = flags.quiet ? static_cast<textout&>( dummy_log ) : flags.stdout_data ? static_cast<textout&>( std_log ) : static_cast<textout&>( std_out );
 
 		show_banner( log, flags.banner );
 
