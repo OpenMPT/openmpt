@@ -138,7 +138,7 @@ inline int get_fd( stdio_fd e ) {
 	return fd;
 }
 
-#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 inline std::optional<HANDLE> get_HANDLE( stdio_fd e ) {
 	std::optional<HANDLE> handle;
 	switch ( e ) {
