@@ -33,6 +33,7 @@
 #include <dpmi.h>
 #include <fcntl.h>
 #include <io.h>
+#include <pc.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <termios.h>
@@ -571,10 +572,10 @@ inline void query_terminal_size( int & terminal_width, int & terminal_height ) {
 #endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 #if MPT_OS_DJGPP
 		if ( terminal_width <= 0 ) {
-			terminal_width = 80;
+			terminal_width = ScreenCols();
 		}
 		if ( terminal_height <= 0 ) {
-			terminal_height = 25;
+			terminal_height = ScreenRows();
 		}
 #else
 		if ( terminal_width <= 0 ) {
