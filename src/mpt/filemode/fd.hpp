@@ -73,9 +73,9 @@ public:
 		}
 	}
 	fd_guard(const fd_guard &) = delete;
-	fd_guard(fd_guard &&) = default;
+	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
-	fd_guard & operator=(fd_guard &&) = default;
+	fd_guard & operator=(fd_guard &&) = delete;
 	~fd_guard() {
 		if (old_mode != -1) {
 			old_mode = setmode(get_fd(), old_mode);
@@ -131,9 +131,9 @@ public:
 		}
 	}
 	fd_guard(const fd_guard &) = delete;
-	fd_guard(fd_guard &&) = default;
+	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
-	fd_guard & operator=(fd_guard &&) = default;
+	fd_guard & operator=(fd_guard &&) = delete;
 	~fd_guard() {
 		if (old_mode != -1) {
 			old_mode = _setmode(get_fd(), old_mode);
@@ -167,9 +167,9 @@ public:
 		return;
 	}
 	fd_guard(const fd_guard &) = delete;
-	fd_guard(fd_guard &&) = default;
+	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
-	fd_guard & operator=(fd_guard &&) = default;
+	fd_guard & operator=(fd_guard &&) = delete;
 	~fd_guard() = default;
 };
 

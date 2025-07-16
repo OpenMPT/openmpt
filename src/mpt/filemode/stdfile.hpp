@@ -54,15 +54,15 @@ public:
 public:
 	explicit FILE_guard(mpt::filemode::mode new_mode) {
 		std::fflush(get_FILE());
-		guard = std::make_optional<mpt::filemode::fd_guard<which>>(new_mode);
+		guard.emplace(new_mode);
 	}
 	FILE_guard(const FILE_guard &) = delete;
-	FILE_guard(FILE_guard &&) = default;
+	FILE_guard(FILE_guard &&) = delete;
 	FILE_guard & operator=(const FILE_guard &) = delete;
-	FILE_guard & operator=(FILE_guard &&) = default;
+	FILE_guard & operator=(FILE_guard &&) = delete;
 	~FILE_guard() {
 		std::fflush(get_FILE());
-		guard = std::nullopt;
+		guard.reset();
 	}
 };
 

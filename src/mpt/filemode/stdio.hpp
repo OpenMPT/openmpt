@@ -40,13 +40,13 @@ public:
 	explicit stdio_guard(mpt::filemode::api api, mpt::filemode::mode mode) {
 		switch (api) {
 			case mpt::filemode::api::iostream:
-				guard = mpt::filemode::iostream_guard<which>(mode);
+				guard.template emplace<mpt::filemode::iostream_guard<which>>(mode);
 				break;
 			case mpt::filemode::api::file:
-				guard = mpt::filemode::FILE_guard<which>(mode);
+				guard.template emplace<mpt::filemode::FILE_guard<which>>(mode);
 				break;
 			case mpt::filemode::api::fd:
-				guard = mpt::filemode::fd_guard<which>(mode);
+				guard.template emplace<mpt::filemode::fd_guard<which>>(mode);
 				break;
 			case mpt::filemode::api::none:
 				// nothing;
@@ -54,11 +54,11 @@ public:
 		}
 	}
 	stdio_guard(const stdio_guard &) = delete;
-	stdio_guard(stdio_guard &&) = default;
+	stdio_guard(stdio_guard &&) = delete;
 	stdio_guard & operator=(const stdio_guard &) = delete;
-	stdio_guard & operator=(stdio_guard &&) = default;
+	stdio_guard & operator=(stdio_guard &&) = delete;
 	~stdio_guard() {
-		guard = std::monostate{};
+		guard.template emplace<std::monostate>();
 	}
 };
 

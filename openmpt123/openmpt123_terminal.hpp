@@ -628,9 +628,9 @@ class terminal_ui_guard {
 public:
 	terminal_ui_guard() = default;
 	terminal_ui_guard( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard( terminal_ui_guard && ) = default;
+	terminal_ui_guard( terminal_ui_guard && ) = delete;
 	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
+	terminal_ui_guard & operator=( terminal_ui_guard && ) = delete;
 	~terminal_ui_guard() = default;
 };
 
@@ -639,7 +639,7 @@ public:
 class terminal_ui_guard {
 private:
 	bool changed = false;
-	termios saved_attributes;
+	termios saved_attributes{};
 public:
 	terminal_ui_guard() {
 		if ( !isatty( STDIN_FILENO ) ) {
@@ -654,9 +654,9 @@ public:
 		changed = true;
 	}
 	terminal_ui_guard( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard( terminal_ui_guard && ) = default;
+	terminal_ui_guard( terminal_ui_guard && ) = delete;
 	terminal_ui_guard & operator=( const terminal_ui_guard & ) = delete;
-	terminal_ui_guard & operator=( terminal_ui_guard && ) = default;
+	terminal_ui_guard & operator=( terminal_ui_guard && ) = delete;
 	~terminal_ui_guard() {
 		if ( changed ) {
 			tcsetattr( STDIN_FILENO, TCSANOW, &saved_attributes );
@@ -792,13 +792,13 @@ public:
 				// nothing
 				break;
 			case stdin_mode::text:
-				stdin_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::input>{ get_filemode_api( in_api ), mpt::filemode::mode::text };
+				stdin_guard.emplace( get_filemode_api( in_api ), mpt::filemode::mode::text );
 				break;
 			case stdin_mode::binary:
-				stdin_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::input>{ get_filemode_api( in_api ), mpt::filemode::mode::binary };
+				stdin_guard.emplace( get_filemode_api( in_api ), mpt::filemode::mode::binary );
 				break;
 			case stdin_mode::terminal:
-				stdin_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::input>{ get_filemode_api( in_api ), mpt::filemode::mode::text };
+				stdin_guard.emplace( get_filemode_api( in_api ), mpt::filemode::mode::text );
 				break;
 		}
 		switch ( out_mode ) {
@@ -806,10 +806,10 @@ public:
 				// nothing
 				break;
 			case stdout_mode::text:
-				stdout_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::output>{ get_filemode_api( out_api ), mpt::filemode::mode::text };
+				stdout_guard.emplace( get_filemode_api( out_api ), mpt::filemode::mode::text );
 				break;
 			case stdout_mode::binary:
-				stdout_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::output>{ get_filemode_api( out_api ), mpt::filemode::mode::binary };
+				stdout_guard.emplace( get_filemode_api( out_api ), mpt::filemode::mode::binary );
 				break;
 		}
 		switch ( err_mode ) {
@@ -817,12 +817,12 @@ public:
 				// nothing
 				break;
 			case stderr_mode::text:
-				stderr_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::error>{ get_filemode_api( err_api ), mpt::filemode::mode::text };
-				stdlog_guard = mpt::filemode::stdio_guard<mpt::filemode::stdio::log>{ get_filemode_api( err_api ), mpt::filemode::mode::text };
+				stderr_guard.emplace( get_filemode_api( err_api ), mpt::filemode::mode::text );
+				stdlog_guard.emplace( get_filemode_api( err_api ), mpt::filemode::mode::text );
 				break;
 		}
 		if ( in_mode == stdin_mode::terminal ) {
-			stdin_terminal_guard = std::make_optional<terminal_ui_guard>();
+			stdin_terminal_guard.emplace();
 		}
 		if ( out_mode == stdout_mode::text ) {
 			std_out = std::make_unique<textout_wrapper<textout_destination::destination_stdout>>();

@@ -63,17 +63,17 @@ private:
 	}
 public:
 	explicit iostream_guard(mpt::filemode::mode mode) {
-		guard = std::make_optional<mpt::filemode::FILE_guard<which>>(mode);
+		guard.emplace(mode);
 	}
 	iostream_guard(const iostream_guard &) = delete;
-	iostream_guard(iostream_guard &&) = default;
+	iostream_guard(iostream_guard &&) = delete;
 	iostream_guard & operator=(const iostream_guard &) = delete;
-	iostream_guard & operator=(iostream_guard &&) = default;
+	iostream_guard & operator=(iostream_guard &&) = delete;
 	~iostream_guard() {
 		if constexpr (which != mpt::filemode::stdio::input) {
 			get_stream().flush();
 		}
-		guard = std::nullopt;
+		guard.reset();
 	}
 };
 
