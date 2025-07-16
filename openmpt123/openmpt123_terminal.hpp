@@ -102,43 +102,78 @@ public:
 };
 
 
+enum class stdio_fd {
+	in,
+	out,
+	err,
+};
+
+namespace detail {
+
+inline int get_fd( stdio_fd e ) {
+	int fd = -1;
+	switch ( e ) {
+		case stdio_fd::in:
 #if MPT_OS_WINDOWS
-inline std::optional<DWORD> StdHandleFromFd( int fd ) {
-	std::optional<DWORD> stdHandle;
-	if ( fd == _fileno( stdin ) ) {
-		stdHandle = STD_INPUT_HANDLE;
-	} else if ( fd == _fileno( stdout ) ) {
-		stdHandle = STD_OUTPUT_HANDLE;
-	} else if ( fd == _fileno( stderr ) ) {
-		stdHandle = STD_ERROR_HANDLE;
+			fd = _fileno( stdin );
+#else
+			fd = STDIN_FILENO;
+#endif
+			break;
+		case stdio_fd::out:
+#if MPT_OS_WINDOWS
+			fd = _fileno( stdout );
+#else
+			fd = STDOUT_FILENO;
+#endif
+			break;
+		case stdio_fd::err:
+#if MPT_OS_WINDOWS
+			fd = _fileno( stderr );
+#else
+			fd = STDERR_FILENO;
+#endif
+			break;
 	}
-	return stdHandle;
+	return fd;
+}
+
+#if MPT_OS_WINDOWS
+inline std::optional<HANDLE> get_HANDLE( stdio_fd e ) {
+	std::optional<HANDLE> handle;
+	switch ( e ) {
+		case stdio_fd::in:
+			handle = GetStdHandle( STD_INPUT_HANDLE );
+			break;
+		case stdio_fd::out:
+			handle = GetStdHandle( STD_OUTPUT_HANDLE );
+			break;
+		case stdio_fd::err:
+			handle = GetStdHandle( STD_ERROR_HANDLE );
+			break;
+	}
+	if ( ( handle.value() == NULL ) || ( handle.value() == INVALID_HANDLE_VALUE ) ) {
+		handle = std::nullopt;
+	}
+	return handle;
 }
 #endif
 
+} // namespace detail
+
+inline bool is_terminal( stdio_fd e ) {
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-inline bool IsConsole( DWORD stdHandle ) {
-	HANDLE hStd = GetStdHandle( stdHandle );
-	if ( ( hStd == NULL ) || ( hStd == INVALID_HANDLE_VALUE ) ) {
+	if ( !_isatty( detail::get_fd( e ) ) ) {
+		return false;
+	}
+	std::optional<HANDLE> handle = detail::get_HANDLE( e );
+	if ( !handle ) {
 		return false;
 	}
 	DWORD mode = 0;
-	return GetConsoleMode( hStd, &mode ) != FALSE;
-}
-#endif // MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-
-inline bool IsTerminal( int fd ) {
-#if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
-	if ( !_isatty( fd ) ) {
-		return false;
-	}
-	std::optional<DWORD> stdHandle = StdHandleFromFd( fd );
-	if ( !stdHandle ) {
-		return false;
-	}
-	return IsConsole( *stdHandle );
+	return ( GetConsoleMode( handle.value(), &mode ) != FALSE );
 #else
-	return isatty( fd ) ? true : false;
+	return isatty( detail::get_fd( e ) ) ? true : false;
 #endif
 }
 
@@ -415,13 +450,13 @@ private:
 #endif
 public:
 #if defined(UNICODE)
-	textout_ostream_console( std::wostream & s_, DWORD stdHandle_ )
+	textout_ostream_console( std::wostream & s_, stdio_fd e )
 #else
-	textout_ostream_console( std::ostream & s_, DWORD stdHandle_ )
+	textout_ostream_console( std::ostream & s_, stdio_fd e )
 #endif
 		: s(s_)
-		, handle(GetStdHandle( stdHandle_ ))
-		, console(IsConsole( stdHandle_ ))
+		, handle( detail::get_HANDLE( e ).value_or( static_cast<HANDLE>( NULL ) ) )
+		, console( is_terminal( e ) )
 	{
 		s.flush();
 #if MPT_WIN_AT_LEAST(MPT_WIN_10_1809)
@@ -484,9 +519,9 @@ class textout_wrapper : public textout {
 private:
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 #if defined(UNICODE)
-	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::wcout : ( dest == textout_destination::destination_stderr ) ? std::wcerr : std::wclog, ( dest == textout_destination::destination_stdout ) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::wcout : ( dest == textout_destination::destination_stderr ) ? std::wcerr : std::wclog, ( dest == textout_destination::destination_stdout ) ? stdio_fd::out : stdio_fd::err };
 #else
-	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::cout : ( dest == textout_destination::destination_stderr ) ? std::cerr : std::clog, ( dest == textout_destination::destination_stdout ) ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE };
+	textout_ostream_console out{ ( dest == textout_destination::destination_stdout ) ? std::cout : ( dest == textout_destination::destination_stderr ) ? std::cerr : std::clog, ( dest == textout_destination::destination_stdout ) ? stdio_fd::out : stdio_fd::err };
 #endif
 #elif MPT_OS_WINDOWS
 #if defined(UNICODE)
@@ -646,7 +681,7 @@ public:
 		pollfd pollfds;
 		pollfds.fd = STDIN_FILENO;
 		pollfds.events = POLLIN;
-		poll(&pollfds, 1, 0);
+		poll( &pollfds, 1, 0 );
 		if ( !( pollfds.revents & POLLIN ) ) {
 			return false;
 		}

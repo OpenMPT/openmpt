@@ -238,13 +238,8 @@ struct commandlineflags {
 		bool canUI = true;
 		bool canProgress = true;
 		if ( !assume_terminal ) {
-#if MPT_OS_WINDOWS
-			canUI = IsTerminal( 0 ) ? true : false;
-			canProgress = IsTerminal( 2 ) ? true : false;
-#else // !MPT_OS_WINDOWS
-			canUI = isatty( STDIN_FILENO ) ? true : false;
-			canProgress = isatty( STDERR_FILENO ) ? true : false;
-#endif // MPT_OS_WINDOWS
+			canUI = is_terminal( stdio_fd::in ) ? true : false;
+			canProgress = is_terminal( stdio_fd::err ) ? true : false;
 		}
 		query_terminal_size( terminal_width, terminal_height );
 		if ( filenames.size() == 0 ) {
