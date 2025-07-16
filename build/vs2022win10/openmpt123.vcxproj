@@ -1612,6 +1612,13 @@
     <ClInclude Include="..\..\src\mpt\string\utility.hpp" />
     <ClInclude Include="..\..\src\mpt\string_transcode\macros.hpp" />
     <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\base.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\input.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\is_terminal.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\output.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\size.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\stdio_manager.hpp" />
+    <ClInclude Include="..\..\src\mpt\terminal\transliterate.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\openmpt123\openmpt123.cpp" />

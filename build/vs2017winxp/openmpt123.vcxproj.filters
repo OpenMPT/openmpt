@@ -58,6 +58,9 @@
     <Filter Include="src\mpt\string_transcode">
       <UniqueIdentifier>{F5FA629F-E11F-B21F-0A6B-97AFF6EEB03D}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\terminal">
+      <UniqueIdentifier>{3865FE51-245E-1DA4-4D90-022939E8FCAF}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\openmpt123\openmpt123.hpp">
@@ -395,6 +398,27 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\string_transcode\transcode.hpp">
       <Filter>src\mpt\string_transcode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\base.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\input.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\is_terminal.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\output.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\size.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\stdio_manager.hpp">
+      <Filter>src\mpt\terminal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\terminal\transliterate.hpp">
+      <Filter>src\mpt\terminal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

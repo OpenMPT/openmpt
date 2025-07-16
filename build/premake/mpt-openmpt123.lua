@@ -46,6 +46,8 @@
    "../../src/mpt/random/*.hpp",
    "../../src/mpt/string/*.hpp",
    "../../src/mpt/string_transcode/*.hpp",
+   "../../src/mpt/terminal/**.cpp",
+   "../../src/mpt/terminal/**.hpp",
    "../../openmpt123/*.cpp",
    "../../openmpt123/*.hpp",
   }

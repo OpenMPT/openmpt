@@ -1104,8 +1104,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 
 		if ( flags.mode == Mode::UI ) {
 
-			while ( terminal_input::is_input_available() ) {
-				auto c = terminal_input::read_input_char();
+			while ( mpt::terminal::input::is_input_available() ) {
+				auto c = mpt::terminal::input::read_input_char();
 				if ( !c ) {
 					break;
 				}
@@ -2140,10 +2140,10 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		parse_openmpt123( flags, args );
 		flags.check_and_sanitize();
 	} catch ( ... ) {
-		stdio_manager stdio{
-			std::move( token_in ), stdio_manager::api::unused, stdio_manager::stdin_mode::unused,
-			std::move( token_out ), stdio_manager::api::stdiostream, stdio_manager::stdout_mode::text,
-			std::move( token_err ), stdio_manager::api::stdiostream, stdio_manager::stderr_mode::text
+		mpt::terminal::stdio_manager stdio{
+			std::move( token_in ), mpt::terminal::stdio_manager::api::unused, mpt::terminal::stdio_manager::stdin_mode::unused,
+			std::move( token_out ), mpt::terminal::stdio_manager::api::stdiostream, mpt::terminal::stdio_manager::stdout_mode::text,
+			std::move( token_err ), mpt::terminal::stdio_manager::api::stdiostream, mpt::terminal::stdio_manager::stderr_mode::text
 		};
 		textout & std_out = stdio.output_text();
 		textout & std_err = stdio.error_text();
@@ -2228,12 +2228,12 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 		}
 	}
 
-	stdio_manager stdio{
+	mpt::terminal::stdio_manager stdio{
 		std::move( token_in ),
-			flags.stdin_data ? stdio_manager::api::stdiostream : ( flags.mode == Mode::UI ) ? stdio_manager::api::crt : stdio_manager::api::unused,
-			flags.stdin_data ? stdio_manager::stdin_mode::binary : ( flags.mode == Mode::UI ) ? stdio_manager::stdin_mode::terminal : stdio_manager::stdin_mode::unused,
-		std::move( token_out ), stdio_manager::api::stdiostream, flags.stdout_data ? stdio_manager::stdout_mode::binary : stdio_manager::stdout_mode::text,
-		std::move( token_err ), stdio_manager::api::stdiostream, stdio_manager::stderr_mode::text
+			flags.stdin_data ? mpt::terminal::stdio_manager::api::stdiostream : ( flags.mode == Mode::UI ) ? mpt::terminal::stdio_manager::api::crt : mpt::terminal::stdio_manager::api::unused,
+			flags.stdin_data ? mpt::terminal::stdio_manager::stdin_mode::binary : ( flags.mode == Mode::UI ) ? mpt::terminal::stdio_manager::stdin_mode::terminal : mpt::terminal::stdio_manager::stdin_mode::unused,
+		std::move( token_out ), mpt::terminal::stdio_manager::api::stdiostream, flags.stdout_data ? mpt::terminal::stdio_manager::stdout_mode::binary : mpt::terminal::stdio_manager::stdout_mode::text,
+		std::move( token_err ), mpt::terminal::stdio_manager::api::stdiostream, mpt::terminal::stdio_manager::stderr_mode::text
 	};
 	textout & log = flags.quiet ? stdio.silent_text() : stdio.output_text();
 	textout & log_err = stdio.error_text();

@@ -39,6 +39,8 @@
 		"../../src/mpt/filemode/**.hpp",
 		"../../src/mpt/main/**.cpp",
 		"../../src/mpt/main/**.hpp",
+		"../../src/mpt/terminal/**.cpp",
+		"../../src/mpt/terminal/**.hpp",
 		"../../src/openmpt/fileformat_base/**.cpp",
 		"../../src/openmpt/fileformat_base/**.hpp",
 		"../../src/openmpt/soundfile_data/**.cpp",
