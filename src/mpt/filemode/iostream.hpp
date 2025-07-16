@@ -6,6 +6,9 @@
 
 
 #include "mpt/base/detect.hpp"
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+#include "mpt/base/macros.hpp"
+#endif
 #include "mpt/base/namespace.hpp"
 #include "mpt/filemode/filemode.hpp"
 #include "mpt/filemode/stdfile.hpp"
@@ -62,6 +65,10 @@ private:
 		}
 	}
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit iostream_guard(mpt::filemode::mode mode) {
 		guard.emplace(mode);
 	}
@@ -69,6 +76,10 @@ public:
 	iostream_guard(iostream_guard &&) = delete;
 	iostream_guard & operator=(const iostream_guard &) = delete;
 	iostream_guard & operator=(iostream_guard &&) = delete;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	~iostream_guard() {
 		if constexpr (which != mpt::filemode::stdio::input) {
 			get_stream().flush();

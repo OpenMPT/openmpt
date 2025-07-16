@@ -6,6 +6,9 @@
 
 
 #include "mpt/base/detect.hpp"
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+#include "mpt/base/macros.hpp"
+#endif
 #include "mpt/base/namespace.hpp"
 #include "mpt/exception/runtime_error.hpp"
 #include "mpt/filemode/filemode.hpp"
@@ -55,6 +58,10 @@ public:
 		}
 	}
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit fd_guard(mpt::filemode::mode new_mode)
 		: old_mode(-1) {
 		switch (new_mode) {
@@ -76,6 +83,10 @@ public:
 	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
 	fd_guard & operator=(fd_guard &&) = delete;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	~fd_guard() {
 		if (old_mode != -1) {
 			old_mode = setmode(get_fd(), old_mode);
@@ -109,6 +120,10 @@ public:
 		return fd;
 	}
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit fd_guard(mpt::filemode::mode new_mode)
 		: old_mode(-1) {
 		switch (new_mode) {
@@ -134,6 +149,10 @@ public:
 	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
 	fd_guard & operator=(fd_guard &&) = delete;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	~fd_guard() {
 		if (old_mode != -1) {
 			old_mode = _setmode(get_fd(), old_mode);
@@ -163,6 +182,10 @@ public:
 		}
 	}
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit fd_guard(mpt::filemode::mode /* new_mode */) {
 		return;
 	}
@@ -170,7 +193,13 @@ public:
 	fd_guard(fd_guard &&) = delete;
 	fd_guard & operator=(const fd_guard &) = delete;
 	fd_guard & operator=(fd_guard &&) = delete;
-	~fd_guard() = default;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
+	~fd_guard() {
+		return;
+	}
 };
 
 #endif

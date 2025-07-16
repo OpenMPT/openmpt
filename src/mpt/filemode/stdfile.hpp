@@ -6,6 +6,9 @@
 
 
 #include "mpt/base/detect.hpp"
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+#include "mpt/base/macros.hpp"
+#endif
 #include "mpt/base/namespace.hpp"
 #include "mpt/filemode/fd.hpp"
 #include "mpt/filemode/filemode.hpp"
@@ -52,6 +55,10 @@ public:
 		return file;
 	}
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit FILE_guard(mpt::filemode::mode new_mode) {
 		std::fflush(get_FILE());
 		guard.emplace(new_mode);
@@ -60,6 +67,10 @@ public:
 	FILE_guard(FILE_guard &&) = delete;
 	FILE_guard & operator=(const FILE_guard &) = delete;
 	FILE_guard & operator=(FILE_guard &&) = delete;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	~FILE_guard() {
 		std::fflush(get_FILE());
 		guard.reset();

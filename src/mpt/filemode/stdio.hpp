@@ -6,6 +6,9 @@
 
 
 #include "mpt/base/detect.hpp"
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+#include "mpt/base/macros.hpp"
+#endif
 #include "mpt/base/namespace.hpp"
 #include "mpt/filemode/fd.hpp"
 #include "mpt/filemode/filemode.hpp"
@@ -37,6 +40,10 @@ class stdio_guard {
 private:
 	std::variant<std::monostate, mpt::filemode::iostream_guard<which>, mpt::filemode::FILE_guard<which>, mpt::filemode::fd_guard<which>> guard;
 public:
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	explicit stdio_guard(mpt::filemode::api api, mpt::filemode::mode mode) {
 		switch (api) {
 			case mpt::filemode::api::iostream:
@@ -57,6 +64,10 @@ public:
 	stdio_guard(stdio_guard &&) = delete;
 	stdio_guard & operator=(const stdio_guard &) = delete;
 	stdio_guard & operator=(stdio_guard &&) = delete;
+#if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
+	// work-around bogus -Wmaybe-uninitialized
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
+#endif
 	~stdio_guard() {
 		guard.template emplace<std::monostate>();
 	}
