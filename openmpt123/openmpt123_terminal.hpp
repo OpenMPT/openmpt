@@ -577,14 +577,13 @@ inline void query_terminal_size( int & terminal_width, int & terminal_height ) {
 		if ( terminal_height <= 0 ) {
 			terminal_height = ScreenRows();
 		}
-#else
+#endif
 		if ( terminal_width <= 0 ) {
 			terminal_width = 72;
 		}
 		if ( terminal_height <= 0 ) {
 			terminal_height = 23;
 		}
-#endif
 }
 
 
