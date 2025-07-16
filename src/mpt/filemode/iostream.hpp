@@ -67,9 +67,11 @@ private:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	explicit iostream_guard(mpt::filemode::mode mode) {
+		// clang-format on
 		guard.emplace(mode);
 	}
 	iostream_guard(const iostream_guard &) = delete;
@@ -78,9 +80,11 @@ public:
 	iostream_guard & operator=(iostream_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~iostream_guard() {
+		// clang-format on
 		if constexpr (which != mpt::filemode::stdio::input) {
 			get_stream().flush();
 		}

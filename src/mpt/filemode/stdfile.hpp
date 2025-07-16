@@ -57,9 +57,11 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	explicit FILE_guard(mpt::filemode::mode new_mode) {
+		// clang-format on
 		std::fflush(get_FILE());
 		guard.emplace(new_mode);
 	}
@@ -69,9 +71,11 @@ public:
 	FILE_guard & operator=(FILE_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~FILE_guard() {
+		// clang-format on
 		std::fflush(get_FILE());
 		guard.reset();
 	}

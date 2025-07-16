@@ -42,9 +42,11 @@ private:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	explicit stdio_guard(mpt::filemode::api api, mpt::filemode::mode mode) {
+		// clang-format on
 		switch (api) {
 			case mpt::filemode::api::iostream:
 				guard.template emplace<mpt::filemode::iostream_guard<which>>(mode);
@@ -66,9 +68,11 @@ public:
 	stdio_guard & operator=(stdio_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~stdio_guard() {
+		// clang-format on
 		guard.template emplace<std::monostate>();
 	}
 };

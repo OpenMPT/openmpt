@@ -39,7 +39,7 @@ namespace filemode {
 template <mpt::filemode::stdio which>
 class fd_guard {
 private:
-	int old_mode;
+	int old_mode = -1;
 public:
 	constexpr static int get_fd() {
 		switch (which) {
@@ -60,10 +60,11 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
-	explicit fd_guard(mpt::filemode::mode new_mode)
-		: old_mode(-1) {
+	explicit fd_guard(mpt::filemode::mode new_mode) {
+		// clang-format on
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
 				old_mode = setmode(get_fd(), O_TEXT);
@@ -85,9 +86,11 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~fd_guard() {
+		// clang-format on
 		if (old_mode != -1) {
 			old_mode = setmode(get_fd(), old_mode);
 		}
@@ -99,7 +102,7 @@ public:
 template <mpt::filemode::stdio which>
 class fd_guard {
 private:
-	int old_mode;
+	int old_mode = -1;
 public:
 	static int get_fd() {
 		int fd = -1;
@@ -122,10 +125,11 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
-	explicit fd_guard(mpt::filemode::mode new_mode)
-		: old_mode(-1) {
+	explicit fd_guard(mpt::filemode::mode new_mode) {
+		// clang-format on
 		switch (new_mode) {
 			case mpt::filemode::mode::text:
 #if defined(UNICODE) && MPT_LIBC_MS_AT_LEAST(MPT_LIBC_MS_VER_UCRT)
@@ -151,9 +155,11 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~fd_guard() {
+		// clang-format on
 		if (old_mode != -1) {
 			old_mode = _setmode(get_fd(), old_mode);
 		}
@@ -184,9 +190,11 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	explicit fd_guard(mpt::filemode::mode /* new_mode */) {
+		// clang-format on
 		return;
 	}
 	fd_guard(const fd_guard &) = delete;
@@ -195,9 +203,11 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
 	~fd_guard() {
+		// clang-format on
 		return;
 	}
 };
