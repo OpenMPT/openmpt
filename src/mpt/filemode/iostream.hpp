@@ -57,8 +57,8 @@ private:
 #else
 			return std::clog;
 #endif
-		// cppcheck false-positive
-		// cppcheck-suppress missingReturn
+			// cppcheck false-positive
+			// cppcheck-suppress missingReturn
 		}
 	}
 public:
