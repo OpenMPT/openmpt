@@ -12,7 +12,6 @@
 #include "mpt/filemode/iostream.hpp"
 #include "mpt/filemode/stdfile.hpp"
 
-#include <optional>
 #include <variant>
 
 
