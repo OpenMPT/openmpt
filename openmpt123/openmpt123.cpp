@@ -2294,6 +2294,8 @@ static mpt::uint8 main( std::vector<mpt::ustring> args, mpt::main::stdin_token t
 			break;
 		}
 
+	} catch ( silent_exit_exception & ) {
+		return 0;
 	} catch ( args_error_exception & ) {
 		show_banner( log, flags.banner );
 		show_help( log );
