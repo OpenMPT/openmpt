@@ -20,7 +20,7 @@ mkdir -p bin
 echo "Checking C header ..."
 echo '' > bin/headercheck.c
 echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.c
-echo 'int main() { return 0; }' >> bin/headercheck.c
+echo 'int main(void) { return 0; }' >> bin/headercheck.c
 echo " cc"
 cc             -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc.out
 echo " cc 89"
