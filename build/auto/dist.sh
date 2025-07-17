@@ -17,7 +17,7 @@ export PATH="/usr/lib/ccache:$PATH"
 echo "Checking C header ..."
 echo '' > bin/headercheck.c
 echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.c
-echo 'int main() { return 0; }' >> bin/headercheck.c
+echo 'int main(void) { return 0; }' >> bin/headercheck.c
 cc             -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc.out
 cc    -std=c89 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc89.out
 cc    -std=c99 -pedantic -Wall -Wextra                        -Werror -I. bin/headercheck.c -o bin/headercheck.cc99.out
