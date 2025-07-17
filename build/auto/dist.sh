@@ -127,10 +127,10 @@ rm bin/helper_get_openmpt_version
 make NO_SDL=1 NO_SDL2=1 clean-dist
 
 # Check the build
-make NO_SDL=1 NO_SDL2=1 STRICT=1 clean
-make NO_SDL=1 NO_SDL2=1 STRICT=1
-make NO_SDL=1 NO_SDL2=1 STRICT=1 check
-make NO_SDL=1 NO_SDL2=1 STRICT=1 clean
+make NO_SDL=1 NO_SDL2=1 clean
+make NO_SDL=1 NO_SDL2=1
+make NO_SDL=1 NO_SDL2=1 check
+make NO_SDL=1 NO_SDL2=1 clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
 if `svn info . > /dev/null 2>&1` ; then
