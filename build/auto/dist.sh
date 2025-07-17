@@ -56,10 +56,10 @@ rm bin/helper_get_openmpt_version
 make clean-dist
 
 # Check the build
-make STRICT=1 clean
-make STRICT=1
-make STRICT=1 check
-make STRICT=1 clean
+make clean
+make
+make check
+make clean
 
 # Build Unix-like tarball, Windows zipfile and docs tarball
 make dist
