@@ -8,8 +8,10 @@
 #include "mpt/base/detect.hpp"
 #include "mpt/base/namespace.hpp"
 
+#if MPT_CXX_BEFORE(26)
 #include <algorithm>
 #include <limits>
+#endif
 #if MPT_CXX_AT_LEAST(26)
 #include <numeric>
 #endif
