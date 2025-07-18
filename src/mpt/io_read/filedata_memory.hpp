@@ -5,6 +5,7 @@
 
 
 
+#include "mpt/base/detect.hpp"
 #include "mpt/base/memory.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/io_read/filedata.hpp"
@@ -12,6 +13,9 @@
 #include <algorithm>
 
 #include <cstddef>
+#if MPT_GCC_AT_LEAST(12, 0, 0)
+#include <cstring>
+#endif
 
 
 
@@ -65,8 +69,15 @@ public:
 			return dst.first(0);
 		}
 		pos_type avail = std::min(streamLength - pos, dst.size());
-		std::copy(streamData + pos, streamData + pos + avail, dst.data());
-		return dst.first(avail);
+		const std::byte * src = streamData + pos;
+#if MPT_GCC_AT_LEAST(12, 0, 0)
+		// work-around bogus -Warray-bounds
+		// work-around bogus -Wstringop-overflow
+		std::memcpy(dst.data(), src, avail);
+#else
+		std::copy(src, src + avail, dst.data());
+#endif
+		return dst.first(static_cast<std::size_t>(avail));
 	}
 
 	bool CanRead(pos_type pos, pos_type length) const override {
