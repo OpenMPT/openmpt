@@ -254,22 +254,22 @@ protected:
 
 	void OnOK() override {
 
-		s->samplerate = m_ComboBoxSamplerate.GetItemData( m_ComboBoxSamplerate.GetCurSel() );
+		s->samplerate = static_cast<int>( m_ComboBoxSamplerate.GetItemData( m_ComboBoxSamplerate.GetCurSel() ) );
 
-		s->channels = m_ComboBoxChannels.GetItemData( m_ComboBoxChannels.GetCurSel() );
+		s->channels = static_cast<int>( m_ComboBoxChannels.GetItemData( m_ComboBoxChannels.GetCurSel() ) );
 
 		s->mastergain_millibel = m_SliderCtrlGain.GetPos();
 
-		s->interpolationfilterlength = m_ComboBoxInterpolation.GetItemData( m_ComboBoxInterpolation.GetCurSel() );
+		s->interpolationfilterlength = static_cast<int>( m_ComboBoxInterpolation.GetItemData( m_ComboBoxInterpolation.GetCurSel() ) );
 
 		s->use_amiga_resampler = ( m_CheckBoxAmigaResampler.GetCheck() != BST_UNCHECKED ) ? 1 : 0;
-		s->amiga_filter_type = m_ComboBoxAmigaFilter.GetItemData( m_ComboBoxAmigaFilter.GetCurSel() );
+		s->amiga_filter_type = static_cast<int>( m_ComboBoxAmigaFilter.GetItemData( m_ComboBoxAmigaFilter.GetCurSel() ) );
 
-		s->repeatcount = m_ComboBoxRepeat.GetItemData( m_ComboBoxRepeat.GetCurSel() );
+		s->repeatcount = static_cast<int>( m_ComboBoxRepeat.GetItemData( m_ComboBoxRepeat.GetCurSel() ) );
 
 		s->stereoseparation = m_SliderCtrlStereoSeparation.GetPos();
 
-		s->ramping = m_ComboBoxRamping.GetItemData( m_ComboBoxRamping.GetCurSel() );
+		s->ramping = static_cast<int>( m_ComboBoxRamping.GetItemData( m_ComboBoxRamping.GetCurSel() ) );
 
 		s->changed();
 
