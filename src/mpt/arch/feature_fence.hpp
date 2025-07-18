@@ -21,20 +21,20 @@ namespace arch {
 
 
 
-MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void feature_fence_aquire() noexcept {
+MPT_FORCEINLINE void feature_fence_aquire() noexcept {
 	std::atomic_signal_fence(std::memory_order_acquire);
 }
 
-MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void feature_fence_release() noexcept {
+MPT_FORCEINLINE void feature_fence_release() noexcept {
 	std::atomic_signal_fence(std::memory_order_release);
 }
 
 class feature_fence_guard {
 public:
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE feature_fence_guard() noexcept {
+	MPT_FORCEINLINE feature_fence_guard() noexcept {
 		mpt::arch::feature_fence_aquire();
 	}
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ~feature_fence_guard() noexcept {
+	MPT_FORCEINLINE ~feature_fence_guard() noexcept {
 		mpt::arch::feature_fence_release();
 	}
 	feature_fence_guard(feature_fence_guard &&) = delete;
