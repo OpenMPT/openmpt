@@ -69,6 +69,7 @@ enum {
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <map>
 #include <queue>
 #include <sstream>
@@ -80,6 +81,41 @@ enum {
 
 #define SHORT_TITLE "xmp-openmpt"
 #define SHORTER_TITLE "openmpt"
+
+// Saturate the value of src to the domain of Tdst
+template <typename Tdst, typename Tsrc>
+static constexpr Tdst saturate_cast(Tsrc src) noexcept {
+	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	static_assert(std::numeric_limits<Tsrc>::is_integer);
+	if constexpr (std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+		}
+	} else if constexpr (!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		}
+	} else if constexpr (std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) > sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else if constexpr (sizeof(Tdst) == sizeof(Tsrc)) {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		} else {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		}
+	} else { // Tdst unsigned, Tsrc signed
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), src));
+		} else {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+		}
+	}
+}
 
 static CRITICAL_SECTION xmpopenmpt_mutex;
 class xmpopenmpt_lock {
@@ -151,8 +187,8 @@ public:
 struct self_xmplay_t {
 	std::vector<double> subsong_lengths;
 	std::vector<std::string> subsong_names;
-	std::size_t samplerate = 48000;
-	std::size_t num_channels = 2;
+	std::int32_t samplerate = 48000;
+	std::int32_t num_channels = 2;
 	xmp_openmpt_settings settings;
 	openmpt::module_ext * mod = nullptr;
 	bool set_format_called = false;
@@ -195,7 +231,7 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), encoded_string.size(), nullptr, nullptr);
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), saturate_cast<int>( encoded_string.size() ), nullptr, nullptr);
 	return encoded_string.data();
 }
 #endif
@@ -208,7 +244,7 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 		return std::wstring();
 	}
 	std::vector<WCHAR> decoded_string( required_size );
-	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), decoded_string.size() );
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), saturate_cast<int>( decoded_string.size() ) );
 	return decoded_string.data();
 }
 
@@ -372,7 +408,7 @@ static DWORD WINAPI openmpt_GetConfig( void * config ) {
 	if ( config ) {
 		std::memcpy( config, xml.c_str(), xml.length() + 1 );
 	}
-	return xml.length() + 1;
+	return saturate_cast<DWORD>( xml.length() + 1 );
 }
 
 // apply config (OPTIONAL)
@@ -533,7 +569,7 @@ std::streambuf::int_type xmplay_streambuf::underflow() {
 	}
 	std::size_t put_back_count = std::min( put_back, static_cast<std::size_t>( egptr() - buffer.data() ) );
 	std::memmove( buffer.data(), egptr() - put_back_count, put_back_count );
-	std::size_t readcount = xmpffile->Read( file, buffer.data() + put_back_count, buffer.size() - put_back_count );
+	std::size_t readcount = xmpffile->Read( file, buffer.data() + put_back_count, saturate_cast<DWORD>( buffer.size() - put_back_count ) );
 	setg( buffer.data(), buffer.data() + put_back_count, buffer.data() + put_back_count + readcount );
 	if ( readcount == 0 ) {
 		return traits_type::eof();
@@ -763,7 +799,8 @@ static char * build_xmplay_tags( const openmpt::module & mod, int32_t subsong = 
 		append_xmplay_tag( tags, "comment", convert_to_native( mod.get_metadata( "message" ) ) );
 		tags.append( 1, '\0' );
 	}
-	char * result = static_cast<char*>( xmpfmisc->Alloc( tags.size() ) );
+	tags.resize( saturate_cast<DWORD>( tags.size() ) );
+	char * result = static_cast<char*>( xmpfmisc->Alloc( saturate_cast<DWORD>( tags.size() ) ) );
 	if ( !result ) {
 		return nullptr;
 	}
@@ -782,8 +819,9 @@ static std::vector<double> build_subsong_lengths( openmpt::module & mod ) {
 }
 
 static float * build_xmplay_length( openmpt::module & mod ) {
-	const auto subsong_lengths = build_subsong_lengths( mod );
-	float * result = static_cast<float*>( xmpfmisc->Alloc( sizeof( float ) * subsong_lengths.size() ) );
+	std::vector<double> subsong_lengths = build_subsong_lengths( mod );
+	subsong_lengths.resize( saturate_cast<DWORD>( sizeof( float ) * subsong_lengths.size() ) / sizeof( float ) );
+	float * result = static_cast<float*>( xmpfmisc->Alloc( saturate_cast<DWORD>( sizeof( float ) * subsong_lengths.size() ) ) );
 	if ( !result ) {
 		return nullptr;
 	}
@@ -1238,14 +1276,14 @@ static DWORD WINAPI openmpt_Process( float * dstbuf, DWORD count ) {
 		if ( frames_chunk == 0 ) {
 			break;
 		}
-		update_timeinfos( self->samplerate, frames_chunk );
+		update_timeinfos( self->samplerate, static_cast<std::int32_t>( frames_chunk ) );
 		frames_to_render -= frames_chunk;
 		frames_rendered += frames_chunk;
 	}
 	if ( frames_rendered == 0 ) {
 		return 0;
 	}
-	return frames_rendered * self->num_channels;
+	return static_cast<DWORD>( frames_rendered * self->num_channels );
 }
 
 static void add_names( std::ostream & str, const std::string & title, const std::vector<std::string> & names, int display_offset ) {
@@ -1479,21 +1517,22 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 	int pattern = info.pattern;
 	int current_row = info.row;
 
-	const std::size_t channels = self->mod->get_num_channels();
-	const std::size_t rows = self->mod->get_pattern_num_rows( pattern );
+	const std::int32_t channels = self->mod->get_num_channels();
+	const std::int32_t rows = self->mod->get_pattern_num_rows( pattern );
 
-	const std::size_t num_half_chars = std::max( static_cast<std::size_t>( 2 * size.cx / text_size.cx ), std::size_t(8) ) - 8;
+	const std::int32_t num_half_chars = std::max( static_cast<std::int32_t>( 2 * size.cx / text_size.cx ), std::int32_t(8) ) - 8;
 	//const std::size_t num_rows = size.cy / text_size.cy;
 
 	// Spaces between pattern components are half width, full space at channel end
-	const std::size_t half_chars_per_channel = num_half_chars / channels;
-	std::size_t chars_per_channel, spaces_per_channel;
-	std::size_t num_cols;
-	std::size_t col0_width = pattern_columns[0].num_chars;
+	const std::int32_t half_chars_per_channel = num_half_chars / channels;
+	std::int32_t chars_per_channel;
+	std::int32_t spaces_per_channel;
+	std::int32_t num_cols;
+	std::int32_t col0_width = pattern_columns[0].num_chars;
 	for ( num_cols = sizeof ( pattern_columns ) / sizeof ( pattern_columns[0] ); num_cols >= 1; num_cols-- ) {
 		chars_per_channel = 0;
 		spaces_per_channel = num_cols > 1 ? num_cols : 0;	// No extra space if we only display notes
-		for ( std::size_t i = 0; i < num_cols; i++ ) {
+		for ( std::int32_t i = 0; i < num_cols; i++ ) {
 			chars_per_channel += pattern_columns[i].num_chars;
 		}
 
@@ -1542,7 +1581,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 		POINT pos;
 		pos.y = 0;
 
-		for ( std::size_t row = 0; row < rows; row++ ) {
+		for ( std::int32_t row = 0; row < rows; row++ ) {
 			pos.x = 0;
 
 			std::ostringstream s;
@@ -1551,10 +1590,10 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 			const std::string rowstr = s.str();
 
 			SetTextColor( visDC, viscolors[1].dw );
-			TextOutA( visDC, pos.x, pos.y, rowstr.c_str(), rowstr.length() );
+			TextOutA( visDC, pos.x, pos.y, rowstr.c_str(), saturate_cast<int>( rowstr.length() ) );
 			pos.x += 4 * text_size.cx;
 
-			for ( std::size_t channel = 0; channel < channels; ++channel ) {
+			for ( std::int32_t channel = 0; channel < channels; ++channel ) {
 
 				struct coldata {
 					std::string text;
@@ -1570,7 +1609,7 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 
 				coldata cols[max_cols];
 
-				for ( std::size_t col = 0; col < max_cols; ++col ) {
+				for ( std::int32_t col = 0; col < max_cols; ++col ) {
 					switch ( col ) {
 						case 0:
 							cols[col].text = self->mod->format_pattern_row_channel_command( pattern, row, channel, openmpt::module::command_note );
@@ -1628,14 +1667,14 @@ static BOOL WINAPI VisRenderDC( HDC dc, SIZE size, DWORD flags ) {
 					}
 				}
 
-				for ( std::size_t col = 0; col < num_cols; ++col ) {
+				for ( std::int32_t col = 0; col < num_cols; ++col ) {
 
-					std::size_t col_width = ( num_cols > 1 ) ? pattern_columns[col].num_chars : col0_width;
+					std::int32_t col_width = ( num_cols > 1 ) ? pattern_columns[col].num_chars : col0_width;
 
 					assure_width( cols[col].text, col_width );
 
 					SetTextColor( visDC, viscolors[cols[col].color].dw );
-					TextOutA( visDC, pos.x, pos.y, cols[col].text.c_str(), cols[col].text.length() );
+					TextOutA( visDC, pos.x, pos.y, cols[col].text.c_str(), saturate_cast<int>( cols[col].text.length() ) );
 					pos.x += col_width * text_size.cx + text_size.cx / 2;
 				}
 				// Extra padding
