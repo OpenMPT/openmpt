@@ -122,6 +122,7 @@ includelibopenmpt_HEADERS =
 
 MPT_FILES_SRC_MPT = 
 MPT_FILES_SRC_MPT += src/mpt/arch/arch.hpp
+MPT_FILES_SRC_MPT += src/mpt/arch/feature_fence.hpp
 MPT_FILES_SRC_MPT += src/mpt/arch/feature_flags.hpp
 MPT_FILES_SRC_MPT += src/mpt/arch/x86_amd64.hpp
 MPT_FILES_SRC_MPT += src/mpt/audio/sample.hpp

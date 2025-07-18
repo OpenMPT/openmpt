@@ -198,6 +198,9 @@
     <ClInclude Include="..\..\src\mpt\arch\arch.hpp">
       <Filter>src\mpt\arch</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\arch\feature_fence.hpp">
+      <Filter>src\mpt\arch</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\arch\feature_flags.hpp">
       <Filter>src\mpt\arch</Filter>
     </ClInclude>

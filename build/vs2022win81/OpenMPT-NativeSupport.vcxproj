@@ -1083,6 +1083,7 @@
     <ClInclude Include="..\..\mptrack\wine\NativeSoundDeviceMarshalling.h" />
     <ClInclude Include="..\..\mptrack\wine\NativeUtils.h" />
     <ClInclude Include="..\..\src\mpt\arch\arch.hpp" />
+    <ClInclude Include="..\..\src\mpt\arch\feature_fence.hpp" />
     <ClInclude Include="..\..\src\mpt\arch\feature_flags.hpp" />
     <ClInclude Include="..\..\src\mpt\arch\x86_amd64.hpp" />
     <ClInclude Include="..\..\src\mpt\audio\sample.hpp" />
