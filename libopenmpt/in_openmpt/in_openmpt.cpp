@@ -56,6 +56,7 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <sstream>
 
 #include <cstring>
@@ -70,6 +71,41 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #define WM_OPENMPT_SEEK (WM_USER+3)
 
 #define SHORT_TITLE "in_openmpt"
+
+// Saturate the value of src to the domain of Tdst
+template <typename Tdst, typename Tsrc>
+static constexpr Tdst saturate_cast(Tsrc src) noexcept {
+	// This code tries not only to obviously avoid overflows but also to avoid signed/unsigned comparison warnings and type truncation warnings (which in fact would be safe here) by explicit casting.
+	static_assert(std::numeric_limits<Tdst>::is_integer);
+	static_assert(std::numeric_limits<Tsrc>::is_integer);
+	if constexpr (std::numeric_limits<Tdst>::is_signed && std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(std::numeric_limits<Tdst>::min()), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+		}
+	} else if constexpr (!std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		}
+	} else if constexpr (std::numeric_limits<Tdst>::is_signed && !std::numeric_limits<Tsrc>::is_signed) {
+		if constexpr (sizeof(Tdst) > sizeof(Tsrc)) {
+			return static_cast<Tdst>(src);
+		} else if constexpr (sizeof(Tdst) == sizeof(Tsrc)) {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		} else {
+			return static_cast<Tdst>(std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max())));
+		}
+	} else { // Tdst unsigned, Tsrc signed
+		if constexpr (sizeof(Tdst) >= sizeof(Tsrc)) {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), src));
+		} else {
+			return static_cast<Tdst>(std::max(static_cast<Tsrc>(0), std::min(src, static_cast<Tsrc>(std::numeric_limits<Tdst>::max()))));
+		}
+	}
+}
 
 static void apply_options();
 
@@ -86,7 +122,7 @@ static std::string StringEncode( const std::wstring &src, UINT codepage )
 		return std::string();
 	}
 	std::vector<CHAR> encoded_string( required_size );
-	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), encoded_string.size(), NULL, NULL );
+	WideCharToMultiByte( codepage, 0, src.c_str(), -1, encoded_string.data(), saturate_cast<int>( encoded_string.size() ), NULL, NULL );
 	return encoded_string.data();
 }
 
@@ -98,7 +134,7 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 		return std::wstring();
 	}
 	std::vector<WCHAR> decoded_string( required_size );
-	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), decoded_string.size() );
+	MultiByteToWideChar( codepage, 0, src.c_str(), -1, decoded_string.data(), saturate_cast<int>( decoded_string.size() ) );
 	return decoded_string.data();
 }
 
@@ -436,20 +472,20 @@ static DWORD WINAPI DecodeThread( LPVOID ) {
 				int frames = 0;
 				switch ( self->channels ) {
 				case 1:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = static_cast<int>( self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES ) );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*1+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 					}
 					break;
 				case 2:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = static_cast<int>( self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES ) );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*2+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 						self->interleaved_buffer[frame*2+1] = self->buffer[1*WINAMP_BUFFER_SIZE_FRAMES+frame];
 					}
 					break;
 				case 4:
-					frames = self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 2*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 3*WINAMP_BUFFER_SIZE_FRAMES );
+					frames = static_cast<int>( self->mod->read( self->samplerate, WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 0*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 1*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 2*WINAMP_BUFFER_SIZE_FRAMES, self->buffer.data() + 3*WINAMP_BUFFER_SIZE_FRAMES ) );
 					for ( int frame = 0; frame < frames; frame++ ) {
 						self->interleaved_buffer[frame*4+0] = self->buffer[0*WINAMP_BUFFER_SIZE_FRAMES+frame];
 						self->interleaved_buffer[frame*4+1] = self->buffer[1*WINAMP_BUFFER_SIZE_FRAMES+frame];
