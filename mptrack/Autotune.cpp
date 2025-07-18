@@ -321,9 +321,14 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 
 	AutotuneHistogram autocorr =
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-		(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse)) ? std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } ) :
+		(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse)) ?
+			[&]() {
+				mpt::arch::feature_fence_guard arch_feature_guard;
+				return std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } );
+			}()
+		:
 #endif
-		std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
+			std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
 	
 	// Interpolate the histogram...
 	AutotuneHistogram interpolated;
