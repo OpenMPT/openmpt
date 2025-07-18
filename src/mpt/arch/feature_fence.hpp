@@ -22,11 +22,11 @@ namespace arch {
 
 
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void feature_fence_aquire() noexcept {
-	std::atomic_signal_fence(std::memory_order::acquire);
+	std::atomic_signal_fence(std::memory_order_acquire);
 }
 
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void feature_fence_release() noexcept {
-	std::atomic_signal_fence(std::memory_order::release);
+	std::atomic_signal_fence(std::memory_order_release);
 }
 
 class feature_fence_guard {
