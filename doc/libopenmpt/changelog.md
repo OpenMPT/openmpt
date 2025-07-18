@@ -7,10 +7,23 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.2-pre
 
+ *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
+    of reverse sample playback + offset past sample loop. (r23711).
+
+ *  [**Bug**] Fixed pre-C++20 undefined behaviour due to left-shifting negative
+    integer values.
+
  *  [**New**] `Makefile` now supports DragonFly BSD.
 
  *  openmpt123: FLAC multithreaded encoding has been enabled for Windows builds
     (<https://github.com/xiph/flac/pull/822/>).
+
+ *  Since libopenmpt 0.8.0, swapping between samples on the rear channels could
+    introduce a click on the front channels.
+ *  IT: Volume column slides no longer propagate their effect memory to the
+    regular effect column volume slides.
+ *  FC: Allow files with a sequence size of 0 to load (fixes a broken copy of
+    cult.smod).
 
  *  ogg: Update to v1.3.6 (2025-06-16).
 
