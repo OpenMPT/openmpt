@@ -7,6 +7,12 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.38-pre
 
+ *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
+    of reverse sample playback + offset past sample loop. (r23714).
+
+ *  [**Bug**] Fixed pre-C++20 undefined behaviour due to left-shifting negative
+    integer values.
+
  *  ogg: Update to v1.3.6 (2025-06-16).
 
 ### libopenmpt 0.5.37 (2025-06-14)
