@@ -69,7 +69,7 @@ static constexpr struct GeneralOptionsDescriptions
 	{PatternSetup::HideUnavailableMenuEntries, "Old style pattern context menu", "Check this option to hide unavailable items in the pattern editor context menu. Uncheck to grey-out unavailable items instead."},
 	{PatternSetup::SyncMute,                   "Maintain sample sync on mute",   "Samples continue to be processed when channels are muted (like in IT2 and FT2)"},
 	{PatternSetup::SampleSyncOnSeek,           "Maintain sample sync on seek",   "Sample that are still active from previous patterns are continued to be played after seeking.\nNote: Some pattern commands may prevent samples from being synced. This feature may slow down seeking."},
-	{PatternSetup::AutoDelayCommands,          "Automatic delay commands",       "Automatically insert appropriate note-delay commands when recording notes during live playback."},
+	{PatternSetup::AutoDelayCommands,          "Automatic delay commands",       "Automatically insert appropriate note-delay commands when recording notes during live playback.\nThis setting is ignored when quantization is enabled in the pattern editor."},
 	{PatternSetup::NoteFadeOnKeyUp,            "Note fade on key up",            "Enable to fade / stop notes on key up in pattern tab."},
 	{PatternSetup::OverflowPaste,              "Overflow paste mode",            "Wrap pasted pattern data into next pattern. This is useful for creating echo channels."},
 	{PatternSetup::ResetChannelsOnLoop,        "Reset channels on loop",         "If enabled, channels will be reset to their initial state when song looping is enabled.\nNote: This does not affect manual song loops (i.e. triggered by pattern commands) and is not recommended to be enabled."},
