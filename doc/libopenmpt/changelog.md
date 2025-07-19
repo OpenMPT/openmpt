@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.16-pre
+
 ### libopenmpt 0.7.15 (2025-07-19)
 
  *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
