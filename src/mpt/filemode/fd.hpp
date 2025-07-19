@@ -60,6 +60,7 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
@@ -86,6 +87,7 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
@@ -125,6 +127,7 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
@@ -155,6 +158,7 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
@@ -190,6 +194,7 @@ public:
 public:
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
@@ -203,6 +208,7 @@ public:
 	fd_guard & operator=(fd_guard &&) = delete;
 #if MPT_GCC_AT_LEAST(14, 0, 0) && MPT_GCC_BEFORE(15, 1, 0)
 	// work-around bogus -Wmaybe-uninitialized
+	// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121173>.
 	// clang-format off
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE
 #endif
