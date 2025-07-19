@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.50-pre
+### libopenmpt 0.4.50 (2025-07-19)
 
  *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
     of reverse sample playback + offset past sample loop. (r23715).
