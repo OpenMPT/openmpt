@@ -73,6 +73,7 @@ public:
 #if MPT_GCC_AT_LEAST(12, 0, 0)
 		// work-around bogus -Warray-bounds
 		// work-around bogus -Wstringop-overflow
+		// See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121165>.
 		std::memcpy(dst.data(), src, avail);
 #else
 		std::copy(src, src + avail, dst.data());
