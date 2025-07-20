@@ -831,6 +831,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	if (uFlags & CHN_STEREO) smplsize *= 2;
 	if (uFlags & CHN_16BIT)
 	{
+		// cppcheck-suppress dangerousTypeCast
 		y0 = YCVT(*((int16 *)(psample-smplsize)),15);
 	} else
 	{
@@ -867,6 +868,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		for (SmpLength n = 0; n <= numDrawSamples; n++)
 		{
 			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
+			// cppcheck-suppress dangerousTypeCast
 			int y = *(const int16 *)psample;
 			::LineTo(hdc, x, YCVT(y, 15));
 			psample += smplsize;
@@ -901,6 +903,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 
 	if (uFlags & CHN_16BIT)
 	{
+		// cppcheck-suppress dangerousTypeCast
 		y0 = YCVT(*((const int16 *)(psample-smplsize)), 15);
 	} else
 	{
