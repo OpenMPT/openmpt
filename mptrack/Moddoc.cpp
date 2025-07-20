@@ -1611,7 +1611,7 @@ LRESULT CModDoc::ActivateView(UINT nIdView, DWORD dwParam)
 		CView *pView = pMDIActive->GetActiveView();
 		if ((pView) && (pView->GetDocument() == this))
 		{
-			return ((CChildFrame *)pMDIActive)->ActivateView(nIdView, dwParam);
+			return static_cast<CChildFrame*>(pMDIActive)->ActivateView(nIdView, dwParam);
 		}
 	}
 	POSITION pos = GetFirstViewPosition();
