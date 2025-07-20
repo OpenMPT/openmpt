@@ -122,8 +122,10 @@ protected:
 	void SetCurSel(SmpLength nBegin, SmpLength nEnd);
 	void ScrollToPosition(int x);
 	void DrawPositionMarks();
-	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
-	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData);
+	template <typename Tsample>
+	void DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const Tsample *psample);
+	template <typename Tsample>
+	void DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const Tsample *psample);
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	bool GetNcButtonRect(UINT button, CRect &rect) const;
 	UINT GetNcButtonAtPoint(CPoint point, CRect *outRect = nullptr) const;

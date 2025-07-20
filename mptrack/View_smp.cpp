@@ -820,22 +820,22 @@ void CViewSample::UpdateView(UpdateHint hint, CObject *pObj)
 
 
 // Draw one channel of sample data, 1:1 ratio or higher (zoomed in)
-void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData)
+template <typename Tsample>
+void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const Tsample *psample)
 {
-	int smplsize;
 	int yrange = cy/2;
-	const int8 *psample = static_cast<const int8 *>(pSampleData);
 	int y0 = 0;
 
-	smplsize = (uFlags & CHN_16BIT) ? 2 : 1;
-	if (uFlags & CHN_STEREO) smplsize *= 2;
+	const int numChannels = (uFlags & CHN_STEREO) ? 2 : 1;
+	const int smplsize = ((uFlags & CHN_16BIT) ? 2 : 1) * numChannels;
+	MPT_ASSERT(sizeof(Tsample) * numChannels == smplSize);
+
 	if (uFlags & CHN_16BIT)
 	{
-		// cppcheck-suppress dangerousTypeCast
-		y0 = YCVT(*((int16 *)(psample-smplsize)),15);
+		y0 = YCVT(*(psample-numChannels),15);
 	} else
 	{
-		y0 = YCVT(*(psample-smplsize),7);
+		y0 = YCVT(*(psample-numChannels),7);
 	}
 
 	SmpLength numDrawSamples, loopDiv = 0;
@@ -868,10 +868,9 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		for (SmpLength n = 0; n <= numDrawSamples; n++)
 		{
 			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
-			// cppcheck-suppress dangerousTypeCast
-			int y = *(const int16 *)psample;
+			int y = *psample;
 			::LineTo(hdc, x, YCVT(y, 15));
-			psample += smplsize;
+			psample += numChannels;
 		}
 	} else
 	{
@@ -881,18 +880,18 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 			int x = loopDiv ? ((n * cx) / loopDiv) : (n << loopShift);
 			int y = *psample;
 			::LineTo(hdc, x, YCVT(y, 7));
-			psample += smplsize;
+			psample += numChannels;
 		}
 	}
 }
 
 
 // Draw one channel of zoomed-out sample data
-void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const void *pSampleData)
+template <typename Tsample>
+void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength len, SampleFlags uFlags, const Tsample *psample)
 {
 	int oldsmin, oldsmax;
 	int yrange = cy/2;
-	const int8 *psample = static_cast<const int8 *>(pSampleData);
 	int32 y0 = 0, xmax;
 	SmpLength poshi;
 	uint64 posincr, posfrac;	// Increments have 16-bit fractional part
@@ -900,14 +899,14 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	if (len <= 0) return;
 	const int numChannels = (uFlags & CHN_STEREO) ? 2 : 1;
 	const int smplsize = ((uFlags & CHN_16BIT) ? 2 : 1) * numChannels;
+	MPT_ASSERT(sizeof(Tsample) * numChannels == smplSize);
 
 	if (uFlags & CHN_16BIT)
 	{
-		// cppcheck-suppress dangerousTypeCast
-		y0 = YCVT(*((const int16 *)(psample-smplsize)), 15);
+		y0 = YCVT(*(psample-numChannels), 15);
 	} else
 	{
-		y0 = YCVT(*(psample-smplsize), 7);
+		y0 = YCVT(*(psample-numChannels), 7);
 	}
 	oldsmin = oldsmax = y0;
 	if (m_nZoom > 0)
@@ -938,14 +937,14 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		// 16-bit
 		if (uFlags & CHN_16BIT)
 		{
-			signed short *p = (signed short *)(psample + poshi*smplsize);
+			const Tsample *p = psample + poshi * numChannels;
 			auto minMax = SampleEdit::FindMinMax(p, scanlen, numChannels);
 			smin = YCVT(minMax.first, 15);
 			smax = YCVT(minMax.second, 15);
 		} else
 		// 8-bit
 		{
-			const int8 *p = psample + poshi * smplsize;
+			const Tsample *p = psample + poshi * numChannels;
 			auto minMax = SampleEdit::FindMinMax(p, scanlen, numChannels);
 			smin = YCVT(minMax.first, 7);
 			smax = YCVT(minMax.second, 7);
@@ -1276,14 +1275,28 @@ void CViewSample::OnDraw(CDC *pDC)
 				{
 					// Draw sample data in 1:1 ratio or higher (zoom in)
 					SmpLength len = sample.nLength - smpScrollPos;
-					const std::byte *psample = sample.sampleb() + smpScrollPos * smplsize;
-					if(sample.uFlags[CHN_STEREO])
+					if(sample.uFlags[CHN_16BIT])
 					{
-						DrawSampleData1(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
-						DrawSampleData1(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + smplsize / 2);
+						const int16 *psample = sample.sample16() + smpScrollPos * sample.GetNumChannels();
+						if(sample.uFlags[CHN_STEREO])
+						{
+							DrawSampleData1(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+							DrawSampleData1(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + 1);
+						} else
+						{
+							DrawSampleData1(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						}
 					} else
 					{
-						DrawSampleData1(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						const int8 *psample = sample.sample8() + smpScrollPos * sample.GetNumChannels();
+						if(sample.uFlags[CHN_STEREO])
+						{
+							DrawSampleData1(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+							DrawSampleData1(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + 1);
+						} else
+						{
+							DrawSampleData1(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						}
 					}
 				} else
 				{
@@ -1295,14 +1308,28 @@ void CViewSample::OnDraw(CDC *pDC)
 						xscroll = smpScrollPos;
 						len -= smpScrollPos;
 					}
-					const std::byte *psample = sample.sampleb() + xscroll * smplsize;
-					if(sample.uFlags[CHN_STEREO])
+					if(sample.uFlags[CHN_16BIT])
 					{
-						DrawSampleData2(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
-						DrawSampleData2(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + smplsize / 2);
+						const int16 *psample = sample.sample16() + xscroll * sample.GetNumChannels();
+						if(sample.uFlags[CHN_STEREO])
+						{
+							DrawSampleData2(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+							DrawSampleData2(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + 1);
+						} else
+						{
+							DrawSampleData2(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						}
 					} else
 					{
-						DrawSampleData2(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						const int8 *psample = sample.sample8() + xscroll * sample.GetNumChannels();
+						if(sample.uFlags[CHN_STEREO])
+						{
+							DrawSampleData2(m_waveformDC, ymed - yrange / 2, rect.right, yrange, len, sample.uFlags, psample);
+							DrawSampleData2(m_waveformDC, ymed + yrange / 2, rect.right, yrange, len, sample.uFlags, psample + 1);
+						} else
+						{
+							DrawSampleData2(m_waveformDC, ymed, rect.right, yrange * 2, len, sample.uFlags, psample);
+						}
 					}
 				}
 			}
