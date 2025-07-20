@@ -55,7 +55,7 @@ BOOL WelcomeDlg::OnInitDialog()
 	DWORD datasize = sizeof(str);
 	DWORD datatype = REG_SZ;
 	if(RegOpenKey(HKEY_LOCAL_MACHINE, _T("Software\\VST"), &hkEnum) == ERROR_SUCCESS
-		&& RegQueryValueEx(hkEnum, _T("VSTPluginsPath"), 0, &datatype, (LPBYTE)str, &datasize) == ERROR_SUCCESS)
+		&& RegQueryValueEx(hkEnum, _T("VSTPluginsPath"), 0, &datatype, reinterpret_cast<LPBYTE>(str), &datasize) == ERROR_SUCCESS)
 	{
 		m_vstPath = mpt::PathString::FromNative(ParseMaybeNullTerminatedStringFromBufferWithSizeInBytes<mpt::winstring>(str, datasize));
 	} else if(SHGetSpecialFolderPath(0, str, CSIDL_PROGRAM_FILES, FALSE))
