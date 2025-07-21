@@ -827,8 +827,7 @@ void CViewSample::DrawSampleData1(HDC hdc, int ymed, int cx, int cy, SmpLength l
 	int y0 = 0;
 
 	const int numChannels = (uFlags & CHN_STEREO) ? 2 : 1;
-	const int smplsize = ((uFlags & CHN_16BIT) ? 2 : 1) * numChannels;
-	MPT_ASSERT(sizeof(Tsample) * numChannels == smplSize);
+	MPT_ASSERT(sizeof(Tsample) == ((uFlags & CHN_16BIT) ? 2 : 1));
 
 	if (uFlags & CHN_16BIT)
 	{
@@ -898,8 +897,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 
 	if (len <= 0) return;
 	const int numChannels = (uFlags & CHN_STEREO) ? 2 : 1;
-	const int smplsize = ((uFlags & CHN_16BIT) ? 2 : 1) * numChannels;
-	MPT_ASSERT(sizeof(Tsample) * numChannels == smplSize);
+	MPT_ASSERT(sizeof(Tsample) == ((uFlags & CHN_16BIT) ? 2 : 1));
 
 	if (uFlags & CHN_16BIT)
 	{
@@ -1270,7 +1268,6 @@ void CViewSample::OnDraw(CDC *pDC)
 				m_waveformDC.SelectStockObject(DC_PEN);
 				m_waveformDC.FillSolidRect(rect, backgroundCol);
 				m_waveformDC.SetDCPenColor(colors[MODCOLOR_SAMPLE]);
-				const int smplsize = sample.GetBytesPerSample();
 				if(m_nZoom == 1 || m_nZoom < 0 || ((!m_nZoom) && (sample.nLength <= (SmpLength)rect.Width())))
 				{
 					// Draw sample data in 1:1 ratio or higher (zoom in)
