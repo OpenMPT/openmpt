@@ -1657,6 +1657,7 @@ INT_PTR COrderList::OnToolHitTest(CPoint point, TOOLINFO *pTI) const
 
 BOOL COrderList::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *)
 {
+	// cppcheck-suppress dangerousTypeCast
 	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
 	if(!(pTTT->uFlags & TTF_IDISHWND))
 	{
