@@ -284,6 +284,7 @@ void CMIDIMappingDialog::OnSelectionChanged(NMHDR *pNMHDR, LRESULT * /*pResult*/
 	int i;
 	if(pNMHDR != nullptr)
 	{
+		// cppcheck-suppress dangerousTypeCast
 		NMLISTVIEW *nmlv = (NMLISTVIEW *)pNMHDR;
 
 		if(((nmlv->uOldState ^ nmlv->uNewState) & INDEXTOSTATEIMAGEMASK(3)) != 0 && nmlv->uOldState != 0)
