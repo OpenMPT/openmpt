@@ -30,7 +30,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
+      uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
@@ -41,7 +41,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
+      uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
@@ -54,7 +54,7 @@ jobs:
           sudo pkg upgrade -y
           sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
+      uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
@@ -66,7 +66,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
-      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
+      uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
@@ -78,7 +78,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@9a4355714f90c057476048788b82147e99b7c0f0
+      uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
