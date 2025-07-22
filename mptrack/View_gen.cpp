@@ -826,7 +826,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		const CHANNELINDEX nLoopLimit = std::min(static_cast<CHANNELINDEX>(CHANNELS_IN_TAB), static_cast<CHANNELINDEX>(pModDoc->GetSoundFile().GetNumChannels() - nChn));
 		for (CHANNELINDEX iCh = 0; iCh < nLoopLimit; iCh++)
 		{
-			if(pScrollBar == (CScrollBar *) &m_sbVolume[iCh])
+			if(static_cast<CWnd*>(pScrollBar) == &m_sbVolume[iCh])
 			{
 				// Volume sliders
 				pos = (short int)m_sbVolume[iCh].GetPos();
@@ -839,7 +839,7 @@ void CViewGlobals::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						bUpdate = TRUE;
 					}
 				}
-			} else if(pScrollBar == (CScrollBar *) &m_sbPan[iCh])
+			} else if(static_cast<CWnd*>(pScrollBar) == &m_sbPan[iCh])
 			{
 				// Pan sliders
 				pos = (short int)m_sbPan[iCh].GetPos();

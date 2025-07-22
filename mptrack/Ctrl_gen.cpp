@@ -405,7 +405,7 @@ void CCtrlGeneral::OnVScroll(UINT code, UINT pos, CScrollBar *pscroll)
 
 	if (m_initialized)
 	{
-		CSliderCtrl* pSlider = (CSliderCtrl*) pscroll;
+		CWnd* pSlider = static_cast<CWnd*>(pscroll);
 
 		if (pSlider == &m_SliderTempo)
 		{
