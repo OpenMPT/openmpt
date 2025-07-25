@@ -958,6 +958,8 @@ enum CommandID : int
 	kcSampleConvertPingPongSustain,
 	kcSampleConvertNormalLoopToSustain,
 	kcSampleConvertSustainLoopToNormal,
+	kcSampleToggleNormalLoop,
+	kcSampleToggleSustainLoop,
 	kcSample8Bit,
 	kcSampleMonoMix,
 	kcSampleMonoLeft,

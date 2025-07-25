@@ -2653,6 +2653,21 @@ LRESULT CCtrlSamples::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 	case kcSampleNew:		InsertSample(false); return wParam;
 	case kcSampleDuplicate:	InsertSample(true); return wParam;
 
+	case kcSampleToggleNormalLoop:
+		if(m_ComboLoopType.IsWindowEnabled())
+		{
+			m_ComboLoopType.SetCurSel((m_ComboLoopType.GetCurSel() + 1) % m_ComboLoopType.GetCount());
+			OnLoopTypeChanged();
+		}
+		return wParam;
+	case kcSampleToggleSustainLoop:
+		if(m_ComboSustainType.IsWindowEnabled())
+		{
+			m_ComboSustainType.SetCurSel((m_ComboSustainType.GetCurSel() + 1) % m_ComboSustainType.GetCount());
+			OnSustainTypeChanged();
+		}
+		return wParam;
+
 	case kcSampleTransposeUp: transpose = 1; break;
 	case kcSampleTransposeDown: transpose = -1; break;
 	case kcSampleTransposeOctUp: transpose = 12; break;

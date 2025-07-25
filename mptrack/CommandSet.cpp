@@ -956,6 +956,8 @@ static constexpr struct
 	{2119, kcToggleMetronome, _T("Toggle Metronome")},
 	{2120, kcPatternExpand, _T("Expand Pattern")},
 	{2121, kcPatternShrink, _T("Shrink Pattern")},
+	{2122, kcSampleToggleNormalLoop, _T("Toggle Loop")},
+	{2123, kcSampleToggleSustainLoop, _T("Toggle Sustain Loop")},
 };
 // clang-format on
 
