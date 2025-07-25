@@ -36,7 +36,6 @@ CXXFLAGS += $(CXXFLAGS_STDCXX)
 CFLAGS += $(CFLAGS_STDC)
 
 CPPFLAGS += -DNOMINMAX
-CPPFLAGS += -DMPT_BUILD_RETRO
 CXXFLAGS += -mconsole -mthreads
 CFLAGS   += -mconsole -mthreads
 LDFLAGS  += 

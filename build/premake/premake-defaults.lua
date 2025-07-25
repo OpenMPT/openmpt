@@ -113,7 +113,6 @@
 			if _ACTION == "vs2017" then
 				toolset "v141_xp"
 			end
-			defines { "MPT_BUILD_RETRO" }
 			filter { "action:vs*" }
 				buildoptions { "/Zc:threadSafeInit-" }
 			filter {}
