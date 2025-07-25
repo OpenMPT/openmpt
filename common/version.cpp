@@ -344,9 +344,7 @@ static mpt::ustring GetBuildFlagsString()
 {
 	mpt::ustring retval;
 	#ifdef MODPLUG_TRACKER
-		#if defined(MPT_BUILD_RETRO)
-			retval += UL_(" RETRO");
-		#endif // MPT_BUILD_RETRO
+		retval += mpt::ToUnicode(mpt::Charset::ASCII, OPENMPT_BUILD_VARIANT_MONIKER);
 		if(Version::Current().IsTestVersion())
 		{
 			retval += UL_(" TEST");

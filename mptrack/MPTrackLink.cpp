@@ -16,9 +16,9 @@ OPENMPT_NAMESPACE_BEGIN
 #if defined(MPT_BUILD_MSVC)
 #if MPT_COMPILER_MSVC || MPT_COMPILER_CLANG
 
-#if !defined(MPT_BUILD_RETRO)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 #pragma comment(lib, "delayimp.lib")
-#endif // !MPT_BUILD_RETRO
+#endif
 
 #pragma comment(lib, "version.lib")
 #pragma comment(lib, "rpcrt4.lib")

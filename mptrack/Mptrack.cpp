@@ -1091,7 +1091,7 @@ mpt::PathString CTrackApp::GetExampleSongsPath() const
 }
 
 
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_ENABLE_SYSTEM_SUPPORT_CHECK)
 
 static bool ProcessorCanRunCurrentBuild()
 {
@@ -1158,7 +1158,7 @@ bool CTrackApp::CheckSystemSupport()
 	return true;
 }
 
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_ENABLE_SYSTEM_SUPPORT_CHECK
 
 
 BOOL CTrackApp::InitInstanceEarly(CMPTCommandLineInfo &cmdInfo)
@@ -1473,7 +1473,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	// Perform startup tasks.
 
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_ENABLE_SYSTEM_SUPPORT_CHECK)
 	// Check whether we are running the best build for the given system.
 	if(!cmdInfo.m_noSysCheck)
 	{
@@ -1483,14 +1483,14 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 			return FALSE;
 		}
 	}
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_ENABLE_SYSTEM_SUPPORT_CHECK
 
 	if(TrackerSettings::Instance().FirstRun)
 	{
 		new WelcomeDlg(m_pMainWnd);
 	} else
 	{
-#if !defined(MPT_BUILD_RETRO)
+#if defined(MPT_ENABLE_SYSTEM_SUPPORT_CHECK)
 		bool deprecatedSoundDevice = GetSoundDevicesManager()->FindDeviceInfo(TrackerSettings::Instance().GetSoundDeviceIdentifier()).IsDeprecated();
 		bool showSettings = deprecatedSoundDevice && !TrackerSettings::Instance().m_SoundDeprecatedDeviceWarningShown && (Reporting::Confirm(
 			U_("You have currently selected a sound device which is deprecated. MME/WaveOut support will be removed in a future OpenMPT version.\n") +
@@ -1503,7 +1503,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 			TrackerSettings::Instance().m_SoundDeprecatedDeviceWarningShown = true;
 			m_pMainWnd->PostMessage(WM_COMMAND, ID_VIEW_OPTIONS);
 		}
-#endif // !MPT_BUILD_RETRO
+#endif // MPT_ENABLE_SYSTEM_SUPPORT_CHECK
 	}
 
 #ifdef ENABLE_TESTS
