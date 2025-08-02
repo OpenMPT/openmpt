@@ -553,10 +553,13 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	{
 		return false;
 	}
+#if (MPG123_API_VERSION >= 45)
 	if(mpg123_param(mh, MPG123_REMOVE_FLAGS, MPG123_FLOAT_FALLBACK, 0.0)) // allow float
 	{
 		return false;
 	}
+#endif
+#if (MPG123_API_VERSION >= 44)
 	if(mpg123_format_none(mh))
 	{
 		return false;
@@ -589,6 +592,49 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 	{
 		return false;
 	}
+#else
+	const long *rates = nullptr;
+	size_t num_rates = 0;
+	mpg123_rates(&rates, &num_rates);
+	if(rates && (num_rates > 0))
+	{
+		if(mpg123_format_none(mh))
+		{
+			return false;
+		}
+		for(std::size_t i = 0; i < num_rates; ++i)
+		{
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_UNSIGNED_8))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_SIGNED_8))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_SIGNED_16))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_SIGNED_24))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_SIGNED_32))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_FLOAT_32))
+			{
+				return false;
+			}
+			if(mpg123_format(mh, rates[i], MPG123_MONO | MPG123_STEREO, MPG123_ENC_FLOAT_64))
+			{
+				return false;
+			}
+		}
+	}
+#endif
 #if (MPG123_API_VERSION >= 48) && MPT_USE_MPG123_PORTABLE_API
 	if(mpg123_reader64(mh, ComponentMPG123::FileReaderRead, ComponentMPG123::FileReaderSeek, 0))
 	{
