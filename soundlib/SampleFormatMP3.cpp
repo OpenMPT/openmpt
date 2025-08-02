@@ -559,7 +559,7 @@ bool CSoundFile::ReadMP3Sample(SAMPLEINDEX sample, FileReader &file, bool raw, b
 		return false;
 	}
 #endif
-#if (MPG123_API_VERSION >= 44)
+#if (MPG123_API_VERSION >= 45)
 	if(mpg123_format_none(mh))
 	{
 		return false;
