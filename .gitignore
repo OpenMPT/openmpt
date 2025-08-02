@@ -332,6 +332,8 @@
 /include/lame/mpglib/Makefile.in
 /include/lame/mpglib/README
 /include/lame/mpglib/depcomp
+/include/lhasa/.github
+/include/lhasa/.lvimrc
 /include/lhasa/m4
 /include/lhasa/test
 /include/minimp3/*.d
