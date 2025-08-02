@@ -117,6 +117,38 @@
 /* #define DEBUG */
 /* #define EXTRA_DEBUG */
 
+/* Arch */
+
+#if defined(_MSC_VER)
+#define WORDS_LITTLEENDIAN 1
+#elif defined(__GNUC__) || defined(__clang__)
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define WORDS_LITTLEENDIAN 1
+#endif
+#elif defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) && defined(__ORDER_LITTLE_ENDIAN__)
+#if __ORDER_BIG_ENDIAN__ != __ORDER_LITTLE_ENDIAN__
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define WORDS_BIGENDIAN 1
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define WORDS_LITTLEENDIAN 1
+#endif
+#endif
+#endif
+// fallback
+#if !defined(WORDS_BIGENDIAN) && !defined(WORDS_LITTLEENDIAN)
+#if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) || (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)) || (defined(_STLP_BIG_ENDIAN) && !defined(_STLP_LITTLE_ENDIAN))
+#define WORDS_BIGENDIAN 1
+#elif (defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)) || (defined(__LITTLE_ENDIAN__) && !defined(__BIG_ENDIAN__)) || (defined(_STLP_LITTLE_ENDIAN) && !defined(_STLP_BIG_ENDIAN))
+#define WORDS_LITTLEENDIAN 1
+#elif defined(__hpux) || defined(__hppa) || defined(_MIPSEB) || defined(__s390__)
+#define WORDS_BIGENDIAN 1
+#elif defined(__i386__) || defined(_M_IX86) || defined(__amd64) || defined(__amd64__) || defined(_M_AMD64) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) || defined(__bfin__)
+#define WORDS_LITTLEENDIAN 1
+#endif
+#endif
+
 /* Precision */
 
 /* use floating point */
