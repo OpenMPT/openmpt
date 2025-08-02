@@ -37,7 +37,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 static uint64_t unix_epoch_offset = 0;
 
-int lha_arch_vasprintf(char **result, char *fmt, va_list args)
+int lha_arch_vasprintf(char **result, const char *fmt, va_list args)
 {
 	int len;
 

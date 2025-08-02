@@ -425,7 +425,7 @@ static size_t macbinary_decoder_read(void *_decoder, uint8_t *buf)
 	return result;
 }
 
-static LHADecoderType macbinary_decoder_type = {
+static const LHADecoderType macbinary_decoder_type = {
 	macbinary_decoder_init,
 	NULL,
 	macbinary_decoder_read,

@@ -13,7 +13,7 @@ copy /y ..\include\ancient\src\BZIP2Table.hpp                        .\Licenses\
 copy /y ..\include\cryptopp\License.txt                              .\Licenses\License.CryptoPP.txt || goto error
 copy /y ..\include\flac\COPYING.Xiph                                 .\Licenses\License.FLAC.txt || goto error
 copy /y ..\include\lame\COPYING                                      .\Licenses\License.lame.txt || goto error
-copy /y ..\include\lhasa\COPYING                                     .\Licenses\License.lhasa.txt || goto error
+copy /y ..\include\lhasa\COPYING.md                                  .\Licenses\License.lhasa.txt || goto error
 copy /y ..\include\minimp3\LICENSE                                   .\Licenses\License.minimp3.txt || goto error
 rem copy /y ..\include\miniz\LICENSE                                     .\Licenses\License.miniz.txt || goto error
 copy /y ..\include\mpg123\COPYING                                    .\Licenses\License.mpg123.txt || goto error

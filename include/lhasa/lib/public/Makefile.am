@@ -1,4 +1,4 @@
-headerfilesdir=$(includedir)/liblhasa-1.0
+headerfilesdir=$(includedir)/liblhasa-$(PACKAGE_VERSION)
 headerfiles_HEADERS=      \
    lhasa.h                \
    lha_decoder.h          \

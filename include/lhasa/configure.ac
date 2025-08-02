@@ -1,7 +1,15 @@
-AC_INIT([Lhasa],[0.4.0],[fraggle@gmail.com],[lhasa])
+AC_INIT([Lhasa],[0.5.0],[fraggle@gmail.com],[lhasa])
 AC_CONFIG_AUX_DIR(autotools)
 
-AM_INIT_AUTOMAKE([no-define])
+# The version information below should be updated with each new release.
+# See <https://www.gnu.org/software/libtool/manual/html_node/Versioning.html>
+# for documentation about how this works.
+LIBVER_CURRENT=1
+LIBVER_REVISION=0
+LIBVER_AGE=1
+
+AM_INIT_AUTOMAKE([no-define foreign])
+
 LT_INIT
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -62,6 +70,9 @@ if [[ "$use_valgrind" = "true" ]]; then
 fi
 
 AM_CONDITIONAL(USE_VALGRIND, $use_valgrind)
+
+LT_LIBRARY_VERSION=$LIBVER_CURRENT:$LIBVER_REVISION:$LIBVER_AGE
+AC_SUBST(LT_LIBRARY_VERSION)
 
 # Save the default CFLAGS and clear them, so that the test build
 # of the library doesn't get the optimisation flags.

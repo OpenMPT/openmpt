@@ -79,11 +79,12 @@ typedef size_t (*LHADecoderCallback)(void *buf, size_t buf_len,
 
 /**
  * Callback function used for monitoring decode progress.
- * The callback is invoked for every block processed (block size depends on
- * decode algorithm).
+ * The callback is invoked for every block processed; the block size that is
+ * chosen is arbitrary and depends on the decode algorithm and file size, but
+ * you should not make any assumptions about how many bytes are in a block.
  *
- * @param num_blocks      Number of blocks processed so far.
- * @param total_blocks    Total number of blocks to process.
+ * @param num_blocks     Number of blocks processed so far.
+ * @param total_blocks   Total number of blocks to process.
  * @param callback_data  Extra user-specified data passed to the callback.
  */
 
@@ -100,7 +101,10 @@ typedef void (*LHADecoderProgressCallback)(unsigned int num_blocks,
  *                       is no decoder type for the specified name.
  */
 
-LHADecoderType *lha_decoder_for_name(char *name);
+const LHADecoderType *lha_decoder_for_name(const char *name);
+
+/* This macro performs a rename for ABI backwards-compatibility. */
+#define lha_decoder_new lha_decoder_new64
 
 /**
  * Allocate a new decoder for the specified type.
@@ -114,10 +118,10 @@ LHADecoderType *lha_decoder_for_name(char *name);
  * @return               Pointer to the new decoder, or NULL for failure.
  */
 
-LHADecoder *lha_decoder_new(LHADecoderType *dtype,
+LHADecoder *lha_decoder_new(const LHADecoderType *dtype,
                             LHADecoderCallback callback,
                             void *callback_data,
-                            size_t stream_length);
+                            uint64_t stream_length);
 
 /**
  * Free a decoder.
@@ -163,6 +167,9 @@ size_t lha_decoder_read(LHADecoder *decoder, uint8_t *buf, size_t buf_len);
 
 uint16_t lha_decoder_get_crc(LHADecoder *decoder);
 
+/* This macro performs a rename for ABI backwards-compatibility. */
+#define lha_decoder_get_length lha_decoder_get_length64
+
 /**
  * Get the count of the number of bytes decoded.
  *
@@ -173,7 +180,7 @@ uint16_t lha_decoder_get_crc(LHADecoder *decoder);
  * @return               The number of decoded bytes.
  */
 
-size_t lha_decoder_get_length(LHADecoder *decoder);
+uint64_t lha_decoder_get_length(LHADecoder *decoder);
 
 #ifdef __cplusplus
 }

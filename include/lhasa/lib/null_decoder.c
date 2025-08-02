@@ -50,7 +50,7 @@ static size_t lha_null_read(void *data, uint8_t *buf)
 	return decoder->callback(buf, BLOCK_READ_SIZE, decoder->callback_data);
 }
 
-LHADecoderType lha_null_decoder = {
+const LHADecoderType lha_null_decoder = {
 	lha_null_init,
 	NULL,
 	lha_null_read,

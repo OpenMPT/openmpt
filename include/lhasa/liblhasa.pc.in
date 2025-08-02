@@ -7,4 +7,4 @@ Name: liblhasa
 Description: LHA (de)compression library
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -llhasa
-Cflags: -I${includedir}/liblhasa-1.0
+Cflags: -I${includedir}/liblhasa-@PACKAGE_VERSION@

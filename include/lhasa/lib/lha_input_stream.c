@@ -29,19 +29,21 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 // Maximum length of the self-extractor header.
 // If we don't find an LHA file header after this many bytes, give up.
+// Largest sfx header we know are the DECLHA ones.
 
-#define MAX_SFX_HEADER_LEN 65536
+#define MAX_SFX_HEADER_LEN (256 * 1024)
 
 // Size of the lead-in buffer used to skip the self-extractor.
 
 #define LEADIN_BUFFER_LEN 24
 
-// Magic string to detect an Amiga LhASFX self-extracting file.
-// This type of self-extractor is special because the program itself
-// contains a mini-LHA file that must be skipped over to get to
-// the real one.
+// Magic strings to detect certain self-extracting files.
+// These types of self-extractor are special because the program itself
+// contains something resembling an LHA header that must be skipped over to get
+// to the real one.
 
-#define AMIGA_LHASFX_ID "LhASFX V1.2,"
+#define AMIGA_LHASFX_ID "LhASFX V1.2,"  /* Amiga LhASFX */
+#define DECLHA_SFX_ID "LHA-SFX"
 
 typedef enum {
 	LHA_INPUT_STREAM_INIT,
@@ -173,9 +175,10 @@ static int skip_sfx(LHAInputStream *stream)
 				}
 			}
 
-			// Detect Amiga self-extractor.
-
-			if (!memcmp(stream->leadin + i, AMIGA_LHASFX_ID,
+			// Detect special case self-extractors.
+			if (!memcmp(stream->leadin + i, DECLHA_SFX_ID,
+			            strlen(DECLHA_SFX_ID))
+			 || !memcmp(stream->leadin + i, AMIGA_LHASFX_ID,
 			            strlen(AMIGA_LHASFX_ID))) {
 				skip_files = 1;
 			}
