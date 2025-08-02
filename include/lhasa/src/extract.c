@@ -36,8 +36,8 @@ typedef struct {
 	int invoked;
 	LHAFileHeader *header;
 	LHAOptions *options;
-	char *filename;
-	char *operation;
+	const char *filename;
+	const char *operation;
 } ProgressCallbackData;
 
 // Given a file header structure, get the path to extract to.
@@ -109,14 +109,14 @@ static char *file_full_path(LHAFileHeader *header, LHAOptions *options)
 	return result;
 }
 
-static void print_filename(char *filename, char *status)
+static void print_filename(const char *filename, const char *status)
 {
 	printf("\r");
 	safe_printf("%s", filename);
 	printf("\t- %s  ", status);
 }
 
-static void print_filename_brief(char *filename)
+static void print_filename_brief(const char *filename)
 {
 	printf("\r");
 	safe_printf("%s :", filename);
@@ -254,20 +254,22 @@ static int check_parent_directory(char *path)
 			// Create the missing directory:
 
 			if (!lha_arch_mkdir(path, 0755)) {
-				fprintf(stderr,
-				        "Failed to create parent directory %s\n",
-				        path);
+				safe_fprintf(stderr, "Failed to create parent "
+				             "directory %s", path);
+				fprintf(stderr, "\n");
 				return 0;
 			}
 			break;
 
 		case LHA_FILE_FILE:
-			fprintf(stderr, "Parent path %s is not a directory!\n",
-			        path);
+			safe_fprintf(stderr, "Parent path %s is not a "
+			             "directory!", path);
+			fprintf(stderr, "\n");
 			return 0;
 
 		case LHA_FILE_ERROR:
-			fprintf(stderr, "Failed to stat %s\n", path);
+			safe_fprintf(stderr, "Failed to stat %s", path);
+			fprintf(stderr, "\n");
 			return 0;
 	}
 
@@ -335,7 +337,7 @@ static int make_parent_directories(char *orig_path)
 // Prompt the user with a message, and return the first character of
 // the typed response.
 
-static char prompt_user(char *message)
+static char prompt_user(const char *message)
 {
 	char result;
 	int c;
@@ -414,7 +416,9 @@ static int file_exists(char *filename)
 	file_type = lha_arch_exists(filename);
 
 	if (file_type == LHA_FILE_ERROR) {
-		fprintf(stderr, "Failed to read file type of '%s'\n", filename);
+		safe_fprintf(stderr, "Failed to read file type of '%s'",
+		             filename);
+		fprintf(stderr, "\n");
 		exit(-1);
 	}
 
@@ -452,6 +456,7 @@ static int extract_archived_file(LHAReader *reader,
 	// No need to extract directories if use_path is disabled.
 
 	if (!options->use_path && is_dir) {
+		free(filename);
 		return 1;
 	}
 

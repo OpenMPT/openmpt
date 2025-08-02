@@ -41,6 +41,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #define LHA_EXT_HEADER_COMMENT             0x3f
 
 #define LHA_EXT_HEADER_WINDOWS_TIMESTAMPS  0x41
+#define LHA_EXT_HEADER_FILE_SIZES          0x42
 
 #define LHA_EXT_HEADER_UNIX_PERMISSION     0x50
 #define LHA_EXT_HEADER_UNIX_UID_GID        0x51
@@ -106,7 +107,7 @@ static int ext_header_common_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_common = {
+static const LHAExtHeaderType lha_ext_header_common = {
 	LHA_EXT_HEADER_COMMON,
 	ext_header_common_decoder,
 	2
@@ -150,7 +151,7 @@ static int ext_header_filename_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_filename = {
+static const LHAExtHeaderType lha_ext_header_filename = {
 	LHA_EXT_HEADER_FILENAME,
 	ext_header_filename_decoder,
 	1
@@ -200,7 +201,7 @@ static int ext_header_path_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_path = {
+static const LHAExtHeaderType lha_ext_header_path = {
 	LHA_EXT_HEADER_PATH,
 	ext_header_path_decoder,
 	1
@@ -224,12 +225,47 @@ static int ext_header_windows_timestamps(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_windows_timestamps = {
+static const LHAExtHeaderType lha_ext_header_windows_timestamps = {
 	LHA_EXT_HEADER_WINDOWS_TIMESTAMPS,
 	ext_header_windows_timestamps,
 	24
 };
 
+// File sizes header (0x42).
+//
+// This contains 64-bit versions of the uncompressed/compressed file size
+// header fields, for storing very long files.
+
+static int ext_header_file_size_decoder(LHAFileHeader *header, uint8_t *data,
+                                        size_t data_len)
+{
+	header->extra_flags |= LHA_FILE_64BIT_SIZES;
+	header->compressed_length = lha_decode_uint64(data);
+	header->length = lha_decode_uint64(data + 8);
+
+	// We populate the old ABI size fields, which used size_t. On some
+	// systems this is a 32-bit integer, so if the new values would
+	// overflow this, store the maximum value possible instead.
+	if (header->compressed_length > SIZE_MAX) {
+		header->_old_compressed_length = SIZE_MAX;
+	} else {
+		header->_old_compressed_length =
+			(size_t) header->compressed_length;
+	}
+	if (header->length > SIZE_MAX) {
+		header->_old_length = SIZE_MAX;
+	} else {
+		header->_old_length = (size_t) header->length;
+	}
+
+	return 1;
+}
+
+static const LHAExtHeaderType lha_ext_header_file_sizes = {
+	LHA_EXT_HEADER_FILE_SIZES,
+	ext_header_file_size_decoder,
+	16
+};
 
 // Unix permissions header (0x50).
 
@@ -243,7 +279,7 @@ static int ext_header_unix_perms_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_unix_perms = {
+static const LHAExtHeaderType lha_ext_header_unix_perms = {
 	LHA_EXT_HEADER_UNIX_PERMISSION,
 	ext_header_unix_perms_decoder,
 	2
@@ -262,7 +298,7 @@ static int ext_header_unix_uid_gid_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_unix_uid_gid = {
+static const LHAExtHeaderType lha_ext_header_unix_uid_gid = {
 	LHA_EXT_HEADER_UNIX_UID_GID,
 	ext_header_unix_uid_gid_decoder,
 	4
@@ -294,7 +330,7 @@ static int ext_header_unix_username_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_unix_username = {
+static const LHAExtHeaderType lha_ext_header_unix_username = {
 	LHA_EXT_HEADER_UNIX_USER,
 	ext_header_unix_username_decoder,
 	1
@@ -327,7 +363,7 @@ static int ext_header_unix_group_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_unix_group = {
+static const LHAExtHeaderType lha_ext_header_unix_group = {
 	LHA_EXT_HEADER_UNIX_GROUP,
 	ext_header_unix_group_decoder,
 	1
@@ -347,7 +383,7 @@ static int ext_header_unix_timestamp_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_unix_timestamp = {
+static const LHAExtHeaderType lha_ext_header_unix_timestamp = {
 	LHA_EXT_HEADER_UNIX_TIMESTAMP,
 	ext_header_unix_timestamp_decoder,
 	4
@@ -371,7 +407,7 @@ static int ext_header_os9_decoder(LHAFileHeader *header,
 	return 1;
 }
 
-static LHAExtHeaderType lha_ext_header_os9 = {
+static const LHAExtHeaderType lha_ext_header_os9 = {
 	LHA_EXT_HEADER_OS9,
 	ext_header_os9_decoder,
 	12
@@ -379,7 +415,7 @@ static LHAExtHeaderType lha_ext_header_os9 = {
 
 // Table of extended headers.
 
-static const LHAExtHeaderType *ext_header_types[] = {
+static const LHAExtHeaderType *const ext_header_types[] = {
 	&lha_ext_header_common,
 	&lha_ext_header_filename,
 	&lha_ext_header_path,
@@ -389,6 +425,7 @@ static const LHAExtHeaderType *ext_header_types[] = {
 	&lha_ext_header_unix_group,
 	&lha_ext_header_unix_timestamp,
 	&lha_ext_header_windows_timestamps,
+	&lha_ext_header_file_sizes,
 	&lha_ext_header_os9,
 };
 

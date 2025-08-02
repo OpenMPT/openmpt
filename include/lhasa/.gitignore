@@ -1,3 +1,4 @@
+*~
 *.o
 *.lo
 *.la
@@ -5,7 +6,6 @@
 *.gcno
 *.gcda
 *.c.gcov
-*.exe
 .deps
 .libs
 .gitignore

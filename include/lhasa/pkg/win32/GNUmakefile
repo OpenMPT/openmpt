@@ -14,9 +14,9 @@ staging: $(EXE_FILES) $(patsubst %,$(TOPLEVEL)/%,$(DOC_FILES))
 	mkdir staging
 	cp $(EXE_FILES) staging/
 	$(STRIP) staging/*.exe
-	for f in $(DOC_FILES); do                      \
-	    cp $(TOPLEVEL)/$$f staging/$$f.txt;        \
-	    unix2dos staging/$$f.txt;                  \
+	for f in $(DOC_FILES); do                       \
+	    cp $(TOPLEVEL)/$$f staging/$${f/.md/}.txt;  \
+	    unix2dos staging/$${f/.md/}.txt;            \
 	done
 	groff -Thtml -mandoc $(TOPLEVEL)/doc/lha.1 > staging/lha.html
 

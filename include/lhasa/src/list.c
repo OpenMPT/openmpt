@@ -32,13 +32,13 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 typedef struct {
 	unsigned int num_files;
-	unsigned int compressed_length;
-	unsigned int length;
+	uint64_t compressed_length;
+	uint64_t length;
 	unsigned int timestamp;
 } FileStatistics;
 
 typedef struct {
-	char *name;
+	const char *name;
 	unsigned int width;
 	void (*handler)(LHAFileHeader *header);
 	void (*footer)(FileStatistics *stats);
@@ -46,8 +46,11 @@ typedef struct {
 
 // Display OS type:
 
-static char *os_type_to_string(uint8_t os_type)
+static const char *os_type_to_string(uint8_t os_type)
 {
+	// Note that the OS type string returned here should always be
+	// a single "word" (no spaces) to make output more consistent and
+	// easier to parse by higher-level programs.
 	switch (os_type) {
 		case LHA_OS_TYPE_MSDOS:
 			return "[MS-DOS]";
@@ -62,7 +65,8 @@ static char *os_type_to_string(uint8_t os_type)
 		case LHA_OS_TYPE_CPM:
 			return "[CP/M]";
 		case LHA_OS_TYPE_MACOS:
-			return "[Mac OS]";
+			// Unix lha showed "Mac OS" (with space) here:
+			return "[MacOS]";
 		case LHA_OS_TYPE_JAVA:
 			return "[Java]";
 		case LHA_OS_TYPE_FLEX:
@@ -161,7 +165,7 @@ static void permission_column_footer(FileStatistics *stats)
 	printf(" Total    ");
 }
 
-static ListColumn permission_column = {
+static const ListColumn permission_column = {
 	" PERMSSN", 10,
 	permission_column_print,
 	permission_column_footer
@@ -174,7 +178,11 @@ static void unix_uid_gid_column_print(LHAFileHeader *header)
 	if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_UNIX_UID_GID)) {
 		printf("%5i/%-5i", header->unix_uid, header->unix_gid);
 	} else {
-		printf("           ");
+		// Note: Original Unix lha shows whitespace here, but we
+		// instead print a dummy spacer word to be kinder to programs
+		// that parse our output (see Lhasa bug #59)
+		//printf("           ");
+		printf("*****/*****");
 	}
 }
 
@@ -190,7 +198,7 @@ static void unix_uid_gid_column_footer(FileStatistics *stats)
 	}
 }
 
-static ListColumn unix_uid_gid_column = {
+static const ListColumn unix_uid_gid_column = {
 	" UID  GID", 11,
 	unix_uid_gid_column_print,
 	unix_uid_gid_column_footer
@@ -200,15 +208,15 @@ static ListColumn unix_uid_gid_column = {
 
 static void packed_column_print(LHAFileHeader *header)
 {
-	printf("%7lu", (unsigned long) header->compressed_length);
+	printf("%7" PRIu64, header->compressed_length);
 }
 
 static void packed_column_footer(FileStatistics *stats)
 {
-	printf("%7lu", (unsigned long) stats->compressed_length);
+	printf("%7" PRIu64, stats->compressed_length);
 }
 
-static ListColumn packed_column = {
+static const ListColumn packed_column = {
 	" PACKED", 7,
 	packed_column_print,
 	packed_column_footer
@@ -218,15 +226,15 @@ static ListColumn packed_column = {
 
 static void size_column_print(LHAFileHeader *header)
 {
-	printf("%7lu", (unsigned long) header->length);
+	printf("%7" PRIu64, header->length);
 }
 
 static void size_column_footer(FileStatistics *stats)
 {
-	printf("%7lu", (unsigned long) stats->length);
+	printf("%7" PRIu64, stats->length);
 }
 
-static ListColumn size_column = {
+static const ListColumn size_column = {
 	"   SIZE", 7,
 	size_column_print,
 	size_column_footer
@@ -234,13 +242,22 @@ static ListColumn size_column = {
 
 // Compression ratio
 
-static float compression_percent(size_t compressed, size_t uncompressed)
+static const char *compression_percent(size_t compressed, size_t uncompressed)
 {
+	static char buf[10];
+	int permille;
+
+	// We pessimistically round the compression ratio up to the next 0.1%,
+	// so that even if eg. a 10,000:1 ratio was achieved, it will be shown
+	// as "0.1%", not "0.0%". This is marginally more honest.
 	if (uncompressed > 0) {
-		return ((float) compressed * 100.0f) / (float) uncompressed;
+		permille = (compressed * 1000 + uncompressed - 1) / uncompressed;
 	} else {
-		return 100.0f;
+		permille = 1000;
 	}
+
+	snprintf(buf, sizeof(buf), "%3d.%1d%%", permille / 10, permille % 10);
+	return buf;
 }
 
 static void ratio_column_print(LHAFileHeader *header)
@@ -248,8 +265,8 @@ static void ratio_column_print(LHAFileHeader *header)
 	if (!strcmp(header->compress_method, "-lhd-")) {
 		printf("******");
 	} else {
-		printf("%5.1f%%", compression_percent(header->compressed_length,
-		                                      header->length));
+		printf("%s", compression_percent(header->compressed_length,
+		                                 header->length));
 	}
 }
 
@@ -258,12 +275,12 @@ static void ratio_column_footer(FileStatistics *stats)
 	if (stats->length == 0) {
 		printf("******");
 	} else {
-		printf("%5.1f%%", compression_percent(stats->compressed_length,
-		                                      stats->length));
+		printf("%s", compression_percent(stats->compressed_length,
+		                                 stats->length));
 	}
 }
 
-static ListColumn ratio_column = {
+static const ListColumn ratio_column = {
 	" RATIO", 6,
 	ratio_column_print,
 	ratio_column_footer
@@ -276,7 +293,7 @@ static void method_crc_column_print(LHAFileHeader *header)
 	printf("%-5s %04x", header->compress_method, header->crc);
 }
 
-static ListColumn method_crc_column = {
+static const ListColumn method_crc_column = {
 	"METHOD CRC", 10,
 	method_crc_column_print
 };
@@ -316,7 +333,7 @@ static void output_timestamp(unsigned int timestamp)
 	time_t tmp;
 
 	if (timestamp == 0) {
-		printf("            ");
+		printf("*** ** *****");
 		return;
 	}
 
@@ -345,7 +362,7 @@ static void output_full_timestamp(unsigned int timestamp)
 	time_t tmp;
 
 	if (timestamp == 0) {
-		printf("                   ");
+		printf("********** ********");
 		return;
 	}
 
@@ -380,13 +397,13 @@ static void full_timestamp_column_footer(FileStatistics *stats)
 	output_full_timestamp(stats->timestamp);
 };
 
-static ListColumn timestamp_column = {
+static const ListColumn timestamp_column = {
 	"    STAMP", 12,
 	timestamp_column_print,
 	timestamp_column_footer
 };
 
-static ListColumn full_timestamp_column = {
+static const ListColumn full_timestamp_column = {
 	"    STAMP", 19,
 	full_timestamp_column_print,
 	full_timestamp_column_footer
@@ -407,12 +424,12 @@ static void name_column_print(LHAFileHeader *header)
 	}
 }
 
-static ListColumn name_column = {
+static const ListColumn name_column = {
 	"       NAME", 20,
 	name_column_print
 };
 
-static ListColumn short_name_column = {
+static const ListColumn short_name_column = {
 	"      NAME", 13,
 	name_column_print
 };
@@ -441,7 +458,7 @@ static void whole_line_name_column_print(LHAFileHeader *header)
 	printf("\n");
 }
 
-static ListColumn whole_line_name_column = {
+static const ListColumn whole_line_name_column = {
 	"", 0,
 	whole_line_name_column_print
 };
@@ -453,7 +470,7 @@ static void header_level_column_print(LHAFileHeader *header)
 	printf("[%i]", header->header_level);
 }
 
-static ListColumn header_level_column = {
+static const ListColumn header_level_column = {
 	" LV", 3,
 	header_level_column_print
 };
@@ -462,9 +479,9 @@ static ListColumn header_level_column = {
 // column with a width > 0. Beyond this last column it isn't necessary
 // to print any more whitespace.
 
-static ListColumn *last_column(ListColumn **columns)
+static const ListColumn *last_column(const ListColumn *const *columns)
 {
-	ListColumn *last;
+	const ListColumn *last;
 	unsigned int i;
 
 	last = NULL;
@@ -480,9 +497,9 @@ static ListColumn *last_column(ListColumn **columns)
 
 // Print the names of the column headings at the top of the file list.
 
-static void print_list_headings(ListColumn **columns)
+static void print_list_headings(const ListColumn *const *columns)
 {
-	ListColumn *last;
+	const ListColumn *last;
 	unsigned int i, j;
 
 	last = last_column(columns);
@@ -502,9 +519,9 @@ static void print_list_headings(ListColumn **columns)
 
 // Print separator lines shown at top and bottom of file list.
 
-static void print_list_separators(ListColumn **columns)
+static void print_list_separators(const ListColumn *const *columns)
 {
-	ListColumn *last;
+	const ListColumn *last;
 	unsigned int i, j;
 
 	last = last_column(columns);
@@ -524,9 +541,9 @@ static void print_list_separators(ListColumn **columns)
 
 // Print a row in the list corresponding to a file.
 
-static void print_columns(ListColumn **columns, LHAFileHeader *header)
+static void print_columns(const ListColumn *const *columns, LHAFileHeader *header)
 {
-	ListColumn *last;
+	const ListColumn *last;
 	unsigned int i;
 
 	last = last_column(columns);
@@ -544,7 +561,7 @@ static void print_columns(ListColumn **columns, LHAFileHeader *header)
 
 // Print footer information shown at end of list (overall file stats)
 
-static void print_footers(ListColumn **columns, FileStatistics *stats)
+static void print_footers(const ListColumn *const *columns, FileStatistics *stats)
 {
 	unsigned int i, j, len;
 	unsigned int num_columns;
@@ -599,7 +616,7 @@ static unsigned int read_file_timestamp(FILE *fstream)
 // Different columns are provided for basic and verbose modes.
 
 static void list_file_contents(LHAFilter *filter, FILE *fstream,
-                               LHAOptions *options, ListColumn **columns)
+                               LHAOptions *options, const ListColumn *const *columns)
 {
 	FileStatistics stats;
 
@@ -637,7 +654,7 @@ static void list_file_contents(LHAFilter *filter, FILE *fstream,
 
 // Used for lha -l:
 
-static ListColumn *normal_column_headers[] = {
+static const ListColumn *const normal_column_headers[] = {
 	&permission_column,
 	&unix_uid_gid_column,
 	&size_column,
@@ -649,7 +666,7 @@ static ListColumn *normal_column_headers[] = {
 
 // Used for lha -lv:
 
-static ListColumn *normal_column_headers_verbose[] = {
+static const ListColumn *const normal_column_headers_verbose[] = {
 	&whole_line_name_column,
 	&permission_column,
 	&unix_uid_gid_column,
@@ -664,7 +681,7 @@ static ListColumn *normal_column_headers_verbose[] = {
 
 void list_file_basic(LHAFilter *filter, LHAOptions *options, FILE *fstream)
 {
-	ListColumn **headers;
+	const ListColumn *const *headers;
 
 	if (options->verbose) {
 		headers = normal_column_headers_verbose;
@@ -677,7 +694,7 @@ void list_file_basic(LHAFilter *filter, LHAOptions *options, FILE *fstream)
 
 // Used for lha -v:
 
-static ListColumn *verbose_column_headers[] = {
+static const ListColumn *const verbose_column_headers[] = {
 	&permission_column,
 	&unix_uid_gid_column,
 	&packed_column,
@@ -691,7 +708,7 @@ static ListColumn *verbose_column_headers[] = {
 
 // Used for lha -vv:
 
-static ListColumn *verbose_column_headers_verbose[] = {
+static const ListColumn *const verbose_column_headers_verbose[] = {
 	&whole_line_name_column,
 	&permission_column,
 	&unix_uid_gid_column,
@@ -708,7 +725,7 @@ static ListColumn *verbose_column_headers_verbose[] = {
 
 void list_file_verbose(LHAFilter *filter, LHAOptions *options, FILE *fstream)
 {
-	ListColumn **headers;
+	const ListColumn *const *headers;
 
 	if (options->verbose) {
 		headers = verbose_column_headers_verbose;

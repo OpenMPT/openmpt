@@ -538,7 +538,7 @@ static size_t lha_pm2_decoder_read(void *data, uint8_t *buf)
 	return result;
 }
 
-LHADecoderType lha_pm2_decoder = {
+const LHADecoderType lha_pm2_decoder = {
 	lha_pm2_decoder_init,
 	NULL,
 	lha_pm2_decoder_read,

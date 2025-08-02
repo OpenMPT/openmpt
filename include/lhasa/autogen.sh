@@ -1,12 +1,5 @@
 #!/bin/sh
 
 mkdir -p autotools
+autoreconf -fi && ./configure "$@"
 
-libtoolize || glibtoolize
-aclocal
-autoheader
-automake -a 
-autoconf
-automake -a
-
-./configure $@

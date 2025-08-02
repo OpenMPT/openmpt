@@ -65,7 +65,7 @@ static void safe_output(FILE *stream, unsigned char *str)
 // Note: all escape characters are considered potentially malicious,
 // including newline characters.
 
-int safe_fprintf(FILE *stream, char *format, ...)
+int safe_fprintf(FILE *stream, const char *format, ...)
 {
 	va_list args;
 	int result;
@@ -85,7 +85,7 @@ int safe_fprintf(FILE *stream, char *format, ...)
 	return result;
 }
 
-int safe_printf(char *format, ...)
+int safe_printf(const char *format, ...)
 {
 	va_list args;
 	int result;

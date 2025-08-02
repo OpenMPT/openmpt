@@ -1,12 +1,14 @@
 LIBRARY
 EXPORTS
-;cat include/lhasa/lib/public/*.h | grep -v '^ ' | sed 's/\*//g' | tr '\t' ' ' | grep -v '^ ' | grep ' lha_' | tr '\(' ' ' | awk '{print $2;}' | sort
+;cat include/lhasa/lib/public/*.h | grep -v '^ ' | grep -v '^#include' | tr '\t' ' ' | grep -v '^ ' | grep 'lha_' | tr '\(' ' ' | tr '\*' ' ' | tr ' ' '\n' | grep 'lha_' | sort | uniq
 lha_decoder_for_name
 lha_decoder_free
 lha_decoder_get_crc
 lha_decoder_get_length
+lha_decoder_get_length64
 lha_decoder_monitor
 lha_decoder_new
+lha_decoder_new64
 lha_decoder_read
 lha_input_stream_free
 lha_input_stream_from

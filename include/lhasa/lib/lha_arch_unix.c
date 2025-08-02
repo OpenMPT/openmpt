@@ -40,7 +40,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // implementation of it, but develop a compatible workaround for
 // operating systems that don't have it.
 
-int lha_arch_vasprintf(char **result, char *fmt, va_list args)
+int lha_arch_vasprintf(char **result, const char *fmt, va_list args)
 {
 	return vasprintf(result, fmt, args);
 }

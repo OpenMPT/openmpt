@@ -21,7 +21,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #ifndef LHASA_SAFE_H
 #define LHASA_SAFE_H
 
-int safe_fprintf(FILE *stream, char *format, ...);
-int safe_printf(char *format, ...);
+int safe_fprintf(FILE *stream, const char *format, ...);
+int safe_printf(const char *format, ...);
 
 #endif /* #ifndef LHASA_SAFE_H */

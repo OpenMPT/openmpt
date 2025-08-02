@@ -712,7 +712,7 @@ static size_t lha_lh1_read(void *data, uint8_t *buf)
 	return result;
 }
 
-LHADecoderType lha_lh1_decoder = {
+const LHADecoderType lha_lh1_decoder = {
 	lha_lh1_init,
 	NULL,
 	lha_lh1_read,
