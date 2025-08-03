@@ -39,8 +39,8 @@ rem Get current 7zip commandline version which can unpack 7zip and the 7zip inst
 rem Get 7zip installer and unpack it with current commandline 7zip
 rem This is a mess for automation. Oh well.
 cscript build\scriptlib\unpack-zip.vbs "build\externals\7za920.zip" "build\tools\7zipold" || goto error
-build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z2500-extra.7z" || goto error
-build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z2500-x64.exe" || goto error
+build\tools\7zipold\7za.exe x -y -obuild\tools\7zipa "build\externals\7z2501-extra.7z" || goto error
+build\tools\7zipa\7za.exe x -y -obuild\tools\7zip "build\externals\7z2501-x64.exe" || goto error
 
 call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp.exe" "." || goto error
 
