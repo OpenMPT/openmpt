@@ -19,6 +19,8 @@
 
 #include "mpg123lib_intern.h"
 
+#if defined(OPT_I486)  /* OpenMPT */
+
 #define COS_0_0 16403
 #define COS_0_1 16563
 #define COS_0_2 16890
@@ -340,3 +342,4 @@ void INT123_dct64_i486(int *a,int *b,real *samples)
   dct64_1_486(a,b,bufs+32,bufs);
 }
 
+#endif  /* OpenMPT */
