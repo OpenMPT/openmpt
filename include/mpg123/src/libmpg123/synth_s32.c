@@ -11,7 +11,9 @@
 #include "../common/debug.h"
 
 #ifdef REAL_IS_FIXED
+#if 0  /* OpenMPT */
 #error "Do not build this file with fixed point math!"
+#endif  /* OpenMPT */
 #else
 /* 
 	Part 4: All synth functions that produce signed 32 bit output.
