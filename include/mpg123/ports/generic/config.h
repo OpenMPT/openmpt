@@ -109,16 +109,23 @@
 /* also gapless playback! */
 #define GAPLESS 1
 
-/* new huffman decoding */
-#define USE_NEW_HUFFTABLE 1
-
 /* Debugging */
 
 /* #define DEBUG */
 /* #define EXTRA_DEBUG */
 
-/* Arch */
+/* CPU Features */
 
+/* use floating point */
+#define REAL_IS_FLOAT 1
+
+/* use rounding instead of trunction */
+#define ACCURATE_ROUNDING 1
+
+/* new huffman decoding */
+#define USE_NEW_HUFFTABLE 1
+
+/* Endian */
 #if defined(_MSC_VER)
 #define WORDS_LITTLEENDIAN 1
 #elif defined(__GNUC__) || defined(__clang__)
@@ -136,7 +143,7 @@
 #endif
 #endif
 #endif
-// fallback
+/* fallback */
 #if !defined(WORDS_BIGENDIAN) && !defined(WORDS_LITTLEENDIAN)
 #if (defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)) || (defined(__BIG_ENDIAN__) && !defined(__LITTLE_ENDIAN__)) || (defined(_STLP_BIG_ENDIAN) && !defined(_STLP_LITTLE_ENDIAN))
 #define WORDS_BIGENDIAN 1
@@ -149,18 +156,10 @@
 #endif
 #endif
 
-/* Precision */
-
-/* use floating point */
-#define REAL_IS_FLOAT 1
-
 /* floating point is IEEE754 */
 #if defined(_WIN32)
 #define IEEE_FLOAT 1
 #endif
-
-/* use rounding instead of trunction */
-#define ACCURATE_ROUNDING 1
 
 /* Platform */
 
