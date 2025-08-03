@@ -24,6 +24,8 @@
 
 #include "mpg123lib_intern.h"
 
+#if defined(OPT_I486)  /* OpenMPT */
+
 #define FIR16_1(pos,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15) \
 {\
   int sum;\
@@ -250,3 +252,4 @@ int INT123_absynth_1to1_i486(real *bandPtr, int channel, mpg123_handle *fr, int 
   return clip;
 }
 
+#endif  /* OpenMPT */
