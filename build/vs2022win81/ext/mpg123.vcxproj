@@ -983,6 +983,8 @@
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\compat\compat_str.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64.c" />
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64_i386.c" />
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64_i486.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dither.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\equalizer.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\feature.c" />
@@ -1004,6 +1006,7 @@
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\stringbuf.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_8bit.c" />
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_i486.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_real.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_s32.c" />
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\tabinit.c" />

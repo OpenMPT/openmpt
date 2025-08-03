@@ -161,6 +161,12 @@
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64.c">
       <Filter>src\libmpg123</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64_i386.c">
+      <Filter>src\libmpg123</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dct64_i486.c">
+      <Filter>src\libmpg123</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\dither.c">
       <Filter>src\libmpg123</Filter>
     </ClCompile>
@@ -222,6 +228,9 @@
       <Filter>src\libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_8bit.c">
+      <Filter>src\libmpg123</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_i486.c">
       <Filter>src\libmpg123</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\mpg123\src\libmpg123\synth_real.c">
