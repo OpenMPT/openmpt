@@ -126,12 +126,30 @@
 
 #elif defined(__i386__) || defined(_X86_)
 
+#ifndef MPG123_ISA_X86_386
+#define MPG123_ISA_X86_386
+#endif
+
+#if defined(__i486__)
+#ifndef MPG123_ISA_X86_486
+#define MPG123_ISA_X86_486
+#endif
+#endif
+
 #if defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8)
-#define MPG123_X86_586
-#elif defined(__i486__)
-#define MPG123_X86_486
-#else
-#define MPG123_X86_386
+#ifndef MPG123_ISA_X86_486
+#define MPG123_ISA_X86_486
+#endif
+#ifndef MPG123_ISA_X86_586
+#define MPG123_ISA_X86_586
+#endif
+#endif
+
+#if defined(__tune_i386__)
+#define MPG123_TUNE_386
+#endif
+#if defined(__tune_i486__)
+#define MPG123_TUNE_486
 #endif
 
 #elif defined(__arm__)
@@ -150,7 +168,7 @@
 
 #endif
 
-#if defined(MPG123_X86_386) && defined(MPT123_NOFPU)
+#if defined(MPG123_ISA_X86_386) && defined(MPG123_TUNE_386) && defined(MPT123_NOFPU)
 
 #ifndef OPT_I386
 #define OPT_I386
@@ -168,7 +186,7 @@
 #define REAL_IS_FIXED 1
 #define NO_SYNTH32 1
 
-#elif defined(MPG123_X86_386)
+#elif defined(MPG123_ISA_X86_386) && defined(MPG123_TUNE_386)
 
 #ifndef OPT_I386
 #define OPT_I386
@@ -176,7 +194,7 @@
 /* use floating point */
 #define REAL_IS_FLOAT 1
 
-#elif defined(MPG123_X86_486)
+#elif defined(MPG123_ISA_X86_486) && defined(MPG123_TUNE_486)
 
 #ifndef OPT_I486
 #define OPT_I486
