@@ -116,16 +116,93 @@
 
 /* CPU Features */
 
-#define OPT_GENERIC
+#if defined(__GNUC__) || defined(__clang__)
 
+#if defined(_SOFT_FLOAT)
+#define MPT123_NOFPU
+#endif
+
+#if defined(__amd64__) || defined(__x86_64__)
+
+#elif defined(__i386__) || defined(_X86_)
+
+#if defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8)
+#define MPG123_X86_586
+#elif defined(__i486__)
+#define MPG123_X86_486
+#else
+#define MPG123_X86_386
+#endif
+
+#elif defined(__arm__)
+
+#if defined(__SOFTFP__)
+#define MPT123_NOFPU
+#endif
+
+#elif defined(__mips__)
+
+#if defined(__mips_soft_float)
+#define MPT123_NOFPU
+#endif
+
+#endif
+
+#endif
+
+#if defined(MPG123_X86_386) && defined(MPT123_NOFPU)
+
+#ifndef OPT_I386
+#define OPT_I386
+#endif
+/* do not use floating point */
+#define REAL_IS_FIXED 1
+#define NO_SYNTH32 1
+
+#elif defined(MPT123_NOFPU)
+
+#ifndef OPT_GENERIC
+#define OPT_GENERIC
+#endif
+/* do not use floating point */
+#define REAL_IS_FIXED 1
+#define NO_SYNTH32 1
+
+#elif defined(MPG123_X86_386)
+
+#ifndef OPT_I386
+#define OPT_I386
+#endif
 /* use floating point */
 #define REAL_IS_FLOAT 1
 
+#elif defined(MPG123_X86_486)
+
+#ifndef OPT_I486
+#define OPT_I486
+#endif
+/* use floating point */
+#define REAL_IS_FLOAT 1
+
+#else
+
+#ifndef OPT_MULTI
+#define OPT_MULTI
+#endif
+#ifndef OPT_GENERIC
+#define OPT_GENERIC
+#endif
+#ifndef OPT_GENERIC_DITHER
+#define OPT_GENERIC_DITHER
+#endif
+/* use floating point */
+#define REAL_IS_FLOAT 1
 /* use rounding instead of trunction */
 #define ACCURATE_ROUNDING 1
-
 /* new huffman decoding */
 #define USE_NEW_HUFFTABLE 1
+
+#endif
 
 /* Endian */
 #if defined(_MSC_VER)
