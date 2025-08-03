@@ -5,6 +5,10 @@ The following changes have been made:
     warnings.
  *  `src/compat/compat.c` and `src/compat/compat.h` have been modified to
     exclude unneeded functionality.
+ *  `src/libmpg123/dct64_i386.c`, `src/libmpg123/dct64_i486.c`,
+    `src/libmpg123/synth_i486.c`, `src/libmpg123/synth_real.c`,
+    and `src/libmpg123/synth_s32.c` have been modified to build in all
+    build configurations.
  *  Modifications are marked by `// OpenMPT` or `/* OpenMPT */`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.
