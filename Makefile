@@ -717,6 +717,7 @@ LOCAL_MPG123_SOURCES :=
 LOCAL_MPG123_SOURCES += include/mpg123/src/compat/compat.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/compat/compat_str.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/dct64.c
+LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/dither.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/equalizer.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/feature.c
 LOCAL_MPG123_SOURCES += include/mpg123/src/libmpg123/format.c
