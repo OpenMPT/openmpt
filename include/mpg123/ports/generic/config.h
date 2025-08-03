@@ -158,7 +158,29 @@
 
 /* floating point is IEEE754 */
 #if defined(_WIN32)
+#ifndef IEEE_FLOAT
 #define IEEE_FLOAT 1
+#endif
+#endif
+#if defined(__STDC_VERSION__)
+#if (__STDC_VERSION__ >= 199901L)
+#if defined(__STDC_IEC_559__)
+#if (__STDC_IEC_559__ == 1)
+#ifndef IEEE_FLOAT
+#define IEEE_FLOAT 1
+#endif
+#endif
+#endif
+#endif
+#if (__STDC_VERSION__ >= 202311L)
+#if defined(__STDC_IEC_60559_BFP__)
+#if (__STDC_IEC_60559_BFP__ >= 202311L)
+#ifndef IEEE_FLOAT
+#define IEEE_FLOAT 1
+#endif
+#endif
+#endif
+#endif
 #endif
 
 /* Platform */
