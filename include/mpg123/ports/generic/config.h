@@ -116,6 +116,8 @@
 
 /* CPU Features */
 
+#define OPT_GENERIC
+
 /* use floating point */
 #define REAL_IS_FLOAT 1
 

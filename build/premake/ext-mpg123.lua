@@ -94,7 +94,7 @@
    "../../include/mpg123/src/libmpg123/tabinit.c",
    --"../../include/mpg123/src/libmpg123/testcpu.c",
   }
-  defines { "DYNAMIC_BUILD", "OPT_GENERIC" }
+  defines { "DYNAMIC_BUILD" }
   links {
    "shlwapi",
   }

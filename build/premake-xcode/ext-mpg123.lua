@@ -42,4 +42,3 @@
    "../../include/mpg123/src/libmpg123/synth_s32.c",
    "../../include/mpg123/src/libmpg123/tabinit.c",
   }
-  defines { "OPT_GENERIC" }
