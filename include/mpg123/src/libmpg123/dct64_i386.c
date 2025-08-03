@@ -16,6 +16,8 @@
 
 #include "mpg123lib_intern.h"
 
+#if defined(OPT_I386) || defined(OPT_I486) || defined(OPT_I586) || defined(OPT_I586_DITHER) || defined(OPT_MMX) || defined(OPT_3DNOW) || defined(OPT_3DNOW_VINTAGE) || defined(OPT_3DNOWEXT) || defined(OPT_3DNOWEXT_VINTAGE) || defined(OPT_SSE) || defined(OPT_SSE_VINTAGE)  /* OpenMPT */
+
 static void dct64_1(real *out0,real *out1,real *b1,real *b2,real *samples)
 {
  {
@@ -334,3 +336,4 @@ void INT123_dct64_i386(real *a,real *b,real *c)
   dct64_1(a,b,bufs,bufs+0x20,c);
 }
 
+#endif  /* OpenMPT */
