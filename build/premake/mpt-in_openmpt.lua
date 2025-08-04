@@ -48,7 +48,7 @@
 
 	mpt_use_mfc()
 	defines { "MPT_WITH_MFC" }
-	if _OPTIONS["charset"] ~= "Unicode" then
+	if _OPTIONS["windows-charset"] ~= "Unicode" then
 		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
 	end
 

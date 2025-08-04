@@ -44,7 +44,7 @@
 		"../../src/openmpt/streamencoder/**.hpp",
 	}
   defines { "MODPLUG_TRACKER", "MPT_BUILD_UPDATESIGNTOOL" }
-	if _OPTIONS["charset"] ~= "Unicode" then
+	if _OPTIONS["windows-charset"] ~= "Unicode" then
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	end
   warnings "Extra"

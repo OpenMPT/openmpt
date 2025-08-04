@@ -151,7 +151,7 @@ end
 
   defines { "MODPLUG_TRACKER" }
   dpiawareness "None"
-	if _OPTIONS["charset"] ~= "Unicode" then
+	if _OPTIONS["windows-charset"] ~= "Unicode" then
 		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	else

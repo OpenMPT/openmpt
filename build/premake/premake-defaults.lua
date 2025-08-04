@@ -120,7 +120,7 @@
 	filter {}
 
 	filter {}
-		characterset ( _OPTIONS["charset"] )
+		characterset ( _OPTIONS["windows-charset"] )
 		largeaddressaware ( true )
 	filter {}
 
