@@ -1,4 +1,4 @@
-libmpg123 library version 1.33.1 (2025-07-27).
+libmpg123 library version 1.33.2 (2025-08-05).
 The following changes have been made:
  *  `ports/generic/config.h` has been added for build system independent builds.
  *  `src/compat/compat.c` has been modified to silence MSVC static analyzer
