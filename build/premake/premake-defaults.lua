@@ -303,7 +303,7 @@
 			systemversion "10.0.20348.0"
 		filter {}
 		filter { "action:vs2022" }
-			systemversion "10.0.20348.0"
+			systemversion "10.0.22621.0"
 		filter {}
 	end
 
