@@ -21,6 +21,9 @@
 #include <tchar.h>
 #include <algorithm>
 #include <string>
+#ifndef UNICODE
+#include <vector>
+#endif // !UNICODE
 
 #if defined(MPT_BUILD_MSVC)
 #pragma comment(lib, "comdlg32.lib")
@@ -49,18 +52,18 @@
 // Crash handler for writing memory dumps
 static LONG WINAPI CrashHandler(_EXCEPTION_POINTERS *pExceptionInfo)
 {
-	WCHAR tempPath[MAX_PATH + 2];
-	DWORD result = GetTempPathW(MAX_PATH + 1, tempPath);
+	TCHAR tempPath[MAX_PATH + 2];
+	DWORD result = GetTempPath(MAX_PATH + 1, tempPath);
 	if(result > 0 && result <= MAX_PATH + 1)
 	{
-		std::wstring filename = tempPath;
-		filename += L"OpenMPT Crash Files\\";
-		CreateDirectoryW(filename.c_str(), nullptr);
+		std::basic_string<TCHAR> filename = tempPath;
+		filename += _T("OpenMPT Crash Files\\");
+		CreateDirectory(filename.c_str(), nullptr);
 
 		tempPath[0] = 0;
-		const int ch = GetDateFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"'PluginBridge 'yyyy'-'MM'-'dd ", tempPath, mpt::saturate_cast<int>(std::size(tempPath)));
+		const int ch = GetDateFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, _T("'PluginBridge 'yyyy'-'MM'-'dd "), tempPath, mpt::saturate_cast<int>(std::size(tempPath)));
 		if(ch)
-			GetTimeFormatW(LOCALE_SYSTEM_DEFAULT, 0, nullptr, L"HH'.'mm'.'ss'.dmp'", tempPath + ch - 1, mpt::saturate_cast<int>(std::size(tempPath)) - ch + 1);
+			GetTimeFormat(LOCALE_SYSTEM_DEFAULT, 0, nullptr, _T("HH'.'mm'.'ss'.dmp'"), tempPath + ch - 1, mpt::saturate_cast<int>(std::size(tempPath)) - ch + 1);
 		filename += tempPath;
 		OPENMPT_NAMESPACE::WriteMemoryDump(pExceptionInfo, filename.c_str(), OPENMPT_NAMESPACE::PluginBridge::m_fullMemDump);
 	}
@@ -100,7 +103,23 @@ int WINAPI WinMain(_In_ HINSTANCE /*hInstance*/, _In_opt_ HINSTANCE /*hPrevInsta
 {
 	int argc = 0;
 	auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+#ifdef UNICODE
 	return _tmain(argc, argv);
+#else // !UNICODE
+	std::vector<std::string> args;
+	for(int i = 0; i < argc; ++i)
+	{
+		args.push_back(PluginBridge::StringEncode(argv[i] ? std::wstring(argv[i]) : std::wstring(), CP_ACP));
+
+	}
+	std::vector<TCHAR*> argp;
+	for(int i = 0; i < argc; ++i)
+	{
+		argp.push_back(args[i].data());
+	}
+	argp.push_back(nullptr);
+	return _tmain(argc, argp.data());
+#endif // UNICODE
 }
 
 
@@ -140,7 +159,12 @@ void PluginBridge::MainLoop(TCHAR *argv[])
 	SetTimer(m_communicationWindow, TIMER_IDLE, 20, IdleTimerProc);
 
 	uint32 parentProcessId = _ttoi(argv[1]);
+#ifdef UNICODE
 	new PluginBridge(argv[0], OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
+#else // !UNICODE
+	std::wstring argv0 = PluginBridge::StringDecode(argv[0] ? std::string(argv[0]) : std::string(), CP_ACP);
+	new PluginBridge(argv0.data(), OpenProcess(SYNCHRONIZE, FALSE, parentProcessId));
+#endif // UNICODE
 
 	MSG msg;
 	while(::GetMessage(&msg, nullptr, 0, 0))
@@ -174,6 +198,35 @@ void PluginBridge::MainLoop(TCHAR *argv[])
 
 	DestroyWindow(m_communicationWindow);
 }
+
+
+#ifndef UNICODE
+
+std::string PluginBridge::StringEncode(const std::wstring &src, UINT codepage)
+{
+	int required_size = WideCharToMultiByte(codepage, 0, src.c_str(), -1, NULL, 0, NULL, NULL);
+	if(required_size <= 0)
+	{
+		return std::string();
+	}
+	std::vector<CHAR> encoded_string(required_size);
+	WideCharToMultiByte(codepage, 0, src.c_str(), -1, encoded_string.data(), mpt::saturate_cast<int>(encoded_string.size()), NULL, NULL);
+	return std::string(encoded_string.data(), encoded_string.size());
+}
+
+std::wstring PluginBridge::StringDecode(const std::string &src, UINT codepage)
+{
+	int required_size = MultiByteToWideChar( codepage, 0, src.c_str(), -1, NULL, 0 );
+	if(required_size <= 0)
+	{
+		return std::wstring();
+	}
+	std::vector<WCHAR> decoded_string(required_size);
+	MultiByteToWideChar(codepage, 0, src.c_str(), -1, decoded_string.data(), mpt::saturate_cast<int>(decoded_string.size()));
+	return std::wstring(decoded_string.data(), decoded_string.size());
+}
+
+#endif // !UNICODE
 
 
 PluginBridge::PluginBridge(const wchar_t *memName, HANDLE otherProcess)

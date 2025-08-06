@@ -59,6 +59,12 @@ protected:
 	bool m_needIdle = false;  // Plugin needs idle time
 
 public:
+
+#ifndef UNICODE
+	static std::string StringEncode(const std::wstring &src, UINT codepage);
+	static std::wstring StringDecode(const std::string &src, UINT codepage);
+#endif
+
 	PluginBridge(const wchar_t *memName, HANDLE otherProcess);
 	~PluginBridge();
 	
