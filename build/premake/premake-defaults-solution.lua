@@ -3,7 +3,7 @@
 
 if _OPTIONS["win10"] then
 	filter {}
-		systemversion "10.0.16299.0"
+		systemversion "10.0.19041.0"
 end
 
 	filter { "platforms:x86" }
