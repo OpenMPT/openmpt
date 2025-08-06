@@ -353,7 +353,7 @@
 	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-family"] ~= "uwp" then
 		filter {}
 		filter { "action:vs2017" }
-			systemversion "10.0.17763.0"
+			systemversion "10.0.19041.0"
 		filter {}
 		filter { "action:vs2019" }
 			systemversion "10.0.19041.0"
