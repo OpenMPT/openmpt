@@ -418,7 +418,7 @@ if _OPTIONS["windows-family"] == "uwp" then
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')
 			premake.w('<ApplicationType>Windows Store</ApplicationType>')
 			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
-			premake.w('<WindowsTargetPlatformVersion>10.0.20348.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>')
 			premake.w('<WindowsTargetPlatformMinVersion>10.0.10240.0</WindowsTargetPlatformMinVersion>')
 		end
 	end

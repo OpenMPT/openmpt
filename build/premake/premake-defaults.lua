@@ -356,7 +356,7 @@
 			systemversion "10.0.17763.0"
 		filter {}
 		filter { "action:vs2019" }
-			systemversion "10.0.20348.0"
+			systemversion "10.0.19041.0"
 		filter {}
 		filter { "action:vs2022" }
 			if _OPTIONS["windows-version"] == "win7" then
