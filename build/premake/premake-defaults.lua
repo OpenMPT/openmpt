@@ -238,7 +238,7 @@
 		systemversion "10.0.19041.0"
 	filter {}
 	filter { "action:vs2019" }
-		systemversion "10.0.19041.0"
+		systemversion "10.0.22621.0"
 	filter {}
 
   filter {}
