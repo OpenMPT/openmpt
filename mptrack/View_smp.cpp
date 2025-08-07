@@ -3928,6 +3928,7 @@ void CViewSample::OnSampleSlice()
 			ModSample &newSample = sndFile.GetSample(nextSmp);
 			newSample = sample;
 			newSample.RemoveAllCuePoints();
+			newSample.uFlags.reset(SMP_KEEPONDISK);
 			newSample.nLength = cues[i + 1] - cues[i];
 			newSample.pData.pSample = nullptr;
 			sndFile.m_szNames[nextSmp] = sndFile.m_szNames[m_nSample];
@@ -3949,6 +3950,7 @@ void CViewSample::OnSampleSlice()
 	modDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_delete, "Slice Sample", cues[1], sample.nLength);
 	SampleEdit::ResizeSample(sample, cues[1], sndFile);
 	sample.PrecomputeLoops(sndFile, true);
+	sample.uFlags.reset(SMP_KEEPONDISK);
 	SetModified(SampleHint().Info().Data().Names(), true, true);
 	modDoc->UpdateAllViews(this, SampleHint().Info().Data().Names(), this);
 	modDoc->UpdateAllViews(this, InstrumentHint().Info().Envelope().Names(), this);
