@@ -1589,8 +1589,10 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 	} else
 #endif
 	{
-		Reporting::Information(msg.message, msg.mainTitle ? CString{msg.mainTitle} : CString{});
-		TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~msg.mask;
+		if(Reporting::Confirm(msg.message + CString(_T("\n\nShow this message again?")), msg.mainTitle ? CString{msg.mainTitle} : CString{}, msg.defaultDontShowAgainStatus) == cnfNo)
+			TrackerSettings::Instance().gnMsgBoxVisiblityFlags &= ~msg.mask;
+		else
+			TrackerSettings::Instance().gnMsgBoxVisiblityFlags |= msg.mask;
 	}
 }
 
