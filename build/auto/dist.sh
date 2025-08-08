@@ -99,6 +99,74 @@ fi
 rm -f bin/headercheck.*.err
 rm bin/headercheck.*.out
 rm bin/headercheck.c
+echo "Checking C header in C++ mode ..."
+echo '#include <vector>' > bin/empty.cpp
+touch bin/empty.dummy.out
+echo '' > bin/headercheck.cpp
+echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.cpp
+echo 'int main() { return 0; }' >> bin/headercheck.cpp
+echo " c++"
+c++                -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out
+echo " c++ 98"
+c++     -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
+echo " c++ 03"
+c++     -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
+echo " c++ 11"
+c++     -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
+echo " c++ 14"
+c++     -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
+echo " c++ 17"
+c++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
+if c++ -std=c++20 -c bin/empty.cpp -o bin/empty.cpp20.out > /dev/null 2>&1 ; then
+echo " c++ 20"
+c++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp20.out
+fi
+if c++ -std=c++23 -c bin/empty.cpp -o bin/empty.cpp23.out > /dev/null 2>&1 ; then
+echo " c++ 23"
+c++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp23.out
+fi
+echo " g++"
+g++                -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+echo " g++ 98"
+g++     -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+echo " g++ 03"
+g++     -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+echo " g++ 11"
+g++     -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+echo " g++ 14"
+g++     -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+echo " g++ 17"
+g++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
+if g++ -std=c++20 -c bin/empty.cpp -o bin/empty.gpp20.out > /dev/null 2>&1 ; then
+echo " g++ 20"
+g++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp20.out
+fi
+if g++ -std=c++23 -c bin/empty.cpp -o bin/empty.gpp23.out > /dev/null 2>&1 ; then
+echo " g++ 23"
+g++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp23.out
+fi
+echo " clang++"
+clang++            -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+echo " clang++ 98"
+clang++ -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+echo " clang++ 03"
+clang++ -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+echo " clang++ 11"
+clang++ -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+echo " clang++ 14"
+clang++ -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+echo " clang++ 17"
+clang++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
+if clang++ -std=c++20 -c bin/empty.cpp -o bin/empty.clangpp20.out > /dev/null 2>&1  ; then
+echo " clang++ 20"
+clang++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp20.out
+fi
+if clang++ -std=c++23 -c bin/empty.cpp -o bin/empty.clangpp23.out > /dev/null 2>&1  ; then
+echo " clang++ 23"
+clang++ -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp23.out
+fi
+rm bin/headercheck.*.out
+rm bin/headercheck.cpp
 echo "Checking C++ header ..."
 echo '#include <array>' > bin/empty.cpp
 touch bin/empty.dummy.out
