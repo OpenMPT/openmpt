@@ -9,6 +9,8 @@ is just a high-level summary.
 
  *  [**Bug**] libopenmpt is now compatible with most non-standard builds of
     libmpg123 which do not by default output signed 16bit PCM.
+ *  [**Bug**] openmpt123: Pausing playback using the space key did not work
+    since 0.8.0.
 
  *  mpg123: Update to v1.33.2 (2025-08-05).
 
