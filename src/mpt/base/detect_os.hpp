@@ -93,6 +93,10 @@
 #endif
 
 
+#elif defined(__MSYS__)
+#define MPT_OS_MSYS 1
+
+
 #elif defined(__CYGWIN__)
 #define MPT_OS_CYGWIN 1
 
@@ -382,6 +386,9 @@ static_assert(NTDDI_WIN11_GE == MPT_WIN_11_23H2);
 #endif
 #ifndef MPT_OS_EMSCRIPTEN
 #define MPT_OS_EMSCRIPTEN 0
+#endif
+#ifndef MPT_OS_MSYS
+#define MPT_OS_MSYS 0
 #endif
 #ifndef MPT_OS_CYGWIN
 #define MPT_OS_CYGWIN 0
