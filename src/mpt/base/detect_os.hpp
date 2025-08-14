@@ -325,6 +325,9 @@ static_assert(NTDDI_WIN11_GE == MPT_WIN_11_23H2);
 #define MPT_WIN_AT_LEAST(v) 0
 #define MPT_WIN_BEFORE(v)   1
 #endif
+#if (MPT_OS_WINDOWS_WINNT || MPT_OS_WINDOWS_WINRT) && defined(WDK_NTDDI_VERSION)
+static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
+#endif
 
 
 #elif defined(__APPLE__)
