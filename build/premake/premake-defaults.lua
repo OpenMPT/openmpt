@@ -415,11 +415,11 @@
 	if _OPTIONS["windows-version"] == "win11" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0A00" }
-		defines { "NTDDI_VERSION=0x0A000010" } -- Windows 11 23H2 Build 22631
+		defines { "NTDDI_VERSION=0x0A000010" } -- Windows 11 24H2 Build 26100
 	elseif _OPTIONS["windows-version"] == "win10" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0A00" }
-		defines { "NTDDI_VERSION=0x0A00000D" } -- Windows 10 22H2 Build 19045
+		defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
 		defines { "_WIN32_WINNT=0x0603" }
