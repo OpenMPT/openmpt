@@ -11,6 +11,8 @@ is just a high-level summary.
     libmpg123 which do not by default output signed 16bit PCM.
  *  [**Bug**] openmpt123: Pausing playback using the space key did not work
     since 0.8.0.
+ *  [**Bug**] Windows 10 binaries wrongly targeted Windows 11 22H2. They now
+    target Windows 10 2004.
 
  *  mpg123: Update to v1.33.2 (2025-08-05).
 
