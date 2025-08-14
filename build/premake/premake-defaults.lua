@@ -374,16 +374,16 @@
 		defines { "_WIN32_WINNT=0x0A00" }
 		filter {}
 		filter { "architecture:x86" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
+			defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
 		filter {}
 		filter { "architecture:x86_64" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
+			defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
 		filter {}
 		filter { "architecture:ARM" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
+			defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
 		filter {}
 		filter { "architecture:ARM64" }
-			defines { "NTDDI_VERSION=0x0A00000C" } -- Windows 10 21H2 Build 19044
+			defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
 		filter {}
 	elseif _OPTIONS["windows-version"] == "win81" then
 		filter {}
