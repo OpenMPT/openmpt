@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.16-pre
 
+ *  [**Bug**] Windows 10 binaries wrongly targeted Windows 11 22H2. They now
+    target Windows 10 2004.
+
  *  mpg123: Update to v1.33.2 (2025-08-05).
 
 ### libopenmpt 0.7.15 (2025-07-19)
