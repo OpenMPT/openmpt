@@ -60,6 +60,7 @@
 #define MPT_WIN_11       MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0e) // NTDDI_WIN11_ZN   21H2
 #define MPT_WIN_11_22H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0f) // NTDDI_WIN11_GA   22H2
 #define MPT_WIN_11_23H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10) // NTDDI_WIN11_GE   23H2
+#define MPT_WIN_11_24H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10)
 
 // MPT_WIN_API_DESKTOP     : Windows 8/10 Desktop Application (Win32)
 // MPT_WIN_API_UNIVERSAL   : Windows 10 Store App / Universal App
