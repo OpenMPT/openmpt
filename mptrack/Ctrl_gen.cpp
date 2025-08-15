@@ -725,17 +725,17 @@ CString CCtrlGeneral::GetToolTipText(UINT uId, HWND) const
 				s = notAvailable;
 			break;
 		case IDC_SLIDER_SAMPLEPREAMP:
-			s = displayDBValues ? CModDoc::LinearToDecibelsString(m_sndFile.m_nSamplePreAmp, m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote;
+			s = displayDBValues ? CModDoc::LinearToDecibelsString(static_cast<float>(m_sndFile.m_nSamplePreAmp), m_sndFile.GetPlayConfig().getNormalSamplePreAmp()).GetString() : moreRecentMixModeNote;
 			break;
 		case IDC_SLIDER_VSTIVOL:
 			if(isEnabled)
-				s = displayDBValues ? CModDoc::LinearToDecibelsString(m_sndFile.m_nVSTiVolume, m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote;
+				s = displayDBValues ? CModDoc::LinearToDecibelsString(static_cast<float>(m_sndFile.m_nVSTiVolume), m_sndFile.GetPlayConfig().getNormalVSTiVol()).GetString() : moreRecentMixModeNote;
 			else
 				s = notAvailable;
 			break;
 		case IDC_SLIDER_GLOBALVOL:
 			if(isEnabled)
-				s = displayDBValues ? CModDoc::LinearToDecibelsString(m_sndFile.m_PlayState.m_nGlobalVolume, m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote;
+				s = displayDBValues ? CModDoc::LinearToDecibelsString(static_cast<float>(m_sndFile.m_PlayState.m_nGlobalVolume), m_sndFile.GetPlayConfig().getNormalGlobalVol()).GetString() : moreRecentMixModeNote;
 			else
 				s = notAvailable;
 			break;

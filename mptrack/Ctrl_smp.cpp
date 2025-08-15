@@ -558,7 +558,7 @@ static CString EffectiveOPLVolume(double value, double effectiveFactor, const CS
 	if(!playConfig.getDisplayDBValues())
 		return s;
 
-	s += _T(" (") + CModDoc::DecibelsToStrings(dB + effectiveDB + CModDoc::LinearToDecibels(sndFile.m_nVSTiVolume, playConfig.getNormalVSTiVol())) + _T(" effectively)");
+	s += _T(" (") + CModDoc::DecibelsToStrings(dB + effectiveDB + CModDoc::LinearToDecibels(static_cast<float>(sndFile.m_nVSTiVolume), playConfig.getNormalVSTiVol())) + _T(" effectively)");
 	return s;
 }
 
