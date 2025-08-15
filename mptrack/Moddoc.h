@@ -411,12 +411,28 @@ public:
 
 	// Convert a linear volume property to decibels, and format the value as a readable string
 	static CString LinearToDecibelsString(double value, double valueAtZeroDB);
+	inline static CString LinearToDecibelsString(float value, float valueAtZeroDB)
+	{
+		return LinearToDecibelsString(static_cast<double>(value), static_cast<double>(valueAtZeroDB));
+	}
 	// Convert a linear volume property to decibels
 	static double LinearToDecibels(double value, double valueAtZeroDB);
+	inline static float LinearToDecibels(float value, float valueAtZeroDB)
+	{
+		return static_cast<float>(LinearToDecibels(static_cast<double>(value), static_cast<double>(valueAtZeroDB)));
+	}
 	// Convert a decibels value to linear volume
 	static double DecibelsToLinear(double value, double valueAtZeroDB);
+	inline static float DecibelsToLinear(float value, float valueAtZeroDB)
+	{
+		return static_cast<float>(DecibelsToLinear(static_cast<double>(value), static_cast<double>(valueAtZeroDB)));
+	}
 	// Format a decibel value as a readable string
 	static CString DecibelsToStrings(double dB);
+	inline static CString DecibelsToStrings(float dB)
+	{
+		return DecibelsToStrings(static_cast<double>(dB));
+	}
 	// Convert a panning value to a more readable string
 	static CString PanningToString(int32 value, int32 valueAtCenter);
 
