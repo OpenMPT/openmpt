@@ -13,6 +13,7 @@
 #include "SampleEditorDialogs.h"
 #include "HighDPISupport.h"
 #include "Mptrack.h"
+#include "Moddoc.h"
 #include "Reporting.h"
 #include "resource.h"
 #include "../common/misc_util.h"
@@ -29,8 +30,9 @@ OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(CAmpDlg, DialogBase)
 	ON_WM_DESTROY()
-	ON_EN_CHANGE(IDC_EDIT2, &CAmpDlg::EnableFadeIn)
-	ON_EN_CHANGE(IDC_EDIT3, &CAmpDlg::EnableFadeOut)
+	ON_EN_CHANGE(IDC_EDIT2,      &CAmpDlg::EnableFadeIn)
+	ON_EN_CHANGE(IDC_EDIT3,      &CAmpDlg::EnableFadeOut)
+	ON_CBN_SELCHANGE(IDC_COMBO2, &CAmpDlg::OnUnitChanged)
 END_MESSAGE_MAP()
 
 void CAmpDlg::DoDataExchange(CDataExchange* pDX)
@@ -38,41 +40,51 @@ void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CAmpDlg)
 	DDX_Control(pDX, IDC_COMBO1, m_fadeBox);
+	DDX_Control(pDX, IDC_COMBO2, m_unitBox);
+	DDX_Control(pDX, IDC_UNIT1, m_unitLabel[0]);
+	DDX_Control(pDX, IDC_UNIT2, m_unitLabel[1]);
+	DDX_Control(pDX, IDC_UNIT3, m_unitLabel[2]);
+	DDX_Control(pDX, IDC_SPIN1, m_spin[0]);
+	DDX_Control(pDX, IDC_SPIN2, m_spin[1]);
+	DDX_Control(pDX, IDC_SPIN3, m_spin[2]);
 	//}}AFX_DATA_MAP
 }
 
-CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin, int16 factorMax)
-	: DialogBase(IDD_SAMPLE_AMPLIFY, parent)
-	, m_settings(settings)
-	, m_nFactorMin(factorMin)
-	, m_nFactorMax(factorMax)
+CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, double factorMin, double factorMax)
+	: DialogBase{IDD_SAMPLE_AMPLIFY, parent}
+	, m_settings{settings}
+	, m_factorMinLinear{factorMin}
+	, m_factorMaxLinear{factorMax}
+	, m_factorMinDecibels{(factorMin > 0) ? CModDoc::LinearToDecibels(factorMin, 100.0) : SILENCE_DB}
+	, m_factorMaxDecibels{(factorMax > 0) ? CModDoc::LinearToDecibels(factorMax, 100.0) : SILENCE_DB}
 {}
 
 BOOL CAmpDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
-	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN1);
-	spin->SetRange32(m_nFactorMin, m_nFactorMax);
-	spin->SetPos32(m_settings.factor);
-	spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN2);
-	spin->SetRange32(0, 100);
-	spin->SetPos32(m_settings.fadeInStart);
-	spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN3);
-	spin->SetRange32(0, 100);
-	spin->SetPos32(m_settings.fadeOutEnd);
 
-	SetDlgItemInt(IDC_EDIT1, m_settings.factor);
-	SetDlgItemInt(IDC_EDIT2, m_settings.fadeInStart);
-	SetDlgItemInt(IDC_EDIT3, m_settings.fadeOutEnd);
-	m_edit.SubclassDlgItem(IDC_EDIT1, this);
-	m_edit.AllowFractions(false);
-	m_edit.AllowNegative(m_nFactorMin < 0);
-	m_editFadeIn.SubclassDlgItem(IDC_EDIT2, this);
-	m_editFadeIn.AllowFractions(false);
-	m_editFadeIn.AllowNegative(m_nFactorMin < 0);
-	m_editFadeOut.SubclassDlgItem(IDC_EDIT3, this);
-	m_editFadeOut.AllowFractions(false);
-	m_editFadeOut.AllowNegative(m_nFactorMin < 0);
+	m_unit = m_settings.unit;
+	m_unitBox.SetItemData(m_unitBox.AddString(_T("Percent (%)")), static_cast<DWORD_PTR>(AmpUnit::Percent));
+	m_unitBox.SetItemData(m_unitBox.AddString(_T("Decibels (dB)")), static_cast<DWORD_PTR>(AmpUnit::Decibels));
+	m_unitBox.SetCurSel(static_cast<int>(m_unit));
+
+	const bool allowNegative = m_factorMinLinear < 0 || m_unit == AmpUnit::Decibels;
+	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
+	std::array<double, 3> values = {m_settings.factor, m_settings.fadeInStart, m_settings.fadeOutEnd};
+
+	for(size_t i = 0; i < 3; i++)
+	{
+		m_edit[i].SubclassDlgItem(static_cast<UINT>(IDC_EDIT1 + i), this);
+		m_edit[i].AllowFractions(true);
+		m_edit[i].AllowNegative(allowNegative);
+
+		if(m_unit == AmpUnit::Decibels)
+			values[i] = (values[i] > 0) ? CModDoc::LinearToDecibels(values[i], 100.0) : SILENCE_DB;
+		m_edit[i].SetDecimalValue(values[i]);
+		m_spin[i].SetRange32(factorMin, factorMax);
+		m_spin[i].SetPos32(mpt::saturate_round<int32>(values[i]));
+	}
 
 	const struct
 	{
@@ -103,6 +115,7 @@ BOOL CAmpDlg::OnInitDialog()
 	}
 
 	OnDPIChanged();
+	UpdateUnitLabels();
 
 	m_locked = false;
 
@@ -160,9 +173,19 @@ void CAmpDlg::OnDestroy()
 
 void CAmpDlg::OnOK()
 {
-	m_settings.factor = static_cast<int16>(Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT1)), m_nFactorMin, m_nFactorMax));
-	m_settings.fadeInStart = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT2)), m_nFactorMin, m_nFactorMax);
-	m_settings.fadeOutEnd = Clamp(static_cast<int>(GetDlgItemInt(IDC_EDIT3)), m_nFactorMin, m_nFactorMax);
+	std::array<double, 3> values;
+	for(size_t i = 0; i < 3; i++)
+	{
+		m_edit[i].GetDecimalValue(values[i]);
+		if(m_unit == AmpUnit::Decibels)
+			values[i] = CModDoc::DecibelsToLinear(values[i], 100.0);
+		Limit(values[i], m_factorMinLinear, m_factorMaxLinear);
+	}
+	m_settings.factor = values[0];
+	m_settings.fadeInStart = values[1];
+	m_settings.fadeOutEnd = values[2];
+
+	m_settings.unit = m_unit;
 	m_settings.fadeIn = (IsDlgButtonChecked(IDC_CHECK1) != BST_UNCHECKED);
 	m_settings.fadeOut = (IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED);
 	m_settings.fadeLaw = static_cast<Fade::Law>(m_fadeBox.GetItemData(m_fadeBox.GetCurSel()));
@@ -181,6 +204,60 @@ void CAmpDlg::EnableFadeOut()
 {
 	if(!m_locked)
 		CheckDlgButton(IDC_CHECK2, BST_CHECKED);
+}
+
+
+void CAmpDlg::OnUnitChanged()
+{
+	if(m_locked)
+		return;
+
+	const AmpUnit newUnit = static_cast<AmpUnit>(m_unitBox.GetItemData(m_unitBox.GetCurSel()));
+	if(newUnit == m_unit)
+		return;
+
+	m_locked = true;
+	m_unit = newUnit;
+
+	const bool allowNegative = m_factorMinLinear < 0 || m_unit == AmpUnit::Decibels;
+	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
+
+	for(size_t i = 0; i < 3; i++)
+	{
+		double value;
+		m_edit[i].GetDecimalValue(value);
+		if(m_unit == AmpUnit::Decibels)
+		{
+			if(value > 0)
+				value = CModDoc::LinearToDecibels(value, 100.0);
+			else
+				value = SILENCE_DB;
+		} else
+		{
+			if(value > SILENCE_DB)
+				value = CModDoc::DecibelsToLinear(value, 100.0);
+			else
+				value = 0;
+		}
+		m_edit[i].AllowNegative(allowNegative);
+		m_edit[i].SetDecimalValue(value);
+		m_spin[i].SetRange32(factorMin, factorMax);
+		m_spin[i].SetPos32(mpt::saturate_round<int32>(value));
+	}
+
+	m_locked = false;
+	UpdateUnitLabels();
+}
+
+
+void CAmpDlg::UpdateUnitLabels()
+{
+	const TCHAR *unitLabel = (m_unit == AmpUnit::Decibels) ? _T("dB") : _T("%");
+	for(auto &label : m_unitLabel)
+	{
+		label.SetWindowText(unitLabel);
+	}
 }
 
 

@@ -1713,7 +1713,7 @@ void CCtrlSamples::ApplyAmplify(const double amp, const double fadeInStart, cons
 
 void CCtrlSamples::OnAmplify()
 {
-	static CAmpDlg::AmpSettings settings { Fade::kLinear, 0, 0, 100, false, false };
+	static CAmpDlg::AmpSettings settings { Fade::kLinear, CAmpDlg::AmpUnit::Percent, 0.0, 0.0, 100.0, false, false };
 
 	CAmpDlg dlg(this, settings);
 	if (dlg.DoModal() != IDOK) return;

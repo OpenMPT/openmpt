@@ -559,6 +559,9 @@
 #define IDC_PROGRESS1                   1901
 #define IDC_PROGRESS2                   1902
 #define IDC_SPIN_VSTIVOL                1921
+#define IDC_UNIT1                       1922
+#define IDC_UNIT2                       1923
+#define IDC_UNIT3                       1924
 #define IDC_TABCTRL1                    1951
 #define IDC_SCROLLBAR1                  1998
 #define IDC_QUESTION1                   1999
@@ -865,7 +868,6 @@
 #define IDC_CHK_REARRANGE_PATTERNS      2396
 #define IDC_CHK_REARRANGE_SAMPLES       2397
 #define IDC_CHK_REMOVE_INSTRUMENTS      2398
-#define IDC_CHK_SAMPLEPACK              2399
 #define IDC_CHK_RESET_VARIABLES         2399
 #define IDC_BTN_CLEANUP_SONG            2400
 #define IDC_BTN_COMPO_CLEANUP           2401

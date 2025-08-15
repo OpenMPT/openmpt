@@ -3446,7 +3446,7 @@ void CViewPattern::UndoRedo(bool undo)
 
 
 // Apply amplification and fade function to volume
-static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int fadeIn, int fadeOut, Fade::Func &fadeFunc)
+static void AmplifyFade(int &vol, double amp, ROWINDEX row, ROWINDEX numRows, double fadeIn, double fadeOut, Fade::Func &fadeFunc)
 {
 	const bool doFadeIn = fadeIn != amp, doFadeOut = fadeOut != amp;
 	const double fadeStart = fadeIn / 100.0, fadeStartDiff = (amp - fadeIn) / 100.0;
@@ -3477,7 +3477,7 @@ static void AmplifyFade(int &vol, int amp, ROWINDEX row, ROWINDEX numRows, int f
 
 void CViewPattern::OnPatternAmplify()
 {
-	static CAmpDlg::AmpSettings settings{Fade::kLinear, 0, 0, 100, false, false};
+	static CAmpDlg::AmpSettings settings{ Fade::kLinear, CAmpDlg::AmpUnit::Percent, 0.0, 0.0, 100.0, false, false };
 
 	CAmpDlg dlg(this, settings, 0);
 	if(dlg.DoModal() != IDOK)
@@ -3498,7 +3498,7 @@ void CViewPattern::OnPatternAmplify()
 	const CHANNELINDEX firstChannel = m_Selection.GetStartChannel(), lastChannel = m_Selection.GetEndChannel();
 	const ROWINDEX firstRow = m_Selection.GetStartRow(), lastRow = m_Selection.GetEndRow();
 
-	// For partically selected start and end channels, we check if the start and end columns contain the relevant columns.
+	// For partially selected start and end channels, we check if the start and end columns contain the relevant columns.
 	bool firstChannelValid, lastChannelValid;
 	if(useVolCol)
 	{

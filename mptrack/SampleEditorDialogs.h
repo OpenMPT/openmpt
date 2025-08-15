@@ -27,25 +27,41 @@ OPENMPT_NAMESPACE_BEGIN
 class CAmpDlg : public DialogBase
 {
 public:
+	enum class AmpUnit
+	{
+		Percent = 0,
+		Decibels,
+	};
+
 	struct AmpSettings
 	{
 		Fade::Law fadeLaw;
-		int fadeInStart, fadeOutEnd;
-		int16 factor;
+		AmpUnit unit;
+		double fadeInStart, fadeOutEnd;
+		double factor;
 		bool fadeIn, fadeOut;
 	};
 
 	AmpSettings &m_settings;
-	int16 m_nFactorMin, m_nFactorMax;
 
 protected:
+	static constexpr double SILENCE_DB = -96.0;
+
+	const double m_factorMinLinear, m_factorMaxLinear;
+	const double m_factorMinDecibels, m_factorMaxDecibels;
+
 	CComboBoxEx m_fadeBox;
+	CComboBox m_unitBox;
 	CImageList m_list;
-	CNumberEdit m_edit, m_editFadeIn, m_editFadeOut;
+	std::array<CNumberEdit, 3> m_edit;
+	std::array<CStatic, 3> m_unitLabel;
+	std::array<CSpinButtonCtrl, 3> m_spin;
+
+	AmpUnit m_unit = AmpUnit::Percent;
 	bool m_locked = true;
 
 public:
-	CAmpDlg(CWnd *parent, AmpSettings &settings, int16 factorMin = int16_min, int16 factorMax = int16_max);
+	CAmpDlg(CWnd *parent, AmpSettings &settings, double factorMin = int32_min, double factorMax = int32_max);
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
@@ -56,6 +72,8 @@ protected:
 
 	afx_msg void EnableFadeIn();
 	afx_msg void EnableFadeOut();
+	afx_msg void OnUnitChanged();
+	void UpdateUnitLabels();
 
 	DECLARE_MESSAGE_MAP()
 };

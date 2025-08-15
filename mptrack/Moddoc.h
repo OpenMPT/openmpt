@@ -413,6 +413,8 @@ public:
 	static CString LinearToDecibelsString(double value, double valueAtZeroDB);
 	// Convert a linear volume property to decibels
 	static double LinearToDecibels(double value, double valueAtZeroDB);
+	// Convert a decibels value to linear volume
+	static double DecibelsToLinear(double value, double valueAtZeroDB);
 	// Format a decibel value as a readable string
 	static CString DecibelsToStrings(double dB);
 	// Convert a panning value to a more readable string

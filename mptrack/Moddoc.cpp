@@ -3207,6 +3207,12 @@ double CModDoc::LinearToDecibels(double value, double valueAtZeroDB)
 }
 
 
+double CModDoc::DecibelsToLinear(double value, double valueAtZeroDB)
+{
+	return valueAtZeroDB * std::pow(10.0, value / 20.0);
+}
+
+
 CString CModDoc::DecibelsToStrings(double dB)
 {
 	if(std::isinf(dB))
