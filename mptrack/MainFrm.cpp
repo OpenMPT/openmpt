@@ -3255,7 +3255,7 @@ void CMainFrame::UpdateMetronomeSamples()
 
 void CMainFrame::UpdateMetronomeVolume()
 {
-	const float linear = CModDoc::DecibelsToLinear(TrackerSettings::Instance().metronomeVolume, 256.0);
+	const float linear = CModDoc::DecibelsToLinear(TrackerSettings::Instance().metronomeVolume, 256.0f);
 	const uint16 volume = std::clamp(mpt::saturate_round<uint16>(linear), uint16(0), uint16(256));
 	CriticalSection cs;
 	m_metronomeBeat.nVolume = m_metronomeMeasure.nVolume = volume;
