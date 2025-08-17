@@ -38,6 +38,7 @@ mkdir openmpt123\x86
 mkdir openmpt123\amd64
 mkdir XMPlay
 mkdir Winamp
+mkdir Winamp2
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt                          .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
@@ -77,6 +78,7 @@ copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp2\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-pthread-win32.dll .\openmpt123\x86\ || goto error
@@ -87,6 +89,8 @@ copy /y ..\..\bin\release\vs2017-winxp-static\x86\xmp-openmpt.dll .\XMPlay\ || g
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\in_openmpt.dll .\Winamp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpansi-static\x86\in_openmpt.dll .\Winamp2\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpansi-static\x86\openmpt-mpg123.dll .\Winamp2\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
@@ -101,6 +105,9 @@ copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\Winamp\ |
  Winamp\in_openmpt.txt ^
  Winamp\in_openmpt.dll ^
  Winamp\openmpt-mpg123.dll ^
+ Winamp2\in_openmpt.txt ^
+ Winamp2\in_openmpt.dll ^
+ Winamp2\openmpt-mpg123.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-retro-winxp
