@@ -13,6 +13,13 @@ is just a high-level summary.
     since 0.8.0.
  *  [**Bug**] Windows 10 binaries wrongly targeted Windows 11 22H2. They now
     target Windows 10 2004.
+ *  [**Bug**] in_openmpt: in_openmpt for Windows XP or later did not ever work
+    in Winamp 2.x. We now provide a build specifically for Winamp 2.x in the
+    `Winamp2/` folder inside the `retro.winxp` package. The `retro.win98` build
+    was not affected.
+
+ *  [**Change**] in_openmpt: Modern and legacy builds of in_openmpt now
+    officially only support Winamp 5.x.
 
  *  mpg123: Update to v1.33.2 (2025-08-05).
 
