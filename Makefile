@@ -1649,9 +1649,20 @@ OBJECTS_LIBOPENMPT += $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 endif
 
 
+INOPENMPTWA2_CXX_SOURCES += \
+ libopenmpt/plugin-common/libopenmpt_plugin_gui.cpp \
+ libopenmpt/in_openmpt/in_openmpt_wa2.cpp \
+ 
+
+INOPENMPTWA2_OBJECTS += $(INOPENMPTWA2_CXX_SOURCES:.cpp=$(FLAVOUR_O).o) $(INOPENMPTWA2_C_SOURCES:.c=$(FLAVOUR_O).o)
+INOPENMPTWA2_DEPENDS = $(INOPENMPTWA2_OBJECTS:$(FLAVOUR_O).o=$(FLAVOUR_O).d)
+ALL_OBJECTS += $(INOPENMPTWA2_OBJECTS)
+ALL_DEPENDS += $(INOPENMPTWA2_DEPENDS)
+
+
 INOPENMPT_CXX_SOURCES += \
  libopenmpt/plugin-common/libopenmpt_plugin_gui.cpp \
- libopenmpt/in_openmpt/in_openmpt.cpp \
+ libopenmpt/in_openmpt/in_openmpt_wa5.cpp \
  
 
 INOPENMPT_OBJECTS += $(INOPENMPT_CXX_SOURCES:.cpp=$(FLAVOUR_O).o) $(INOPENMPT_C_SOURCES:.c=$(FLAVOUR_O).o)
@@ -1750,6 +1761,7 @@ OUTPUTS += bin/$(FLAVOUR_DIR)libopenmpt.a
 endif
 ifeq ($(IN_OPENMPT),1)
 OUTPUTS += bin/$(FLAVOUR_DIR)in_openmpt$(SOSUFFIX)
+OUTPUTS += bin/$(FLAVOUR_DIR)in_openmpt_wa2$(SOSUFFIX)
 endif
 ifeq ($(XMP_OPENMPT),1)
 OUTPUTS += bin/$(FLAVOUR_DIR)xmp-openmpt$(SOSUFFIX)
@@ -2395,9 +2407,12 @@ endif
 	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay
 	svn export ./libopenmpt/xmp-openmpt/xmp-openmpt.txt bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt                --native-eol CRLF
 	cp bin/$(FLAVOUR_DIR)xmp-openmpt.dll                bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.dll
-	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
-	svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt                 --native-eol CRLF
-	cp bin/$(FLAVOUR_DIR)in_openmpt.dll                 bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
+	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5
+	mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2
+	svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5/in_openmpt.txt                 --native-eol CRLF
+	svn export ./libopenmpt/in_openmpt/in_openmpt_wa2.txt bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2/in_openmpt_wa2.txt           --native-eol CRLF
+	cp bin/$(FLAVOUR_DIR)in_openmpt.dll                 bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5/in_openmpt.dll
+	cp bin/$(FLAVOUR_DIR)in_openmpt_wa2.dll                 bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2/in_openmpt_wa2.dll
 	cd bin/$(FLAVOUR_DIR)dist-retro-win98/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && ../../../build/tools/7zip/7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win98.zip *
 
 .PHONY: bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip
@@ -2425,9 +2440,12 @@ endif
 	#mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay
 	#svn export ./libopenmpt/xmp-openmpt/xmp-openmpt.txt bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.txt                --native-eol CRLF
 	#cp bin/$(FLAVOUR_DIR)xmp-openmpt.dll                bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/XMPlay/xmp-openmpt.dll
-	#mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp
-	#svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.txt                 --native-eol CRLF
-	#cp bin/$(FLAVOUR_DIR)in_openmpt.dll                 bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp/in_openmpt.dll
+	#mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5
+	#mkdir -p                                            bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2
+	#svn export ./libopenmpt/in_openmpt/in_openmpt.txt   bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5/in_openmpt.txt                 --native-eol CRLF
+	#svn export ./libopenmpt/in_openmpt/in_openmpt_wa2.txt bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2/in_openmpt_wa2.txt           --native-eol CRLF
+	#cp bin/$(FLAVOUR_DIR)in_openmpt.dll                 bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp5/in_openmpt.dll
+	#cp bin/$(FLAVOUR_DIR)in_openmpt_wa2.dll             bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/Winamp2/in_openmpt_wa2.dll
 	cd bin/$(FLAVOUR_DIR)dist-retro-win95/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/ && 7z a -tzip -mx=9 ../libopenmpt-$(DIST_LIBOPENMPT_VERSION).bin.retro.win95.zip *
 
 bin/$(FLAVOUR_DIR)libopenmpt.a: $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
@@ -2451,6 +2469,14 @@ bin/$(FLAVOUR_DIR)openmpt123.1: bin/$(FLAVOUR_DIR)openmpt123$(EXESUFFIX) openmpt
 	$(SILENT)help2man --no-discard-stderr --no-info --version-option=--man-version --help-option=--man-help --include=openmpt123/openmpt123.h2m $< > $@
 
 bin/$(FLAVOUR_DIR)in_openmpt$(SOSUFFIX): $(INOPENMPT_OBJECTS) $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
+	$(INFO) [LD] $@
+ifeq ($(NO_SHARED_LINKER_FLAG),1)
+	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+else
+	$(SILENT)$(LINK.cc) -shared $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@
+endif
+
+bin/$(FLAVOUR_DIR)in_openmpt_wa2$(SOSUFFIX): $(INOPENMPTWA2_OBJECTS) $(LIBOPENMPT_OBJECTS) $(LIBOPENMPT_LIBS)
 	$(INFO) [LD] $@
 ifeq ($(NO_SHARED_LINKER_FLAG),1)
 	$(SILENT)$(LINK.cc) $(LIBOPENMPT_LDFLAGS) $(SO_LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -o $@

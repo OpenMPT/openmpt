@@ -10,7 +10,12 @@ is just a high-level summary.
  *  [**New**] libopenmpt: New APIs for retrieving the sequence (order list) to
     which the currently playing subsong belongs:
     `openmpt::module::get_current sequence()` (C++) and
-    `openmpt_module_get_current_sequence()` (C). 
+    `openmpt_module_get_current_sequence()` (C).
+
+ *  [**Change**] in_openmpt: We now provide a separate `in_openmpt_wa2.dll`
+    which is compatible with Winamp 2 for all build variants in the `Winamp2/`
+    folder. The folder for the modern `in_openmpt.dll` which requires Winamp 5
+    is renamed to `Winamp5/`.
 
  *  libopenmpt now always uses architecture-specific SIMD intrinsics when
     available. This currently only enables the SSE2 implementation for Reverb.

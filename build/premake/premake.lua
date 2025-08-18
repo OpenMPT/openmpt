@@ -240,6 +240,7 @@ solution "in_openmpt"
  dofile "../../build/premake/ext-zlib.lua"
  dofile "../../build/premake/mpt-libopenmpt.lua"
  dofile "../../build/premake/mpt-in_openmpt.lua"
+ dofile "../../build/premake/mpt-in_openmpt_wa2.lua"
 
 end
 

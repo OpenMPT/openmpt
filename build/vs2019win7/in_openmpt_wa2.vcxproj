@@ -51,10 +51,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D75AEB78-5537-49BD-9085-F92DEEFA84E8}</ProjectGuid>
+    <ProjectGuid>{9165EEEC-0102-4F02-A8F5-3A771BF62EF6}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>in_openmpt</RootNamespace>
+    <RootNamespace>in_openmpt_wa2</RootNamespace>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -64,7 +64,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -72,7 +72,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -80,7 +80,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
@@ -89,7 +89,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
@@ -98,7 +98,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'" Label="Configuration">
@@ -106,7 +106,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'" Label="Configuration">
@@ -114,7 +114,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'" Label="Configuration">
@@ -122,7 +122,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'" Label="Configuration">
@@ -130,7 +130,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
@@ -139,7 +139,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
@@ -148,7 +148,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'" Label="Configuration">
@@ -156,7 +156,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -201,93 +201,93 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win7-static\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\Debug\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2019-win7-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\Debug\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win7-static\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\Debug\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2019-win7-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\Debug\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win7-static\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\Release\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2019-win7-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\Release\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win7-static\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\Release\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2019-win7-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\Release\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win7-static\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\Checked\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2019-win7-static\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\Checked\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win7-static\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\Checked\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2019-win7-static\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\Checked\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win7-shared\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\DebugShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2019-win7-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\DebugShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\debug\vs2022-win7-shared\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\DebugShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\debug\vs2019-win7-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\DebugShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win7-shared\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\ReleaseShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2019-win7-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\ReleaseShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\release\vs2022-win7-shared\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\ReleaseShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\release\vs2019-win7-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\ReleaseShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win7-shared\x86\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86\CheckedShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2019-win7-shared\x86\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86\CheckedShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)..\..\bin\checked\vs2022-win7-shared\amd64\</OutDir>
-    <IntDir>$(ProjectDir)..\obj\vs2022win7\in_openmpt\x86_64\CheckedShared\</IntDir>
-    <TargetName>in_openmpt</TargetName>
+    <OutDir>$(ProjectDir)..\..\bin\checked\vs2019-win7-shared\amd64\</OutDir>
+    <IntDir>$(ProjectDir)..\obj\vs2019win7\in_openmpt_wa2\x86_64\CheckedShared\</IntDir>
+    <TargetName>in_openmpt_wa2</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -295,21 +295,21 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2022-win7-static\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2019-win7-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -320,28 +320,28 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2022-win7-static\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2019-win7-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -352,7 +352,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -363,15 +363,14 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -380,7 +379,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>..\..\bin\release\vs2022-win7-static\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2019-win7-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -391,7 +390,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -401,15 +400,14 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -418,7 +416,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>..\..\bin\release\vs2022-win7-static\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2019-win7-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -429,7 +427,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
@@ -441,15 +439,14 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -457,7 +454,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2022-win7-static\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2019-win7-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -468,7 +465,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
@@ -479,15 +476,14 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -495,7 +491,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2022-win7-static\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2019-win7-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -506,7 +502,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -514,20 +510,20 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2022-win7-shared\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2019-win7-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -538,27 +534,27 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_DEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ImportLibrary>..\..\bin\debug\vs2022-win7-shared\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\debug\vs2019-win7-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -569,7 +565,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -580,15 +576,14 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -597,7 +592,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>..\..\bin\release\vs2022-win7-shared\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2019-win7-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -608,7 +603,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
@@ -618,15 +613,14 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -635,7 +629,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <ImportLibrary>..\..\bin\release\vs2022-win7-shared\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\release\vs2019-win7-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -646,7 +640,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
@@ -658,15 +652,14 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"x86\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -674,7 +667,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2022-win7-shared\x86\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2019-win7-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>
@@ -685,7 +678,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
@@ -696,15 +689,14 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/Gw /Zc:checkGwOdr %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP5;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;MPT_BUILD_CHECKED;MPT_BUILD_MSVC;WIN32;NOMINMAX;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1;_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1;_WIN32_WINNT=0x0601;NTDDI_VERSION=0x06010000;LIBOPENMPT_USE_DLL;MPT_BUILD_IN_OPENMPT_WINAMP2;_CSTRING_DISABLE_NARROW_WIDE_CONVERSION;_AFX_NO_MFC_CONTROLS_IN_DIALOGS;MPT_WITH_MFC;VER_ARCHNAME=\"amd64\";MPT_BUILD_VER_FILENAME=\"in_openmpt_wa2.dll\";MPT_BUILD_VER_FILEDESC=\"in_openmpt_wa2\";MPT_BUILD_VER_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\include;..\..;$(IntDir)\svn_version;$(IntDir)\svn_version;..\svn_version;$(ProjDir)\..\..\build\svn_version;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
@@ -712,7 +704,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ImportLibrary>..\..\bin\checked\vs2022-win7-shared\amd64\in_openmpt.lib</ImportLibrary>
+      <ImportLibrary>..\..\bin\checked\vs2019-win7-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <PreBuildEvent>

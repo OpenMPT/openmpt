@@ -42,9 +42,11 @@ mkdir openmpt123\arm-legacy
 mkdir openmpt123\arm64
 mkdir openmpt123\arm64ec
 mkdir XMPlay
-mkdir Winamp
+mkdir Winamp5
+mkdir Winamp2
 mkdir XMPlay-legacy
-mkdir Winamp-legacy
+mkdir Winamp5-legacy
+mkdir Winamp2-legacy
 rmdir /s /q Licenses
 mkdir Licenses
 copy /y ..\..\src\mpt\LICENSE.BSD-3-Clause.txt                          .\Licenses\License.mpt.BSD-3-Clause.txt || goto error
@@ -83,9 +85,11 @@ rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt           .\Li
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
-copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp5\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay-legacy\ || goto error
-copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp-legacy\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp5-legacy\ || goto error
+copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
@@ -102,12 +106,16 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\amd64\openmpt123.exe .\openmp
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\in_openmpt.dll .\Winamp\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\Winamp\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\in_openmpt.dll .\Winamp5\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\Winamp5\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\in_openmpt_wa2.dll .\Winamp2\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\Winamp2\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\xmp-openmpt.dll .\XMPlay-legacy\ || goto error
 copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\XMPlay-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt.dll .\Winamp-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt.dll .\Winamp5-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp5-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt_wa2.dll .\Winamp2-legacy\ || goto error
+copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp2-legacy\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.windows\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
@@ -129,15 +137,21 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Wina
  XMPlay\xmp-openmpt.txt ^
  XMPlay\xmp-openmpt.dll ^
  XMPlay\openmpt-mpg123.dll ^
- Winamp\in_openmpt.txt ^
- Winamp\in_openmpt.dll ^
- Winamp\openmpt-mpg123.dll ^
+ Winamp5\in_openmpt.txt ^
+ Winamp5\in_openmpt.dll ^
+ Winamp5\openmpt-mpg123.dll ^
+ Winamp2\in_openmpt_wa2.txt ^
+ Winamp2\in_openmpt_wa2.dll ^
+ Winamp2\openmpt-mpg123.dll ^
  XMPlay-legacy\xmp-openmpt.txt ^
  XMPlay-legacy\xmp-openmpt.dll ^
  XMPlay-legacy\openmpt-mpg123.dll ^
- Winamp-legacy\in_openmpt.txt ^
- Winamp-legacy\in_openmpt.dll ^
- Winamp-legacy\openmpt-mpg123.dll ^
+ Winamp5-legacy\in_openmpt.txt ^
+ Winamp5-legacy\in_openmpt.dll ^
+ Winamp5-legacy\openmpt-mpg123.dll ^
+ Winamp2-legacy\in_openmpt_wa2.txt ^
+ Winamp2-legacy\in_openmpt_wa2.dll ^
+ Winamp2-legacy\openmpt-mpg123.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-windows

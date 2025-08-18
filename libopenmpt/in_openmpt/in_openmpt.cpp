@@ -36,9 +36,16 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 
 #include <windows.h>
 
-#ifdef UNICODE
+#if defined(MPT_BUILD_IN_OPENMPT_WINAMP5)
+#ifndef UNICODE_INPUT_PLUGIN
 #define UNICODE_INPUT_PLUGIN
 #endif
+#elif defined(MPT_BUILD_IN_OPENMPT_WINAMP2)
+#ifdef UNICODE_INPUT_PLUGIN
+#undef UNICODE_INPUT_PLUGIN
+#endif
+#endif
+
 #ifndef _MSC_VER
 #define _MSC_VER 1300
 #endif

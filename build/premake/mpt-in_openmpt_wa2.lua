@@ -1,6 +1,6 @@
 
- project "in_openmpt"
-  uuid "D75AEB78-5537-49BD-9085-F92DEEFA84E8"
+ project "in_openmpt_wa2"
+  uuid "9165eeec-0102-4f02-a8f5-3a771bf62ef6"
   language "C++"
   vpaths { ["*"] = "../../libopenmpt/" }
   mpt_kind "shared"
@@ -25,8 +25,8 @@
 	filter {}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
 		resdefines {
-			"MPT_BUILD_VER_FILENAME=\"" .. "in_openmpt" .. ".dll\"",
-			"MPT_BUILD_VER_FILEDESC=\"" .. "in_openmpt" .. "\"",
+			"MPT_BUILD_VER_FILENAME=\"" .. "in_openmpt_wa2" .. ".dll\"",
+			"MPT_BUILD_VER_FILEDESC=\"" .. "in_openmpt_wa2" .. "\"",
 		}
 	filter {}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }
@@ -46,7 +46,7 @@
 		resdefines { "MPT_BUILD_VER_EXE" }
 	filter {}
 
-	defines { "MPT_BUILD_IN_OPENMPT_WINAMP5" }
+	defines { "MPT_BUILD_IN_OPENMPT_WINAMP2" }
 	mpt_use_mfc()
 	defines { "MPT_WITH_MFC" }
 	if _OPTIONS["windows-charset"] ~= "Unicode" then
