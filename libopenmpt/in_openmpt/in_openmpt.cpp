@@ -46,6 +46,22 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #endif
 #endif
 
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <sstream>
+
+#include <cstring>
+
+#include <tchar.h>
+
+// Include Winamp headers last because they require _MSC_VER defined which
+// confuses other headers.
+// Also include headers included by Winamp headers first.
+#include <windows.h>
+#include <stddef.h>
 #ifndef _MSC_VER
 #define _MSC_VER 1300
 #endif
@@ -58,17 +74,6 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #pragma clang diagnostic pop
 #endif
 #include "winamp/Winamp/wa_ipc.h"
-
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <sstream>
-
-#include <cstring>
-
-#include <tchar.h>
 
 #define BPS 16
 
