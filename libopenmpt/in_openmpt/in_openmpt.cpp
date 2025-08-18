@@ -119,6 +119,9 @@ static void apply_options();
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
 static std::string StringEncode( const std::wstring &src, UINT codepage )
@@ -199,6 +202,8 @@ static std::wstring StringFromWinamp( const std::string & src )
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
