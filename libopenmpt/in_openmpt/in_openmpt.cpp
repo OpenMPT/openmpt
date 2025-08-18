@@ -138,13 +138,14 @@ static std::wstring StringDecode( const std::string & src, UINT codepage )
 	return decoded_string.data();
 }
 
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
-
 #if defined(UNICODE)
 
 static std::wstring StringToWINAPI( const std::wstring & src )
+{
+	return src;
+}
+
+static std::wstring StringFromWINAPI( const std::wstring & src )
 {
 	return src;
 }
@@ -156,6 +157,41 @@ static std::string StringToWINAPI( const std::wstring & src )
 	return StringEncode( src, CP_ACP );
 }
 
+static std::wstring StringFromWINAPI( const std::string & src )
+{
+	return StringDecode( src, CP_ACP );
+}
+
+#endif
+
+#if defined(UNICODE_INPUT_PLUGIN)
+
+static std::wstring StringToWinamp( const std::wstring & src )
+{
+	return src;
+}
+
+static std::wstring StringFromWinamp( const std::wstring & src )
+{
+	return src;
+}
+
+#else
+
+static std::string StringToWinamp( const std::wstring & src )
+{
+	return StringEncode( src, CP_ACP );
+}
+
+static std::wstring StringFromWinamp( const std::string & src )
+{
+	return StringDecode( src, CP_ACP );
+}
+
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif
 
 template <typename Tstring, typename Tstring2, typename Tstring3>
@@ -307,7 +343,7 @@ static int play( const in_char * fn ) {
 		std::ifstream s( fn, std::ios::binary );
 		std::map< std::string, std::string > ctls;
 		self->mod = new openmpt::module( s, std::clog, ctls );
-		self->cached_filename = fn;
+		self->cached_filename = StringToWINAPI( StringFromWinamp( fn ) );
 		self->cached_title = StringToWINAPI( StringDecode( self->mod->get_metadata( "title" ), CP_UTF8 ) );
 		self->cached_length = static_cast<int>( self->mod->get_duration_seconds() * 1000.0 );
 		self->cached_infotext = generate_infotext( self->cached_filename, *self->mod );
@@ -383,12 +419,12 @@ static void setpan( int pan ) {
 }
 
 static int infobox( const in_char * fn, HWND hWndParent ) {
-	if ( fn && fn[0] != '\0' && self->cached_filename != std::basic_string<TCHAR>(fn) ) {
+	if ( fn && fn[0] != '\0' && self->cached_filename != StringToWINAPI( StringFromWinamp( fn ) ) ) {
 		try {
 			std::ifstream s( fn, std::ios::binary );
 			openmpt::module mod( s );
 #if 1
-			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ) );
+			libopenmpt::plugin::gui_show_file_info( hWndParent, TEXT(SHORT_TITLE), StringReplace( generate_infotext( StringToWINAPI( StringFromWinamp( fn ) ), mod ), TEXT("\n"), TEXT("\r\n") ) );
 #else
 			MessageBox( hWndParent, StringReplace( generate_infotext( fn, mod ), TEXT("\n"), TEXT("\r\n") ).c_str(), TEXT(SHORT_TITLE), MB_OK );
 #endif
@@ -411,11 +447,16 @@ static void getfileinfo( const in_char * filename, in_char * title, int * length
 			*length_in_ms = self->cached_length;
 		}
 		if ( title ) {
-			std::basic_string<TCHAR> truncated_title = self->cached_title;
+			std::basic_string<in_char> truncated_title = StringToWinamp( StringFromWINAPI( self->cached_title ) );
 			if ( truncated_title.length() >= GETFILEINFO_TITLE_LENGTH ) {
 				truncated_title.resize( GETFILEINFO_TITLE_LENGTH - 1 );
 			}
-			_tcscpy( title, truncated_title.c_str() );
+			//_tcscpy( title, truncated_title.c_str() );
+#if defined(UNICODE_INPUT_PLUGIN)
+			wcscpy( title, truncated_title.c_str() );
+#else
+			strcpy( title, truncated_title.c_str() );
+#endif
 		}
 	} else {
 		try {
@@ -425,11 +466,16 @@ static void getfileinfo( const in_char * filename, in_char * title, int * length
 				*length_in_ms = static_cast<int>( mod.get_duration_seconds() * 1000.0 );
 			}
 			if ( title ) {
-				std::basic_string<TCHAR> truncated_title = StringToWINAPI( StringDecode( mod.get_metadata("title"), CP_UTF8 ) );
+				std::basic_string<in_char> truncated_title = StringToWinamp( StringDecode( mod.get_metadata("title"), CP_UTF8 ) );
 				if ( truncated_title.length() >= GETFILEINFO_TITLE_LENGTH ) {
 					truncated_title.resize( GETFILEINFO_TITLE_LENGTH - 1 );
 				}
-				_tcscpy( title, truncated_title.c_str() );
+			//_tcscpy( title, truncated_title.c_str() );
+#if defined(UNICODE_INPUT_PLUGIN)
+			wcscpy( title, truncated_title.c_str() );
+#else
+			strcpy( title, truncated_title.c_str() );
+#endif
 			}
 		} catch ( ... ) {
 		}
