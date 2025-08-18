@@ -78,12 +78,6 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #ifdef UNICODE
 #define UNICODE_INPUT_PLUGIN
 #endif
-#ifndef _MSC_VER
-#define _MSC_VER 1300
-#endif
-#include "winamp/Winamp/IN2.H"
-#include "winamp/Winamp/wa_ipc.h"
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -93,6 +87,17 @@ static const char * in_openmpt_string = "in_openmpt " OPENMPT_API_VERSION_STRING
 #include <cstring>
 
 #include <tchar.h>
+
+// Include Winamp headers last because they require _MSC_VER defined which
+// confuses other headers.
+// Also include headers included by Winamp headers first.
+#include <windows.h>
+#include <stddef.h>
+#ifndef _MSC_VER
+#define _MSC_VER 1300
+#endif
+#include "winamp/Winamp/IN2.H"
+#include "winamp/Winamp/wa_ipc.h"
 
 #define BPS 16
 
