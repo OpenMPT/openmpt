@@ -370,7 +370,7 @@ public:
 		CProgressDialog::OnInitDialog();
 
 		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, static_cast<int>(s_format));
-		CheckRadioButton(IDC_RADIO4, IDC_RADIO5, IDC_RADIO4);
+		CheckRadioButton(IDC_RADIO4, IDC_RADIO5, m_subSongs.size() <= 1 ? IDC_RADIO4 : IDC_RADIO5);
 
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, static_cast<int>(m_subSongs.size()));
 		SetDlgItemInt(IDC_EDIT1, static_cast<UINT>(m_selectedSong + 1), FALSE);
