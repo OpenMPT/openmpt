@@ -133,9 +133,10 @@ BOOL CWaveConvert::OnInitDialog()
 
 	// Export limits
 	const bool selection = (m_Settings.minOrder != ORDERINDEX_INVALID && m_Settings.maxOrder != ORDERINDEX_INVALID);
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selection ? IDC_RADIO2 : IDC_RADIO3);
+	int selectedRadio = (m_subSongs.size() <= 1) ? IDC_RADIO3 : IDC_RADIO1;
 	if(selection)
 	{
+		selectedRadio = IDC_RADIO2;
 		SetDlgItemInt(IDC_EDIT3, m_Settings.minOrder);
 		SetDlgItemInt(IDC_EDIT4, m_Settings.maxOrder);
 	}
@@ -152,6 +153,7 @@ BOOL CWaveConvert::OnInitDialog()
 		GetDlgItem(IDC_RADIO3)->SetWindowText(_T("&Entire Song"));
 		GetDlgItem(IDC_RADIO1)->EnableWindow(FALSE);
 	}
+	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selectedRadio);
 	UpdateSubsongName();
 
 	FillFileTypes();
