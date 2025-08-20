@@ -152,6 +152,10 @@ std::string Context::PathToPosix(mpt::PathString windowsPath)
 	result = tmp;
 	HeapFree(GetProcessHeap(), 0, tmp);
 	tmp = nullptr;
+	if(mpt::ends_with(windowsPath.AsNative(), P_("\\").AsNative()) && !mpt::ends_with(result, "/"))
+	{
+		result.push_back('/');
+	}
 	return result;
 }
 
@@ -175,6 +179,10 @@ mpt::PathString Context::PathToWindows(std::string hostPath)
 	result = mpt::PathString::FromWide(tmp);
 	HeapFree(GetProcessHeap(), 0, tmp);
 	tmp = nullptr;
+	if(!mpt::ends_with(hostPath, "/") && !mpt::ends_with(result.AsNative(), P_("\\").AsNative()))
+	{
+		result.append(P_("\\"));
+	}
 	return result;
 }
 
@@ -199,6 +207,10 @@ std::string Context::PathToPosixCanonical(mpt::PathString windowsPath)
 	}
 	std::string trimmedOutput = mpt::trim(output, std::string("\r\n"));
 	result = trimmedOutput;
+	if(mpt::ends_with(windowsPath.AsNative(), P_("\\").AsNative()) && !mpt::ends_with(result, "/"))
+	{
+		result.push_back('/');
+	}
 	return result;
 }
 
