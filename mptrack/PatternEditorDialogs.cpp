@@ -1554,6 +1554,7 @@ void QuickChannelProperties::Show(CModDoc *modDoc, CHANNELINDEX chn, CPoint posi
 
 void QuickChannelProperties::UpdateDisplay()
 {
+	const CWnd *oldFocusWnd = GetFocus();
 	SetWindowText(MPT_TFORMAT("Settings for Channel {}")(m_channel + 1).c_str());
 
 	// Set up channel properties
@@ -1587,6 +1588,18 @@ void QuickChannelProperties::UpdateDisplay()
 
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON1), isFirst ? FALSE : TRUE);
 	::EnableWindow(::GetDlgItem(m_hWnd, IDC_BUTTON2), isLast ? FALSE : TRUE);
+
+	// Avoid focus trap if we just navigated to the first or last channel
+	const int PrevNextButtons[] = {IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON5, IDC_BUTTON6};
+	for(int button : PrevNextButtons)
+	{
+		const CWnd *wnd = GetDlgItem(button);
+		if (oldFocusWnd == wnd && !wnd->IsWindowEnabled())
+		{
+			SetFocusToFirstControl();
+			break;
+		}
+	}
 }
 
 void QuickChannelProperties::PrepareUndo()
