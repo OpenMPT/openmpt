@@ -22,6 +22,8 @@
 OPENMPT_NAMESPACE_BEGIN
 
 BEGIN_MESSAGE_MAP(QuickStartDlg, ResizableDialog)
+	ON_WM_DESTROY()
+
 	ON_COMMAND(IDC_BUTTON1,   &QuickStartDlg::OnNew)
 	ON_COMMAND(IDC_BUTTON2,   &QuickStartDlg::OnOpen)
 	ON_COMMAND(ID_REMOVE,     &QuickStartDlg::OnRemoveMRUItem)
@@ -90,6 +92,10 @@ QuickStartDlg::QuickStartDlg(const std::vector<mpt::PathString> &templates, cons
 			group.uAlign = LVGA_HEADER_LEFT;
 			ListView_InsertGroup(m_list.m_hWnd, -1, &group);
 			ListView_SetGroupState(m_list.m_hWnd, group.iGroupId, LVGS_COLLAPSIBLE, LVGS_COLLAPSIBLE);
+			if((TrackerSettings::Instance().quickStartGroupsCollapsed & (1 << groupId)) != 0)
+			{
+				ListView_SetGroupState(m_list.m_hWnd, group.iGroupId, LVGS_COLLAPSED, LVGS_COLLAPSED);
+			}
 		}
 
 		m_paths[groupId] = PathGroups[groupId].first;
@@ -366,6 +372,22 @@ void QuickStartDlg::OnRightClickFile(NMHDR *nmhdr, LRESULT *)
 void QuickStartDlg::OnItemChanged(NMHDR *, LRESULT *)
 {
 	GetDlgItem(IDOK)->EnableWindow(m_list.GetSelectedCount() != 0 ? TRUE : FALSE);
+}
+
+
+void QuickStartDlg::OnDestroy()
+{
+	if(m_groupsEnabled)
+	{
+		uint8 state = 0;
+		for(size_t groupId = 0; groupId < m_paths.size(); groupId++)
+		{
+			if((ListView_GetGroupState(m_list.m_hWnd, groupId, LVGS_COLLAPSED) & LVGS_COLLAPSED) != 0)
+				state |= static_cast<uint8>(1 << groupId);
+		}
+		TrackerSettings::Instance().quickStartGroupsCollapsed = state;
+	}
+	ResizableDialog::OnDestroy();
 }
 
 OPENMPT_NAMESPACE_END

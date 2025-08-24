@@ -23,6 +23,7 @@ class QuickStartDlg : public ResizableDialog
 {
 public:
 	QuickStartDlg(const std::vector<mpt::PathString> &templates, const std::vector<mpt::PathString> &examples, CWnd *parent);
+	~QuickStartDlg() override { DestroyWindow(); }
 
 	void UpdateHeight();
 
@@ -46,6 +47,7 @@ protected:
 	afx_msg void OnOpenFile(NMHDR *, LRESULT *);
 	afx_msg void OnRightClickFile(NMHDR *, LRESULT *);
 	afx_msg void OnItemChanged(NMHDR *, LRESULT *);
+	afx_msg void OnDestroy();
 
 	DECLARE_MESSAGE_MAP()
 
