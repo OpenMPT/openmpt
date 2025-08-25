@@ -38,7 +38,7 @@ protected:
 	bool m_preview = false;
 
 protected:
-	FileDialog(bool load, const CString &caption = {}) : m_load{load}, m_caption{caption} { }
+	FileDialog(bool load, const CString &caption = {}) : m_caption{caption}, m_load{load} { }
 
 public:
 	// Default extension to use if none is specified.
