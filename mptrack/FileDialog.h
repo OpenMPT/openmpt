@@ -31,13 +31,14 @@ protected:
 	mpt::RawPathString m_extension;
 	PathList m_filenames;
 	PathList m_places;
+	CString m_caption;
 	int *m_filterIndex = nullptr;
 	bool m_load;
 	bool m_multiSelect = false;
 	bool m_preview = false;
 
 protected:
-	FileDialog(bool load) : m_load(load) { }
+	FileDialog(bool load, const CString &caption = {}) : m_load{load}, m_caption{caption} { }
 
 public:
 	// Default extension to use if none is specified.
@@ -97,7 +98,7 @@ public:
 class OpenFileDialog : public FileDialog
 {
 public:
-	OpenFileDialog() : FileDialog(true) { }
+	explicit OpenFileDialog(const CString &caption = {}) : FileDialog{true, caption} { }
 
 	// Enable selection of multiple files
 	OpenFileDialog &AllowMultiSelect() { m_multiSelect = true; return *this; }
@@ -108,7 +109,7 @@ public:
 class SaveFileDialog : public FileDialog
 {
 public:
-	SaveFileDialog() : FileDialog(false) { }
+	explicit SaveFileDialog(const CString &caption = {}) : FileDialog{false, caption} { }
 };
 
 

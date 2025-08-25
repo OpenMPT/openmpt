@@ -146,6 +146,10 @@ bool FileDialog::Show(CWnd *parent)
 	{
 		ofn.lpstrInitialDir = m_workingDirectory.c_str();
 	}
+	if(!m_caption.IsEmpty())
+	{
+		ofn.lpstrTitle = m_caption;
+	}
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 	for(const auto &place : m_places)
 	{
