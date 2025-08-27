@@ -2092,7 +2092,7 @@ void ErrorBox(UINT nStringID, CWnd *parent)
 		str.Format(_T("Resource string %u not found."), nStringID);
 	}
 	MPT_ASSERT(resourceLoaded);
-	Reporting::CustomNotification(str, _T("Error!"), MB_OK | MB_ICONERROR, parent);
+	Reporting::Error(str, _T("Error!"), parent);
 }
 
 

@@ -85,12 +85,6 @@ static UINT ShowNotificationImpl(CString text, const CString &caption, UINT flag
 }
 
 
-UINT Reporting::CustomNotification(const AnyStringLocale &text, const AnyStringLocale &caption, UINT flags, const CWnd *parent)
-{
-	return ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(mpt::ToCString(caption)), flags, parent);
-}
-
-
 void Reporting::Notification(const AnyStringLocale &text, const CWnd *parent)
 {
 	ShowNotificationImpl(mpt::ToCString(text), FillEmptyCaption(CString(), LogNotification), LogLevelToFlags(LogNotification), parent);

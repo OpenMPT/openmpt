@@ -35,10 +35,6 @@ class Reporting
 {
 
 public:
-
-	// TODO Quick'n'dirty workaround for MsgBox(). Shouldn't be public.
-	static UINT CustomNotification(const AnyStringLocale &text, const AnyStringLocale &caption, UINT flags, const CWnd *parent);
-
 	// Show a simple notification
 	static void Notification(const AnyStringLocale &text, const CWnd *parent = nullptr);
 	static void Notification(const AnyStringLocale &text, const AnyStringLocale &caption, const CWnd *parent = nullptr);
