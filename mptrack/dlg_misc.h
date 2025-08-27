@@ -195,10 +195,10 @@ protected:
 /////////////////////////////////////////////////////////////////////////
 // Sample Map
 
-class CSampleMapDlg : public DialogBase
+class CSampleMapDlg : public ResizableDialog
 {
 protected:
-	enum class MouseAction
+	enum class MouseAction : uint8
 	{
 		Unknown,  // Didn't mouse-down yet
 		Set,      // Set selected sample
@@ -206,27 +206,45 @@ protected:
 		Zero,     // Set to zero
 	};
 
+	struct SampleRegion
+	{
+		ModCommand::NOTE startNote = NOTE_NONE;
+		ModCommand::NOTE endNote = NOTE_NONE;
+	};
+
 	CKeyboardControl m_Keyboard;
-	CComboBox m_CbnSample;
+	CComboBox m_CbnSample, m_CbnRegion, m_CbnRegionStart, m_CbnRegionEnd;
 	CSliderCtrl m_SbOctave;
 
-	CSoundFile &sndFile;
+	std::vector<SampleRegion> m_regions;
+
+	CSoundFile &m_sndFile;
 	const INSTRUMENTINDEX m_nInstrument;
 	std::array<SAMPLEINDEX, NOTE_MAX - NOTE_MIN + 1> KeyboardMap;
-	MouseAction mouseAction = MouseAction::Unknown;
+	MouseAction m_mouseAction = MouseAction::Unknown;
+
+	const ModCommand::NOTE m_minNote, m_maxNote;
 
 public:
-	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX nInstr, CWnd *parent = nullptr);
+	CSampleMapDlg(CSoundFile &sf, INSTRUMENTINDEX instr, CWnd *parent = nullptr);
 
 protected:
-	void DoDataExchange(CDataExchange* pDX) override;
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+
 	afx_msg void OnUpdateSamples();
+	afx_msg void OnSampleChanged();
 	afx_msg void OnUpdateKeyboard();
 	afx_msg void OnUpdateOctave();
+	afx_msg void UpdateRegionStartEndSelection();
+	afx_msg void OnRegionBoundaryChanged();
 	afx_msg void OnHScroll(UINT, UINT, CScrollBar *);
 	afx_msg LRESULT OnKeyboardNotify(WPARAM, LPARAM);
+
+	void RecalcSampleRegions();
+	void UpdateRegionControls(ModCommand::NOTE modifiedNote = NOTE_NONE);
+
 	DECLARE_MESSAGE_MAP()
 };
 
