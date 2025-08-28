@@ -1481,7 +1481,7 @@ void CSampleMapDlg::OnRegionBoundaryChanged()
 void CSampleMapDlg::OnOK()
 {
 	ModInstrument *pIns = m_sndFile.Instruments[m_nInstrument];
-	if(!pIns)
+	if(pIns)
 	{
 		bool modified = false;
 		for(ModCommand::NOTE i = m_minNote; i < m_maxNote; i++)
