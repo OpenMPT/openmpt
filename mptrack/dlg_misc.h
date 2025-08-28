@@ -153,12 +153,13 @@ enum
 class CKeyboardControl: public CWnd
 {
 public:
-	enum
+	enum class KeyFlag : uint8
 	{
-		KEYFLAG_NORMAL    = 0x00,
-		KEYFLAG_REDDOT    = 0x01,
-		KEYFLAG_BRIGHTDOT = 0x02,
+		Normal    = 0x00,
+		RedDot    = 0x01,
+		BrightDot = 0x02,
 	};
+
 protected:
 	CWnd *m_parent = nullptr;
 	CFont m_font;
@@ -167,18 +168,18 @@ protected:
 	bool m_mouseCapture = false, m_cursorNotify = false;
 	bool m_mouseDown = false;
 
-	std::array<uint8, NOTE_MAX> KeyFlags; // 10 octaves max
-	std::array<SAMPLEINDEX, NOTE_MAX> m_sampleNum;
+	std::array<FlagSet<KeyFlag>, NOTE_MAX - NOTE_MIN + 1> KeyFlags;  // 10 octaves max
+	std::array<SAMPLEINDEX, NOTE_MAX - NOTE_MIN + 1> m_sampleNum;
 
 public:
 	CKeyboardControl() = default;
 
 public:
 	void Init(CWnd *parent, int octaves = 1, bool cursorNotify = false);
-	void SetFlags(UINT key, uint8 flags) { if (key < NOTE_MAX) KeyFlags[key] = flags; }
-	uint8 GetFlags(UINT key) const { return (key < NOTE_MAX) ? KeyFlags[key] : 0; }
-	void SetSample(UINT key, SAMPLEINDEX sample) { if (key < NOTE_MAX) m_sampleNum[key] = sample; }
-	SAMPLEINDEX GetSample(UINT key) const { return (key < NOTE_MAX) ? m_sampleNum[key] : 0; }
+	void SetFlags(UINT key, FlagSet<KeyFlag> flags) { if (key < KeyFlags.size()) KeyFlags[key] = flags; }
+	FlagSet<KeyFlag> GetFlags(UINT key) const { return (key < KeyFlags.size()) ? KeyFlags[key] : KeyFlag::Normal; }
+	void SetSample(UINT key, SAMPLEINDEX sample) { if (key < m_sampleNum.size()) m_sampleNum[key] = sample; }
+	SAMPLEINDEX GetSample(UINT key) const { return (key < m_sampleNum.size()) ? m_sampleNum[key] : 0; }
 
 protected:
 	void DrawKey(CPaintDC &dc, const CRect rect, int key, bool black) const;
@@ -190,6 +191,8 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 };
+
+DECLARE_FLAGSET(CKeyboardControl::KeyFlag)
 
 
 /////////////////////////////////////////////////////////////////////////

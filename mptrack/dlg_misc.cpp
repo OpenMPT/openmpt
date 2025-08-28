@@ -927,8 +927,8 @@ void CKeyboardControl::Init(CWnd *parent, int octaves, bool cursorNotify)
 	m_parent = parent;
 	m_nOctaves = std::max(1, octaves);
 	m_cursorNotify = cursorNotify;
-	MemsetZero(KeyFlags);
-	MemsetZero(m_sampleNum);
+	KeyFlags.fill(KeyFlag::Normal);
+	m_sampleNum.fill(0);
 
 	// Point size to pixels
 	int fontSize = -MulDiv(60, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
@@ -953,21 +953,21 @@ void CKeyboardControl::DrawKey(CPaintDC &dc, const CRect rect, int key, bool bla
 	dc.SetDCBrushColor(color);
 	dc.Rectangle(&rect);
 
-	if(static_cast<size_t>(key) < std::size(KeyFlags) && KeyFlags[key] != KEYFLAG_NORMAL)
+	if(static_cast<size_t>(key) < std::size(KeyFlags) && KeyFlags[key] != KeyFlag::Normal)
 	{
 		const int margin = black ? 0 : 2;
 		CRect ellipseRect(rect.left + margin, rect.bottom - rect.Width() + margin, rect.right - margin, rect.bottom - margin);
-		dc.SetDCBrushColor((KeyFlags[key] & KEYFLAG_BRIGHTDOT) ? RGB(255, 192, 192) : RGB(255, 0, 0));
+		dc.SetDCBrushColor((KeyFlags[key] & KeyFlag::BrightDot) ? RGB(255, 192, 192) : RGB(255, 0, 0));
 		dc.Ellipse(ellipseRect);
 		if(m_sampleNum[key] != 0)
 		{
-			dc.SetTextColor((KeyFlags[key] & KEYFLAG_BRIGHTDOT) ? RGB(0, 0, 0) : RGB(255, 255, 255));
+			dc.SetTextColor((KeyFlags[key] & KeyFlag::BrightDot) ? RGB(0, 0, 0) : RGB(255, 255, 255));
 			TCHAR s[16];
 			wsprintf(s, _T("%u"), m_sampleNum[key]);
 			dc.DrawText(s, -1, ellipseRect, DT_CENTER | DT_SINGLELINE | DT_VCENTER);
 		}
 
-		if(KeyFlags[key] == (KEYFLAG_REDDOT | KEYFLAG_BRIGHTDOT))
+		if(KeyFlags[key] == (KeyFlag::RedDot | KeyFlag::BrightDot))
 		{
 			// Both flags set: Draw second dot
 			ellipseRect.MoveToY(ellipseRect.top - ellipseRect.Height() - 2);
@@ -1274,14 +1274,14 @@ void CSampleMapDlg::OnUpdateKeyboard()
 	bool redraw = false;
 	for(UINT iNote = 0; iNote < 3 * 12; iNote++)
 	{
-		uint8 oldFlags = m_Keyboard.GetFlags(iNote);
-		SAMPLEINDEX oldSmp = m_Keyboard.GetSample(iNote);
+		const auto oldFlags = m_Keyboard.GetFlags(iNote);
+		const SAMPLEINDEX oldSmp = m_Keyboard.GetSample(iNote);
 		UINT ndx = baseOctave * 12 + iNote;
-		uint8 newFlags = CKeyboardControl::KEYFLAG_NORMAL;
+		FlagSet<CKeyboardControl::KeyFlag> newFlags = CKeyboardControl::KeyFlag::Normal;
 		if(KeyboardMap[ndx] == nSample)
-			newFlags = CKeyboardControl::KEYFLAG_REDDOT;
+			newFlags = CKeyboardControl::KeyFlag::RedDot;
 		else if(KeyboardMap[ndx] != 0)
-			newFlags = CKeyboardControl::KEYFLAG_BRIGHTDOT;
+			newFlags = CKeyboardControl::KeyFlag::BrightDot;
 		if(newFlags != oldFlags || oldSmp != KeyboardMap[ndx])
 		{
 			m_Keyboard.SetFlags(iNote, newFlags);

@@ -1283,14 +1283,14 @@ void CChordEditor::UpdateKeyboard()
 	const int baseNote = (chord.key == MPTChord::relativeMode) ? 0 : (chord.key % 12);
 	for(int i = CHORD_MIN; i < CHORD_MAX; i++)
 	{
-		uint8 b = CKeyboardControl::KEYFLAG_NORMAL;
+		FlagSet<CKeyboardControl::KeyFlag> b = CKeyboardControl::KeyFlag::Normal;
 		for(const auto note : chord.notes)
 		{
 			if(i == note)
-				b |= CKeyboardControl::KEYFLAG_REDDOT;
+				b.set(CKeyboardControl::KeyFlag::RedDot);
 		}
 		if(i == baseNote)
-			b |= CKeyboardControl::KEYFLAG_BRIGHTDOT;
+			b.set(CKeyboardControl::KeyFlag::BrightDot);
 		m_Keyboard.SetFlags(i - CHORD_MIN, b);
 	}
 	m_Keyboard.InvalidateRect(nullptr, FALSE);
