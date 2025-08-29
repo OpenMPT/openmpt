@@ -325,11 +325,8 @@ bool CFindReplaceTab::IsPCEvent() const
 {
 	if(m_isReplaceTab)
 	{
-		if(ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(m_settings.replaceNote)))
-			return true;
-		else if(m_settings.replaceFlags[FindReplace::Note])
-			return false;
-		// If we don't replace the note, still show the PC-related settings if we search for PC events.
+		if(m_settings.replaceFlags[FindReplace::Note] && m_settings.replaceNoteAction == FindReplace::ReplaceValue)
+			return ModCommand::IsPcNote(static_cast<ModCommand::NOTE>(m_settings.replaceNote));
 	}
 	return ModCommand::IsPcNote(m_settings.findNoteMin);
 }
@@ -928,18 +925,33 @@ void CFindReplaceTab::OnPCParamChanged()
 }
 
 
-void CFindReplaceTab::OnCheckNote() { CheckReplace(IDC_CHECK1); };
-void CFindReplaceTab::OnCheckInstr() { CheckReplace(IDC_CHECK2); };
-void CFindReplaceTab::OnCheckVolCmd() { CheckReplace(IDC_CHECK3); };
-void CFindReplaceTab::OnCheckVolume() { CheckReplace(IDC_CHECK4); };
-void CFindReplaceTab::OnCheckEffect() { CheckReplace(IDC_CHECK5); };
-void CFindReplaceTab::OnCheckParam() { CheckReplace(IDC_CHECK6); };
-
-
-void CFindReplaceTab::CheckReplace(int nIDButton)
+void CFindReplaceTab::OnCheckNote()
 {
-	if(m_isReplaceTab && IsDlgButtonChecked(nIDButton))
+	CheckReplace(IDC_CHECK1);
+	if(m_isReplaceTab && IsPCEvent() != !!GetWindowLongPtr(m_cbnInstr.m_hWnd, GWLP_USERDATA))
+	{
+		UpdateInstrumentList();
+		UpdateVolumeList();
+	}
+}
+
+void CFindReplaceTab::OnCheckInstr() { CheckReplace(IDC_CHECK2); }
+void CFindReplaceTab::OnCheckVolCmd() { CheckReplace(IDC_CHECK3); }
+void CFindReplaceTab::OnCheckVolume() { CheckReplace(IDC_CHECK4); }
+void CFindReplaceTab::OnCheckEffect() { CheckReplace(IDC_CHECK5); }
+void CFindReplaceTab::OnCheckParam() { CheckReplace(IDC_CHECK6); }
+
+
+void CFindReplaceTab::CheckReplace(int buttonID)
+{
+	if(m_isReplaceTab && IsDlgButtonChecked(buttonID))
 		CheckDlgButton(IDC_CHECK7, BST_CHECKED);
+
+	if(buttonID == IDC_CHECK1)
+	{
+		FlagSet<FindReplace::Flags> &flags = m_isReplaceTab ? m_settings.replaceFlags : m_settings.findFlags;
+		flags.set(FindReplace::Note, !!IsDlgButtonChecked(IDC_CHECK1));
+	}
 };
 
 

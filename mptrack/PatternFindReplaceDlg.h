@@ -28,11 +28,11 @@ protected:
 	CComboBox m_cbnNote, m_cbnVolCmd, m_cbnVolume, m_cbnCommand, m_cbnParam, m_cbnPCParam;
 	PluginComboBox m_cbnInstr;
 
-	CSoundFile &m_sndFile;
+	const CSoundFile &m_sndFile;
 	FindReplace &m_settings;
 	EffectInfo m_effectInfo;
 	ModCommand m_initialValues;
-	bool m_isReplaceTab;
+	const bool m_isReplaceTab;
 
 	// Special ItemData values
 	enum
@@ -55,13 +55,13 @@ protected:
 	};
 
 public:
-	CFindReplaceTab(UINT nIDD, bool isReplaceTab, CSoundFile &sf, FindReplace &settings, const ModCommand &initialValues)
-		: CPropertyPage(nIDD)
-		, m_sndFile(sf)
-		, m_settings(settings)
-		, m_effectInfo(sf)
-		, m_initialValues(initialValues)
-		, m_isReplaceTab(isReplaceTab)
+	CFindReplaceTab(UINT dlgID, bool isReplaceTab, const CSoundFile &sf, FindReplace &settings, const ModCommand &initialValues)
+		: CPropertyPage{dlgID}
+		, m_sndFile{sf}
+		, m_settings{settings}
+		, m_effectInfo{sf}
+		, m_initialValues{initialValues}
+		, m_isReplaceTab{isReplaceTab}
 	{ }
 
 protected:
@@ -76,7 +76,7 @@ protected:
 	void UpdateParamList();
 
 	// When a combobox is focussed, check the corresponding checkbox.
-	void CheckOnChange(int nIDButton) { CheckDlgButton(nIDButton, BST_CHECKED); CheckReplace(nIDButton); };
+	void CheckOnChange(int buttonID) { CheckDlgButton(buttonID, BST_CHECKED); CheckReplace(buttonID); };
 	afx_msg void OnNoteChanged();
 	afx_msg void OnInstrChanged();
 	afx_msg void OnVolCmdChanged();
@@ -92,7 +92,7 @@ protected:
 	afx_msg void OnCheckEffect();
 	afx_msg void OnCheckParam();
 	// Check "Replace By"
-	afx_msg void CheckReplace(int nIDButton);
+	afx_msg void CheckReplace(int buttonID);
 
 	afx_msg void OnCheckChannelSearch();
 
