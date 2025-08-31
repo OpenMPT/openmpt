@@ -756,6 +756,7 @@ void CLegacyPlaybackSettingsDlg::OnFilterStringChanged()
 		case kFT2OffsetMemoryRequiresNote: desc = _T("Offset effect memory is only updated when the command is next to a note"); break;
 		case kITNoteCutWithPorta: desc = _T("Note Cut (SCx) resets note pitch and interacts with tone portamento + row delay"); break;
 		case kITVolColNoSlidePropagation: desc = _T("Do not propagate volume column volume slide memory to regular effect column"); break;
+		case kITStoppedFilterEnvAtStart: desc = _T("Stopped filter envelope is still applied even if its first tick has not been processed yet"); break;
 
 		default: MPT_ASSERT_NOTREACHED();
 		}
