@@ -1471,11 +1471,8 @@ void CMainFrame::UnsetPlaybackSoundFile()
 	MPT_ASSERT_ALWAYS(!gpSoundDevice || !gpSoundDevice->IsPlaying());
 	if(m_pSndFile)
 	{
+		CriticalSection cs;
 		m_pSndFile->SuspendPlugins();
-		if(m_pSndFile->GetpModDoc())
-		{
-			m_wndTree.UpdatePlayPos(m_pSndFile->GetpModDoc(), nullptr);
-		}
 		m_pSndFile->m_PlayState.m_flags.reset(SONG_PAUSED);
 		if(m_pSndFile == &m_WaveFile)
 		{
@@ -1492,6 +1489,11 @@ void CMainFrame::UnsetPlaybackSoundFile()
 					chn.position.Set(0);
 				}
 			}
+		}
+		cs.Leave();
+		if(m_pSndFile->GetpModDoc())
+		{
+			m_wndTree.UpdatePlayPos(m_pSndFile->GetpModDoc(), nullptr);
 		}
 	}
 	m_pSndFile = nullptr;
