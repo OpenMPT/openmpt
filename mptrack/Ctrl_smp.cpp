@@ -725,7 +725,17 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 	if(!hintType[HINT_SMPNAMES | HINT_SAMPLEINFO | HINT_MODTYPE]) return;
 
 	const SAMPLEINDEX updateSmp = sampleHint.GetSample();
-	if(updateSmp != m_nSample && updateSmp != 0 && !hintType[HINT_MODTYPE]) return;
+	if(updateSmp != m_nSample && updateSmp != 0 && !hintType[HINT_MODTYPE])
+	{
+		int lower = 0, upper = 0;
+		m_SpinSample.GetRange(lower, upper);
+		if(upper != m_sndFile.GetNumSamples())
+		{
+			m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
+			m_SpinSample.Invalidate(FALSE);  // In case the spin button was previously disabled
+		}
+		return;
+	}
 
 	const CModSpecifications &specs = m_sndFile.GetModSpecifications();
 	const bool isOPL = IsOPLInstrument();
@@ -825,7 +835,7 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 		DWORD d;
 
 		m_SpinSample.SetRange(1, m_sndFile.GetNumSamples());
-		m_SpinSample.Invalidate(FALSE);	// In case the spin button was previously disabled
+		m_SpinSample.Invalidate(FALSE);  // In case the spin button was previously disabled
 
 		// Length / Type
 		if(isOPL)

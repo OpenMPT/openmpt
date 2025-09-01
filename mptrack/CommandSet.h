@@ -965,6 +965,7 @@ enum CommandID : int
 	kcSampleMonoLeft,
 	kcSampleMonoRight,
 	kcSampleMonoSplit,
+	kcSampleSendSelectionToNew,
 	kcSampleStereoSep,
 	kcSampleUpsample,
 	kcSampleDownsample,

@@ -1195,6 +1195,7 @@
 #define ID_KEYPRESET_MPT                36048
 #define ID_KEYPRESET_IT                 36049
 #define ID_KEYPRESET_FT2                36050
+#define ID_SAMPLE_SEND_TO_NEW_SLOT      36051
 #define ID_SELECTINST                   36100
 // From here: Command range [ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS]
 #define ID_PLUG_RECORDAUTOMATION        37003

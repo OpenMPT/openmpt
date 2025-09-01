@@ -244,6 +244,7 @@ protected:
 	afx_msg void OnSampleSlice();
 	afx_msg void OnSampleInsertCuePoint();
 	afx_msg void OnSampleDeleteCuePoint();
+	afx_msg void OnSendSelectionToNewSlot();
 	afx_msg void OnTimelineFormatSeconds() { SetTimelineFormat(TimelineFormat::Seconds); }
 	afx_msg void OnTimelineFormatSamples() { SetTimelineFormat(TimelineFormat::Samples); }
 	afx_msg void OnTimelineFormatSamplesPow2() { SetTimelineFormat(TimelineFormat::SamplesPow2); }

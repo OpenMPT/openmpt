@@ -148,6 +148,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_SLICE,				&CViewSample::OnSampleSlice)
 	ON_COMMAND(ID_SAMPLE_INSERT_CUEPOINT,	&CViewSample::OnSampleInsertCuePoint)
 	ON_COMMAND(ID_SAMPLE_DELETE_CUEPOINT,	&CViewSample::OnSampleDeleteCuePoint)
+	ON_COMMAND(ID_SAMPLE_SEND_TO_NEW_SLOT,	&CViewSample::OnSendSelectionToNewSlot)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SECONDS,	&CViewSample::OnTimelineFormatSeconds)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES,	&CViewSample::OnTimelineFormatSamples)
 	ON_COMMAND(ID_SAMPLE_TIMELINE_SAMPLES_POW2, &CViewSample::OnTimelineFormatSamplesPow2)
@@ -2274,10 +2275,11 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 		{
 			if (m_dwEndSel >= m_dwBeginSel + 4)
 			{
-				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, ih->GetKeyTextFromCommand(kcSampleZoomSelection, _T("Zoom")));
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As Loop"));
+				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, ih->GetKeyTextFromCommand(kcSampleZoomSelection, _T("&Zoom")));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As &Loop"));
 				if (sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))
-					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As Sustain Loop"));
+					::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETSUSTAINLOOP, _T("Set As &Sustain Loop"));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SEND_TO_NEW_SLOT, ih->GetKeyTextFromCommand(kcSampleSendSelectionToNew, _T("Send to &New Sample Slot")));
 				::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
 			} else
 			{
@@ -3015,6 +3017,45 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 		}
 	}
 	EndWaitCursor();
+}
+
+
+void CViewSample::OnSendSelectionToNewSlot()
+{
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	const ModSample &sourceSmp = sndFile.GetSample(m_nSample);
+	LimitMax(m_dwBeginSel, sourceSmp.nLength);
+	LimitMax(m_dwEndSel, sourceSmp.nLength);
+	if(!sourceSmp.HasSampleData() || sourceSmp.uFlags[CHN_ADLIB] || m_dwEndSel <= m_dwBeginSel)
+		return;
+
+	const SAMPLEINDEX newSample = modDoc->InsertSample();
+	if(newSample == SAMPLEINDEX_INVALID)
+		return;
+
+	CriticalSection cs;
+	ModSample &targetSample = sndFile.GetSample(newSample);
+	targetSample = sourceSmp;
+	targetSample.pData.pSample = nullptr;
+	targetSample.nLoopStart = targetSample.nLoopEnd = 0;
+	targetSample.nSustainStart = targetSample.nSustainEnd = 0;
+	targetSample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
+	targetSample.cues.fill(MAX_SAMPLE_LENGTH);
+	sndFile.m_szNames[newSample] = sndFile.m_szNames[m_nSample];
+	targetSample.nLength = m_dwEndSel - m_dwBeginSel;
+
+	if(targetSample.AllocateSample())
+	{
+		modDoc->GetSampleUndo().PrepareUndo(newSample, sundo_replace, "Send Selection to New Sample Slot");
+		const uint8 bps = targetSample.GetBytesPerSample();
+		std::copy(sourceSmp.sampleb() + m_dwBeginSel * bps, sourceSmp.sampleb() + m_dwEndSel * bps, targetSample.sampleb());
+		targetSample.PrecomputeLoops(sndFile, false);
+	}
+	cs.Leave();
+	modDoc->UpdateAllViews(nullptr, SampleHint(newSample).Info().Data().Names());
 }
 
 
@@ -3788,6 +3829,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleMonoLeft:	OnMonoConvertLeft(); return wParam;
 		case kcSampleMonoRight:	OnMonoConvertRight(); return wParam;
 		case kcSampleMonoSplit:	OnMonoConvertSplit(); return wParam;
+		case kcSampleSendSelectionToNew: OnSendSelectionToNewSlot(); return wParam;
 
 		case kcSampleReverse:			PostCtrlMessage(IDC_SAMPLE_REVERSE); return wParam;
 		case kcSampleSilence:			PostCtrlMessage(IDC_SAMPLE_SILENCE); return wParam;
