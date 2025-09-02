@@ -462,7 +462,7 @@ void CSoundDeviceWithThread::InternalStop()
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-private-field"
-#endif // MPT_COMPILER_CLANG
+#endif  // MPT_COMPILER_CLANG
 
 class ThreadPriorityGuardImpl
 {
@@ -601,7 +601,7 @@ public:
 
 #if MPT_COMPILER_CLANG
 #pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
+#endif  // MPT_COMPILER_CLANG
 
 
 
