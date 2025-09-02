@@ -285,6 +285,7 @@ protected:
 	CDLSBank *GetDLSBankFromItem(HTREEITEM hItem) const;
 
 	void InsertOrDupItem(bool insert);
+	void MoveTreeItem(HTREEITEM hItem, bool moveUp);
 	void OnItemRightClick(HTREEITEM hItem, CPoint pt);
 
 	static bool HasEffectPlugins(const CSoundFile &sndFile);

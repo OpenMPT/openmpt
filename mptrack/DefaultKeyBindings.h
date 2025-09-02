@@ -428,6 +428,8 @@ constexpr DefaultKeybinding DefaultKeybindings[] =
 	{kcTreeViewDuplicate,                      VK_INSERT,          ModShift,           kKeyEventDown | kKeyEventRepeat, MPT_V("1.31.00.14")},
 	{kcTreeViewDelete,                         VK_DELETE,          ModNone,            kKeyEventDown | kKeyEventRepeat, MPT_V("1.31.00.14")},
 	{kcTreeViewDeletePermanently,              VK_DELETE,          ModShift,           kKeyEventDown | kKeyEventRepeat, MPT_V("1.31.00.16")},
+	{kcTreeViewMoveUp,                         VK_UP,              ModAlt,             kKeyEventDown | kKeyEventRepeat, MPT_V("1.33.00.12")},
+	{kcTreeViewMoveDown,                       VK_DOWN,            ModAlt,             kKeyEventDown | kKeyEventRepeat, MPT_V("1.33.00.12")},
 	{kcTreeViewRename,                         VK_RETURN,          ModCtrl,            kKeyEventDown,                   MPT_V("1.31.00.14")},
 	{kcTreeViewSendToEditorInsertNew,          VK_RETURN,          ModShift | ModCtrl, kKeyEventDown,                   MPT_V("1.31.00.15")},
 	{kcTreeViewFolderUp,                       VK_BACK,            ModNone,            kKeyEventDown | kKeyEventRepeat, MPT_V("1.31.00.27")},

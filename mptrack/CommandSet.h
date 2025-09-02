@@ -998,6 +998,8 @@ enum CommandID : int
 	kcTreeViewDuplicate,
 	kcTreeViewDelete,
 	kcTreeViewDeletePermanently,
+	kcTreeViewMoveUp,
+	kcTreeViewMoveDown,
 	kcTreeViewRename,
 	kcTreeViewSendToEditorInsertNew,
 	kcTreeViewFolderUp,

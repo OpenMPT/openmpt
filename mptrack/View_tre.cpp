@@ -3867,6 +3867,121 @@ void CModTree::InsertOrDupItem(bool insert)
 }
 
 
+template<typename T>
+static std::pair<std::vector<T>, T> PrepareMoveVector(T item, T firstItem, T lastItem, bool moveUp)
+{
+	std::pair<std::vector<T>, T> result{};
+	T target = item;
+	if(moveUp && item > firstItem)
+		target--;
+	else if(!moveUp && item < lastItem)
+		target++;
+	else
+		return result;
+
+	auto &newOrder = result.first;
+	newOrder.resize(lastItem - firstItem + 1);
+	std::iota(newOrder.begin(), newOrder.end(), firstItem);
+	std::swap(newOrder[item - firstItem], newOrder[target - firstItem]);
+	result.second = target;
+	return result;
+}
+
+
+void CModTree::MoveTreeItem(HTREEITEM hItem, bool moveUp)
+{
+	ModTreeDocInfo *info = GetDocumentInfoFromItem(hItem);
+	if(!info)
+		return;
+
+	const ModItem modItem = GetModItem(hItem);
+	const uint32 modItemID = modItem.val1;
+
+	CModDoc &modDoc = info->modDoc;
+	CSoundFile &sndFile = modDoc.GetSoundFile();
+	HTREEITEM newSelection = nullptr;
+
+	switch(modItem.type)
+	{
+	case MODITEM_ORDER:
+		{
+			const SEQUENCEINDEX seq = static_cast<SEQUENCEINDEX>(modItem.val2);
+			const ORDERINDEX ord = static_cast<ORDERINDEX>(modItemID);
+			ModSequence &sequence = sndFile.Order(seq);
+
+			ORDERINDEX target = ord;
+			if(moveUp && ord > 0)
+				target--;
+			else if(!moveUp && ord < sequence.GetLengthTailTrimmed() - 1)
+				target++;
+			else
+				return;
+
+			if(sequence[ord] != sequence[target])
+			{
+				std::swap(sequence[ord], sequence[target]);
+				modDoc.SetModified();
+				modDoc.UpdateAllViews(nullptr, SequenceHint(seq).Data());
+			}
+
+			if(seq < info->tiOrders.size() && target < info->tiOrders[seq].size())
+				newSelection = info->tiOrders[seq][target];
+		}
+		break;
+
+	case MODITEM_SEQUENCE:
+		if(const auto [newOrder, target] = PrepareMoveVector(static_cast<SEQUENCEINDEX>(modItemID), SEQUENCEINDEX(0), static_cast<SEQUENCEINDEX>(sndFile.Order.GetNumSequences() - 1), moveUp); !newOrder.empty())
+		{
+			modDoc.ReArrangeSequences(newOrder);
+
+			auto curSeq = sndFile.Order.GetCurrentSequenceIndex();
+			if(curSeq == modItemID)
+				curSeq = target;
+			else if(modItemID > curSeq && target <= curSeq)
+				curSeq++;
+			else if(modItemID < curSeq && target >= curSeq)
+				curSeq--;
+			sndFile.Order.SetSequence(curSeq);
+
+			modDoc.SetModified();
+			modDoc.UpdateAllViews(nullptr, SequenceHint(SEQUENCEINDEX_INVALID).Names().Data());
+
+			if(info->tiSequences.size() > target)
+				newSelection = info->tiSequences[target];
+		}
+		break;
+
+	case MODITEM_SAMPLE:
+		if(const auto [newOrder, target] = PrepareMoveVector(static_cast<SAMPLEINDEX>(modItemID), SAMPLEINDEX(1), sndFile.GetNumSamples(), moveUp); !newOrder.empty())
+		{
+			modDoc.ReArrangeSamples(newOrder);
+			modDoc.SetModified();
+			modDoc.UpdateAllViews(nullptr, SampleHint().Info().Data().Names());
+			modDoc.UpdateAllViews(nullptr, PatternHint().Data());
+			modDoc.UpdateAllViews(nullptr, InstrumentHint().Info());
+			newSelection = GetNthChildItem(info->hSamples, target - 1);
+		}
+		break;
+
+	case MODITEM_INSTRUMENT:
+		if(const auto [newOrder, target] = PrepareMoveVector(static_cast<INSTRUMENTINDEX>(modItemID), INSTRUMENTINDEX(1), sndFile.GetNumInstruments(), moveUp); !newOrder.empty())
+		{
+			modDoc.ReArrangeInstruments(newOrder);
+			modDoc.SetModified();
+			modDoc.UpdateAllViews(nullptr, InstrumentHint().Info().Envelope().Names());
+			modDoc.UpdateAllViews(nullptr, PatternHint().Data());
+			newSelection = GetNthChildItem(info->hInstruments, target - 1);
+		}
+		break;
+
+	default:
+		break;
+	}
+	if(newSelection)
+		SelectItem(newSelection);
+}
+
+
 void CModTree::OnSwitchToTreeItem()
 {
 	HTREEITEM hItem = GetSelectedItem();
@@ -4317,6 +4432,11 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 		return wParam;
 	case kcTreeViewSortBySize:
 		OnSortBySize();
+		return wParam;
+
+	case kcTreeViewMoveUp:
+	case kcTreeViewMoveDown:
+		MoveTreeItem(GetSelectedItem(), wParam == kcTreeViewMoveUp);
 		return wParam;
 
 	default:

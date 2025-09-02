@@ -958,7 +958,9 @@ static constexpr struct
 	{2121, kcPatternShrink, _T("Shrink Pattern")},
 	{2122, kcSampleToggleNormalLoop, _T("Toggle Loop")},
 	{2123, kcSampleToggleSustainLoop, _T("Toggle Sustain Loop")},
-	{2124, kcSampleSendSelectionToNew , _T("Send Selection to New Sample Slot")}
+	{2124, kcSampleSendSelectionToNew, _T("Send Selection to New Sample Slot")},
+	{2125, kcTreeViewMoveUp, _T("Move Item Up")},
+	{2126, kcTreeViewMoveDown, _T("Move Item Down")},
 };
 // clang-format on
 
