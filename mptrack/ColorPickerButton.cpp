@@ -46,7 +46,7 @@ std::optional<COLORREF> ColorPickerButton::PickChannelColor(const CSoundFile &sn
 }
 
 
-std::optional<COLORREF> ColorPickerButton::PickPatternColor(const std::span<COLORREF> patternColors, PATTERNINDEX pat)
+std::optional<COLORREF> ColorPickerButton::PickPatternColor(const mpt::span<COLORREF> patternColors, PATTERNINDEX pat)
 {
 	static std::array<COLORREF, 16> colors = {0};
 	// Build a set of currently used pattern colors to be displayed in the color picker.
@@ -64,7 +64,7 @@ std::optional<COLORREF> ColorPickerButton::PickPatternColor(const std::span<COLO
 }
 
 
-std::optional<COLORREF> ColorPickerButton::PickColor(std::span<COLORREF> colors, std::map<COLORREF, int> usedColors)
+std::optional<COLORREF> ColorPickerButton::PickColor(mpt::span<COLORREF> colors, std::map<COLORREF, int> usedColors)
 {
 	std::vector<std::pair<COLORREF, int>> sortedColors(usedColors.begin(), usedColors.end());
 	std::sort(sortedColors.begin(), sortedColors.end(), [](const auto &l, const auto &r) { return l.second < r.second; });

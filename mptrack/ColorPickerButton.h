@@ -22,12 +22,12 @@ class ColorPickerButton : public CButton
 public:
 	void SetColor(COLORREF color);
 	std::optional<COLORREF> PickChannelColor(const CSoundFile &sndFile, CHANNELINDEX chn);
-	std::optional<COLORREF> PickPatternColor(const std::span<COLORREF> patternColors, PATTERNINDEX pat);
+	std::optional<COLORREF> PickPatternColor(const mpt::span<COLORREF> patternColors, PATTERNINDEX pat);
 
 protected:
 	void DrawItem(DRAWITEMSTRUCT *dis) override;
 
-	std::optional<COLORREF> PickColor(std::span<COLORREF> colors, std::map<COLORREF, int> usedColors);
+	std::optional<COLORREF> PickColor(mpt::span<COLORREF> colors, std::map<COLORREF, int> usedColors);
 
 	COLORREF m_color = 0;
 };
