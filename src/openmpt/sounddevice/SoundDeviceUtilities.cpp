@@ -618,7 +618,7 @@ ThreadBase::ThreadBase(ILogger &logger, SoundDevice::Info info, SoundDevice::Sys
 bool ThreadBase::InternalStart()
 {
 	m_ThreadStopRequest.store(false);
-	m_Thread = std::move(std::thread(&ThreadProcStatic, this));
+	m_Thread = std::thread(&ThreadProcStatic, this);
 	m_ThreadStarted.wait();
 	m_ThreadStarted.post();
 	return true;
@@ -646,7 +646,7 @@ void ThreadBase::InternalStop()
 {
 	m_ThreadStopRequest.store(true);
 	m_Thread.join();
-	m_Thread = std::move(std::thread());
+	m_Thread = std::thread();
 	m_ThreadStopRequest.store(false);
 }
 
