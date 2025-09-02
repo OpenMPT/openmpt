@@ -3037,24 +3037,22 @@ void CViewSample::OnSendSelectionToNewSlot()
 		return;
 
 	CriticalSection cs;
-	ModSample &targetSample = sndFile.GetSample(newSample);
-	targetSample = sourceSmp;
-	targetSample.pData.pSample = nullptr;
-	targetSample.nLoopStart = targetSample.nLoopEnd = 0;
-	targetSample.nSustainStart = targetSample.nSustainEnd = 0;
-	targetSample.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
-	targetSample.cues.fill(MAX_SAMPLE_LENGTH);
-	sndFile.m_szNames[newSample] = sndFile.m_szNames[m_nSample];
-	targetSample.nLength = m_dwEndSel - m_dwBeginSel;
-
-	if(targetSample.AllocateSample())
+	modDoc->GetSampleUndo().PrepareUndo(newSample, sundo_replace, "Send Selection to New Sample Slot");
+	ModSample &targetSmp = sndFile.GetSample(newSample);
+	targetSmp = sourceSmp;
+	targetSmp.nLoopStart = targetSmp.nLoopEnd = 0;
+	targetSmp.nSustainStart = targetSmp.nSustainEnd = 0;
+	targetSmp.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
+	targetSmp.cues.fill(MAX_SAMPLE_LENGTH);
+	if(!targetSmp.CopyWaveform(sourceSmp, m_dwBeginSel, m_dwEndSel))
 	{
-		modDoc->GetSampleUndo().PrepareUndo(newSample, sundo_replace, "Send Selection to New Sample Slot");
-		const uint8 bps = targetSample.GetBytesPerSample();
-		std::copy(sourceSmp.sampleb() + m_dwBeginSel * bps, sourceSmp.sampleb() + m_dwEndSel * bps, targetSample.sampleb());
-		targetSample.PrecomputeLoops(sndFile, false);
+		targetSmp.pData.pSample = nullptr;
+		targetSmp.nLength = 0;
 	}
+	targetSmp.PrecomputeLoops(sndFile, false);
+	sndFile.m_szNames[newSample] = sndFile.m_szNames[m_nSample];
 	cs.Leave();
+	modDoc->SetModified();
 	modDoc->UpdateAllViews(nullptr, SampleHint(newSample).Info().Data().Names());
 }
 

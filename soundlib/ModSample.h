@@ -128,7 +128,7 @@ struct ModSample
 	void Initialize(MODTYPE type = MOD_TYPE_NONE);
 
 	// Copies sample data from another sample slot and ensures that the 16-bit/stereo flags are set accordingly.
-	bool CopyWaveform(const ModSample &smpFrom);
+	bool CopyWaveform(const ModSample &smpFrom, SmpLength start = 0, SmpLength end = MAX_SAMPLE_LENGTH);
 
 	// Replace waveform with given data, keeping the currently chosen format of the sample slot.
 	void ReplaceWaveform(void *newWaveform, const SmpLength newLength, CSoundFile &sndFile);
