@@ -292,22 +292,32 @@ finish:
 #else
 
 int rtkit_make_realtime(DBusConnection *connection, pid_t thread, int priority) {
+        (void)connection; /* OpenMPT */
+        (void)thread; /* OpenMPT */
+        (void)priority; /* OpenMPT */
         return -ENOTSUP;
 }
 
 int rtkit_make_high_priority(DBusConnection *connection, pid_t thread, int nice_level) {
+        (void)connection; /* OpenMPT */
+        (void)thread; /* OpenMPT */
+        (void)nice_level; /* OpenMPT */
         return -ENOTSUP;
 }
 
 int rtkit_get_max_realtime_priority(DBusConnection *connection) {
+        (void)connection; /* OpenMPT */
         return -ENOTSUP;
 }
 
 int rtkit_get_min_nice_level(DBusConnection *connection, int* min_nice_level) {
+        (void)connection; /* OpenMPT */
+        (void)min_nice_level; /* OpenMPT */
         return -ENOTSUP;
 }
 
 long long rtkit_get_rttime_usec_max(DBusConnection *connection) {
+        (void)connection; /* OpenMPT */
         return -ENOTSUP;
 }
 
