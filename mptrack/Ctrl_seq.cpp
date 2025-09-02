@@ -780,13 +780,13 @@ void COrderList::OnPaint()
 {
 	TCHAR s[64];
 	CPaintDC dc(this);
-	HGDIOBJ oldfont = dc.SelectObject(m_hFont);
-	HGDIOBJ oldpen = dc.SelectStockObject(DC_PEN);
+	HGDIOBJ oldFont = dc.SelectObject(m_hFont);
+	HGDIOBJ oldPen = dc.SelectStockObject(DC_PEN);
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT), colorInvalid = GetSysColor(COLOR_GRAYTEXT), colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	const auto windowBrush = GetSysColorBrush(COLOR_WINDOW), highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), faceBrush = GetSysColorBrush(COLOR_BTNFACE);
 
-	SetDCPenColor(dc, separatorColor);
+	dc.SetDCPenColor(separatorColor);
 
 	// First time?
 	if(m_cxFont <= 0 || m_cyFont <= 0)
@@ -839,6 +839,13 @@ void COrderList::OnPaint()
 				background = windowBrush;  // Normal, unselected item.
 			::FillRect(dc, &rect, background);
 
+			if(const CPattern* pat = order.PatternAt(ord); pat != nullptr && pat->HasColor())
+			{
+				CRect colorRect = rect;
+				colorRect.bottom = colorRect.top + rect.Height() / 5;
+				dc.FillSolidRect(colorRect, pat->GetColor());
+			}
+
 			// Drawing the shown pattern-indicator or drag position.
 			if(ord == (m_bDragging ? m_nDropPos : m_nScrollPos))
 			{
@@ -846,7 +853,8 @@ void COrderList::OnPaint()
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
 			}
-			MoveToEx(dc, rect.right, rect.top, NULL);
+
+			MoveToEx(dc, rect.right, rect.top, nullptr);
 			LineTo(dc, rect.right, rect.bottom);
 
 			// Drawing the 'ctrl-transition' indicator
@@ -892,10 +900,10 @@ void COrderList::OnPaint()
 			dc.DrawText(s, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		}
 	}
-	if(oldpen)
-		dc.SelectObject(oldpen);
-	if(oldfont)
-		dc.SelectObject(oldfont);
+	if(oldPen)
+		dc.SelectObject(oldPen);
+	if(oldFont)
+		dc.SelectObject(oldFont);
 }
 
 

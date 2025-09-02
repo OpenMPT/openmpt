@@ -709,7 +709,7 @@ void CViewGlobals::OnEditColor(const CHANNELINDEX chnMod4)
 	auto *modDoc = GetDocument();
 	auto &sndFile = modDoc->GetSoundFile();
 	const CHANNELINDEX chn = static_cast<CHANNELINDEX>(m_nActiveTab * CHANNELS_IN_TAB) + chnMod4;
-	if(auto color = m_channelColor[chnMod4].PickColor(sndFile, chn); color.has_value())
+	if(auto color = m_channelColor[chnMod4].PickChannelColor(sndFile, chn); color.has_value())
 	{
 		PrepareUndo(chnMod4);
 		sndFile.ChnSettings[chn].color = *color;

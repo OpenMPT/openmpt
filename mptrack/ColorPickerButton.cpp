@@ -28,7 +28,7 @@ void ColorPickerButton::SetColor(COLORREF color)
 }
 
 
-std::optional<COLORREF> ColorPickerButton::PickColor(const CSoundFile &sndFile, CHANNELINDEX chn)
+std::optional<COLORREF> ColorPickerButton::PickChannelColor(const CSoundFile &sndFile, CHANNELINDEX chn)
 {
 	static std::array<COLORREF, 16> colors = {0};
 	// Build a set of currently used channel colors to be displayed in the color picker.
@@ -42,6 +42,30 @@ std::optional<COLORREF> ColorPickerButton::PickColor(const CSoundFile &sndFile, 
 		const int distance = std::abs(static_cast<int>(i) - chn);
 		usedColors[color] = usedColors.count(color) ? std::min(distance, usedColors[color]) : distance;
 	}
+	return PickColor(colors, usedColors);
+}
+
+
+std::optional<COLORREF> ColorPickerButton::PickPatternColor(const std::span<COLORREF> patternColors, PATTERNINDEX pat)
+{
+	static std::array<COLORREF, 16> colors = {0};
+	// Build a set of currently used pattern colors to be displayed in the color picker.
+	// Pattern that are close to the currently edited pattern are preferred.
+	std::map<COLORREF, int> usedColors;
+	for(size_t i = 0; i < patternColors.size(); i++)
+	{
+		auto color = patternColors[i];
+		if(color == CPattern::INVALID_COLOR)
+			continue;
+		const int distance = std::abs(static_cast<int>(i) - pat);
+		usedColors[color] = usedColors.count(color) ? std::min(distance, usedColors[color]) : distance;
+	}
+	return PickColor(colors, usedColors);
+}
+
+
+std::optional<COLORREF> ColorPickerButton::PickColor(std::span<COLORREF> colors, std::map<COLORREF, int> usedColors)
+{
 	std::vector<std::pair<COLORREF, int>> sortedColors(usedColors.begin(), usedColors.end());
 	std::sort(sortedColors.begin(), sortedColors.end(), [](const auto &l, const auto &r) { return l.second < r.second; });
 

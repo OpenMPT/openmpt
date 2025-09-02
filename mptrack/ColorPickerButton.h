@@ -21,12 +21,15 @@ class ColorPickerButton : public CButton
 {
 public:
 	void SetColor(COLORREF color);
-	std::optional<COLORREF> PickColor(const CSoundFile &sndFile, CHANNELINDEX chn);
+	std::optional<COLORREF> PickChannelColor(const CSoundFile &sndFile, CHANNELINDEX chn);
+	std::optional<COLORREF> PickPatternColor(const std::span<COLORREF> patternColors, PATTERNINDEX pat);
 
 protected:
-	COLORREF m_color = 0;
-
 	void DrawItem(DRAWITEMSTRUCT *dis) override;
+
+	std::optional<COLORREF> PickColor(std::span<COLORREF> colors, std::map<COLORREF, int> usedColors);
+
+	COLORREF m_color = 0;
 };
 
 OPENMPT_NAMESPACE_END

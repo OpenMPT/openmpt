@@ -36,6 +36,8 @@ protected:
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 
+	afx_msg void OnChangeColor();
+	afx_msg void OnResetColor();
 	afx_msg void OnHalfRowNumber();
 	afx_msg void OnDoubleRowNumber();
 	afx_msg void OnOverrideSignature();
@@ -51,6 +53,7 @@ protected:
 		TempoSwing tempoSwing;
 		ROWINDEX numRows = 0, rowsPerBeat = 0, rowsPerMeasure = 0;
 		ROWINDEX resizeWarningShown = 0;
+		uint32 color = CPattern::INVALID_COLOR;
 		bool resizeWarningAtEnd = false;
 		bool resizeAtEnd = true, repeatContents = false;
 	};
@@ -66,6 +69,7 @@ protected:
 	PATTERNINDEX m_nPattern;
 	CSpinButtonCtrl m_spinPattern, m_spinRPB, m_spinRPM;
 	CComboBox m_numRows;
+	ColorPickerButton m_colorBtn;
 	bool m_locked = true;
 };
 

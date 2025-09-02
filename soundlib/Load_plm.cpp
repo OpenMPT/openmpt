@@ -255,6 +255,12 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 		CMD_OFFSETPERCENTAGE,
 	};
 
+	static constexpr uint32 PatternColors[] =
+	{
+		0x000000, 0x414141, 0xA2A2A2, 0x510000, 0xC30000, 0xFF5141, 0xC3C300, 0x514100,
+		0x612020, 0x0000FF, 0x00A2FF, 0x00FFFF, 0xA200FF, 0x00FF00, 0x418200, 0xFFFFFF,
+	};
+
 	Order().clear();
 	for(const auto &ord : order)
 	{
@@ -290,6 +296,8 @@ bool CSoundFile::ReadPLM(FileReader &file, ModLoadingFlags loadFlags)
 			PATTERNINDEX pat = Order()[curOrd];
 			if(!Patterns.IsValidPat(pat)) break;
 
+			if(patHeader.color < std::size(PatternColors))
+				Patterns[pat].SetColor(PatternColors[patHeader.color]);
 			ModCommand *m = Patterns[pat].GetpModCommand(curRow, ord.y);
 			for(CHANNELINDEX c = 0; c < numChannels; c++, m++)
 			{

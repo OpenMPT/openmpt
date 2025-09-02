@@ -150,6 +150,7 @@ void CPattern::Deallocate()
 	m_ModCommands.clear();
 	m_tempoSwing.clear();
 	m_PatternName.clear();
+	m_color = INVALID_COLOR;
 }
 
 
@@ -510,6 +511,10 @@ void WriteModPattern(std::ostream& oStrm, const CPattern& pat)
 	{
 		ssb.WriteItem<TempoSwing>(pat.GetTempoSwing(), "SWNG", TempoSwing::Serialize);
 	}
+	if(pat.HasColor())
+	{
+		ssb.WriteItem<uint32>(pat.GetColor(), "COL");
+	}
 	ssb.FinishWrite();
 }
 
@@ -533,6 +538,9 @@ void ReadModPattern(std::istream& iStrm, CPattern& pat, const size_t)
 	if(!swing.empty())
 		swing.resize(pat.GetRowsPerBeat());
 	pat.SetTempoSwing(swing);
+	uint32 color = CPattern::INVALID_COLOR;
+	ssb.ReadItem<uint32>(color, "COL");
+	pat.SetColor(color);
 }
 
 

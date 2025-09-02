@@ -132,6 +132,8 @@ BEGIN_MESSAGE_MAP(CPatternPropertiesDlg, DialogBase)
 	ON_COMMAND(IDC_BUTTON_DOUBLE, &CPatternPropertiesDlg::OnDoubleRowNumber)
 	ON_COMMAND(IDC_CHECK1,        &CPatternPropertiesDlg::OnOverrideSignature)
 	ON_COMMAND(IDC_BUTTON1,       &CPatternPropertiesDlg::OnTempoSwing)
+	ON_COMMAND(IDC_BUTTON2,       &CPatternPropertiesDlg::OnChangeColor)
+	ON_COMMAND(IDC_BUTTON3,       &CPatternPropertiesDlg::OnResetColor)
 	ON_EN_CHANGE(IDC_EDIT1,       &CPatternPropertiesDlg::OnPatternChanged)
 END_MESSAGE_MAP()
 
@@ -174,6 +176,8 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 	SetDlgItemInt(IDC_EDIT1, m_nPattern);
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO2, IDC_RADIO2);
 	static_cast<CEdit *>(GetDlgItem(IDC_EDIT2))->SetLimitText(MAX_PATTERNNAME - 1);
+
+	m_colorBtn.SubclassDlgItem(IDC_BUTTON2, this);
 
 	m_locked = false;
 	SetCurrentPattern(m_nPattern);
@@ -226,6 +230,8 @@ void CPatternPropertiesDlg::SetCurrentPattern(PATTERNINDEX pat)
 		SetDlgItemInt(IDC_ROWSPERBEAT, rpb, FALSE);
 		SetDlgItemInt(IDC_ROWSPERMEASURE, rpm, FALSE);
 		OnOverrideSignature();
+
+		m_colorBtn.SetColor(prop.color);
 	} else
 	{
 		MessageBeep(MB_ICONWARNING);
@@ -356,11 +362,37 @@ CPatternPropertiesDlg::PatternProperties& CPatternPropertiesDlg::GetPatternPrope
 		prop.numRows = pattern.GetNumRows();
 		prop.rowsPerBeat = pattern.GetRowsPerBeat();
 		prop.rowsPerMeasure = pattern.GetRowsPerMeasure();
+		prop.color = pattern.GetColor();
 	}
 	// Take whatever was selected for the previous pattern to be the default for this newly-edited pattern as well
 	prop.resizeAtEnd = IsDlgButtonChecked(IDC_RADIO2) != BST_UNCHECKED;
 	prop.repeatContents = IsDlgButtonChecked(IDC_CHECK2) != BST_UNCHECKED;
 	return m_properties.insert(std::make_pair(pat, std::move(prop))).first->second;
+}
+
+
+void CPatternPropertiesDlg::OnChangeColor()
+{
+	const auto &patterns = m_modDoc.GetSoundFile().Patterns;
+	const PATTERNINDEX numPatterns = patterns.GetNumPatterns();
+	std::vector<COLORREF> colors(numPatterns, CPattern::INVALID_COLOR);
+	for(PATTERNINDEX pat = 0; pat < numPatterns; pat++)
+	{
+		if(auto it = m_properties.find(pat); it != m_properties.end())
+			colors[pat] = it->second.color;
+		else if(patterns.IsValidPat(pat))
+			colors[pat] = patterns[pat].GetColor();
+	}
+
+	if(auto color = m_colorBtn.PickPatternColor(colors, m_nPattern); color.has_value())
+		GetPatternProperties().color = *color;
+}
+
+
+void CPatternPropertiesDlg::OnResetColor()
+{
+	GetPatternProperties().color = CPattern::INVALID_COLOR;
+	m_colorBtn.SetColor(CPattern::INVALID_COLOR);
 }
 
 
@@ -494,6 +526,13 @@ void CPatternPropertiesDlg::OnOK()
 		{
 			pattern.SetName(prop.name);
 			updateHint.Names();
+		}
+		if(pattern.GetColor() != prop.color)
+		{
+			pattern.SetColor(prop.color);
+			if(m_modDoc.GetModType() == MOD_TYPE_MPT)
+				modified = true;
+			m_modDoc.UpdateAllViews(nullptr, SequenceHint{SEQUENCEINDEX_INVALID}.Data());
 		}
 
 		if(updateHint.GetType() != HINT_NONE)
@@ -1742,7 +1781,7 @@ void QuickChannelProperties::OnNameChanged()
 void QuickChannelProperties::OnChangeColor()
 {
 	m_settingColor = true;
-	if(auto color = m_colorBtn.PickColor(m_document->GetSoundFile(), m_channel); color.has_value())
+	if(auto color = m_colorBtn.PickChannelColor(m_document->GetSoundFile(), m_channel); color.has_value())
 	{
 		PrepareUndo();
 		m_document->GetSoundFile().ChnSettings[m_channel].color = *color;

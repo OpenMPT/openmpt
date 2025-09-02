@@ -28,6 +28,8 @@ class CPattern
 	friend class CPatternContainer;
 	
 public:
+	static constexpr uint32 INVALID_COLOR = 0xFFFFFFFF;
+
 	CPattern(CPatternContainer &patCont) : m_rPatternContainer{patCont} {}
 	CPattern(const CPattern &) = default;
 	CPattern(CPattern &&) noexcept = default;
@@ -99,6 +101,10 @@ public:
 
 	std::string GetName() const { return m_PatternName; }
 
+	bool HasColor() const noexcept { return m_color != INVALID_COLOR; }
+	uint32 GetColor() const noexcept { return m_color; }
+	void SetColor(uint32 color) noexcept { m_color = color; }
+
 #ifdef MODPLUG_TRACKER
 	// Double number of rows
 	bool Expand();
@@ -134,6 +140,7 @@ protected:
 	ROWINDEX m_Rows = 0;
 	ROWINDEX m_RowsPerBeat = 0;    // patterns-specific time signature. if != 0, the time signature is used automatically.
 	ROWINDEX m_RowsPerMeasure = 0; // ditto
+	uint32 m_color = INVALID_COLOR;
 	TempoSwing m_tempoSwing;
 	std::string m_PatternName;
 	CPatternContainer& m_rPatternContainer;

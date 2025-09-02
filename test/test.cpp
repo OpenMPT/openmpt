@@ -3236,6 +3236,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerBeat(), 5);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].GetRowsPerMeasure(), 10);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].HasTempoSwing(), true);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[0].HasColor(), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(0), true);
 
 	{
@@ -3255,6 +3256,7 @@ static void TestLoadMPTMFile(const CSoundFile &sndFile)
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerBeat(), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetRowsPerMeasure(), 0);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].HasTempoSwing(), false);
+	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetColor(), RGB(128, 192, 255));
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns.IsPatternEmpty(1), false);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->IsPcNote(), true);
 	VERIFY_EQUAL_NONCONT(sndFile.Patterns[1].GetpModCommand(0, 0)->note, NOTE_PC);
