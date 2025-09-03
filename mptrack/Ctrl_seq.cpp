@@ -784,7 +784,7 @@ void COrderList::OnPaint()
 	HGDIOBJ oldpen = dc.SelectStockObject(DC_PEN);
 	const auto separatorColor = GetSysColor(COLOR_WINDOW) ^ 0x808080;
 	const auto colorText = GetSysColor(COLOR_WINDOWTEXT), colorInvalid = GetSysColor(COLOR_GRAYTEXT), colorTextSel = GetSysColor(COLOR_HIGHLIGHTTEXT);
-	const auto windowBrush = GetSysColorBrush(COLOR_WINDOW), highlightBrush = GetSysColorBrush(COLOR_HIGHLIGHT), faceBrush = GetSysColorBrush(COLOR_BTNFACE);
+	const auto windowColor = GetSysColor(COLOR_WINDOW), highlightColor = GetSysColor(COLOR_HIGHLIGHT), faceColor = GetSysColor(COLOR_BTNFACE);
 
 	SetDCPenColor(dc, separatorColor);
 
@@ -830,18 +830,18 @@ void COrderList::OnPaint()
 				rect.right = rcClient.right;
 			rect.right--;
 
-			HBRUSH background;
+			COLORREF background = windowColor;  // Normal, unselected item.
 			if(highLight)
-				background = highlightBrush;  // Currently selected order item
+				background = highlightColor;  // Currently selected order item
 			else if(order.IsPositionLocked(ord))
-				background = faceBrush;  // "Playback lock" indicator - grey out all order items which aren't played.
-			else
-				background = windowBrush;  // Normal, unselected item.
-			::FillRect(dc, &rect, background);
+				background = faceColor;  // "Playback lock" indicator - grey out all order items which aren't played.
+			dc.FillSolidRect(rect, background);
 
 			// Drawing the shown pattern-indicator or drag position.
 			if(ord == (m_bDragging ? m_nDropPos : m_nScrollPos))
 			{
+				dc.SetBkColor(RGB(0, 0, 0));
+				dc.SetTextColor(RGB(255, 255, 255));
 				rect.InflateRect(-1, -1);
 				dc.DrawFocusRect(&rect);
 				rect.InflateRect(1, 1);
