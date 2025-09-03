@@ -159,6 +159,10 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
 
+	COMBOBOXINFO cbi{sizeof(cbi)};
+	GetComboBoxInfo(m_numRows, &cbi);
+	CWnd::FromHandle(cbi.hwndItem)->ModifyStyle(0, ES_NUMBER);
+
 	const CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	const CModSpecifications &specs = sndFile.GetModSpecifications();
 	m_numRows.SetRedraw(FALSE);
