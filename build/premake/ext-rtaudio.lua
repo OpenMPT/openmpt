@@ -44,6 +44,7 @@
 	end
   filter { }
   filter { "action:vs*" }
+		defines { " _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" }
     buildoptions { "/wd4267" }
   filter {}
 	filter { "action:vs*" }
