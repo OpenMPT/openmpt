@@ -3042,8 +3042,8 @@ void CViewSample::OnSendSelectionToNewSlot()
 	targetSmp = sourceSmp;
 	targetSmp.nLoopStart = targetSmp.nLoopEnd = 0;
 	targetSmp.nSustainStart = targetSmp.nSustainEnd = 0;
-	targetSmp.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN);
-	targetSmp.cues.fill(MAX_SAMPLE_LENGTH);
+	targetSmp.uFlags.reset(CHN_LOOP | CHN_SUSTAINLOOP | CHN_PINGPONGLOOP | CHN_PINGPONGSUSTAIN | SMP_KEEPONDISK);
+	targetSmp.RemoveAllCuePoints();
 	if(!targetSmp.CopyWaveform(sourceSmp, m_dwBeginSel, m_dwEndSel))
 	{
 		targetSmp.pData.pSample = nullptr;
@@ -3993,14 +3993,12 @@ void CViewSample::OnSampleSlice()
 			newSample = sample;
 			newSample.RemoveAllCuePoints();
 			newSample.uFlags.reset(SMP_KEEPONDISK);
-			newSample.nLength = cues[i + 1] - cues[i];
 			newSample.pData.pSample = nullptr;
 			sndFile.m_szNames[nextSmp] = sndFile.m_szNames[m_nSample];
-			if(newSample.AllocateSample() > 0)
+			if(newSample.CopyWaveform(sample, cues[i], cues[i + 1]))
 			{
 				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nLoopStart, newSample.nLoopEnd);
 				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nSustainStart, newSample.nSustainEnd);
-				memcpy(newSample.sampleb(), sample.sampleb() + cues[i] * sample.GetBytesPerSample(), newSample.nLength * sample.GetBytesPerSample());
 				newSample.PrecomputeLoops(sndFile, false);
 
 				if(sndFile.GetNumInstruments() > 0)
