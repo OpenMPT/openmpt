@@ -32,7 +32,7 @@
 #pragma warning(pop)
 #endif
 #if defined(RTAUDIO_VERSION_MAJOR)
-#if (RTAUDIO_VERSION_MAJOR >= 6)
+#if(RTAUDIO_VERSION_MAJOR >= 6)
 #define MPT_RTAUDIO_VER 6
 #endif
 #endif
@@ -40,7 +40,7 @@
 #define MPT_RTAUDIO_VER 5
 #endif
 #define MPT_RTAUDIO_AT_LEAST(v) (MPT_RTAUDIO_VER >= (v))
-#define MPT_RTAUDIO_BEFORE(v) (MPT_RTAUDIO_VER < (v))
+#define MPT_RTAUDIO_BEFORE(v)   (MPT_RTAUDIO_VER < (v))
 #endif  // MPT_WITH_RTAUDIO
 
 OPENMPT_NAMESPACE_BEGIN
@@ -107,7 +107,10 @@ private:
 	static unsigned int GetDevice(SoundDevice::Info info);
 
 public:
-	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer() { return std::make_unique<SoundDevice::BackendInitializer>(); }
+	static std::unique_ptr<SoundDevice::BackendInitializer> BackendInitializer()
+	{
+		return std::make_unique<SoundDevice::BackendInitializer>();
+	}
 	static std::vector<SoundDevice::Info> EnumerateDevices(ILogger &logger, SoundDevice::SysInfo sysInfo);
 };
 
