@@ -953,6 +953,7 @@ bool CModDoc::MoveOrder(ORDERINDEX sourceOrd, ORDERINDEX destOrd, bool update, b
 	if(destOrd == maxOrders && (sourceSeq != destSeq || copy))
 		return false;
 
+	CriticalSection cs;
 	auto &sourceSequence = m_SndFile.Order(sourceSeq);
 	const PATTERNINDEX sourcePat = sourceOrd < sourceSequence.size() ? sourceSequence[sourceOrd] : PATTERNINDEX_INVALID;
 
@@ -968,6 +969,7 @@ bool CModDoc::MoveOrder(ORDERINDEX sourceOrd, ORDERINDEX destOrd, bool update, b
 
 	if(update)
 	{
+		cs.Leave();
 		UpdateAllViews(nullptr, SequenceHint().Data());
 	}
 	return true;
