@@ -31,6 +31,16 @@
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif
+#if defined(RTAUDIO_VERSION_MAJOR)
+#if (RTAUDIO_VERSION_MAJOR >= 6)
+#define MPT_RTAUDIO_VER 6
+#endif
+#endif
+#ifndef MPT_RTAUDIO_VER
+#define MPT_RTAUDIO_VER 5
+#endif
+#define MPT_RTAUDIO_AT_LEAST(v) (MPT_RTAUDIO_VER >= (v))
+#define MPT_RTAUDIO_BEFORE(v) (MPT_RTAUDIO_VER < (v))
 #endif  // MPT_WITH_RTAUDIO
 
 OPENMPT_NAMESPACE_BEGIN
@@ -80,7 +90,14 @@ public:
 	SoundDevice::DynamicCaps GetDeviceDynamicCaps(const std::vector<uint32> &baseSampleRates);
 
 private:
+#if MPT_RTAUDIO_AT_LEAST(6)
+	static bool IsError(const RtAudioErrorType &e);
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+	void SendError(const RtAudioErrorType &e, const std::string &errorText);
+#else
 	void SendError(const RtAudioError &e);
+#endif
 
 	void AudioCallback(void *outputBuffer, void *inputBuffer, unsigned int nFrames, double streamTime, RtAudioStreamStatus status);
 

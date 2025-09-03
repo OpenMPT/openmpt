@@ -229,13 +229,21 @@ CRtAudioDevice::CRtAudioDevice(ILogger &logger, SoundDevice::Info info, SoundDev
 	m_CurrentStreamTime = 0.0;
 	m_StatisticLatencyFrames.store(0);
 	m_StatisticPeriodFrames.store(0);
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+		m_RtAudio = std::make_unique<RtAudio>(GetApi(info), [this](RtAudioErrorType type, const std::string &errorText) { this->SendError(type, errorText); });
+#else
 		m_RtAudio = std::make_unique<RtAudio>(GetApi(info));
+#endif
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &)
 	{
 		// nothing
 	}
+#endif
 }
 
 
@@ -247,8 +255,10 @@ CRtAudioDevice::~CRtAudioDevice()
 
 bool CRtAudioDevice::InternalOpen()
 {
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
 		if(SampleFormatToRtAudioFormat(m_Settings.sampleFormat) == RtAudioFormat())
 		{
 			return false;
@@ -286,54 +296,89 @@ bool CRtAudioDevice::InternalOpen()
 		{
 			m_Flags.WantsClippedOutput = (GetSysInfo().IsOriginal() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista));
 		}
+#if MPT_RTAUDIO_AT_LEAST(6)
+		if(IsError(m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions)))
+		{
+			return false;
+		}
+#else
 		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
+#endif
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
 	}
+#endif
 	return true;
 }
 
 
 bool CRtAudioDevice::InternalClose()
 {
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
 		m_RtAudio->closeStream();
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
 	}
+#endif
 	return true;
 }
 
 
 bool CRtAudioDevice::InternalStart()
 {
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+		if(IsError(m_RtAudio->startStream()))
+		{
+			return false;
+		}
+#else
 		m_RtAudio->startStream();
+#endif
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return false;
 	}
+#endif
 	return true;
 }
 
 
 void CRtAudioDevice::InternalStop()
 {
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+		if(IsError(m_RtAudio->stopStream()))
+		{
+			return;
+		}
+#else
 		m_RtAudio->stopStream();
+#endif
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
 	{
 		SendError(e);
 		return;
 	}
+#endif
 	return;
 }
 
@@ -398,8 +443,10 @@ SoundDevice::Statistics CRtAudioDevice::GetStatistics() const
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::Statistics result;
 	long latency = 0;
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
 		if(m_RtAudio->isStreamOpen())
 		{
 			latency = m_RtAudio->getStreamLatency();
@@ -408,10 +455,12 @@ SoundDevice::Statistics CRtAudioDevice::GetStatistics() const
 				latency /= 2;
 			}
 		}
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &)
 	{
 		latency = 0;
 	}
+#endif
 	if(latency > 0)
 	{
 		result.InstantaneousLatency = latency / static_cast<double>(m_Settings.Samplerate);
@@ -434,14 +483,22 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 		return caps;
 	}
 	RtAudio::DeviceInfo rtinfo;
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
 		rtinfo = m_RtAudio->getDeviceInfo(GetDevice(GetDeviceInfo()));
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &)
 	{
 		return caps;
 	}
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+	caps.Available = true;
+#else
 	caps.Available = rtinfo.probed;
+#endif
 	caps.CanUpdateInterval = true;
 	caps.CanSampleFormat = true;
 	caps.CanExclusiveMode = true;
@@ -454,6 +511,12 @@ SoundDevice::Caps CRtAudioDevice::InternalGetDeviceCaps()
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
 	caps.ExclusiveModeDescription = MPT_USTRING("Exclusive Mode");
+#if MPT_RTAUDIO_AT_LEAST(6)
+	if(rtinfo.currentSampleRate > 0)
+	{
+		caps.DefaultSettings.Samplerate = rtinfo.currentSampleRate;
+	}
+#endif
 	return caps;
 }
 
@@ -463,17 +526,23 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	MPT_SOUNDDEV_TRACE_SCOPE();
 	SoundDevice::DynamicCaps caps;
 	RtAudio::DeviceInfo rtinfo;
+#if MPT_RTAUDIO_BEFORE(6)
 	try
 	{
+#endif
 		rtinfo = m_RtAudio->getDeviceInfo(GetDevice(GetDeviceInfo()));
+#if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &)
 	{
 		return caps;
 	}
+#endif
+#if MPT_RTAUDIO_BEFORE(6)
 	if(!rtinfo.probed)
 	{
 		return caps;
 	}
+#endif
 	caps.inputSourceNames.clear();
 	for(unsigned int channel = 0; channel < rtinfo.inputChannels; ++channel)
 	{
@@ -517,9 +586,74 @@ SoundDevice::DynamicCaps CRtAudioDevice::GetDeviceDynamicCaps(const std::vector<
 	{
 		caps.inputSourceNames.push_back(std::make_pair(static_cast<uint32>(channel), MPT_UFORMAT_MESSAGE("Input Channel {}")(channel)));
 	}
+#if MPT_RTAUDIO_AT_LEAST(6)
+	if(rtinfo.currentSampleRate > 0)
+	{
+		caps.currentSampleRate = rtinfo.currentSampleRate;
+	}
+#endif
 	return caps;
 }
 
+
+#if MPT_RTAUDIO_AT_LEAST(6)
+
+bool CRtAudioDevice::IsError(const RtAudioErrorType &e)
+{
+	return (e != RTAUDIO_NO_ERROR) && (e != RTAUDIO_WARNING);
+}
+
+#endif
+
+
+#if MPT_RTAUDIO_AT_LEAST(6)
+
+void CRtAudioDevice::SendError(const RtAudioErrorType &e, const std::string &errorText)
+{
+	LogLevel level = LogError;
+	switch(e)
+	{
+		case RTAUDIO_WARNING:
+			level = LogWarning;
+			break;
+		case RTAUDIO_UNKNOWN_ERROR:
+			level = LogError;
+			break;
+		case RTAUDIO_NO_DEVICES_FOUND:
+			level = LogError;
+			break;
+		case RTAUDIO_INVALID_DEVICE:
+			level = LogError;
+			break;
+		case RTAUDIO_DEVICE_DISCONNECT:
+			level = LogError;
+			break;
+		case RTAUDIO_MEMORY_ERROR:
+			level = LogError;
+			break;
+		case RTAUDIO_INVALID_PARAMETER:
+			level = LogError;
+			break;
+		case RTAUDIO_INVALID_USE:
+			level = LogError;
+			break;
+		case RTAUDIO_DRIVER_ERROR:
+			level = LogError;
+			break;
+		case RTAUDIO_SYSTEM_ERROR:
+			level = LogError;
+			break;
+		case RTAUDIO_THREAD_ERROR:
+			level = LogError;
+			break;
+		default:
+			level = LogError;
+			break;
+	}
+	SendDeviceMessage(level, mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, errorText));
+}
+
+#else
 
 void CRtAudioDevice::SendError(const RtAudioError &e)
 {
@@ -566,6 +700,8 @@ void CRtAudioDevice::SendError(const RtAudioError &e)
 	SendDeviceMessage(level, mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, e.getMessage()));
 }
 
+#endif
+
 
 RtAudio::Api CRtAudioDevice::GetApi(SoundDevice::Info info)
 {
@@ -608,23 +744,42 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 		{
 			continue;
 		}
+#if MPT_RTAUDIO_BEFORE(6)
 		try
 		{
+#endif
 			RtAudio rtaudio(api);
+#if MPT_RTAUDIO_AT_LEAST(6)
+			MPT_DISCARD(rtaudio.getDeviceCount());
+			std::vector<unsigned int> deviceIDs = rtaudio.getDeviceIds();
+			for(const auto &device : deviceIDs)
+#else
 			for(unsigned int device = 0; device < rtaudio.getDeviceCount(); ++device)
+#endif
 			{
 				RtAudio::DeviceInfo rtinfo;
+#if MPT_RTAUDIO_BEFORE(6)
 				try
 				{
+#endif
 					rtinfo = rtaudio.getDeviceInfo(device);
+#if MPT_RTAUDIO_BEFORE(6)
 				} catch(const RtAudioError &)
 				{
 					continue;
 				}
+#endif
+#if MPT_RTAUDIO_AT_LEAST(6)
+				if(rtinfo.ID == 0)
+				{
+					continue;
+				}
+#else
 				if(!rtinfo.probed)
 				{
 					continue;
 				}
+#endif
 				SoundDevice::Info info = SoundDevice::Info();
 				info.type = MPT_USTRING("RtAudio") + MPT_USTRING("-") + mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiName(rtaudio.getCurrentApi()));
 				std::vector<mpt::ustring> apidev;
@@ -763,10 +918,12 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 
 				devices.push_back(info);
 			}
+#if MPT_RTAUDIO_BEFORE(6)
 		} catch(const RtAudioError &)
 		{
 			// nothing
 		}
+#endif
 	}
 	return devices;
 }
