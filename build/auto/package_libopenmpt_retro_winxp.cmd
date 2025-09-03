@@ -66,7 +66,7 @@ copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licens
 copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
+rem copy /y ..\..\include\rtaudio\LICENSE                                   .\Licenses\License.RtAudio.txt || goto error
 rem copy /y ..\..\include\rtmidi\LICENSE                                    .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\SignalsmithStretch\SignalsmithStretch\LICENSE.txt .\Licenses\License.SignalsmithStretch.txt || goto error
 rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Licenses\License.stb_vorbis.txt || goto error
@@ -161,7 +161,7 @@ rem copy /y ..\..\include\pthread-win32\docs\COPYING.FSF.md                 .\Li
 rem copy /y ..\..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 rem copy /y ..\..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 rem copy /y ..\..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
-rem copy /y ..\..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
+rem copy /y ..\..\include\rtaudio\LICENSE                                   .\Licenses\License.RtAudio.txt || goto error
 rem copy /y ..\..\include\rtmidi\LICENSE                                    .\Licenses\License.RtMidi.txt || goto error
 rem copy /y ..\..\include\SignalsmithStretch\SignalsmithStretch\LICENSE.txt .\Licenses\License.SignalsmithStretch.txt || goto error
 rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Licenses\License.stb_vorbis.txt || goto error

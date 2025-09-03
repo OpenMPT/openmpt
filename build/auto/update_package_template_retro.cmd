@@ -31,7 +31,7 @@ copy /y ..\include\pthread-win32\docs\COPYING.FSF.md                 .\Licenses\
 copy /y ..\include\pthread-win32\docs\CONTRIBUTORS.md                .\Licenses\License.PThread-Win32.CONTRIBUTORS.txt || goto error
 rem copy /y ..\include\pugixml\LICENSE.md                                .\Licenses\License.PugiXML.txt || goto error
 copy /y ..\include\r8brain\LICENSE                                   .\Licenses\License.R8Brain.txt || goto error
-copy /y ..\include\rtaudio\README.md                                 .\Licenses\License.RtAudio.txt || goto error
+copy /y ..\include\rtaudio\LICENSE                                   .\Licenses\License.RtAudio.txt || goto error
 copy /y ..\include\rtkit\rtkit.h                                     .\Licenses\License.RealtimeKit.txt || goto error
 copy /y ..\include\rtmidi\LICENSE                                    .\Licenses\License.RtMidi.txt || goto error
 copy /y ..\include\SignalsmithStretch\SignalsmithStretch\LICENSE.txt .\Licenses\License.SignalsmithStretch.txt || goto error
