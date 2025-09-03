@@ -234,9 +234,10 @@ CRtAudioDevice::CRtAudioDevice(ILogger &logger, SoundDevice::Info info, SoundDev
 	{
 #endif
 #if MPT_RTAUDIO_AT_LEAST(6)
-		m_RtAudio = std::make_unique<RtAudio>(GetApi(info), [this](RtAudioErrorType type, const std::string &errorText) { this->SendError(type, errorText); });
+		m_RtAudio = std::make_unique<RtAudio>(GetApi(info), [this](RtAudioErrorType type, const std::string &errorText)
+											  { this->SendError(type, errorText); });
 #else
-		m_RtAudio = std::make_unique<RtAudio>(GetApi(info));
+	m_RtAudio = std::make_unique<RtAudio>(GetApi(info));
 #endif
 #if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &)
@@ -302,7 +303,7 @@ bool CRtAudioDevice::InternalOpen()
 			return false;
 		}
 #else
-		m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
+	m_RtAudio->openStream((m_OutputStreamParameters.nChannels > 0) ? &m_OutputStreamParameters : nullptr, (m_InputStreamParameters.nChannels > 0) ? &m_InputStreamParameters : nullptr, SampleFormatToRtAudioFormat(m_Settings.sampleFormat), m_Settings.Samplerate, &m_FramesPerChunk, &RtAudioCallback, this, &m_StreamOptions, nullptr);
 #endif
 #if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
@@ -345,7 +346,7 @@ bool CRtAudioDevice::InternalStart()
 			return false;
 		}
 #else
-		m_RtAudio->startStream();
+	m_RtAudio->startStream();
 #endif
 #if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
@@ -370,7 +371,7 @@ void CRtAudioDevice::InternalStop()
 			return;
 		}
 #else
-		m_RtAudio->stopStream();
+	m_RtAudio->stopStream();
 #endif
 #if MPT_RTAUDIO_BEFORE(6)
 	} catch(const RtAudioError &e)
@@ -754,7 +755,7 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 			std::vector<unsigned int> deviceIDs = rtaudio.getDeviceIds();
 			for(const auto &device : deviceIDs)
 #else
-			for(unsigned int device = 0; device < rtaudio.getDeviceCount(); ++device)
+		for(unsigned int device = 0; device < rtaudio.getDeviceCount(); ++device)
 #endif
 			{
 				RtAudio::DeviceInfo rtinfo;
@@ -775,10 +776,10 @@ std::vector<SoundDevice::Info> CRtAudioDevice::EnumerateDevices(ILogger &logger,
 					continue;
 				}
 #else
-				if(!rtinfo.probed)
-				{
-					continue;
-				}
+			if(!rtinfo.probed)
+			{
+				continue;
+			}
 #endif
 				SoundDevice::Info info = SoundDevice::Info();
 				info.type = MPT_USTRING("RtAudio") + MPT_USTRING("-") + mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, RtAudioShim::getApiName(rtaudio.getCurrentApi()));
