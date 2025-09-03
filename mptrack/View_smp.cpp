@@ -3999,9 +3999,7 @@ void CViewSample::OnSampleSlice()
 			if(newSample.AllocateSample() > 0)
 			{
 				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nLoopStart, newSample.nLoopEnd);
-				memcpy(newSample.sampleb(), sample.sampleb() + cues[i] * sample.GetBytesPerSample(), newSample.nLength * sample.GetBytesPerSample());
-				newSample.PrecomputeLoops(sndFile, false);
-
+				Util::DeleteRange(SmpLength(0), cues[i] - SmpLength(1), newSample.nSustainStart, newSample.nSustainEnd);
 				if(sndFile.GetNumInstruments() > 0)
 				{
 					if(auto instr = modDoc->InsertInstrument(nextSmp); instr != INSTRUMENTINDEX_INVALID)
