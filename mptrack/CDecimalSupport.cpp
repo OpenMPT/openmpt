@@ -13,7 +13,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-BEGIN_MESSAGE_MAP(CNumberEdit, CEdit)
+BEGIN_MESSAGE_MAP(CNumberEdit, AccessibleEdit)
 	ON_WM_CHAR()
 	ON_MESSAGE(WM_PASTE, &CNumberEdit::OnPaste)
 END_MESSAGE_MAP()
@@ -39,7 +39,7 @@ void CNumberEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if(GetStyle() & ES_NUMBER)
 		CDecimalSupport<CNumberEdit>::OnChar(0, nChar, 0, handled);
 	if(!handled)
-		CEdit::OnChar(nChar, nRepCnt, nFlags);
+		AccessibleEdit::OnChar(nChar, nRepCnt, nFlags);
 }
 
 
@@ -48,7 +48,7 @@ LPARAM CNumberEdit::OnPaste(WPARAM wParam, LPARAM lParam)
 	bool bHandled = false;
 	CDecimalSupport<CNumberEdit>::OnPaste(0, wParam, lParam, bHandled);
 	if(!bHandled)
-		return CEdit::DefWindowProc(WM_PASTE, wParam, lParam);
+		return AccessibleEdit::DefWindowProc(WM_PASTE, wParam, lParam);
 	else
 		return 0;
 }
