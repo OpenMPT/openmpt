@@ -760,6 +760,9 @@
 /include/rtaudio/doc
 /include/rtaudio/include
 /include/rtaudio/install.txt
+/include/rtaudio/m4
+/include/rtaudio/meson.build
+/include/rtaudio/meson_options.txt
 /include/rtaudio/rtaudio.pc.in
 /include/rtaudio/rtaudio_c.cpp
 /include/rtaudio/rtaudio_c.h
