@@ -384,7 +384,7 @@ void CPatternPropertiesDlg::OnChangeColor()
 			colors[pat] = patterns[pat].GetColor();
 	}
 
-	if(auto color = m_colorBtn.PickPatternColor(colors, m_nPattern); color.has_value())
+	if(auto color = m_colorBtn.PickPatternColor(mpt::as_span(colors), m_nPattern); color.has_value())
 		GetPatternProperties().color = *color;
 }
 
