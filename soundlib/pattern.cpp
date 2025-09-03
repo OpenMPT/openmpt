@@ -164,6 +164,7 @@ CPattern& CPattern::operator= (const CPattern &pat)
 	m_RowsPerBeat = pat.m_RowsPerBeat;
 	m_RowsPerMeasure = pat.m_RowsPerMeasure;
 	m_tempoSwing = pat.m_tempoSwing;
+	m_color = pat.m_color;
 	m_PatternName = pat.m_PatternName;
 
 	if(GetSoundFile().GetType() != pat.GetSoundFile().GetType())
@@ -186,7 +187,8 @@ bool CPattern::operator== (const CPattern &other) const noexcept
 		&& GetRowsPerBeat() == other.GetRowsPerBeat()
 		&& GetRowsPerMeasure() == other.GetRowsPerMeasure()
 		&& GetTempoSwing() == other.GetTempoSwing()
-		&& m_ModCommands == other.m_ModCommands;
+		&& GetColor() == other.GetColor()
+		&&m_ModCommands == other.m_ModCommands;
 }
 
 
