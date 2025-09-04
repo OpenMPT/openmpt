@@ -161,7 +161,8 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
 
-	COMBOBOXINFO cbi{sizeof(cbi)};
+	COMBOBOXINFO cbi{};
+	cbi.cbSize = sizeof(cbi);
 	GetComboBoxInfo(m_numRows, &cbi);
 	CWnd::FromHandle(cbi.hwndItem)->ModifyStyle(0, ES_NUMBER);
 
