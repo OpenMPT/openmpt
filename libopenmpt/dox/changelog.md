@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.26-pre
+
 ### libopenmpt 0.6.25 (2025-09-06)
 
  *  mpg123: Update to v1.33.2 (2025-08-05).
