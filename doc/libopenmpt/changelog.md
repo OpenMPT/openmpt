@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.16-pre
+### libopenmpt 0.7.16 (2025-09-06)
 
  *  [**Bug**] Windows 10 binaries wrongly targeted Windows 11 22H2. They now
     target Windows 10 2004.
