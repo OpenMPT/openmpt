@@ -286,7 +286,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updat
 	if(wrapMode == WrapMode::WrapAround && numRows)
 	{
 		const auto &order = Order();
-		if(static_cast<int>(row) < 0)
+		if(static_cast<int32>(row) < 0)
 		{
 			if(patternSetup[PatternSetup::ContinuousScrolling])
 			{
@@ -359,7 +359,7 @@ ROWINDEX CViewPattern::SetCurrentRow(ROWINDEX row, WrapMode wrapMode, bool updat
 		}
 	} else if(wrapMode == WrapMode::LimitAtPatternEnd)
 	{
-		if(static_cast<int>(row) < 0)
+		if(static_cast<int32>(row) < 0)
 			row = 0;
 		if(row >= numRows)
 			row = numRows - 1;
@@ -1515,8 +1515,7 @@ void CViewPattern::OnRButtonUp(UINT flags, CPoint pt)
 		CInputHandler *ih = CMainFrame::GetInputHandler();
 
 		//------ Plugin Header Menu --------- :
-		if(m_Status[psShowPluginNames] &&
-			inChannelHeader && (pt.y > m_szHeader.cy - m_szPluginHeader.cy))
+		if(m_Status[psShowPluginNames] && inChannelHeader && (pt.y > m_szHeader.cy - m_szPluginHeader.cy))
 		{
 			BuildPluginCtxMenu(hMenu, nChn, sndFile);
 		}
@@ -4364,7 +4363,15 @@ void CViewPattern::CursorJump(int distance, bool snap)
 		row = (((row + (upwards ? -1 : 0)) / distanceAbs) + (upwards ? 0 : 1)) * distanceAbs;
 	else
 		row += distance;
-	row = SetCurrentRow(row, (m_Status[psMouseDragSelect] || IsSelectionPressed()) ? WrapMode::LimitAtPatternEnd : WrapMode::WrapAround);
+
+	WrapMode wrap = WrapMode::WrapAround;
+	if(m_Status[psMouseDragSelect]
+	   || IsSelectionPressed()
+	   || !(TrackerSettings::Instance().patternSetup & (PatternSetup::ContinuousScrolling | PatternSetup::CursorWrap)))
+	{
+		wrap = WrapMode::LimitAtPatternEnd;
+	}
+	row = SetCurrentRow(row, wrap);
 
 	if(IsLiveRecord() && !m_Status[psDragActive])
 	{
@@ -6514,8 +6521,7 @@ void CViewPattern::OnSelectPCNoteParam(UINT nID)
 
 	uint16 paramNdx = static_cast<uint16>(nID - ID_CHANGE_PCNOTE_PARAM);
 	bool modified = false;
-	ApplyToSelection([paramNdx, &modified] (ModCommand &m, ROWINDEX, CHANNELINDEX)
-	{
+	ApplyToSelection([paramNdx, &modified](ModCommand &m, ROWINDEX, CHANNELINDEX) {
 		if(m.IsPcNote() && (m.GetValueVolCol() != paramNdx))
 		{
 			m.SetValueVolCol(paramNdx);
@@ -6939,8 +6945,10 @@ bool CViewPattern::BuildSetInstCtxMenu(HMENU hMenu, CInputHandler *ih) const
 			} else
 			{
 				CString s;
-				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++) if (sndFile->GetSample(i).HasSampleData())
+				for(SAMPLEINDEX i = 1; i <= sndFile->GetNumSamples(); i++)
 				{
+					if(!sndFile->GetSample(i).HasSampleData())
+						continue;
 					s.Format(_T("%02d: "), i);
 					s += mpt::ToCString(sndFile->GetCharsetInternal(), sndFile->GetSampleName(i));
 					AppendMenu(instrumentChangeMenu, MF_STRING, ID_CHANGE_INSTRUMENT + i, s);
