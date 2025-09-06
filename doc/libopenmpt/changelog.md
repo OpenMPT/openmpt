@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.3-pre
+### libopenmpt 0.8.3 (2025-09-06)
 
  *  [**Bug**] libopenmpt is now compatible with most non-standard builds of
     libmpg123 which do not by default output signed 16bit PCM.
