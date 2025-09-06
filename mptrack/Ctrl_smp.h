@@ -43,11 +43,11 @@ protected:
 	};
 
 	CModControlBar m_ToolBar1, m_ToolBar2;
-	CEdit m_EditSample, m_EditName, m_EditFileName, m_EditFineTune;
+	CEdit m_EditSample, m_EditName, m_EditFileName;
 	CEdit m_EditLoopStart, m_EditLoopEnd, m_EditSustainStart, m_EditSustainEnd;
 	CEdit m_EditVibSweep, m_EditVibDepth, m_EditVibRate;
 	CEdit m_EditVolume, m_EditGlobalVol, m_EditPanning;
-	CNumberEdit m_EditTimeStretchRatio;
+	CNumberEdit m_EditFineTune, m_EditTimeStretchRatio, m_EditPitch;
 	CSpinButtonCtrl m_SpinVolume, m_SpinGlobalVol, m_SpinPanning, m_SpinVibSweep, m_SpinVibDepth, m_SpinVibRate;
 	CSpinButtonCtrl m_SpinLoopStart, m_SpinLoopEnd, m_SpinSustainStart, m_SpinSustainEnd;
 	CSpinButtonCtrl m_SpinFineTune, m_SpinSample, m_SpinTimeStretchRatio;

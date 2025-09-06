@@ -289,6 +289,15 @@ BOOL CCtrlSamples::OnInitDialog()
 			str = _T("+") + mpt::tfmt::dec(i);
 		m_ComboPitch.SetItemData(m_ComboPitch.AddString(str.c_str()), i + 12);
 	}
+
+	COMBOBOXINFO cbi{};
+	cbi.cbSize = sizeof(cbi);
+	GetComboBoxInfo(m_ComboPitch, &cbi);
+	(m_EditPitch.SubclassWindow)(cbi.hwndItem);
+	m_EditPitch.ModifyStyle(0, ES_NUMBER);
+	m_EditPitch.AllowNegative(true);
+	m_EditPitch.AllowFractions(true);
+
 	m_ComboPitch.SetRedraw(TRUE);
 	// Set "unchanged" as default pitch
 	m_ComboPitch.SetCurSel(12);
@@ -852,6 +861,8 @@ void CCtrlSamples::UpdateView(UpdateHint hint, CObject *pObj)
 			SetDlgItemInt(IDC_EDIT9, sample.nPan / 4u);	//displayed panning with anything but XM is 0-64 so we divide by 4
 		// FineTune / C-4 Speed / BaseNote
 		int transp = 0;
+		m_EditFineTune.AllowNegative(m_sndFile.UseFinetuneAndTranspose());
+		m_EditFineTune.AllowFractions(false);
 		if (!m_sndFile.UseFinetuneAndTranspose())
 		{
 			s = mpt::cfmt::val(sample.nC5Speed);
@@ -1921,20 +1932,19 @@ void CCtrlSamples::OnPitchShiftTimeStretch()
 	if(!sample.HasSampleData())
 		return;
 	
-	CString text;
-	GetDlgItem(IDC_COMBO4)->GetWindowText(text);
-	const float semitones = mpt::parse<float>(text);
-	const float pitch = std::pow(2.0f, semitones / 12.0f);
+	double semitones = 0.0f;
+	m_EditPitch.GetDecimalValue(semitones);
+	const double pitch = std::pow(2.0, semitones / 12.0);
 
 	double ratio = 100.0;
 	m_EditTimeStretchRatio.GetDecimalValue(ratio);
 
 	const auto grainSize = static_cast<int>(GetDlgItemInt(IDC_COMBO5));
 
-	if(pitch != 1.0f || ratio != 100.0)
+	if(pitch != 1.0 || ratio != 100.0)
 	{
 		auto selection = GetSelectionPoints();
-		DoPitchShiftTimeStretch timeStretch(*this, m_modDoc, m_nSample, selection.nStart, selection.nEnd, pitch, static_cast<float>(ratio / 100.0), grainSize, IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
+		DoPitchShiftTimeStretch timeStretch(*this, m_modDoc, m_nSample, selection.nStart, selection.nEnd, static_cast<float>(pitch), static_cast<float>(ratio / 100.0), grainSize, IsDlgButtonChecked(IDC_CHECK3) != BST_UNCHECKED);
 		timeStretch.DoModal();
 		errorCode = timeStretch.m_result;
 		if(selection.selectionActive)
