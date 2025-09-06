@@ -21,6 +21,9 @@ is just a high-level summary.
  *  [**Change**] in_openmpt: Modern and legacy builds of in_openmpt now
     officially only support Winamp 5.x.
 
+ *  IT: Even when the filter cutoff envelope is stopped before its first tick is
+    applied, the filter should still be activated.
+
  *  mpg123: Update to v1.33.2 (2025-08-05).
 
 ### libopenmpt 0.8.2 (2025-07-19)
