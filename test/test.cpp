@@ -1534,6 +1534,28 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc2()
 		VERIFY_EQUAL(req.host, U_("host"));
 		VERIFY_EQUAL(req.path, U_("/"));
 	}
+	{
+		// https://daniel.haxx.se/blog/2022/09/08/http-http-http-http-http-http-http/
+		URI uri = ParseURI(U_("http://http://http://@http://http://?http://#http://"));
+		// python urllib / RFC 3986
+		VERIFY_EQUAL(uri.scheme, U_("http"));
+		VERIFY_EQUAL(uri.username, U_(""));
+		VERIFY_EQUAL(uri.password, U_(""));
+		VERIFY_EQUAL(uri.host, U_("http"));
+		VERIFY_EQUAL(uri.port, U_(""));
+		VERIFY_EQUAL(uri.path, U_("//http://@http://http://"));
+		VERIFY_EQUAL(uri.query, U_("http://"));
+		VERIFY_EQUAL(uri.fragment, U_("http://"));
+		// curl (broken)
+		//VERIFY_EQUAL(uri.scheme, U_("http"));
+		//VERIFY_EQUAL(uri.username, U_("http"));
+		//VERIFY_EQUAL(uri.password, U_("//http://"));
+		//VERIFY_EQUAL(uri.host, U_("http"));
+		//VERIFY_EQUAL(uri.port, U_(""));
+		//VERIFY_EQUAL(uri.path, U_("//http://"));
+		//VERIFY_EQUAL(uri.query, U_("http://"));
+		//VERIFY_EQUAL(uri.fragment, U_("http://"));
+	}
 
 #endif // MODPLUG_TRACKER
 
