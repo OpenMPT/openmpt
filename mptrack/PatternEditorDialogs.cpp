@@ -12,6 +12,7 @@
 #include "stdafx.h"
 #include "PatternEditorDialogs.h"
 #include "FileDialog.h"
+#include "HighDPISupport.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
 #include "Moddoc.h"
