@@ -1208,7 +1208,7 @@ BOOL CSampleMapDlg::OnInitDialog()
 
 void CSampleMapDlg::OnDPIChanged()
 {
-	ResizableDialog::OnDPIChanged();
+	DialogBase::OnDPIChanged();
 	m_Keyboard.SendMessage(WM_DPICHANGED);
 }
 
