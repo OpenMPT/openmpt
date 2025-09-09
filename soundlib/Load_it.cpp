@@ -1018,7 +1018,6 @@ bool CSoundFile::ReadIT(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Load instrument and song extensions.
 	const bool hasExtendedInstrumentProperties = LoadExtendedInstrumentProperties(file);
-	interpretModPlugMade |= hasExtendedInstrumentProperties;
 	if(interpretModPlugMade && !isBeRoTracker)
 	{
 		m_playBehaviour.reset();
