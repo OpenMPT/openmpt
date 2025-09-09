@@ -183,6 +183,7 @@ public:
 protected:
 	void DrawKey(CPaintDC &dc, const CRect rect, int key, bool black) const;
 
+	afx_msg LRESULT OnDPIChanged(WPARAM, LPARAM);
 	afx_msg void OnDestroy();
 	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
@@ -222,6 +223,8 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+	void OnDPIChanged() override;
+
 	afx_msg void OnUpdateSamples();
 	afx_msg void OnUpdateKeyboard();
 	afx_msg void OnUpdateOctave();

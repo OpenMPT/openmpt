@@ -915,6 +915,8 @@ static constexpr uint8 whitetab[7] = {0,2,4,5,7,9,11};
 static constexpr uint8 blacktab[7] = {0xff,1,3,0xff,6,8,10};
 
 BEGIN_MESSAGE_MAP(CKeyboardControl, CWnd)
+	ON_MESSAGE(WM_DPICHANGED, &CKeyboardControl::OnDPIChanged)
+
 	ON_WM_DESTROY()
 	ON_WM_PAINT()
 	ON_WM_MOUSEMOVE()
@@ -930,10 +932,17 @@ void CKeyboardControl::Init(CWnd *parent, int octaves, bool cursorNotify)
 	m_cursorNotify = cursorNotify;
 	MemsetZero(KeyFlags);
 	MemsetZero(m_sampleNum);
-	
+	OnDPIChanged(0, 0);
+}
+
+
+LRESULT CKeyboardControl::OnDPIChanged(WPARAM, LPARAM)
+{
 	// Point size to pixels
 	int fontSize = -MulDiv(60, HighDPISupport::GetDpiForWindow(m_hWnd), 720);
+	m_font.DeleteObject();
 	m_font.CreateFont(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_RASTER_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_DONTCARE, _T("MS Shell Dlg"));
+	return 0;
 }
 
 
@@ -1194,6 +1203,13 @@ BOOL CSampleMapDlg::OnInitDialog()
 	OnUpdateSamples();
 	OnUpdateOctave();
 	return TRUE;
+}
+
+
+void CSampleMapDlg::OnDPIChanged()
+{
+	ResizableDialog::OnDPIChanged();
+	m_Keyboard.SendMessage(WM_DPICHANGED);
 }
 
 

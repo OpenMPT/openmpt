@@ -1170,6 +1170,13 @@ BOOL CChordEditor::OnInitDialog()
 }
 
 
+void CChordEditor::OnDPIChanged()
+{
+	ResizableDialog::OnDPIChanged();
+	m_Keyboard.SendMessage(WM_DPICHANGED);
+}
+
+
 void CChordEditor::OnOK()
 {
 	TrackerSettings::GetChords() = m_chords;
