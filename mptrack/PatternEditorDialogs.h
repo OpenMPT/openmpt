@@ -155,6 +155,7 @@ protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+	void OnDPIChanged() override;
 
 	void UpdateKeyboard();
 	afx_msg LRESULT OnKeyboardNotify(WPARAM, LPARAM);
