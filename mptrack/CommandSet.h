@@ -980,8 +980,9 @@ enum CommandID : int
 
 	kcStartSampleCues,
 	kcEndSampleCues = kcStartSampleCues + 8,
-	kcSampleSlice,
-	kcEndSampleCueGroup = kcSampleSlice,
+	kcSampleSliceCuePoints,
+	kcSampleSliceGrid,
+	kcEndSampleCueGroup = kcSampleSliceGrid,
 
 	kcSampStartNotes,
 	kcSampEndNotes = kcSampStartNotes + kcCommandSetNumNotes,

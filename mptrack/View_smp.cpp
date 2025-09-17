@@ -145,7 +145,8 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_ADDSILENCE,		&CViewSample::OnAddSilence)
 	ON_COMMAND(ID_SAMPLE_GRID,				&CViewSample::OnChangeGridSize)
 	ON_COMMAND(ID_SAMPLE_QUICKFADE,			&CViewSample::OnQuickFade)
-	ON_COMMAND(ID_SAMPLE_SLICE,				&CViewSample::OnSampleSlice)
+	ON_COMMAND(ID_SAMPLE_SLICE,				&CViewSample::OnSampleSliceCuePoints)
+	ON_COMMAND(ID_SAMPLE_SLICE_GRID,		&CViewSample::OnSampleSliceGrid)
 	ON_COMMAND(ID_SAMPLE_INSERT_CUEPOINT,	&CViewSample::OnSampleInsertCuePoint)
 	ON_COMMAND(ID_SAMPLE_DELETE_CUEPOINT,	&CViewSample::OnSampleDeleteCuePoint)
 	ON_COMMAND(ID_SAMPLE_SEND_TO_NEW_SLOT,	&CViewSample::OnSendSelectionToNewSlot)
@@ -2333,7 +2334,9 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 						}
 						wsprintf(s, _T("Set Sample Cu&e to:\t%s"), pos.GetString());
 						::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hCueMenu), s);
-						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSlice, _T("Slice at cue points")));
+						::AppendMenu(hMenu, MF_STRING | (hasValidCues ? 0 : MF_GRAYED), ID_SAMPLE_SLICE, ih->GetKeyTextFromCommand(kcSampleSliceCuePoints, _T("Slice at cue points")));
+						if(m_nGridSegments > 1)
+							::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SLICE_GRID, ih->GetKeyTextFromCommand(kcSampleSliceGrid, _T("Slice at grid")));
 					}
 
 					::AppendMenu(hMenu, MF_SEPARATOR, 0, _T(""));
@@ -3840,7 +3843,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleAutotune:			PostCtrlMessage(IDC_SAMPLE_AUTOTUNE); return wParam;
 		case kcSampleQuickFade:			PostCtrlMessage(IDC_SAMPLE_QUICKFADE); return wParam;
 		case kcSampleStereoSep:			PostCtrlMessage(IDC_SAMPLE_STEREOSEPARATION); return wParam;
-		case kcSampleSlice:				OnSampleSlice(); return wParam;
+		case kcSampleSliceCuePoints:	OnSampleSliceCuePoints(); return wParam;
+		case kcSampleSliceGrid:			OnSampleSliceGrid(); return wParam;
 		case kcSampleToggleDrawing:		OnDrawingToggle(); return wParam;
 		case kcSampleResize:			OnAddSilence(); return wParam;
 		case kcSampleGrid:				OnChangeGridSize(); return wParam;
@@ -3949,13 +3953,12 @@ void CViewSample::PlayOrSetCuePoint(size_t cue)
 }
 
 
-void CViewSample::OnSampleSlice()
+void CViewSample::OnSampleSliceCuePoints()
 {
-	CModDoc *modDoc = GetDocument();
+	const CModDoc *modDoc = GetDocument();
 	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
 		return;
-	CSoundFile &sndFile = modDoc->GetSoundFile();
-	ModSample &sample = sndFile.GetSample(m_nSample);
+	const ModSample &sample = modDoc->GetSoundFile().GetSample(m_nSample);
 	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
 		return;
 
@@ -3978,9 +3981,41 @@ void CViewSample::OnSampleSlice()
 	cues[NUM_CUES] = 0;
 	cues[NUM_CUES + 1] = sample.nLength;
 	std::sort(cues.begin(), cues.end());
+	OnSampleSlice(mpt::as_span(cues));
+}
+
+
+void CViewSample::OnSampleSliceGrid()
+{
+	const CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples() || m_nGridSegments < 2)
+		return;
+	const ModSample &sample = modDoc->GetSoundFile().GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
+		return;
+
+	std::vector<SmpLength> slicePoints(m_nGridSegments + 1);
+	const auto samplesPerSegment = static_cast<double>(sample.nLength) / m_nGridSegments;
+	for (SmpLength i = 0; i <= m_nGridSegments; i++)
+	{
+		slicePoints[i] = mpt::saturate_round<SmpLength>(i * samplesPerSegment);
+	}
+	OnSampleSlice(mpt::as_span(slicePoints));
+}
+
+
+void CViewSample::OnSampleSlice(mpt::span<SmpLength> cues)
+{
+	CModDoc *modDoc = GetDocument();
+	if(modDoc == nullptr || m_nSample > modDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = modDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(!sample.HasSampleData() || sample.uFlags[CHN_ADLIB])
+		return;
 
 	// Now slice the sample at each cue point
-	for(std::size_t i = 1; i < std::size(cues) - 1; i++)
+	for(size_t i = 1; i < cues.size() - 1; i++)
 	{
 		const SmpLength cue  = cues[i];
 		if(cue > cues[i - 1] && cue < cues[i + 1])
