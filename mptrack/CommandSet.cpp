@@ -801,7 +801,7 @@ static constexpr struct
 	{1950, kcOrderlistEditCopyOrders, _T("Copy Orders")},
 	{KeyCommand::Hidden, kcTreeViewStopPreview, _T("Stop sample preview")},
 	{1952, kcSampleDuplicate, _T("Duplicate Sample")},
-	{1953, kcSampleSlice, _T("Slice at cue points")},
+	{1953, kcSampleSliceCuePoints, _T("Slice at cue points")},
 	{1954, kcInstrumentEnvelopeScale, _T("Scale Envelope Points")},
 	{1955, kcInsNoteMapRemove, _T("Remove All Samples")},
 	{1956, kcInstrumentEnvelopeSelectLoopStart, _T("Select Envelope Loop Start")},
@@ -958,6 +958,7 @@ static constexpr struct
 	{2121, kcPatternShrink, _T("Shrink Pattern")},
 	{2122, kcSampleToggleNormalLoop, _T("Toggle Loop")},
 	{2123, kcSampleToggleSustainLoop, _T("Toggle Sustain Loop")},
+	{2127, kcSampleSliceGrid, _T("Slice at grid") },
 };
 // clang-format on
 

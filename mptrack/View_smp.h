@@ -239,7 +239,9 @@ protected:
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
-	afx_msg void OnSampleSlice();
+	afx_msg void OnSampleSliceCuePoints();
+	afx_msg void OnSampleSliceGrid();
+	void OnSampleSlice(mpt::span<SmpLength> slicePoints);
 	afx_msg void OnSampleInsertCuePoint();
 	afx_msg void OnSampleDeleteCuePoint();
 	afx_msg void OnTimelineFormatSeconds() { SetTimelineFormat(TimelineFormat::Seconds); }

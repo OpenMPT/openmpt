@@ -1124,7 +1124,8 @@
 #define ID_PRESET_LOAD                  32915
 #define ID_PRESET_SAVE                  32916
 #define ID_PRESET_RANDOM                32917
-#define ID_PRESET_LIST                  32919
+#define ID_PRESET_LIST                  32918
+#define ID_SAMPLE_SLICE_GRID            32819
 #define ID_INFO                         32920
 #define ID_VIEWPLUGNAMES                32921
 #define ID_EQSLIDER_BASE                32922
