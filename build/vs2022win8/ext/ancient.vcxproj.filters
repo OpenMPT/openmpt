@@ -33,6 +33,9 @@
     <ClInclude Include="..\..\..\include\ancient\src\BZIP2Table.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\ancient\src\ByteKillerDecompressor.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\CBR0Decompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
@@ -99,10 +102,10 @@
     <ClInclude Include="..\..\..\include\ancient\src\InputStream.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\LHDecompressor.hpp">
+    <ClInclude Include="..\..\..\include\ancient\src\JAMPackerDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\ancient\src\LHLBDecompressor.hpp">
+    <ClInclude Include="..\..\..\include\ancient\src\LHDecompressor.hpp">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\ancient\src\LIN1Decompressor.hpp">
@@ -269,6 +272,9 @@
     <ClCompile Include="..\..\..\include\ancient\src\BZIP2Decompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\ancient\src\ByteKillerDecompressor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\CBR0Decompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -326,10 +332,10 @@
     <ClCompile Include="..\..\..\include\ancient\src\InputStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\LHDecompressor.cpp">
+    <ClCompile Include="..\..\..\include\ancient\src\JAMPackerDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\include\ancient\src\LHLBDecompressor.cpp">
+    <ClCompile Include="..\..\..\include\ancient\src\LHDecompressor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\ancient\src\LIN1Decompressor.cpp">
