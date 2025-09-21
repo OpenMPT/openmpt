@@ -78,6 +78,7 @@ public:
 	void writeByte(uint8_t value);
 
 	uint8_t copy(size_t distance,size_t count);
+	uint8_t copy(size_t distance,size_t count,uint8_t defaultChar);
 
 	bool eof() const { return _currentOffset==_startOffset; }
 	size_t getOffset() const { return _currentOffset; }

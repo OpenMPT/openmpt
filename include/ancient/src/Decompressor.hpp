@@ -52,7 +52,7 @@ public:
 	void decompress(Buffer &rawData,bool verify);
 
 	// in case of disk image based formats the data does not necessarily start
-	// from logical beginnig of the image but it is offsetted inside the logical image
+	// from logical beginning of the image but it is offsetted inside the logical image
 	// (f.e. DMS). getDataOffset will return the offset (or 0 if not relevant or if offset does not exist)
 	// getImageSize will return the size of the the logical image, or 0 if not image-based format
 	virtual size_t getImageSize() const noexcept;

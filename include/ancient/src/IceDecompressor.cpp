@@ -144,14 +144,14 @@ void IceDecompressor::decompressInternal(Buffer &rawData,bool useBytes)
 			if (useBytes)
 			{
 				if (distance) distance+=count-1;
-					else distance+=1;
+					else distance=1;
 			} else distance+=count;
 		}
 		outputStream.copy(distance,count);
 	}
 
 	// picture mode
-	if (_ver && readBits(1U))
+	if (_ver && bitReader.available() && readBits(1U))
 	{
 		uint32_t pictureSize=32000U;
 		if (_ver==2)

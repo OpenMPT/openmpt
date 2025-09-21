@@ -21,7 +21,7 @@ public:
 	static bool detectHeaderXPK(uint32_t hdr) noexcept;
 	static std::shared_ptr<XPKDecompressor> create(uint32_t hdr,uint32_t recursionLevel,const Buffer &packedData,std::shared_ptr<XPKDecompressor::State> &state,bool verify);
 
-	static void decompressLhLib(Buffer &rawData,const Buffer &packedData);
+	static size_t decompressLhLib(Buffer &rawData,const Buffer &packedData);
 
 private:
 	const Buffer	&_packedData;

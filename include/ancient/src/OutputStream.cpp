@@ -180,4 +180,21 @@ uint8_t BackwardOutputStream::copy(size_t distance,size_t count)
 	return ret;
 }
 
+uint8_t BackwardOutputStream::copy(size_t distance,size_t count,uint8_t defaultChar)
+{
+	if (!distance || OverflowCheck::sum(_startOffset,count)>_currentOffset)
+		throw Decompressor::DecompressionError();
+	size_t prevCount{0};
+	uint8_t ret{0};
+	if (OverflowCheck::sum(_currentOffset,distance)>_endOffset)
+	{
+		prevCount=std::min(count,_currentOffset+distance-_endOffset);
+		for (size_t i=0;i<prevCount;i++,--_currentOffset)
+			ret=_buffer[_currentOffset-1]=defaultChar;
+	}
+	for (size_t i=prevCount;i<count;i++,--_currentOffset)
+		ret=_buffer[_currentOffset-1]=_buffer[_currentOffset+distance-1];
+	return ret;
+}
+
 }
