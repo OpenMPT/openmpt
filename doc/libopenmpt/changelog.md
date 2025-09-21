@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.17-pre
 
+ *  miniz: Update to v3.1.0 (2025-09-21).
+
 ### libopenmpt 0.7.16 (2025-09-06)
 
  *  [**Bug**] Windows 10 binaries wrongly targeted Windows 11 22H2. They now
