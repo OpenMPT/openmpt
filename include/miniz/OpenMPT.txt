@@ -1,1 +1,1 @@
-﻿miniz 3.0.2 (<https://github.com/richgel999/miniz>)
+﻿miniz <https://github.com/richgel999/miniz> v3.1.0 (2025-09-21)
