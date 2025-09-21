@@ -19,7 +19,7 @@ bool StoneCrackerDecompressor::detectHeaderAndGeneration(uint32_t hdr,uint32_t &
 	// last byte is bit length.
 	//
 	// 2.92 and 2.99 do not have either any proper identification word either, however its
-	// bit lengts for decompressor are stored in the first 4 bytes, which forms identifiable
+	// bit lengths for decompressor are stored in the first 4 bytes, which forms identifiable
 	// value.
 	//
 	// Thus for detecting 2.71 and friends, we are creating lots of false positives here.
@@ -221,58 +221,16 @@ StoneCrackerDecompressor::StoneCrackerDecompressor(const Buffer &packedData,bool
 
 const std::string &StoneCrackerDecompressor::getName() const noexcept
 {
-	switch (_generation)
-	{
-		case 1:
-		{
-			static std::string name{"SC: StoneCracker v2.69 - v2.81"};
-			return name;
-		}
-
-		case 2:
-		{
-			static std::string name{"SC: StoneCracker v2.92, v2.99"};
-			return name;
-		}
-
-		case 3:
-		{
-			static std::string name{"S300: StoneCracker v3.00"};
-			return name;
-		}
-
-		case 4:
-		{
-			static std::string name{"S310: StoneCracker v3.10, v3.11b"};
-			return name;
-		}
-
-		case 5:
-		{
-			static std::string name{"S400: StoneCracker pre v4.00"};
-			return name;
-		}
-
-		case 6:
-		{
-			static std::string name{"S401: StoneCracker v4.01"};
-			return name;
-		}
-
-		case 7:
-		{
-			static std::string name{"S403: StoneCracker v4.02a"};
-			return name;
-		}
-
-		case 8:
-		{
-			static std::string name{"S404: StoneCracker v4.10"};
-			return name;
-		}
-	}
-	static std::string dummy="";
-	return dummy;
+	static std::string names[8]={
+		"SC: StoneCracker v2.69 - v2.81",
+		"SC: StoneCracker v2.92, v2.99",
+		"S300: StoneCracker v3.00",
+		"S310: StoneCracker v3.10, v3.11b",
+		"S400: StoneCracker pre v4.00",
+		"S401: StoneCracker v4.01",
+		"S403: StoneCracker v4.02a",
+		"S404: StoneCracker v4.10"};
+	return names[_generation-1U];
 }
 
 size_t StoneCrackerDecompressor::getPackedSize() const noexcept

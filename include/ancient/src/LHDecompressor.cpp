@@ -1,5 +1,7 @@
 /* Copyright (C) Teemu Suutari */
 
+#include <cstring>
+
 #include "LHDecompressor.hpp"
 
 #include "InputStream.hpp"
@@ -36,7 +38,7 @@ const std::string &LHDecompressor::getSubName() const noexcept
 }
 
 // lh.library decompress
-void LHDecompressor::decompressLhLib(Buffer &rawData,const Buffer &packedData)
+size_t LHDecompressor::decompressLhLib(Buffer &rawData,const Buffer &packedData)
 {
 	ForwardInputStream inputStream{packedData,0,packedData.size()};
 	MSBBitReader<ForwardInputStream> bitReader{inputStream};
@@ -79,10 +81,14 @@ void LHDecompressor::decompressLhLib(Buffer &rawData,const Buffer &packedData)
 				else for (uint32_t i=0;i<count;i++) outputStream.writeByte(0);
 		}
 	}
+	return outputStream.getOffset();
 }
+
 void LHDecompressor::decompressImpl(Buffer &rawData,const Buffer &previousData,bool verify)
 {
-	decompressLhLib(rawData,_packedData);
+	size_t length{decompressLhLib(rawData,_packedData)};
+	if (length!=rawData.size())
+		std::memset(rawData.data()+length,0,rawData.size()-length);
 }
 
 }

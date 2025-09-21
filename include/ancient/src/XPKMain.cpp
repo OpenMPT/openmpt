@@ -336,7 +336,7 @@ void XPKMain::forEachChunk(F func) const
 		} else {
 			uint32_t tmp;
 			readDualValue(4U,4U,tmp);
-			tmp=((tmp+3U)&~3U);
+			tmp=(OverflowCheck::sum(tmp,3U)&~3U);
 			if (OverflowCheck::sum(tmp,currentOffset,chunkHeaderLen)>_packedSize)
 				throw InvalidFormatError();
 			currentOffset+=chunkHeaderLen+tmp;

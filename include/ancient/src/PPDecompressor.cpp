@@ -182,7 +182,7 @@ size_t PPDecompressor::getRawSize() const noexcept
 
 	Since the actual decompression is 32-bit xor, it would also be beneficial to do just a histogram
 	with 4 buckets. However, the input files are pretty short and PP algorithm is very good at mangling
-	bytes and bits so there is not neccessarily enough data to get a good idea of the key.
+	bytes and bits so there is not necessarily enough data to get a good idea of the key.
 
 	Going through the 32-bit keyspace is not complicated in itself either. The only complication
 	is that since there are not checksum for the output, the only way to validate the key is to check that

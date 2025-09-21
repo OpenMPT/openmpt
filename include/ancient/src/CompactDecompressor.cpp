@@ -13,9 +13,9 @@ namespace ancient::internal
 
 bool CompactDecompressor::detectHeader(uint32_t hdr,uint32_t footer) noexcept
 {
-	// If a compact file has signature of 0x1fff it means the its endianess is wrongly configured
+	// If a compact file has signature of 0x1fff it means the its endianness is wrongly configured
 	// (This is easy since it only knows of vax and pdp-11)
-	// Files with a wrong endianess are almost salvageable - they just wrongly encode first and last byte
+	// Files with a wrong endianness are almost salvageable - they just wrongly encode first and last byte
 	// Thus supporting them would be in vain
 	return (hdr>>16)==0xff1fU;
 }

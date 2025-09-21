@@ -1,5 +1,7 @@
 /* Copyright (C) Teemu Suutari */
 
+#include <cstring>
+
 #include "PMCDecompressor.hpp"
 #include "InputStream.hpp"
 #include "OutputStream.hpp"
@@ -60,11 +62,23 @@ size_t PMCDecompressor::getRawSize() const noexcept
 
 void PMCDecompressor::decompressImpl(Buffer &rawData,bool verify)
 {
-	// thats all folks!
+	if (rawData.size()<_rawSize)
+		throw DecompressionError();
 	ConstSubBuffer subPackedData(_packedData,12,_packedSize-12);
 
-	LHDecompressor::decompressLhLib(rawData,subPackedData);
-	if (_ver) DLTADecode::decode(rawData,rawData,0,_rawSize);
+	size_t length{LHDecompressor::decompressLhLib(rawData,subPackedData)};
+	if (!length)
+		throw DecompressionError();
+	// thats all folks!
+	if (_ver)
+	{
+		DLTADecode::decode(rawData,rawData,0,_rawSize);
+		if (length!=_rawSize)
+			std::memset(rawData.data()+length,rawData[length-1],_rawSize-length);
+	} else {
+		if (length!=_rawSize)
+			std::memset(rawData.data()+length,0,_rawSize-length);
+	}
 }
 
 }
