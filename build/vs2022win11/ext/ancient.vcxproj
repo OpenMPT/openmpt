@@ -1214,6 +1214,7 @@
     <ClInclude Include="..\..\..\include\ancient\src\BLZWDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\BZIP2Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\BZIP2Table.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\ByteKillerDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\CBR0Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\CRMDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\CYB2Decoder.hpp" />
@@ -1236,8 +1237,8 @@
     <ClInclude Include="..\..\..\include\ancient\src\IMPDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\IceDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\InputStream.hpp" />
+    <ClInclude Include="..\..\..\include\ancient\src\JAMPackerDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LHDecompressor.hpp" />
-    <ClInclude Include="..\..\..\include\ancient\src\LHLBDecompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LIN1Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LIN2Decompressor.hpp" />
     <ClInclude Include="..\..\..\include\ancient\src\LOBDecompressor.hpp" />
@@ -1294,6 +1295,7 @@
     <ClCompile Include="..\..\..\include\ancient\src\ARTMDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\BLZWDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\BZIP2Decompressor.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\ByteKillerDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\CBR0Decompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\CRMDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\CYB2Decoder.cpp" />
@@ -1313,8 +1315,8 @@
     <ClCompile Include="..\..\..\include\ancient\src\IMPDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\IceDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\InputStream.cpp" />
+    <ClCompile Include="..\..\..\include\ancient\src\JAMPackerDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LHDecompressor.cpp" />
-    <ClCompile Include="..\..\..\include\ancient\src\LHLBDecompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LIN1Decompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LIN2Decompressor.cpp" />
     <ClCompile Include="..\..\..\include\ancient\src\LOBDecompressor.cpp" />
