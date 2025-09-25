@@ -18,6 +18,7 @@
 #if MPT_CXX_AT_LEAST(20)
 #include <stdexcept>
 #endif // C++20
+#include <type_traits>
 
 #include <cstddef>
 
@@ -29,7 +30,7 @@ inline namespace MPT_INLINE_NS {
 
 
 using usize = std::size_t;
-using ssize = std::ptrdiff_t;
+using ssize = std::common_type<std::ptrdiff_t, std::make_signed<std::size_t>::type>::type;
 
 
 namespace size_literals {
