@@ -189,6 +189,7 @@ jobs:
       if: ${{ matrix.host == 'macos-13' }}
       run: brew unlink python@3.12 && brew unlink python@3.13 && brew link --overwrite python@3.12 && brew link --overwrite python@3.13
     - name: upgrade packages
+      if: ${{ matrix.host != 'macos-13' }}
       run: brew upgrade
     - name: install dependencies
       run: brew install p7zip help2man doxygen autoconf autoconf-archive automake libtool mpg123 libogg libvorbis portaudio flac libsndfile sdl2
