@@ -70,7 +70,7 @@ environment:
 
 
 
-image: Visual Studio 2022
+image: Previous Visual Studio 2022
 
 clone_depth: 2500
 
