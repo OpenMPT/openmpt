@@ -1109,7 +1109,7 @@ template <typename Tbyte> static inline FileReader make_FileReader(mpt::span<Tby
 static inline FileReader make_FileReader(CallbackStream s, const mpt::PathString *filename = nullptr)
 {
 	return FileReader(
-				FileDataContainerCallbackStreamSeekable::IsSeekable(s) ?
+				FileDataContainerCallbackStreamSeekable::StaticIsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStreamSeekable>(s))
 				:
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerCallbackStream>(s))
@@ -1122,7 +1122,7 @@ static inline FileReader make_FileReader(CallbackStream s, const mpt::PathString
 static inline FileReader make_FileReader(std::istream *s, const mpt::PathString *filename = nullptr)
 {
 	return FileReader(
-				FileDataContainerStdStreamSeekable::IsSeekable(s) ?
+				FileDataContainerStdStreamSeekable::StaticIsSeekable(s) ?
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStreamSeekable>(s))
 				:
 					std::static_pointer_cast<IFileDataContainer>(std::make_shared<FileDataContainerStdStream>(s))

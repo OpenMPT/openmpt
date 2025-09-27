@@ -352,7 +352,7 @@ IFileDataContainer::off_t FileDataContainerSeekable::Read(mpt::byte *dst, IFileD
 
 
 
-bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
+bool FileDataContainerStdStreamSeekable::StaticIsSeekable(std::istream *stream)
 {
 	stream->clear();
 	std::streampos oldpos = stream->tellg();
@@ -390,7 +390,7 @@ bool FileDataContainerStdStreamSeekable::IsSeekable(std::istream *stream)
 	return true;
 }
 
-IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength(std::istream *stream)
+IFileDataContainer::off_t FileDataContainerStdStreamSeekable::StaticGetLength(std::istream *stream)
 {
 	stream->clear();
 	std::streampos oldpos = stream->tellg();
@@ -401,7 +401,7 @@ IFileDataContainer::off_t FileDataContainerStdStreamSeekable::GetLength(std::ist
 }
 
 FileDataContainerStdStreamSeekable::FileDataContainerStdStreamSeekable(std::istream *s)
-	: FileDataContainerSeekable(GetLength(s))
+	: FileDataContainerSeekable(StaticGetLength(s))
 	, stream(s)
 {
 	return;
@@ -585,7 +585,7 @@ IFileDataContainer::off_t FileDataContainerStdStream::InternalRead(mpt::byte *ds
 #if defined(MPT_FILEREADER_CALLBACK_STREAM)
 
 
-bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
+bool FileDataContainerCallbackStreamSeekable::StaticIsSeekable(CallbackStream stream)
 {
 	if(!stream.stream)
 	{
@@ -624,7 +624,7 @@ bool FileDataContainerCallbackStreamSeekable::IsSeekable(CallbackStream stream)
 	return true;
 }
 
-IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::GetLength(CallbackStream stream)
+IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::StaticGetLength(CallbackStream stream)
 {
 	if(!stream.stream)
 	{
@@ -664,7 +664,7 @@ IFileDataContainer::off_t FileDataContainerCallbackStreamSeekable::GetLength(Cal
 }
 
 FileDataContainerCallbackStreamSeekable::FileDataContainerCallbackStreamSeekable(CallbackStream s)
-	: FileDataContainerSeekable(GetLength(s))
+	: FileDataContainerSeekable(StaticGetLength(s))
 	, stream(s)
 {
 	return;
