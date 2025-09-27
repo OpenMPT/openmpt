@@ -892,8 +892,8 @@ public:
 
 	FileDataContainerStdStreamSeekable(std::istream *s);
 
-	static bool IsSeekable(std::istream *stream);
-	static off_t GetLength(std::istream *stream);
+	static bool StaticIsSeekable(std::istream *stream);
+	static off_t StaticGetLength(std::istream *stream);
 
 private:
 
@@ -988,8 +988,8 @@ class FileDataContainerCallbackStreamSeekable : public FileDataContainerSeekable
 private:
 	CallbackStream stream;
 public:
-	static bool IsSeekable(CallbackStream stream);
-	static off_t GetLength(CallbackStream stream);
+	static bool StaticIsSeekable(CallbackStream stream);
+	static off_t StaticGetLength(CallbackStream stream);
 	FileDataContainerCallbackStreamSeekable(CallbackStream s);
 private:
 	off_t InternalRead(std::byte *dst, off_t pos, off_t count) const override;
