@@ -35,8 +35,19 @@
 #else
 #define MPT_ATTR_NOINLINE
 #endif
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
-#define MPT_ATTR_NOINLINE [[gnu::noinline]]
+#elif MPT_COMPILER_GCC
+// https://godbolt.org/z/1P8758q89
+#if MPT_GCC_AT_LEAST(8, 1, 0)
+#define MPT_ATTR_NOINLINE [[gnu::noinline]] [[gnu::noclone]] [[gnu::no_icf]] [[gnu::noipa]]
+#else
+#define MPT_ATTR_NOINLINE [[gnu::noinline]] [[gnu::noclone]] [[gnu::no_icf]]
+#endif
+#elif MPT_COMPILER_CLANG
+#if MPT_CLANG_AT_LEAST(15, 0, 0)
+#define MPT_ATTR_NOINLINE [[clang::noinline]] [[clang::noduplicate]]
+#else
+#define MPT_ATTR_NOINLINE [[gnu::noinline]] [[clang::noduplicate]]
+#endif
 #else
 #define MPT_ATTR_NOINLINE
 #endif
@@ -49,8 +60,14 @@
 #else
 #define MPT_ATTR_ALWAYSINLINE
 #endif
-#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+#elif MPT_COMPILER_GCC
 #define MPT_ATTR_ALWAYSINLINE [[gnu::always_inline]]
+#elif MPT_COMPILER_CLANG
+#if MPT_CLANG_AT_LEAST(15, 0, 0)
+#define MPT_ATTR_ALWAYSINLINE [[clang::always_inline]]
+#else
+#define MPT_ATTR_ALWAYSINLINE [[gnu::always_inline]]
+#endif
 #else
 #define MPT_ATTR_ALWAYSINLINE
 #endif
