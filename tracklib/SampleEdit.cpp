@@ -1184,7 +1184,7 @@ SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForwar
 	{
 		// Find Next LoopStart Point
 		const SmpLength searchEnd = moveLoop ? sample.nLength - loopLength : (std::max(loopEnd, SmpLength(16)) - 16);
-		for(SmpLength i = sample.nLoopStart + 1; i <= searchEnd; i++)
+		for(SmpLength i = loopStart + 1; i <= searchEnd; i++)
 		{
 			p += inc;
 			if(pingpong)
@@ -1205,7 +1205,7 @@ SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForwar
 	} else
 	{
 		// Find Prev LoopStart Point
-		for(SmpLength i = sample.nLoopStart; i;)
+		for(SmpLength i = loopStart; i;)
 		{
 			i--;
 			p -= inc;
