@@ -44,9 +44,9 @@
 #endif
 #elif MPT_COMPILER_CLANG
 #if MPT_CLANG_AT_LEAST(15, 0, 0)
-#define MPT_ATTR_NOINLINE [[clang::noinline]] [[clang::noduplicate]]
+#define MPT_ATTR_NOINLINE [[clang::noinline]]
 #else
-#define MPT_ATTR_NOINLINE [[gnu::noinline]] [[clang::noduplicate]]
+#define MPT_ATTR_NOINLINE [[gnu::noinline]]
 #endif
 #else
 #define MPT_ATTR_NOINLINE
