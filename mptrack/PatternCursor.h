@@ -79,33 +79,52 @@ public:
 	};
 
 	// Set the cursor to given coordinates.
-	void Set(ROWINDEX row, CHANNELINDEX channel, Columns column = firstColumn)
+	PatternCursor& Set(ROWINDEX row, CHANNELINDEX channel, Columns column = firstColumn)
 	{
 		cursor = (row << 16) | ((channel << 3) & 0x1FFF) | (column & 0x07);
+		return *this;
 	};
 
 	// Set the cursor to the same position as another curosr.
-	void Set(const PatternCursor &other)
+	PatternCursor& Set(const PatternCursor &other)
 	{
 		*this = other;
+		return *this;
 	};
 
 	// Set the cursor to a given row and another cursor's horizontal position (channel + column).
-	void Set(ROWINDEX row, const PatternCursor &other)
+	PatternCursor& Set(ROWINDEX row, const PatternCursor &other)
 	{
 		cursor = (row << 16) | (other.cursor & 0xFFFF);
+		return *this;
 	};
 
 	// Only update the row of a cursor.
-	void SetRow(ROWINDEX row)
+	PatternCursor& SetRow(ROWINDEX row)
 	{
 		Set(row, *this);
+		return *this;
+	};
+
+	// Only update the channel position of a cursor, keeping the same column inside the channel as before.
+	PatternCursor& SetChannel(CHANNELINDEX chn)
+	{
+		Set(GetRow(), chn, GetColumnType());
+		return *this;
 	};
 
 	// Only update the horizontal position of a cursor.
-	void SetColumn(CHANNELINDEX chn, Columns col)
+	PatternCursor& SetColumn(CHANNELINDEX chn, Columns col)
 	{
 		Set(GetRow(), chn, col);
+		return *this;
+	};
+
+	// Only update the horizontal position of a cursor.
+	PatternCursor &SetColumn(Columns col)
+	{
+		Set(GetRow(), GetChannel(), col);
+		return *this;
 	};
 
 	// Move the cursor relatively.
@@ -363,6 +382,12 @@ public:
 	bool operator == (const PatternRect &other) const
 	{
 		return upperLeft == other.upperLeft && lowerRight == other.lowerRight;
+	}
+
+	void Move(int rows, int channels)
+	{
+		upperLeft.Move(rows, channels, 0);
+		lowerRight.Move(rows, channels, 0);
 	}
 
 };
