@@ -2880,7 +2880,12 @@ bool CViewPattern::TransposeSelection(int transp)
 		}
 	});
 	SetModified(false);
-	InvalidateSelection();
+	// If the selection doesn't contain the volume column of the last channel, extend it.
+	// When displaying default volumes, it may change due to a different sample being played inside the instrument.
+	PatternRect sel = m_Selection;
+	if(sel.GetEndColumn() < PatternCursor::volumeColumn)
+		sel = {sel.GetUpperLeft(), sel.GetLowerRight().SetColumn(PatternCursor::volumeColumn)};
+	InvalidateArea(sel);
 
 	if(m_Selection.GetNumChannels() == 1 && m_Selection.GetNumRows() == 1 && (TrackerSettings::Instance().patternSetup & PatternSetup::PreviewNoteTransposition))
 	{
