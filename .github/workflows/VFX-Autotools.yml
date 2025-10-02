@@ -1,0 +1,40 @@
+name: VFX Reference Autotools
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '2019' }
+          - { version: '2020' }
+          - { version: '2021' }
+          - { version: '2022' }
+          - { version: '2023' }
+          - { version: '2024' }
+          - { version: '2025' }
+          - { version: '2026' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-latest
+    container:
+      image: aswf/ci-vfxall:${{matrix.version}}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: fix git
+      # https://github.com/actions/runner/issues/2033
+      run: chown -R $(id -u):$(id -g) $(pwd)
+    - name: Build
+      run: export MAKEFLAGS=-j$(nproc); ./build/autotools/autoconfiscate.sh
