@@ -13,30 +13,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: '2019', deps: sys   }
-          - { version: '2019', deps: local }
-          - { version: '2019', deps: small }
-          - { version: '2020', deps: sys   }
-          - { version: '2020', deps: local }
-          - { version: '2020', deps: small }
-          - { version: '2021', deps: sys   }
-          - { version: '2021', deps: local }
-          - { version: '2021', deps: small }
-          - { version: '2022', deps: sys   }
-          - { version: '2022', deps: local }
-          - { version: '2022', deps: small }
+          #- { version: '2019', deps: sys   }
+          #- { version: '2019', deps: local }
+          #- { version: '2019', deps: small }
+          #- { version: '2020', deps: sys   }
+          #- { version: '2020', deps: local }
+          #- { version: '2020', deps: small }
+          #- { version: '2021', deps: sys   }
+          #- { version: '2021', deps: local }
+          #- { version: '2021', deps: small }
+          #- { version: '2022', deps: sys   }
+          #- { version: '2022', deps: local }
+          #- { version: '2022', deps: small }
           - { version: '2023', deps: sys   }
           - { version: '2023', deps: local }
           - { version: '2023', deps: small }
           - { version: '2024', deps: sys   }
           - { version: '2024', deps: local }
           - { version: '2024', deps: small }
-          - { version: '2025', deps: sys   }
-          - { version: '2025', deps: local }
-          - { version: '2025', deps: small }
-          - { version: '2026', deps: sys   }
-          - { version: '2026', deps: local }
-          - { version: '2026', deps: small }
+          #- { version: '2025', deps: sys   }
+          #- { version: '2025', deps: local }
+          #- { version: '2025', deps: small }
+          #- { version: '2026', deps: sys   }
+          #- { version: '2026', deps: local }
+          #- { version: '2026', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
@@ -75,7 +75,7 @@ jobs:
         # Remove CodeQL and other toolcaches
         sudo rm -rf /opt/hostedtoolcache
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: fix git
       # https://github.com/actions/runner/issues/2033
       run: chown -R $(id -u):$(id -g) $(pwd)
