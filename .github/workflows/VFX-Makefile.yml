@@ -31,12 +31,12 @@ jobs:
           - { version: '2024', deps: sys   }
           - { version: '2024', deps: local }
           - { version: '2024', deps: small }
-          #- { version: '2025', deps: sys   }
-          #- { version: '2025', deps: local }
-          #- { version: '2025', deps: small }
-          #- { version: '2026', deps: sys   }
-          #- { version: '2026', deps: local }
-          #- { version: '2026', deps: small }
+          - { version: '2025', deps: sys   }
+          - { version: '2025', deps: local }
+          - { version: '2025', deps: small }
+          - { version: '2026', deps: sys   }
+          - { version: '2026', deps: local }
+          - { version: '2026', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
@@ -47,8 +47,35 @@ jobs:
       image: aswf/ci-vfxall:${{matrix.version}}
 
     steps:
+    - name: Aggressive cleanup
+      # https://dev.to/mathio/squeezing-disk-space-from-github-actions-runners-an-engineers-guide-3pjg#6-how-to-automate-cleanup-in-your-ci
+      run: |
+        # Remove Java (JDKs)
+        sudo rm -rf /usr/lib/jvm
+        # Remove .NET SDKs
+        sudo rm -rf /usr/share/dotnet
+        # Remove Swift toolchain
+        sudo rm -rf /usr/share/swift
+        # Remove Haskell (GHC)
+        sudo rm -rf /usr/local/.ghcup
+        # Remove Julia
+        sudo rm -rf /usr/local/julia*
+        # Remove Android SDKs
+        sudo rm -rf /usr/local/lib/android
+        # Remove Chromium (optional if not using for browser tests)
+        sudo rm -rf /usr/local/share/chromium
+        # Remove Microsoft/Edge builds
+        sudo rm -rf /opt/microsoft
+        # Remove Google Chrome builds
+        sudo rm -rf /opt/google
+        # Remove Azure CLI
+        sudo rm -rf /opt/az
+        # Remove PowerShell
+        sudo rm -rf /usr/local/share/powershell
+        # Remove CodeQL and other toolcaches
+        sudo rm -rf /opt/hostedtoolcache
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
     - name: fix git
       # https://github.com/actions/runner/issues/2033
       run: chown -R $(id -u):$(id -g) $(pwd)
