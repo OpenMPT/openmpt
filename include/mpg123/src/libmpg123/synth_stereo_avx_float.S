@@ -33,11 +33,7 @@
 	return value: number of clipped samples (0)
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 scale_avx:
 	.long   939524096

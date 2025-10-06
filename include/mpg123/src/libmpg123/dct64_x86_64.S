@@ -28,11 +28,7 @@
 	void dct64_x86_64(short *out0, short *out1, real *samples);
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 ASM_NAME(INT123_costab_x86_64):
 	.long 1056974725
