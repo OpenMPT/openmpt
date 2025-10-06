@@ -21,195 +21,264 @@ fi
 mkdir -p bin
 
 # Check that the API headers are standard compliant
+
 echo "Checking C header ..."
-echo '#include <stddef.h>' > bin/empty.c
-echo '' > bin/headercheck.c
-echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.c
-echo 'int main(void) { return 0; }' >> bin/headercheck.c
-echo " cc"
-cc             -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc.out
-echo " cc 89"
-cc    -std=c89 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc89.out
-echo " cc 99"
-cc    -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc99.out
-echo " cc 11"
-cc    -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc11.out
-echo " cc 17"
-cc    -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc17.out
-if cc -std=c18 -c bin/empty.c -o bin/empty.cc18.out > /dev/null 2>&1 ; then
-echo " cc 18"
-cc    -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc18.out
-fi
-if cc -std=c23 -c bin/empty.c -o bin/empty.cc23.out > /dev/null 2>&1 ; then
-echo " cc 23"
-cc    -std=c23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.cc23.out
-fi
-echo " gcc 89"
-gcc   -std=c89 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc89.out
-echo " gcc 99"
-gcc   -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc99.out
-echo " gcc 11"
-gcc   -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc11.out
-echo " gcc 17"
-gcc   -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc17.out
-if gcc -std=c18 -c bin/empty.c -o bin/empty.gcc18.out > /dev/null 2>&1 ; then
-echo " gcc 18"
-gcc   -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc18.out
-fi
-if gcc -std=c23 -c bin/empty.c -o bin/empty.gcc23.out > /dev/null 2>&1 ; then
-echo " gcc 23"
-gcc   -std=c23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.gcc23.out
-fi
-echo " clang 89"
-clang -std=c89 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang89.out
-echo " clang 99"
-clang -std=c99 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang99.out
-echo " clang 11"
-clang -std=c11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang11.out
-echo " clang 17"
-clang -std=c17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang17.out
-if clang -std=c18 -c bin/empty.c -o bin/empty.clang18.out > /dev/null 2>&1 ; then
-echo " clang 18"
-clang -std=c18 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang18.out
-fi
-if clang -std=c23 -c bin/empty.c -o bin/empty.clang23.out > /dev/null 2>&1 ; then
-echo " clang 23"
-clang -std=c23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.c -o bin/headercheck.clang23.out
-fi
+function headercheck_c() {
+	HEADERCHECK_NAME="${1}"
+	HEADERCHECK_COMPILER="${2}"
+	HEADERCHECK_STANDARD="${3}"
+	HEADERCHECK_OPTIONS="${4}"
+	echo '#include <stddef.h>' > bin/empty.c
+	if ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} -c bin/empty.c -o bin/empty.${HEADERCHECK_NAME}.out > /dev/null 2>&1 ; then
+		echo '' > bin/headercheck.c
+		echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.c
+		echo 'int main(void) { return 0; }' >> bin/headercheck.c
+		echo " ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD}"
+		${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} ${HEADERCHECK_OPTIONS} -I. bin/headercheck.c -o bin/headercheck.${HEADERCHECK_NAME}.out 2>bin/headercheck.${HEADERCHECK_NAME}.err
+		( cat bin/headercheck.${HEADERCHECK_NAME}.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2 ) || true
+		rm bin/headercheck.c
+	fi
+	rm bin/empty.c
+}
+headercheck_c "cc"         "cc"    ""                    "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "ccansi"     "cc"    "-ansi"               "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc90iso"    "cc"    "-std=iso9899:1990"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc94iso"    "cc"    "-std=iso9899:199409" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc99iso"    "cc"    "-std=iso9899:1999"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc11iso"    "cc"    "-std=iso9899:2011"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc17iso"    "cc"    "-std=iso9899:2017"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc18iso"    "cc"    "-std=iso9899:2018"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc24iso"    "cc"    "-std=iso9899:2024"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc89"       "cc"    "-std=c89"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc90"       "cc"    "-std=c90"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc94"       "cc"    "-std=c94"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc95"       "cc"    "-std=c95"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc99"       "cc"    "-std=c99"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc11"       "cc"    "-std=c11"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc17"       "cc"    "-std=c17"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc18"       "cc"    "-std=c18"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc23"       "cc"    "-std=c23"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc89gnu"    "cc"    "-std=gnu89"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc90gnu"    "cc"    "-std=gnu90"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc99gnu"    "cc"    "-std=gnu99"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc11gnu"    "cc"    "-std=gnu11"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc17gnu"    "cc"    "-std=gnu17"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc18gnu"    "cc"    "-std=gnu18"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "cc23gnu"    "cc"    "-std=gnu23"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc"        "gcc"   ""                    "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gccansi"    "gcc"   "-ansi"               "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc90iso"   "gcc"   "-std=iso9899:1990"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc94iso"   "gcc"   "-std=iso9899:199409" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc99iso"   "gcc"   "-std=iso9899:1999"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc11iso"   "gcc"   "-std=iso9899:2011"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc17iso"   "gcc"   "-std=iso9899:2017"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc18iso"   "gcc"   "-std=iso9899:2018"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc24iso"   "gcc"   "-std=iso9899:2024"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc89"      "gcc"   "-std=c89"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc90"      "gcc"   "-std=c90"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc94"      "gcc"   "-std=c94"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc95"      "gcc"   "-std=c95"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc99"      "gcc"   "-std=c99"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc11"      "gcc"   "-std=c11"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc17"      "gcc"   "-std=c17"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc18"      "gcc"   "-std=c18"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc23"      "gcc"   "-std=c23"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc89gnu"   "gcc"   "-std=gnu89"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc90gnu"   "gcc"   "-std=gnu90"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc99gnu"   "gcc"   "-std=gnu99"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc11gnu"   "gcc"   "-std=gnu11"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc17gnu"   "gcc"   "-std=gnu17"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc18gnu"   "gcc"   "-std=gnu18"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "gcc23gnu"   "gcc"   "-std=gnu23"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang"      "clang" ""                    "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clangansi"  "clang" "-ansi"               "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang90iso" "clang" "-std=iso9899:1990"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang94iso" "clang" "-std=iso9899:199409" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang99iso" "clang" "-std=iso9899:1999"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang11iso" "clang" "-std=iso9899:2011"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang17iso" "clang" "-std=iso9899:2017"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang18iso" "clang" "-std=iso9899:2018"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang24iso" "clang" "-std=iso9899:2024"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang89"    "clang" "-std=c89"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang90"    "clang" "-std=c90"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang94"    "clang" "-std=c94"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang95"    "clang" "-std=c95"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang99"    "clang" "-std=c99"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang11"    "clang" "-std=c11"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang17"    "clang" "-std=c17"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang18"    "clang" "-std=c18"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang23"    "clang" "-std=c23"            "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang89gnu" "clang" "-std=gnu89"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang90gnu" "clang" "-std=gnu90"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang99gnu" "clang" "-std=gnu99"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang11gnu" "clang" "-std=gnu11"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang17gnu" "clang" "-std=gnu17"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang18gnu" "clang" "-std=gnu18"          "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "clang23gnu" "clang" "-std=gnu23"          "-Wall -Wextra -Wpedantic -Werror"
 if [ `uname -s` != "Darwin" ] ; then
 if [ `uname -m` == "x86_64" ] ; then
 if [ "${MSYSTEM}x" == "x" ]; then
-echo " pcc"
-pcc -I. bin/headercheck.c -o bin/headercheck.pcc.out 2>bin/headercheck.pcc.err
-( cat bin/headercheck.pcc.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2 ) || true
-echo " pcc 89"
-pcc -std=c89 -I. bin/headercheck.c -o bin/headercheck.pcc89.out 2>bin/headercheck.pcc89.err
-( cat bin/headercheck.pcc89.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2 ) || true
-echo " pcc 99"
-pcc -std=c99 -I. bin/headercheck.c -o bin/headercheck.pcc99.out 2>bin/headercheck.pcc99.err
-( cat bin/headercheck.pcc99.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2 ) || true
-echo " pcc 11"
-pcc -std=c11 -I. bin/headercheck.c -o bin/headercheck.pcc11.out 2>bin/headercheck.pcc11.err
-( cat bin/headercheck.pcc11.err | grep -v 'gnu-ld: warning:' | grep -v 'gnu-ld: NOTE:' >&2 ) || true
-echo " tcc"
-tcc -Wall -Wunusupported -Wwrite-strings -Werror -I. bin/headercheck.c -o bin/headercheck.tcc.out
+headercheck_c "pcc"        "pcc"   ""                    ""
+headercheck_c "pccansi"    "pcc"   "-ansi"               ""
+headercheck_c "pcc90iso"   "pcc"   "-std=iso9899:1990"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc94iso"   "pcc"   "-std=iso9899:199409" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc99iso"   "pcc"   "-std=iso9899:1999"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc11iso"   "pcc"   "-std=iso9899:2011"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc17iso"   "pcc"   "-std=iso9899:2017"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc18iso"   "pcc"   "-std=iso9899:2018"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc24iso"   "pcc"   "-std=iso9899:2024"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c "pcc89"      "pcc"   "-std=c89"            ""
+headercheck_c "pcc90"      "pcc"   "-std=c90"            ""
+headercheck_c "pcc94"      "pcc"   "-std=c94"            ""
+headercheck_c "pcc95"      "pcc"   "-std=c95"            ""
+headercheck_c "pcc99"      "pcc"   "-std=c99"            ""
+headercheck_c "pcc11"      "pcc"   "-std=c11"            ""
+headercheck_c "pcc17"      "pcc"   "-std=c17"            ""
+headercheck_c "pcc18"      "pcc"   "-std=c18"            ""
+headercheck_c "pcc23"      "pcc"   "-std=c23"            ""
+headercheck_c "pcc89gnu"   "pcc"   "-std=gnu89"          ""
+headercheck_c "pcc90gnu"   "pcc"   "-std=gnu90"          ""
+headercheck_c "pcc99gnu"   "pcc"   "-std=gnu99"          ""
+headercheck_c "pcc11gnu"   "pcc"   "-std=gnu11"          ""
+headercheck_c "pcc17gnu"   "pcc"   "-std=gnu17"          ""
+headercheck_c "pcc18gnu"   "pcc"   "-std=gnu18"          ""
+headercheck_c "pcc23gnu"   "pcc"   "-std=gnu23"          ""
+headercheck_c "tcc"        "tcc"   ""                    "-Wall -Wunusupported -Wwrite-strings -Werror"
 fi
 fi
 fi
+rm -f bin/headercheck.*.out
 rm -f bin/headercheck.*.err
-rm bin/headercheck.*.out
-rm bin/headercheck.c
+
 echo "Checking C header in C++ mode ..."
-echo '#include <vector>' > bin/empty.cpp
-touch bin/empty.dummy.out
-echo '' > bin/headercheck.cpp
-echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.cpp
-echo 'int main() { return 0; }' >> bin/headercheck.cpp
-echo " c++"
-c++                -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out
-echo " c++ 98"
-c++     -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-echo " c++ 03"
-c++     -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-echo " c++ 11"
-c++     -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-echo " c++ 14"
-c++     -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-echo " c++ 17"
-c++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-if c++ -std=c++20 -c bin/empty.cpp -o bin/empty.cpp20.out > /dev/null 2>&1 ; then
-echo " c++ 20"
-c++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp20.out
-fi
-if c++ -std=c++23 -c bin/empty.cpp -o bin/empty.cpp23.out > /dev/null 2>&1 ; then
-echo " c++ 23"
-c++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp23.out
-fi
-echo " g++"
-g++                -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-echo " g++ 98"
-g++     -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-echo " g++ 03"
-g++     -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-echo " g++ 11"
-g++     -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-echo " g++ 14"
-g++     -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-echo " g++ 17"
-g++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-if g++ -std=c++20 -c bin/empty.cpp -o bin/empty.gpp20.out > /dev/null 2>&1 ; then
-echo " g++ 20"
-g++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp20.out
-fi
-if g++ -std=c++23 -c bin/empty.cpp -o bin/empty.gpp23.out > /dev/null 2>&1 ; then
-echo " g++ 23"
-g++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp23.out
-fi
-echo " clang++"
-clang++            -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-echo " clang++ 98"
-clang++ -std=c++98 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-echo " clang++ 03"
-clang++ -std=c++03 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-echo " clang++ 11"
-clang++ -std=c++11 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-echo " clang++ 14"
-clang++ -std=c++14 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-echo " clang++ 17"
-clang++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-if clang++ -std=c++20 -c bin/empty.cpp -o bin/empty.clangpp20.out > /dev/null 2>&1  ; then
-echo " clang++ 20"
-clang++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp20.out
-fi
-if clang++ -std=c++23 -c bin/empty.cpp -o bin/empty.clangpp23.out > /dev/null 2>&1  ; then
-echo " clang++ 23"
-clang++ -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp23.out
-fi
-rm bin/headercheck.*.out
-rm bin/headercheck.cpp
+function headercheck_c_cpp() {
+	HEADERCHECK_NAME="${1}"
+	HEADERCHECK_COMPILER="${2}"
+	HEADERCHECK_STANDARD="${3}"
+	HEADERCHECK_OPTIONS="${4}"
+	echo '#include <vector>' > bin/empty.cpp
+	if ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} -c bin/empty.cpp -o bin/empty.${HEADERCHECK_NAME}.out > /dev/null 2>&1 ; then
+		echo '' > bin/headercheck.c
+		echo '#include "libopenmpt/libopenmpt.h"' >> bin/headercheck.cpp
+		echo 'int main() { return 0; }' >> bin/headercheck.cpp
+		echo " ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD}"
+		${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} ${HEADERCHECK_OPTIONS} -I. bin/headercheck.cpp -o bin/headercheck.${HEADERCHECK_NAME}.out 2>bin/headercheck.${HEADERCHECK_NAME}.err
+		rm bin/headercheck.cpp
+	fi
+	rm bin/empty.cpp
+}
+headercheck_c_cpp "c++"          "c++"       ""             "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++98"        "c++"       "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++03"        "c++"       "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++11"        "c++"       "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++14"        "c++"       "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++17"        "c++"       "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++20"        "c++"       "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++23"        "c++"       "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++98gnu"     "c++"       "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++03gnu"     "c++"       "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++11gnu"     "c++"       "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++14gnu"     "c++"       "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++17gnu"     "c++"       "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++30gnu"     "c++"       "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "c++23gnu"     "c++"       "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++"          "g++"       ""             "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++98"        "g++"       "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++03"        "g++"       "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++11"        "g++"       "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++14"        "g++"       "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++17"        "g++"       "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++20"        "g++"       "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++23"        "g++"       "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++98gnu"     "g++"       "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++03gnu"     "g++"       "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++11gnu"     "g++"       "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++14gnu"     "g++"       "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++17gnu"     "g++"       "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++20gnu"     "g++"       "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "g++23gnu"     "g++"       "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++"      "clang++"   ""             "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++98"    "clang++"   "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++03"    "clang++"   "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++11"    "clang++"   "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++14"    "clang++"   "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++17"    "clang++"   "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++20"    "clang++"   "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++23"    "clang++"   "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++98gnu" "clang++"   "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++03gnu" "clang++"   "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++11gnu" "clang++"   "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++14gnu" "clang++"   "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++17gnu" "clang++"   "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++20gnu" "clang++"   "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_c_cpp "clang++23gnu" "clang++"   "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+rm -f bin/headercheck.*.out
+rm -f bin/headercheck.*.err
+
 echo "Checking C++ header ..."
-echo '#include <array>' > bin/empty.cpp
-touch bin/empty.dummy.out
-echo '' > bin/headercheck.cpp
-echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
-echo 'int main() { return 0; }' >> bin/headercheck.cpp
-#echo " c++"
-#c++                -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp.out
-echo " c++ 17"
-c++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp17.out
-if c++ -std=c++20 -c bin/empty.cpp -o bin/empty.cpp20.out > /dev/null 2>&1 ; then
-echo " c++ 20"
-c++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp20.out
-fi
-if c++ -std=c++23 -c bin/empty.cpp -o bin/empty.cpp23.out > /dev/null 2>&1 ; then
-echo " c++ 23"
-c++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.cpp23.out
-fi
-echo " g++ 17"
-g++     -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp17.out
-if g++ -std=c++20 -c bin/empty.cpp -o bin/empty.gpp20.out > /dev/null 2>&1 ; then
-echo " g++ 20"
-g++     -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp20.out
-fi
-if g++ -std=c++23 -c bin/empty.cpp -o bin/empty.gpp23.out > /dev/null 2>&1 ; then
-echo " g++ 23"
-g++     -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.gpp23.out
-fi
-echo " clang++ 17"
-clang++ -std=c++17 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp17.out
-if clang++ -std=c++20 -c bin/empty.cpp -o bin/empty.clangpp20.out > /dev/null 2>&1  ; then
-echo " clang++ 20"
-clang++ -std=c++20 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp20.out
-fi
-if clang++ -std=c++23 -c bin/empty.cpp -o bin/empty.clangpp23.out > /dev/null 2>&1  ; then
-echo " clang++ 23"
-clang++ -std=c++23 -Wall -Wextra -Wpedantic -Werror -I. bin/headercheck.cpp -o bin/headercheck.clangpp23.out
-fi
-rm bin/headercheck.*.out
-rm bin/headercheck.cpp
-rm bin/empty.*.out
-rm bin/empty.cpp
-rm bin/empty.c
+function headercheck_cpp() {
+	HEADERCHECK_NAME="${1}"
+	HEADERCHECK_COMPILER="${2}"
+	HEADERCHECK_STANDARD="${3}"
+	HEADERCHECK_OPTIONS="${4}"
+	echo '#include <array>' > bin/empty.cpp
+	if ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} -c bin/empty.cpp -o bin/empty.${HEADERCHECK_NAME}.out > /dev/null 2>&1 ; then
+		echo '' > bin/headercheck.c
+		echo '#include "libopenmpt/libopenmpt.hpp"' >> bin/headercheck.cpp
+		echo 'int main() { return 0; }' >> bin/headercheck.cpp
+		echo " ${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD}"
+		${HEADERCHECK_COMPILER} ${HEADERCHECK_STANDARD} ${HEADERCHECK_OPTIONS} -I. bin/headercheck.cpp -o bin/headercheck.${HEADERCHECK_NAME}.out 2>bin/headercheck.${HEADERCHECK_NAME}.err
+		rm bin/headercheck.cpp
+	fi
+	rm bin/empty.cpp
+}
+#headercheck_cpp "c++"          "c++"       ""             "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++98"        "c++"       "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++03"        "c++"       "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++11"        "c++"       "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++14"        "c++"       "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++17"        "c++"       "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++20"        "c++"       "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++23"        "c++"       "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++98gnu"     "c++"       "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++03gnu"     "c++"       "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++11gnu"     "c++"       "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "c++14gnu"     "c++"       "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++17gnu"     "c++"       "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++30gnu"     "c++"       "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "c++23gnu"     "c++"       "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++"          "g++"       ""             "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++98"        "g++"       "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++03"        "g++"       "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++11"        "g++"       "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++14"        "g++"       "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++17"        "g++"       "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++20"        "g++"       "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++23"        "g++"       "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++98gnu"     "g++"       "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++03gnu"     "g++"       "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++11gnu"     "g++"       "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "g++14gnu"     "g++"       "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++17gnu"     "g++"       "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++20gnu"     "g++"       "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "g++23gnu"     "g++"       "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++"      "clang++"   ""             "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++98"    "clang++"   "-std=c++98"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++03"    "clang++"   "-std=c++03"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++11"    "clang++"   "-std=c++11"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++14"    "clang++"   "-std=c++14"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++17"    "clang++"   "-std=c++17"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++20"    "clang++"   "-std=c++20"   "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++23"    "clang++"   "-std=c++23"   "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++98gnu" "clang++"   "-std=gnu++98" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++03gnu" "clang++"   "-std=gnu++03" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++11gnu" "clang++"   "-std=gnu++11" "-Wall -Wextra -Wpedantic -Werror"
+#headercheck_cpp "clang++14gnu" "clang++"   "-std=gnu++14" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++17gnu" "clang++"   "-std=gnu++17" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++20gnu" "clang++"   "-std=gnu++20" "-Wall -Wextra -Wpedantic -Werror"
+headercheck_cpp "clang++23gnu" "clang++"   "-std=gnu++23" "-Wall -Wextra -Wpedantic -Werror"
+rm -f bin/headercheck.*.out
+rm -f bin/headercheck.*.err
 
 echo "Checking version helper ..."
 c++ -Wall -Wextra -I. -Isrc -Icommon build/auto/helper_get_openmpt_version.cpp -o bin/helper_get_openmpt_version
