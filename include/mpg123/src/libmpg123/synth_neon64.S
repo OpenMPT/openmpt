@@ -8,11 +8,7 @@
 
 #include "mangle.h"
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 maxmin_s16:
 	.word   32767

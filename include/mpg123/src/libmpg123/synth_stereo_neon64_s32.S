@@ -9,11 +9,7 @@
 #include "aarch64_defs.h"
 #include "mangle.h"
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 maxmin_s32:
 	.word   1191181824

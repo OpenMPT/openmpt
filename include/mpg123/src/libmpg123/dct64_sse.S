@@ -16,11 +16,7 @@
 	void dct64_sse(short *out0, short *out1, real *samples);
 */
 
-#if !defined (__APPLE__) && !defined (__OS2__)
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 pnpn:
 	.long	0
