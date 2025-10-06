@@ -37,11 +37,7 @@
 	return value: number of clipped samples
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 ASM_NAME(INT123_maxmin_s16):
 	.long   1191181824

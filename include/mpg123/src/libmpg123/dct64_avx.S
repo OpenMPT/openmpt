@@ -17,11 +17,7 @@
 	void dct64_avx(short *out0, short *out1, real *samples);
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 costab_avx:
 	.long 1056974725
