@@ -24,11 +24,7 @@
 	return value: number of clipped samples (0)
 */
 
-#if !defined ( __APPLE__) && !defined (__OS2__)
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 scale_sse:
 	.long   939524096

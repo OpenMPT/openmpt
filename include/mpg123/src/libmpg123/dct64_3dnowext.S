@@ -22,7 +22,7 @@
 
 #include "mangle.h"
 
-	.data
+	RODATA
 	ALIGN4
 	/* .type	plus_1f, @object
 	   .size	plus_1f, 4  */

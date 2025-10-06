@@ -30,11 +30,7 @@
 	void dct36_avx(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf);
 */
 	
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 dct36_avx_COS9:
 	.long 0x3f5db3d7
