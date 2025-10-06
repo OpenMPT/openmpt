@@ -35,11 +35,7 @@
 	return value: number of clipped samples (0)
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 ASM_NAME(INT123_scale_x86_64):
 	.long   939524096

@@ -19,11 +19,7 @@
 	void dct36_sse(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf);
 */
 	
-#if !defined ( __APPLE__) && !defined (__OS2__)
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN16
 dct36_sse_COS9:
 	.long 0x3f5db3d7
