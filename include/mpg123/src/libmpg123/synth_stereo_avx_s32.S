@@ -33,11 +33,7 @@
 	return value: number of clipped samples
 */
 
-#ifndef __APPLE__
-	.section	.rodata
-#else
-	.data
-#endif
+	RODATA
 	ALIGN32
 maxmin_avx:
 	.long   1191182335

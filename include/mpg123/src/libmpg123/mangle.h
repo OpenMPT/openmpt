@@ -84,6 +84,12 @@
 #define ASM_VALUE(a) MANGLE_MACROCAT($,a)
 #endif
 
+#if !defined(__APPLE__) && !defined (__OS2__)
+#define RODATA .section .rodata
+#else
+#define RODATA .data
+#endif
+
 /* Enable position-independent code for certain platforms. */
 
 #if defined(OPT_X86)
@@ -139,7 +145,7 @@ Lpic_base: \
 #endif /* PIC variants */
 
 // Apple and Android NDK seem both not to like direct global access.
-#if defined(PIC) && (defined(__APPLE__) || defined(ANDROID))
+#if defined(PIC) && (defined(__APPLE__) || defined(__ANDROID__))
 #define PIC_GLOBAL_PTR
 #endif
 
