@@ -27,6 +27,7 @@ newoption {
 	default = "win81",
 	allowed = {
 		{ "winxp", "Windows XP" },
+		{ "winxpx64", "Windows XP" },
 		{ "win7", "Windows 7" },
 		{ "win8", "Windows 8" },
 		{ "win81", "Windows 8.1" },
@@ -189,10 +190,12 @@ elseif _OPTIONS["windows-version"] == "win8" then
 	allplatforms = { "x86", "x86_64", "arm" }
 elseif _OPTIONS["windows-version"] == "win7" then
 	allplatforms = { "x86", "x86_64" }
+elseif _OPTIONS["windows-version"] == "winxpx64" then
+	allplatforms = { "x86", "x86_64" }
 elseif _OPTIONS["windows-version"] == "winxp" then
-	allplatforms = { "x86", "x86_64" }
+	allplatforms = { "x86" }
 else
-	allplatforms = { "x86", "x86_64" }
+	allplatforms = { "x86_64" }
 end
 
 if _OPTIONS["windows-family"] == "uwp" then
@@ -332,7 +335,7 @@ solution "OpenMPT-UTF8"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" then
+if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
 if _ACTION < "vs2022" then
@@ -370,7 +373,7 @@ solution "OpenMPT-ANSI"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" then
+if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
 if _ACTION < "vs2022" then
@@ -408,7 +411,7 @@ solution "OpenMPT"
  dofile "../../build/premake/sys-mfc.lua"
  dofile "../../build/premake/ext-ancient.lua"
  dofile "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" then
+if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
 if _ACTION < "vs2022" then

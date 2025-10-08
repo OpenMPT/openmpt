@@ -42,6 +42,16 @@ ${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2017 --wi
 ${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt-small vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt       vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=openmpt123       vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=PluginBridge     vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua --group=OpenMPT          vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+echo ok &
+
 ${PREMAKE} --file=build/premake/premake.lua --group=libopenmpt_test  vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
 ${PREMAKE} --file=build/premake/premake.lua --group=in_openmpt       vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
 ${PREMAKE} --file=build/premake/premake.lua --group=xmp-openmpt      vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \

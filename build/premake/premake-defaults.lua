@@ -109,7 +109,7 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			if _ACTION == "vs2017" then
 				toolset "v141_xp"
 			end
@@ -149,7 +149,7 @@
 
 	filter {}
 	filter { "action:vs*" }
-		if not _OPTIONS["clang"] and _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-family"] ~= "uwp" then
+		if not _OPTIONS["clang"] and _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and _OPTIONS["windows-family"] ~= "uwp" then
 			spectremitigations "On"
 		end
 	filter {}
@@ -343,7 +343,7 @@
 			flags { "MultiProcessorCompile" }
 		end
 
-	if _OPTIONS["windows-version"] == "winxp" then
+	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		filter {}
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
@@ -387,7 +387,7 @@
 
   filter {}
   
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-family"] ~= "uwp" then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and _OPTIONS["windows-family"] ~= "uwp" then
 		filter {}
 		filter { "action:vs2017" }
 			systemversion "10.0.19041.0"
@@ -432,17 +432,16 @@
 		filter {}
 		defines { "_WIN32_WINNT=0x0601" }
 		defines { "NTDDI_VERSION=0x06010000" }
+	elseif _OPTIONS["windows-version"] == "winxpx64" then
+		filter {}
+		systemversion "7.0"
+		defines { "_WIN32_WINNT=0x0502" }
+		defines { "NTDDI_VERSION=0x05020200" } -- Windows XP x64 SP2
 	elseif _OPTIONS["windows-version"] == "winxp" then
 		filter {}
 		systemversion "7.0"
-		filter {}
-		filter { "architecture:x86" }
-			defines { "_WIN32_WINNT=0x0501" }
-			defines { "NTDDI_VERSION=0x05010300" } -- Windows XP SP3
-		filter { "architecture:x86_64" }
-			defines { "_WIN32_WINNT=0x0502" }
-			defines { "NTDDI_VERSION=0x05020200" } -- Windows XP x64 SP2
-		filter {}
+		defines { "_WIN32_WINNT=0x0501" }
+		defines { "NTDDI_VERSION=0x05010300" } -- Windows XP SP3
 	end
 
   filter {}

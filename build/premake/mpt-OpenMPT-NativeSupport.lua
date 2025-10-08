@@ -5,7 +5,7 @@
   vpaths { ["*"] = "../../" }
   mpt_kind "shared"
 	
-	if _OPTIONS["windows-version"] ~= "winxp" and not _OPTIONS["clang"] then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
 		mpt_use_asiomodern()
 		defines { "MPT_WITH_ASIO" }
 	end

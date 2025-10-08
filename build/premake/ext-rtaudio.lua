@@ -7,7 +7,7 @@
   targetname "openmpt-rtaudio"
 	filter {}
 	filter { "action:vs2017" }
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			defines {
 				"__WINDOWS_DS__",
 			}
@@ -17,7 +17,7 @@
 			}
 		end
 	filter { "not action:vs2017" }
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			defines {
 				"__WINDOWS_DS__",
 			}
@@ -31,7 +31,7 @@
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-	if _OPTIONS["windows-version"] == "winxp" then
+	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		if _OPTIONS["clang"] then
 			filter { "not kind:StaticLib" }
 				links { "dsound" }

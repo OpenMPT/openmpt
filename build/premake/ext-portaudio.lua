@@ -7,7 +7,7 @@
   targetname "openmpt-portaudio"
   includedirs { "../../include/portaudio/include", "../../include/portaudio/src/common", "../../include/portaudio/src/os/win" }
 	filter {}
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			defines {
 				"PA_USE_ASIO=0",
 				"PA_USE_DS=1",
@@ -71,7 +71,7 @@
    "../../include/portaudio/src/os/win/pa_x86_plain_converters.h",
   }
 	filter {}
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			files {
 				"../../include/portaudio/src/hostapi/wmme/pa_win_wmme.c",
 				"../../include/portaudio/src/hostapi/dsound/pa_win_ds.c",
@@ -130,7 +130,7 @@
   filter { "configurations:DebugMDd" }
    defines { "PA_ENABLE_DEBUG_OUTPUT" }
   filter { "kind:SharedLib" }
-	if _OPTIONS["windows-version"] == "winxp" then
+	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		files { "../../build/premake/def/ext-portaudio-retro.def" }
 	elseif _OPTIONS["windows-family"] == "uwp" then
 		files { "../../build/premake/def/ext-portaudio-uwp.def" }

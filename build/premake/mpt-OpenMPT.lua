@@ -25,19 +25,19 @@ end
 	
 	mpt_use_mfc()
 	defines { "MPT_WITH_MFC" }
-	if _OPTIONS["windows-version"] == "winxp" then
+	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		defines { "MPT_WITH_DIRECTSOUND" }
 	end
 
 	mpt_use_ancient()
 	defines { "MPT_WITH_ANCIENT" }
-	if _OPTIONS["windows-version"] ~= "winxp" and not _OPTIONS["clang"] then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
 		-- disabled for VS2017 because of multiple initialization of inline variables
 		-- https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
 		mpt_use_asiomodern()
 		defines { "MPT_WITH_ASIO" }
 	end
-	if _OPTIONS["windows-version"] == "winxp" then
+	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		mpt_use_cryptopp()
 		defines { "MPT_WITH_CRYPTOPP" }
 	end
@@ -168,7 +168,7 @@ end
 
   warnings "Extra"
   filter {}
-	if _OPTIONS["windows-version"] ~= "winxp" then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" then
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",

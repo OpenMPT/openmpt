@@ -154,7 +154,7 @@
 			}
 		filter {}
 	else
-		if _OPTIONS["windows-version"] == "winxp" then
+		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 			filter { "architecture:x86" }
 				defines {
 					"OPUS_HAVE_RTCD=1",

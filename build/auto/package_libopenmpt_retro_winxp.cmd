@@ -82,9 +82,9 @@ copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-pthread-win32.dll .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-static\amd64\openmpt-pthread-Win32.dll .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-static\amd64\openmpt-pthread-Win32.dll .\openmpt123\amd64\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-static\x86\in_openmpt.dll .\Winamp5\ || goto error
@@ -189,12 +189,12 @@ copy /y ..\..\bin\release\vs2017-winxp-shared\x86\openmpt-mpg123.dll bin\x86-ret
 copy /y ..\..\bin\release\vs2017-winxp-shared\x86\openmpt-ogg.dll bin\x86-retro-winxp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-shared\x86\openmpt-vorbis.dll bin\x86-retro-winxp\ || goto error
 copy /y ..\..\bin\release\vs2017-winxp-shared\x86\openmpt-zlib.dll bin\x86-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\libopenmpt.lib lib\amd64-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\libopenmpt.dll bin\amd64-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-mpg123.dll bin\amd64-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-ogg.dll bin\amd64-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-vorbis.dll bin\amd64-retro-winxp\ || goto error
-copy /y ..\..\bin\release\vs2017-winxp-shared\amd64\openmpt-zlib.dll bin\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\libopenmpt.lib lib\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\libopenmpt.dll bin\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\openmpt-mpg123.dll bin\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\openmpt-ogg.dll bin\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\openmpt-vorbis.dll bin\amd64-retro-winxp\ || goto error
+copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\openmpt-zlib.dll bin\amd64-retro-winxp\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^

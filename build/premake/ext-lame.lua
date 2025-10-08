@@ -69,7 +69,7 @@
 			}
 		end
 	filter {}
-	if _OPTIONS["windows-version"] ~= "winxp" then
+	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" then
 		-- WinXP builds do not use SSE2 by default
 		filter {}
 		filter { "architecture:x86" }
