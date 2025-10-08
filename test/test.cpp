@@ -254,7 +254,13 @@ void DoTests()
 					}
 					return result;
 				};
-				std::cout << "Rounding mode: " << format_rounding(std::fegetround()) << std::endl;
+				auto get_rounding_mode = []() {
+					#ifndef MPT_COMPILER_QUIRK_NO_PRAGMA_STDC_FENV_ACCESS
+					#pragma STDC FENV_ACCESS ON
+					#endif
+					return std::fegetround();
+				};
+				std::cout << "Rounding mode: " << format_rounding(get_rounding_mode()) << std::endl;
 			}
 		#endif // !MPT_LIBC_QUIRK_NO_FENV
 		#if MPT_ARCH_X86 || MPT_ARCH_AMD64
