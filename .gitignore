@@ -44,6 +44,11 @@
 /build/vs2017winxp/Release
 /build/vs2017winxpansi/*.user
 /build/vs2017winxpansi/.vs
+/build/vs2017winxpx64/*.user
+/build/vs2017winxpx64/.vs
+/build/vs2017winxpx64/Debug
+/build/vs2017winxpx64/OpenMPT-custom.*
+/build/vs2017winxpx64/Release
 /build/vs2019win7/*.user
 /build/vs2019win7/.vs
 /build/vs2022win10/*.user
