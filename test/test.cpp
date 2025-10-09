@@ -100,6 +100,7 @@
 #include <stdexcept>
 #ifdef LIBOPENMPT_BUILD
 #include <cfenv>
+#include <cfloat>
 #endif // LIBOPENMPT_BUILD
 #if MPT_COMPILER_MSVC
 #include <tchar.h>
@@ -255,7 +256,7 @@ void DoTests()
 					return result;
 				};
 				auto get_rounding_mode = []() {
-					#ifndef MPT_COMPILER_QUIRK_NO_PRAGMA_STDC_FENV_ACCESS
+					#ifdef MPT_COMPILER_QUIRK_WANT_PRAGMA_STDC_FENV_ACCESS
 					#pragma STDC FENV_ACCESS ON
 					#endif
 					return std::fegetround();
