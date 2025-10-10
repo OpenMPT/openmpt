@@ -1501,7 +1501,7 @@ void CSampleMapDlg::OnOK()
 	if(pIns)
 	{
 		bool modified = false;
-		for(ModCommand::NOTE i = m_minNote; i < m_maxNote; i++)
+		for(ModCommand::NOTE i = m_minNote - NOTE_MIN; i < m_maxNote - NOTE_MIN; i++)
 		{
 			if(KeyboardMap[i] != pIns->Keyboard[i])
 			{
