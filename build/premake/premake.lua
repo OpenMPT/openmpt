@@ -4,23 +4,6 @@ MPT_PREMAKE_VERSION = ""
 MPT_PREMAKE_VERSION = "5.0"
 
 newoption {
- trigger     = "group",
- value       = "PROJECTS",
- description = "OpenMPT project group",
- allowed = {
-  { "all", "all" },
-  { "libopenmpt_test", "libopenmpt_test" },
-  { "libopenmpt", "libopenmpt" },
-  { "libopenmpt-small", "libopenmpt-small" },
-  { "in_openmpt", "in_openmpt" },
-  { "xmp-openmpt", "xmp-openmpt" },
-  { "openmpt123", "openmpt123" },
-  { "PluginBridge", "PluginBridge" },
-  { "OpenMPT", "OpenMPT" },
- }
-}
-
-newoption {
 	trigger = "windows-version",
 	value = "Windows Version",
 	description = "Target Windows Version",

@@ -22,40 +22,40 @@ fi
 
 
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=MBCS && \
+${PREMAKE} --file=build/premake/premake.lua vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=MBCS && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win8 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win8 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win81 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win81 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode && \
 echo ok &
 
-${PREMAKE} --file=build/premake/premake.lua --group=all  vs2022 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode && \
+${PREMAKE} --file=build/premake/premake.lua vs2022 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode && \
 echo ok &
 
 ${PREMAKE} --file=build/premake-xcode/premake.lua --target=macosx xcode4 && \
