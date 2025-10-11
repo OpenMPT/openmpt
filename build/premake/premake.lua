@@ -181,6 +181,9 @@ end
 dofile "../../build/premake/premake-defaults.lua"
 
 
+charset = "Unicode"
+stringmode = "WCHAR"
+
 if _OPTIONS["group"] == "libopenmpt_test" then
 
 solution "libopenmpt_test"
