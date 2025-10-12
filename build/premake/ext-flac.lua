@@ -1,4 +1,9 @@
- 
+
+include_dependency "ext-ogg.lua"
+if _ACTION < "vs2022" then
+include_dependency "ext-pthread-win32.lua"
+end
+
  project "flac"
   uuid "E599F5AA-F9A3-46CC-8DB0-C8DEFCEB90C5"
   language "C"

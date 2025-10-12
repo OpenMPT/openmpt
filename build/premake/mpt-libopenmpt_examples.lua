@@ -1,4 +1,8 @@
 
+include_dependency "ext-portaudio.lua"
+include_dependency "ext-portaudiocpp.lua"
+include_dependency "mpt-libopenmpt.lua"
+
 function mpt_libopenmpt_rc (name)
 	filter {}
 	filter { "action:vs*", "kind:SharedLib or ConsoleApp or WindowedApp" }

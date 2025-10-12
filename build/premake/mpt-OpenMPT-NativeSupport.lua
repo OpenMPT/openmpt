@@ -1,4 +1,11 @@
 
+if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+include_dependency "ext-asiomodern.lua"
+end
+include_dependency "ext-nlohmann-json.lua"
+include_dependency "ext-portaudio.lua"
+include_dependency "ext-rtaudio.lua"
+
  project "OpenMPT-NativeSupport"
   uuid "563a631d-fe07-47bc-a98f-9fe5b3ebabfa"
   language "C++"

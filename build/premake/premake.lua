@@ -200,6 +200,9 @@ end
 dofile "../../build/premake/premake-defaults.lua"
 
 
+
+include_dependency = include
+
 solution "all"
 
 	startproject "OpenMPT"
@@ -258,15 +261,15 @@ end
 
 
 
+include_dependency = includeexternal
+
+
+
 if _OPTIONS["windows-family"] ~= "uwp" then
 
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
 
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
  includeexternal "../../build/premake/mpt-libopenmpt_test.lua"
 
 end
@@ -278,13 +281,6 @@ if _OPTIONS["windows-family"] ~= "uwp" then
 solution "in_openmpt"
 	startproject "in_openmpt"
 
- includeexternal "../../build/premake/sys-mfc.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-winamp.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/mpt-libopenmpt.lua"
  includeexternal "../../build/premake/mpt-in_openmpt.lua"
  includeexternal "../../build/premake/mpt-in_openmpt_wa2.lua"
 
@@ -297,14 +293,6 @@ if _OPTIONS["windows-family"] ~= "uwp" then
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
 
- includeexternal "../../build/premake/sys-mfc.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-pugixml.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-xmplay.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/mpt-libopenmpt.lua"
  includeexternal "../../build/premake/mpt-xmp-openmpt.lua"
 
 end
@@ -314,9 +302,6 @@ end
 solution "libopenmpt-small"
 	startproject "libopenmpt-small"
 
- includeexternal "../../build/premake/ext-minimp3.lua"
- includeexternal "../../build/premake/ext-miniz.lua"
- includeexternal "../../build/premake/ext-stb_vorbis.lua"
  includeexternal "../../build/premake/mpt-libopenmpt-small.lua"
 
 
@@ -324,41 +309,15 @@ solution "libopenmpt-small"
 solution "libopenmpt"
 	startproject "libopenmpt"
 
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
  includeexternal "../../build/premake/mpt-libopenmpt.lua"
-
-
-
 if _OPTIONS["windows-family"] ~= "uwp" then
-
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-portaudio.lua"
- includeexternal "../../build/premake/ext-portaudiocpp.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/mpt-libopenmpt.lua"
  includeexternal "../../build/premake/mpt-libopenmpt_examples.lua"
-
 end
 
 
 solution "openmpt123"
 	startproject "openmpt123"
 
-if _ACTION < "vs2022" then
- includeexternal "../../build/premake/ext-pthread-win32.lua"
-end
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-flac.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-portaudio.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/mpt-libopenmpt.lua"
  includeexternal "../../build/premake/mpt-openmpt123.lua"
 
 
@@ -379,33 +338,6 @@ if _OPTIONS["windows-family"] ~= "uwp" then
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
 
- includeexternal "../../build/premake/sys-mfc.lua"
- includeexternal "../../build/premake/ext-ancient.lua"
- includeexternal "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
- includeexternal "../../build/premake/ext-cryptopp.lua"
-end
-if _ACTION < "vs2022" then
- includeexternal "../../build/premake/ext-pthread-win32.lua"
-end
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-flac.lua"
- includeexternal "../../build/premake/ext-lame.lua"
- includeexternal "../../build/premake/ext-lhasa.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-nlohmann-json.lua"
- includeexternal "../../build/premake/ext-opus.lua"
- includeexternal "../../build/premake/ext-opusenc.lua"
- includeexternal "../../build/premake/ext-opusfile.lua"
- includeexternal "../../build/premake/ext-portaudio.lua"
- includeexternal "../../build/premake/ext-r8brain.lua"
- includeexternal "../../build/premake/ext-rtaudio.lua"
- includeexternal "../../build/premake/ext-rtmidi.lua"
- includeexternal "../../build/premake/ext-SignalsmithStretch.lua"
- includeexternal "../../build/premake/ext-UnRAR.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/ext-minizip.lua"
  includeexternal "../../build/premake/mpt-updatesigntool.lua"
  includeexternal "../../build/premake/mpt-PluginBridge.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
@@ -415,33 +347,6 @@ end
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
 
- includeexternal "../../build/premake/sys-mfc.lua"
- includeexternal "../../build/premake/ext-ancient.lua"
- includeexternal "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
- includeexternal "../../build/premake/ext-cryptopp.lua"
-end
-if _ACTION < "vs2022" then
- includeexternal "../../build/premake/ext-pthread-win32.lua"
-end
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-flac.lua"
- includeexternal "../../build/premake/ext-lame.lua"
- includeexternal "../../build/premake/ext-lhasa.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-nlohmann-json.lua"
- includeexternal "../../build/premake/ext-opus.lua"
- includeexternal "../../build/premake/ext-opusenc.lua"
- includeexternal "../../build/premake/ext-opusfile.lua"
- includeexternal "../../build/premake/ext-portaudio.lua"
- includeexternal "../../build/premake/ext-r8brain.lua"
- includeexternal "../../build/premake/ext-rtaudio.lua"
- includeexternal "../../build/premake/ext-rtmidi.lua"
- includeexternal "../../build/premake/ext-SignalsmithStretch.lua"
- includeexternal "../../build/premake/ext-UnRAR.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/ext-minizip.lua"
  includeexternal "../../build/premake/mpt-updatesigntool.lua"
  includeexternal "../../build/premake/mpt-PluginBridge.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
@@ -451,33 +356,6 @@ end
 solution "OpenMPT"
 	startproject "OpenMPT"
 
- includeexternal "../../build/premake/sys-mfc.lua"
- includeexternal "../../build/premake/ext-ancient.lua"
- includeexternal "../../build/premake/ext-asiomodern.lua"
-if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
- includeexternal "../../build/premake/ext-cryptopp.lua"
-end
-if _ACTION < "vs2022" then
- includeexternal "../../build/premake/ext-pthread-win32.lua"
-end
- includeexternal "../../build/premake/ext-ogg.lua"
- includeexternal "../../build/premake/ext-flac.lua"
- includeexternal "../../build/premake/ext-lame.lua"
- includeexternal "../../build/premake/ext-lhasa.lua"
- includeexternal "../../build/premake/ext-mpg123.lua"
- includeexternal "../../build/premake/ext-nlohmann-json.lua"
- includeexternal "../../build/premake/ext-opus.lua"
- includeexternal "../../build/premake/ext-opusenc.lua"
- includeexternal "../../build/premake/ext-opusfile.lua"
- includeexternal "../../build/premake/ext-portaudio.lua"
- includeexternal "../../build/premake/ext-r8brain.lua"
- includeexternal "../../build/premake/ext-rtaudio.lua"
- includeexternal "../../build/premake/ext-rtmidi.lua"
- includeexternal "../../build/premake/ext-SignalsmithStretch.lua"
- includeexternal "../../build/premake/ext-UnRAR.lua"
- includeexternal "../../build/premake/ext-vorbis.lua"
- includeexternal "../../build/premake/ext-zlib.lua"
- includeexternal "../../build/premake/ext-minizip.lua"
  includeexternal "../../build/premake/mpt-updatesigntool.lua"
  includeexternal "../../build/premake/mpt-PluginBridge.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"

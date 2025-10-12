@@ -1,4 +1,8 @@
- 
+
+include_dependency "ext-minimp3.lua"
+include_dependency "ext-miniz.lua"
+include_dependency "ext-stb_vorbis.lua"
+
  project "libopenmpt-small"
   uuid "25560abd-41fc-444c-9e71-f8502bc7ee96"
   language "C++"

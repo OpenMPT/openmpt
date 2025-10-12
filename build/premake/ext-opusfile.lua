@@ -1,4 +1,7 @@
-  
+
+include_dependency "ext-ogg.lua"
+include_dependency "ext-opus.lua"
+
  project "opusfile"
   uuid "f8517509-9317-4a46-b5ed-06ae5a399e6c"
   language "C"

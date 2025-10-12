@@ -1,4 +1,8 @@
 
+include_dependency "sys-mfc.lua"
+include_dependency "ext-winamp.lua"
+include_dependency "mpt-libopenmpt.lua"
+
  project "in_openmpt_wa2"
   uuid "9165eeec-0102-4f02-a8f5-3a771bf62ef6"
   language "C++"

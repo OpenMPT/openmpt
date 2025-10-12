@@ -1,4 +1,9 @@
 
+include_dependency "sys-mfc.lua"
+include_dependency "ext-pugixml.lua"
+include_dependency "ext-xmplay.lua"
+include_dependency "mpt-libopenmpt.lua"
+
  project "xmp-openmpt"
   uuid "AEA14F53-ADB0-45E5-9823-81F4F36886C2"
   language "C++"

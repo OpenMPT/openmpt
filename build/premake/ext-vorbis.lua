@@ -1,4 +1,6 @@
-  
+
+include_dependency "ext-ogg.lua"
+
  project "vorbis"
   -- NOTE: Unlike the official libvorbis, we built everything into a single library instead of the vorbis, vorbisenc, vorbisfile split.
   uuid "b544dcb7-16e5-41bc-b51b-7ead8cfdfa05"

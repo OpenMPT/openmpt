@@ -1,4 +1,34 @@
 
+include_dependency "../../build/premake/sys-mfc.lua"
+include_dependency "../../build/premake/ext-ancient.lua"
+if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+include_dependency "../../build/premake/ext-asiomodern.lua"
+end
+if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+include_dependency "../../build/premake/ext-cryptopp.lua"
+end
+include_dependency "../../build/premake/ext-flac.lua"
+include_dependency "../../build/premake/ext-lame.lua"
+include_dependency "../../build/premake/ext-lhasa.lua"
+include_dependency "../../build/premake/ext-minizip.lua"
+include_dependency "../../build/premake/ext-mpg123.lua"
+include_dependency "../../build/premake/ext-nlohmann-json.lua"
+include_dependency "../../build/premake/ext-ogg.lua"
+include_dependency "../../build/premake/ext-opus.lua"
+include_dependency "../../build/premake/ext-opusenc.lua"
+include_dependency "../../build/premake/ext-opusfile.lua"
+include_dependency "../../build/premake/ext-portaudio.lua"
+if _ACTION < "vs2022" then
+include_dependency "../../build/premake/ext-pthread-win32.lua"
+end
+include_dependency "../../build/premake/ext-r8brain.lua"
+include_dependency "../../build/premake/ext-rtaudio.lua"
+include_dependency "../../build/premake/ext-rtmidi.lua"
+include_dependency "../../build/premake/ext-SignalsmithStretch.lua"
+include_dependency "../../build/premake/ext-UnRAR.lua"
+include_dependency "../../build/premake/ext-vorbis.lua"
+include_dependency "../../build/premake/ext-zlib.lua"
+
 if not charset or charset == "Unicode" then
 if not stringmode or stringmode == "WCHAR" then
   project "OpenMPT"

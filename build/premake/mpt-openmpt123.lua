@@ -1,4 +1,11 @@
- 
+
+include_dependency "ext-flac.lua"
+include_dependency "ext-portaudio.lua"
+if _ACTION < "vs2022" then
+include_dependency "ext-pthread-win32.lua"
+end
+include_dependency "mpt-libopenmpt.lua"
+
  project "openmpt123"
   uuid "2879F62E-9E2F-4EAB-AE7D-F60C194DD5CB"
   language "C++"

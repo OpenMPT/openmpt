@@ -1,4 +1,9 @@
- 
+
+include_dependency "ext-mpg123.lua"
+include_dependency "ext-ogg.lua"
+include_dependency "ext-vorbis.lua"
+include_dependency "ext-zlib.lua"
+
  project "libopenmpt"
   uuid "9C5101EF-3E20-4558-809B-277FDD50E878"
   language "C++"
