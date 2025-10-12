@@ -125,14 +125,9 @@ include_dependency "ext-stb_vorbis.lua"
 
 function mpt_use_libopenmpt_small ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../..",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../..",
-		}
+	dependencyincludedirs {
+		"../..",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 		defines { "LIBOPENMPT_USE_DLL" }

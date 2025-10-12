@@ -30,15 +30,9 @@ project "ancient"
 
 function mpt_use_ancient ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/ancient/api",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/ancient/api",
-		}
-	filter {}
+	dependencyincludedirs {
+		"../../include/ancient/api",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 		defines { "ANCIENT_API_DECLSPEC_DLLIMPORT" }

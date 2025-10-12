@@ -38,14 +38,9 @@
 
 function mpt_use_pthread_win32 ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/pthread-win32",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/pthread-win32",
-		}
+	dependencyincludedirs {
+		"../../include/pthread-win32",
+	}
 	filter {}
 		defines { "PTW32_CLEANUP_SEH" }
 	filter {}

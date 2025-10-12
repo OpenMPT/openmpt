@@ -1,7 +1,7 @@
 
 function mpt_use_nlohmannjson ()
 	filter {}
-	includedirs {
+	dependencyincludedirs {
 		"../../include/nlohmann-json/include",
 	}
 	files {

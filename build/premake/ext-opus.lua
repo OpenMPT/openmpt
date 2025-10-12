@@ -283,14 +283,9 @@
 
 function mpt_use_opus ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/opus/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/opus/include",
-		}
+	dependencyincludedirs {
+		"../../include/opus/include",
+	}
 	filter {}
 	links {
 		"opus",

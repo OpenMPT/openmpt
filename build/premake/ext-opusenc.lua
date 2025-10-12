@@ -53,14 +53,9 @@ include_dependency "ext-opus.lua"
 
 function mpt_use_opusenc ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/opusenc/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/opusenc/include",
-		}
+	dependencyincludedirs {
+		"../../include/opusenc/include",
+	}
 	filter {}
 	links {
 		"opusenc",

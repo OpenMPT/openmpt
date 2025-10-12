@@ -28,14 +28,9 @@
 
 function mpt_use_rtmidi ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include",
-		}
+	dependencyincludedirs {
+		"../../include",
+	}
 	filter {}
 	links {
 		"rtmidi",

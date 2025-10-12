@@ -163,14 +163,9 @@
 
 function mpt_use_unrar ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include",
-		}
+	dependencyincludedirs {
+		"../../include",
+	}
 	filter {}
 	links {
 		"UnRAR",

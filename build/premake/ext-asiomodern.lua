@@ -1,7 +1,7 @@
 
 function mpt_use_asiomodern ()
 	filter {}
-	includedirs {
+	dependencyincludedirs {
 		"../../include/asiomodern/include",
 	}
 	files {

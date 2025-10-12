@@ -148,15 +148,9 @@ end
 
 function mpt_use_flac ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/flac/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/flac/include",
-		}
-	filter {}
+	dependencyincludedirs {
+		"../../include/flac/include",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 	filter { "not configurations:*Shared" }

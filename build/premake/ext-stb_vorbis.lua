@@ -20,14 +20,9 @@
 
 function mpt_use_stbvorbis ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include",
-		}
+	dependencyincludedirs {
+		"../../include",
+	}
 	filter {}
 	defines {
 		"STB_VORBIS_HEADER_ONLY",

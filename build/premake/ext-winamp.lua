@@ -1,7 +1,7 @@
 
 function mpt_use_winamp ()
 	filter {}
-	includedirs {
+	dependencyincludedirs {
 		"../../include",
 	}
 	filter {}

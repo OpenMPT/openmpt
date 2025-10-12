@@ -108,14 +108,9 @@ include_dependency "ext-zlib.lua"
 
 function mpt_use_libopenmpt ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../..",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../..",
-		}
+	dependencyincludedirs {
+		"../..",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 		defines { "LIBOPENMPT_USE_DLL" }

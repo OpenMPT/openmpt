@@ -23,14 +23,9 @@
 
 function mpt_use_ogg ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/ogg/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/ogg/include",
-		}
+	dependencyincludedirs {
+		"../../include/ogg/include",
+	}
 	filter {}
 	links {
 		"ogg",

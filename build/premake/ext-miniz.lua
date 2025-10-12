@@ -23,14 +23,9 @@
 
 function mpt_use_miniz ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include",
-		}
+	dependencyincludedirs {
+		"../../include",
+	}
 	filter {}
 	defines {
 		"MINIZ_NO_STDIO",

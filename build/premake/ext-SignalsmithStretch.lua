@@ -2,7 +2,7 @@
 function mpt_use_signalsmith_stretch ()
 	-- header-only library
 	filter {}
-	includedirs {
+	dependencyincludedirs {
 		"../../include/SignalsmithStretch",
 	}
 	files {

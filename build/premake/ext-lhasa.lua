@@ -54,14 +54,9 @@
 
 function mpt_use_lhasa ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/lhasa/lib/public",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/lhasa/lib/public",
-		}
+	dependencyincludedirs {
+		"../../include/lhasa/lib/public",
+	}
 	filter {}
 	links {
 		"lhasa",

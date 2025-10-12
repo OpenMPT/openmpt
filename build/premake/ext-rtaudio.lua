@@ -53,14 +53,9 @@
 
 function mpt_use_rtaudio ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/rtaudio",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/rtaudio",
-		}
+	dependencyincludedirs {
+		"../../include/rtaudio",
+	}
 	filter {}
 	links {
 		"rtaudio",

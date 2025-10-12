@@ -141,14 +141,9 @@
 
 function mpt_use_portaudio ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/portaudio/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/portaudio/include",
-		}
+	dependencyincludedirs {
+		"../../include/portaudio/include",
+	}
 	filter {}
 	links {
 		"portaudio",

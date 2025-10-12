@@ -42,14 +42,9 @@ include_dependency "ext-opus.lua"
 
 function mpt_use_opusfile ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/opusfile/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/opusfile/include",
-		}
+	dependencyincludedirs {
+		"../../include/opusfile/include",
+	}
 	filter {}
 	links {
 		"opusfile",

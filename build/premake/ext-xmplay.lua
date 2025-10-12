@@ -1,7 +1,7 @@
 
 function mpt_use_xmplay ()
 	filter {}
-	includedirs {
+	dependencyincludedirs {
 		"../../include",
 	}
 	filter {}

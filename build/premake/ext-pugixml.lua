@@ -24,14 +24,9 @@
 
 function mpt_use_pugixml ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/pugixml/src",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/pugixml/src",
-		}
+	dependencyincludedirs {
+		"../../include/pugixml/src",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 		defines { "PUGIXML_API=__declspec(dllimport)" }

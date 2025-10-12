@@ -373,14 +373,9 @@
 
 function mpt_use_cryptopp ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include",
-		}
+	dependencyincludedirs {
+		"../../include",
+	}
 	filter {}
 	defines {
 		"CRYPTOPP_ENABLE_NAMESPACE_WEAK=1",

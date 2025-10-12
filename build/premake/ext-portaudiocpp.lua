@@ -35,14 +35,9 @@
 
 function mpt_use_portaudiocpp ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/portaudio/bindings/cpp/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/portaudio/bindings/cpp/include",
-		}
+	dependencyincludedirs {
+		"../../include/portaudio/bindings/cpp/include",
+	}
 	filter {}
 	links {
 		"portaudiocpp",

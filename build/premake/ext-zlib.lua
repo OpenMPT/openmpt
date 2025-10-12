@@ -60,14 +60,9 @@
 
 function mpt_use_zlib ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/zlib",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/zlib",
-		}
+	dependencyincludedirs {
+		"../../include/zlib",
+	}
 	filter {}
 	filter { "configurations:*Shared" }
 		defines { "ZLIB_DLL" }

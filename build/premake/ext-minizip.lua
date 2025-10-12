@@ -48,14 +48,9 @@ include_dependency "ext-zlib.lua"
 
 function mpt_use_minizip ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/zlib",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/zlib",
-		}
+	dependencyincludedirs {
+		"../../include/zlib",
+	}
 	filter {}
 	links {
 		"minizip",

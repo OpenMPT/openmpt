@@ -114,14 +114,9 @@
 
 function mpt_use_mpg123 ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/mpg123/src/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/mpg123/src/include",
-		}
+	dependencyincludedirs {
+		"../../include/mpg123/src/include",
+	}
 	filter {}
 		defines { "MPG123_NO_LARGENAME" }
 		links {

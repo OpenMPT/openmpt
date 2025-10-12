@@ -89,14 +89,9 @@
 
 function mpt_use_lame ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/lame/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/lame/include",
-		}
+	dependencyincludedirs {
+		"../../include/lame/include",
+	}
 	filter {}
 	links {
 		"lame",

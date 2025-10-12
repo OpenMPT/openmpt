@@ -111,14 +111,9 @@ include_dependency "ext-ogg.lua"
 
 function mpt_use_vorbis ()
 	filter {}
-	filter { "action:vs*" }
-		includedirs {
-			"../../include/vorbis/include",
-		}
-	filter { "not action:vs*" }
-		externalincludedirs {
-			"../../include/vorbis/include",
-		}
+	dependencyincludedirs {
+		"../../include/vorbis/include",
+	}
 	filter {}
 	links {
 		"vorbis",

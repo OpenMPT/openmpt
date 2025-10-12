@@ -197,6 +197,15 @@ if _OPTIONS["windows-charset"] == "MBCS" then
 end
 
 
+
+if MPT_BUILD_MSBUILD then
+	dependencyincludedirs = includedirs
+else
+	dependencyincludedirs = externalincludedirs
+end
+
+
+
 dofile "../../build/premake/premake-defaults.lua"
 
 
