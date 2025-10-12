@@ -255,18 +255,9 @@ if _OPTIONS["windows-family"] ~= "uwp" then
 	dofile "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
 	dofile "../../build/premake/mpt-PluginBridge.lua"
 	dofile "../../build/premake/mpt-OpenMPT.lua"
-	charset = "Unicode"
-	stringmode = "UTF8"
-		dofile "../../build/premake/mpt-OpenMPT.lua"
-	charset = "MBCS"
-	stringmode = "WCHAR"
-		dofile "../../build/premake/mpt-OpenMPT.lua"
+	dofile "../../build/premake/mpt-OpenMPT-UTF8.lua"
+	dofile "../../build/premake/mpt-OpenMPT-ANSI.lua"
 end
-
-
-
-charset = "Unicode"
-stringmode = "WCHAR"
 
 
 
@@ -388,8 +379,6 @@ end
 
 if _OPTIONS["windows-family"] ~= "uwp" then
 
-charset = "Unicode"
-stringmode = "UTF8"
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
 
@@ -424,10 +413,8 @@ end
  includeexternal "../../build/premake/mpt-PluginBridge.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
- includeexternal "../../build/premake/mpt-OpenMPT.lua"
+ includeexternal "../../build/premake/mpt-OpenMPT-UTF8.lua"
 
-charset = "MBCS"
-stringmode = "WCHAR"
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
 
@@ -462,10 +449,8 @@ end
  includeexternal "../../build/premake/mpt-PluginBridge.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
- includeexternal "../../build/premake/mpt-OpenMPT.lua"
+ includeexternal "../../build/premake/mpt-OpenMPT-ANSI.lua"
 
-charset = "Unicode"
-stringmode = "WCHAR"
 solution "OpenMPT"
 	startproject "OpenMPT"
 

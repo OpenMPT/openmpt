@@ -1,6 +1,6 @@
 
-if charset == "Unicode" then
-if stringmode == "WCHAR" then
+if not charset or charset == "Unicode" then
+if not stringmode or stringmode == "WCHAR" then
   project "OpenMPT"
 	uuid "37FC32A4-8DDC-4A9C-A30C-62989DD8ACE9"
 else
@@ -14,9 +14,9 @@ end
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
-if stringmode == "UTF8" then
+if stringmode and stringmode == "UTF8" then
    targetname "OpenMPT-UTF8"
-elseif charset == "MBCS" then
+elseif charset and charset == "MBCS" then
    targetname "OpenMPT-ANSI"
 else
    targetname "OpenMPT"
@@ -24,7 +24,7 @@ end
   filter {}
 	
 	if _OPTIONS["windows-charset"] == "Unicode" then
-		mpt_use_mfc(charset)
+		mpt_use_mfc(charset or "Unicode")
 	else
 		mpt_use_mfc(_OPTIONS["windows-charset"])
 	end
@@ -165,7 +165,7 @@ end
 			defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 		end
 	end
-	if stringmode == "UTF8" then
+	if stringmode and stringmode == "UTF8" then
 		defines { "MPT_USTRING_MODE_UTF8_FORCE" }
 	end
 
