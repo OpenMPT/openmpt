@@ -5,14 +5,10 @@
   location ( "%{wks.location}" .. "/ext" )
   mpt_kind "default"
   targetname "openmpt-flac"
-  local extincludedirs = {
-		"../../include/ogg/include",
-	}
-	filter { "action:vs*" }
-		includedirs ( extincludedirs )
-	filter { "not action:vs*" }
-		externalincludedirs ( extincludedirs )
-	filter {}
+
+	mpt_use_ogg()
+	defines { "FLAC__HAS_OGG=1" }
+
   includedirs {
 		"../../include/flac/include",
 		"../../include/flac/src/libFLAC/include",
@@ -114,8 +110,6 @@
   filter { "action:vs*" }
     buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd26110", "/wd28182" } -- /analyze
   filter {}
-  defines { "FLAC__HAS_OGG=1" }
-  links { "ogg" }
   defines { "PACKAGE_VERSION=\"1.5.0\"" }
   filter {}
   filter { "kind:StaticLib" }

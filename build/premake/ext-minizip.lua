@@ -27,9 +27,6 @@
    "../../include/zlib/contrib/minizip/unzip.h",
    "../../include/zlib/contrib/minizip/zip.h",
   }
-  links {
-   "zlib"
-  }
   filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-minizip.def" }
