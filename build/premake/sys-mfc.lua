@@ -10,7 +10,7 @@ function mpt_use_mfc (mfc_charset)
 		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
 	end
 	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
-	if _OPTIONS["clang"] then
+	if MPT_COMPILER_CLANGCL then
 		filter {}
 		filter { "configurations:Debug" }
 			if true then -- _AFX_NO_MFC_CONTROLS_IN_DIALOGS

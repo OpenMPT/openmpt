@@ -112,9 +112,13 @@ function mpt_use_libopenmpt ()
 		"../..",
 	}
 	filter {}
-	filter { "configurations:*Shared" }
-		defines { "LIBOPENMPT_USE_DLL" }
-	filter { "not configurations:*Shared" }
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "configurations:*Shared" }
+			defines { "LIBOPENMPT_USE_DLL" }
+		filter { "not configurations:*Shared" }
+		filter {}
+	end
 	filter {}
 	links {
 		"libopenmpt",

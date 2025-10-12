@@ -98,18 +98,17 @@
   links {
    "shlwapi",
   }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd4018", "/wd4244", "/wd4267", "/wd4305", "/wd4334" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd6011", "/wd6285", "/wd6297", "/wd6305", "/wd6385", "/wd6386" } -- /analyze
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-unused-function",
-			}
-		end
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4018", "/wd4244", "/wd4267", "/wd4305", "/wd4334" }
+		buildoptions { "/wd6011", "/wd6285", "/wd6297", "/wd6305", "/wd6385", "/wd6386" } -- /analyze
+	end
+	filter {}
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-unused-function",
+		}
+	end
 	filter {}
 
 function mpt_use_mpg123 ()
@@ -122,7 +121,9 @@ function mpt_use_mpg123 ()
 		links {
 			"mpg123",
 		}
-	filter { "action:vs*" }
+	filter {}
+	if MPT_OS_WINDOWS then
 		defines { "LINK_MPG123_DLL" }
+	end
 	filter {}
 end

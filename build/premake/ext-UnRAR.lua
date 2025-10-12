@@ -134,28 +134,27 @@
    "../../include/unrar/volume.hpp",
   }
 	filter {}
-	filter { "action:vs*" }
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
 		buildoptions { "/wd4996" }
-	filter {}
-	filter { "action:vs*" }
 		buildoptions {
 			"/wd6031",
 			"/wd6262",
 			"/wd28159",
 		} -- analyze
+	end
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-dangling-else",
-				"-Wno-logical-not-parentheses",
-				"-Wno-logical-op-parentheses",
-				"-Wno-missing-braces",
-				"-Wno-switch",
-				"-Wno-unused-but-set-variable",
-				"-Wno-unused-function",
-				"-Wno-unused-variable",
-			}
-		end
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-dangling-else",
+			"-Wno-logical-not-parentheses",
+			"-Wno-logical-op-parentheses",
+			"-Wno-missing-braces",
+			"-Wno-switch",
+			"-Wno-unused-but-set-variable",
+			"-Wno-unused-function",
+			"-Wno-unused-variable",
+		}
+	end
 	filter {}
   filter { "kind:SharedLib" }
    files { "../../include/unrar/dll_nocrypt.def" }

@@ -6,33 +6,25 @@
   mpt_kind "static"
   targetname "openmpt-rtaudio"
 	filter {}
-	filter { "action:vs2017" }
-		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
-			defines {
-				"__WINDOWS_DS__",
-			}
-		else
-			defines {
-				-- WASAPI causes link failure due to confused SDK headers
-			}
-		end
-	filter { "not action:vs2017" }
-		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
-			defines {
-				"__WINDOWS_DS__",
-			}
-		else
-			defines {
-				"__WINDOWS_WASAPI__",
-			}
-		end
+	if MPT_WIN_BEFORE(MPT_WIN["7"]) then
+		defines {
+			"__WINDOWS_DS__",
+		}
+	end
+	filter {}
+	if not MPT_MSVC_BEFORE(2019) then
+		defines {
+			-- WASAPI causes link failure due to confused SDK headers
+			"__WINDOWS_WASAPI__",
+		}
+	end
 	filter {}
   files {
    "../../include/rtaudio/RtAudio.cpp",
    "../../include/rtaudio/RtAudio.h",
   }
-	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
-		if _OPTIONS["clang"] then
+	if MPT_WIN_BEFORE(MPT_WIN["7"]) then
+		if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
 			filter { "not kind:StaticLib" }
 				links { "dsound" }
 			filter {}
@@ -42,13 +34,12 @@
 			filter {}
 		end
 	end
-  filter { }
-  filter { "action:vs*" }
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
 		defines { " _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING" }
-    buildoptions { "/wd4267" }
-  filter {}
-	filter { "action:vs*" }
+		buildoptions { "/wd4267" }
 		buildoptions { "/wd6031" } -- analyze
+	end
 	filter {}
 
 function mpt_use_rtaudio ()

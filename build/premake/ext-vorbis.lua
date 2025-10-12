@@ -90,21 +90,19 @@ include_dependency "ext-ogg.lua"
    "../../include/vorbis/lib/modes/setup_44u.h",
    "../../include/vorbis/lib/modes/setup_X.h",
   }
-  filter { "action:vs*" }
-    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305", "/wd4703" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd6001", "/wd6011", "/wd6255", "/wd6262", "/wd6263", "/wd6297", "/wd6308", "/wd6385", "/wd6386", "/wd6387", "/wd28182" } -- /analyze
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-unused-but-set-variable",
-				"-Wno-unused-variable",
-			}
-		end
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4305", "/wd4703" }
+		buildoptions { "/wd6001", "/wd6011", "/wd6255", "/wd6262", "/wd6263", "/wd6297", "/wd6308", "/wd6385", "/wd6386", "/wd6387", "/wd28182" } -- /analyze
+	end
 	filter {}
-
-  filter {}
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-unused-but-set-variable",
+			"-Wno-unused-variable",
+		}
+	end
+	filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-vorbis.def" }
   filter {}

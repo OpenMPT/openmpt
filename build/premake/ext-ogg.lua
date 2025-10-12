@@ -16,10 +16,11 @@
   }
   filter { "kind:SharedLib" }
    files { "../../include/ogg/win32/ogg.def" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd6001", "/wd6011" } -- /analyze
-  filter {}
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd6001", "/wd6011" } -- /analyze
+	end
+	filter {}
 
 function mpt_use_ogg ()
 	filter {}

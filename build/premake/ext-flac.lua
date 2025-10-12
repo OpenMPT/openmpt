@@ -1,6 +1,6 @@
 
 include_dependency "ext-ogg.lua"
-if _ACTION < "vs2022" then
+if MPT_MSVC_BEFORE(2022) then
 include_dependency "ext-pthread-win32.lua"
 end
 
@@ -79,11 +79,14 @@ end
    "../../include/flac/src/libFLAC/include/protected/stream_decoder.h",
    "../../include/flac/src/libFLAC/include/protected/stream_encoder.h",
   }
-  filter { "action:vs*" }
-    files {
-     "../../include/flac/src/share/win_utf8_io/win_utf8_io.c",
-    }
-  filter {}
+	filter {}
+	if MPT_OS_WINDOWS then
+		filter {}
+		files {
+			"../../include/flac/src/share/win_utf8_io/win_utf8_io.c",
+		}
+	end
+	filter {}
   files {
    "../../include/flac/include/FLAC/all.h",
    "../../include/flac/include/FLAC/assert.h",
@@ -104,17 +107,19 @@ end
    "../../include/flac/include/share/private.h",
    "../../include/flac/include/share/safe_str.h",
   }
-  filter { "action:vs*" }
-    files {
-     "../../include/flac/include/share/win_utf8_io.h",
-    }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4334" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd26110", "/wd28182" } -- /analyze
-  filter {}
+	filter {}
+	if MPT_OS_WINDOWS then
+		filter {}
+		files {
+			"../../include/flac/include/share/win_utf8_io.h",
+		}
+	end
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4101", "/wd4244", "/wd4267", "/wd4334" }
+		buildoptions { "/wd6001", "/wd6011", "/wd6031", "/wd6297", "/wd6386", "/wd26110", "/wd28182" } -- /analyze
+	end
+	filter {}
   defines { "PACKAGE_VERSION=\"1.5.0\"" }
   filter {}
   filter { "kind:StaticLib" }
@@ -132,17 +137,17 @@ end
 			"FLAC__USE_AVX",
 		}
 	filter {}
-		if _ACTION >= "vs2022" then
+		if MPT_MSVC_BEFORE(2022) then
+			filter {}
+			mpt_use_pthread_win32()
+			defines { "HAVE_PTHREAD" }
+			filter {}
+		else
 			filter {}
 			filter {  "not configurations:DebugShared" }
 				-- Debug DLL runtime is missing a DLL when using C11 threads
-				if _ACTION >= "vs2022" then
-					defines { "HAVE_C11THREADS" }
-				end
+				defines { "HAVE_C11THREADS" }
 			filter {}
-		else
-			mpt_use_pthread_win32()
-			defines { "HAVE_PTHREAD" }
 		end
 	filter {}
 
@@ -152,9 +157,13 @@ function mpt_use_flac ()
 		"../../include/flac/include",
 	}
 	filter {}
-	filter { "configurations:*Shared" }
-	filter { "not configurations:*Shared" }
-		defines { "FLAC__NO_DLL" }
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "configurations:*Shared" }
+		filter { "not configurations:*Shared" }
+			defines { "FLAC__NO_DLL" }
+		filter {}
+	end
 	filter {}
 	links {
 		"flac",

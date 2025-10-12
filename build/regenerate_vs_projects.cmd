@@ -20,51 +20,51 @@ if errorlevel 1 goto errversion
 
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=MBCS ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=MBCS ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2017 --windows-version=winxp --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win8 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win8 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win81 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win81 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^
-%PREMAKE% --file=build/premake/premake.lua vs2022 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode ^&^& ^
+%PREMAKE% --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode ^&^& ^
 echo Done ^) ^|^| pause
 
 start cmd /c ^( ^

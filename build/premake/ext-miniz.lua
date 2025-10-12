@@ -10,11 +10,18 @@
    "../../include/miniz/miniz.c",
    "../../include/miniz/miniz.h",
   }
-  filter { "action:vs*" }
-    buildoptions { "/wd4244" }
+
 	filter {}
-	filter { "kind:SharedLib" }
-		defines { "MINIZ_EXPORT=__declspec(dllexport)" }
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4244" }
+	end
+	filter {}
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "kind:SharedLib" }
+			defines { "MINIZ_EXPORT=__declspec(dllexport)" }
+		filter {}
+	end
 	filter {}
 	defines {
 		"MINIZ_NO_STDIO",

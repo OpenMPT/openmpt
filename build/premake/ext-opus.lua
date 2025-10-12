@@ -108,7 +108,7 @@
 			filter {}
 		end
 	filter {}
-	if _OPTIONS["clang"] then
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
 		filter { "architecture:x86" }
 			defines {
 				"OPUS_HAVE_RTCD=1",
@@ -154,7 +154,7 @@
 			}
 		filter {}
 	else
-		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+		if MPT_WIN_BEFORE(MPT_WIN["7"]) then
 			filter { "architecture:x86" }
 				defines {
 					"OPUS_HAVE_RTCD=1",
@@ -254,32 +254,36 @@
 			}
 		filter {}
 	end
-	links { }
-	filter { "action:vs*" }
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
 		buildoptions {
 			"/wd4244",
 			"/wd4305",
 		}
-	filter {}
-	filter { "action:vs*" }
 		buildoptions { -- analyze
 			"/wd6255",
 			"/wd6297",
 		}
+	end
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-excess-initializers",
-				"-Wno-macro-redefined",
-			}
-		end
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-excess-initializers",
+			"-Wno-macro-redefined",
+		}
+	end
 	filter {}
-	filter { "kind:SharedLib" }
-		defines { "DLL_EXPORT" }
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "kind:SharedLib" }
+			defines { "DLL_EXPORT" }
+		filter {}
+	end
 	filter {}
-		if _OPTIONS["clang"] then
-			defines { "FLOAT_APPROX" }
-		end
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		defines { "FLOAT_APPROX" }
+	end
+	filter {}
 
 function mpt_use_opus ()
 	filter {}

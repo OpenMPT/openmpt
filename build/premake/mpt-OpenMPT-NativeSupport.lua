@@ -1,5 +1,5 @@
 
-if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+if MPT_MSVC_AT_LEAST(2019) then
 include_dependency "ext-asiomodern.lua"
 end
 include_dependency "ext-nlohmann-json.lua"
@@ -12,7 +12,9 @@ include_dependency "ext-rtaudio.lua"
   vpaths { ["*"] = "../../" }
   mpt_kind "shared"
 	
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+	if MPT_MSVC_AT_LEAST(2019) then
+		-- disabled for VS2017 because of multiple initialization of inline variables
+		-- https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
 		mpt_use_asiomodern()
 		defines { "MPT_WITH_ASIO" }
 	end

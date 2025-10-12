@@ -1,7 +1,7 @@
 
 include_dependency "ext-flac.lua"
 include_dependency "ext-portaudio.lua"
-if _ACTION < "vs2022" then
+if MPT_MSVC_BEFORE(2022) then
 include_dependency "ext-pthread-win32.lua"
 end
 include_dependency "mpt-libopenmpt.lua"
@@ -23,7 +23,7 @@ include_dependency "mpt-libopenmpt.lua"
 		"MPT_WITH_PORTAUDIO",
 	}
 
-	if _ACTION < "vs2022" then
+	if MPT_MSVC_BEFORE(2022) then
 		mpt_use_pthread_win32()
 		defines { "MPT_WITH_PTHREAD" }
 	end
@@ -93,7 +93,7 @@ include_dependency "mpt-libopenmpt.lua"
   }
   
   filter {}
-	if _OPTIONS["windows-family"] ~= "uwp" then
+	if not MPT_OS_WINDOWS_WINRT then
 		filter { "action:vs*" }
 			linkoptions { "wsetargv.obj" }
 		filter {}

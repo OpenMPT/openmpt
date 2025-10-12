@@ -49,52 +49,35 @@
 			kind "StaticLib"
 		elseif mykind == "GUI" then
 			kind "WindowedApp"
-			if _OPTIONS["windows-version"] == "win11" then
-				files {
-					"../../build/vs/win10.manifest",
-				}
-			elseif _OPTIONS["windows-version"] == "win10" then
-				files {
-					"../../build/vs/win10.manifest",
-				}
-			elseif  _OPTIONS["windows-version"] == "win81" then
-				files {
-					"../../build/vs/win81.manifest",
-				}
-			elseif  _OPTIONS["windows-version"] == "win8" then
-				files {
-					"../../build/vs/win8.manifest",
-				}
-			elseif  _OPTIONS["windows-version"] == "win7" then
-				files {
-					"../../build/vs/win7.manifest",
-				}
-			end
 		elseif mykind == "Console" then
 			kind "ConsoleApp"
-			if _OPTIONS["windows-version"] == "win11" then
+		else
+			-- nothing
+		end
+		if mykind == "GUI" or mykind == "Console" then
+			if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
 				files {
 					"../../build/vs/win10.manifest",
 				}
-			elseif _OPTIONS["windows-version"] == "win10" then
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
 				files {
 					"../../build/vs/win10.manifest",
 				}
-			elseif  _OPTIONS["windows-version"] == "win81" then
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["81"]) then
 				files {
 					"../../build/vs/win81.manifest",
 				}
-			elseif  _OPTIONS["windows-version"] == "win8" then
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["8"]) then
 				files {
 					"../../build/vs/win8.manifest",
 				}
-			elseif  _OPTIONS["windows-version"] == "win7" then
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["7"]) then
 				files {
 					"../../build/vs/win7.manifest",
 				}
+			else
+				-- nothing
 			end
-		else
-			-- nothing
 		end
 	end
 
@@ -103,17 +86,16 @@
 	filter {}
 
 	filter {}
-		if _OPTIONS["clang"] then
+		if MPT_BUILD_MSBUILD and MPT_COMPILER_CLANGCL then
 			toolset "clang"
 		end
 	filter {}
 
 	filter {}
-		if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
-			if _ACTION == "vs2017" then
-				toolset "v141_xp"
-			end
+		if MPT_WIN_BEFORE(MPT_WIN["VISTA"]) then
+			filter {}
 			filter { "action:vs*" }
+				toolset "v141_xp"
 				buildoptions { "/Zc:threadSafeInit-" }
 			filter {}
 		end
@@ -133,7 +115,7 @@
 	filter { "action:vs*", "language:C++", "not action:vs2017", "not action:vs2019" }
 		cppdialect "C++20"
 	filter { "action:vs*", "action:vs2017" }
-		if _OPTIONS["windows-version"] == "win10" then
+		if MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
 			conformancemode "On"
 		end
 	filter { "action:vs*", "action:vs2017" }
@@ -141,17 +123,14 @@
 	filter { "action:vs*", "not action:vs2017" }
 		usestandardpreprocessor "On"
 		conformancemode "On"
-	filter { "not action:vs*", "language:C++" }
-		buildoptions { "-std=c++17" }
-	filter { "not action:vs*", "language:C" }
-		buildoptions { "-std=c17" }
 	filter {}
 
 	filter {}
-	filter { "action:vs*" }
-		if not _OPTIONS["clang"] and _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and _OPTIONS["windows-family"] ~= "uwp" then
+	if MPT_BUILD_MSBUILD then
+		if MPT_COMPILER_MSVC and MPT_WIN_AT_LEAST(MPT_WIN["7"]) and not MPT_OS_WINDOWS_WINRT then
 			spectremitigations "On"
 		end
+	end
 	filter {}
 	filter { "action:vs*", "architecture:x86" }
 		resdefines { "VER_ARCHNAME=\"x86\"" }
@@ -255,7 +234,7 @@
 	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64", "architecture:not ARM64EC" }
 		symbols "FastLink"
 	filter { "configurations:Debug" }
-		if _OPTIONS["windows-family"] ~= "uwp" then
+		if not MPT_OS_WINDOWS_WINRT then
 			staticruntime "On"
 		end
 	 runtime "Debug"
@@ -273,16 +252,14 @@
    defines { "DEBUG" }
    defines { "MPT_BUILD_CHECKED" }
    symbols "On"
-		if _OPTIONS["windows-family"] ~= "uwp" then
+		if not MPT_OS_WINDOWS_WINRT then
 			staticruntime "On"
 		end
 	 runtime "Release"
    optimize "On"
-		if not _OPTIONS["clang"] then
-			if _ACTION >= "vs2022" then
-				buildoptions { "/Gw" }
-				buildoptions { "/Zc:checkGwOdr" }
-			end
+		if MPT_MSVC_AT_LEAST(2022) then
+			buildoptions { "/Gw" }
+			buildoptions { "/Zc:checkGwOdr" }
 		end
 	 omitframepointer "Off"
 
@@ -292,11 +269,9 @@
    symbols "On"
 	 runtime "Release"
    optimize "On"
-		if not _OPTIONS["clang"] then
-			if _ACTION >= "vs2022" then
-				buildoptions { "/Gw" }
-				buildoptions { "/Zc:checkGwOdr" }
-			end
+		if MPT_MSVC_AT_LEAST(2022) then
+			buildoptions { "/Gw" }
+			buildoptions { "/Zc:checkGwOdr" }
 		end
 	 omitframepointer "Off"
 
@@ -304,14 +279,14 @@
   filter { "configurations:Release" }
    defines { "NDEBUG" }
    symbols "On"
-		if not _OPTIONS["clang"] then
+		if MPT_COMPILER_MSVC then
 			linktimeoptimization "On"
-			if _ACTION >= "vs2022" then
-				buildoptions { "/Gw" }
-				buildoptions { "/Zc:checkGwOdr" }
-			end
 		end
-		if _OPTIONS["windows-family"] ~= "uwp" then
+		if MPT_MSVC_AT_LEAST(2022) then
+			buildoptions { "/Gw" }
+			buildoptions { "/Zc:checkGwOdr" }
+		end
+		if not MPT_OS_WINDOWS_WINRT then
 			staticruntime "On"
 		end
 	 runtime "Release"
@@ -320,30 +295,30 @@
   filter { "configurations:ReleaseShared" }
    defines { "NDEBUG" }
    symbols "On"
-		if not _OPTIONS["clang"] then
+		if MPT_COMPILER_MSVC then
 			linktimeoptimization "On"
-			if _ACTION >= "vs2022" then
-				buildoptions { "/Gw" }
-				buildoptions { "/Zc:checkGwOdr" }
-			end
+		end
+		if MPT_MSVC_AT_LEAST(2022) then
+			buildoptions { "/Gw" }
+			buildoptions { "/Zc:checkGwOdr" }
 		end
 	 runtime "Release"
    optimize "Speed"
 
 
 	filter {}
-		if _OPTIONS["clang"] then
+		if MPT_BUILD_MSBUILD and MPT_COMPILER_CLANGCL then
 			-- work-around
 			-- <https://github.com/llvm/llvm-project/issues/56285>
 			symbols "Off"
 		end
 
 	filter {}
-		if not _OPTIONS["clang"] then
+		if MPT_BUILD_MSBUILD and MPT_COMPILER_MSVC then
 			flags { "MultiProcessorCompile" }
 		end
 
-	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+	if MPT_WIN_BEFORE(MPT_WIN["7"]) then
 		filter {}
 		filter { "architecture:x86" }
 			vectorextensions "IA32"
@@ -355,25 +330,21 @@
 		filter {}
 	end
 
-	if _OPTIONS["windows-version"] == "win11" then
-
+	if MPT_WIN_AT_LEAST(MPT_WIN["11_24H2"]) then
 		filter {}
-
 		filter { "architecture:x86_64" }
-			if _OPTIONS["clang"] then
-				-- not supported at the moment for clang-cl
-				--vectorextensions "SSE4.2"
-			elseif _ACTION >= "vs2022" then
+			if MPT_MSVC_AT_LEAST(2022) then
 				buildoptions { "/arch:SSE4.2" }
 				defines { "MPT_BUILD_MSVC_REQUIRE_SSE42" }
+			elseif MPT_COMPILER_CLANGCL then
+				-- not supported at the moment for clang-cl
+				--vectorextensions "SSE4.2"
 			end
-
 		filter {}
-
 	end
 
-  filter {}
-	defines { "MPT_BUILD_MSVC" }
+	filter {}
+		defines { "MPT_BUILD_MSVC" }
 
 	filter {}
 		defines {
@@ -385,63 +356,36 @@
 			"_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT=1",
 		}
 
-  filter {}
-  
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and _OPTIONS["windows-family"] ~= "uwp" then
+	filter {}
+
+	if not MPT_OS_WINDOWS_WINRT then
 		filter {}
 		filter { "action:vs2017" }
-			systemversion "10.0.19041.0"
+			if MPT_WIN_BEFORE(MPT_WIN["VISTA"]) then
+				systemversion "7.0"
+			elseif MPT_WIN_BEFORE(MPT_WIN["10"]) then
+				systemversion "8.1"
+			else
+				systemversion "10.0.19041.0"
+			end
 		filter {}
 		filter { "action:vs2019" }
 			systemversion "10.0.22621.0"
 		filter {}
 		filter { "action:vs2022" }
-			if _OPTIONS["windows-version"] == "win7" then
+			if MPT_WIN_BEFORE(MPT_WIN["10"]) then
 				systemversion "10.0.22621.0"
-			elseif _OPTIONS["windows-version"] == "win8" then
+			elseif MPT_WIN_BEFORE(MPT_WIN["11"]) then
 				systemversion "10.0.22621.0"
-			elseif _OPTIONS["windows-version"] == "win81" then
-				systemversion "10.0.22621.0"
-			elseif _OPTIONS["windows-version"] == "win10" then
-				systemversion "10.0.22621.0"
-			elseif _OPTIONS["windows-version"] == "win11" then
-				systemversion "10.0.26100.0"
 			else
 				systemversion "10.0.26100.0"
 			end
 		filter {}
 	end
 
-	if _OPTIONS["windows-version"] == "win11" then
-		filter {}
-		defines { "_WIN32_WINNT=0x0A00" }
-		defines { "NTDDI_VERSION=0x0A000010" } -- Windows 11 24H2 Build 26100
-	elseif _OPTIONS["windows-version"] == "win10" then
-		filter {}
-		defines { "_WIN32_WINNT=0x0A00" }
-		defines { "NTDDI_VERSION=0x0A000008" } -- Windows 10 2004 Build 19041
-	elseif _OPTIONS["windows-version"] == "win81" then
-		filter {}
-		defines { "_WIN32_WINNT=0x0603" }
-		defines { "NTDDI_VERSION=0x06030000" }
-	elseif _OPTIONS["windows-version"] == "win8" then
-		filter {}
-		defines { "_WIN32_WINNT=0x0602" }
-		defines { "NTDDI_VERSION=0x06020000" }
-	elseif _OPTIONS["windows-version"] == "win7" then
-		filter {}
-		defines { "_WIN32_WINNT=0x0601" }
-		defines { "NTDDI_VERSION=0x06010000" }
-	elseif _OPTIONS["windows-version"] == "winxpx64" then
-		filter {}
-		systemversion "7.0"
-		defines { "_WIN32_WINNT=0x0502" }
-		defines { "NTDDI_VERSION=0x05020200" } -- Windows XP x64 SP2
-	elseif _OPTIONS["windows-version"] == "winxp" then
-		filter {}
-		systemversion "7.0"
-		defines { "_WIN32_WINNT=0x0501" }
-		defines { "NTDDI_VERSION=0x05010300" } -- Windows XP SP3
-	end
+	filter {}
+		defines { "_WIN32_WINNT" .. "=" .. "0x" .. string.format("%04X", MPT_WIN_VERSION >> 16) }
+		defines { "NTDDI_VERSION" .. "=" .. "0x" .. string.format("%08X", MPT_WIN_VERSION) }
+	filter {}
 
-  filter {}
+	filter {}

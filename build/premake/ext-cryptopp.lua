@@ -7,10 +7,14 @@
   targetname "openmpt-cryptopp"
   includedirs { "../../include/cryptopp" }
 	filter {}
-	filter { "action:vs*", "architecture:x86_64" }
-		defines {
-			"CRYPTOPP_DISABLE_ASM=1",
-		}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		filter {}
+		filter { "architecture:x86_64" }
+			defines {
+				"CRYPTOPP_DISABLE_ASM=1",
+			}
+		filter {}
+	end
 	filter {}
 	-- cat cryptlib.vcxproj | grep 'ClInclude Include' | awk '{print $2;}' | sed 's/Include=//g' | sed 's/"//g' | sed 's/^/\t\t"..\/..\/include\/cryptopp\//g' | sed 's/$/",/g'
 	files {

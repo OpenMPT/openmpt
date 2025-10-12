@@ -52,14 +52,13 @@
    "../../include/lame/libmp3lame/vector/xmm_quantize_sub.c",
   }
   defines { "HAVE_CONFIG_H", "HAVE_MPGLIB", "USE_LAYER_2" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd4267", "/wd4334" }
 	filter {}
-	filter { "action:vs*" }
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4267", "/wd4334" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
+	end
 	filter {}
-		if _OPTIONS["clang"] then
+		if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
 			buildoptions {
 				"-Wno-absolute-value",
 				"-Wno-tautological-pointer-compare",
@@ -69,7 +68,7 @@
 			}
 		end
 	filter {}
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" then
+	if MPT_WIN_AT_LEAST(MPT_WIN["7"]) then
 		-- WinXP builds do not use SSE2 by default
 		filter {}
 		filter { "architecture:x86" }

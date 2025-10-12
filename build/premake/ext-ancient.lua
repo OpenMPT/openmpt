@@ -18,14 +18,20 @@ project "ancient"
 		"../../include/ancient/src/**.hpp",
 		"../../include/ancient/src/**.cpp",
 	}
-	filter { "action:vs*" }
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
 		buildoptions {
 			"/wd4251",
 			"/wd4275",
 		}
+	end
 	filter {}
-	filter { "kind:SharedLib" }
-		defines { "ANCIENT_API_DECLSPEC_DLLEXPORT" }
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "kind:SharedLib" }
+			defines { "ANCIENT_API_DECLSPEC_DLLEXPORT" }
+		filter {}
+	end
 	filter {}
 
 function mpt_use_ancient ()
@@ -34,9 +40,13 @@ function mpt_use_ancient ()
 		"../../include/ancient/api",
 	}
 	filter {}
-	filter { "configurations:*Shared" }
-		defines { "ANCIENT_API_DECLSPEC_DLLIMPORT" }
-	filter { "not configurations:*Shared" }
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "configurations:*Shared" }
+			defines { "ANCIENT_API_DECLSPEC_DLLIMPORT" }
+		filter { "not configurations:*Shared" }
+		filter {}
+	end
 	filter {}
 	links {
 		"ancient",

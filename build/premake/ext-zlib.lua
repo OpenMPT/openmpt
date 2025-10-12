@@ -37,25 +37,28 @@
    "../../include/zlib/zlib.h",
    "../../include/zlib/zutil.h",
   }
-  filter {}
-  filter { "kind:StaticLib" }
-  filter { "kind:SharedLib" }
-   defines { "ZLIB_DLL" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd4267" }
-  filter {}
-  filter { "action:vs*" }
-    buildoptions { "/wd6297", "/wd6385" } -- /analyze
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-deprecated-non-prototype",
-				"-Wno-tautological-pointer-compare",
-				"-Wno-unused-but-set-variable",
-				"-Wno-unused-const-variable",
-			}
-		end
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "kind:StaticLib" }
+		filter { "kind:SharedLib" }
+			defines { "ZLIB_DLL" }
+		filter {}
+	end
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4267" }
+		buildoptions { "/wd6297", "/wd6385" } -- /analyze
+	end
+	filter {}
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-deprecated-non-prototype",
+			"-Wno-tautological-pointer-compare",
+			"-Wno-unused-but-set-variable",
+			"-Wno-unused-const-variable",
+		}
+	end
 	filter {}
 
 function mpt_use_zlib ()

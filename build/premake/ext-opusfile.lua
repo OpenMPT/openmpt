@@ -23,18 +23,20 @@ include_dependency "ext-opus.lua"
    "../../include/opusfile/src/*.c",
    "../../include/opusfile/src/*.h",
   }
-  filter { "action:vs*" }
-    buildoptions { "/wd4267" }
 	filter {}
-		if _OPTIONS["clang"] then
-			buildoptions {
-				"-Wno-bitwise-op-parentheses",
-				"-Wno-logical-op-parentheses",
-				"-Wno-shift-op-parentheses",
-				"-Wno-unused-but-set-variable",
-				"-Wno-unused-const-variable",
-			}
-		end
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions { "/wd4267" }
+	end
+	filter {}
+	if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
+		buildoptions {
+			"-Wno-bitwise-op-parentheses",
+			"-Wno-logical-op-parentheses",
+			"-Wno-shift-op-parentheses",
+			"-Wno-unused-but-set-variable",
+			"-Wno-unused-const-variable",
+		}
+	end
 	filter {}
   filter { "kind:SharedLib" }
    files { "../../build/premake/def/ext-opusfile.def" }

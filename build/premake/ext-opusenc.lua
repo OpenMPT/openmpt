@@ -28,8 +28,9 @@ include_dependency "ext-opus.lua"
   }
 	defines { "HAVE_CONFIG_H" }
 	defines { "OUTSIDE_SPEEX", "RANDOM_PREFIX=libopusenc" }
-  filter { "action:vs*" }
-    buildoptions {
+	filter {}
+	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		buildoptions {
 			"/wd4018",
 			"/wd4100",
 			"/wd4101",
@@ -39,17 +40,20 @@ include_dependency "ext-opus.lua"
 			"/wd4456",
 			"/wd4706",
 		}
-  filter {}
-	filter { "action:vs*" }
 		buildoptions {
 			"/wd6262",
 		} -- analyze
+	end
 	filter {}
-  filter { "kind:StaticLib" }
-   defines { }
-  filter { "kind:SharedLib" }
-   defines { "DLL_EXPORT" }
-  filter {}
+	if MPT_OS_WINDOWS then
+		filter {}
+		filter { "kind:StaticLib" }
+			defines { }
+		filter { "kind:SharedLib" }
+			defines { "DLL_EXPORT" }
+		filter {}
+	end
+	filter {}
 
 function mpt_use_opusenc ()
 	filter {}

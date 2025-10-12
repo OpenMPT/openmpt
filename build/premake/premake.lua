@@ -154,34 +154,288 @@ end)
 
 
 
+function MPT_WIN_MAKE_VERSION(major, minor, sp, build)
+	return ((major << 24) + (minor << 16) + (sp << 8) + (build << 0))
+end
+
+MPT_WIN = {
+
+	["WIN32S"]   = MPT_WIN_MAKE_VERSION(0x03, 0x00, 0x00, 0x00),
+
+	["WIN95"]    = MPT_WIN_MAKE_VERSION(0x04, 0x00, 0x00, 0x00),
+	["WIN98"]    = MPT_WIN_MAKE_VERSION(0x04, 0x10, 0x00, 0x00),
+	["WINME"]    = MPT_WIN_MAKE_VERSION(0x04, 0x90, 0x00, 0x00),
+
+	["NT3"]      = MPT_WIN_MAKE_VERSION(0x03, 0x00, 0x00, 0x00),
+	["NT4"]      = MPT_WIN_MAKE_VERSION(0x04, 0x00, 0x00, 0x00),
+	["2000"]     = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x00, 0x00),
+	["2000SP1"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x01, 0x00),
+	["2000SP2"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x02, 0x00),
+	["2000SP3"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x03, 0x00),
+	["2000SP4"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x04, 0x00),
+	["XP"]       = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x00, 0x00),
+	["XPSP1"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x01, 0x00),
+	["XPSP2"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x02, 0x00),
+	["XPSP3"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x03, 0x00),
+	["XPSP4"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x04, 0x00), -- unused
+	["XP64"]     = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x00, 0x00), -- unused
+	["XP64SP1"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x01, 0x00),
+	["XP64SP2"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x02, 0x00),
+	["XP64SP3"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x03, 0x00), -- unused
+	["XP64SP4"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x04, 0x00), -- unused
+	["VISTA"]    = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x00, 0x00),
+	["VISTASP1"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x01, 0x00),
+	["VISTASP2"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x02, 0x00),
+	["VISTASP3"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x03, 0x00), -- unused
+	["VISTASP4"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x04, 0x00), -- unused
+	["7"]        = MPT_WIN_MAKE_VERSION(0x06, 0x01, 0x00, 0x00),
+	["8"]        = MPT_WIN_MAKE_VERSION(0x06, 0x02, 0x00, 0x00),
+	["81"]       = MPT_WIN_MAKE_VERSION(0x06, 0x03, 0x00, 0x00),
+
+	["10_PRE"]   = MPT_WIN_MAKE_VERSION(0x06, 0x04, 0x00, 0x00),
+	["10"]       = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x00), -- NTDDI_WIN10      1507
+	["10_1511"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x01), -- NTDDI_WIN10_TH2  1511
+	["10_1607"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x02), -- NTDDI_WIN10_RS1  1607
+	["10_1703"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x03), -- NTDDI_WIN10_RS2  1703
+	["10_1709"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x04), -- NTDDI_WIN10_RS3  1709
+	["10_1803"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x05), -- NTDDI_WIN10_RS4  1803
+	["10_1809"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x06), -- NTDDI_WIN10_RS5  1809
+	["10_1903"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x07), -- NTDDI_WIN10_19H1 1903/19H1
+	--["10_1909"]                                                                    1909/19H2
+	["10_2004"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x08), -- NTDDI_WIN10_VB   2004/20H1
+	--["10_20H2"]                                                                    20H2
+	--["10_21H1"]                                                                    21H1
+	--["10_21H2"]                                                                    21H2
+	--["10_22H2"]                                                                    22H2
+
+	["11"]       = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0b), -- NTDDI_WIN10_CO   21H2
+	["11_22H2"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0c), -- NTDDI_WIN10_NI   22H2
+	--["11_23H2"]                                                                    23H2
+	["11_24H2"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10), -- NTDDI_WIN11_GE   24H2
+	--["11_25H2"]                                                                    25H2
+
+}
+
+
+
+MPT_BUILD_MSBUILD = false
+if string.sub(_ACTION, 1, 2) == "vs" then
+	MPT_BUILD_MSBUILD = true
+end
+
+
+
+MPT_COMPILER_CLANG = false
+MPT_COMPILER_CLANGCL = false
+MPT_COMPILER_GCC = false
+MPT_COMPILER_MSVC = false
+if MPT_BUILD_MSBUILD then
+	if _OPTIONS["clang"] then
+		MPT_COMPILER_CLANGCL = true
+		MPT_COMPILER_CLANGCL_VERSION = tonumber(string.sub(_ACTION, 3))
+	else
+		MPT_COMPILER_MSVC = true
+		MPT_COMPILER_MSVC_VERSION = tonumber(string.sub(_ACTION, 3))
+	end
+end
+if MPT_COMPILER_CLANGCL then
+	function MPT_CLANGCL_BEFORE(v)
+		return (MPT_COMPILER_CLANGCL_VERSION < v)
+	end
+	function MPT_CLANGCL_AT_LEAST(v)
+		return (MPT_COMPILER_CLANGCL_VERSION >= v)
+	end
+else
+	function MPT_CLANGCL_BEFORE(v)
+		return false
+	end
+	function MPT_CLANGCL_AT_LEAST(v)
+		return false
+	end
+end
+if MPT_COMPILER_MSVC then
+	function MPT_MSVC_BEFORE(v)
+		return (MPT_COMPILER_MSVC_VERSION < v)
+	end
+	function MPT_MSVC_AT_LEAST(v)
+		return (MPT_COMPILER_MSVC_VERSION >= v)
+	end
+else
+	function MPT_MSVC_BEFORE(v)
+		return false
+	end
+	function MPT_MSVC_AT_LEAST(v)
+		return false
+	end
+end
+
+
+
+if _TARGET_OS == "windows" then
+
+	MPT_OS_WINDOWS = true
+
+	if _OPTIONS["windows-family"] == "uwp" then
+		MPT_OS_WINDOWS_WINRT = true
+		MPT_OS_WINDOWS_WINNT = true
+		MPT_OS_WINDOWS_WIN9X = false
+		MPT_OS_WINDOWS_WIN32 = false
+	else
+		MPT_OS_WINDOWS_WINRT = false
+		MPT_OS_WINDOWS_WINNT = true
+		MPT_OS_WINDOWS_WIN9X = false
+		MPT_OS_WINDOWS_WIN32 = false
+	end
+
+	function MPT_WINRT_AT_LEAST(v)
+		return MPT_OS_WINDOWS_WINRT and MPT_OS_WINDOWS_WINNT and (MPT_WIN_VERSION >= v)
+	end
+	function MPT_WINRT_BEFORE(v)
+		return MPT_OS_WINDOWS_WINRT and MPT_OS_WINDOWS_WINNT and (MPT_WIN_VERSION < v)
+	end
+	function MPT_WINNT_AT_LEAST(v)
+		return MPT_OS_WINDOWS_WINNT and (MPT_WIN_VERSION >= v)
+	end
+	function MPT_WINNT_BEFORE(v)
+		return MPT_OS_WINDOWS_WINNT and (MPT_WIN_VERSION < v)
+	end
+	function MPT_WIN9X_AT_LEAST(v)
+		return (MPT_OS_WINDOWS_WINNT or MPT_OS_WINDOWS_WIN9X) and (MPT_WIN_VERSION >= v)
+	end
+	function MPT_WIN9X_BEFORE(v)
+		return (MPT_OS_WINDOWS_WINNT or MPT_OS_WINDOWS_WIN9X) and (MPT_WIN_VERSION < v)
+	end
+	function MPT_WIN32_AT_LEAST(v)
+		return (MPT_OS_WINDOWS_WINNT or MPT_OS_WINDOWS_WIN9X or MPT_OS_WINDOWS_WIN32) and (MPT_WIN_VERSION >= v)
+	end
+	function MPT_WIN32_BEFORE(v)
+		return (MPT_OS_WINDOWS_WINNT or MPT_OS_WINDOWS_WIN9X or MPT_OS_WINDOWS_WIN32) and (MPT_WIN_VERSION < v)
+	end
+
+	if MPT_OS_WINDOWS_WINRT then
+		MPT_WIN_AT_LEAST = MPT_WINRT_AT_LEAST
+		MPT_WIN_BEFORE = MPT_WINRT_BEFORE
+	elseif MPT_OS_WINDOWS_WINNT then
+		MPT_WIN_AT_LEAST = MPT_WINNT_AT_LEAST
+		MPT_WIN_BEFORE = MPT_WINNT_BEFORE
+	elseif MPT_OS_WINDOWS_WIN9X then
+		MPT_WIN_AT_LEAST = MPT_WIN9X_AT_LEAST
+		MPT_WIN_BEFORE = MPT_WIN9X_BEFORE
+	elseif MPT_OS_WINDOWS_WIN32 then
+		MPT_WIN_AT_LEAST = MPT_WIN32_AT_LEAST
+		MPT_WIN_BEFORE = MPT_WIN32_BEFORE
+	else
+		function MPT_WIN_AT_LEAST(v)
+			return false
+		end
+		function MPT_WIN_BEFORE(v)
+			return true
+		end
+	end
+
+else
+
+	MPT_OS_WINDOWS = false
+
+	MPT_OS_WINDOWS_WINRT = false
+	MPT_OS_WINDOWS_WINNT = false
+	MPT_OS_WINDOWS_WIN9X = false
+	MPT_OS_WINDOWS_WIN32 = false
+
+	function MPT_WINRT_AT_LEAST(v)
+		return false
+	end
+	function MPT_WINRT_BEFORE(v)
+		return false
+	end
+	function MPT_WINNT_AT_LEAST(v)
+		return false
+	end
+	function MPT_WINNT_BEFORE(v)
+		return false
+	end
+	function MPT_WIN9X_AT_LEAST(v)
+		return false
+	end
+	function MPT_WIN9X_BEFORE(v)
+		return false
+	end
+	function MPT_WIN32_AT_LEAST(v)
+		return false
+	end
+	function MPT_WIN32_BEFORE(v)
+		return false
+	end
+
+	function MPT_WIN_AT_LEAST(v)
+		return false
+	end
+	function MPT_WIN_BEFORE(v)
+		return false
+	end
+
+end
+
+
+
+
+
+function MPT_WIN_PLATFORMS(v)
+	if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
+		return { "x86", "x86_64", "arm64", "arm64ec" }
+	elseif MPT_WIN_AT_LEAST(MPT_WIN["10_1709"]) then
+		return { "x86", "x86_64", "arm", "arm64" }
+	elseif MPT_WIN_AT_LEAST(MPT_WIN["8"]) then
+		return { "x86", "x86_64", "arm" }
+	elseif MPT_WIN_AT_LEAST(MPT_WIN["XP64"]) then
+		return { "x86", "x86_64" }
+	elseif MPT_WIN_AT_LEAST(MPT_WIN["XP"]) then
+		return { "x86" }
+	else
+		return { "x86_64" }
+	end
+end
+
 mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
 mpt_bindirsuffix = _OPTIONS["windows-version"]
 
 if _OPTIONS["windows-version"] == "win11" then
-	if _OPTIONS["clang"] then
-		allplatforms = { "x86", "x86_64", "arm64" }
-	elseif _OPTIONS["windows-family"] == "uwp" then
-		allplatforms = { "x86", "x86_64", "arm64" }
-	else
-		allplatforms = { "x86", "x86_64", "arm64", "arm64ec" }
-	end
+	MPT_WIN_VERSION = MPT_WIN["11_24H2"]
 elseif _OPTIONS["windows-version"] == "win10" then
-	allplatforms = { "x86", "x86_64", "arm", "arm64" }
+	MPT_WIN_VERSION = MPT_WIN["10_2004"]
 elseif _OPTIONS["windows-version"] == "win81" then
-	allplatforms = { "x86", "x86_64", "arm" }
+	MPT_WIN_VERSION = MPT_WIN["81"]
 elseif _OPTIONS["windows-version"] == "win8" then
-	allplatforms = { "x86", "x86_64", "arm" }
+	MPT_WIN_VERSION = MPT_WIN["8"]
 elseif _OPTIONS["windows-version"] == "win7" then
-	allplatforms = { "x86", "x86_64" }
+	MPT_WIN_VERSION = MPT_WIN["7"]
 elseif _OPTIONS["windows-version"] == "winxpx64" then
-	allplatforms = { "x86", "x86_64" }
+	MPT_WIN_VERSION = MPT_WIN["XP64SP2"]
 elseif _OPTIONS["windows-version"] == "winxp" then
-	allplatforms = { "x86" }
-else
-	allplatforms = { "x86_64" }
+	MPT_WIN_VERSION = MPT_WIN["XPSP3"]
 end
 
-if _OPTIONS["windows-family"] == "uwp" then
+allplatforms = MPT_WIN_PLATFORMS(MPT_WIN_VERSION)
+if _OPTIONS["clang"] then
+	local clangplatforms = {}
+	for i, platform in ipairs(allplatforms) do
+		if platform ~= "arm64ec" then
+			table.insert(clangplatforms, platform)
+		end
+	end
+	allplatforms = clangplatforms
+end
+if MPT_OS_WINDOWS_WINRT then
+	local uwpplatforms = {}
+	for i, platform in ipairs(allplatforms) do
+		if platform ~= "arm64ec" then
+			table.insert(uwpplatforms, platform)
+		end
+	end
+	allplatforms = uwpplatforms
+end
+
+if MPT_OS_WINDOWS_WINRT then
 	mpt_projectpathname = mpt_projectpathname .. "uwp"
 	mpt_bindirsuffix = mpt_bindirsuffix .. "uwp"
 end
@@ -249,16 +503,16 @@ solution "all"
 	include "../../build/premake/mpt-libopenmpt.lua"
 	include "../../build/premake/mpt-libopenmpt-small.lua"
 	include "../../build/premake/mpt-libopenmpt_test.lua"
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 	include "../../build/premake/mpt-libopenmpt_examples.lua"
 end
 	include "../../build/premake/mpt-openmpt123.lua"
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 	include "../../build/premake/mpt-in_openmpt.lua"
 	include "../../build/premake/mpt-in_openmpt_wa2.lua"
 	include "../../build/premake/mpt-xmp-openmpt.lua"
 end
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 	include "../../build/premake/mpt-updatesigntool.lua"
 	include "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
 	include "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
@@ -274,7 +528,7 @@ include_dependency = includeexternal
 
 
 
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
@@ -285,7 +539,7 @@ end
 
 
 
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 
 solution "in_openmpt"
 	startproject "in_openmpt"
@@ -297,7 +551,7 @@ end
 
 
 
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
@@ -319,7 +573,7 @@ solution "libopenmpt"
 	startproject "libopenmpt"
 
  includeexternal "../../build/premake/mpt-libopenmpt.lua"
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
  includeexternal "../../build/premake/mpt-libopenmpt_examples.lua"
 end
 
@@ -331,7 +585,7 @@ solution "openmpt123"
 
 
 
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 
 solution "PluginBridge"
 	startproject "PluginBridge"
@@ -342,7 +596,7 @@ end
 
 
 
-if _OPTIONS["windows-family"] ~= "uwp" then
+if not MPT_OS_WINDOWS_WINRT then
 
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
@@ -375,7 +629,7 @@ end
 
 
 
-if _OPTIONS["windows-family"] == "uwp" then
+if MPT_OS_WINDOWS_WINRT then
 
 	require('vstudio')
 
@@ -386,12 +640,12 @@ if _OPTIONS["windows-family"] == "uwp" then
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')
 			premake.w('<ApplicationType>Windows Store</ApplicationType>')
 			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
-			if _OPTIONS["windows-version"] == "win10" then
-				premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22621.0</WindowsTargetPlatformVersion>')
-				premake.w('<WindowsTargetPlatformMinVersion>10.0.19045.0</WindowsTargetPlatformMinVersion>')
-			elseif _OPTIONS["windows-version"] == "win11" then
+			if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
 				premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.26100.0</WindowsTargetPlatformVersion>')
 				premake.w('<WindowsTargetPlatformMinVersion>10.0.22631.0</WindowsTargetPlatformMinVersion>')
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
+				premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22621.0</WindowsTargetPlatformVersion>')
+				premake.w('<WindowsTargetPlatformMinVersion>10.0.19045.0</WindowsTargetPlatformMinVersion>')
 			end
 		elseif _ACTION == 'vs2019' then
 			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')

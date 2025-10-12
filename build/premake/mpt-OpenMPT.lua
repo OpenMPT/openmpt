@@ -1,10 +1,10 @@
 
 include_dependency "../../build/premake/sys-mfc.lua"
 include_dependency "../../build/premake/ext-ancient.lua"
-if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+if MPT_MSVC_AT_LEAST(2019) then
 include_dependency "../../build/premake/ext-asiomodern.lua"
 end
-if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+if MPT_WIN_BEFORE(MPT_WIN["7"]) then
 include_dependency "../../build/premake/ext-cryptopp.lua"
 end
 include_dependency "../../build/premake/ext-flac.lua"
@@ -18,7 +18,7 @@ include_dependency "../../build/premake/ext-opus.lua"
 include_dependency "../../build/premake/ext-opusenc.lua"
 include_dependency "../../build/premake/ext-opusfile.lua"
 include_dependency "../../build/premake/ext-portaudio.lua"
-if _ACTION < "vs2022" then
+if MPT_MSVC_BEFORE(2022) then
 include_dependency "../../build/premake/ext-pthread-win32.lua"
 end
 include_dependency "../../build/premake/ext-r8brain.lua"
@@ -59,19 +59,19 @@ end
 		mpt_use_mfc(_OPTIONS["windows-charset"])
 	end
 	defines { "MPT_WITH_MFC" }
-	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+	if MPT_WIN_BEFORE(MPT_WIN["7"]) then
 		defines { "MPT_WITH_DIRECTSOUND" }
 	end
 
 	mpt_use_ancient()
 	defines { "MPT_WITH_ANCIENT" }
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" and not _OPTIONS["clang"] then
+	if MPT_MSVC_AT_LEAST(2019) then
 		-- disabled for VS2017 because of multiple initialization of inline variables
 		-- https://developercommunity.visualstudio.com/t/static-inline-variable-gets-destroyed-multiple-tim/297876
 		mpt_use_asiomodern()
 		defines { "MPT_WITH_ASIO" }
 	end
-	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
+	if MPT_WIN_BEFORE(MPT_WIN["7"]) then
 		mpt_use_cryptopp()
 		defines { "MPT_WITH_CRYPTOPP" }
 	end
@@ -97,7 +97,7 @@ end
 	defines { "MPT_WITH_OPUSFILE" }
 	mpt_use_portaudio()
 	defines { "MPT_WITH_PORTAUDIO" }
-	if _ACTION < "vs2022" then
+	if MPT_MSVC_BEFORE(2022) then
 		mpt_use_pthread_win32()
 		defines { "MPT_WITH_PTHREAD" }
 	end
@@ -200,7 +200,7 @@ end
 
   warnings "Extra"
   filter {}
-	if _OPTIONS["windows-version"] ~= "winxp" and _OPTIONS["windows-version"] ~= "winxpx64" then
+	if MPT_WIN_AT_LEAST(MPT_WIN["7"]) then
   linkoptions {
    "/DELAYLOAD:mf.dll",
    "/DELAYLOAD:mfplat.dll",

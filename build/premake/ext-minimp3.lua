@@ -12,7 +12,7 @@
    "../../include/minimp3/minimp3.c",
    "../../include/minimp3/minimp3.h",
   }
-  filter { "action:vs*", "kind:SharedLib" }
+  filter { "kind:SharedLib" }
     files { "../../build/premake/def/ext-minimp3.def" }
   filter {}
 
