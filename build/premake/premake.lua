@@ -200,9 +200,6 @@ end
 dofile "../../build/premake/premake-defaults.lua"
 
 
-charset = "Unicode"
-stringmode = "WCHAR"
-
 solution "all"
 
 	startproject "OpenMPT"
