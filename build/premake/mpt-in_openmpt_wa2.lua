@@ -47,7 +47,7 @@
 	filter {}
 
 	defines { "MPT_BUILD_IN_OPENMPT_WINAMP2" }
-	mpt_use_mfc()
+	mpt_use_mfc(_OPTIONS["windows-charset"])
 	defines { "MPT_WITH_MFC" }
 	if _OPTIONS["windows-charset"] ~= "Unicode" then
 		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }

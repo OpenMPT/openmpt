@@ -23,7 +23,11 @@ else
 end
   filter {}
 	
-	mpt_use_mfc()
+	if _OPTIONS["windows-charset"] == "Unicode" then
+		mpt_use_mfc(charset)
+	else
+		mpt_use_mfc(_OPTIONS["windows-charset"])
+	end
 	defines { "MPT_WITH_MFC" }
 	if _OPTIONS["windows-version"] == "winxp" or _OPTIONS["windows-version"] == "winxpx64" then
 		defines { "MPT_WITH_DIRECTSOUND" }
@@ -156,8 +160,7 @@ end
 		defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 	else
 		characterset(charset)
-		if charset == "Unicode" then
-		else
+		if charset ~= "Unicode" then
 			defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
 			defines { "MPT_CHECK_WINDOWS_IGNORE_WARNING_NO_UNICODE" }
 		end
