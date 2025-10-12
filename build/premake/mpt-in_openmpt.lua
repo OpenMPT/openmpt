@@ -53,9 +53,6 @@ include_dependency "mpt-libopenmpt.lua"
 	defines { "MPT_BUILD_IN_OPENMPT_WINAMP5" }
 	mpt_use_mfc(_OPTIONS["windows-charset"])
 	defines { "MPT_WITH_MFC" }
-	if _OPTIONS["windows-charset"] ~= "Unicode" then
-		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
-	end
 
   filter {}
   prebuildcommands { "..\\..\\build\\svn_version\\update_svn_version_vs_premake.cmd $(IntDir)" }

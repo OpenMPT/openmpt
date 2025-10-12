@@ -6,6 +6,9 @@ function mpt_use_mfc (mfc_charset)
 		"_CSTRING_DISABLE_NARROW_WIDE_CONVERSION",
 		"_AFX_NO_MFC_CONTROLS_IN_DIALOGS",
 	}
+	if mfc_charset ~= "Unicode" then
+		defines { "NO_WARN_MBCS_MFC_DEPRECATION" }
+	end
 	-- work-around https://developercommunity.visualstudio.com/t/link-errors-when-building-mfc-application-with-cla/1617786
 	if _OPTIONS["clang"] then
 		filter {}
