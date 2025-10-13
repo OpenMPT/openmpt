@@ -33,6 +33,10 @@ else ifeq ($(HOST_FLAVOUR),LINUX)
 
 include build/make/config-gcc.mk
 
+else ifeq ($(HOST_FLAVOUR),TERMUX)
+
+include build/make/config-clang.mk
+
 else ifeq ($(HOST_FLAVOUR),NETBSD)
 
 include build/make/config-gcc.mk

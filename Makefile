@@ -349,7 +349,11 @@ ifeq ($(UNAME_S),Darwin)
 HOST_FLAVOUR=MACOSX
 endif
 ifeq ($(UNAME_S),Linux)
+ifeq ($(TERMUX_VERSION),)
 HOST_FLAVOUR=LINUX
+else
+HOST_FLAVOUR=TERMUX
+endif
 endif
 ifeq ($(UNAME_S),NetBSD)
 HOST_FLAVOUR=NETBSD
