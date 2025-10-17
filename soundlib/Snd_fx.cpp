@@ -5046,6 +5046,9 @@ void CSoundFile::ProcessMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool 
 
 void CSoundFile::ParseMIDIMacro(PlayState &playState, CHANNELINDEX nChn, bool isSmooth, const mpt::span<const char> macro, mpt::span<uint8> &out, uint8 param, PLUGINDEX plugin) const
 {
+#ifdef NO_PLUGINS
+	MPT_UNUSED(plugin);
+#endif
 	ModChannel &chn = playState.Chn[nChn];
 	const ModInstrument *pIns = chn.pModInstrument;
 
@@ -5430,7 +5433,6 @@ void CSoundFile::SendMIDINote(CHANNELINDEX chn, uint16 note, uint16 volume)
 	MPT_UNUSED(chn);
 	MPT_UNUSED(note);
 	MPT_UNUSED(volume);
-	MPT_UNUSED(plugin);
 #endif // NO_PLUGINS
 }
 
