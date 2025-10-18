@@ -1511,6 +1511,8 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 		Test::DoTests();
 #endif
 
+	theApp.GetSettings().Flush();
+
 	if(TrackerSettings::Instance().m_SoundSettingsOpenDeviceAtStartup)
 	{
 		pMainFrame->InitPreview();
