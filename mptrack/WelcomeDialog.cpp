@@ -193,6 +193,9 @@ void WelcomeDlg::OnOK()
 		CUpdateCheck::DoAutoUpdateCheck();
 	}
 #endif // MPT_ENABLE_UPDATE
+
+	theApp.GetSettings().Flush();
+
 	CMainFrame::GetMainFrame()->PostMessage(WM_MOD_INVALIDATEPATTERNS, HINT_MPTOPTIONS);
 
 	DestroyWindow();
