@@ -609,6 +609,7 @@ void CSoundFile::UpgradeModule()
 		m_playBehaviour.set(kHertzInLinearMode);
 	}
 
+#ifndef NO_PLUGINS
 	if(m_dwLastSavedWithVersion >= MAKE_VERSION_NUMERIC(1, 27, 00, 00) && m_dwLastSavedWithVersion < MAKE_VERSION_NUMERIC(1, 30, 06, 00) && (GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM)))
 	{
 		// Fix off-by-one delay length in older Echo DMO emulation
@@ -626,6 +627,7 @@ void CSoundFile::UpgradeModule()
 			}
 		}
 	}
+#endif  // NO_PLUGINS
 }
 
 
