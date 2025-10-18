@@ -1,9 +1,15 @@
 
+include_dependency "../../build/premake/ext-vst.lua"
+
  project "PluginBridge"
   uuid "1A147336-891E-49AC-9EAD-A750599A224C"
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
+
+	mpt_use_vst()
+	defines { "MPT_WITH_VST" }
+
   includedirs {
    "../../src",
    "../../common",
@@ -71,6 +77,10 @@
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
+
+	mpt_use_vst()
+	defines { "MPT_WITH_VST" }
+
   includedirs {
    "../../src",
    "../../common",

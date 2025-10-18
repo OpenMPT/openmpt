@@ -61,10 +61,6 @@
 #endif
 #endif
 
-#define MPT_WITH_DMO
-
-#define MPT_WITH_VST
-
 #if MPT_OS_WINDOWS
 #if MPT_WINNT_AT_LEAST(MPT_WIN_7)
 #define MPT_WITH_MEDIAFOUNDATION

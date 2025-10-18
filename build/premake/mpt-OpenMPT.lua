@@ -1,4 +1,5 @@
 
+include_dependency "../../build/premake/sys-dmo.lua"
 include_dependency "../../build/premake/sys-mfc.lua"
 include_dependency "../../build/premake/ext-ancient.lua"
 if MPT_MSVC_AT_LEAST(2019) then
@@ -27,6 +28,7 @@ include_dependency "../../build/premake/ext-rtmidi.lua"
 include_dependency "../../build/premake/ext-SignalsmithStretch.lua"
 include_dependency "../../build/premake/ext-UnRAR.lua"
 include_dependency "../../build/premake/ext-vorbis.lua"
+include_dependency "../../build/premake/ext-vst.lua"
 include_dependency "../../build/premake/ext-zlib.lua"
 
 if not charset or charset == "Unicode" then
@@ -75,6 +77,8 @@ end
 		mpt_use_cryptopp()
 		defines { "MPT_WITH_CRYPTOPP" }
 	end
+	mpt_use_dmo()
+	defines { "MPT_WITH_DMO" }
 	mpt_use_flac()
 	defines { "MPT_WITH_FLAC" }
 	mpt_use_lame()
@@ -113,6 +117,8 @@ end
 	defines { "MPT_WITH_UNRAR" }
 	mpt_use_vorbis()
 	defines { "MPT_WITH_VORBIS", "MPT_WITH_VORBISENC", "MPT_WITH_VORBISFILE" }
+	mpt_use_vst()
+	defines { "MPT_WITH_VST" }
 	mpt_use_zlib()
 	defines { "MPT_WITH_ZLIB" }
 	

@@ -12,7 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#include "../mptrack/plugins/VstDefinitions.h"
+#include <VstDefinitions.h>
 
 OPENMPT_NAMESPACE_BEGIN
 

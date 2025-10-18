@@ -14,6 +14,8 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "mpt/base/namespace.hpp"
+#include "mpt/base/integer.hpp"
 
 #if MPT_OS_WINDOWS
 #define VSTCALLBACK __cdecl
@@ -23,6 +25,8 @@
 
 namespace Vst
 {
+
+using namespace mpt;
 
 inline constexpr int32 kVstVersion = 2400;
 

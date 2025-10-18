@@ -17,7 +17,7 @@
 #include "../soundlib/Snd_defs.h"
 #include "../soundlib/plugins/PlugInterface.h"
 #include "../soundlib/Mixer.h"
-#include "plugins/VstDefinitions.h"
+#include <VstDefinitions.h>
 #include "plugins/VstEventQueue.h"
 #if defined(MODPLUG_TRACKER)
 #include "ExceptionHandler.h"
