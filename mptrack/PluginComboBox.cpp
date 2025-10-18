@@ -14,6 +14,7 @@
 #include "Vstplug.h"
 #include "../soundlib/Sndfile.h"
 #include "../soundlib/plugins/PluginManager.h"
+#include "../soundlib/plugins/PlugInterface.h"
 
 static constexpr auto PluginShiftBits = (sizeof(PLUGINDEX) * CHAR_BIT);
 static constexpr PLUGINDEX GetPluginIndex(DWORD_PTR x) { return static_cast<PLUGINDEX>(x & ((1 << PluginShiftBits) - 1)); }
