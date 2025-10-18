@@ -633,6 +633,10 @@ VSTPluginLib *CVstPluginManager::AddPlugin(const mpt::PathString &dllPath, bool 
 		CVstPluginManager::ReportPlugException(MPT_UFORMAT("Exception {} while trying to load plugin \"{}\"!\n")(mpt::ufmt::HEX0<8>(exception), plug->libraryName));
 	}
 
+#else // !MPT_WITH_VST
+
+	MPT_UNUSED(maskCrashes);
+
 #endif // MPT_WITH_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
