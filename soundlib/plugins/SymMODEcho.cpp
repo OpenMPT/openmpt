@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "SymMODEcho.h"
 #include "../Sndfile.h"
 
@@ -266,5 +265,3 @@ void SymMODEcho::RecalculateEchoParams()
 }
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

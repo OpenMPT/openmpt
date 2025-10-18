@@ -41,7 +41,6 @@
 
 #include <cmath>
 
-#ifndef NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -1076,6 +1075,5 @@ void SNDMIXPLUGIN::Destroy()
 	pluginData.shrink_to_fit();
 }
 
-OPENMPT_NAMESPACE_END
 
-#endif // NO_PLUGINS
+OPENMPT_NAMESPACE_END

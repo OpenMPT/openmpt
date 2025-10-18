@@ -12,8 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_PLUGINS
-
 #include "PlugInterface.h"
 #include "../../common/mptRandom.h"
 
@@ -151,5 +149,3 @@ public:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

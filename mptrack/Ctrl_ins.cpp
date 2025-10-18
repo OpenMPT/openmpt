@@ -1819,7 +1819,6 @@ CString CCtrlInstruments::GetToolTipText(UINT uId, HWND) const
 				s = _T("Only available in IT / MPTM format");
 			break;
 
-#ifndef NO_PLUGINS
 		case IDC_EDIT10:
 		case IDC_EDIT11:
 			// Show plugin program name when hovering program or bank edits
@@ -1834,7 +1833,6 @@ CString CCtrlInstruments::GetToolTipText(UINT uId, HWND) const
 				}
 			}
 			break;
-#endif // NO_PLUGINS
 
 		case IDC_PLUGIN_VELOCITYSTYLE:
 		case IDC_PLUGIN_VOLUMESTYLE:
@@ -2509,7 +2507,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 			velocityStyle.SetCheck(pIns->pluginVelocityHandling == PLUGIN_VELOCITYHANDLING_CHANNEL ? BST_CHECKED : BST_UNCHECKED);
 			m_CbnPluginVolumeHandling.SetCurSel(pIns->pluginVolumeHandling);
 
-#ifndef NO_PLUGINS
 			if(pIns->nMixPlug)
 			{
 				// we have selected a plugin that's not "no plugin"
@@ -2569,7 +2566,6 @@ void CCtrlInstruments::OnMixPlugChanged()
 					return;
 				}
 			}
-#endif // NO_PLUGINS
 		}
 
 	}

@@ -392,11 +392,6 @@ mpt::ustring GetBuildFeaturesString()
 		#if !(defined(MPT_WITH_OGG) && defined(MPT_WITH_VORBIS) && defined(MPT_WITH_VORBISFILE)) && !defined(MPT_WITH_STBVORBIS)
 			UL_(" -VORBIS")
 		#endif
-		#if !defined(NO_PLUGINS)
-			UL_(" +PLUGINS")
-		#else
-			UL_(" -PLUGINS")
-		#endif
 		#if defined(MPT_WITH_DMO)
 			UL_(" +DMO")
 		#endif
@@ -414,9 +409,6 @@ mpt::ustring GetBuildFeaturesString()
 		#endif
 		#ifndef MPT_WITH_DMO
 			UL_(" NO_DMO")
-		#endif
-		#ifdef NO_PLUGINS
-			UL_(" NO_PLUGINS")
 		#endif
 			;
 	#endif

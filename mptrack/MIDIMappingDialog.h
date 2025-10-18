@@ -12,8 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_PLUGINS
-
 #include "CListCtrl.h"
 #include "MIDIMapping.h"
 #include "ResizableDialog.h"
@@ -83,5 +81,3 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

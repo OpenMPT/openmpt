@@ -12,7 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_PLUGINS
 #include "DialogBase.h"
 #include "ProgressDialog.h"
 #include "../soundlib/Snd_defs.h"
@@ -76,5 +75,3 @@ protected:
 
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

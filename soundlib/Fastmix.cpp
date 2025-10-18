@@ -331,7 +331,6 @@ std::pair<mixsample_t *, mixsample_t *> CSoundFile::GetChannelOffsets(const ModC
 		pOfsL = &m_surroundLOfsVol;
 	}
 	// Look for plugins associated with this implicit tracker channel.
-#ifndef NO_PLUGINS
 	const PLUGINDEX mixPlugin = GetBestPlugin(chn, channel, PrioritiseInstrument, RespectMutes);
 	if((mixPlugin > 0) && (mixPlugin <= MAX_MIXPLUGINS) && m_MixPlugins[mixPlugin - 1].pMixPlugin != nullptr)
 	{
@@ -343,9 +342,6 @@ std::pair<mixsample_t *, mixsample_t *> CSoundFile::GetChannelOffsets(const ModC
 			pOfsL = &mixState.nVolDecayL;
 		}
 	}
-#else  // NO_PLUGINS
-	MPT_UNUSED(channel);
-#endif  // NO_PLUGINS
 	return std::make_pair(pOfsL, pOfsR);
 }
 
@@ -377,7 +373,6 @@ bool CSoundFile::MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bo
 		}
 
 		// Look for plugins associated with this implicit tracker channel.
-#ifndef NO_PLUGINS
 		const PLUGINDEX mixPlugin = GetBestPlugin(chn, channel, PrioritiseInstrument, RespectMutes);
 		if((mixPlugin > 0) && (mixPlugin <= MAX_MIXPLUGINS) && m_MixPlugins[mixPlugin - 1].pMixPlugin != nullptr)
 		{
@@ -393,7 +388,6 @@ bool CSoundFile::MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bo
 				}
 			}
 		}
-#endif // NO_PLUGINS
 
 		if(chn.isPaused)
 		{
@@ -548,12 +542,10 @@ bool CSoundFile::MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bo
 		// Restore sample pointer in case it got changed through loop wrap-around
 		chn.pCurrentSample = mixLoopState.samplePointer;
 	
-#ifndef NO_PLUGINS
 		if(addToMix && mixPlugin > 0 && mixPlugin <= MAX_MIXPLUGINS && m_MixPlugins[mixPlugin - 1].pMixPlugin)
 		{
 			m_MixPlugins[mixPlugin - 1].pMixPlugin->ResetSilence();
 		}
-#endif // NO_PLUGINS
 		return addToMix;
 	}
 	return false;
@@ -562,7 +554,6 @@ bool CSoundFile::MixChannel(int count, ModChannel &chn, CHANNELINDEX channel, bo
 
 void CSoundFile::ProcessPlugins(uint32 nCount)
 {
-#ifndef NO_PLUGINS
 	// If any sample channels are active or any plugin has some input, possibly suspended master plugins need to be woken up.
 	bool masterHasInput = (m_nMixStat > 0);
 
@@ -786,10 +777,6 @@ void CSoundFile::ProcessPlugins(uint32 nCount)
 #else
 	InterleaveStereo(pMixL, pMixR, MixSoundBuffer, nCount);
 #endif // MPT_INTMIXER
-
-#else
-	MPT_UNREFERENCED_PARAMETER(nCount);
-#endif // NO_PLUGINS
 }
 
 

@@ -10,8 +10,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
-
 #include "PluginManager.h"
 #include "PlugInterface.h"
 #include "../../common/version.h"
@@ -830,5 +828,3 @@ void CVstPluginManager::ReportPlugException(const mpt::ustring &msg)
 #endif // MODPLUG_TRACKER
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

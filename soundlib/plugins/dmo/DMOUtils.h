@@ -10,8 +10,6 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
-
 namespace DMO
 {
 
@@ -19,8 +17,6 @@ namespace DMO
 float logGain(float x, int32 shiftL, int32 shiftR);
 
 }
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END
 

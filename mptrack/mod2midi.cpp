@@ -30,8 +30,6 @@
 
 #include <sstream>
 
-#ifndef NO_PLUGINS
-
 OPENMPT_NAMESPACE_BEGIN
 
 namespace MidiExport
@@ -1063,5 +1061,3 @@ void CModToMidi::DoConversion(const mpt::PathString &fileName)
 }
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

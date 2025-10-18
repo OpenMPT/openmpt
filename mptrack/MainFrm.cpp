@@ -231,9 +231,6 @@ void CMainFrame::Initialize()
 	#ifndef MPT_WITH_DMO
 		title += _T(" NO_DMO");
 	#endif
-	#ifdef NO_PLUGINS
-		title += _T(" NO_PLUGINS");
-	#endif
 	SetTitle(title);
 	OnUpdateFrameTitle(false);
 
@@ -2150,7 +2147,6 @@ void CMainFrame::OnViewOptions()
 
 void CMainFrame::OnPluginManager()
 {
-#ifndef NO_PLUGINS
 	PLUGINDEX nPlugslot = PLUGINDEX_INVALID;
 	CModDoc* pModDoc = GetActiveDoc();
 
@@ -2178,7 +2174,6 @@ void CMainFrame::OnPluginManager()
 		CChildFrame *pActiveChild = (CChildFrame *)MDIGetActive();
 		pActiveChild->ForceRefresh();
 	}
-#endif // NO_PLUGINS
 }
 
 

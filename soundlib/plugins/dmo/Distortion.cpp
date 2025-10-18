@@ -12,16 +12,13 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "Distortion.h"
 #include "../../Sndfile.h"
 #include "DMOUtils.h"
 #include "mpt/base/numbers.hpp"
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -207,9 +204,5 @@ void Distortion::RecalculateDistortionParams()
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(Distortion)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

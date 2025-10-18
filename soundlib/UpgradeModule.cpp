@@ -352,7 +352,6 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
-#ifndef NO_PLUGINS
 	bool hasAnyPlugins = false;
 	if(GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
 	{
@@ -379,7 +378,6 @@ void CSoundFile::UpgradeModule()
 			plugin.Info.szLibraryName = name;
 		}
 	}
-#endif // NO_PLUGINS
 
 	// Starting from OpenMPT 1.22.07.19, FT2-style panning was applied in compatible mix mode.
 	// Starting from OpenMPT 1.23.01.04, FT2-style panning has its own mix mode instead.
@@ -749,7 +747,6 @@ void CSoundFile::UpgradeModule()
 		}
 	}
 
-#ifndef NO_PLUGINS
 	if(m_dwLastSavedWithVersion >= MPT_V("1.27.00.42") && m_dwLastSavedWithVersion < MPT_V("1.30.00.46") && hasAnyPlugins)
 	{
 		// The Flanger DMO plugin is almost identical to the Chorus... but only almost.
@@ -822,7 +819,7 @@ void CSoundFile::UpgradeModule()
 			}
 		}
 	}
-#endif
+
 }
 
 OPENMPT_NAMESPACE_END

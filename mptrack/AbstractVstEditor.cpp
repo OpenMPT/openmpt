@@ -35,8 +35,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_PLUGINS
-
 CAbstractVstEditor::WindowSizeAdjuster::WindowSizeAdjuster(CWnd &wnd)
 	: m_wnd(wnd)
 {
@@ -1019,9 +1017,6 @@ void CAbstractVstEditor::RestoreWindowPos()
 		SetWindowPlacement(&wnd);
 	}
 }
-
-
-#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

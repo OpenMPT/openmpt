@@ -10,14 +10,11 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "WavesReverb.h"
 #include "../../Sndfile.h"
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -252,9 +249,5 @@ void WavesReverb::RecalculateWavesReverbParams()
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(WavesReverb)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

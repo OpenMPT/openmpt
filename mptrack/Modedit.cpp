@@ -652,7 +652,6 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 		target.editorX += addPixels;
 		target.editorY += addPixels;
 	}
-#ifndef NO_PLUGINS
 	if(theApp.GetPluginManager()->CreateMixPlugin(target, GetSoundFile()))
 	{
 		IMixPlugin *newVstPlug = target.pMixPlugin;
@@ -673,7 +672,6 @@ void CModDoc::ClonePlugin(SNDMIXPLUGIN &target, const SNDMIXPLUGIN &source)
 #endif // MPT_COMPILER_MSVC
 		}
 	}
-#endif // !NO_PLUGINS
 }
 
 
@@ -818,7 +816,6 @@ void CModDoc::InitializeInstrument(ModInstrument *pIns)
 // Try to set up a new instrument that is linked to a given plugin
 INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 {
-#ifndef NO_PLUGINS
 	const bool first = (GetNumInstruments() == 0);
 	INSTRUMENTINDEX instr = InsertInstrument(0, INSTRUMENTINDEX_INVALID, true);
 	if(instr == INSTRUMENTINDEX_INVALID)
@@ -840,9 +837,6 @@ INSTRUMENTINDEX CModDoc::InsertInstrumentForPlugin(PLUGINDEX plug)
 	}
 
 	return instr;
-#else
-	return INSTRUMENTINDEX_INVALID;
-#endif
 }
 
 

@@ -751,7 +751,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#ifndef NO_PLUGINS
 	// Now that we have both the track settings and plugins, establish the track routing by applying the same plugins to the source track as to the target track:
 	for(CHANNELINDEX c = 0; c < GetNumChannels(); c++)
 	{
@@ -776,7 +775,6 @@ bool CSoundFile::ReadMT2(FileReader &file, ModLoadingFlags loadFlags)
 			}
 		}
 	}
-#endif // NO_PLUGINS
 
 	// Read drum channels
 	INSTRUMENTINDEX drumMap[8] = { 0 };

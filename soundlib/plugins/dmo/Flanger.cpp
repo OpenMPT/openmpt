@@ -10,14 +10,11 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "Flanger.h"
 #include "../../Sndfile.h"
-#endif  // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -150,9 +147,5 @@ CString Flanger::GetParamDisplay(PlugParamIndex param)
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(Flanger)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

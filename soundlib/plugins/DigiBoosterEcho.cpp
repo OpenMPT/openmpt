@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "DigiBoosterEcho.h"
 #include "../Sndfile.h"
 
@@ -230,5 +229,3 @@ void DigiBoosterEcho::RecalculateEchoParams()
 }
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

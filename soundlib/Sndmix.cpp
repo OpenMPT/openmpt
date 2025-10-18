@@ -18,9 +18,7 @@
 #ifdef MODPLUG_TRACKER
 #include "../mptrack/TrackerSettings.h"
 #endif // MODPLUG_TRACKER
-#ifndef NO_PLUGINS
 #include "plugins/PlugInterface.h"
-#endif // NO_PLUGINS
 #include "OPL.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -315,12 +313,10 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 		m_Reverb.Process(MixSoundBuffer, ReverbSendBuffer, m_RvbROfsVol, m_RvbLOfsVol, countChunk);
 #endif  // NO_REVERB
 
-#ifndef NO_PLUGINS
 		if(m_loadedPlugins)
 		{
 			ProcessPlugins(countChunk);
 		}
-#endif  // NO_PLUGINS
 
 		if(m_MixerSettings.gnChannels == 1)
 		{
@@ -1050,7 +1046,6 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 		chn.dwFlags.set(CHN_FASTVOLRAMP);
 	}
 
-#ifndef NO_PLUGINS
 	// Plugin tremor
 	if(chn.nCommand == CMD_TREMOR && chn.pModInstrument && chn.pModInstrument->nMixPlug
 		&& !chn.pModInstrument->dwFlags[INS_MUTE]
@@ -1068,7 +1063,6 @@ void CSoundFile::ProcessTremor(CHANNELINDEX nChn, int &vol)
 				pPlugin->MidiCommand(*pIns, chn.nLastNote, static_cast<uint16>(chn.nVolume), nChn);
 		}
 	}
-#endif // NO_PLUGINS
 }
 
 
@@ -1455,7 +1449,6 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
 
-#ifndef NO_PLUGINS
 	// Plugin arpeggio
 	if(chn.pModInstrument && chn.pModInstrument->nMixPlug
 		&& !chn.pModInstrument->dwFlags[INS_MUTE]
@@ -1506,7 +1499,6 @@ void CSoundFile::ProcessArpeggio(CHANNELINDEX nChn, int32 &period, Tuning::NOTEI
 				chn.nArpeggioLastNote = NOTE_NONE;
 		}
 	}
-#endif // NO_PLUGINS
 
 	if(chn.nCommand == CMD_ARPEGGIO)
 	{
@@ -1740,7 +1732,6 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 			DoFreqSlide(chn, period, vdelta);
 
 			// Process MIDI vibrato for plugins:
-#ifndef NO_PLUGINS
 			IMixPlugin *plugin = GetChannelInstrumentPlugin(m_PlayState.Chn[nChn]);
 			if(plugin != nullptr)
 			{
@@ -1753,7 +1744,6 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 				}
 				plugin->MidiVibrato(vdelta, pwd, nChn);
 			}
-#endif // NO_PLUGINS
 		}
 
 		// Advance vibrato position - IT updates on every tick, unless "old effects" are enabled (in this case it only updates on non-first ticks like other trackers)
@@ -1763,13 +1753,11 @@ void CSoundFile::ProcessVibrato(CHANNELINDEX nChn, int32 &period, Tuning::RATIOT
 	} else if(chn.dwOldFlags[CHN_VIBRATO])
 	{
 		// Stop MIDI vibrato for plugins:
-#ifndef NO_PLUGINS
 		IMixPlugin *plugin = GetChannelInstrumentPlugin(m_PlayState.Chn[nChn]);
 		if(plugin != nullptr)
 		{
 			plugin->MidiVibrato(0, 0, nChn);
 		}
-#endif // NO_PLUGINS
 	}
 }
 
@@ -2644,8 +2632,6 @@ void CSoundFile::ProcessMacroOnChannel(CHANNELINDEX nChn)
 }
 
 
-#ifndef NO_PLUGINS
-
 void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 {
 	ModChannel &chn = m_PlayState.Chn[nChn];
@@ -2750,8 +2736,6 @@ void CSoundFile::ProcessMidiOut(CHANNELINDEX nChn)
 		}		
 	}
 }
-
-#endif // NO_PLUGINS
 
 
 template<int channels>

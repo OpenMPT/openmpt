@@ -11,9 +11,7 @@
 #include "stdafx.h"
 #include "Loaders.h"
 #include "../common/mptStringBuffer.h"
-#ifndef NO_PLUGINS
 #include "plugins/DigiBoosterEcho.h"
-#endif // NO_PLUGINS
 
 #ifdef LIBOPENMPT_BUILD
 #define MPT_DBM_USE_REAL_SUBSONGS
@@ -197,13 +195,11 @@ static constexpr EffectCommand dbmEffects[] =
 	CMD_KEYOFF, CMD_SETENVPOSITION, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_PANNINGSLIDE, CMD_NONE, CMD_NONE,
 	CMD_NONE, CMD_NONE, CMD_NONE,
-#ifndef NO_PLUGINS
 	CMD_DBMECHO,  // Toggle DSP
 	CMD_MIDI,     // Wxx Echo Delay
 	CMD_MIDI,     // Xxx Echo Feedback
 	CMD_MIDI,     // Yxx Echo Mix
 	CMD_MIDI,     // Zxx Echo Cross
-#endif // NO_PLUGINS
 };
 
 
@@ -493,9 +489,7 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 
 	// Patterns
 	FileReader patternChunk = chunks.GetChunk(DBMChunk::idPATT);
-#ifndef NO_PLUGINS
 	bool hasEchoEnable = false, hasEchoParams = false;
-#endif // NO_PLUGINS
 	if(patternChunk.IsValid() && (loadFlags & loadPatternData))
 	{
 		FileReader patternNameChunk = chunks.GetChunk(DBMChunk::idPNAM);
@@ -588,18 +582,15 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 #ifdef MODPLUG_TRACKER
 					m.ExtendedMODtoS3MEffect();
 #endif // MODPLUG_TRACKER
-#ifndef NO_PLUGINS
 					if(m.command == CMD_DBMECHO)
 						hasEchoEnable = true;
 					else if(m.command == CMD_MIDI)
 						hasEchoParams = true;
-#endif // NO_PLUGINS
 				}
 			}
 		}
 	}
 
-#ifndef NO_PLUGINS
 	// Echo DSP
 	if(loadFlags & loadPluginData)
 	{
@@ -674,7 +665,6 @@ bool CSoundFile::ReadDBM(FileReader &file, ModLoadingFlags loadFlags)
 			m_MidiCfg.Zxx[i + 96] = MPT_AFORMAT("F0F083{}")(mpt::afmt::HEX0<2>(param));
 		}
 	}
-#endif // NO_PLUGINS
 
 	// Samples
 	FileReader sampleChunk = chunks.GetChunk(DBMChunk::idSMPL);

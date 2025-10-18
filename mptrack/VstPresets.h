@@ -31,7 +31,6 @@ public:
 		outOfMemory,
 	};
 
-#ifndef NO_PLUGINS
 	static ErrorCode LoadFile(FileReader &file, IMixPlugin &plugin);
 	static bool SaveFile(std::ostream &, IMixPlugin &plugin, bool bank);
 	static const char *GetErrorMessage(ErrorCode code);
@@ -39,11 +38,6 @@ public:
 protected:
 	static void SaveProgram(std::ostream &f, IMixPlugin &plugin);
 
-#else
-	static ErrorCode LoadFile(FileReader &, IMixPlugin &) { return invalidFile; }
-	static bool SaveFile(std::ostream &, IMixPlugin &, bool) { return false; }
-	static const char *GetErrorMessage(ErrorCode) { return "OpenMPT has been built without plugin support"; }
-#endif // NO_PLUGINS
 };
 
 OPENMPT_NAMESPACE_END

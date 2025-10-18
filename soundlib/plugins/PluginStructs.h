@@ -13,9 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "../Snd_defs.h"
-#ifndef NO_PLUGINS
 #include "openmpt/base/Endian.hpp"
-#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -26,8 +24,6 @@ struct SNDMIXPLUGINSTATE;
 struct SNDMIXPLUGIN;
 class IMixPlugin;
 class CSoundFile;
-
-#ifndef NO_PLUGINS
 
 enum class PluginMixMode : uint8
 {
@@ -144,7 +140,5 @@ struct SNDMIXPLUGIN
 };
 
 bool CreateMixPluginProc(SNDMIXPLUGIN &mixPlugin, CSoundFile &sndFile);
-
-#endif // NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

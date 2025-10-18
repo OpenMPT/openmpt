@@ -1397,12 +1397,10 @@ bool CSoundFile::ReadMO3(FileReader &file, ModLoadingFlags loadFlags)
 			if(len >= containerHeader.musicSize || containerHeader.musicSize - len < musicChunk.GetPosition())
 				return false;
 			FileReader pluginChunk = musicChunk.ReadChunk(len);
-#ifndef NO_PLUGINS
 			if(plug <= MAX_MIXPLUGINS)
 			{
 				ReadMixPluginChunk(pluginChunk, m_MixPlugins[plug - 1]);
 			}
-#endif  // NO_PLUGINS
 		}
 	}
 

@@ -8,8 +8,6 @@
  */
 
 
-#ifndef NO_PLUGINS
-
 #include "PlugInterface.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -126,5 +124,3 @@ MPT_BINARY_STRUCT(SymMODEcho::PluginChunk, 7)
 
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

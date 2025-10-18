@@ -2437,8 +2437,6 @@ void CTrackApp::UninitializeDXPlugins()
 {
 	if(!m_pPluginManager) return;
 
-#ifndef NO_PLUGINS
-
 	size_t plugIndex = 0;
 	for(auto &plug : *m_pPluginManager)
 	{
@@ -2471,7 +2469,6 @@ void CTrackApp::UninitializeDXPlugins()
 		}
 	}
 	theApp.GetSettings().Write(U_("VST Plugins"), U_("NumPlugins"), static_cast<uint32>(plugIndex));
-#endif // NO_PLUGINS
 
 	delete m_pPluginManager;
 	m_pPluginManager = nullptr;

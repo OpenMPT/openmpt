@@ -8,8 +8,6 @@
  */
 
 
-#ifndef NO_PLUGINS
-
 #include "PlugInterface.h"
 
 OPENMPT_NAMESPACE_BEGIN
@@ -121,5 +119,3 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

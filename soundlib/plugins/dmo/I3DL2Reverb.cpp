@@ -10,18 +10,15 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "I3DL2Reverb.h"
 #include "../../Sndfile.h"
 #ifdef MODPLUG_TRACKER
 #include "../../../sounddsp/Reverb.h"
 #endif // MODPLUG_TRACKER
 #include "mpt/base/numbers.hpp"
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -636,9 +633,5 @@ float I3DL2Reverb::CalcDecayCoeffs(int32 index)
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(I3DL2Reverb)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

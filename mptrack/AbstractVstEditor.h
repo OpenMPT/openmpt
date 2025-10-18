@@ -12,8 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_PLUGINS
-
 #include "ResizableDialog.h"
 #include "Moddoc.h"
 #include "../soundlib/Snd_defs.h"
@@ -135,5 +133,3 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

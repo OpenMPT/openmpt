@@ -1660,10 +1660,8 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 							// DSP effects
 						case SymEvent::Filter:
-#ifndef NO_PLUGINS
 						case SymEvent::DSPEcho:
 						case SymEvent::DSPDelay:
-#endif
 							if(auto it = macroMap.find(event); it != macroMap.end() && it->second != 0)
 							{
 								m.SetEffectCommand(CMD_MIDI, it->second);
@@ -1908,7 +1906,6 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 		}
 	}
 
-#ifndef NO_PLUGINS
 	if(useDSP)
 	{
 		SNDMIXPLUGIN &plugin = m_MixPlugins[0];
@@ -1926,7 +1923,6 @@ bool CSoundFile::ReadSymMOD(FileReader &file, ModLoadingFlags loadFlags)
 
 		m_MixPlugins[1].Info.szName = "No Echo";
 	}
-#endif // NO_PLUGINS
 
 	// Channel panning
 	for(CHANNELINDEX chn = 0; chn < GetNumChannels(); chn++)

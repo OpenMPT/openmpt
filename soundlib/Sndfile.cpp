@@ -434,9 +434,7 @@ bool CSoundFile::Create(FileReader file, ModLoadingFlags loadFlags, CModDoc *pMo
 #endif  // MODPLUG_TRACKER
 
 	Clear(m_szNames);
-#ifndef NO_PLUGINS
 	std::fill(std::begin(m_MixPlugins), std::end(m_MixPlugins), SNDMIXPLUGIN());
-#endif  // NO_PLUGINS
 
 	if(CreateInternal(file, loadFlags))
 		return true;
@@ -726,7 +724,6 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		UpgradeModule();
 	}
 
-#ifndef NO_PLUGINS
 	// Load plugins
 #ifdef MODPLUG_TRACKER
 	mpt::ustring notFoundText;
@@ -813,7 +810,6 @@ bool CSoundFile::CreateInternal(FileReader file, ModLoadingFlags loadFlags)
 		}
 	}
 #endif // MODPLUG_TRACKER
-#endif // NO_PLUGINS
 
 	return true;
 }
@@ -849,12 +845,10 @@ bool CSoundFile::Destroy()
 		delete ins;
 		ins = nullptr;
 	}
-#ifndef NO_PLUGINS
 	for(auto &plug : m_MixPlugins)
 	{
 		plug.Destroy();
 	}
-#endif // NO_PLUGINS
 
 	m_nType = MOD_TYPE_NONE;
 	m_ContainerType = ModContainerType::None;
@@ -966,10 +960,8 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 		chn.nTremorCount = 0;
 	}
 
-#ifndef NO_PLUGINS
 	// Stop hanging notes from VST instruments as well
 	StopAllVsti();
-#endif // NO_PLUGINS
 
 	if (!nOrder)
 	{
@@ -992,7 +984,6 @@ void CSoundFile::SetCurrentOrder(ORDERINDEX nOrder)
 
 void CSoundFile::SuspendPlugins()
 {
-#ifndef NO_PLUGINS
 	for(auto &plug : m_MixPlugins)
 	{
 		IMixPlugin *pPlugin = plug.pMixPlugin;
@@ -1003,12 +994,10 @@ void CSoundFile::SuspendPlugins()
 			pPlugin->Suspend();
 		}
 	}
-#endif // NO_PLUGINS
 }
 
 void CSoundFile::ResumePlugins()
 {
-#ifndef NO_PLUGINS
 	for(auto &plugin : m_MixPlugins)
 	{
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
@@ -1018,13 +1007,11 @@ void CSoundFile::ResumePlugins()
 			pPlugin->Resume();
 		}
 	}
-#endif // NO_PLUGINS
 }
 
 
 void CSoundFile::UpdatePluginPositions()
 {
-#ifndef NO_PLUGINS
 	for(auto &plugin : m_MixPlugins)
 	{
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
@@ -1033,13 +1020,11 @@ void CSoundFile::UpdatePluginPositions()
 			pPlugin->PositionChanged();
 		}
 	}
-#endif  // NO_PLUGINS
 }
 
 
 void CSoundFile::StopAllVsti()
 {
-#ifndef NO_PLUGINS
 	for(auto &plugin : m_MixPlugins)
 	{
 		IMixPlugin *pPlugin = plugin.pMixPlugin;
@@ -1048,7 +1033,6 @@ void CSoundFile::StopAllVsti()
 			pPlugin->HardAllNotesOff();
 		}
 	}
-#endif // NO_PLUGINS
 }
 
 
@@ -1062,13 +1046,11 @@ void CSoundFile::SetMixLevels(MixLevels levels)
 
 void CSoundFile::RecalculateGainForAllPlugs()
 {
-#ifndef NO_PLUGINS
 	for(auto &plugin : m_MixPlugins)
 	{
 		if(plugin.pMixPlugin != nullptr)
 			plugin.pMixPlugin->RecalculateGain();
 	}
-#endif // NO_PLUGINS
 }
 
 

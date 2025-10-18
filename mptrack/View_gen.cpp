@@ -1058,7 +1058,6 @@ void CViewGlobals::OnPluginChanged()
 
 void CViewGlobals::OnSelectPlugin()
 {
-#ifndef NO_PLUGINS
 	CModDoc *pModDoc = GetDocument();
 
 	if ((pModDoc) && (m_nCurrentPlugin < MAX_MIXPLUGINS))
@@ -1072,13 +1071,11 @@ void CViewGlobals::OnSelectPlugin()
 		OnPluginChanged();
 		OnParamChanged();
 	}
-#endif // NO_PLUGINS
 }
 
 
 void CViewGlobals::OnRemovePlugin()
 {
-#ifndef NO_PLUGINS
 	CModDoc *pModDoc = GetDocument();
 
 	if(pModDoc && m_nCurrentPlugin < MAX_MIXPLUGINS && Reporting::Confirm(MPT_UFORMAT("Remove plugin FX{}: {}?")(m_nCurrentPlugin + 1, pModDoc->GetSoundFile().m_MixPlugins[m_nCurrentPlugin].GetName()), false, true) == cnfYes)
@@ -1089,7 +1086,6 @@ void CViewGlobals::OnRemovePlugin()
 			OnParamChanged();
 		}
 	}
-#endif  // NO_PLUGINS
 }
 
 

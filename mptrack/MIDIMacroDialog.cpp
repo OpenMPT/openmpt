@@ -351,7 +351,6 @@ void CMidiMacroSetup::OnSetSFx(UINT id)
 
 void CMidiMacroSetup::OnViewAllParams(UINT id)
 {
-#ifndef NO_PLUGINS
 	CString message, plugName;
 	int sfx = id - ID_PLUGSELECT;
 	PlugParamIndex param = m_MidiCfg.MacroToPlugParam(sfx);
@@ -369,12 +368,10 @@ void CMidiMacroSetup::OnViewAllParams(UINT id)
 	}
 
 	Reporting::Notification(message, _T("Macro -> Parameters"));
-#endif // NO_PLUGINS
 }
 
 void CMidiMacroSetup::OnPlugChanged()
 {
-#ifndef NO_PLUGINS
 	PLUGINDEX plug = m_CbnMacroPlug.GetSelection().value_or(PLUGINDEX_INVALID);
 
 	if(plug >= MAX_MIXPLUGINS)
@@ -392,7 +389,6 @@ void CMidiMacroSetup::OnPlugChanged()
 		int param = m_MidiCfg.MacroToPlugParam(m_CbnSFx.GetCurSel());
 		m_CbnMacroParam.SetCurSel(param);
 	}
-#endif // NO_PLUGINS
 }
 
 void CMidiMacroSetup::OnPlugParamChanged()

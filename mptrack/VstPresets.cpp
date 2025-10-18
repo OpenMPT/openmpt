@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "VstPresets.h"
 #ifdef MPT_WITH_VST
 #include "Vstplug.h"
@@ -309,8 +308,6 @@ const char *VSTPresets::GetErrorMessage(ErrorCode code)
 	}
 	return result;
 }
-
-#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

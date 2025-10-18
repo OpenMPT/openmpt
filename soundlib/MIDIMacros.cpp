@@ -171,7 +171,6 @@ CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *
 			const int param = MacroToPlugParam(macroIndex);
 			CString formattedName;
 			formattedName.Format(_T("Param %d"), param);
-#ifndef NO_PLUGINS
 			if(plugin != nullptr)
 			{
 				CString paramName = plugin->GetParamName(param);
@@ -180,9 +179,6 @@ CString MIDIMacroConfig::GetParameteredMacroName(uint32 macroIndex, IMixPlugin *
 					formattedName += _T(" (") + paramName + _T(")");
 				}
 			} else
-#else
-			MPT_UNREFERENCED_PARAMETER(plugin);
-#endif // NO_PLUGINS
 			{
 				formattedName += _T(" (N/A)");
 			}

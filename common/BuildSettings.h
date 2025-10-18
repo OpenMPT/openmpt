@@ -137,9 +137,6 @@
 // Disable the built-in automatic gain control
 //#define NO_AGC
 
-// (HACK) Define to build without any plugin support
-//#define NO_PLUGINS
-
 #endif // MODPLUG_TRACKER
 
 
@@ -187,7 +184,6 @@
 #define NO_DSP
 #define NO_EQ
 #define NO_AGC
-//#define NO_PLUGINS
 
 #endif // LIBOPENMPT_BUILD
 
@@ -281,13 +277,6 @@
 
 #if defined(MPT_EXTERNAL_SAMPLES) && !defined(MPT_ENABLE_FILEIO)
 #define MPT_ENABLE_FILEIO // External samples require disk file io
-#endif
-
-#if defined(NO_PLUGINS)
-// Any plugin type requires NO_PLUGINS to not be defined.
-#if defined(MPT_WITH_VST)
-#undef MPT_WITH_VST
-#endif
 #endif
 
 

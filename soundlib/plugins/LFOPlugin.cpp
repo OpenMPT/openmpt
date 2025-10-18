@@ -10,7 +10,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "LFOPlugin.h"
 #include "../Sndfile.h"
 #include "../../common/FileReader.h"
@@ -514,8 +513,3 @@ IMixPlugin *LFOPlugin::GetOutputPlugin() const
 
 
 OPENMPT_NAMESPACE_END
-
-#else
-MPT_MSVC_WORKAROUND_LNK4221(LFOPlugin)
-
-#endif // !NO_PLUGINS

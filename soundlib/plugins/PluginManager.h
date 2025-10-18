@@ -154,7 +154,6 @@ public:
 
 class CVstPluginManager
 {
-#ifndef NO_PLUGINS
 protected:
 #if defined(MPT_WITH_DMO)
 	bool MustUnInitilizeCOM = false;
@@ -187,15 +186,6 @@ protected:
 
 	std::vector<VSTPluginLib *> AddPluginsToList(std::vector<VSTPluginLib> containedPlugins, std::function<void(VSTPluginLib &, bool)> updateFunc);
 
-#else // NO_PLUGINS
-public:
-	const VSTPluginLib **begin() const { return nullptr; }
-	const VSTPluginLib **end() const { return nullptr; }
-	void reserve(size_t) { }
-	size_t size() const { return 0; }
-
-	void OnIdle() {}
-#endif // NO_PLUGINS
 };
 
 

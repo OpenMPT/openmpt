@@ -48,9 +48,7 @@
 #include "../soundlib/modsmp_ctrl.h"
 #include "../tracklib/SampleEdit.h"
 
-#ifndef NO_PLUGINS
 #include "AbstractVstEditor.h"
-#endif
 
 #include "mpt/binary/hex.hpp"
 #include "mpt/base/numbers.hpp"
@@ -1651,7 +1649,6 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 		if(instance != nullptr && pHint != instance && instance->GetDocument() == this)
 			instance->Update(hint, pHint);
 	}
-#ifndef NO_PLUGINS
 	if(hint.GetType()[HINT_MIXPLUGINS | HINT_PLUGINNAMES])
 	{
 		for(auto &plug : m_SndFile.m_MixPlugins)
@@ -1663,7 +1660,6 @@ void CModDoc::UpdateAllViews(CView *pSender, UpdateHint hint, CObject *pHint)
 			}
 		}
 	}
-#endif
 }
 
 
@@ -2031,13 +2027,9 @@ void CModDoc::OnFileWaveConvert(ORDERINDEX nMinOrder, ORDERINDEX nMaxOrder)
 
 void CModDoc::OnFileMidiConvert()
 {
-#ifndef NO_PLUGINS
 	CModToMidi mididlg(*this, CMainFrame::GetMainFrame());
 	BypassInputHandler bih;
 	mididlg.DoModal();
-#else
-	Reporting::Error("In order to use MIDI export, OpenMPT must be built with plugin support.");
-#endif // NO_PLUGINS
 }
 
 //HACK: This is a quick fix. Needs to be better integrated into player and GUI.

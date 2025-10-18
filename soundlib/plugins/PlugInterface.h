@@ -12,8 +12,6 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
-#ifndef NO_PLUGINS
-
 #include "../../soundlib/Snd_defs.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/Mixer.h"
@@ -309,6 +307,3 @@ protected:
 };
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS
-

@@ -2102,7 +2102,6 @@ bool CSoundFile::SaveIT(std::ostream &f, const mpt::PathString &filename, bool c
 
 uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 {
-#ifndef NO_PLUGINS
 	uint32 totalSize = 0;
 
 	for(PLUGINDEX i = 0; i < MAX_MIXPLUGINS; i++)
@@ -2186,11 +2185,6 @@ uint32 CSoundFile::SaveMixPlugins(std::ostream *file, bool updatePlugData)
 		totalSize += numChInfo * 4 + 8;
 	}
 	return totalSize;
-#else
-	MPT_UNREFERENCED_PARAMETER(file);
-	MPT_UNREFERENCED_PARAMETER(updatePlugData);
-	return 0;
-#endif // NO_PLUGINS
 }
 
 #endif // MODPLUG_NO_FILESAVE
@@ -2227,7 +2221,6 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file, bool ignoreCh
 				chn.nMixPlugin = static_cast<PLUGINDEX>(chunk.ReadUint32LE());
 			}
 			hasPluginChunks = true;
-#ifndef NO_PLUGINS
 		}
 		// Plugin Data FX00, ... FX99, F100, ... F255
 #define MPT_ISDIGIT(x) (code[(x)] >= '0' && code[(x)] <= '9')
@@ -2242,7 +2235,6 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file, bool ignoreCh
 				ReadMixPluginChunk(chunk, m_MixPlugins[plug]);
 			}
 			hasPluginChunks = true;
-#endif // NO_PLUGINS
 		} else if(!memcmp(code, "MODU", 4))
 		{
 			isBeRoTracker = true;
@@ -2253,7 +2245,6 @@ std::pair<bool, bool> CSoundFile::LoadMixPlugins(FileReader &file, bool ignoreCh
 }
 
 
-#ifndef NO_PLUGINS
 void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 {
 	// MPT's standard plugin data. Size not specified in file.. grrr..
@@ -2299,7 +2290,6 @@ void CSoundFile::ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin)
 		}
 	}
 }
-#endif // NO_PLUGINS
 
 
 #ifndef MODPLUG_NO_FILESAVE

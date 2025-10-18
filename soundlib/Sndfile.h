@@ -74,9 +74,7 @@ uintptr_t DMFUnpack(FileReader &file, uint8 *psample, uint32 maxlen);
 
 
 #ifdef LIBOPENMPT_BUILD
-#ifndef NO_PLUGINS
 class CVstPluginManager;
-#endif
 #endif
 
 
@@ -526,10 +524,8 @@ public:
 	ModInstrument *Instruments[MAX_INSTRUMENTS];  // Instrument Headers
 	InstrumentSynth::Events m_globalScript;
 	MIDIMacroConfig m_MidiCfg;                    // MIDI Macro config table
-#ifndef NO_PLUGINS
 	std::array<SNDMIXPLUGIN, MAX_MIXPLUGINS> m_MixPlugins;  // Mix plugins
 	uint32 m_loadedPlugins = 0;                             // Not a PLUGINDEX because number of loaded plugins may exceed MAX_MIXPLUGINS during MIDI conversion
-#endif
 	mpt::charbuf<MAX_SAMPLENAME> m_szNames[MAX_SAMPLES];  // Sample names
 
 	Version m_dwCreatedWithVersion;
@@ -575,7 +571,7 @@ private:
 #endif // MODPLUG_TRACKER
 
 public:
-#if defined(LIBOPENMPT_BUILD) && !defined(NO_PLUGINS)
+#if defined(LIBOPENMPT_BUILD)
 	std::unique_ptr<CVstPluginManager> m_PluginManager;
 #endif
 
@@ -720,9 +716,7 @@ public:
 	constexpr bool CanAddMoreSamples(SAMPLEINDEX amount = 1) const noexcept { return (amount < MAX_SAMPLES) && m_nSamples < (MAX_SAMPLES - amount); }
 	constexpr bool CanAddMoreInstruments(INSTRUMENTINDEX amount = 1) const noexcept { return (amount < MAX_INSTRUMENTS) && m_nInstruments < (MAX_INSTRUMENTS - amount); }
 
-#ifndef NO_PLUGINS
 	IMixPlugin* GetInstrumentPlugin(INSTRUMENTINDEX instr) const noexcept;
-#endif
 	const CModSpecifications& GetModSpecifications() const {return *m_pModSpecs;}
 	static const CModSpecifications& GetModSpecifications(const MODTYPE type);
 
@@ -1272,10 +1266,8 @@ public:
 	uint32 MapMidiInstrument(uint8 program, uint16 bank, uint8 midiChannel, uint8 note, bool isXG, std::bitset<32> drumChns);
 	size_t ITInstrToMPT(FileReader &file, ModInstrument &ins, uint16 trkvers);
 	std::pair<bool, bool> LoadMixPlugins(FileReader &file, bool ignoreChannelCount = true);
-#ifndef NO_PLUGINS
 	static void ReadMixPluginChunk(FileReader &file, SNDMIXPLUGIN &plugin);
 	void ProcessMidiOut(CHANNELINDEX nChn);
-#endif // NO_PLUGINS
 
 	void ProcessGlobalVolume(samplecount_t countChunk);
 	void ProcessStereoSeparation(samplecount_t countChunk);
@@ -1295,7 +1287,6 @@ public:
 };
 
 
-#ifndef NO_PLUGINS
 inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr) const noexcept
 {
 	if(instr > 0 && instr <= GetNumInstruments() && Instruments[instr] && Instruments[instr]->nMixPlug && Instruments[instr]->nMixPlug <= MAX_MIXPLUGINS)
@@ -1303,7 +1294,6 @@ inline IMixPlugin* CSoundFile::GetInstrumentPlugin(INSTRUMENTINDEX instr) const 
 	else
 		return nullptr;
 }
-#endif // NO_PLUGINS
 
 
 #define FADESONGDELAY		100

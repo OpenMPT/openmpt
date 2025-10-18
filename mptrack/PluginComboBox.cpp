@@ -93,7 +93,6 @@ int PluginComboBox::Update(const Config config, const CSoundFile &sndFile)
 			}
 		}
 	}
-#ifndef NO_PLUGINS
 	const auto fxFormat = MPT_TFORMAT("FX{}: ");
 	const auto inputFormat = MPT_TFORMAT("    Stereo Input {}");
 	mpt::tstring str;
@@ -142,7 +141,6 @@ int PluginComboBox::Update(const Config config, const CSoundFile &sndFile)
 			SetCurSel(selectedItem);
 		}
 	}
-#endif // NO_PLUGINS
 	Invalidate(FALSE);
 	SetRedraw(TRUE);
 	return selectedItem;
@@ -182,23 +180,19 @@ std::optional<PLUGINDEX> PluginComboBox::GetSelection() const
 
 void AddPluginParameternamesToCombobox(CComboBox &CBox, SNDMIXPLUGIN &plug)
 {
-#ifndef NO_PLUGINS
 	if(plug.pMixPlugin)
 		AddPluginParameternamesToCombobox(CBox, *plug.pMixPlugin);
-#endif // NO_PLUGINS
 }
 
 
 void AddPluginParameternamesToCombobox(CComboBox &CBox, IMixPlugin &plug)
 {
-#ifndef NO_PLUGINS
 	const PlugParamIndex numParams = plug.GetNumVisibleParameters();
 	plug.CacheParameterNames(0, numParams);
 	for(PlugParamIndex i = 0; i < numParams; i++)
 	{
 		CBox.SetItemData(CBox.AddString(plug.GetFormattedParamName(i)), i);
 	}
-#endif // NO_PLUGINS
 }
 
 

@@ -11,8 +11,6 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
-
 #include "SelectPluginDialog.h"
 #include "FileDialog.h"
 #include "FolderScanner.h"
@@ -882,5 +880,3 @@ void CSelectPluginDlg::OnPluginTagsChanged()
 
 
 OPENMPT_NAMESPACE_END
-
-#endif // NO_PLUGINS

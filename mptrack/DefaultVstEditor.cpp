@@ -19,9 +19,6 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-#ifndef NO_PLUGINS
-
-
 // Window proportions
 struct PluginEditorMeasurements
 {
@@ -494,8 +491,6 @@ void CDefaultVstEditor::UpdateParamDisplay(PlugParamIndex param)
 	m_nControlLock--;
 	
 }
-
-#endif // NO_PLUGINS
 
 
 OPENMPT_NAMESPACE_END

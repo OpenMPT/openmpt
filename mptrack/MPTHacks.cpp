@@ -71,7 +71,6 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	ClearLog();
 
 	// Check for plugins
-#ifndef NO_PLUGINS
 	foundHere = false;
 	for(const auto &plug : m_SndFile.m_MixPlugins)
 	{
@@ -84,7 +83,6 @@ bool CModDoc::HasMPTHacks(const bool autofix)
 	}
 	if(foundHere)
 		AddToLog("Found plugins");
-#endif // NO_PLUGINS
 
 	// Check for invalid order items
 	if(!originalSpecs->hasIgnoreIndex && mpt::contains(m_SndFile.Order(), PATTERNINDEX_SKIP))

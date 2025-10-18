@@ -10,14 +10,11 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "Echo.h"
 #include "../../Sndfile.h"
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -198,9 +195,5 @@ void Echo::RecalculateEchoParams()
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(Echo)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END

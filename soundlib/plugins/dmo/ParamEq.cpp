@@ -10,15 +10,12 @@
 
 #include "stdafx.h"
 
-#ifndef NO_PLUGINS
 #include "ParamEq.h"
 #include "../../Sndfile.h"
 #include "mpt/base/numbers.hpp"
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_BEGIN
 
-#ifndef NO_PLUGINS
 
 namespace DMO
 {
@@ -192,9 +189,5 @@ void ParamEq::RecalculateEqParams()
 
 } // namespace DMO
 
-#else
-MPT_MSVC_WORKAROUND_LNK4221(ParamEq)
-
-#endif // !NO_PLUGINS
 
 OPENMPT_NAMESPACE_END
