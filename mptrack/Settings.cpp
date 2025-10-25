@@ -419,12 +419,11 @@ static std::vector<char> ReadFile(const mpt::PathString &filename)
 {
 	mpt::IO::ifstream s(filename, std::ios::binary);
 	std::vector<char> result;
+	std::vector<char> buf(mpt::IO::BUFFERSIZE_NORMAL);
 	while(s)
 	{
-		char buf[4096];
-		s.read(buf, 4096);
-		std::streamsize count = s.gcount();
-		result.insert(result.end(), buf, buf + count);
+		s.read(buf.data(), buf.size());
+		result.insert(result.end(), buf.data(), buf.data() + s.gcount());
 	}
 	return result;
 }
@@ -433,7 +432,7 @@ static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring
 {
 	static_assert(sizeof(wchar_t) == 2);
 	mpt::IO::SafeOutputFile sinifile(filename, std::ios::binary, mpt::IO::FlushMode::Full);
-	mpt::IO::ofstream& inifile = sinifile;
+	mpt::IO::ofstream &inifile = sinifile;
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
 	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
