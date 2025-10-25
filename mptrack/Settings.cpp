@@ -458,6 +458,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 
 SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	switch(def.GetType())
 	{
 	case SettingTypeBool: return SettingValue(ReadSettingRaw(path, def.as<bool>()), def.GetTypeTag()); break;
@@ -471,6 +472,7 @@ SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const 
 
 void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const SettingValue &val)
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	ASSERT(val.GetType() != SettingTypeNone);
 	switch(val.GetType())
 	{
@@ -485,11 +487,13 @@ void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const Setting
 
 void IniFileSettingsBackend::RemoveSetting(const SettingPath &path)
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	RemoveSettingRaw(path);
 }
 
 void IniFileSettingsBackend::RemoveSection(const mpt::ustring &section)
 {
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	RemoveSectionRaw(section);
 }
 
