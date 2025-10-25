@@ -445,6 +445,14 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	// and thus support storing unicode strings uncorrupted.
 	// This is backwards compatible because even ANSI WINAPI behaves the
 	// same way in this case.
+	// Do not convert when not runing a UNICODE build.
+	// Do not convert when running on Windows 2000 or earlier
+	// because of missing Unicode support on Win9x,
+#if defined(UNICODE)
+	if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinXP))
+	{
+		return;
+	}
 	const std::vector<char> data = ReadFile(filename);
 	if(!data.empty() && IsTextUnicode(data.data(), mpt::saturate_cast<int>(data.size()), NULL))
 	{
@@ -453,6 +461,9 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
 	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
 	WriteFileUTF16LE(filename, mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data)));
+#else
+	MPT_UNUSED(backupTag);
+#endif
 }
 
 SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
