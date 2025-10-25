@@ -24,9 +24,11 @@ public:
 	Profile &profile;
 	Profile::Data data;
 	double usage;
+	double seconds;
 	Statistics(Profile &p) : profile(p)
 	{
 		usage = 0.0;
+		seconds = 0.0;
 		Update();
 	}
 	void Update()
@@ -41,6 +43,7 @@ public:
 		{
 			usage = 0.0;
 		}
+		seconds += static_cast<double>(data.Sum) / static_cast<double>(profile.GetFrequency());
 	}
 };
 
@@ -113,7 +116,7 @@ std::string Profiler::DumpProfiles()
 			case Profiler::Notify: cat = "Notify"; break;
 			case Profiler::Settings: cat = "Settings"; break;
 			}
-			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::afmt::right(6, mpt::afmt::fix(stats.usage * 100.0, 3)) + "%\r\n";
+			ret += cat + " " + std::string(stats.profile.Name) + ": " + mpt::afmt::right(6, mpt::afmt::fix(stats.usage * 100.0, 3)) + "% " + mpt::afmt::fix(stats.seconds, 3) + "s\r\n";
 		}
 	}
 	ret += "\r\n";
