@@ -389,7 +389,7 @@ void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
 
 void IniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
 {
-	::WritePrivateProfileSection(mpt::ToWin(section).c_str(), _T("\0"), filename.AsNative().c_str());
+	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
 
