@@ -1692,6 +1692,11 @@ int CTrackApp::ExitInstanceImpl()
 		ExceptionHandler::Unregister();
 	}
 
+#ifdef USE_PROFILER
+	Profiler::Update();
+	Reporting::Information(Profiler::DumpProfiles());
+#endif
+
 	return CWinApp::ExitInstance();
 }
 
