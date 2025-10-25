@@ -38,6 +38,7 @@ public:
 		GUI,
 		Audio,
 		Notify,
+		Settings,
 		CategoriesCount
 	};
 	static std::vector<std::string> GetCategoryNames()
@@ -46,6 +47,7 @@ public:
 		ret.push_back("GUI");
 		ret.push_back("Audio");
 		ret.push_back("Notify");
+		ret.push_back("Settings");
 		return ret;
 	}
 public:
