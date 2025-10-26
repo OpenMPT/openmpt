@@ -1866,11 +1866,19 @@ __declspec(dllexport) void XMPIN_GetInterface() __attribute__((alias("XMPIN_GetI
 #if (__GNUC__ >= 8)
 #pragma GCC diagnostic pop
 #endif
-#else
+#elif defined(_MSC_VER)
 XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
 	return XMPIN_GetInterface_cxx( face, faceproc );
 }
+#if defined(_M_IX86)
 #pragma comment(linker, "/EXPORT:XMPIN_GetInterface=_XMPIN_GetInterface@8")
+#else
+#pragma comment(linker, "/EXPORT:XMPIN_GetInterface")
+#endif
+#else
+__declspec(dllexport) XMPIN * WINAPI XMPIN_GetInterface( DWORD face, InterfaceProc faceproc ) {
+	return XMPIN_GetInterface_cxx( face, faceproc );
+}
 #endif
 
 } // extern "C"
