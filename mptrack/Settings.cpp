@@ -164,7 +164,7 @@ bool SettingsContainer::IsDefaultSetting(const SettingPath &path) const
 	return entry->second.IsDefault();
 }
 
-void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val, SettingFlushMode flushMode)
+void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val)
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
@@ -178,11 +178,6 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 		entry->second = val;
 	}
 	NotifyListeners(path);
-	if(immediateFlush || flushMode == SettingWriteThrough)
-	{
-		BackendsWriteSetting(path, val);
-		entry->second.Clean();
-	}
 }
 
 void SettingsContainer::ForgetSetting(const SettingPath &path)
@@ -257,15 +252,6 @@ void SettingsContainer::Flush()
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
 	WriteSettings();
-}
-
-void SettingsContainer::SetImmediateFlush(bool newImmediateFlush)
-{
-	if(newImmediateFlush)
-	{
-		Flush();
-	}
-	immediateFlush = newImmediateFlush;
 }
 
 void SettingsContainer::Register(ISettingChanged *listener, const SettingPath &path)
