@@ -39,12 +39,11 @@ class atomic_file_lock_guard {
 private:
 
 	T & file;
-	
+
 public:
 
 	atomic_file_lock_guard(T & f)
-		: file(f)
-	{
+		: file(f) {
 		file.lock();
 	}
 
@@ -53,8 +52,7 @@ public:
 	}
 
 	atomic_file_lock_guard(const atomic_file_lock_guard &) = delete;
-	atomic_file_lock_guard & operator =(const atomic_file_lock_guard &) = delete;
-
+	atomic_file_lock_guard & operator=(const atomic_file_lock_guard &) = delete;
 };
 
 
@@ -72,8 +70,7 @@ protected:
 public:
 
 	atomic_file_ref(mpt::PathString filename)
-		: m_filename(std::move(filename))
-	{
+		: m_filename(std::move(filename)) {
 		mpt::windows::CheckBOOL(CopyFile(mpt::support_long_path(m_filename).c_str(), mpt::support_long_path(m_filename + MPT_PATHSTRING(".bak")).c_str(), FALSE));
 		m_hFile = mpt::windows::CheckFileHANDLE(CreateFile(mpt::support_long_path(m_filename).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
 	}
@@ -81,15 +78,14 @@ public:
 protected:
 
 	atomic_file_ref(mpt::PathString filename, bool shared)
-		: m_filename(std::move(filename))
-	{
+		: m_filename(std::move(filename)) {
 		m_hFile = mpt::windows::CheckFileHANDLE(CreateFile(mpt::support_long_path(m_filename).c_str(), GENERIC_READ | GENERIC_WRITE, shared ? (FILE_SHARE_READ | FILE_SHARE_WRITE) : 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
 	}
 
 public:
 
 	atomic_file_ref(const atomic_file_ref &) = delete;
-	atomic_file_ref & operator =(const atomic_file_ref &) = delete;
+	atomic_file_ref & operator=(const atomic_file_ref &) = delete;
 
 	void lock() {
 	}
@@ -167,7 +163,6 @@ public:
 		CloseHandle(m_hFile);
 		m_hFile = NULL;
 	}
-
 };
 
 
@@ -181,13 +176,12 @@ protected:
 public:
 
 	atomic_shared_file_ref(mpt::PathString filename)
-		: atomic_file_ref(std::move(filename), true)
-	{
+		: atomic_file_ref(std::move(filename), true) {
 		return;
 	}
 
 	atomic_shared_file_ref(const atomic_shared_file_ref &) = delete;
-	atomic_shared_file_ref & operator =(const atomic_shared_file_ref &) = delete;
+	atomic_shared_file_ref & operator=(const atomic_shared_file_ref &) = delete;
 
 	void lock() {
 		if (m_locks == 0) {
@@ -229,7 +223,6 @@ public:
 	~atomic_shared_file_ref() {
 		assert(m_locks == 0);
 	}
-
 };
 
 
