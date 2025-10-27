@@ -147,6 +147,7 @@ protected:
 	IniFileSettingsBackend *m_pSongSettingsIniFile = nullptr;
 	SettingsContainer *m_pSongSettings = nullptr;
 	ComponentManagerSettings *m_pComponentManagerSettings = nullptr;
+	IniFileSettingsContainer *m_pPluginState = nullptr;
 	IniFileSettingsContainer *m_pPluginCache = nullptr;
 	CModDocTemplate *m_pModTemplate = nullptr;
 	CVstPluginManager *m_pPluginManager = nullptr;
@@ -162,6 +163,7 @@ protected:
 	mpt::PathString m_ConfigPath;  // InstallPath (portable mode) or "%AppData%\OpenMPT\"
 
 	mpt::PathString m_szConfigFileName;
+	mpt::PathString m_PluginStateFileName;
 	mpt::PathString m_szPluginCacheFileName;
 
 	std::shared_ptr<mpt::Wine::Context> m_Wine;
@@ -233,6 +235,7 @@ public:
 	SoundDevice::Manager *GetSoundDevicesManager() const { return m_pSoundDevicesManager.get(); }
 	void GetDefaultMidiMacro(MIDIMacroConfig &cfg) const { cfg = m_MidiCfg; }
 	void SetDefaultMidiMacro(const MIDIMacroConfig &cfg) { m_MidiCfg = cfg; }
+	mpt::PathString GetConfigDirectory() const { return m_ConfigPath; }
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
 	SettingsContainer *GetpSettings()
 	{
@@ -277,6 +280,7 @@ public:
 		return MPT_USTRING("unknown");
 	}
 
+	SettingsContainer &GetPluginState();
 	SettingsContainer &GetPluginCache();
 	SettingsContainer &GetSongSettings();
 	const mpt::PathString &GetSongSettingsFilename() const;

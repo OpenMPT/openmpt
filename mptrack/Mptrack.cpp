@@ -901,6 +901,13 @@ public:
 };
 
 
+SettingsContainer &CTrackApp::GetPluginState()
+{
+	ASSERT(m_pPluginState);
+	return *m_pPluginState;
+}
+
+
 SettingsContainer &CTrackApp::GetPluginCache()
 {
 	ASSERT(m_pPluginCache);
@@ -1028,6 +1035,7 @@ void CTrackApp::SetupPaths(bool overridePortable)
 
 	// Set up default file locations
 	m_szConfigFileName = m_ConfigPath + P_("mptrack.ini"); // config file
+	m_PluginStateFileName = m_ConfigPath + P_("PluginState.ini"); // state of plugin loader for crash recovery
 	m_szPluginCacheFileName = m_ConfigPath + P_("plugin.cache"); // plugin cache
 
 	// Force use of custom ini file rather than windowsDir\executableName.ini
@@ -1322,6 +1330,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
 
+	m_pPluginState = new IniFileSettingsContainer(m_PluginStateFileName);
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
 
 	// Load standard INI file options (without MRU)
@@ -1659,6 +1668,8 @@ int CTrackApp::ExitInstanceImpl()
 
 	delete m_pPluginCache;
 	m_pPluginCache = nullptr;
+	delete m_pPluginState;
+	m_pPluginState = nullptr;
 	delete m_pComponentManagerSettings;
 	m_pComponentManagerSettings = nullptr;
 	delete m_pTrackerSettings;
@@ -2343,7 +2354,7 @@ void CTrackApp::InitializeDXPlugins()
 	bool maskCrashes = TrackerSettings::Instance().BrokenPluginsWorkaroundVSTMaskAllCrashes;
 
 	std::vector<VSTPluginLib *> nonFoundPlugs;
-	const mpt::PathString failedPlugin = GetSettings().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"));
+	const mpt::PathString failedPlugin = GetPluginState().Read<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"));
 	ConfirmAnswer skipFailed = cnfCancel;
 
 	CDialog pluginScanDlg;
@@ -2392,7 +2403,8 @@ void CTrackApp::InitializeDXPlugins()
 
 		if(plugPath == failedPlugin)
 		{
-			GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
+			GetPluginState().Remove(U_("VST Plugins"), U_("FailedPlugin"));
+			GetPluginState().Flush();
 			if(skipFailed == cnfCancel)
 			{
 				const CString text = MPT_CFORMAT("The following plugin has previously crashed OpenMPT during initialisation:\n\n{}\n\nDo you still want to load it?")

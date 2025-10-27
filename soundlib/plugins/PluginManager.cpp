@@ -523,7 +523,8 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPlugin(const mpt::PathString &
 	}
 
 	// If this key contains a file name on program launch, a plugin previously crashed OpenMPT.
-	theApp.GetSettings().Write<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), dllPath, SettingWriteThrough);
+	theApp.GetPluginState().Write<mpt::PathString>(U_("VST Plugins"), U_("FailedPlugin"), dllPath);
+	theApp.GetPluginState().Flush();
 
 	std::vector<VSTPluginLib *> foundPlugins;
 
@@ -570,7 +571,8 @@ std::vector<VSTPluginLib *> CVstPluginManager::AddPlugin(const mpt::PathString &
 #endif // MPT_WITH_VST
 
 	// Now it should be safe to assume that this plugin loaded properly. :)
-	theApp.GetSettings().Remove(U_("VST Plugins"), U_("FailedPlugin"));
+	theApp.GetPluginState().Remove(U_("VST Plugins"), U_("FailedPlugin"));
+	theApp.GetPluginState().Flush();
 
 	return foundPlugins;
 }

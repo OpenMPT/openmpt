@@ -872,6 +872,11 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		}
 	}
 
+	if(storedVersion < MPT_V("1.33.00.15"))
+	{
+		conf.Remove(U_("VST Plugins"), U_("FailedPlugin"));
+	}
+
 	// Effects
 #ifndef NO_EQ
 	FixupEQ(m_EqSettings);
