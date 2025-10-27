@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cassert>
 #include <cstddef>
 
 #if MPT_OS_WINDOWS
