@@ -493,6 +493,7 @@
     <ClInclude Include="..\..\src\mpt\io_file\inputfile.hpp" />
     <ClInclude Include="..\..\src\mpt\io_file\outputfile.hpp" />
     <ClInclude Include="..\..\src\mpt\io_file_adapter\fileadapter.hpp" />
+    <ClInclude Include="..\..\src\mpt\io_file_atomic\atomic_file.hpp" />
     <ClInclude Include="..\..\src\mpt\io_file_read\inputfile_filecursor.hpp" />
     <ClInclude Include="..\..\src\mpt\io_file_unique\unique_basename.hpp" />
     <ClInclude Include="..\..\src\mpt\io_file_unique\unique_tempfilename.hpp" />

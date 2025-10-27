@@ -124,7 +124,8 @@ svn export ./src/mpt/format                           bin/dist-autotools/src/mpt
 #svn export ./src/mpt/fs                               bin/dist-autotools/src/mpt/fs
 svn export ./src/mpt/io                               bin/dist-autotools/src/mpt/io
 svn export ./src/mpt/io_file                          bin/dist-autotools/src/mpt/io_file
-svn export ./src/mpt/io_file_adapter                   bin/dist-autotools/src/mpt/io_file_adapter
+svn export ./src/mpt/io_file_adapter                  bin/dist-autotools/src/mpt/io_file_adapter
+#svn export ./src/mpt/io_file_atomic                   bin/dist-autotools/src/mpt/io_file_atomic
 svn export ./src/mpt/io_file_read                     bin/dist-autotools/src/mpt/io_file_read
 svn export ./src/mpt/io_file_unique                   bin/dist-autotools/src/mpt/io_file_unique
 svn export ./src/mpt/io_read                          bin/dist-autotools/src/mpt/io_read
@@ -203,7 +204,8 @@ cp -r ./src/mpt/format                                bin/dist-autotools/src/mpt
 #cp -r ./src/mpt/fs                                    bin/dist-autotools/src/mpt/fs
 cp -r ./src/mpt/io                                    bin/dist-autotools/src/mpt/io
 cp -r ./src/mpt/io_file                               bin/dist-autotools/src/mpt/io_file
-cp -r ./src/mpt/io_file_adapter                        bin/dist-autotools/src/mpt/io_file_adapter
+cp -r ./src/mpt/io_file_adapter                       bin/dist-autotools/src/mpt/io_file_adapter
+#cp -r ./src/mpt/io_file_atomic                        bin/dist-autotools/src/mpt/io_file_atomic
 cp -r ./src/mpt/io_file_read                          bin/dist-autotools/src/mpt/io_file_read
 cp -r ./src/mpt/io_file_unique                        bin/dist-autotools/src/mpt/io_file_unique
 cp -r ./src/mpt/io_read                               bin/dist-autotools/src/mpt/io_read

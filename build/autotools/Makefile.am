@@ -222,6 +222,7 @@ MPT_FILES_SRC_MPT += src/mpt/io_file/fstream.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file/inputfile.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file/outputfile.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file_adapter/fileadapter.hpp
+#MPT_FILES_SRC_MPT += src/mpt/io_file_atomic/atomic_file.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file_read/inputfile_filecursor.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file_unique/unique_basename.hpp
 MPT_FILES_SRC_MPT += src/mpt/io_file_unique/unique_tempfilename.hpp

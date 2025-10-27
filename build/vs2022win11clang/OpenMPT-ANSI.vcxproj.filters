@@ -169,6 +169,9 @@
     <Filter Include="src\mpt\io_file_adapter">
       <UniqueIdentifier>{93011107-FF38-599E-0843-BDC174F97F97}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\io_file_atomic">
+      <UniqueIdentifier>{2F089EF9-1B02-C74B-046F-5D5CF0072DB8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\io_file_read">
       <UniqueIdentifier>{4E9E4D56-3A2D-D71F-E34B-EB1ACFB9E7C5}</UniqueIdentifier>
     </Filter>
@@ -1457,6 +1460,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_file_adapter\fileadapter.hpp">
       <Filter>src\mpt\io_file_adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\io_file_atomic\atomic_file.hpp">
+      <Filter>src\mpt\io_file_atomic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\io_file_read\inputfile_filecursor.hpp">
       <Filter>src\mpt\io_file_read</Filter>

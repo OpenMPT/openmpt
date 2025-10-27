@@ -68,6 +68,8 @@ include_dependency "ext-stb_vorbis.lua"
 		"../../src/mpt/filemode/**.hpp",
 		"../../src/mpt/fs/**.cpp",
 		"../../src/mpt/fs/**.hpp",
+		"../../src/mpt/io_file_atomic/*.cpp",
+		"../../src/mpt/io_file_atomic/*.hpp",
 		"../../src/mpt/json/**.cpp",
 		"../../src/mpt/json/**.hpp",
 		"../../src/mpt/library/**.cpp",
