@@ -2720,7 +2720,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 	{
 		const mpt::PathString filename = theApp.GetConfigPath() + P_("test.ini");
 		{
-			mpt::IO::SafeOutputFile outputfile{filename};
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
 			mpt::IO::ofstream & outputstream = outputfile.stream(); 
 			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("[S1]")));
 			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=1")));
