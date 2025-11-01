@@ -669,6 +669,7 @@ void CModDoc::InitializeMod()
 	{
 		const bool isAmiga = (defaultType != MOD_TYPE_MOD_PC);
 		m_SndFile.m_SongFlags.set(SONG_ISAMIGA | SONG_AMIGALIMITS | SONG_PT_MODE, isAmiga);
+		m_SndFile.m_SongFlags.set(SONG_FORMAT_NO_VOLCOL);
 		m_SndFile.m_playBehaviour.set(kMODOneShotLoops, isAmiga);
 		m_SndFile.m_playBehaviour.set(kMODSampleSwap, isAmiga);
 		m_SndFile.m_playBehaviour.set(kMODOutOfRangeNoteDelay, isAmiga);
