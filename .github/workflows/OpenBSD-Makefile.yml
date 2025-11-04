@@ -13,6 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { version: '7.8', deps: sys   }
+          - { version: '7.8', deps: local }
+          - { version: '7.8', deps: small }
           - { version: '7.7', deps: sys   }
           - { version: '7.7', deps: local }
           - { version: '7.7', deps: small }
@@ -36,7 +39,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v0.29.0
+      uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
         architecture: x86_64
         memory: 4G
@@ -47,7 +50,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v0.29.0
+      uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
         architecture: x86_64
         memory: 4G
@@ -58,11 +61,11 @@ jobs:
         shutdown_vm: false
         run: |
           sudo pkg_add -u
-          sudo pkg_add -I ${{ (matrix.version == '7.7') && 'ghostscript-10.05.0' || (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
-          sudo pkg_add -I ${{ (matrix.version == '7.7') && 'autoconf-2.72p0 automake-1.17' || (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
+          sudo pkg_add -I ${{ (matrix.version == '7.8') && 'ghostscript-10.06.0' || (matrix.version == '7.7') && 'ghostscript-10.05.0' || (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
+          sudo pkg_add -I ${{ (matrix.version == '7.8') && 'autoconf-2.72p0 automake-1.18' || (matrix.version == '7.7') && 'autoconf-2.72p0 automake-1.17' || (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5' || 'autoconf automake' }}
           sudo pkg_add -I subversion p5-XML-XPath git mawk gmake pkgconf autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
     - name: Build
-      uses: cross-platform-actions/action@v0.29.0
+      uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
         architecture: x86_64
         memory: 4G
@@ -74,7 +77,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
-      uses: cross-platform-actions/action@v0.29.0
+      uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
         architecture: x86_64
         memory: 4G
@@ -86,7 +89,7 @@ jobs:
         run: |
           gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v0.29.0
+      uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
         architecture: x86_64
         memory: 4G
