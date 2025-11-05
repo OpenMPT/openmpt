@@ -65,7 +65,7 @@ jobs:
         sync_files: false
         shutdown_vm: false
         run: |
-          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.7') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.7') && 'export AUTOMAKE_VERSION=1.17' || (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.8') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.7') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.7') && 'export AUTOMAKE_VERSION=1.17' || (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
       uses: cross-platform-actions/action@9be9731e1b6dd301157acb699912067f9c1458f4
       with:
