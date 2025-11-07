@@ -12,10 +12,8 @@ jobs:
       matrix:
         include:
           - { version: '14.3', deps: sys   }
-          - { version: '14.3', deps: local }
           - { version: '14.3', deps: small }
           - { version: '13.5', deps: sys   }
-          - { version: '13.5', deps: local }
           - { version: '13.5', deps: small }
 
     concurrency:

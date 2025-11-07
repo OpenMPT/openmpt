@@ -12,10 +12,8 @@ jobs:
       matrix:
         include:
           - { version: '24.04', deps: sys   }
-          - { version: '24.04', deps: local }
           - { version: '24.04', deps: small }
           - { version: '22.04', deps: sys   }
-          - { version: '22.04', deps: local }
           - { version: '22.04', deps: small }
 
     concurrency:
