@@ -8,6 +8,9 @@ is just a high-level summary.
 ### libopenmpt 0.5.40-pre
 
  *  mpg123: Update to v1.33.3 (2025-10-05).
+ *  minimp3: Update to fork
+    <https://github.com/manxorist/minimp3/releases/tag/openmpt-2024-08-15-v4>
+    commit 2116754771b79347ad2f39127abace2a093c383e (2024-08-15).
 
 ### libopenmpt 0.5.39 (2025-09-06)
 
