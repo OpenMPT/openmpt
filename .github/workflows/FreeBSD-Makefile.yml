@@ -1,15 +1,26 @@
-name: FreeBSD 14.3 Makefile
+name: FreeBSD Makefile
 
 on:
   push:
     branches: [ OpenMPT-1.30 ]
 
-concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
-
 jobs:
   build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '14.3', deps: sys   }
+          - { version: '14.3', deps: local }
+          - { version: '14.3', deps: small }
+          - { version: '13.5', deps: sys   }
+          - { version: '13.5', deps: local }
+          - { version: '13.5', deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
 
     runs-on: ubuntu-24.04
 
@@ -22,7 +33,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.3'
+        version: ${{matrix.version}}
         shell: bash
         sync_files: runner-to-vm
         shutdown_vm: false
@@ -33,7 +44,7 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.3'
+        version: ${{matrix.version}}
         shell: bash
         sync_files: false
         shutdown_vm: false
@@ -46,31 +57,31 @@ jobs:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.3'
+        version: ${{matrix.version}}
         shell: bash
         sync_files: false
         shutdown_vm: false
         run: |
-          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
       uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.3'
+        version: ${{matrix.version}}
         shell: bash
         sync_files: false
         shutdown_vm: false
         run: |
-          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 AUTO_DEPS=1 check
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
     - name: Shutdown VM
       uses: cross-platform-actions/action@v0.29.0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
-        version: '14.3'
+        version: ${{matrix.version}}
         shell: bash
         sync_files: false
         shutdown_vm: true
