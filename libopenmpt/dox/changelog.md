@@ -9,8 +9,8 @@ is just a high-level summary.
 
  *  mpg123: Update to v1.33.3 (2025-10-05).
  *  minimp3: Update to fork
-    <https://github.com/manxorist/minimp3/releases/tag/openmpt-2024-08-15-v4>
-    commit 2116754771b79347ad2f39127abace2a093c383e (2024-08-15).
+    <https://github.com/manxorist/minimp3/releases/tag/openmpt-2025-11-07-v5>
+    commit ec51f21ef59ecf6d87bdcb028fe8f76fe761e0fe (2025-11-07).
 
 ### libopenmpt 0.5.39 (2025-09-06)
 
