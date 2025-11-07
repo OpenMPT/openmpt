@@ -1,0 +1,36 @@
+name: Ubuntu Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.29 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '24.04', deps: sys   }
+          - { version: '24.04', deps: small }
+          - { version: '22.04', deps: sys   }
+          - { version: '22.04', deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-${{matrix.version}}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: install dependencies
+      run: sudo apt-get update && sudo apt-get install -y subversion libxml-xpath-perl git mawk zip unzip p7zip xz-utils make binutils gcc g++ clang tcc pcc pkg-config help2man doxygen autoconf autoconf-archive automake libtool ccache zlib1g-dev libmpg123-dev libogg-dev libvorbis-dev portaudio19-dev libpulse-dev libsdl2-dev libflac-dev libsndfile1-dev libltdl-dev
+    - name: setup parallel make
+      run: echo "MAKEFLAGS=-j$(nproc)" >> $GITHUB_ENV
+    - name: Build
+      run: |
+        make STRICT=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: Test
+      run: |
+        make STRICT=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
