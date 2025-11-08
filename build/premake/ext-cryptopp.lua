@@ -15,6 +15,13 @@
 			}
 		filter {}
 	end
+	if MPT_MSVC_AT_LEAST(2022) then
+		filter {}
+			defines {
+				"_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS",
+			}
+		filter {}
+	end
 	filter {}
 	-- cat cryptlib.vcxproj | grep 'ClInclude Include' | awk '{print $2;}' | sed 's/Include=//g' | sed 's/"//g' | sed 's/^/\t\t"..\/..\/include\/cryptopp\//g' | sed 's/$/",/g'
 	files {
