@@ -137,7 +137,7 @@ WAVEncoder::WAVEncoder()
 {
 	Encoder::Traits traits;
 	traits.fileExtension = MPT_NATIVE_PATH("wav");
-	traits.fileShortDescription = MPT_USTRING("Wave");
+	traits.fileShortDescription = MPT_USTRING("WAV");
 	traits.fileDescription = MPT_USTRING("Microsoft RIFF Wave");
 	traits.encoderSettingsName = MPT_USTRING("Wave");
 	traits.canTags = true;

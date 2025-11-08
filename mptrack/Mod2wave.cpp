@@ -452,19 +452,19 @@ void CWaveConvert::FillFormats()
 			switch(format.encoding)
 			{
 			case Encoder::Format::Encoding::Float:
-				description = MPT_UFORMAT("{} Bit Floating Point")(format.bits);
+				description = MPT_UFORMAT("{} Bit Floating Point PCM")(format.bits);
 				break;
 			case Encoder::Format::Encoding::Integer:
-				description = MPT_UFORMAT("{} Bit")(format.bits);
+				description = MPT_UFORMAT("{} Bit linear PCM")(format.bits);
 				break;
 			case Encoder::Format::Encoding::Alaw:
-				description = U_("A-law");
+				description = U_("A-law PCM");
 				break;
 			case Encoder::Format::Encoding::ulaw:
-				description = MPT_UTF8("\xce\xbc-law");
+				description = MPT_UTF8("\xce\xbc-law PCM");
 				break;
 			case Encoder::Format::Encoding::Unsigned:
-				description = MPT_UFORMAT("{} Bit (unsigned)")(format.bits);
+				description = MPT_UFORMAT("unsigned {} Bit linear PCM")(format.bits);
 				break;
 			}
 			if(showEndian && format.bits != 8 && format.encoding != Encoder::Format::Encoding::Alaw && format.encoding != Encoder::Format::Encoding::ulaw)
