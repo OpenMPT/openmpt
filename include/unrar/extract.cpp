@@ -712,6 +712,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           if (!CheckWinLimit(Arc,ArcFileName))
             return false;
 
+          // 2025.09.03: OpenIndiana info is likely outdated, see https://www.illumos.org/issues/2000
           // Read+write mode is required to set "Compressed" attribute.
           // Other than that prefer the write only mode to avoid
           // OpenIndiana NAS problem with SetFileTime and read+write files.
@@ -847,6 +848,7 @@ bool CmdExtract::ExtractCurrentFile(Archive &Arc,size_t HeaderSize,bool &Repeat)
           // processed correctly.
           SlashToNative(Arc.FileHead.RedirName,RedirName);
 
+          // Ensure that target is inside of destination folder.
           ConvertPath(&RedirName,&RedirName);
 
           std::wstring NameExisting;
