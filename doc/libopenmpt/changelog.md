@@ -10,6 +10,10 @@ is just a high-level summary.
  *  [**Bug**] `build/download_externals.txt` was missing from `makefile` and
     `msvc` source archives.
 
+ *  IT: Files are no longer interpreted as ModPlug-made (thus disabling all
+    compatibility settings) just because instrument extensions are found (no
+    such files are currently known to exist in the wild).
+
  *  mpg123: Update to v1.33.3 (2025-10-05).
  *  miniz: Update to v3.1.0 (2025-09-21).
  *  minimp3: Update to fork
