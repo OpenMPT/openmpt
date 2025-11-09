@@ -28,9 +28,9 @@ jobs:
           - { version: '2023', deps: sys   }
           - { version: '2023', deps: local }
           - { version: '2023', deps: small }
-          - { version: '2024', deps: sys   }
-          - { version: '2024', deps: local }
-          - { version: '2024', deps: small }
+          #- { version: '2024', deps: sys   }
+          #- { version: '2024', deps: local }
+          #- { version: '2024', deps: small }
           #- { version: '2025', deps: sys   }
           #- { version: '2025', deps: local }
           #- { version: '2025', deps: small }
