@@ -139,7 +139,7 @@ struct GetTickCount_clock {
 		return time_point{duration{std::chrono::milliseconds{now_raw()}}};
 	}
 };
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && !defined(LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK)
 static_assert(std::chrono::is_clock<GetTickCount_clock>::value);
 #endif
 
@@ -172,7 +172,7 @@ struct high_resolution_clock {
 		return std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	}
 };
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && !defined(LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK)
 static_assert(std::chrono::is_clock<high_resolution_clock>::value);
 #endif
 
@@ -196,7 +196,7 @@ struct steady_clock {
 		return std::chrono::steady_clock::now().time_since_epoch().count();
 	}
 };
-#if MPT_CXX_AT_LEAST(20)
+#if MPT_CXX_AT_LEAST(20) && !defined(LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK)
 static_assert(std::chrono::is_clock<steady_clock>::value);
 #endif
 

@@ -352,6 +352,9 @@
 #endif
 
 #if MPT_CXX_AT_LEAST(20)
+#if MPT_LIBCXX_LLVM_BEFORE(22000)
+#define LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK
+#endif
 #if MPT_LIBCXX_MS && MPT_OS_WINDOWS
 #if MPT_WIN_BEFORE(MPT_WIN_10_1903)
 // std::chrono timezones require Windows 10 1903 with VS2022 as of 2022-01-22.
