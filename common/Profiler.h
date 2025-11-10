@@ -16,10 +16,15 @@
 #include "mpt/mutex/mutex.hpp"
 
 #include "mptCPU.h"
+#include "mptTime.h"
 
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <chrono>
+#endif
 #include <optional>
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <ratio>
+#endif
 #include <string>
 #include <vector>
 
@@ -60,9 +65,11 @@ namespace profiler
 
 struct tsc_clock {
 	using rep = uint64;
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	//using period = std::ratio;
 	//using duration = std::chrono::duration<rep, period>;
 	//using time_point = std::chrono::time_point<tsc_clock>;
+#endif
 	static inline constexpr bool is_steady = false;
 	static inline constexpr bool is_dynamic = true;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
@@ -74,7 +81,9 @@ struct tsc_clock {
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		return __rdtsc();
 	}
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	//[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept;
+#endif
 };
 
 using highres_clock = tsc_clock;
@@ -88,9 +97,11 @@ using default_clock = tsc_clock;
 
 struct QueryPerformanceCounter_clock {
 	using rep = uint64;
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	//using period = std::ratio;
 	//using duration = std::chrono::duration<rep, period>;
 	//using time_point = std::chrono::time_point<QueryPerformanceCounter_clock>;
+#endif
 	static inline constexpr bool is_steady = false;
 	static inline constexpr bool is_dynamic = true;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
@@ -108,7 +119,9 @@ struct QueryPerformanceCounter_clock {
 		QueryPerformanceCounter(&result);
 		return result.QuadPart;
 	}
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	//[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept;
+#endif
 };
 
 struct GetTickCount_clock {
@@ -117,9 +130,11 @@ struct GetTickCount_clock {
 #else
 	using rep = uint32;
 #endif
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	using period = std::milli;
 	using duration = std::chrono::duration<rep, period>;
 	using time_point = std::chrono::time_point<GetTickCount_clock>;
+#endif
 	static inline constexpr bool is_steady = true;
 	static inline constexpr bool is_dynamic = false;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
@@ -135,9 +150,11 @@ struct GetTickCount_clock {
 		return GetTickCount();
 #endif
 	}
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
 		return time_point{duration{std::chrono::milliseconds{now_raw()}}};
 	}
+#endif
 };
 #if MPT_CXX_AT_LEAST(20) && !defined(LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK)
 static_assert(std::chrono::is_clock<GetTickCount_clock>::value);
@@ -148,7 +165,7 @@ using fast_clock = GetTickCount_clock;
 
 using default_clock = QueryPerformanceCounter_clock;
 
-#else
+#elif !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 
 #define MPT_PROFILER_TSC_CLOCK 0
 
@@ -205,7 +222,37 @@ using fast_clock = steady_clock;
 
 using default_clock = high_resolution_clock;
 
-#endif // MPT_OS_WINDOWS
+#else
+
+#define MPT_PROFILER_TSC_CLOCK 0
+
+struct default_system_clock {
+	using rep = mpt::chrono::default_system_clock::rep;
+	//using period = mpt::chrono::default_system_clock::period;
+	using duration = mpt::chrono::default_system_clock::duration;
+	using time_point = mpt::chrono::default_system_clock::time_point;
+	static inline constexpr bool is_steady = mpt::chrono::default_system_clock::is_steady;
+	static inline constexpr bool is_dynamic = false;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		return 0.000'000'001;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return 1'000'000'000.0;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
+		return mpt::chrono::default_system_clock::now();
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
+		return mpt::chrono::default_system_clock::to_unix_nanoseconds(mpt::chrono::default_system_clock::now());
+	}
+};
+
+using highres_clock = default_system_clock;
+using fast_clock = default_system_clock;
+
+using default_clock = default_system_clock;
+
+#endif
 
 
 } // namespace profiler
