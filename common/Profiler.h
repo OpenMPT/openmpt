@@ -19,7 +19,11 @@
 #include <vector>
 
 #if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
-#if MPT_COMPILER_MSVC
+#if MPT_COMPILER_CLANG
+#include <x86intrin.h>
+#elif MPT_COMPILER_GCC
+#include <x86intrin.h>
+#elif MPT_COMPILER_MSVC
 #include <intrin.h>
 #endif
 #include <immintrin.h>
