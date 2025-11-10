@@ -18,6 +18,17 @@
 #include <string>
 #include <vector>
 
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+#if MPT_COMPILER_MSVC
+#include <intrin.h>
+#endif
+#include <immintrin.h>
+#elif MPT_OS_WINDOWS
+#include <windows.h>
+#else
+#include <chrono>
+#endif
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -27,6 +38,85 @@ OPENMPT_NAMESPACE_BEGIN
 //#define USE_PROFILER
 
 #endif
+
+
+namespace mpt
+{
+
+namespace profiler
+{
+
+
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+
+#define MPT_PROFILER_TSC_CLOCK 1
+
+struct tsc_clock {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+		return __rdtsc();
+	}
+};
+
+using highres_clock = tsc_clock;
+using fast_clock = tsc_clock;
+
+using default_clock = tsc_clock;
+
+#elif MPT_OS_WINDOWS
+
+#define MPT_PROFILER_TSC_CLOCK 0
+
+struct QueryPerformanceCounter_clock {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+		LARGE_INTEGER result{};
+		QueryPerformanceCounter(&result);
+		return result.QuadPart;
+	}
+};
+
+struct GetTickCount_clock {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+		return GetTickCount64();
+#else
+		return GetTickCount();
+#endif
+	}
+};
+
+using highres_clock = QueryPerformanceCounter_clock;
+using fast_clock = GetTickCount_clock;
+
+using default_clock = QueryPerformanceCounter_clock;
+
+#else
+
+#define MPT_PROFILER_TSC_CLOCK 0
+
+struct high_resolution_clock {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+		return std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	}
+};
+
+struct steady_clock {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+		return std::chrono::steady_clock::now().time_since_epoch().count();
+	}
+};
+
+using highres_clock = high_resolution_clock;
+using fast_clock = steady_clock;
+
+using default_clock = high_resolution_clock;
+
+#endif // MPT_OS_WINDOWS
+
+
+} // namespace profiler
+
+} // namespace mpt
+
 
 #ifdef USE_PROFILER
 
