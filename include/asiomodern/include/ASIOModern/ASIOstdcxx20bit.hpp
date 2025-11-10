@@ -26,7 +26,7 @@ namespace ASIO {
 inline namespace ASIO_VERSION_NAMESPACE {
 namespace stdcxx20 {
 template <class To, class From>
-typename inline std::enable_if<(sizeof(To) == sizeof(From)) && std::is_trivially_copyable<From>::value && std::is_trivial<To>::value, To>::type bit_cast(const From & src) noexcept {
+typename inline std::enable_if<(sizeof(To) == sizeof(From)) && std::is_trivially_copyable<From>::value && std::is_trivially_copyable<To>::value, To>::type bit_cast(const From & src) noexcept {
 	To dst;
 	std::memcpy(&dst, &src, sizeof(To));
 	return dst;
