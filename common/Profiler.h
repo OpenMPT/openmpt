@@ -15,6 +15,11 @@
 
 #include "mpt/mutex/mutex.hpp"
 
+#include "mptCPU.h"
+
+#include <chrono>
+#include <optional>
+#include <ratio>
 #include <string>
 #include <vector>
 
@@ -29,8 +34,6 @@
 #include <immintrin.h>
 #elif MPT_OS_WINDOWS
 #include <windows.h>
-#else
-#include <chrono>
 #endif
 
 
@@ -56,9 +59,22 @@ namespace profiler
 #define MPT_PROFILER_TSC_CLOCK 1
 
 struct tsc_clock {
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+	using rep = uint64;
+	//using period = std::ratio;
+	//using duration = std::chrono::duration<rep, period>;
+	//using time_point = std::chrono::time_point<tsc_clock>;
+	static inline constexpr bool is_steady = false;
+	static inline constexpr bool is_dynamic = true;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		return std::nullopt;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return std::nullopt;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		return __rdtsc();
 	}
+	//[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept;
 };
 
 using highres_clock = tsc_clock;
@@ -71,22 +87,61 @@ using default_clock = tsc_clock;
 #define MPT_PROFILER_TSC_CLOCK 0
 
 struct QueryPerformanceCounter_clock {
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+	using rep = uint64;
+	//using period = std::ratio;
+	//using duration = std::chrono::duration<rep, period>;
+	//using time_point = std::chrono::time_point<QueryPerformanceCounter_clock>;
+	static inline constexpr bool is_steady = false;
+	static inline constexpr bool is_dynamic = true;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		LARGE_INTEGER result{};
+		QueryPerformanceFrequency(&result);
+		return 1.0 / mpt::saturate_round<double>(result.QuadPart);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		LARGE_INTEGER result{};
+		QueryPerformanceFrequency(&result);
+		return mpt::saturate_round<double>(result.QuadPart);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		LARGE_INTEGER result{};
 		QueryPerformanceCounter(&result);
 		return result.QuadPart;
 	}
+	//[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept;
 };
 
 struct GetTickCount_clock {
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+	using rep = uint64;
+#else
+	using rep = uint32;
+#endif
+	using period = std::milli;
+	using duration = std::chrono::duration<rep, period>;
+	using time_point = std::chrono::time_point<GetTickCount_clock>;
+	static inline constexpr bool is_steady = true;
+	static inline constexpr bool is_dynamic = false;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		return 0.001;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return 1000.0;
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 		return GetTickCount64();
 #else
 		return GetTickCount();
 #endif
 	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
+		return time_point{duration{std::chrono::milliseconds{now_raw()}}};
+	}
 };
+#if MPT_CXX_AT_LEAST(20)
+static_assert(std::chrono::is_clock<GetTickCount_clock>::value);
+#endif
 
 using highres_clock = QueryPerformanceCounter_clock;
 using fast_clock = GetTickCount_clock;
@@ -98,16 +153,52 @@ using default_clock = QueryPerformanceCounter_clock;
 #define MPT_PROFILER_TSC_CLOCK 0
 
 struct high_resolution_clock {
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+	using rep = std::chrono::high_resolution_clock::rep;
+	using period = std::chrono::high_resolution_clock::period;
+	using duration = std::chrono::high_resolution_clock::duration;
+	using time_point = std::chrono::high_resolution_clock::time_point;
+	static inline constexpr bool is_steady = std::chrono::high_resolution_clock::is_steady;
+	static inline constexpr bool is_dynamic = false;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		return static_cast<double>(period::num) / static_cast<double>(period::den);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return static_cast<double>(period::den) / static_cast<double>(period::num);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
+		return std::chrono::high_resolution_clock::now();
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		return std::chrono::high_resolution_clock::now().time_since_epoch().count();
 	}
 };
+#if MPT_CXX_AT_LEAST(20)
+static_assert(std::chrono::is_clock<high_resolution_clock>::value);
+#endif
 
 struct steady_clock {
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint64 now() noexcept {
+	using rep = std::chrono::steady_clock::rep;
+	using period = std::chrono::steady_clock::period;
+	using duration = std::chrono::steady_clock::duration;
+	using time_point = std::chrono::steady_clock::time_point;
+	static inline constexpr bool is_steady = std::chrono::steady_clock::is_steady;
+	static inline constexpr bool is_dynamic = false;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
+		return static_cast<double>(period::num) / static_cast<double>(period::den);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return static_cast<double>(period::den) / static_cast<double>(period::num);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
+		return std::chrono::steady_clock::now();
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		return std::chrono::steady_clock::now().time_since_epoch().count();
 	}
 };
+#if MPT_CXX_AT_LEAST(20)
+static_assert(std::chrono::is_clock<steady_clock>::value);
+#endif
 
 using highres_clock = high_resolution_clock;
 using fast_clock = steady_clock;
