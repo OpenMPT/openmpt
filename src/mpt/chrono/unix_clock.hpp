@@ -30,6 +30,8 @@ namespace chrono {
 
 struct unix_clock {
 
+	using rep = int64;
+
 	// int64 counts 1s since 1970-01-01T00:00Z
 	struct time_point {
 		int64 seconds = 0;
@@ -43,6 +45,8 @@ struct unix_clock {
 	};
 
 	using duration = int64;
+
+	static inline constexpr bool is_steady = false;
 
 	static int64 to_unix_seconds(time_point tp) {
 		return tp.seconds;

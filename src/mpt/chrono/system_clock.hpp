@@ -32,9 +32,13 @@ namespace chrono {
 
 struct system_clock {
 
+	using rep = std::chrono::system_clock::rep;
+
 	using time_point = std::chrono::system_clock::time_point;
 
 	using duration = std::chrono::system_clock::duration;
+
+	static inline constexpr bool is_steady = std::chrono::system_clock::is_steady;
 
 	static int64 to_unix_seconds(time_point tp) {
 		return static_cast<int64>(std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count());
