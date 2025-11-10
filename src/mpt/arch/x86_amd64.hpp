@@ -65,7 +65,7 @@ namespace x86 {
 
 
 
-using feature_flags = mpt::arch::basic_feature_flags<uint32>;
+using feature_flags = mpt::arch::basic_feature_flags<uint64>;
 
 
 using mode_flags = mpt::arch::basic_feature_flags<uint8>;
@@ -76,44 +76,46 @@ using mode_flags = mpt::arch::basic_feature_flags<uint8>;
 
 namespace feature {
 inline constexpr feature_flags none           = feature_flags{};
-inline constexpr feature_flags intel386       = feature_flags{ 0x0000'0001 };
-inline constexpr feature_flags fpu            = feature_flags{ 0x0000'0002 };
-inline constexpr feature_flags fsin           = feature_flags{ 0x0000'0004 };
-inline constexpr feature_flags intel486       = feature_flags{ 0x0000'0008 };  // XADD, BSWAP, CMPXCHG
-inline constexpr feature_flags cpuid          = feature_flags{ 0x0000'0010 };
-inline constexpr feature_flags tsc            = feature_flags{ 0x0000'0020 };
-inline constexpr feature_flags cx8            = feature_flags{ 0x0000'0040 };
-inline constexpr feature_flags cmov           = feature_flags{ 0x0000'0080 };
-inline constexpr feature_flags mmx            = feature_flags{ 0x0000'0100 };
-inline constexpr feature_flags mmxext         = feature_flags{ 0x0000'0200 };
-inline constexpr feature_flags x3dnow         = feature_flags{ 0x0000'0400 };
-inline constexpr feature_flags x3dnowext      = feature_flags{ 0x0000'0800 };
-inline constexpr feature_flags x3dnowprefetch = feature_flags{ 0x0000'1000 };
-inline constexpr feature_flags fxsr           = feature_flags{ 0x0000'2000 };
-inline constexpr feature_flags sse            = feature_flags{ 0x0000'4000 };
-inline constexpr feature_flags sse2           = feature_flags{ 0x0000'8000 };
-inline constexpr feature_flags sse3           = feature_flags{ 0x0001'0000 };
-inline constexpr feature_flags ssse3          = feature_flags{ 0x0002'0000 };
-inline constexpr feature_flags sse4_1         = feature_flags{ 0x0004'0000 };
-inline constexpr feature_flags sse4_2         = feature_flags{ 0x0008'0000 };
-inline constexpr feature_flags xsave          = feature_flags{ 0x0010'0000 };
-inline constexpr feature_flags avx            = feature_flags{ 0x0020'0000 };
-inline constexpr feature_flags avx2           = feature_flags{ 0x0040'0000 };
-inline constexpr feature_flags cx16           = feature_flags{ 0x0080'0000 };
-inline constexpr feature_flags lahf           = feature_flags{ 0x0100'0000 };
-inline constexpr feature_flags popcnt         = feature_flags{ 0x0200'0000 };
-inline constexpr feature_flags bmi1           = feature_flags{ 0x0400'0000 };
-inline constexpr feature_flags bmi2           = feature_flags{ 0x0800'0000 };
-inline constexpr feature_flags f16c           = feature_flags{ 0x1000'0000 };
-inline constexpr feature_flags fma            = feature_flags{ 0x2000'0000 };
-inline constexpr feature_flags lzcnt          = feature_flags{ 0x4000'0000 };
-inline constexpr feature_flags movbe          = feature_flags{ 0x8000'0000 };
+inline constexpr feature_flags intel386       = feature_flags{ 1ull <<  0 };
+inline constexpr feature_flags fpu            = feature_flags{ 1ull <<  1 };
+inline constexpr feature_flags fsin           = feature_flags{ 1ull <<  2 };
+inline constexpr feature_flags intel486       = feature_flags{ 1ull <<  3 };  // XADD, BSWAP, CMPXCHG
+inline constexpr feature_flags cpuid          = feature_flags{ 1ull <<  4 };
+inline constexpr feature_flags tsc            = feature_flags{ 1ull <<  5 };
+inline constexpr feature_flags cx8            = feature_flags{ 1ull <<  6 };
+inline constexpr feature_flags cmov           = feature_flags{ 1ull <<  7 };
+inline constexpr feature_flags mmx            = feature_flags{ 1ull <<  8 };
+inline constexpr feature_flags mmxext         = feature_flags{ 1ull <<  9 };
+inline constexpr feature_flags x3dnow         = feature_flags{ 1ull << 10 };
+inline constexpr feature_flags x3dnowext      = feature_flags{ 1ull << 11 };
+inline constexpr feature_flags x3dnowprefetch = feature_flags{ 1ull << 12 };
+inline constexpr feature_flags fxsr           = feature_flags{ 1ull << 13 };
+inline constexpr feature_flags sse            = feature_flags{ 1ull << 14 };
+inline constexpr feature_flags sse2           = feature_flags{ 1ull << 15 };
+inline constexpr feature_flags sse3           = feature_flags{ 1ull << 16 };
+inline constexpr feature_flags ssse3          = feature_flags{ 1ull << 17 };
+inline constexpr feature_flags sse4_1         = feature_flags{ 1ull << 18 };
+inline constexpr feature_flags sse4_2         = feature_flags{ 1ull << 19 };
+inline constexpr feature_flags rdtscp         = feature_flags{ 1ull << 20 };
+inline constexpr feature_flags xsave          = feature_flags{ 1ull << 21 };
+inline constexpr feature_flags avx            = feature_flags{ 1ull << 22 };
+inline constexpr feature_flags avx2           = feature_flags{ 1ull << 23 };
+inline constexpr feature_flags cx16           = feature_flags{ 1ull << 24 };
+inline constexpr feature_flags lahf           = feature_flags{ 1ull << 25 };
+inline constexpr feature_flags popcnt         = feature_flags{ 1ull << 26 };
+inline constexpr feature_flags bmi1           = feature_flags{ 1ull << 27 };
+inline constexpr feature_flags bmi2           = feature_flags{ 1ull << 28 };
+inline constexpr feature_flags f16c           = feature_flags{ 1ull << 29 };
+inline constexpr feature_flags fma            = feature_flags{ 1ull << 30 };
+inline constexpr feature_flags lzcnt          = feature_flags{ 1ull << 31 };
+inline constexpr feature_flags movbe          = feature_flags{ 1ull << 32 };
+inline constexpr feature_flags tscinvariant   = feature_flags{ 1ull << 33 };
 } // namespace feature
 
 namespace mode {
-inline constexpr mode_flags base      = mode_flags{ 0x00 };
-inline constexpr mode_flags xmm128sse = mode_flags{ 0x01 };
-inline constexpr mode_flags ymm256avx = mode_flags{ 0x02 };
+inline constexpr mode_flags base      = mode_flags{};
+inline constexpr mode_flags xmm128sse = mode_flags{ 1u << 0 };
+inline constexpr mode_flags ymm256avx = mode_flags{ 1u << 1 };
 } // namespace mode
 
 namespace featureset {
@@ -265,6 +267,9 @@ enum class vendor : uint8 {
 	#endif
 	#ifdef MPT_ARCH_X86_SSE4_2
 		flags |= feature::sse4_2;
+	#endif
+	#ifdef MPT_ARCH_X86_RDTSCP
+		flags |= feature::rdtscp;
 	#endif
 	#ifdef MPT_ARCH_X86_XSAVE
 		flags |= feature::xsave;
@@ -1313,6 +1318,7 @@ public:
 #endif // !MPT_ARCH_AMD64
 						Features |= (ExtendedFeatureFlags.c & (1u <<  0)) ? (feature::lahf) : feature::none;
 						Features |= (ExtendedFeatureFlags.c & (1u <<  5)) ? (feature::lzcnt) : feature::none;
+						Features |= (ExtendedFeatureFlags.d & (1u << 27)) ? (feature::rdtscp) : feature::none;
 						if (x3dnowknown) {
 							Features |= (ExtendedFeatureFlags.d & (1u << 31)) ? (feature::x3dnow) : feature::none;
 						}
@@ -1326,6 +1332,12 @@ public:
 					}
 					if (ExtendedVendorString.a >= 0x8000'0004u) {
 						BrandID = cpuid(0x8000'0002u).as_text16() + cpuid(0x8000'0003u).as_text16() + cpuid(0x8000'0004u).as_text16();
+					}
+					if (ExtendedVendorString.a >= 0x8000'0007u) {
+						// clang-format off
+						cpuid_result ExtendedFeatureFlags = cpuid(0x8000'0007u);
+						Features |= (ExtendedFeatureFlags.d & (1u <<  8)) ? (feature::tscinvariant) : feature::none;
+						// clang-format on
 					}
 				}
 			}

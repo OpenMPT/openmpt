@@ -252,6 +252,9 @@
 	#endif
 #endif
 #if defined(__AVX__)
+	#ifndef MPT_ARCH_X86_RDTSCP
+	#define MPT_ARCH_X86_RDTSCP  // assume AVX implies RDTSCP
+	#endif
 	#define MPT_ARCH_X86_3DNOWPREFETCH
 	#ifndef MPT_ARCH_X86_XSAVE
 	#define MPT_ARCH_X86_XSAVE
@@ -342,6 +345,9 @@
 	#define MPT_ARCH_X86_XSAVE
 #endif
 #ifdef __AVX__
+	#ifndef MPT_ARCH_X86_RDTSCP
+	#define MPT_ARCH_X86_RDTSCP  // assume AVX implies RDTSCP
+	#endif
 	#define MPT_ARCH_X86_AVX
 #endif
 #ifdef __AVX2__
