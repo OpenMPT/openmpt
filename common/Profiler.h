@@ -96,12 +96,12 @@ struct QueryPerformanceCounter_clock {
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
 		LARGE_INTEGER result{};
 		QueryPerformanceFrequency(&result);
-		return 1.0 / mpt::saturate_round<double>(result.QuadPart);
+		return 1.0 / static_cast<double>(result.QuadPart);
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		LARGE_INTEGER result{};
 		QueryPerformanceFrequency(&result);
-		return mpt::saturate_round<double>(result.QuadPart);
+		return static_cast<double>(result.QuadPart);
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		LARGE_INTEGER result{};
