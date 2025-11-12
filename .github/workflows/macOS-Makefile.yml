@@ -180,8 +180,9 @@ jobs:
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.14', deps: small, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
           - { host: macos-14, compiler: '15.3', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
-          - { host: macos-13, compiler: '14.2', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
-          - { host: macos-13, compiler: '14.1', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.2', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.1', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.0', arch: x86_64, target: '10.13', deps: small, check: true , ancient: false }
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-${{matrix.arch}}-${{matrix.target}}-${{matrix.deps}}
       cancel-in-progress: true
