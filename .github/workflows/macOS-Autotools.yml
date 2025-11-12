@@ -19,9 +19,9 @@ jobs:
           - { host: macos-15, compiler: '16.0' }
           - { host: macos-14, compiler: '15.4' }
           - { host: macos-14, compiler: '15.3' }
-          - { host: macos-13, compiler: '15.2' }
-          - { host: macos-13, compiler: '14.2' }
-          - { host: macos-13, compiler: '14.1' }
+          - { host: macos-14, compiler: '15.2' }
+          - { host: macos-14, compiler: '15.1' }
+          - { host: macos-14, compiler: '15.0' }
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.host}}-${{matrix.compiler}}-autotools
       cancel-in-progress: true
