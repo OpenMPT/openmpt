@@ -56,7 +56,7 @@ VersionInfoTextVersion={#GetAppVersion}
 VersionInfoVersion={#GetAppVersion}
 WizardImageFile=install-big.bmp
 WizardSmallImageFile=install-small.bmp
-WizardStyle=modern
+WizardStyle=modern dynamic
 
 
 
