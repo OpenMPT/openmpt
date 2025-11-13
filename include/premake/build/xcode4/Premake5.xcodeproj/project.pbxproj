@@ -308,6 +308,7 @@
 		636FFC7C75273C6EEA952ABC /* test_response.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_response.lua; path = ../../modules/gmakelegacy/tests/cs/test_response.lua; sourceTree = "<group>"; };
 		64F67C6477205916AB1142A4 /* test_dotnet.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_dotnet.lua; path = ../../tests/tools/test_dotnet.lua; sourceTree = "<group>"; };
 		65793DFD035A3EAFDAD8843D /* vs2005_dotnetbase.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = vs2005_dotnetbase.lua; path = ../../modules/vstudio/vs2005_dotnetbase.lua; sourceTree = "<group>"; };
+		65F8504BD9E0C7FDFC2E768B /* vs2026_solution.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = vs2026_solution.lua; path = ../../modules/vstudio/vs2026_solution.lua; sourceTree = "<group>"; };
 		666C5DAAFC956F9CBDFBCBEA /* test_config_props.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_config_props.lua; path = ../../modules/vstudio/tests/vc2010/test_config_props.lua; sourceTree = "<group>"; };
 		66E9417D97CD396FAAE56FBD /* detoken.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = detoken.lua; path = ../../src/base/detoken.lua; sourceTree = "<group>"; };
 		689F168DFE15D5BF6CB22CCD /* vs2005.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = vs2005.lua; path = ../../modules/vstudio/vs2005.lua; sourceTree = "<group>"; };
@@ -419,6 +420,7 @@
 		A5B78431CBDDB3E332E4AA71 /* scripts.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = scripts.c; path = ../../src/scripts.c; sourceTree = "<group>"; };
 		A60C907DFC99FAEFD5130EBD /* json.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = json.lua; path = ../../src/base/json.lua; sourceTree = "<group>"; };
 		A80B5805EC1F2937DFF0AE45 /* _preload.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = _preload.lua; path = ../../modules/gmakelegacy/_preload.lua; sourceTree = "<group>"; };
+		A84FDC533DC69B85AC62F293 /* vs2026.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = vs2026.lua; path = ../../modules/vstudio/vs2026.lua; sourceTree = "<group>"; };
 		A92853A26FB64B14DDB871E2 /* test_aliasing.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_aliasing.lua; path = ../../tests/base/test_aliasing.lua; sourceTree = "<group>"; };
 		AA2266A900AFD11BD928E4E9 /* tree.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = tree.lua; path = ../../src/base/tree.lua; sourceTree = "<group>"; };
 		AA532CE5407C3ED701E29B25 /* test_project_refs.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_project_refs.lua; path = ../../modules/vstudio/tests/cs2005/test_project_refs.lua; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 		C13F13F2753B2D2456ED6A32 /* test_gmake_perfile_flags.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_gmake_perfile_flags.lua; path = ../../modules/gmake/tests/test_gmake_perfile_flags.lua; sourceTree = "<group>"; };
 		C246BDE0A163D8127D6D3420 /* test_location.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_location.lua; path = ../../tests/project/test_location.lua; sourceTree = "<group>"; };
 		C3179DA15940AF931AA70BE1 /* test_build_events.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_build_events.lua; path = ../../modules/vstudio/tests/cs2005/test_build_events.lua; sourceTree = "<group>"; };
+		C39578297791915B5943CE69 /* test_configurations.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_configurations.lua; path = ../../modules/vstudio/tests/sln2026/test_configurations.lua; sourceTree = "<group>"; };
 		C4B70CF51FF86067F352AB35 /* config.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = config.lua; path = ../../src/base/config.lua; sourceTree = "<group>"; };
 		C56A0ECDA40CAA3F58EEAD0D /* test_project.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_project.lua; path = ../../modules/vstudio/tests/vc200x/test_project.lua; sourceTree = "<group>"; };
 		C7099BC0210AB2B2E851AA00 /* test_tokens.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_tokens.lua; path = ../../modules/vstudio/tests/vc2010/test_tokens.lua; sourceTree = "<group>"; };
@@ -553,6 +556,7 @@
 		FA33E12BBD9FA2DDFC43476B /* _manifest.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = _manifest.lua; path = ../../src/_manifest.lua; sourceTree = "<group>"; };
 		FA39980DF39F997FE73AF64D /* os.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = os.lua; path = ../../src/base/os.lua; sourceTree = "<group>"; };
 		FC29401C449A244E8938F65C /* premake5.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = premake5.lua; path = ../../premake5.lua; sourceTree = "<group>"; };
+		FCEBD1C7458B0FF968B6C807 /* test_projects.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_projects.lua; path = ../../modules/vstudio/tests/sln2026/test_projects.lua; sourceTree = "<group>"; };
 		FE2FF5660E152198FA88ABA6 /* test_lua_loaded_noenv.lua */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.lua; name = test_lua_loaded_noenv.lua; path = ../../tests/test_lua_loaded_noenv.lua; sourceTree = "<group>"; };
 		FFD4678270F7087426BDB5C2 /* string_hash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = string_hash.c; path = ../../src/host/string_hash.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -586,6 +590,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
+		059EDB9D9B159ACF09B1F1DD /* sln2026 */ = {
+			isa = PBXGroup;
+			children = (
+				C39578297791915B5943CE69 /* test_configurations.lua */,
+				FCEBD1C7458B0FF968B6C807 /* test_projects.lua */,
+			);
+			name = sln2026;
+			sourceTree = "<group>";
+		};
 		06812D8E5694C240D912F3CE /* tests */ = {
 			isa = PBXGroup;
 			children = (
@@ -746,6 +759,7 @@
 				79A6FD6FABA04821257F83AF /* fs2005 */,
 				2B5607AF78B8FDE1EED7FDEF /* linux */,
 				DBF103B77167C2E9E00419F7 /* sln2005 */,
+				059EDB9D9B159ACF09B1F1DD /* sln2026 */,
 				D94A20F50B436BA78522A735 /* vc200x */,
 				1839CDA74A331859C41253E7 /* vc2010 */,
 				2713ACAD590CF75FD2EC32ED /* vc2013 */,
@@ -1056,6 +1070,8 @@
 				DA21A4136F986345DE34BA53 /* vs2017.lua */,
 				47048797DC7B46C94B179DD7 /* vs2019.lua */,
 				CE8A154B6400D47DD29D2B8B /* vs2022.lua */,
+				A84FDC533DC69B85AC62F293 /* vs2026.lua */,
+				65F8504BD9E0C7FDFC2E768B /* vs2026_solution.lua */,
 				E2F621E9B119759B3827C829 /* vstudio.lua */,
 			);
 			name = vstudio;

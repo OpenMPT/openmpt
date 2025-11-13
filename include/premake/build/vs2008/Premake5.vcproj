@@ -800,6 +800,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\modules\vstudio\vs2026.lua"
+					>
+				</File>
+				<File
+					RelativePath="..\..\modules\vstudio\vs2026_solution.lua"
+					>
+				</File>
+				<File
 					RelativePath="..\..\modules\vstudio\vstudio.lua"
 					>
 				</File>
@@ -971,6 +979,18 @@
 						</File>
 						<File
 							RelativePath="..\..\modules\vstudio\tests\sln2005\test_shared_projects.lua"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="sln2026"
+						>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\sln2026\test_configurations.lua"
+							>
+						</File>
+						<File
+							RelativePath="..\..\modules\vstudio\tests\sln2026\test_projects.lua"
 							>
 						</File>
 					</Filter>

@@ -377,6 +377,8 @@
     <None Include="..\..\modules\vstudio\tests\sln2005\test_projects.lua" />
     <None Include="..\..\modules\vstudio\tests\sln2005\test_sections.lua" />
     <None Include="..\..\modules\vstudio\tests\sln2005\test_shared_projects.lua" />
+    <None Include="..\..\modules\vstudio\tests\sln2026\test_configurations.lua" />
+    <None Include="..\..\modules\vstudio\tests\sln2026\test_projects.lua" />
     <None Include="..\..\modules\vstudio\tests\vc200x\test_assembly_refs.lua" />
     <None Include="..\..\modules\vstudio\tests\vc200x\test_build_steps.lua" />
     <None Include="..\..\modules\vstudio\tests\vc200x\test_compiler_block.lua" />
@@ -468,6 +470,8 @@
     <None Include="..\..\modules\vstudio\vs2017.lua" />
     <None Include="..\..\modules\vstudio\vs2019.lua" />
     <None Include="..\..\modules\vstudio\vs2022.lua" />
+    <None Include="..\..\modules\vstudio\vs2026.lua" />
+    <None Include="..\..\modules\vstudio\vs2026_solution.lua" />
     <None Include="..\..\modules\vstudio\vstudio.lua" />
     <None Include="..\..\modules\xcode\LICENSE.TXT" />
     <None Include="..\..\modules\xcode\_manifest.lua" />

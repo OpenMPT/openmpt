@@ -146,10 +146,10 @@
 --    An array of symbols with the appropriate flag decorations.
 --
 
-	function clang.getdefines(defines)
+	function clang.getdefines(defines, cfg)
 
 		-- Just pass through to GCC for now
-		local flags = gcc.getdefines(defines)
+		local flags = gcc.getdefines(defines, cfg)
 		return flags
 
 	end
@@ -233,12 +233,10 @@
 --
 
 	clang.ldflags = {
-		architecture = {
-			x86 = "-m32",
-			x86_64 = "-m64",
+		architecture = table.merge(gcc.ldflags.architecture, {
 			WASM32 = "-m32",
 			WASM64 = "-m64",
-		},
+		}),
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
 		},
@@ -365,4 +363,8 @@
 			value = value .. "-" .. version
 		end
 		return value
+	end
+
+	function clang.gettooloutputext(tool)
+		return gcc.gettooloutputext(tool)
 	end

@@ -27,6 +27,29 @@
 
 
 --
+-- Check the selection of tools.
+--
+
+	function suite.tools_onDefaults()
+		prepare()
+		test.isequal("cl", msc.gettoolname(cfg, "cc"))
+		test.isequal("cl", msc.gettoolname(cfg, "cxx"))
+		test.isequal("lib", msc.gettoolname(cfg, "ar"))
+		test.isequal("rc", msc.gettoolname(cfg, "rc"))
+	end
+
+	function suite.tools_withMsc()
+		toolset "msc"
+		prepare()
+		test.isequal("cl", msc.gettoolname(cfg, "cc"))
+		test.isequal("cl", msc.gettoolname(cfg, "cxx"))
+		test.isequal("lib", msc.gettoolname(cfg, "ar"))
+		test.isequal("rc", msc.gettoolname(cfg, "rc"))
+	end
+
+
+
+--
 -- Check the optimization flags.
 --
 
@@ -340,14 +363,14 @@
 	function suite.cflags_onExternalIncludeDirs()
 		externalincludedirs { "/usr/local/include" }
 		prepare()
-		test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+		test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
 	function suite.cflags_onVs2008ExternalIncludeDirs()
 		p.action.set("vs2008")
 		externalincludedirs { "/usr/local/include" }
 		prepare()
-		test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+		test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
 	function suite.cflags_onVs2022ExternalIncludeDirs()
@@ -365,14 +388,14 @@
 function suite.cflags_onIncludeDirsAfter()
 	includedirsafter { "/usr/local/include" }
 	prepare()
-	test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+	test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
 end
 
 function suite.cflags_onVs2008IncludeDirsAfter()
 	p.action.set("vs2008")
 	includedirsafter { "/usr/local/include" }
 	prepare()
-	test.contains("-I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+	test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
 end
 
 function suite.cflags_onVs2022IncludeDirsAfter()
@@ -532,13 +555,37 @@ end
 	function suite.defines()
 		defines "DEF"
 		prepare()
+		p.escaper(p.quote)
 		test.contains({ '/D"DEF"' }, msc.getdefines(cfg.defines, cfg))
+		p.escaper()
+		test.contains({ '/DDEF' }, msc.getdefines(cfg.defines, cfg))
+	end
+
+	function suite.definesVar()
+		defines "DEF=42"
+		prepare()
+		p.escaper(p.quote)
+		test.contains({ '/D"DEF=42"' }, msc.getdefines(cfg.defines, cfg))
+		p.escaper()
+		test.contains({ '/DDEF=42' }, msc.getdefines(cfg.defines, cfg))
+	end
+
+	function suite.definesStringVar()
+		defines 'DEF="Hello world"'
+		prepare()
+		p.escaper(p.quote)
+		test.contains({ '/D"DEF=\\"Hello world\\""' }, msc.getdefines(cfg.defines, cfg))
+		p.escaper()
+		test.contains({ '/DDEF="Hello world"' }, msc.getdefines(cfg.defines, cfg))
 	end
 
 	function suite.undefines()
 		undefines "UNDEF"
 		prepare()
+		p.escaper(p.quote)
 		test.contains({ '/U"UNDEF"' }, msc.getundefines(cfg.undefines))
+		p.escaper()
+		test.contains({ '/UUNDEF' }, msc.getundefines(cfg.undefines))
 	end
 
 
@@ -715,25 +762,25 @@ end
 
 	function suite.cflags_onCharSetDefault()
 		prepare()
-		test.contains('/D"_UNICODE"', msc.getdefines(cfg.defines, cfg))
+		test.contains('/D_UNICODE', msc.getdefines(cfg.defines, cfg))
 	end
 
 	function suite.cflags_onCharSetUnicode()
 		characterset "Unicode"
 		prepare()
-		test.contains('/D"_UNICODE"', msc.getdefines(cfg.defines, cfg))
+		test.contains('/D_UNICODE', msc.getdefines(cfg.defines, cfg))
 	end
 
 	function suite.cflags_onCharSetMBCS()
 		characterset "MBCS"
 		prepare()
-		test.contains('/D"_MBCS"', msc.getdefines(cfg.defines, cfg))
+		test.contains('/D_MBCS', msc.getdefines(cfg.defines, cfg))
 	end
 
 	function suite.cflags_onCharSetASCII()
 		characterset "ASCII"
 		prepare()
-		test.excludes({'/D"_MBCS"', '/D"_UNICODE"'}, msc.getdefines(cfg.defines, cfg))
+		test.excludes({'/D_MBCS', '/D_UNICODE'}, msc.getdefines(cfg.defines, cfg))
 	end
 
 

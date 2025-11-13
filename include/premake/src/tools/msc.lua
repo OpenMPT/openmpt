@@ -239,9 +239,9 @@
 
 	msc.defines = {
 		characterset = {
-			Default = { '/D"_UNICODE"', '/D"UNICODE"' },
-			MBCS = '/D"_MBCS"',
-			Unicode = { '/D"_UNICODE"', '/D"UNICODE"' },
+			Default = { '/D_UNICODE', '/DUNICODE' },
+			MBCS = '/D_MBCS',
+			Unicode = { '/D_UNICODE', '/DUNICODE' },
 			ASCII = { },
 		}
 	}
@@ -260,7 +260,7 @@
 		end
 
 		for _, define in ipairs(defines) do
-			table.insert(result, '/D"' .. define .. '"')
+			table.insert(result, '/D' .. p.esc(define))
 		end
 
 		if cfg and cfg.exceptionhandling == p.OFF then
@@ -271,11 +271,7 @@
 	end
 
 	function msc.getundefines(undefines)
-		local result = {}
-		for _, undefine in ipairs(undefines) do
-			table.insert(result, '/U"' .. undefine .. '"')
-		end
-		return result
+		return table.translate(undefines, function (undefine) return '/U' .. p.esc(undefine) end)
 	end
 
 
@@ -312,7 +308,7 @@
 		local result = {}
 		for _, dir in ipairs(dirs) do
 			dir = p.tools.getrelative(cfg.project, dir)
-			table.insert(result, '-I' ..  p.quoted(dir))
+			table.insert(result, '/I' ..  p.quoted(dir))
 		end
 
 		for _, dir in ipairs(extdirs or {}) do
@@ -320,7 +316,7 @@
 			if isVersionGreaterOrEqualTo(cfg.toolset, "msc-v142") then
 				table.insert(result, '/external:I' ..  p.quoted(dir))
 			else
-				table.insert(result, '-I' ..  p.quoted(dir))
+				table.insert(result, '/I' ..  p.quoted(dir))
 			end
 		end
 
@@ -329,7 +325,7 @@
 			if isVersionGreaterOrEqualTo(cfg.toolset, "msc-v142") then
 				table.insert(result, '/external:I' ..  p.quoted(dir))
 			else
-				table.insert(result, '-I' ..  p.quoted(dir))
+				table.insert(result, '/I' ..  p.quoted(dir))
 			end
 		end
 
@@ -485,10 +481,22 @@
 --    default value should be used.
 --
 
+	msc.tools = {
+		cc = "cl",
+		cxx = "cl",
+		ar = "lib",
+		rc = "rc"
+	}
+
 	function msc.gettoolname(cfg, tool)
-		return nil
+		local toolset, version = p.tools.canonical(cfg.toolset or p.MSC)
+		-- TODO: Support versioning?
+		return msc.tools[tool]
 	end
 
+	function msc.gettooloutputext(tool)
+		return iif(tool == "rc", ".res", ".obj")
+	end
 
 
 	function msc.getwarnings(cfg)

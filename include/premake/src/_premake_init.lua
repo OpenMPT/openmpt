@@ -34,7 +34,8 @@
 			p.PPC64,
 			p.WASM32,
 			p.WASM64,
-			p.E2K
+			p.E2K,
+			p.MIPS64EL
 		},
 		aliases = {
 			i386  = p.X86,
@@ -1257,6 +1258,7 @@
 			{ "msc-v141", "Microsoft compiler (Visual Studio 2017)" },
 			{ "msc-v142", "Microsoft compiler (Visual Studio 2019)" },
 			{ "msc-v143", "Microsoft compiler (Visual Studio 2022)" },
+			{ "msc-v145", "Microsoft compiler (Visual Studio 2026)" },
 			function (name)
 				local toolset, version = p.tools.canonical(name)
 				return toolset

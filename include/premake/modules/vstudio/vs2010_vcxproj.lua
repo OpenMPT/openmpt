@@ -2053,7 +2053,7 @@
 			elseif (cfg.cppdialect == "C++20") then
 				m.element("LanguageStandard", condition, iif(_ACTION <= "vs2017", 'stdcpplatest', 'stdcpp20'))
 			elseif (cfg.cppdialect == "C++23") then
-				m.element("LanguageStandard", condition, 'stdcpplatest')
+				m.element("LanguageStandard", condition, iif(_ACTION <= "vs2019", 'stdcpplatest', 'stdcpp23'))
 			elseif (cfg.cppdialect == "C++latest") then
 				m.element("LanguageStandard", condition, 'stdcpplatest')
 			end
@@ -2141,8 +2141,8 @@
 			elseif (cfg.cppdialect == "C++17") then
 				table.insert(opts, "/std:c++17")
 			elseif (cfg.cppdialect == "C++20") then
-				table.insert(opts, "/std:c++latest")
-			elseif (cfg.cppdialect == "C++latest") then
+				table.insert(opts, iif(_ACTION <= "vs2017", "/std:c++latest", "/std:c++20"))
+			elseif (cfg.cppdialect == "C++latest" or cfg.cppdialect == "C++23") then
 				table.insert(opts, "/std:c++latest")
 			end
 		end
@@ -2150,6 +2150,7 @@
 		if cfg.toolset and cfg.toolset:startswith("msc") then
 			local value = iif(cfg.unsignedchar, "On", "Off")
 			table.insert(opts, p.tools.msc.shared.unsignedchar[value])
+			opts = table.join(opts, table.translate(cfg.enablewarnings, function(enable) return '/w1' .. enable end))
 		elseif _ACTION >= "vs2019" and cfg.toolset and cfg.toolset == "clang" then
 			local value = iif(cfg.unsignedchar, "On", "Off")
 			table.insert(opts, p.tools.msc.shared.unsignedchar[value])
@@ -2161,6 +2162,9 @@
 			if cfg.structmemberalign then
 				table.insert(opts, 1, '/Zp' .. tostring(cfg.structmemberalign))
 			end
+			opts = table.join(opts, table.translate(cfg.disablewarnings, function(disable) return '-Wno-' .. disable end))
+			opts = table.join(opts, table.translate(p.filterFatalWarnings(cfg.fatalwarnings), function(disable) return '-Werror=' .. disable end))
+			opts = table.join(opts, table.translate(cfg.enablewarnings, function(enable) return '-W' .. enable end))
 		end
 
 		if #opts > 0 then
@@ -3556,7 +3560,7 @@
 
 
 	function m.disableSpecificWarnings(cfg, condition)
-		if #cfg.disablewarnings > 0 then
+		if #cfg.disablewarnings > 0 and cfg.toolset ~= "clang" then
 			local warnings = table.concat(cfg.disablewarnings, ";")
 			warnings = warnings .. ";%%(DisableSpecificWarnings)"
 			m.element('DisableSpecificWarnings', condition, warnings)
@@ -3567,7 +3571,7 @@
 	function m.treatSpecificWarningsAsErrors(cfg, condition)
 		local filteredWarnings = p.filterFatalWarnings(cfg.fatalwarnings)
 
-		if #filteredWarnings > 0 then
+		if #filteredWarnings > 0 and cfg.toolset ~= "clang" then
 			local fatal = table.concat(filteredWarnings, ";")
 			fatal = fatal .. ";%%(TreatSpecificWarningsAsErrors)"
 			m.element('TreatSpecificWarningsAsErrors', condition, fatal)

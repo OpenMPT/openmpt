@@ -54,8 +54,9 @@
 --
 	gcc.shared = {
 		architecture = {
-			x86 = "-m32",
-			x86_64 = "-m64",
+			x86 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch i386", "-m32") end,
+			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
+			ARM64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
 		fatalwarnings = {
 			All = "-Werror",
@@ -287,7 +288,7 @@
 -- Decorate defines for the GCC command line.
 --
 
-	function gcc.getdefines(defines)
+	function gcc.getdefines(defines, cfg)
 		local result = {}
 		for _, define in ipairs(defines) do
 			table.insert(result, '-D' .. p.esc(define))
@@ -485,8 +486,9 @@
 
 	gcc.ldflags = {
 		architecture = {
-			x86 = "-m32",
-			x86_64 = "-m64",
+			x86 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch i386", "-m32") end,
+			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
+			ARM64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
@@ -721,4 +723,8 @@
 			version = ""
 		end
 		return (cfg.gccprefix or "") .. gcc.tools[tool] .. version
+	end
+
+	function gcc.gettooloutputext(tool)
+		return iif(tool == "rc", ".res", ".o")
 	end

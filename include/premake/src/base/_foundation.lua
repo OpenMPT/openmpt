@@ -41,6 +41,7 @@
 	premake.MACOSX      = "macosx"
 	premake.MAKEFILE    = "Makefile"
 	premake.MBCS        = "MBCS"
+	premake.MSC         = "msc"
 	premake.NONE        = "None"
 	premake.DEFAULT     = "Default"
 	premake.OBJECTIVEC   = "Objective-C"
@@ -70,6 +71,7 @@
 	premake.WASM32 = "wasm32"
 	premake.WASM64 = "wasm64"
 	premake.E2K = "e2k"
+	premake.MIPS64EL = "mips64el"
 
 
 ---

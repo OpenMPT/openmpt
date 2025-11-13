@@ -61,6 +61,9 @@
     <Filter Include="modules\vstudio\tests\sln2005">
       <UniqueIdentifier>{C07C5821-2C95-3F4B-F541-CFE46119D4E4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="modules\vstudio\tests\sln2026">
+      <UniqueIdentifier>{037D5821-6F95-3F4B-3842-CFE4A419D4E4}</UniqueIdentifier>
+    </Filter>
     <Filter Include="modules\vstudio\tests\vc200x">
       <UniqueIdentifier>{8F45E192-7B00-D13E-24B8-498910521BCF}</UniqueIdentifier>
     </Filter>
@@ -667,6 +670,12 @@
     <None Include="..\..\modules\vstudio\tests\sln2005\test_shared_projects.lua">
       <Filter>modules\vstudio\tests\sln2005</Filter>
     </None>
+    <None Include="..\..\modules\vstudio\tests\sln2026\test_configurations.lua">
+      <Filter>modules\vstudio\tests\sln2026</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\tests\sln2026\test_projects.lua">
+      <Filter>modules\vstudio\tests\sln2026</Filter>
+    </None>
     <None Include="..\..\modules\vstudio\tests\vc200x\test_assembly_refs.lua">
       <Filter>modules\vstudio\tests\vc200x</Filter>
     </None>
@@ -938,6 +947,12 @@
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vs2022.lua">
+      <Filter>modules\vstudio</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\vs2026.lua">
+      <Filter>modules\vstudio</Filter>
+    </None>
+    <None Include="..\..\modules\vstudio\vs2026_solution.lua">
       <Filter>modules\vstudio</Filter>
     </None>
     <None Include="..\..\modules\vstudio\vstudio.lua">

@@ -53,7 +53,7 @@
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="_WINDOWS"/>
       </Compiler>
-      <Linker Options="-m32;-flto" Required="yes">
+      <Linker Options="-m32;-flto;-fuse-ld=lld" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/x86/Release/zlib-lib.lib" IntermediateDirectory="obj/x86/Release/zlib-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
@@ -99,7 +99,7 @@
         <Preprocessor Value="N_FSEEKO"/>
         <Preprocessor Value="_WINDOWS"/>
       </Compiler>
-      <Linker Options="-m64;-flto" Required="yes">
+      <Linker Options="-m64;-flto;-fuse-ld=lld" Required="yes">
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="bin/x64/Release/zlib-lib.lib" IntermediateDirectory="obj/x64/Release/zlib-lib" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>

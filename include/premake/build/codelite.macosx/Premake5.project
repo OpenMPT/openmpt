@@ -159,6 +159,10 @@
             <File Name="../../modules/vstudio/tests/sln2005/test_sections.lua"/>
             <File Name="../../modules/vstudio/tests/sln2005/test_shared_projects.lua"/>
           </VirtualDirectory>
+          <VirtualDirectory Name="sln2026">
+            <File Name="../../modules/vstudio/tests/sln2026/test_configurations.lua"/>
+            <File Name="../../modules/vstudio/tests/sln2026/test_projects.lua"/>
+          </VirtualDirectory>
           <VirtualDirectory Name="vc200x">
             <File Name="../../modules/vstudio/tests/vc200x/test_assembly_refs.lua"/>
             <File Name="../../modules/vstudio/tests/vc200x/test_build_steps.lua"/>
@@ -261,6 +265,8 @@
         <File Name="../../modules/vstudio/vs2017.lua"/>
         <File Name="../../modules/vstudio/vs2019.lua"/>
         <File Name="../../modules/vstudio/vs2022.lua"/>
+        <File Name="../../modules/vstudio/vs2026.lua"/>
+        <File Name="../../modules/vstudio/vs2026_solution.lua"/>
         <File Name="../../modules/vstudio/vstudio.lua"/>
       </VirtualDirectory>
       <VirtualDirectory Name="xcode">

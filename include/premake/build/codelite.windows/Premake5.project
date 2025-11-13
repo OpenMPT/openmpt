@@ -159,6 +159,10 @@
             <File Name="../../modules/vstudio/tests/sln2005/test_sections.lua"/>
             <File Name="../../modules/vstudio/tests/sln2005/test_shared_projects.lua"/>
           </VirtualDirectory>
+          <VirtualDirectory Name="sln2026">
+            <File Name="../../modules/vstudio/tests/sln2026/test_configurations.lua"/>
+            <File Name="../../modules/vstudio/tests/sln2026/test_projects.lua"/>
+          </VirtualDirectory>
           <VirtualDirectory Name="vc200x">
             <File Name="../../modules/vstudio/tests/vc200x/test_assembly_refs.lua"/>
             <File Name="../../modules/vstudio/tests/vc200x/test_build_steps.lua"/>
@@ -261,6 +265,8 @@
         <File Name="../../modules/vstudio/vs2017.lua"/>
         <File Name="../../modules/vstudio/vs2019.lua"/>
         <File Name="../../modules/vstudio/vs2022.lua"/>
+        <File Name="../../modules/vstudio/vs2026.lua"/>
+        <File Name="../../modules/vstudio/vs2026_solution.lua"/>
         <File Name="../../modules/vstudio/vstudio.lua"/>
       </VirtualDirectory>
       <VirtualDirectory Name="xcode">
@@ -543,7 +549,7 @@
         <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Options="-m32;-flto;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
+      <Linker Options="-m32;-flto;-fuse-ld=lld;bin/x86/Release/lua-lib.lib;bin/x86/Release/zip-lib.lib;bin/x86/Release/zlib-lib.lib;bin/x86/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion;-lcrypt32;-lbcrypt" Required="yes">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-DNDEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
@@ -598,7 +604,7 @@
         <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Options="-m64;-flto;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
+      <Linker Options="-m64;-flto;-fuse-ld=lld;bin/x64/Release/lua-lib.lib;bin/x64/Release/zip-lib.lib;bin/x64/Release/zlib-lib.lib;bin/x64/Release/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion;-lcrypt32;-lbcrypt" Required="yes">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-DNDEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
@@ -653,7 +659,7 @@
         <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
+      <Linker Options="-m32;bin/x86/Debug/lua-lib.lib;bin/x86/Debug/zip-lib.lib;bin/x86/Debug/zlib-lib.lib;bin/x86/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion;-lcrypt32;-lbcrypt" Required="yes">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-D_DEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>
@@ -708,7 +714,7 @@
         <Preprocessor Value="LUA_STATICLIB"/>
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
-      <Linker Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion" Required="yes">
+      <Linker Options="-m64;bin/x64/Debug/lua-lib.lib;bin/x64/Debug/zip-lib.lib;bin/x64/Debug/zlib-lib.lib;bin/x64/Debug/curl-lib.lib;-lole32;-lws2_32;-ladvapi32;-lversion;-lcrypt32;-lbcrypt" Required="yes">
       </Linker>
       <ResourceCompiler Options="-DPREMAKE_COMPRESSION;-DPREMAKE_CURL;-DCURL_STATICLIB;-DLUA_STATICLIB;-D_DEBUG;" Required="yes">
         <IncludePath Value="../../contrib/lua/src"/>

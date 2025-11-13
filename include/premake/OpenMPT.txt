@@ -1,1 +1,24 @@
-Premake version 5.0.0-beta7 (2025-06-12)
+Premake version 5.0.0-beta7-20251111-433e43bff745709cfa61b4c53a189f69da781f1d (2025-11-11)
+The source archive has been generated with the following script:
+```
+#!/usr/bin/env bash
+set -e
+HEAD="433e43bff745709cfa61b4c53a189f69da781f1d"
+rm -rf premake-build
+git clone https://github.com/premake/premake-core.git premake-build
+cd premake-build
+git checkout ${HEAD}
+git checkout -b branch-${HEAD}
+sed -i 's/options\:arch="/options\:not arch="/g' premake5.lua
+git add premake5.lua
+git commit -m 'fix arch'
+./Bootstrap.sh
+echo "" | ./bin/release/premake5 package branch-${HEAD} source
+cd release
+unzip -x premake-5.0.0-dev-src.zip
+cd premake-5.0.0-dev-src
+cat build/vs2022/Premake5.sln
+cd ..
+cd ..
+cd ..
+```
