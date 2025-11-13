@@ -386,13 +386,7 @@
 				systemversion "10.0.26100.0"
 			end
 		filter { "action:vs2026" }
-			if MPT_WIN_BEFORE(MPT_WIN["10"]) then
-				systemversion "10.0.22621.0"
-			elseif MPT_WIN_BEFORE(MPT_WIN["11"]) then
-				systemversion "10.0.22621.0"
-			else
-				systemversion "10.0.26100.0"
-			end
+			systemversion "10.0.26100.0"
 		filter {}
 	end
 
