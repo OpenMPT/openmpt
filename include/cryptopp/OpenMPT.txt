@@ -4,6 +4,9 @@ The following changes have been made:
     applied to fix <https://github.com/weidai11/cryptopp/issues/1240>.
  *  `#define CRYPTOPP_ARM_ACLE_HEADER 1` in `config_asm.h` has been disabled if
     ´_MSC_VER` is defined.
+ *  `config_asm.h`, `config_cpu.h`, `config_int.h`, `donna.h`,
+    `simon128_simd.cpp`, `speck128_smind.cpp`, and `xts.cpp` have been adapted
+    for `_M_ARM64EC`.
  *  Modifications are marked with `  // OpenMPT`.
  *  Obviously, unnecessary folders and files have been removed.
  *  For building, premake is used to generate Visual Studio project files.

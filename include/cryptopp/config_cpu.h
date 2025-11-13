@@ -53,7 +53,9 @@
 #elif (defined(__ILP32__) || defined(_ILP32)) && defined(__x86_64__)
 	#define CRYPTOPP_BOOL_X32 1
 #elif (defined(_M_X64) || defined(__x86_64__))
+	#if !defined(_M_ARM64EC)  // OpenMPT
 	#define CRYPTOPP_BOOL_X64 1
+	#endif  // OpenMPT
 #elif (defined(_M_IX86) || defined(__i386__) || defined(__i386) || defined(_X86_) || defined(__I86__) || defined(__INTEL__))
 	#define CRYPTOPP_BOOL_X86 1
 #endif
@@ -75,7 +77,10 @@
 	///  for a 32-bit ARM platform. Otherwise, the macro is not defined.
 	/// \details Currently the macro indicates an ARM A-32 architecture.
 	#define CRYPTOPP_BOOL_ARM32 ...
+#elif defined(__arm64__) || defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)  // OpenMPT
+#if 0  // OpenMPT
 #elif defined(__arm64__) || defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64)
+#endif  // OpenMPT
 	// Microsoft added ARM64 define December 2017.
 	#define CRYPTOPP_BOOL_ARMV8 1
 #endif
