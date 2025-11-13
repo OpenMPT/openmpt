@@ -1,5 +1,10 @@
 @echo off
 
+if exist "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call %~dp0\setup_vs2026.cmd
+ goto vsdone
+)
+
 if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call %~dp0\setup_vs2022.cmd
  goto vsdone
