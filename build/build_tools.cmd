@@ -24,6 +24,19 @@ goto main
 
 
 
+if exist "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" (
+ call build\auto\setup_vs2026.cmd || goto error
+ rem cd include\premake || goto error
+ rem  nmake -f Bootstrap.mak windows MSDEV=vs2026 || goto error
+ rem  bin\release\premake5 embed --bytecode || goto error
+ rem  bin\release\premake5 --to=build/vs2026 vs2026 --no-curl --no-zlib --no-luasocket || goto error
+ rem cd ..\.. || goto error
+ cd include\premake\build\vs2026 || goto error
+  msbuild Premake5.slnx /target:Clean /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+  msbuild Premake5.slnx /target:Build /property:Configuration=Release;Platform=x64 /maxcpucount /verbosity:minimal || goto error
+ cd ..\..\..\.. || goto error
+ goto premakedone
+)
 if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" (
  call build\auto\setup_vs2022.cmd || goto error
  rem cd include\premake || goto error
