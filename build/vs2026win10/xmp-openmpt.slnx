@@ -6,7 +6,6 @@
     <BuildType Name="DebugShared" />
     <BuildType Name="Release" />
     <BuildType Name="ReleaseShared" />
-    <Platform Name="ARM" />
     <Platform Name="ARM64" />
     <Platform Name="Win32" />
     <Platform Name="x64" />
