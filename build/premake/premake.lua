@@ -382,11 +382,23 @@ end
 
 function MPT_WIN_PLATFORMS(v)
 	if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
-		return { "x86", "x86_64", "arm64", "arm64ec" }
+		if MPT_MSVC_AT_LEAST(2019) then
+			return { "x86", "x86_64", "arm64", "arm64ec" }
+		else
+			return { "x86", "x86_64", "arm64" }
+		end
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["10_1709"]) then
-		return { "x86", "x86_64", "arm", "arm64" }
+		if MPT_MSVC_BEFORE(2026) then
+			return { "x86", "x86_64", "arm", "arm64" }
+		else
+			return { "x86", "x86_64", "arm64" }
+		end
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["8"]) then
-		return { "x86", "x86_64", "arm" }
+		if MPT_MSVC_BEFORE(2026) then
+			return { "x86", "x86_64", "arm" }
+		else
+			return { "x86", "x86_64" }
+		end
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["XP64"]) then
 		return { "x86", "x86_64" }
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["XP"]) then
