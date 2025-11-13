@@ -21,10 +21,14 @@
 
 // 0.3 to 0.4 cpb profit
 #if defined(__SSE2__) || defined(_M_X64)
+#endif  // OpenMPT
+#if (defined(__SSE2__) || defined(_M_X64)) && !defined(_M_ARM64EC)  // OpenMPT
 # include <emmintrin.h>
 #endif
 
 #if defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64)
+#endif  // OpenMPT
+#if defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)  // OpenMPT
 # if (CRYPTOPP_ARM_NEON_HEADER) || (CRYPTOPP_ARM_ASIMD_AVAILABLE)
 #  include <arm_neon.h>
 # endif
@@ -65,14 +69,20 @@ inline void XorBuffer(byte *output, const byte *input, const byte *mask, size_t 
 #if defined(CRYPTOPP_DISABLE_ASM)
     xorbuf(output, input, mask, count);
 
+#elif (defined(__SSE2__) || defined(_M_X64)) && !defined(_M_ARM64EC)  // OpenMPT
+#if 0  // OpenMPT
 #elif defined(__SSE2__) || defined(_M_X64)
+#endif  // OpenMPT
     for (size_t i=0; i<count; i+=16)
         _mm_storeu_si128(M128_CAST(output+i),
             _mm_xor_si128(
                 _mm_loadu_si128(CONST_M128_CAST(input+i)),
                 _mm_loadu_si128(CONST_M128_CAST(mask+i))));
 
+#elif defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)  // OpenMPT
+#if 0  // OpenMPT
 #elif defined(__aarch32__) || defined(__aarch64__) || defined(_M_ARM64)
+#endif  // OpenMPT
     for (size_t i=0; i<count; i+=16)
         vst1q_u8(output+i, veorq_u8(vld1q_u8(input+i), vld1q_u8(mask+i)));
 

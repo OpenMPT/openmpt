@@ -62,7 +62,9 @@ using CryptoPP::word64;
 #if (CRYPTOPP_ARM_NEON_AVAILABLE)
 
 // Missing from Microsoft's ARM A-32 implementation
+#if defined(CRYPTOPP_MSC_VERSION) && !defined(_M_ARM64) && !defined(_M_ARM64EC)  // OpenMPT
 #if defined(CRYPTOPP_MSC_VERSION) && !defined(_M_ARM64)
+#endif  // OpenMPT
 inline uint64x2_t vld1q_dup_u64(const uint64_t* ptr)
 {
     return vmovq_n_u64(*ptr);

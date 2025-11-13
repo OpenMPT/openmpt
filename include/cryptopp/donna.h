@@ -142,6 +142,8 @@ ed25519_sign_open(std::istream& stream, const byte publicKey[32], const byte sig
 
 #if defined(CRYPTOPP_WORD128_AVAILABLE) || \
    (defined(CRYPTOPP_MSC_VERSION) && defined(_M_X64))
+#endif  // OpenMPT
+#if defined(CRYPTOPP_WORD128_AVAILABLE) || (defined(CRYPTOPP_MSC_VERSION) && defined(_M_X64) && !defined(_M_ARM64EC))  // OpenMPT
 # define CRYPTOPP_CURVE25519_64BIT 1
 #else
 # define CRYPTOPP_CURVE25519_32BIT 1
