@@ -136,7 +136,11 @@ mpt::osinfo::windows::Version Version::GetMinimumKernelLevel() noexcept
 {
 	uint64 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+		#if MPT_MSVC_AT_LEAST(2026, 0)
+			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::Win10));
+		#elif MPT_MSVC_AT_LEAST(2022, 0)
+			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::Win7));
+		#elif MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
 			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::WinVista));
 		#else
 			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::WinXP));
