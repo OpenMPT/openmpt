@@ -353,6 +353,8 @@
 // Limit the <arm_acle.h> include.
 #if !defined(CRYPTOPP_ARM_ACLE_HEADER)
 # if defined(__aarch32__) || defined(__aarch64__) || (__ARM_ARCH >= 8) || defined(__ARM_ACLE)
+# endif  // OpenMPT
+# if (defined(__aarch32__) || defined(__aarch64__) || (__ARM_ARCH >= 8) || defined(__ARM_ACLE)) && !defined(_MSC_VER)  // OpenMPT
 #  define CRYPTOPP_ARM_ACLE_HEADER 1
 # endif
 #endif
