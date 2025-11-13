@@ -636,7 +636,20 @@ if MPT_OS_WINDOWS_WINRT then
 	require('vstudio')
 
 	local function mptGlobalsUWP(prj)
-		if _ACTION == 'vs2022' then
+		if _ACTION == 'vs2026' then
+			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')
+			premake.w('<MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>')
+			premake.w('<AppContainerApplication>true</AppContainerApplication>')
+			premake.w('<ApplicationType>Windows Store</ApplicationType>')
+			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
+			if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
+				premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.26100.0</WindowsTargetPlatformVersion>')
+				premake.w('<WindowsTargetPlatformMinVersion>10.0.22631.0</WindowsTargetPlatformMinVersion>')
+			elseif MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
+				premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.22621.0</WindowsTargetPlatformVersion>')
+				premake.w('<WindowsTargetPlatformMinVersion>10.0.19045.0</WindowsTargetPlatformMinVersion>')
+			end
+		elseif _ACTION == 'vs2022' then
 			premake.w('<DefaultLanguage>en-US</DefaultLanguage>')
 			premake.w('<MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>')
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')

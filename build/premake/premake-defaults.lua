@@ -225,14 +225,19 @@
 	filter { "configurations:Debug" }
    defines { "DEBUG" }
    defines { "MPT_BUILD_DEBUG" }
-	filter { "configurations:Debug", "architecture:ARM" }
-		symbols "On"
-	filter { "configurations:Debug", "architecture:ARM64" }
-		symbols "On"
-	filter { "configurations:Debug", "architecture:ARM64EC" }
-		symbols "On"
-	filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64", "architecture:not ARM64EC" }
-		symbols "FastLink"
+	if MPT_MSVC_AT_LEAST(2017) and MPT_MSVC_BEFORE(2026) then
+		filter { "configurations:Debug", "architecture:ARM" }
+			symbols "On"
+		filter { "configurations:Debug", "architecture:ARM64" }
+			symbols "On"
+		filter { "configurations:Debug", "architecture:ARM64EC" }
+			symbols "On"
+		filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64", "architecture:not ARM64EC" }
+			symbols "FastLink"
+	else
+		filter { "configurations:Debug" }
+			symbols "On"
+	end
 	filter { "configurations:Debug" }
 		if not MPT_OS_WINDOWS_WINRT then
 			staticruntime "On"
@@ -373,6 +378,14 @@
 			systemversion "10.0.22621.0"
 		filter {}
 		filter { "action:vs2022" }
+			if MPT_WIN_BEFORE(MPT_WIN["10"]) then
+				systemversion "10.0.22621.0"
+			elseif MPT_WIN_BEFORE(MPT_WIN["11"]) then
+				systemversion "10.0.22621.0"
+			else
+				systemversion "10.0.26100.0"
+			end
+		filter { "action:vs2026" }
 			if MPT_WIN_BEFORE(MPT_WIN["10"]) then
 				systemversion "10.0.22621.0"
 			elseif MPT_WIN_BEFORE(MPT_WIN["11"]) then

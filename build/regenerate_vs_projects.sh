@@ -46,16 +46,31 @@ echo ok &
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2026 --windows-version=win10 --windows-family=desktop --windows-charset=Unicode && \
+echo ok &
+
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2026 --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
+echo ok &
+
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2022 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
+echo ok &
+
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2026 --clang --windows-version=win11 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode && \
 echo ok &
 
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2022 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode && \
+echo ok &
+
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2026 --windows-version=win10 --windows-family=uwp --windows-charset=Unicode && \
+echo ok &
+
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2026 --windows-version=win11 --windows-family=uwp --windows-charset=Unicode && \
 echo ok &
 
 ${PREMAKE} --file=build/premake-xcode/premake.lua --target=macosx xcode4 && \
