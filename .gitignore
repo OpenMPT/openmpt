@@ -685,6 +685,8 @@
 /include/premake/build/vs2022/.vs
 /include/premake/build/vs2022/bin
 /include/premake/build/vs2022/obj
+/include/premake/build/vs2026/bin
+/include/premake/build/vs2026/obj
 /include/pthread-win32/.gitattributes
 /include/pthread-win32/.github
 /include/pthread-win32/.gitignore
