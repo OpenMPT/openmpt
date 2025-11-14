@@ -1767,7 +1767,9 @@ public:
 #elif defined(MPT_ARCH_X86_FPU)
 		return info[mpt::arch::x86::feature::fsin] ? 3 : 2;
 #else
+		// clang-format off
 		return info[mpt::arch::x86::feature::fsin] ? 3 : info[mpt::arch::x86::feature::fpu] ? 2 : 0;
+		// clang-format on
 #endif
 	}
 
