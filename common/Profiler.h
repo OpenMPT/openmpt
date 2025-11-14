@@ -73,10 +73,18 @@ struct tsc_clock {
 	static inline constexpr bool is_steady = false;
 	static inline constexpr bool is_dynamic = true;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		return std::nullopt;
+		uint64 frequency = mpt::arch::get_cpu_info().get_tsc_frequency();
+		if (frequency == 0) {
+			return std::nullopt;
+		}
+		return 1.0 / static_cast<double>(frequency);
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
-		return std::nullopt;
+		uint64 frequency = mpt::arch::get_cpu_info().get_tsc_frequency();
+		if (frequency == 0) {
+			return std::nullopt;
+		}
+		return static_cast<double>(frequency);
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 		return __rdtsc();
