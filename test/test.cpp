@@ -15,6 +15,7 @@
 #ifdef ENABLE_TESTS
 
 #ifdef LIBOPENMPT_BUILD
+#include "mpt/arch/arch.hpp"
 #include "mpt/arch/x86_amd64.hpp"
 #endif
 #include "mpt/base/check_platform.hpp"
@@ -264,7 +265,12 @@ void DoTests()
 		#endif // !MPT_LIBC_QUIRK_NO_FENV
 		#if MPT_ARCH_X86 || MPT_ARCH_AMD64
 			{
-				const mpt::arch::x86::floating_point::control_state fpstate = mpt::arch::x86::floating_point::get_state();
+				const mpt::arch::x86::floating_point::control_state fpstate =
+					#if MPT_ARCH_X86
+						mpt::arch::x86::floating_point::get_state(mpt::arch::get_cpu_info());
+					#else
+						mpt::arch::x86::floating_point::get_state();
+					#endif
 				if(fpstate.x87_level)
 				{
 					auto format_rounding = [](uint16 fcw) {

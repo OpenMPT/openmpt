@@ -1742,37 +1742,39 @@ public:
 
 #endif // MPT_COMPILER
 
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_fxsr() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_fxsr(const cpu_info & info) noexcept {
 #ifdef MPT_ARCH_X86_FXSR
+		MPT_UNUSED(info);
 		return true;
 #else
-		return mpt::arch::x86::cpu_info::query()[mpt::arch::x86::feature::fxsr];
+		return info[mpt::arch::x86::feature::fxsr];
 #endif
 	}
 
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_sse() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static bool have_sse(const cpu_info & info) noexcept {
 #ifdef MPT_ARCH_X86_SSE
+		MPT_UNUSED(info);
 		return true;
 #else
-		const cpu_info cpu_info{mpt::arch::x86::cpu_info::query()};
-		return cpu_info[mpt::arch::x86::feature::sse] && cpu_info[mpt::arch::x86::mode::xmm128sse];
+		return info[mpt::arch::x86::feature::sse] && info[mpt::arch::x86::mode::xmm128sse];
 #endif
 	}
 
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint8 get_fpu_level() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static uint8 get_fpu_level(const cpu_info & info) noexcept {
 #ifdef MPT_ARCH_X86_FSIN
+		MPT_UNUSED(info);
 		return 3;
 #elif defined(MPT_ARCH_X86_FPU)
-		return mpt::arch::x86::cpu_info::query()[mpt::arch::x86::feature::fsin] ? 3 : 2;
+		return info[mpt::arch::x86::feature::fsin] ? 3 : 2;
 #else
-		const cpu_info cpu_info{mpt::arch::x86::cpu_info::query()};
-		return cpu_info[mpt::arch::x86::feature::fsin] ? 3 : cpu_info[mpt::arch::x86::feature::fpu] ? 2 : 0;
+		return info[mpt::arch::x86::feature::fsin] ? 3 : info[mpt::arch::x86::feature::fpu] ? 2 : 0;
 #endif
 	}
 
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static control_state get_state() noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static control_state get_state(const cpu_info & info) noexcept {
 		control_state result;
 #ifdef MPT_ARCH_X86_FXSR
+		MPT_UNUSED(info);
 		fxsave_state tmp = {};
 		fxsave(&tmp);
 		result.x87_level = 3;
@@ -1780,7 +1782,7 @@ public:
 		result.mxcsr_mask = tmp.mxcsr_mask;
 		result.mxcsr = tmp.mxcsr;
 #else
-		if (have_fxsr()) {
+		if (have_fxsr(info)) {
 			fxsave_state tmp = {};
 			fxsave(&tmp);
 			result.x87_level = 3;
@@ -1788,7 +1790,7 @@ public:
 			result.mxcsr_mask = tmp.mxcsr_mask;
 			result.mxcsr = tmp.mxcsr;
 		} else {
-			result.x87_level = get_fpu_level();
+			result.x87_level = get_fpu_level(info);
 			if (result.x87_level > 0) {
 				result.x87fcw = get_x87fcw();
 			}
@@ -1797,8 +1799,9 @@ public:
 		return result;
 	}
 
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_state(control_state state) noexcept {
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static void set_state(control_state state, const cpu_info & info) noexcept {
 #ifdef MPT_ARCH_X86_SSE
+		MPT_UNUSED(info);
 		if (state.x87_level) {
 			set_x87fcw(state.x87fcw);
 		}
@@ -1806,7 +1809,7 @@ public:
 			set_mxcsr(state.mxcsr);
 		}
 #else
-		if (have_sse()) {
+		if (have_sse(info)) {
 			if (state.x87_level) {
 				set_x87fcw(state.x87fcw);
 			}
@@ -1815,6 +1818,7 @@ public:
 			}
 		} else {
 #ifdef MPT_ARCH_X86_FXSR
+			MPT_UNUSED(info);
 			fxsave_state tmp = {};
 			fxsave(&tmp);
 			if (state.x87_level) {
@@ -1825,7 +1829,7 @@ public:
 			}
 			fxrstor(&tmp);
 #else
-			if (have_fxsr()) {
+			if (have_fxsr(info)) {
 				fxsave_state tmp = {};
 				fxsave(&tmp);
 				if (state.x87_level) {
