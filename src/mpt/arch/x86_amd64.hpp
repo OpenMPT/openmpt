@@ -1746,7 +1746,7 @@ public:
 #ifdef MPT_ARCH_X86_FXSR
 		return true;
 #else
-		return cpu_info{}[mpt::arch::x86::feature::fxsr];
+		return mpt::arch::x86::cpu_info::query()[mpt::arch::x86::feature::fxsr];
 #endif
 	}
 
@@ -1754,7 +1754,7 @@ public:
 #ifdef MPT_ARCH_X86_SSE
 		return true;
 #else
-		const cpu_info cpu_info;
+		const cpu_info cpu_info{mpt::arch::x86::cpu_info::query()};
 		return cpu_info[mpt::arch::x86::feature::sse] && cpu_info[mpt::arch::x86::mode::xmm128sse];
 #endif
 	}
@@ -1763,11 +1763,10 @@ public:
 #ifdef MPT_ARCH_X86_FSIN
 		return 3;
 #elif defined(MPT_ARCH_X86_FPU)
-		return cpu_info{}[mpt::arch::x86::feature::fsin] ? 3 : 2;
+		return mpt::arch::x86::cpu_info::query()[mpt::arch::x86::feature::fsin] ? 3 : 2;
 #else
-		cpu_info tmp{};
-		return tmp[mpt::arch::x86::feature::fsin] ? 3 : tmp[mpt::arch::x86::feature::fpu] ? 2
-																						  : 0;
+		const cpu_info cpu_info{mpt::arch::x86::cpu_info::query()};
+		return cpu_info[mpt::arch::x86::feature::fsin] ? 3 : cpu_info[mpt::arch::x86::feature::fpu] ? 2 : 0;
 #endif
 	}
 
