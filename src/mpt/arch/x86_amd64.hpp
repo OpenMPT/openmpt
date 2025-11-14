@@ -396,6 +396,7 @@ private:
 	bool Virtualized = false;
 	fixed_string<12> HypervisorVendor;
 	fixed_string<4> HypervisorInterface;
+	uint64 TSC_Frequency = 0;
 #if !MPT_ARCH_AMD64
 	bool LongMode = false;
 #endif // !MPT_ARCH_AMD64
@@ -456,6 +457,10 @@ public:
 
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool is_virtual() const noexcept {
 		return Virtualized;
+	}
+
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr uint64 get_tsc_frequency() const noexcept {
+		return TSC_Frequency;
 	}
 
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool can_long_mode() const noexcept {
@@ -1256,6 +1261,21 @@ private:
 				Features |= (ExtendedFeatures.b & (1u <<  5)) ? (feature::avx2) : feature::none;
 				Features |= (ExtendedFeatures.b & (1u <<  8)) ? (feature::bmi2) : feature::none;
 				// clang-format on
+			}
+			if ((Vendor == vendor::Intel) && (VendorString.a >= 0x0000'0015u) && Features.supports(feature::tsc | feature::tscinvariant)) {
+				cpuid_result cpuid_0x15 = cpuid(0x0000'0015u);
+				if ((cpuid_0x15.a != 0) && (cpuid_0x15.b != 0)) {
+					if (cpuid_0x15.c == 0) {
+						if (VendorString.a >= 0x0000'0016u) {
+							cpuid_result cpuid_0x16 = cpuid(0x0000'0016u);
+							if ((cpuid_0x16.a & 0x0000'ffffu) != 0) {
+								TSC_Frequency = static_cast<uint64>(cpuid_0x16.a & 0x0000'ffffu) * static_cast<uint64>(1'000'000);
+							}
+						}
+					} else {
+						TSC_Frequency = static_cast<uint64>(cpuid_0x15.c) * static_cast<uint64>(cpuid_0x15.b) / static_cast<uint64>(cpuid_0x15.a);
+					}
+				}
 			}
 			// 3DNow! manual recommends to just execute 0x8000'0000u.
 			// It is totally unknown how earlier CPUs from other vendors
