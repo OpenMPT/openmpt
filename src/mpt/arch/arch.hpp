@@ -87,6 +87,10 @@ inline constexpr mode_flags none = mode_flags{};
 
 struct cpu_info {
 public:
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static cpu_info query() noexcept {
+		return cpu_info{};
+	}
+private:
 	cpu_info() = default;
 public:
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE constexpr bool operator[](feature_flags) const noexcept {
@@ -132,7 +136,7 @@ namespace current = unknown;
 using cpu_info = mpt::arch::current::cpu_info;
 
 MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline const cpu_info & get_cpu_info() {
-	static cpu_info info;
+	static cpu_info info = cpu_info::query();
 	return info;
 }
 

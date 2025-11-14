@@ -1019,6 +1019,12 @@ private:
 
 public:
 
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static cpu_info query() noexcept {
+		return cpu_info{};
+	}
+
+private:
+
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE cpu_info() noexcept {
 
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
