@@ -74,15 +74,15 @@ struct Info
 struct Info
 {
 private:
-	const mpt::arch::flags_cache m_flags{mpt::arch::get_cpu_info()};
+	const mpt::arch::cpu_info m_cpu_info{mpt::arch::get_cpu_info()};
 public:
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasFeatureSet(mpt::arch::current::feature_flags features) const noexcept
 	{
-		return m_flags[features];
+		return m_cpu_info[features];
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasModesEnabled(mpt::arch::current::mode_flags modes) const noexcept
 	{
-		return m_flags[modes];
+		return m_cpu_info[modes];
 	}
 };
 
