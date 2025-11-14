@@ -466,9 +466,9 @@ public:
 #endif // !MPT_ARCH_AMD64
 	}
 
-private:
-
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
+
+public:
 
 	struct cpuid_result {
 
@@ -695,6 +695,12 @@ private:
 
 #endif // MPT_COMPILER
 	}
+
+#endif // MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
+
+private:
+
+#if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 #if MPT_MODE_KERNEL
 
