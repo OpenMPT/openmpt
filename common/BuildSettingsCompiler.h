@@ -24,6 +24,9 @@
 
 #if MPT_COMPILER_MSVC
 
+// happens for every useful alignas() use
+#pragma warning(disable:4324) // structure was padded due to alignment specifier
+
 #pragma warning(disable:4355) // 'this' : used in base member initializer list
 
 // happens for immutable classes (i.e. classes containing const members)
