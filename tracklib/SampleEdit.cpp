@@ -188,7 +188,7 @@ std::pair<int, int> FindMinMax(const int8 *p, SmpLength numSamples, int numChann
 	int minVal = 127;
 	int maxVal = -128;
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 16)
+	if(CPU::HasFeatureSetAndModesEnabled(CPU::feature::sse2, CPU::mode::xmm128sse) && numSamples >= 16)
 	{
 		mpt::arch::feature_fence_guard arch_feature_guard;
 		sse2_findminmax8(p, numSamples, numChannels, minVal, maxVal);
@@ -213,7 +213,7 @@ std::pair<int, int> FindMinMax(const int16 *p, SmpLength numSamples, int numChan
 	int minVal = 32767;
 	int maxVal = -32768;
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-	if(CPU::HasFeatureSet(CPU::feature::sse2) && CPU::HasModesEnabled(CPU::mode::xmm128sse) && numSamples >= 8)
+	if(CPU::HasFeatureSetAndModesEnabled(CPU::feature::sse2, CPU::mode::xmm128sse) && numSamples >= 8)
 	{
 		mpt::arch::feature_fence_guard arch_feature_guard;
 		sse2_findminmax16(p, numSamples, numChannels, minVal, maxVal);

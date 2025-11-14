@@ -103,6 +103,11 @@ namespace mode = mpt::arch::current::mode;
 	return CPU::Info{}.HasModesEnabled(modes);
 }
 
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE bool HasFeatureSetAndModesEnabled(mpt::arch::current::feature_flags features, mpt::arch::current::mode_flags modes) noexcept
+{
+	CPU::Info info{};
+	return info.HasFeatureSet(features) && info.HasModesEnabled(modes);
+}
 
 #endif // MPT_ENABLE_ARCH_INTRINSICS
 

@@ -100,7 +100,7 @@ void CEQ::ProcessTemplate(TMixSample *frontBuffer, TMixSample *rearBuffer, std::
 {
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE) && defined(MPT_ARCH_INTRINSICS_X86_SSE)
 	unsigned int old_csr = 0;
-	if(CPU::HasFeatureSet(CPU::feature::sse) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
+	if(CPU::HasFeatureSetAndModesEnabled(CPU::feature::sse, CPU::mode::xmm128sse))
 	{
 		mpt::arch::feature_fence_aquire();
 		old_csr = _mm_getcsr();
@@ -122,7 +122,7 @@ void CEQ::ProcessTemplate(TMixSample *frontBuffer, TMixSample *rearBuffer, std::
 		EQFilter<4>(buf, m_Bands, m_ChannelState);
 	}
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE) && defined(MPT_ARCH_INTRINSICS_X86_SSE)
-	if(CPU::HasFeatureSet(CPU::feature::sse) && CPU::HasModesEnabled(CPU::mode::xmm128sse))
+	if(CPU::HasFeatureSetAndModesEnabled(CPU::feature::sse, CPU::mode::xmm128sse))
 	{
 		_mm_setcsr(old_csr);
 		mpt::arch::feature_fence_release();
