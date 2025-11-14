@@ -1019,7 +1019,7 @@ private:
 
 public:
 
-	cpu_info() noexcept {
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE cpu_info() noexcept {
 
 #if MPT_ARCH_X86 || MPT_ARCH_AMD64
 

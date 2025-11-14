@@ -131,7 +131,7 @@ namespace current = unknown;
 
 using cpu_info = mpt::arch::current::cpu_info;
 
-inline const cpu_info & get_cpu_info() {
+MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline const cpu_info & get_cpu_info() {
 	static cpu_info info;
 	return info;
 }
@@ -139,7 +139,7 @@ inline const cpu_info & get_cpu_info() {
 namespace detail {
 
 struct info_initializer {
-	inline info_initializer() noexcept {
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE inline info_initializer() noexcept {
 		get_cpu_info();
 	}
 };
