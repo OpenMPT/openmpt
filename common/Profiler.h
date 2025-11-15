@@ -315,12 +315,43 @@ using default_clock = default_system_clock;
 namespace detail {
 
 
+#if 1
+template <typename T>
+struct measurement_base {
+	mpt::chrono::system_clock::time_point wallclock;
+	T perfclock;
+	bool valid;
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE constexpr measurement_base(std::chrono::system_clock::time_point wc, T pc, bool b) noexcept
+		: wallclock(wc)
+		, perfclock(pc)
+		, valid(b) {
+		return;
+	}
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE constexpr measurement_base() noexcept
+	: wallclock(std::chrono::system_clock::time_point{})
+	, perfclock(T{})
+	, valid(false)
+	{}
+};
+template <typename T>
+struct alignas(mpt::profiler::cacheline_size_max) data_base {
+	std::atomic<mpt::somefloat64> frequency;
+	std::atomic<measurement_base<T>> old = measurement_base<T>;
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE constexpr data_base() noexcept
+		: frequency(0.0_sf64)
+		, old(measurement_base<T>{std::chrono::system_clock::time_point{}, T{}, false}) {
+		return;
+	}
+};
+#endif
+
 template <typename Clock>
 class frequency_estimator {
 private:
 	#if defined(MPT_ARCH_X86_CX8)
 		static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
 	#endif
+#if 0
 	struct measurement {
 		mpt::chrono::system_clock::time_point wallclock{};
 		typename Clock::rep perfclock{};
@@ -330,10 +361,14 @@ private:
 		std::atomic<mpt::somefloat64> frequency = 0.0_sf64;
 		std::atomic<measurement> old = measurement{};
 	};
-	inline static data g_data;
+#else
+	using measurement = typename measurement_base<typename Clock::rep>;
+	using data = typename data_base<typename Clock::rep>;
+#endif
+	inline static data g_data{};
 public:
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void estimate() {
-		measurement now;
+		measurement now{};
 		typename Clock::rep beg = Clock::now_raw();
 		now.wallclock = mpt::chrono::system_clock::now();
 		typename Clock::rep end = Clock::now_raw();
