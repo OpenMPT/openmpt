@@ -73,10 +73,6 @@
 /build/vs2022win81/*.user
 /build/vs2022win81/.vs
 /build/vs2022win81/ext/*.user
-/build/vs2026win10/*.user
-/build/vs2026win10/.vs
-/build/vs2026win10uwp/*.user
-/build/vs2026win10uwp/.vs
 /build/vs2026win11/*.user
 /build/vs2026win11/.vs
 /build/vs2026win11clang/*.user
