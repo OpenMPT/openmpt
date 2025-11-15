@@ -449,32 +449,18 @@ MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() {
 
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_all_frequencies() {
 	if constexpr (std::is_same<mpt::profiler::highres_clock, mpt::profiler::fast_clock>::value) {
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4127)
-#endif // MPT_COMPILER_MSVC
 		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::highres_clock>::value));
 		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::fast_clock>::value));
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
-		if (mpt::profiler::default_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+		if constexpr (mpt::profiler::default_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
 			mpt::profiler::estimate_frequency<mpt::profiler::default_clock>();
 		}
 	} else {
-		#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable : 4127)
-#endif // MPT_COMPILER_MSVC
 		assert((!std::is_same<mpt::profiler::highres_clock, mpt::profiler::fast_clock>::value));
 		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::highres_clock>::value || std::is_same<mpt::profiler::default_clock, mpt::profiler::fast_clock>::value));
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
-		if (mpt::profiler::highres_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+		if constexpr (mpt::profiler::highres_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
 			mpt::profiler::estimate_frequency<mpt::profiler::highres_clock>();
 		}
-		if (mpt::profiler::fast_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+		if constexpr (mpt::profiler::fast_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
 			mpt::profiler::estimate_frequency<mpt::profiler::fast_clock>();
 		}
 	}
