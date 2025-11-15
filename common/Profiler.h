@@ -67,6 +67,7 @@ namespace profiler {
 
 
 #if defined(MPT_LIBCXX_QUIRK_NO_HARDWARE_INTERFERENCE_SIZE)
+
 // guess
 #if MPT_OS_MACOSX_OR_IOS
 #if MPT_ARCH_ARM64
@@ -84,7 +85,17 @@ inline constexpr std::size_t cacheline_size_max = std::min(static_cast<std::size
 inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
 inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
 #endif
+
 #else
+
+#if MPT_OS_DJGPP
+
+// work-around maximum alignment in object file
+inline constexpr std::size_t cacheline_size_min = std::min(static_cast<std::size_t>(16), std::max(alignof(std::max_align_t), static_cast<std::size_t>(64)));
+inline constexpr std::size_t cacheline_size_max = std::min(static_cast<std::size_t>(16), std::max(alignof(std::max_align_t), static_cast<std::size_t>(64)));
+
+#else
+
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winterference-size"
@@ -94,6 +105,9 @@ inline constexpr std::size_t cacheline_size_max = std::hardware_destructive_inte
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic pop
 #endif // MPT_COMPILER_GCC
+
+#endif
+
 #endif
 
 
