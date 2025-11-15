@@ -321,7 +321,7 @@ private:
 	};
 	inline static data g_data;
 public:
-	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void estimate() noexcept {
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void estimate() {
 		measurement now;
 		typename Clock::rep beg = Clock::now_raw();
 		now.wallclock = mpt::chrono::system_clock::now();
@@ -368,7 +368,7 @@ public:
 
 
 template <typename Clock>
-MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() {
 	if constexpr (Clock::frequency_mode == clock_frequency_mode::optional) {
 		mpt::profiler::detail::frequency_estimator<Clock>::estimate();
 	}
@@ -376,7 +376,7 @@ MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
 
 
 
-MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_all_frequencies() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_all_frequencies() {
 	if constexpr (std::is_same<mpt::profiler::highres_clock, mpt::profiler::fast_clock>::value) {
 		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::highres_clock>::value));
 		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::fast_clock>::value));
