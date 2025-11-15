@@ -329,7 +329,11 @@ public:
 		if (end < beg) {
 			return;
 		}
+#if MPT_CXX_AT_LEAST(20)
 		now.perfclock = std::midpoint(beg, end);
+#else
+		now.perfclock = (beg / 2) + (end / 2);
+#endif
 		now.valid = true;
 		measurement old = g_data.old.exchange(now, std::memory_order_relaxed);
 		if (!old.valid) {
