@@ -336,7 +336,7 @@ struct measurement_base {
 template <typename T>
 struct alignas(mpt::profiler::cacheline_size_max) data_base {
 	std::atomic<mpt::somefloat64> frequency;
-	std::atomic<measurement_base<T>> old = measurement_base<T>;
+	std::atomic<measurement_base<T>> old;
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE constexpr data_base() noexcept
 		: frequency(0.0_sf64)
 		, old(measurement_base<T>{std::chrono::system_clock::time_point{}, T{}, false}) {
