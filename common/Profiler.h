@@ -362,8 +362,8 @@ private:
 		std::atomic<measurement> old = measurement{};
 	};
 #else
-	using measurement = typename measurement_base<typename Clock::rep>;
-	using data = typename data_base<typename Clock::rep>;
+	using measurement = measurement_base<typename Clock::rep>;
+	using data = data_base<typename Clock::rep>;
 #endif
 	inline static data g_data{};
 public:
