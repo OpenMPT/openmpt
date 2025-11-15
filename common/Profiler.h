@@ -372,6 +372,26 @@ MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
 
 
 
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_all_frequencies() noexcept {
+	if constexpr (std::is_same<mpt::profiler::highres_clock, mpt::profiler::fast_clock>::value) {
+		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::highres_clock>::value));
+		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::fast_clock>::value));
+		if (mpt::profiler::default_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+			mpt::profiler::estimate_frequency<mpt::profiler::default_clock>();
+		}
+	} else {
+		assert((!std::is_same<mpt::profiler::highres_clock, mpt::profiler::fast_clock>::value));
+		assert((std::is_same<mpt::profiler::default_clock, mpt::profiler::highres_clock>::value || std::is_same<mpt::profiler::default_clock, mpt::profiler::fast_clock>::value));
+		if (mpt::profiler::highres_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+			mpt::profiler::estimate_frequency<mpt::profiler::highres_clock>();
+		}
+		if (mpt::profiler::fast_clock::frequency_mode == mpt::profiler::clock_frequency_mode::optional) {
+			mpt::profiler::estimate_frequency<mpt::profiler::fast_clock>();
+		}
+	}
+}
+
+
 template <typename Clock>
 [[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE std::optional<mpt::somefloat64> get_frequency() noexcept {
 	std::optional<mpt::somefloat64> frequency;

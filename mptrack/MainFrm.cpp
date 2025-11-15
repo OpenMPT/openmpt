@@ -2270,6 +2270,10 @@ void CMainFrame::OnTimerGUI()
 		m_SoundCardOptionsDialog->UpdateStatistics();
 	}
 
+	{
+		mpt::profiler::estimate_all_frequencies();
+	}
+
 #ifdef USE_PROFILER
 	{
 		Profiler::Update();
