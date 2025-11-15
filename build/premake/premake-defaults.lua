@@ -301,7 +301,8 @@
    defines { "NDEBUG" }
    symbols "On"
 		if MPT_COMPILER_MSVC then
-			linktimeoptimization "On"
+			linktimeoptimization "Default"
+			linktimeoptimization2 "Fast"
 		end
 		if MPT_MSVC_AT_LEAST(2022) then
 			buildoptions { "/Gw" }

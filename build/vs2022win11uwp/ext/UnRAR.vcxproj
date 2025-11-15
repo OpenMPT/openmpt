@@ -769,7 +769,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\x86\openmpt-unrar.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -802,7 +802,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\amd64\openmpt-unrar.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -835,7 +835,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\arm64\openmpt-unrar.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/unrar/dll_nocrypt.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>

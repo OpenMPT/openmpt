@@ -503,7 +503,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win7-shared\x86\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -534,7 +534,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win7-shared\amd64\openmpt-vorbis.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-vorbis.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>

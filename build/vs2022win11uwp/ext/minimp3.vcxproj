@@ -752,7 +752,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\x86\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -784,7 +784,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\amd64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -816,7 +816,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win11uwp-shared\arm64\openmpt-minimp3.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-minimp3.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>

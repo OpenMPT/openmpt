@@ -773,7 +773,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\x86\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -804,7 +804,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\amd64\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -835,7 +835,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\arm\openmpt-lame.lib</ImportLibrary>
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>

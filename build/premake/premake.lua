@@ -130,6 +130,51 @@ end)
 
 
 premake.api.register {
+	name = "linktimeoptimization2",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"On",
+		"Off",
+		"Fast",
+	}
+}
+
+function premake.vstudio.vc2010.wholeProgramOptimization2(cfg)
+	if cfg.linktimeoptimization2 == "On" then
+		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "true")
+	elseif cfg.linktimeoptimization2 == "Fast" then
+		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "true")
+	elseif cfg.linktimeoptimization2 == "Off" then
+		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "false")
+	end
+end
+
+function premake.vstudio.vc2010.linkTimeCodeGeneration2(cfg)
+	if cfg.linktimeoptimization2 == "On" then
+		premake.vstudio.vc2010.element("LinkTimeCodeGeneration", nil, "UseLinkTimeCodeGeneration")
+	elseif cfg.linktimeoptimization2 == "Fast" then
+		premake.vstudio.vc2010.element("LinkTimeCodeGeneration", nil, "UseFastLinkTimeCodeGeneration")
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.wholeProgramOptimization, premake.vstudio.vc2010.wholeProgramOptimization2)
+	return calls
+end)
+
+premake.override(premake.vstudio.vc2010.elements, "link", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.linkTimeCodeGeneration, premake.vstudio.vc2010.linkTimeCodeGeneration2)
+	return calls
+end)
+
+
+
+
+premake.api.register {
 	name = "dataexecutionprevention",
 	scope = "config",
 	kind = "string",

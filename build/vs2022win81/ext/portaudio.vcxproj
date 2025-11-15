@@ -737,7 +737,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\x86\openmpt-portaudio.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -768,7 +768,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\amd64\openmpt-portaudio.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -799,7 +799,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <ImportLibrary>..\..\..\bin\release\vs2022-win81-shared\arm\openmpt-portaudio.lib</ImportLibrary>
       <ModuleDefinitionFile>../../premake/def/ext-portaudio.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
