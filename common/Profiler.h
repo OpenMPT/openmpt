@@ -99,10 +99,21 @@ inline constexpr std::size_t cacheline_size_max = std::min(static_cast<std::size
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winterference-size"
+#elif MPT_COMPILER_GENERIC && defined(__GNUC__)
+// GCC stupidly warns for any use of std::hardware_destructive_interference_size
+// unless the warning is explicitly disabled or the value is set on the command line
+// via `--param hardware_destructive_interference_size`.
+// We cannot do that in standard-compliant builds because we explicitly opt-out of
+// any compiler-specific knowledge.
+// Special casse GCC even in generic mode here because we are left with no choice.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winterference-size"
 #endif // MPT_COMPILER_GCC
 inline constexpr std::size_t cacheline_size_min = std::hardware_constructive_interference_size;
 inline constexpr std::size_t cacheline_size_max = std::hardware_destructive_interference_size;
 #if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#elif MPT_COMPILER_GENERIC && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif // MPT_COMPILER_GCC
 
