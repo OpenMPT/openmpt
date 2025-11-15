@@ -81,8 +81,15 @@ inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_alig
 inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
 #endif
 #else
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winterference-size"
+#endif // MPT_COMPILER_GCC
 inline constexpr std::size_t cacheline_size_min = std::hardware_constructive_interference_size;
 inline constexpr std::size_t cacheline_size_max = std::hardware_destructive_interference_size;
+#if MPT_COMPILER_GCC
+#pragma GCC diagnostic pop
+#endif // MPT_COMPILER_GCC
 #endif
 
 
