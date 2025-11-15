@@ -317,7 +317,7 @@ private:
 	};
 	struct alignas(mpt::profiler::cacheline_size_max) data {
 		std::atomic<mpt::somefloat64> frequency = 0.0_sf64;
-		std::atomic<measurement> old = measurement{];
+		std::atomic<measurement> old = measurement{};
 	};
 	inline static data g_data;
 public:
