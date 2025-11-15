@@ -307,7 +307,9 @@ namespace detail {
 template <typename Clock>
 class frequency_estimator {
 private:
-	static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
+	#if defined(MPT_ARCH_X86_CX8)
+		static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
+	#endif
 	struct measurement {
 		mpt::chrono::system_clock::time_point wallclock{};
 		typename Clock::rep perfclock{};
