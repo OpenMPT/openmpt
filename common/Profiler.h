@@ -18,15 +18,20 @@
 #include "mptCPU.h"
 #include "mptTime.h"
 
+#include <algorithm>
+#include <atomic>
 #if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <chrono>
 #endif
+#include <new>
 #include <optional>
 #if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 #include <ratio>
 #endif
 #include <string>
 #include <vector>
+
+#include <cstddef>
 
 #if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
 #if MPT_COMPILER_CLANG
@@ -42,7 +47,9 @@
 #endif
 
 
+
 OPENMPT_NAMESPACE_BEGIN
+
 
 
 #if defined(MODPLUG_TRACKER)
@@ -52,16 +59,43 @@ OPENMPT_NAMESPACE_BEGIN
 #endif
 
 
-namespace mpt
-{
 
-namespace profiler
-{
+namespace mpt {
+
+namespace profiler {
+
+
+
+#if defined(MPT_LIBCXX_QUIRK_NO_HARDWARE_INTERFERENCE_SIZE)
+// guess
+#if MPT_OS_MACOSX_OR_IOS
+#if MPT_ARCH_ARM64
+inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
+inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(128));
+#else
+inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
+inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
+#endif
+#else
+inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
+inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
+#endif
+#else
+inline constexpr std::size_t cacheline_size_min = std::hardware_constructive_interference_size;
+inline constexpr std::size_t cacheline_size_max = std::hardware_destructive_interference_size;
+#endif
+
+
+
+enum class clock_frequency_mode {
+	fast,
+	slow,
+	optional,
+};
+
 
 
 #if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
-
-#define MPT_PROFILER_TSC_CLOCK 1
 
 struct tsc_clock {
 	using rep = uint64;
@@ -71,14 +105,7 @@ struct tsc_clock {
 	//using time_point = std::chrono::time_point<tsc_clock>;
 #endif
 	static inline constexpr bool is_steady = false;
-	static inline constexpr bool is_dynamic = true;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		uint64 frequency = mpt::arch::get_cpu_info().get_tsc_frequency();
-		if (frequency == 0) {
-			return std::nullopt;
-		}
-		return 1.0 / static_cast<double>(frequency);
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::optional;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		uint64 frequency = mpt::arch::get_cpu_info().get_tsc_frequency();
 		if (frequency == 0) {
@@ -94,14 +121,10 @@ struct tsc_clock {
 #endif
 };
 
-using highres_clock = tsc_clock;
-using fast_clock = tsc_clock;
+#endif
 
-using default_clock = tsc_clock;
 
-#elif MPT_OS_WINDOWS
-
-#define MPT_PROFILER_TSC_CLOCK 0
+#if MPT_OS_WINDOWS
 
 struct QueryPerformanceCounter_clock {
 	using rep = uint64;
@@ -111,12 +134,7 @@ struct QueryPerformanceCounter_clock {
 	//using time_point = std::chrono::time_point<QueryPerformanceCounter_clock>;
 #endif
 	static inline constexpr bool is_steady = false;
-	static inline constexpr bool is_dynamic = true;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		LARGE_INTEGER result{};
-		QueryPerformanceFrequency(&result);
-		return 1.0 / static_cast<double>(result.QuadPart);
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		LARGE_INTEGER result{};
 		QueryPerformanceFrequency(&result);
@@ -144,12 +162,9 @@ struct GetTickCount_clock {
 	using time_point = std::chrono::time_point<GetTickCount_clock>;
 #endif
 	static inline constexpr bool is_steady = true;
-	static inline constexpr bool is_dynamic = false;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		return 0.001;
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
-		return 1000.0;
+		return 1000.0_sf64;
 	}
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
@@ -168,14 +183,10 @@ struct GetTickCount_clock {
 static_assert(std::chrono::is_clock<GetTickCount_clock>::value);
 #endif
 
-using highres_clock = QueryPerformanceCounter_clock;
-using fast_clock = GetTickCount_clock;
+#endif
 
-using default_clock = QueryPerformanceCounter_clock;
 
-#elif !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
-
-#define MPT_PROFILER_TSC_CLOCK 0
+#if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 
 struct high_resolution_clock {
 	using rep = std::chrono::high_resolution_clock::rep;
@@ -183,10 +194,7 @@ struct high_resolution_clock {
 	using duration = std::chrono::high_resolution_clock::duration;
 	using time_point = std::chrono::high_resolution_clock::time_point;
 	static inline constexpr bool is_steady = std::chrono::high_resolution_clock::is_steady;
-	static inline constexpr bool is_dynamic = false;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		return static_cast<double>(period::num) / static_cast<double>(period::den);
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		return static_cast<double>(period::den) / static_cast<double>(period::num);
 	}
@@ -207,10 +215,7 @@ struct steady_clock {
 	using duration = std::chrono::steady_clock::duration;
 	using time_point = std::chrono::steady_clock::time_point;
 	static inline constexpr bool is_steady = std::chrono::steady_clock::is_steady;
-	static inline constexpr bool is_dynamic = false;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		return static_cast<double>(period::num) / static_cast<double>(period::den);
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		return static_cast<double>(period::den) / static_cast<double>(period::num);
 	}
@@ -225,14 +230,29 @@ struct steady_clock {
 static_assert(std::chrono::is_clock<steady_clock>::value);
 #endif
 
-using highres_clock = high_resolution_clock;
-using fast_clock = steady_clock;
+struct system_clock {
+	using rep = std::chrono::system_clock::rep;
+	using period = std::chrono::system_clock::period;
+	using duration = std::chrono::system_clock::duration;
+	using time_point = std::chrono::system_clock::time_point;
+	static inline constexpr bool is_steady = std::chrono::system_clock::is_steady;
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		return static_cast<double>(period::den) / static_cast<double>(period::num);
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept {
+		return std::chrono::system_clock::now();
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw() noexcept {
+		return std::chrono::system_clock::now().time_since_epoch().count();
+	}
+};
+#if MPT_CXX_AT_LEAST(20) && !defined(LIBCXX_QUIRK_NO_CHRONO_IS_CLOCK)
+static_assert(std::chrono::is_clock<system_clock>::value);
+#endif
 
-using default_clock = high_resolution_clock;
+#endif
 
-#else
-
-#define MPT_PROFILER_TSC_CLOCK 0
 
 struct default_system_clock {
 	using rep = mpt::chrono::default_system_clock::rep;
@@ -240,10 +260,7 @@ struct default_system_clock {
 	using duration = mpt::chrono::default_system_clock::duration;
 	using time_point = mpt::chrono::default_system_clock::time_point;
 	static inline constexpr bool is_steady = mpt::chrono::default_system_clock::is_steady;
-	static inline constexpr bool is_dynamic = false;
-	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_period() noexcept {
-		return 0.000'000'001;
-	}
+	static inline constexpr clock_frequency_mode frequency_mode = clock_frequency_mode::fast;
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
 		return 1'000'000'000.0;
 	}
@@ -255,17 +272,124 @@ struct default_system_clock {
 	}
 };
 
+
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+
+using highres_clock = tsc_clock;
+using fast_clock = tsc_clock;
+using default_clock = tsc_clock;
+
+#elif MPT_OS_WINDOWS
+
+using highres_clock = QueryPerformanceCounter_clock;
+using fast_clock = GetTickCount_clock;
+using default_clock = QueryPerformanceCounter_clock;
+
+#elif !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
+
+using highres_clock = high_resolution_clock;
+using fast_clock = steady_clock;
+using default_clock = high_resolution_clock;
+
+#else
+
 using highres_clock = default_system_clock;
 using fast_clock = default_system_clock;
-
 using default_clock = default_system_clock;
 
 #endif
 
 
+
+namespace detail {
+
+
+template <typename Clock>
+class frequency_estimator {
+private:
+	static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
+	struct measurement {
+		mpt::chrono::system_clock::time_point wallclock{};
+		typename Clock::rep perfclock{};
+		bool valid = false;
+	};
+	struct alignas(mpt::profiler::cacheline_size_max) data {
+		std::atomic<mpt::somefloat64> frequency = 0.0_sf64;
+		std::atomic<measurement> old;
+	};
+	inline static data g_data;
+public:
+	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void estimate() noexcept {
+		measurement now;
+		typename Clock::rep beg = Clock::now_raw();
+		now.wallclock = mpt::chrono::system_clock::now();
+		typename Clock::rep end = Clock::now_raw();
+		if (end < beg) {
+			return;
+		}
+		now.perfclock = std::midpoint(beg, end);
+		now.valid = true;
+		measurement old = g_data.old.exchange(now, std::memory_order_relaxed);
+		if (!old.valid) {
+			return;
+		}
+		if (now.wallclock <= old.wallclock) {
+			return;
+		}
+		mpt::somefloat64 frequency = 1'000'000'000.0_sf64 * (now.perfclock - old.perfclock) / static_cast<mpt::somefloat64>(mpt::chrono::system_clock::to_unix_nanoseconds(now.wallclock) - mpt::chrono::system_clock::to_unix_nanoseconds(old.wallclock));
+		if (frequency > 0.0_sf64) {
+			g_data.frequency.store(frequency, std::memory_order_relaxed);
+		}
+	}
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static mpt::somefloat64 get_frequency() noexcept {
+		return g_data.frequency.load(std::memory_order_relaxed);
+	}
+};
+
+
+template <typename Clock>
+class frequency_cache {
+public:
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<mpt::somefloat64> get_frequency() noexcept {
+		alignas(mpt::profiler::cacheline_size_max) static std::optional<mpt::somefloat64> s_frequency = Clock::get_frequency();
+		return s_frequency;
+	}
+};
+
+
+} // namespace detail
+
+
+
+template <typename Clock>
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
+	if constexpr (Clock::frequency_mode == clock_frequency_mode::optional) {
+		mpt::profiler::detail::frequency_estimator<Clock>::estimate();
+	}
+}
+
+
+
+template <typename Clock>
+[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE std::optional<mpt::somefloat64> get_frequency() noexcept {
+	std::optional<mpt::somefloat64> frequency;
+	if constexpr (Clock::frequency_mode == clock_frequency_mode::slow) {
+		frequency = mpt::profiler::detail::frequency_cache<Clock>::get_frequency();
+	} else {
+		frequency = Clock::get_frequency();
+	}
+	if (!frequency.has_value()) {
+		frequency = mpt::profiler::detail::frequency_estimator<Clock>::get_frequency();
+	}
+	return frequency;
+}
+
+
+
 } // namespace profiler
 
 } // namespace mpt
+
 
 
 #ifdef USE_PROFILER
@@ -344,7 +468,9 @@ public:
 #define OPENMPT_PROFILE_FUNCTION(cat) OPENMPT_PROFILE_SCOPE(cat, __func__)
 
 
+
 #else // !USE_PROFILER
+
 
 
 class Profiler
@@ -364,7 +490,9 @@ public:
 #define OPENMPT_PROFILE_FUNCTION(cat) do { } while(0)
 
 
+
 #endif // USE_PROFILER
+
 
 
 OPENMPT_NAMESPACE_END
