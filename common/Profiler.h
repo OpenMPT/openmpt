@@ -70,7 +70,7 @@ namespace profiler {
 
 // guess
 #if MPT_OS_MACOSX_OR_IOS
-#if MPT_ARCH_ARM64
+#if MPT_ARCH_AARCH64
 inline constexpr std::size_t cacheline_size_min = std::max(alignof(std::max_align_t), static_cast<std::size_t>(64));
 inline constexpr std::size_t cacheline_size_max = std::max(alignof(std::max_align_t), static_cast<std::size_t>(128));
 #else
