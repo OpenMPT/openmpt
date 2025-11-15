@@ -362,7 +362,7 @@ public:
 
 
 template <typename Clock>
-[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE void estimate_frequency() noexcept {
 	if constexpr (Clock::frequency_mode == clock_frequency_mode::optional) {
 		mpt::profiler::detail::frequency_estimator<Clock>::estimate();
 	}
