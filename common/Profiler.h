@@ -33,7 +33,7 @@
 
 #include <cstddef>
 
-#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC) && defined(MPT_ARCH_INTRINSICS_X86_TSC)
 #if MPT_COMPILER_CLANG
 #include <x86intrin.h>
 #elif MPT_COMPILER_GCC
@@ -131,7 +131,7 @@ enum class clock_frequency_mode {
 
 
 
-#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC) && defined(MPT_ARCH_INTRINSICS_X86_TSC)
 
 struct tsc_clock {
 	using rep = uint64;
@@ -309,7 +309,7 @@ struct default_system_clock {
 };
 
 
-#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC)
+#if (defined(MPT_ENABLE_ARCH_X86) || defined(MPT_ENABLE_ARCH_AMD64)) && defined(MPT_ARCH_X86_TSC) && defined(MPT_ARCH_INTRINSICS_X86_TSC)
 
 using highres_clock = tsc_clock;
 using fast_clock = tsc_clock;
