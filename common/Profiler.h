@@ -99,7 +99,7 @@ inline constexpr std::size_t cacheline_size_max = std::min(static_cast<std::size
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winterference-size"
-#elif MPT_COMPILER_GENERIC && defined(__GNUC__)
+#elif MPT_COMPILER_GENERIC && defined(__GNUC__) && !defined(__clang__)
 // GCC stupidly warns for any use of std::hardware_destructive_interference_size
 // unless the warning is explicitly disabled or the value is set on the command line
 // via `--param hardware_destructive_interference_size`.
@@ -113,7 +113,7 @@ inline constexpr std::size_t cacheline_size_min = std::hardware_constructive_int
 inline constexpr std::size_t cacheline_size_max = std::hardware_destructive_interference_size;
 #if MPT_COMPILER_GCC
 #pragma GCC diagnostic pop
-#elif MPT_COMPILER_GENERIC && defined(__GNUC__)
+#elif MPT_COMPILER_GENERIC && defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif // MPT_COMPILER_GCC
 
@@ -413,7 +413,7 @@ public:
 		if (now.wallclock <= old.wallclock) {
 			return;
 		}
-		mpt::somefloat64 frequency = 1'000'000'000.0_sf64 * (now.perfclock - old.perfclock) / static_cast<mpt::somefloat64>(mpt::chrono::system_clock::to_unix_nanoseconds(now.wallclock) - mpt::chrono::system_clock::to_unix_nanoseconds(old.wallclock));
+		mpt::somefloat64 frequency = 1'000'000'000.0_sf64 * static_cast<mpt::somefloat64>(now.perfclock - old.perfclock) / static_cast<mpt::somefloat64>(mpt::chrono::system_clock::to_unix_nanoseconds(now.wallclock) - mpt::chrono::system_clock::to_unix_nanoseconds(old.wallclock));
 		if (frequency > 0.0_sf64) {
 			g_data.frequency.store(frequency, std::memory_order_relaxed);
 		}
