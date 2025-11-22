@@ -90,36 +90,46 @@ copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay-legacy\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp5-legacy\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\arm64\openmpt123.exe .\openmpt123\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\arm64\openmpt-mpg123.dll .\openmpt123\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\arm64ec\openmpt123.exe .\openmpt123\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\arm64ec\openmpt-mpg123.dll .\openmpt123\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-static\arm\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt123.exe .\openmpt123\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\openmpt123\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\amd64\openmpt123.exe .\openmpt123\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\in_openmpt.dll .\Winamp5\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\Winamp5\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\in_openmpt_wa2.dll .\Winamp2\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-static\x86\openmpt-mpg123.dll .\Winamp2\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\xmp-openmpt.dll .\XMPlay-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\XMPlay-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt.dll .\Winamp5-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp5-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\in_openmpt_wa2.dll .\Winamp2-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Winamp2-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\openmpt123.exe .\openmpt123\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\openmpt-mpg123.dll .\openmpt123\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\amd64\openmpt123.exe .\openmpt123\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-static\arm\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-static\arm\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\arm64\openmpt123.exe .\openmpt123\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\arm64\openmpt-mpg123.dll .\openmpt123\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\arm64ec\openmpt123.exe .\openmpt123\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\arm64ec\openmpt-mpg123.dll .\openmpt123\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\xmp-openmpt.dll .\XMPlay-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\openmpt-mpg123.dll .\XMPlay-legacy\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\xmp-openmpt.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\XMPlay\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\in_openmpt_wa2.dll .\Winamp2-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\openmpt-mpg123.dll .\Winamp2-legacy\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\in_openmpt_wa2.dll .\Winamp2\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\Winamp2\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\in_openmpt.dll .\Winamp5-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-static\x86\openmpt-mpg123.dll .\Winamp5-legacy\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\in_openmpt.dll .\Winamp5\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\Winamp5\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.windows\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
  changelog.md ^
+ openmpt123\x86-legacy\openmpt123.exe ^
+ openmpt123\x86-legacy\openmpt-mpg123.dll ^
+ openmpt123\amd64-legacy\openmpt123.exe ^
+ openmpt123\amd64-legacy\openmpt-mpg123.dll ^
+ openmpt123\arm-legacy\openmpt123.exe ^
+ openmpt123\arm-legacy\openmpt-mpg123.dll ^
+ openmpt123\arm64-legacy\openmpt123.exe ^
+ openmpt123\arm64-legacy\openmpt-mpg123.dll ^
  openmpt123\x86\openmpt123.exe ^
  openmpt123\x86\openmpt-mpg123.dll ^
  openmpt123\amd64\openmpt123.exe ^
@@ -128,30 +138,24 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-static\x86\openmpt-mpg123.dll .\Wina
  openmpt123\arm64\openmpt-mpg123.dll ^
  openmpt123\arm64ec\openmpt123.exe ^
  openmpt123\arm64ec\openmpt-mpg123.dll ^
- openmpt123\arm-legacy\openmpt123.exe ^
- openmpt123\arm-legacy\openmpt-mpg123.dll ^
- openmpt123\x86-legacy\openmpt123.exe ^
- openmpt123\x86-legacy\openmpt-mpg123.dll ^
- openmpt123\amd64-legacy\openmpt123.exe ^
- openmpt123\amd64-legacy\openmpt-mpg123.dll ^
- XMPlay\xmp-openmpt.txt ^
- XMPlay\xmp-openmpt.dll ^
- XMPlay\openmpt-mpg123.dll ^
- Winamp5\in_openmpt.txt ^
- Winamp5\in_openmpt.dll ^
- Winamp5\openmpt-mpg123.dll ^
- Winamp2\in_openmpt_wa2.txt ^
- Winamp2\in_openmpt_wa2.dll ^
- Winamp2\openmpt-mpg123.dll ^
  XMPlay-legacy\xmp-openmpt.txt ^
  XMPlay-legacy\xmp-openmpt.dll ^
  XMPlay-legacy\openmpt-mpg123.dll ^
- Winamp5-legacy\in_openmpt.txt ^
- Winamp5-legacy\in_openmpt.dll ^
- Winamp5-legacy\openmpt-mpg123.dll ^
+ XMPlay\xmp-openmpt.txt ^
+ XMPlay\xmp-openmpt.dll ^
+ XMPlay\openmpt-mpg123.dll ^
  Winamp2-legacy\in_openmpt_wa2.txt ^
  Winamp2-legacy\in_openmpt_wa2.dll ^
  Winamp2-legacy\openmpt-mpg123.dll ^
+ Winamp2\in_openmpt_wa2.txt ^
+ Winamp2\in_openmpt_wa2.dll ^
+ Winamp2\openmpt-mpg123.dll ^
+ Winamp5-legacy\in_openmpt.txt ^
+ Winamp5-legacy\in_openmpt.dll ^
+ Winamp5-legacy\openmpt-mpg123.dll ^
+ Winamp5\in_openmpt.txt ^
+ Winamp5\in_openmpt.dll ^
+ Winamp5\openmpt-mpg123.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-windows
@@ -237,48 +241,54 @@ copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_mingw.h inc\libopenmpt
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h inc\libopenmpt\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\libopenmpt.lib lib\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\libopenmpt.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\openmpt-mpg123.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\openmpt-ogg.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\openmpt-vorbis.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\x86\openmpt-zlib.dll bin\x86\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\libopenmpt.lib lib\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\libopenmpt.dll bin\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\openmpt-mpg123.dll bin\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\openmpt-ogg.dll bin\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\openmpt-vorbis.dll bin\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\amd64\openmpt-zlib.dll bin\amd64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\libopenmpt.lib lib\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\libopenmpt.dll bin\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\openmpt-mpg123.dll bin\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\openmpt-ogg.dll bin\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\openmpt-vorbis.dll bin\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64\openmpt-zlib.dll bin\arm64\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\libopenmpt.lib lib\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\libopenmpt.dll bin\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\openmpt-mpg123.dll bin\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\openmpt-ogg.dll bin\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\openmpt-vorbis.dll bin\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win11-shared\arm64ec\openmpt-zlib.dll bin\arm64ec\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\libopenmpt.lib lib\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\libopenmpt.dll bin\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\openmpt-mpg123.dll bin\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\openmpt-ogg.dll bin\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\openmpt-vorbis.dll bin\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win8-shared\arm\openmpt-zlib.dll bin\arm-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\libopenmpt.lib lib\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\libopenmpt.dll bin\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\openmpt-mpg123.dll bin\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\openmpt-ogg.dll bin\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\openmpt-vorbis.dll bin\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\x86\openmpt-zlib.dll bin\x86-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\libopenmpt.lib lib\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\libopenmpt.dll bin\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-mpg123.dll bin\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-ogg.dll bin\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-vorbis.dll bin\amd64-legacy\ || goto error
-copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-zlib.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\libopenmpt.lib lib\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\libopenmpt.dll bin\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\openmpt-mpg123.dll bin\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\openmpt-ogg.dll bin\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\openmpt-vorbis.dll bin\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\x86\openmpt-zlib.dll bin\x86-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\libopenmpt.lib lib\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\libopenmpt.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\openmpt-mpg123.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\openmpt-ogg.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\openmpt-vorbis.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win7-shared\amd64\openmpt-zlib.dll bin\amd64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\libopenmpt.lib lib\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\libopenmpt.dll bin\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\openmpt-mpg123.dll bin\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\openmpt-ogg.dll bin\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\openmpt-vorbis.dll bin\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win8-shared\arm\openmpt-zlib.dll bin\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\libopenmpt.lib lib\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\libopenmpt.dll bin\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\openmpt-mpg123.dll bin\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\openmpt-ogg.dll bin\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\openmpt-vorbis.dll bin\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-shared\arm64\openmpt-zlib.dll bin\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\libopenmpt.lib lib\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\libopenmpt.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\openmpt-mpg123.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\openmpt-ogg.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\openmpt-vorbis.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\x86\openmpt-zlib.dll bin\x86\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\libopenmpt.lib lib\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\libopenmpt.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\openmpt-mpg123.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\openmpt-ogg.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\openmpt-vorbis.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\amd64\openmpt-zlib.dll bin\amd64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\libopenmpt.lib lib\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\libopenmpt.dll bin\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\openmpt-mpg123.dll bin\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\openmpt-ogg.dll bin\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\openmpt-vorbis.dll bin\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64\openmpt-zlib.dll bin\arm64\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\libopenmpt.lib lib\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\libopenmpt.dll bin\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\openmpt-mpg123.dll bin\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\openmpt-ogg.dll bin\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\openmpt-vorbis.dll bin\arm64ec\ || goto error
+copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\openmpt-zlib.dll bin\arm64ec\ || goto error
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.%MPT_VS_VER%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
@@ -296,13 +306,34 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-zlib.dll bin\am
  inc\libopenmpt\libopenmpt_stream_callbacks_file_msvcrt.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file_posix.h ^
  inc\libopenmpt\libopenmpt_stream_callbacks_file_posix_lfs64.h ^
+ lib\x86-legacy\libopenmpt.lib ^
+ lib\amd64-legacy\libopenmpt.lib ^
+ lib\arm-legacy\libopenmpt.lib ^
+ lib\arm64-legacy\libopenmpt.lib ^
  lib\x86\libopenmpt.lib ^
  lib\amd64\libopenmpt.lib ^
  lib\arm64\libopenmpt.lib ^
  lib\arm64ec\libopenmpt.lib ^
- lib\arm-legacy\libopenmpt.lib ^
- lib\x86-legacy\libopenmpt.lib ^
- lib\amd64-legacy\libopenmpt.lib ^
+ bin\x86-legacy\libopenmpt.dll ^
+ bin\x86-legacy\openmpt-mpg123.dll ^
+ bin\x86-legacy\openmpt-ogg.dll ^
+ bin\x86-legacy\openmpt-vorbis.dll ^
+ bin\x86-legacy\openmpt-zlib.dll ^
+ bin\amd64-legacy\libopenmpt.dll ^
+ bin\amd64-legacy\openmpt-mpg123.dll ^
+ bin\amd64-legacy\openmpt-ogg.dll ^
+ bin\amd64-legacy\openmpt-vorbis.dll ^
+ bin\amd64-legacy\openmpt-zlib.dll ^
+ bin\arm-legacy\libopenmpt.dll ^
+ bin\arm-legacy\openmpt-mpg123.dll ^
+ bin\arm-legacy\openmpt-ogg.dll ^
+ bin\arm-legacy\openmpt-vorbis.dll ^
+ bin\arm-legacy\openmpt-zlib.dll ^
+ bin\arm64-legacy\libopenmpt.dll ^
+ bin\arm64-legacy\openmpt-mpg123.dll ^
+ bin\arm64-legacy\openmpt-ogg.dll ^
+ bin\arm64-legacy\openmpt-vorbis.dll ^
+ bin\arm64-legacy\openmpt-zlib.dll ^
  bin\x86\libopenmpt.dll ^
  bin\x86\openmpt-mpg123.dll ^
  bin\x86\openmpt-ogg.dll ^
@@ -323,21 +354,6 @@ copy /y ..\..\bin\release\%MPT_VS_VER%-win7-shared\amd64\openmpt-zlib.dll bin\am
  bin\arm64ec\openmpt-ogg.dll ^
  bin\arm64ec\openmpt-vorbis.dll ^
  bin\arm64ec\openmpt-zlib.dll ^
- bin\arm-legacy\libopenmpt.dll ^
- bin\arm-legacy\openmpt-mpg123.dll ^
- bin\arm-legacy\openmpt-ogg.dll ^
- bin\arm-legacy\openmpt-vorbis.dll ^
- bin\arm-legacy\openmpt-zlib.dll ^
- bin\x86-legacy\libopenmpt.dll ^
- bin\x86-legacy\openmpt-mpg123.dll ^
- bin\x86-legacy\openmpt-ogg.dll ^
- bin\x86-legacy\openmpt-vorbis.dll ^
- bin\x86-legacy\openmpt-zlib.dll ^
- bin\amd64-legacy\libopenmpt.dll ^
- bin\amd64-legacy\openmpt-mpg123.dll ^
- bin\amd64-legacy\openmpt-ogg.dll ^
- bin\amd64-legacy\openmpt-vorbis.dll ^
- bin\amd64-legacy\openmpt-zlib.dll ^
  || goto error
 cd .. || goto error
 rmdir /s /q libopenmpt-dev-windows-%MPT_VS_VER%
