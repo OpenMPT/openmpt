@@ -14,8 +14,8 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
-msbuild OpenMPT%MPT_VS_FLAVOUR%.sln /target:Build /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
-msbuild OpenMPT%MPT_VS_FLAVOUR%.sln -target:updatesigntool:Rebuild;OpenMPT-NativeSupport:Rebuild;OpenMPT-WineWrapper:Rebuild;PluginBridge:Rebuild;PluginBridgeLegacy:Rebuild;OpenMPT:Rebuild /p:BuildProjectReferences=false /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+msbuild OpenMPT%MPT_VS_FLAVOUR%.%MPT_VS_SLN% /target:Build /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+msbuild OpenMPT%MPT_VS_FLAVOUR%.%MPT_VS_SLN% -target:updatesigntool:Rebuild;OpenMPT-NativeSupport:Rebuild;OpenMPT-WineWrapper:Rebuild;PluginBridge:Rebuild;PluginBridgeLegacy:Rebuild;OpenMPT:Rebuild /p:BuildProjectReferences=false /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=%MPT_VS_CONF%;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
 cd ..\.. || goto error
 

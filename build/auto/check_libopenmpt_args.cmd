@@ -14,13 +14,13 @@ call "build\auto\setup_%MPT_VS_VER%.cmd"
 
 cd "build\%MPT_VS_WITHTARGET%" || goto error
 
- msbuild libopenmpt.sln /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
- msbuild openmpt123.sln /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild libopenmpt.%MPT_VS_SLN% /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild openmpt123.%MPT_VS_SLN% /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  if "%MPT_VS_ARCH%" == "Win32" (
-  msbuild in_openmpt.sln /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
-  msbuild xmp-openmpt.sln /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild in_openmpt.%MPT_VS_SLN% /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+  msbuild xmp-openmpt.%MPT_VS_SLN% /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=Release;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
  )
- msbuild libopenmpt.sln /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
+ msbuild libopenmpt.%MPT_VS_SLN% /target:Build /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=false /property:Configuration=ReleaseShared;Platform=%MPT_VS_ARCH% /maxcpucount /verbosity:minimal || goto error
 
 cd ..\.. || goto error
 

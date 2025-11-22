@@ -20,3 +20,6 @@ echo "Usage: foo.cmd vs2019 winstore82 Win32 Release 7z default"
 exit 1
 
 :setupargumentsstart
+
+set MPT_VS_SLN=sln
+if "%MPT_VS_VER%" == "vs2026" set MPT_VS_SLN=slnx
