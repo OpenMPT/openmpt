@@ -34,11 +34,12 @@ del /f /q libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT%
 mkdir libopenmpt-windows
 cd libopenmpt-windows || goto error
 mkdir openmpt123
-mkdir openmpt123\x86
-mkdir openmpt123\amd64
 mkdir openmpt123\x86-legacy
 mkdir openmpt123\amd64-legacy
 mkdir openmpt123\arm-legacy
+mkdir openmpt123\arm64-legacy
+mkdir openmpt123\x86
+mkdir openmpt123\amd64
 mkdir openmpt123\arm64
 mkdir openmpt123\arm64ec
 mkdir XMPlay
@@ -177,21 +178,23 @@ cd libopenmpt-dev-windows-%MPT_VS_VER% || goto error
 mkdir inc
 mkdir inc\libopenmpt
 mkdir lib
+mkdir lib\x86-legacy
+mkdir lib\amd64-legacy
+mkdir lib\arm-legacy
+mkdir lib\arm64-legacy
 mkdir lib\x86
 mkdir lib\amd64
 mkdir lib\arm64
 mkdir lib\arm64ec
-mkdir lib\arm-legacy
-mkdir lib\x86-legacy
-mkdir lib\amd64-legacy
 mkdir bin
+mkdir bin\x86-legacy
+mkdir bin\amd64-legacy
+mkdir bin\arm-legacy
+mkdir bin\arm64-legacy
 mkdir bin\x86
 mkdir bin\amd64
 mkdir bin\arm64
 mkdir bin\arm64ec
-mkdir bin\arm-legacy
-mkdir bin\x86-legacy
-mkdir bin\amd64-legacy
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 rmdir /s /q Licenses
 mkdir Licenses
