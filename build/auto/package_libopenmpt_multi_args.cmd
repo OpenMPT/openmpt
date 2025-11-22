@@ -97,8 +97,8 @@ copy /y ..\..\bin\release\vs2022-win7-static\amd64\openmpt123.exe .\openmpt123\a
 copy /y ..\..\bin\release\vs2022-win7-static\amd64\openmpt-mpg123.dll .\openmpt123\amd64-legacy\ || goto error
 copy /y ..\..\bin\release\vs2022-win8-static\arm\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
 copy /y ..\..\bin\release\vs2022-win8-static\arm\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
-copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt123.exe .\openmpt123\arm-legacy\ || goto error
-copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt-mpg123.dll .\openmpt123\arm-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt123.exe .\openmpt123\arm64-legacy\ || goto error
+copy /y ..\..\bin\release\vs2022-win10-static\arm64\openmpt-mpg123.dll .\openmpt123\arm64-legacy\ || goto error
 copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt123.exe .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\openmpt123\x86\ || goto error
 copy /y ..\..\bin\release\vs2026-win11-static\amd64\openmpt123.exe .\openmpt123\amd64\ || goto error
