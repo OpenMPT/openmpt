@@ -52,7 +52,7 @@ call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.
 
 call :killdir "build\tools\innosetup" || goto error
 mkdir "build\tools\innosetup" || goto error
-"build\externals\innosetup-6.6.0.exe" /PORTABLE=1 /CURRENTUSER /DIR="%CD%\build\tools\innosetup\{app}" /LOG="%CD%\build\tools\innosetup\setup.log" /SILENT || goto error
+"build\externals\innosetup-6.6.1.exe" /PORTABLE=1 /CURRENTUSER /DIR="%CD%\build\tools\innosetup\{app}" /LOG="%CD%\build\tools\innosetup\setup.log" /SILENT || goto error
 
 call :killdir "build\tools\innounp"   || goto error
 call :killdir "build\tools\innosetup5" || goto error
