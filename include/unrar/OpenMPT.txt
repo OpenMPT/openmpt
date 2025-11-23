@@ -13,7 +13,7 @@ never be used in OpenMPT's context.
 The following files have been modified:
 extract.cpp, filcreat.cpp, file.cpp, filefn.cpp, find.cpp, largepage.hpp,
 match.cpp, os.hpp, pathfn.cpp, rardefs.hpp, rdwrfn.cpp, secpassword.cpp,
-volume.cpp, win32acl.cpp, win32lnk.cpp
+unpack50mt.cpp, volume.cpp, win32acl.cpp, win32lnk.cpp
 
 For building, premake is used to generate Visual Studio project files.
 See ../build/premake/ for details.

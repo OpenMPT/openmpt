@@ -36,7 +36,14 @@ void Unpack::InitMT()
   {
     uint MaxItems=MaxUserThreads*UNP_BLOCKS_PER_THREAD;
     UnpThreadData=new UnpackThreadData[MaxItems];
+#if defined(__clang__)  // OPENMPT ADDITION
+#pragma clang diagnostic push  // OPENMPT ADDITION
+#pragma clang diagnostic ignored "-Wnontrivial-memcall"  // OPENMPT ADDITION
+#endif  // OPENMPT ADDITION
     memset(UnpThreadData,0,sizeof(UnpackThreadData)*MaxItems);
+#if defined(__clang__)  // OPENMPT ADDITION
+#pragma clang diagnostic pop  // OPENMPT ADDITION
+#endif  // OPENMPT ADDITION
 
     for (uint I=0;I<MaxItems;I++)
     {
