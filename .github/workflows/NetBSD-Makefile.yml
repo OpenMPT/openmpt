@@ -28,7 +28,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -39,7 +39,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -57,7 +57,7 @@ jobs:
           sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
           sudo pkgin -y install doxygen help2man
     - name: Build
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -69,7 +69,7 @@ jobs:
         run: |
           gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -81,7 +81,7 @@ jobs:
         run: |
           gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G

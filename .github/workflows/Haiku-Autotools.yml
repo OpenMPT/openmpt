@@ -23,7 +23,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -34,7 +34,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Sync files to VM
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -45,7 +45,7 @@ jobs:
         shutdown_vm: false
         run: chown -R $(id -u):$(id -g) $(pwd)
     - name: Install dependencies
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -58,7 +58,7 @@ jobs:
           pkgman refresh
           pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
     - name: Build
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
@@ -70,7 +70,7 @@ jobs:
         run: |
           export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v.30.0
+      uses: cross-platform-actions/action@v0.30.0
       with:
         architecture: x86_64
         memory: 4G
