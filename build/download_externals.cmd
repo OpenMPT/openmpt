@@ -29,7 +29,7 @@ if not exist "build\externals" mkdir "build\externals"
 if not exist "build\tools"     mkdir "build\tools"
 
 rem download
-for /f "delims=" %%a in ('type "build\download_externals.txt"') do ( call build\scriptlib\download.cmd %%a || goto error )
+for /f "delims=" %%a in ('powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Parse-Metalink.ps1 -filename ".\build\download_externals.meta4"') do ( call build\scriptlib\download.cmd %%a || goto error )
 
 call :killdir "build\tools\7zipold" || goto error
 call :killdir "build\tools\7zipa" || goto error

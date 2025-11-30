@@ -64,6 +64,59 @@ function download () {
  return 0
 }
 
+MPT_XML_BACKEND=sed
+if command -v xmllint &> /dev/null ; then
+ MPT_XML_BACKEND=xmllint
+elif command -v xpath &> /dev/null ; then
+ MPT_XML_BACKEND=xpath
+fi
+
+xml_xpath () {
+ set -e
+ MPT_XPATH_FILENAME="${1}"
+ shift
+ MPT_XPATH_QUERY="${1}"
+ shift
+ if [ "${MPT_XML_BACKEND}" == "xmllint" ] ; then
+  < "${MPT_XPATH_FILENAME}" sed 's/ xmlns="urn:ietf:params:xml:ns:metalink"//g' | xmllint --xpath "${MPT_XPATH_QUERY}" -
+ elif [ "${MPT_XML_BACKEND}" == "xpath" ] ; then
+  xpath -q -e "${MPT_XPATH_QUERY}" "${MPT_XPATH_FILENAME}"
+ fi
+}
+
+parse_metalink4 () {
+ set -e
+ MPT_METAFILE="$1"
+ shift
+ if [ "${MPT_XML_BACKEND}" == "xmllint" ] || [ "${MPT_XML_BACKEND}" == "xpath" ] ; then
+  for filenum in $(seq 1 $(xml_xpath "${MPT_METAFILE}" "count(/metalink/file)")); do
+   MPT_METAFILE_FILENAME=$(xml_xpath "${MPT_METAFILE}" "string(/metalink/file[${filenum}]/@name)")
+   echo -n "${MPT_METAFILE_FILENAME}"
+   echo -n " "
+   MPT_METAFILE_FILESIZE=$(xml_xpath "${MPT_METAFILE}" "string(/metalink/file[${filenum}]/size/text())")
+   echo -n "${MPT_METAFILE_FILESIZE}"
+   echo -n " "
+   MPT_METAFILE_FILEHASH=$(xml_xpath "${MPT_METAFILE}" "string(/metalink/file[${filenum}]/hash/text())")
+   echo -n "${MPT_METAFILE_FILEHASH}"
+   for urlnum in $(seq 1 $(xml_xpath "${MPT_METAFILE}" "count(/metalink/file[${filenum}]/url)")); do
+    MPT_METAFILE_FILEURL=$(xml_xpath "${MPT_METAFILE}" "string(/metalink/file[${filenum}]/url[${urlnum}]/text())")
+    echo -n " "
+    echo -n "\"${MPT_METAFILE_FILEURL}\""
+   done
+   echo ""
+  done
+ else
+  cat "${MPT_METAFILE}" \
+   | sed 's/\r//g' | tr '\n' '\t' | sed 's/\t//g' | sed 's/> *</></g' \
+   | sed 's/<file/\n<file/g' \
+   | sed 's/\/file>/\/file>\n/g' \
+   | grep '\<file' \
+   | sed 's/<file name="//g' | sed 's/"><size>/ /g' | sed 's/<\/size><hash type="sha-512">/ /g' | sed 's/<\/hash>//g' | sed 's/<\/file>//g' \
+   | sed 's/<url>/ "/g' | sed 's/<\/url>/"/g' \
+   | cat
+ fi
+}
+
 function unpack () {
  set -e
  MPT_GET_DESTDIR="$1"
@@ -104,7 +157,7 @@ if [ ! -d "build/tools" ]; then
 fi
 
 # download
-cat build/download_externals.txt | (
+parse_metalink4 build/download_externals.meta4 | (
  while IFS=$'\n' read -r URL; do
   eval download $URL
  done
