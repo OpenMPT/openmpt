@@ -10,10 +10,10 @@ set MY_DIR=%CD%
 
 cmd /c build\download_externals.cmd auto nodownload                                                    || goto error
 cmd /c build\auto\update_package_template.cmd                                                          || goto error
-cmd /c build\auto\build_openmpt_args.cmd vs2022 win11 Win32   Release 7z default                       || goto error
-cmd /c build\auto\build_openmpt_args.cmd vs2022 win11 x64     Release 7z default                       || goto error
-cmd /c build\auto\build_openmpt_args.cmd vs2022 win11 ARM64   Release 7z default                       || goto error
-cmd /c build\auto\build_openmpt_args.cmd vs2022 win11 ARM64EC Release 7z default                       || goto error
+cmd /c build\auto\build_openmpt_args.cmd vs2026 win11 Win32   Release 7z default                       || goto error
+cmd /c build\auto\build_openmpt_args.cmd vs2026 win11 x64     Release 7z default                       || goto error
+cmd /c build\auto\build_openmpt_args.cmd vs2026 win11 ARM64   Release 7z default                       || goto error
+cmd /c build\auto\build_openmpt_args.cmd vs2026 win11 ARM64EC Release 7z default                       || goto error
 cmd /c build\auto\build_openmpt_args.cmd vs2022 win10 ARM64   Release 7z default                       || goto error
 cmd /c build\auto\build_openmpt_args.cmd vs2022 win8  ARM     Release 7z default                       || goto error
 cmd /c build\auto\build_openmpt_args.cmd vs2022 win7  Win32   Release 7z default                       || goto error

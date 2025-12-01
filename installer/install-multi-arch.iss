@@ -3,7 +3,7 @@
 
 
 
-#define BuildFolder "release\vs2022-win11-static"
+#define BuildFolder "release\vs2026-win11-static"
 #define BuildFolderLegacyarm "release\vs2022-win8-static"
 #define BuildFolderLegacyarm64 "release\vs2022-win10-static"
 #define BuildFolderLegacyx86 "release\vs2022-win7-static"
