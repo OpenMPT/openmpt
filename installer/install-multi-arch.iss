@@ -5,6 +5,7 @@
 
 #define BuildFolder "release\vs2022-win11-static"
 #define BuildFolderLegacyarm "release\vs2022-win8-static"
+#define BuildFolderLegacyarm64 "release\vs2022-win10-static"
 #define BuildFolderLegacyx86 "release\vs2022-win7-static"
 #define BuildFolderLegacyamd64 "release\vs2022-win7-static"
 
@@ -119,6 +120,11 @@ Source: ..\bin\{#BuildFolder}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\a
 Source: ..\bin\{#BuildFolder}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.26100
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.26100
 Source: ..\bin\{#BuildFolder}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.26100
+Source: ..\bin\{#BuildFolderLegacyarm64}\arm64\OpenMPT.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; OnlyBelowVersion: 10.0.26100
+Source: ..\bin\{#BuildFolderLegacyarm64}\arm64\PluginBridge-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; OnlyBelowVersion: 10.0.26100
+Source: ..\bin\{#BuildFolderLegacyarm64}\arm64\PluginBridgeLegacy-arm64.exe; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; OnlyBelowVersion: 10.0.26100
+Source: ..\bin\{#BuildFolderLegacyarm64}\arm64\openmpt-lame.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; OnlyBelowVersion: 10.0.26100
+Source: ..\bin\{#BuildFolderLegacyarm64}\arm64\openmpt-mpg123.dll; DestDir: {app}\bin\arm64; Flags: ignoreversion; Components: archarm64; OnlyBelowVersion: 10.0.26100
 
 Source: ..\bin\{#BuildFolder}\arm64ec\OpenMPT.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.26100
 Source: ..\bin\{#BuildFolder}\arm64ec\PluginBridge-arm64ec.exe; DestDir: {app}\bin\arm64ec; Flags: ignoreversion; Components: archarm64; MinVersion: 10.0.26100
@@ -300,7 +306,7 @@ begin
 			end;
 		paARM64:
 			begin
-				if (GetWindowsVersion >= $0A0065F4) then
+				if (GetWindowsVersion >= $0A004A61) then
 				begin
 					Result := 'arm64';
 				end

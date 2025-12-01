@@ -159,6 +159,23 @@ with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT
 	f.close()
 
 update = {
+	"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64-legacy.zip",
+	"checksums": {
+		"SHA-512": hash_file_sha512("installer/OpenMPT-" + plainversion + "-portable-arm64-legacy.zip"),
+		"SHA3-512": hash_file_sha3_512("installer/OpenMPT-" + plainversion + "-portable-arm64-legacy.zip"),
+	},
+	"filename": "OpenMPT-" + version + "-portable-arm64-legacy.zip",
+	"autoupdate_installer": None,
+	"autoupdate_archive": {
+		"subfolder": "",
+		"restartbinary": "OpenMPT.exe"
+	}
+}
+with open("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64-legacy.update.json", "wb") as f:
+	f.write((json.dumps(update, ensure_ascii=False, indent=1)).encode('utf-8'))
+	f.close()
+
+update = {
 	"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64ec.zip",
 	"checksums": {
 		"SHA-512": hash_file_sha512("installer/OpenMPT-" + plainversion + "-portable-arm64ec.zip"),
@@ -268,6 +285,18 @@ update = {
 				"supported_architectures": { "arm64":True },
 				"required_processor_features": { "arm64":{} }
 			},
+			"portable-arm64-legacy": {
+				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64-legacy.update.json",
+				"download_url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64-legacy.zip",
+				"type": "archive",
+				"can_autoupdate": True,
+				"autoupdate_minversion": "1.30.00.08",
+				"os": "windows",
+				"required_windows_version": { "version_major":10, "version_minor":0, "servicepack_major":0, "servicepack_minor":0, "build":19041, "wine_major":1, "wine_minor":8, "wine_update":0 },
+				"required_architectures": {},
+				"supported_architectures": { "arm64":True },
+				"required_processor_features": { "arm64":{} }
+			},
 			"portable-arm64ec": {
 				"url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64ec.update.json",
 				"download_url": download_base_url + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "/OpenMPT-" + version + "-portable-arm64ec.zip",
@@ -299,6 +328,7 @@ sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-amd64-legacy.update.json")
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm-legacy.update.json")
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64.update.json")
+sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64-legacy.update.json")
 sign_file("installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-portable-arm64ec.update.json")
 
 pdumpkey = Popen(["bin/release/vs2022-win7-static/amd64/updatesigntool.exe", "dumpkey", "auto", "installer/" + "OpenMPT-" + OPENMPT_VERSION_MAJORMAJOR + "." + OPENMPT_VERSION_MAJOR + "." + OPENMPT_VERSION_MINOR + "." + OPENMPT_VERSION_MINORMINOR + "-update-publickey.jwk.json"])
