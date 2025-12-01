@@ -196,7 +196,7 @@ for:
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win8 arm'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 arm64'
       - build\tools\7zip\7z.exe x -y bin\*.7z
-      - move bin\release\vs2026-win11-static bin\release\vs2022-win11-static
+      - move bin\release\vs2022-win11-static bin\release\vs2026-win11-static
 
     build_script:
       - build\auto\build_openmpt_release_packages_multiarch.cmd auto
