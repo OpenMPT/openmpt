@@ -65,6 +65,12 @@ environment:
       MPT_APPVEYOR_TARGET: win8
       MPT_APPVEYOR_ARCH: arm
       MPT_APPVEYOR_ARCH_CONFIG: ARM
+    - job_name: VS2022 Win10 arm64
+      job_group: Builds
+      MPT_APPVEYOR_VS: vs2022
+      MPT_APPVEYOR_TARGET: win10
+      MPT_APPVEYOR_ARCH: arm64
+      MPT_APPVEYOR_ARCH_CONFIG: ARM64
     - job_name: Package
       job_depends_on: Builds
 
@@ -188,12 +194,14 @@ for:
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 x86'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win7 amd64'
             Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win8 arm'
+            Get-AppVeyorArtifacts OpenMPT openmpt -Token $env:OPENMPT_APPVEYOR_API_TOKEN -JobName 'VS2022 Win10 arm64'
       - build\tools\7zip\7z.exe x -y bin\*.7z
+      - move bin\release\vs2026-win11-static bin\release\vs2022-win11-static
 
     build_script:
       - build\auto\build_openmpt_release_packages_multiarch.cmd auto
       - build\auto\build_openmpt_update_information.cmd auto
-      - build\auto\package_openmpt_installer_multiarch_args.cmd vs2022 win11 Win32 Release 7z default
+      - build\auto\package_openmpt_installer_multiarch_args.cmd vs2026 win11 Win32 Release 7z default
 
     after_build:
       - appveyor PushArtifact bin\openmpt-pkg.win-multi.tar
