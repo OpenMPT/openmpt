@@ -136,14 +136,14 @@ private:
 						if ( subformat_info.extension && ( extension == subformat_info.extension ) ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
-							} else if ( !flags.use_float && ( subformat_info.format & ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) ) {
+							} else if ( !flags.use_float && ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
 							}
 						}
 						if ( format_info.extension && ( extension == format_info.extension ) ) {
 							if ( flags.use_float && ( subformat_info.format == SF_FORMAT_FLOAT || subformat_info.format == SF_FORMAT_DOUBLE ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
-							} else if ( !flags.use_float && ( subformat_info.format & ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) ) {
+							} else if ( !flags.use_float && ( subformat_info.format == SF_FORMAT_PCM_16 || subformat_info.format == SF_FORMAT_PCM_24 || subformat_info.format == SF_FORMAT_PCM_32 ) ) {
 								return matched_result( format_info, subformat_info, match_mode );
 							}
 						}
