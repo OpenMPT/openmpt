@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.17-pre
 
+ *  [**Bug**] openmpt123: libsndfile float32 output was broken since 0.7.14.
+
  *  IT: Files are no longer interpreted as ModPlug-made (thus disabling all
     compatibility settings) just because instrument extensions are found (no
     such files are currently known to exist in the wild).
