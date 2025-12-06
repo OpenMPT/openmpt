@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.4-pre
 
+ *  [**Bug**] openmpt123: libsndfile float32 output was broken since 0.8.1.
  *  [**Bug**] `build/download_externals.txt` was missing from `makefile` and
     `msvc` source archives.
 
