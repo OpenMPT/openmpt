@@ -75,6 +75,7 @@ protected:
 	}
 public:
 	virtual void writeout() = 0;
+	virtual void cursor_rewind() = 0;
 	virtual void cursor_up(std::size_t lines) = 0;
 };
 
@@ -89,6 +90,9 @@ public:
 public:
 	void writeout() override {
 		static_cast<void>(pop());
+	}
+	virtual void cursor_rewind() override {
+		return;
 	}
 	void cursor_up(std::size_t lines) override {
 		static_cast<void>(lines);
@@ -112,6 +116,7 @@ public:
 	virtual ~textout_backend() = default;
 public:
 	virtual void write(const mpt::ustring & text) = 0;
+	virtual void cursor_rewind() = 0;
 	virtual void cursor_up(std::size_t lines) = 0;
 };
 
@@ -154,6 +159,10 @@ public:
 			s.flush();
 		}
 	}
+	void cursor_rewind() override {
+		s.flush();
+		write_raw(std::string("\r"));
+	}
 	void cursor_up(std::size_t lines) override {
 		s.flush();
 		for (std::size_t line = 0; line < lines; ++line) {
@@ -184,6 +193,10 @@ public:
 			write_raw(mpt::transcode<std::wstring>(transliterate_control_codes_multiline(text, {transliterate_c0::unicode, transliterate_del::unicode, transliterate_c1::unicode_replacement})));
 			s.flush();
 		}
+	}
+	void cursor_rewind() override {
+		s.flush();
+		write_raw(std::wstring(L"\r"));
 	}
 	void cursor_up(std::size_t lines) override {
 		s.flush();
@@ -244,6 +257,10 @@ public:
 				s.flush();
 			}
 		}
+	}
+	void cursor_rewind() override {
+		s.flush();
+		write_raw(mpt::winstring(TEXT("\r")));
 	}
 	void cursor_up(std::size_t lines) override {
 		if (console) {
@@ -312,6 +329,9 @@ public:
 public:
 	void writeout() override {
 		out.write(pop());
+	}
+	void cursor_rewind() override {
+		out.cursor_rewind();
 	}
 	void cursor_up(std::size_t lines) override {
 		out.cursor_up(lines);

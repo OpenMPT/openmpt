@@ -1323,7 +1323,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 					log << MPT_USTRING(":");
 				}
 			}
-			log << MPT_USTRING("   ") << MPT_USTRING("\r");
+			log << MPT_USTRING("   ");
+			log.cursor_rewind();
 		} else {
 			if ( flags.show_ui ) {
 				log << MPT_USTRING(" ");
@@ -1366,7 +1367,8 @@ void render_loop( commandlineflags & flags, Tmod & mod, double & duration, texto
 				log << seconds_to_string( duration );
 			}
 			if ( flags.show_ui || flags.show_details || flags.show_progress ) {
-				log << MPT_USTRING("   ") << MPT_USTRING("\r");
+				log << MPT_USTRING("   ");
+				log.cursor_rewind();
 			}
 		}
 
