@@ -834,7 +834,7 @@ void CModToMidi::UpdateDialog()
 		if(nMidiProgram >= 24 && nMidiProgram <= 84)
 			nMidiProgram -= 23;
 		else
-			nMidiProgram = 0;
+			nMidiProgram = m_instrMap[m_currentInstr].program = 0;
 	} else
 	{
 		if(nMidiProgram > 127)
