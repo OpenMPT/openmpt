@@ -1167,7 +1167,7 @@ static bool BidiStartCheck(int spos0, int spos1, int spos2)
 }
 
 
-SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop)
+SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop, bool fine)
 {
 	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
 	if(sample.uFlags[CHN_16BIT] && mpt::endian_is_little())
@@ -1187,7 +1187,10 @@ SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForwar
 		for(SmpLength i = loopStart + 1; i <= searchEnd; i++)
 		{
 			p += inc;
-			if(pingpong)
+			if(fine)
+			{
+				return i;
+			} else if(pingpong)
 			{
 				if(BidiStartCheck(p[0], p[inc], p[inc * 2]))
 					return i;
@@ -1209,7 +1212,11 @@ SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForwar
 		{
 			i--;
 			p -= inc;
-			if(pingpong)
+			if(fine)
+			{
+				return i;
+
+			} else if(pingpong)
 			{
 				if(BidiStartCheck(p[0], p[inc], p[inc * 2]))
 					return i;
@@ -1229,7 +1236,7 @@ SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForwar
 }
 
 
-SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop)
+SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop, bool fine)
 {
 	const uint8 *pSample = mpt::byte_cast<const uint8 *>(sample.sampleb());
 	if(sample.uFlags[CHN_16BIT] && mpt::endian_is_little())
@@ -1248,7 +1255,10 @@ SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward,
 		for(SmpLength i = loopEnd + 1; i <= sample.nLength; i++)
 		{
 			p += inc;
-			if(pingpong)
+			if(fine)
+			{
+				return i;
+			} else if(pingpong)
 			{
 				if(BidiEndCheck(p[0], p[inc], p[inc * 2]))
 					return i;
@@ -1271,7 +1281,10 @@ SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward,
 		{
 			i--;
 			p -= inc;
-			if(pingpong)
+			if(fine)
+			{
+				return i;
+			} else if(pingpong)
 			{
 				if(BidiEndCheck(p[0], p[inc], p[inc * 2]))
 					return i;

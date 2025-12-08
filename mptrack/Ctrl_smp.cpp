@@ -2499,6 +2499,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	if(IsLocked()) return;
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
 	const bool moveLoop = CMainFrame::GetInputHandler()->CtrlPressed();
+	const bool fineLoop = CMainFrame::GetInputHandler()->ShiftPressed();
 	bool redraw = false;
 	static CScrollBar *lastScrollbar = nullptr;
 
@@ -2506,7 +2507,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	// Loop Start
 	if(int pos = m_SpinLoopStart.GetPos32(); pos != 0 && sample.nLoopEnd > 0 && sample.HasSampleData())
 	{
-		if(SmpLength i = SampleEdit::FindLoopStart(sample, false, pos > 0, moveLoop); i < sample.nLength)
+		if(SmpLength i = SampleEdit::FindLoopStart(sample, false, pos > 0, moveLoop, fineLoop); i < sample.nLength)
 		{
 			if(!m_startedEdit && lastScrollbar != scrollBar)
 				PrepareUndo(moveLoop ? "Move Loop" : "Set Loop Start");
@@ -2527,7 +2528,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	// Loop End
 	if(int pos = m_SpinLoopEnd.GetPos32(); pos != 0 && sample.HasSampleData())
 	{
-		if(SmpLength i = SampleEdit::FindLoopEnd(sample, false, pos > 0, moveLoop); i > 0)
+		if(SmpLength i = SampleEdit::FindLoopEnd(sample, false, pos > 0, moveLoop, fineLoop); i > 0)
 		{
 			if(!m_startedEdit && lastScrollbar != scrollBar)
 				PrepareUndo(moveLoop ? "Move Loop" : "Set Loop End");
@@ -2548,7 +2549,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	// Sustain Loop Start
 	if(int pos = m_SpinSustainStart.GetPos32(); pos != 0 && sample.nSustainEnd > 0 && sample.HasSampleData())
 	{
-		if(SmpLength i = SampleEdit::FindLoopStart(sample, true, pos > 0, moveLoop); i < sample.nLength)
+		if(SmpLength i = SampleEdit::FindLoopStart(sample, true, pos > 0, moveLoop, fineLoop); i < sample.nLength)
 		{
 			if(!m_startedEdit && lastScrollbar != scrollBar)
 				PrepareUndo(moveLoop ? "Move Sustain Loop" : "Set Sustain Loop Start");
@@ -2569,7 +2570,7 @@ void CCtrlSamples::OnVScroll(UINT nCode, UINT, CScrollBar *scrollBar)
 	// Sustain Loop End
 	if(int pos = m_SpinSustainEnd.GetPos32(); pos != 0 && sample.HasSampleData())
 	{
-		if(SmpLength i = SampleEdit::FindLoopEnd(sample, true, pos > 0, moveLoop); i > 0)
+		if(SmpLength i = SampleEdit::FindLoopEnd(sample, true, pos > 0, moveLoop, fineLoop); i > 0)
 		{
 			if(!m_startedEdit && lastScrollbar != scrollBar)
 				PrepareUndo(moveLoop ? "Move Sustain Loop" : "Set Sustain Loop End");
