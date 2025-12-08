@@ -1834,14 +1834,15 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		// Note: point.x might have changed in if block above in case we're scrolling.
 		SmpLength x;
 		const bool dragItemIsInWaveform = (m_dragItem == HitTestItem::SampleData || m_dragItem == HitTestItem::SelectionStart || m_dragItem == HitTestItem::SelectionEnd);
+		const bool zoomIn = (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength < static_cast<SmpLength>(m_rcClient.Width())));
 		if(m_dwStatus[SMPSTATUS_DRAWING])
 		{
 			// Do not snap to grid and adjust for mouse-down position when drawing
 			x = ScreenToSample(point.x);
-		} else if(m_fineDrag)
+		} else if(m_fineDrag && !zoomIn)
 		{
 			x = m_startDragValue + (point.x - m_startDragPoint.x) / HighDPISupport::ScalePixels(2, m_hWnd);
-		} else if(dragItemIsInWaveform && (m_nZoom < 0 || (m_nZoom == 0 && sample.nLength < static_cast<SmpLength>(m_rcClient.Width()))))
+		} else if(dragItemIsInWaveform && zoomIn)
 		{
 			// Don't adjust selection to mouse down point when zooming into the sample
 			x = SnapToGrid(ScreenToSample(point.x));

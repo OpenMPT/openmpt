@@ -101,11 +101,11 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 // Find a suitable loop start going either forward or backward from the current loop start.
 // If moveLoop is true, the calculations are done assuming that the loop length stays the same (i.e. the loop end is moved by the same amount).
 // Returns a valid loop start less than the sample length if it was successful.
-SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop);
+SmpLength FindLoopStart(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop, bool fine);
 // Find a suitable loop end going either forward or backward from the current loop end.
 // If moveLoop is true, the calculations are done assuming that the loop length stays the same (i.e. the loop start is moved by the same amount).
 // Returns a valid loop end greater than 0 if it was successful.
-SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop);
+SmpLength FindLoopEnd(const ModSample &sample, bool sustainLoop, bool goForward, bool moveLoop, bool fine);
 
 } // namespace SampleEdit
 
