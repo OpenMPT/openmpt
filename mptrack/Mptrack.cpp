@@ -688,6 +688,13 @@ CTrackApp::~CTrackApp()
 	// Work-around memleak (see <https://github.com/microsoft/STL/issues/2504#issuecomment-1068008937>)
 	try
 	{
+#if defined(MODPLUG_TRACKER)
+		if(mpt::OS::Windows::IsWine())
+		{
+			// <https://bugs.openmpt.org/view.php?id=1933>
+			throw std::runtime_error("zoned_time is blacklisted on Wine");
+		}
+#endif
 		std::chrono::get_tzdb_list().~tzdb_list();
 	} catch(const std::exception &)
 	{
