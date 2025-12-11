@@ -27,7 +27,7 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
-std::vector<std::byte> IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const
+std::vector<std::byte> ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const
 {
 	std::vector<std::byte> result = def;
 	if(!mpt::in_range<UINT>(result.size()))
@@ -38,7 +38,7 @@ std::vector<std::byte> IniFileSettingsBackend::ReadSettingRaw(const SettingPath 
 	return result;
 }
 
-mpt::ustring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const
+mpt::ustring ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const
 {
 	std::vector<TCHAR> buf(128);
 	while(::GetPrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(def).c_str(), buf.data(), static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
@@ -52,7 +52,7 @@ mpt::ustring IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, con
 	return mpt::ToUnicode(mpt::winstring(buf.data()));
 }
 
-double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double def) const
+double ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double def) const
 {
 	std::vector<TCHAR> buf(128);
 	while(::GetPrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::tfmt::val(def).c_str(), buf.data(), static_cast<DWORD>(buf.size()), filename.AsNative().c_str()) == buf.size() - 1)
@@ -66,24 +66,24 @@ double IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, double de
 	return mpt::parse<double>(mpt::winstring(buf.data()));
 }
 
-int32 IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, int32 def) const
+int32 ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, int32 def) const
 {
 	return (int32)::GetPrivateProfileInt(GetSection(path).c_str(), GetKey(path).c_str(), (UINT)def, filename.AsNative().c_str());
 }
 
-bool IniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, bool def) const
+bool ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, bool def) const
 {
 	return ::GetPrivateProfileInt(GetSection(path).c_str(), GetKey(path).c_str(), def?1:0, filename.AsNative().c_str()) ? true : false;
 }
 
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val)
 {
 	MPT_ASSERT(mpt::in_range<UINT>(val.size()));
 	::WritePrivateProfileStruct(GetSection(path).c_str(), GetKey(path).c_str(), (LPVOID)val.data(), static_cast<UINT>(val.size()), filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt::ustring &val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt::ustring &val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
 
@@ -101,51 +101,51 @@ void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt:
 	}
 }
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, double val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, double val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::tfmt::val(val).c_str(), filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, int32 val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, int32 val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::tfmt::val(val).c_str(), filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, bool val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, bool val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::tfmt::val(val).c_str(), filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
+void ImmediateWindowsIniFileSettingsBackend::RemoveSettingRaw(const SettingPath &path)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), NULL, filename.AsNative().c_str());
 }
 
-void IniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
+void ImmediateWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
 {
 	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
 
-mpt::winstring IniFileSettingsBackend::GetSection(const SettingPath &path)
+mpt::winstring ImmediateWindowsIniFileSettingsBackend::GetSection(const SettingPath &path)
 {
 	return mpt::ToWin(path.GetSection());
 }
-mpt::winstring IniFileSettingsBackend::GetKey(const SettingPath &path)
+mpt::winstring ImmediateWindowsIniFileSettingsBackend::GetKey(const SettingPath &path)
 {
 	return mpt::ToWin(path.GetKey());
 }
 
 
 
-IniFileSettingsBackend::IniFileSettingsBackend(const mpt::PathString &filename)
+ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(const mpt::PathString &filename)
 	: filename(filename)
 	, file(filename)
 {
 	return;
 }
 
-IniFileSettingsBackend::~IniFileSettingsBackend()
+ImmediateWindowsIniFileSettingsBackend::~ImmediateWindowsIniFileSettingsBackend()
 {
 	return;
 }
@@ -160,7 +160,7 @@ static void WriteFileUTF16LE(mpt::IO::atomic_shared_file_ref &file, const std::w
 	file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
 }
 
-void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
+void ImmediateWindowsIniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 {
 	// Force ini file to be encoded in UTF16.
 	// This causes WINAPI ini file functions to keep it in UTF16 encoding
@@ -195,7 +195,7 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 #endif
 }
 
-SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
+SettingValue ImmediateWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	switch(def.GetType())
@@ -209,7 +209,7 @@ SettingValue IniFileSettingsBackend::ReadSetting(const SettingPath &path, const 
 	}
 }
 
-void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const SettingValue &val)
+void ImmediateWindowsIniFileSettingsBackend::WriteSetting(const SettingPath &path, const SettingValue &val)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	ASSERT(val.GetType() != SettingTypeNone);
@@ -224,13 +224,13 @@ void IniFileSettingsBackend::WriteSetting(const SettingPath &path, const Setting
 	}
 }
 
-void IniFileSettingsBackend::RemoveSetting(const SettingPath &path)
+void ImmediateWindowsIniFileSettingsBackend::RemoveSetting(const SettingPath &path)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	RemoveSettingRaw(path);
 }
 
-void IniFileSettingsBackend::RemoveSection(const mpt::ustring &section)
+void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &section)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	RemoveSectionRaw(section);
@@ -241,7 +241,7 @@ void IniFileSettingsBackend::RemoveSection(const mpt::ustring &section)
 
 
 IniFileSettingsContainer::IniFileSettingsContainer(const mpt::PathString &filename)
-	: IniFileSettingsBackend(filename)
+	: ImmediateWindowsIniFileSettingsBackend(filename)
 	, SettingsContainer(this)
 {
 	return;

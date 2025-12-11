@@ -33,7 +33,10 @@ struct AllSoundDeviceComponents;
 class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
-class IniFileSettingsBackend;
+class ImmediateWindowsIniFileSettingsBackend;
+#ifndef IniFileSettingsBackend
+#define IniFileSettingsBackend ImmediateWindowsIniFileSettingsBackend
+#endif
 class IniFileSettingsContainer;
 class SettingsContainer;
 class ComponentManagerSettings;

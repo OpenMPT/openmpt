@@ -25,7 +25,7 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-class IniFileSettingsBackend
+class ImmediateWindowsIniFileSettingsBackend
 	: virtual public ISettingsBackend
 	, public ISettingsBackendFlavour<SettingsBatching::Single>
 {
@@ -48,8 +48,8 @@ private:
 	static mpt::winstring GetSection(const SettingPath &path);
 	static mpt::winstring GetKey(const SettingPath &path);
 public:
-	IniFileSettingsBackend(const mpt::PathString &filename);
-	~IniFileSettingsBackend() override;
+	ImmediateWindowsIniFileSettingsBackend(const mpt::PathString &filename);
+	~ImmediateWindowsIniFileSettingsBackend() override;
 	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
@@ -57,6 +57,10 @@ public:
 	virtual void RemoveSection(const mpt::ustring &section) override;
 	const mpt::PathString& GetFilename() const { return filename; }
 };
+
+#ifndef IniFileSettingsBackend
+#define IniFileSettingsBackend ImmediateWindowsIniFileSettingsBackend
+#endif
 
 class IniFileSettingsContainer : private IniFileSettingsBackend, public SettingsContainer
 {
