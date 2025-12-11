@@ -404,6 +404,8 @@ inline bool operator != (const SettingPath &left, const SettingPath &right) { re
 enum class SettingsBatching
 {
 	Single,
+	Section,
+	All,
 };
 
 class ISettingsBackend
@@ -428,6 +430,31 @@ public:
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
 };
 
+template <>
+class ISettingsBackendFlavour<SettingsBatching::Section>
+	: virtual public ISettingsBackend
+{
+protected:
+	virtual ~ISettingsBackendFlavour() = default;
+public:
+	virtual void InvalidateCache() = 0;
+	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
+	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) = 0;
+	virtual void WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings) = 0;
+};
+
+template <>
+class ISettingsBackendFlavour<SettingsBatching::All>
+	: virtual public ISettingsBackend
+{
+protected:
+	virtual ~ISettingsBackendFlavour() = default;
+public:
+	virtual void InvalidateCache() = 0;
+	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
+	virtual void WriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings) = 0;
+};
+
 
 class ISettingChanged
 {
@@ -444,22 +471,28 @@ class SettingsContainer
 
 public:
 	using SettingsMap = std::map<SettingPath, std::optional<SettingState>>;
+	using SectionsSet = std::set<mpt::ustring>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
-	using BackendVariant = std::variant<std::monostate, ISettingsBackendFlavour<SettingsBatching::Single>*>;
+	using BackendVariant = std::variant<std::monostate, ISettingsBackendFlavour<SettingsBatching::Single>*, ISettingsBackendFlavour<SettingsBatching::Section>*, ISettingsBackendFlavour<SettingsBatching::All>*>;
 public:
 	void WriteSettings();
 private:
 	mutable SettingsMap map;
 	mutable SettingsListenerMap mapListeners;
+	mutable SectionsSet removedSections;
 
 private:
 	BackendVariant backend;
 private:
 	SettingsBatching BackendsSettingsBatching() const;
+	void BackendsInvalidateCache();
 	SettingValue BackendsReadSetting(const SettingPath &path, const SettingValue &def) const;
 	void BackendsWriteSetting(const SettingPath &path, const SettingValue &val);
 	void BackendsRemoveSetting(const SettingPath &path);
 	void BackendsRemoveSection(const mpt::ustring &section);
+	void BackendsWriteRemovedSections(const std::set<mpt::ustring> &removeSections);
+	void BackendsWriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings);
+	void BackendsWriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings);
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	bool IsDefaultSetting(const SettingPath &path) const;
@@ -471,7 +504,12 @@ private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
 public:
+	SettingsContainer(SettingsContainer &&other) = default; 
+public:
 	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Single> *backend);
+	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Section> *backend);
+	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::All> *backend);
+public:
 	void InvalidateCache();
 	template <typename T>
 	T Read(const SettingPath &path, const T &def = T()) const
