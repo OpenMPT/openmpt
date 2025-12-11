@@ -124,7 +124,7 @@ public:
 		return data;
 	}
 
-	void write(mpt::byte_span data, bool sync = false) {
+	void write(mpt::const_byte_span data, bool sync = false) {
 		{
 			LARGE_INTEGER pos{};
 			pos.QuadPart = 0;
@@ -137,7 +137,7 @@ public:
 			while (bytesToWrite > 0) {
 				DWORD bytesChunkToWrite = mpt::saturate_cast<DWORD>(bytesToWrite);
 				DWORD bytesChunkWritten = 0;
-				mpt::windows::CheckBOOL(ReadFile(m_hFile, data.data() + bytesWritten, bytesChunkToWrite, &bytesChunkWritten, NULL));
+				mpt::windows::CheckBOOL(WriteFile(m_hFile, data.data() + bytesWritten, bytesChunkToWrite, &bytesChunkWritten, NULL));
 				bytesWritten += bytesChunkWritten;
 				bytesToWrite -= bytesChunkWritten;
 				if (!bytesChunkWritten) {
@@ -202,7 +202,7 @@ public:
 		return atomic_file_ref::read();
 	}
 
-	void write(mpt::byte_span data, bool sync = false) {
+	void write(mpt::const_byte_span data, bool sync = false) {
 		atomic_file_lock_guard g{*this};
 		atomic_file_ref::write(data, sync);
 	}
