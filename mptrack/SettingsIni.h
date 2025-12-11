@@ -25,8 +25,9 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
-
-class IniFileSettingsBackend : public ISettingsBackend
+class IniFileSettingsBackend
+	: virtual public ISettingsBackend
+	, public ISettingsBackendFlavour<SettingsBatching::Single>
 {
 private:
 	const mpt::PathString filename;

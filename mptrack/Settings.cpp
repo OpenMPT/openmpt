@@ -118,24 +118,64 @@ void SettingValue::SetFromString(const AnyStringLocale &newVal)
 }
 
 
+SettingsBatching SettingsContainer::BackendsSettingsBatching() const
+{
+	if(std::holds_alternative<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend))
+	{
+		return SettingsBatching::Single;
+	} else
+	{
+		MPT_ASSERT_NOTREACHED();
+		throw std::bad_variant_access{};
+	}
+}
+
 SettingValue SettingsContainer::BackendsReadSetting(const SettingPath &path, const SettingValue &def) const
 {
-	return backend->ReadSetting(path, def);
+	const SettingsBatching batching = BackendsSettingsBatching();
+	ASSERT(batching == SettingsBatching::Single);
+	if(batching == SettingsBatching::Single)
+	{
+		return std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->ReadSetting(path, def);
+	}
+	MPT_ASSERT_NOTREACHED();
+	throw std::bad_variant_access{};
 }
 
 void SettingsContainer::BackendsWriteSetting(const SettingPath &path, const SettingValue &val)
 {
-	backend->WriteSetting(path, val);
+	const SettingsBatching batching = BackendsSettingsBatching();
+	ASSERT(batching == SettingsBatching::Single);
+	if(batching == SettingsBatching::Single)
+	{
+		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->WriteSetting(path, val);
+		return;
+	}
+	MPT_ASSERT_NOTREACHED();
 }
 
 void SettingsContainer::BackendsRemoveSetting(const SettingPath &path)
 {
-	backend->RemoveSetting(path);
+	const SettingsBatching batching = BackendsSettingsBatching();
+	ASSERT(batching == SettingsBatching::Single);
+	if(batching == SettingsBatching::Single)
+	{
+		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->RemoveSetting(path);
+		return;
+	}
+	MPT_ASSERT_NOTREACHED();
 }
 
 void SettingsContainer::BackendsRemoveSection(const mpt::ustring &section)
 {
-	backend->RemoveSection(section);
+	const SettingsBatching batching = BackendsSettingsBatching();
+	ASSERT(batching == SettingsBatching::Single);
+	if(batching == SettingsBatching::Single)
+	{
+		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->RemoveSection(section);
+		return;
+	}
+	MPT_ASSERT_NOTREACHED();
 }
 
 SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const SettingValue &def) const
@@ -206,8 +246,11 @@ void SettingsContainer::RemoveSetting(const SettingPath &path)
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	map.erase(path);
-	BackendsRemoveSetting(path);
+	if(BackendsSettingsBatching() == SettingsBatching::Single)
+	{
+		map.erase(path);
+		BackendsRemoveSetting(path);
+	}
 }
 
 void SettingsContainer::RemoveSection(const mpt::ustring &section)
@@ -226,7 +269,10 @@ void SettingsContainer::RemoveSection(const mpt::ustring &section)
 	{
 		map.erase(path);
 	}
-	BackendsRemoveSection(section);
+	if(BackendsSettingsBatching() == SettingsBatching::Single)
+	{
+		BackendsRemoveSection(section);
+	}
 }
 
 void SettingsContainer::NotifyListeners(const SettingPath &path)
@@ -245,25 +291,28 @@ void SettingsContainer::WriteSettings()
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	std::set<SettingPath> removedsettings;
-	for(auto &[path, value] : map)
+	if(BackendsSettingsBatching() == SettingsBatching::Single)
 	{
-		if(value.has_value())
+		std::set<SettingPath> removedsettings;
+		for(auto &[path, value] : map)
 		{
-			if(value.value().IsDirty())
+			if(value.has_value())
 			{
-				BackendsWriteSetting(path, value.value());
-				value.value().Clean();
+				if(value.value().IsDirty())
+				{
+					BackendsWriteSetting(path, value.value());
+					value.value().Clean();
+				}
+			} else
+			{
+				removedsettings.insert(path);
+				BackendsRemoveSetting(path);
 			}
-		} else
-		{
-			removedsettings.insert(path);
-			BackendsRemoveSetting(path);
 		}
-	}
-	for(const auto & path : removedsettings)
-	{
-		map.erase(path);
+		for(const auto & path : removedsettings)
+		{
+			map.erase(path);
+		}
 	}
 }
 
@@ -290,7 +339,7 @@ SettingsContainer::~SettingsContainer()
 }
 
 
-SettingsContainer::SettingsContainer(ISettingsBackend *backend)
+SettingsContainer::SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Single> *backend)
 	: backend(backend)
 {
 	MPT_ASSERT(backend);

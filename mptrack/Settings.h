@@ -401,15 +401,31 @@ inline bool operator == (const SettingPath &left, const SettingPath &right) { re
 inline bool operator != (const SettingPath &left, const SettingPath &right) { return left.compare(right) != 0; }
 
 
+enum class SettingsBatching
+{
+	Single,
+};
+
 class ISettingsBackend
 {
+protected:
+	virtual ~ISettingsBackend() = default;
+};
+
+template <SettingsBatching batching>
+class ISettingsBackendFlavour;
+
+template <>
+class ISettingsBackendFlavour<SettingsBatching::Single>
+	: virtual public ISettingsBackend
+{
+protected:
+	virtual ~ISettingsBackendFlavour() = default;
 public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
 	virtual void RemoveSetting(const SettingPath &path) = 0;
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
-protected:
-	virtual ~ISettingsBackend() = default;
 };
 
 
@@ -429,6 +445,7 @@ class SettingsContainer
 public:
 	using SettingsMap = std::map<SettingPath, std::optional<SettingState>>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
+	using BackendVariant = std::variant<std::monostate, ISettingsBackendFlavour<SettingsBatching::Single>*>;
 public:
 	void WriteSettings();
 private:
@@ -436,8 +453,9 @@ private:
 	mutable SettingsListenerMap mapListeners;
 
 private:
-	ISettingsBackend *backend;
+	BackendVariant backend;
 private:
+	SettingsBatching BackendsSettingsBatching() const;
 	SettingValue BackendsReadSetting(const SettingPath &path, const SettingValue &def) const;
 	void BackendsWriteSetting(const SettingPath &path, const SettingValue &val);
 	void BackendsRemoveSetting(const SettingPath &path);
@@ -453,7 +471,7 @@ private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
 public:
-	SettingsContainer(ISettingsBackend *backend);
+	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Single> *backend);
 	void InvalidateCache();
 	template <typename T>
 	T Read(const SettingPath &path, const T &def = T()) const
