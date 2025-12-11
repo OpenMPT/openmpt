@@ -676,44 +676,6 @@ public:
 };
 
 
-class IniFileSettingsBackend : public ISettingsBackend
-{
-private:
-	const mpt::PathString filename;
-private:
-	std::vector<std::byte> ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const;
-	mpt::ustring ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const;
-	double ReadSettingRaw(const SettingPath &path, double def) const;
-	int32 ReadSettingRaw(const SettingPath &path, int32 def) const;
-	bool ReadSettingRaw(const SettingPath &path, bool def) const;
-	void WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val);
-	void WriteSettingRaw(const SettingPath &path, const mpt::ustring &val);
-	void WriteSettingRaw(const SettingPath &path, double val);
-	void WriteSettingRaw(const SettingPath &path, int32 val);
-	void WriteSettingRaw(const SettingPath &path, bool val);
-	void RemoveSettingRaw(const SettingPath &path);
-	void RemoveSectionRaw(const mpt::ustring &section);
-	static mpt::winstring GetSection(const SettingPath &path);
-	static mpt::winstring GetKey(const SettingPath &path);
-public:
-	IniFileSettingsBackend(const mpt::PathString &filename);
-	~IniFileSettingsBackend() override;
-	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
-	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
-	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
-	virtual void RemoveSetting(const SettingPath &path) override;
-	virtual void RemoveSection(const mpt::ustring &section) override;
-	const mpt::PathString& GetFilename() const { return filename; }
-};
-
-class IniFileSettingsContainer : private IniFileSettingsBackend, public SettingsContainer
-{
-public:
-	IniFileSettingsContainer(const mpt::PathString &filename);
-	~IniFileSettingsContainer() override;
-};
-
-
 class SettingChangedNotifyGuard
 {
 private:

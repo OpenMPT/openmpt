@@ -825,6 +825,9 @@
     <ClInclude Include="..\..\mptrack\Settings.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\SettingsIni.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\StreamEncoderSettings.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -2181,6 +2184,9 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Settings.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\SettingsIni.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\StreamEncoderSettings.cpp">

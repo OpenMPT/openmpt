@@ -15,6 +15,7 @@
 #include "Mainfrm.h"
 #include "Moddoc.h"
 #include "Reporting.h"
+#include "SettingsIni.h"
 #include "../common/mptFileIO.h"
 #include "../common/version.h"
 #include "../misc/mptFileCompression.h"

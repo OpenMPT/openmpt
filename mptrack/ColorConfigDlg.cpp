@@ -18,6 +18,7 @@
 #include "Reporting.h"
 #include "resource.h"
 #include "Settings.h"
+#include "SettingsIni.h"
 #include "WindowMessages.h"
 #include "../common/mptStringBuffer.h"
 

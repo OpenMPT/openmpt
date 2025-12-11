@@ -72,6 +72,7 @@
 #include "../mptrack/Moddoc.h"
 #include "../mptrack/ModDocTemplate.h"
 #include "../mptrack/Settings.h"
+#include "../mptrack/SettingsIni.h"
 #include "../mptrack/HTTP.h"
 #endif // MODPLUG_TRACKER
 #include "mpt/io_file/fileref.hpp"

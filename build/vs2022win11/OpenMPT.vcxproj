@@ -1750,6 +1750,7 @@
     <ClInclude Include="..\..\mptrack\ScaleEnvPointsDlg.h" />
     <ClInclude Include="..\..\mptrack\SelectPluginDialog.h" />
     <ClInclude Include="..\..\mptrack\Settings.h" />
+    <ClInclude Include="..\..\mptrack\SettingsIni.h" />
     <ClInclude Include="..\..\mptrack\StreamEncoderSettings.h" />
     <ClInclude Include="..\..\mptrack\TempoSwingDialog.h" />
     <ClInclude Include="..\..\mptrack\TrackerSettings.h" />
@@ -2204,6 +2205,7 @@
     <ClCompile Include="..\..\mptrack\ScaleEnvPointsDlg.cpp" />
     <ClCompile Include="..\..\mptrack\SelectPluginDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Settings.cpp" />
+    <ClCompile Include="..\..\mptrack\SettingsIni.cpp" />
     <ClCompile Include="..\..\mptrack\StreamEncoderSettings.cpp" />
     <ClCompile Include="..\..\mptrack\TempoSwingDialog.cpp" />
     <ClCompile Include="..\..\mptrack\TrackerSettings.cpp" />
