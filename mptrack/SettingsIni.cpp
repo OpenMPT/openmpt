@@ -140,6 +140,7 @@ mpt::winstring IniFileSettingsBackend::GetKey(const SettingPath &path)
 
 IniFileSettingsBackend::IniFileSettingsBackend(const mpt::PathString &filename)
 	: filename(filename)
+	, file(filename)
 {
 	return;
 }
@@ -149,27 +150,14 @@ IniFileSettingsBackend::~IniFileSettingsBackend()
 	return;
 }
 
-static std::vector<char> ReadFile(const mpt::PathString &filename)
-{
-	mpt::IO::ifstream s(filename, std::ios::binary);
-	std::vector<char> result;
-	std::vector<char> buf(mpt::IO::BUFFERSIZE_NORMAL);
-	while(s)
-	{
-		s.read(buf.data(), buf.size());
-		result.insert(result.end(), buf.data(), buf.data() + s.gcount());
-	}
-	return result;
-}
-
-static void WriteFileUTF16LE(const mpt::PathString &filename, const std::wstring &str)
+static void WriteFileUTF16LE(mpt::IO::atomic_shared_file_ref &file, const std::wstring &str)
 {
 	static_assert(sizeof(wchar_t) == 2);
-	mpt::IO::SafeOutputFile sinifile(filename, std::ios::binary, mpt::IO::FlushMode::Full);
-	mpt::IO::ofstream &inifile = sinifile;
+	std::ostringstream inifile{std::ios::binary};
 	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
 	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
+	file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
 }
 
 void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
@@ -187,14 +175,21 @@ void IniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
 	{
 		return;
 	}
-	const std::vector<char> data = ReadFile(filename);
-	if(!data.empty() && IsTextUnicode(data.data(), mpt::saturate_cast<int>(data.size()), NULL))
 	{
-		return;
+		std::lock_guard l{file};
+		const std::vector<std::byte> data = file.read();
+		if(!data.empty() && IsTextUnicode(data.data(), mpt::saturate_cast<int>(data.size()), NULL))
+		{
+			return;
+		}
+		{
+			const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
+			mpt::IO::atomic_shared_file_ref backup{backupFilename};
+			std::lock_guard bl{backup};
+			backup.write(data);
+		}
+		WriteFileUTF16LE(file, mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data)));
 	}
-	const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
-	CopyFile(filename.AsNative().c_str(), backupFilename.AsNative().c_str(), FALSE);
-	WriteFileUTF16LE(filename, mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data)));
 #else
 	MPT_UNUSED(backupTag);
 #endif

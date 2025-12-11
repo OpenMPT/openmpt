@@ -16,6 +16,8 @@
 
 #include "Settings.h"
 
+#include "mpt/io_file_atomic/atomic_file.hpp"
+
 #include <map>
 #include <set>
 #include <vector>
@@ -28,6 +30,7 @@ class IniFileSettingsBackend : public ISettingsBackend
 {
 private:
 	const mpt::PathString filename;
+	mpt::IO::atomic_shared_file_ref file;
 private:
 	std::vector<std::byte> ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const;
 	mpt::ustring ReadSettingRaw(const SettingPath &path, const mpt::ustring &def) const;
