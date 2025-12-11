@@ -2480,7 +2480,7 @@ void CTrackApp::InitializeDXPlugins()
 	if(TrackerSettings::Instance().PreviousSettingsVersion < MPT_V("1.27.00.15"))
 	{
 		DeleteFile(m_szPluginCacheFileName.AsNative().c_str());
-		GetPluginCache().ForgetAll();
+		GetPluginCache().InvalidateCache();
 	}
 
 	m_pPluginManager->reserve(numPlugins);

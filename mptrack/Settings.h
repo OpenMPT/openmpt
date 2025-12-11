@@ -453,6 +453,7 @@ private:
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
 public:
 	SettingsContainer(ISettingsBackend *backend);
+	void InvalidateCache();
 	template <typename T>
 	T Read(const SettingPath &path, const T &def = T()) const
 	{
@@ -489,7 +490,6 @@ public:
 	{
 		ForgetSetting(SettingPath(std::move(section), std::move(key)));
 	}
-	void ForgetAll();
 	void Remove(const SettingPath &path)
 	{
 		RemoveSetting(path);
