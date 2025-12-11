@@ -425,9 +425,9 @@ protected:
 	virtual ~ISettingsBackendFlavour() = default;
 public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
-	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
-	virtual void RemoveSetting(const SettingPath &path) = 0;
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
+	virtual void RemoveSetting(const SettingPath &path) = 0;
+	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
 };
 
 template <>
