@@ -177,12 +177,14 @@ void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue
 	auto entry = map.find(path);
 	if(entry == map.end())
 	{
-		map[path] = val;
+		map[path] = SettingValue();
 		entry = map.find(path);
-	} else
-	{
-		entry->second = val;
 	}
+	if(!entry->second.has_value())
+	{
+		entry->second = SettingValue();
+	}
+	entry->second = val;
 	NotifyListeners(path);
 }
 
