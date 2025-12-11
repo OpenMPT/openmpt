@@ -72,7 +72,6 @@ public:
 
 	atomic_file_ref(mpt::PathString filename)
 		: m_filename(std::move(filename)) {
-		mpt::windows::CheckBOOL(CopyFile(mpt::support_long_path(m_filename).c_str(), mpt::support_long_path(m_filename + MPT_PATHSTRING(".bak")).c_str(), FALSE));
 		m_hFile = mpt::windows::CheckFileHANDLE(CreateFile(mpt::support_long_path(m_filename).c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL));
 	}
 
