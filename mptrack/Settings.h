@@ -713,13 +713,6 @@ public:
 	~IniFileSettingsContainer() override;
 };
 
-class DefaultSettingsContainer : public IniFileSettingsContainer
-{
-public:
-	DefaultSettingsContainer();
-	~DefaultSettingsContainer() override;
-};
-
 
 class SettingChangedNotifyGuard
 {

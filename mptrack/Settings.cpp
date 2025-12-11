@@ -511,16 +511,4 @@ IniFileSettingsContainer::~IniFileSettingsContainer()
 
 
 
-DefaultSettingsContainer::DefaultSettingsContainer()
-	: IniFileSettingsContainer(theApp.GetConfigFileName())
-{
-	return;
-}
-
-DefaultSettingsContainer::~DefaultSettingsContainer()
-{
-	return;
-}
-
-
 OPENMPT_NAMESPACE_END
