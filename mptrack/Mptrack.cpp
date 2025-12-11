@@ -1106,6 +1106,107 @@ mpt::PathString CTrackApp::GetExampleSongsPath() const
 }
 
 
+UINT CTrackApp::GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault)
+{
+	if(!lpszSection)
+	{
+		return nDefault;
+	}
+	if(!lpszEntry)
+	{
+		return nDefault;
+	}
+	return GetSettings().Read<int32>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))}, nDefault);
+}
+
+BOOL CTrackApp::WriteProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nValue)
+{
+	if(!lpszSection)
+	{
+		return FALSE;
+	}
+	if(!lpszEntry)
+	{
+		return FALSE;
+	}
+	GetSettings().Write<int32>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))}, nValue);
+	return TRUE;
+}
+
+CString CTrackApp::GetProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault)
+{
+	if(!lpszSection)
+	{
+		return lpszDefault ? CString(lpszDefault) : CString();
+	}
+	if(!lpszEntry)
+	{
+		return lpszDefault ? CString(lpszDefault) : CString();
+	}
+	return mpt::ToCString(GetSettings().Read<mpt::ustring>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))}, mpt::ToUnicode(lpszDefault ? CString(lpszDefault) : CString())));
+}
+
+BOOL CTrackApp::WriteProfileString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue)
+{
+	if(!lpszSection)
+	{
+		return FALSE;
+	}
+	if(!lpszEntry)
+	{
+		GetSettings().Remove(mpt::ToUnicode(CString(lpszSection)));
+		return TRUE;
+	}
+	GetSettings().Write<mpt::ustring>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))}, lpszValue ? mpt::ToUnicode(CString(lpszValue)) : mpt::ustring{});
+	return TRUE;
+}
+
+BOOL CTrackApp::GetProfileBinary(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPBYTE* ppData, UINT* pBytes)
+{
+	if(!lpszSection)
+	{
+		return FALSE;
+	}
+	if(!lpszEntry)
+	{
+		return FALSE;
+	}
+	if(!ppData)
+	{
+		return FALSE;
+	}
+	if(!pBytes)
+	{
+		return FALSE;
+	}
+	std::vector<std::byte> data = GetSettings().Read<std::vector<std::byte>>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))});
+	*pBytes = mpt::saturate_cast<UINT>(data.size());
+	*ppData = new BYTE[data.size()];
+	std::memcpy(*ppData, data.data(), data.size());
+	return TRUE;
+}
+
+BOOL CTrackApp::WriteProfileBinary(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPBYTE pData, UINT nBytes)
+{
+	if(!lpszSection)
+	{
+		return FALSE;
+	}
+	if(!lpszEntry)
+	{
+		return FALSE;
+	}
+	if(!pData && nBytes > 0)
+	{
+		return FALSE;
+	}
+	std::vector<std::byte> data = mpt::make_vector(mpt::byte_cast<std::byte*>(pData), nBytes);
+	GetSettings().Write<std::vector<std::byte>>(SettingPath{mpt::ToUnicode(CString(lpszSection)), mpt::ToUnicode(CString(lpszEntry))}, data);
+	return TRUE;
+}
+
+
+
 #if defined(MPT_ENABLE_SYSTEM_SUPPORT_CHECK)
 
 static bool ProcessorCanRunCurrentBuild()
