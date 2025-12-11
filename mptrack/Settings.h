@@ -427,8 +427,9 @@ class SettingsContainer
 {
 
 public:
-	using SettingsMap = std::map<SettingPath,SettingState>;
+	using SettingsMap = std::map<SettingPath, std::optional<SettingState>>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
+public:
 	void WriteSettings();
 private:
 	mutable SettingsMap map;

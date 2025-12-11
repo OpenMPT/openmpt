@@ -125,6 +125,10 @@ void COptionsAdvanced::ReInit()
 	int i = 0;
 	for(const auto &[path, state] : theApp.GetSettings())
 	{
+		if(!state.has_value())
+		{
+			continue;
+		}
 		// In MPT_USTRING_MODE_WIDE mode,
 		// this loop is heavily optimized to avoid as much string copies as possible
 		// in order to perform ok-ish in debug builds.
@@ -132,8 +136,8 @@ void COptionsAdvanced::ReInit()
 		// this mode by default.
 		const mpt::ustring &section = path.GetRefSection();
 		const mpt::ustring &key = path.GetRefKey();
-		const SettingValue &value = state.GetRefValue();
-		const SettingValue &defaultValue = state.GetRefDefault();
+		const SettingValue &value = state.value().GetRefValue();
+		const SettingValue &defaultValue = state.value().GetRefDefault();
 
 		if(!findStr.empty())
 		{
@@ -273,7 +277,7 @@ void COptionsAdvanced::OnCustomDrawList(NMHDR* pNMHDR, LRESULT* pResult)
 		break;
 	case CDDS_ITEMPREPAINT:
 		{
-			const bool isDefault = theApp.GetSettings().GetMap().find(m_indexToPath[pLVCD->nmcd.lItemlParam])->second.IsDefault();
+			const bool isDefault = theApp.GetSettings().GetMap().find(m_indexToPath[pLVCD->nmcd.lItemlParam])->second.value().IsDefault();
 			COLORREF defColor = m_List.GetBkColor();
 			COLORREF txtColor = m_List.GetTextColor();
 			COLORREF modColor = RGB(GetRValue(defColor) * 0.9 + GetRValue(txtColor) * 0.1, GetGValue(defColor) * 0.9 + GetGValue(txtColor) * 0.1, GetBValue(defColor) * 0.9 + GetBValue(txtColor) * 0.1);
@@ -293,7 +297,7 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 	if(index < 0)
 		return;
 	const SettingPath path = m_indexToPath[m_List.GetItemData(index)];
-	SettingValue val = theApp.GetSettings().GetMap().find(path)->second;
+	SettingValue val = theApp.GetSettings().GetMap().find(path)->second.value();
 	if(val.GetType() == SettingTypeBool)
 	{
 		val = !val.as<bool>();

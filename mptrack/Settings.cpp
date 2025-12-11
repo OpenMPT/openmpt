@@ -147,7 +147,11 @@ SettingValue SettingsContainer::ReadSetting(const SettingPath &path, const Setti
 	{
 		entry = map.insert(map.begin(), std::make_pair(path, SettingState(def).assign(BackendsReadSetting(path, def), false)));
 	}
-	return entry->second;
+	if(!entry->second.has_value())
+	{
+		entry->second.emplace(SettingState(def).assign(BackendsReadSetting(path, def), false));
+	}
+	return entry->second.value();
 }
 
 bool SettingsContainer::IsDefaultSetting(const SettingPath &path) const
@@ -159,7 +163,11 @@ bool SettingsContainer::IsDefaultSetting(const SettingPath &path) const
 	{
 		return true;
 	}
-	return entry->second.IsDefault();
+	if(!entry->second.has_value())
+	{
+		return true;
+	}
+	return entry->second.value().IsDefault();
 }
 
 void SettingsContainer::WriteSetting(const SettingPath &path, const SettingValue &val)
@@ -235,13 +243,25 @@ void SettingsContainer::WriteSettings()
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
+	std::set<SettingPath> removedsettings;
 	for(auto &[path, value] : map)
 	{
-		if(value.IsDirty())
+		if(value.has_value())
 		{
-			BackendsWriteSetting(path, value);
-			value.Clean();
+			if(value.value().IsDirty())
+			{
+				BackendsWriteSetting(path, value.value());
+				value.value().Clean();
+			}
+		} else
+		{
+			removedsettings.insert(path);
+			BackendsRemoveSetting(path);
 		}
+	}
+	for(const auto & path : removedsettings)
+	{
+		map.erase(path);
 	}
 }
 

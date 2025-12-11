@@ -375,6 +375,10 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 			SettingsContainer &settings = theApp.GetSettings();
 			for(const auto &it : settings)
 			{
+				if(!it.second.has_value())
+				{
+					continue;
+				}
 				bool skipPath = false;
 				for(const auto &path : configAnonymize)
 				{
@@ -389,7 +393,7 @@ void DebugReporter::ReportError(mpt::ustring errorMessage)
 					continue;
 				}
 				f
-					<< mpt::ToCharset(mpt::Charset::UTF8, it.first.FormatAsString() + U_(" = ") + it.second.GetRefValue().FormatValueAsString())
+					<< mpt::ToCharset(mpt::Charset::UTF8, it.first.FormatAsString() + U_(" = ") + it.second.value().GetRefValue().FormatValueAsString())
 					<< std::endl;
 			}
 		}
