@@ -729,19 +729,18 @@ public:
 			bRet = FALSE;
 
 			// Save the open document list and associated autosave info to the registry
-			IniFileSettingsBackend ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
-			ini.ConvertToUnicode();
+			IniFileSettingsContainer ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
 			int32 count = 0;
 			while (posAutosave != NULL)
 			{
 				CString strDocument, strAutosave;
 				m_mapDocNameToAutosaveName.GetNextAssoc(posAutosave, strDocument, strAutosave);
 
-				ini.WriteSetting({ U_("RestartDocument"), mpt::ufmt::val(count) }, SettingValue(mpt::ToUnicode(strDocument)));
-				ini.WriteSetting({ U_("RestartAutosave"), mpt::ufmt::val(count) }, SettingValue(mpt::ToUnicode(strAutosave)));
+				ini.Write<mpt::ustring>({ U_("RestartDocument"), mpt::ufmt::val(count) }, mpt::ToUnicode(strDocument));
+				ini.Write<mpt::ustring>({ U_("RestartAutosave"), mpt::ufmt::val(count) }, mpt::ToUnicode(strAutosave));
 				count++;
 			}
-			ini.WriteSetting({ U_("Restart"), U_("Count") }, SettingValue(count));
+			ini.Write<int32>({ U_("Restart"), U_("Count") }, count);
 
 			return TRUE;
 		}
@@ -763,22 +762,22 @@ public:
 	BOOL ReadOpenDocumentList() override
 	{
 		{
-			IniFileSettingsBackend ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
-			int32 count = ini.ReadSetting({ U_("Restart"), U_("Count") }, SettingValue(0));
+			IniFileSettingsContainer ini(theApp.GetConfigPath() + P_("restart.") + mpt::PathString::FromCString(GetRestartIdentifier()) + P_(".ini"));
+			int32 count = ini.Read<int32>({ U_("Restart"), U_("Count") }, 0);
 
 			for(int32 index = 0; index < count; ++index)
 			{
-				mpt::ustring document = ini.ReadSetting({ U_("RestartDocument"), mpt::ufmt::val(index) }, SettingValue(U_("")));
-				mpt::ustring autosave = ini.ReadSetting({ U_("RestartAutosave"), mpt::ufmt::val(index) }, SettingValue(U_("")));
+				mpt::ustring document = ini.Read<mpt::ustring>({ U_("RestartDocument"), mpt::ufmt::val(index) }, U_(""));
+				mpt::ustring autosave = ini.Read<mpt::ustring>({ U_("RestartAutosave"), mpt::ufmt::val(index) }, U_(""));
 				if(!document.empty())
 				{
 					m_mapDocNameToAutosaveName[mpt::ToCString(document)] = mpt::ToCString(autosave);
 				}
 			}
 
-			ini.RemoveSection(U_("Restart"));
-			ini.RemoveSection(U_("RestartDocument"));
-			ini.RemoveSection(U_("RestartAutosave"));
+			ini.Remove(U_("Restart"));
+			ini.Remove(U_("RestartDocument"));
+			ini.Remove(U_("RestartAutosave"));
 
 		}
 
@@ -932,7 +931,7 @@ SettingsContainer &CTrackApp::GetSongSettings()
 
 const mpt::PathString &CTrackApp::GetSongSettingsFilename() const
 {
-	return m_pSongSettingsIniFile->GetFilename();
+	return m_pSongSettingsIniFile->Filename();
 }
 
 
