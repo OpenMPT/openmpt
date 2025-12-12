@@ -512,11 +512,7 @@ void CachedBatchedWindowsIniFileSettingsBackend::WriteRemovedSections(const std:
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	for(const auto &section : removeSections)
 	{
-		const auto it = cache.find(section);
-		if(it != cache.end())
-		{
-			it->second = std::nullopt;
-		}
+		cache[section] = std::nullopt;
 	}
 	for(const auto &[section, keyvalues] : cache)
 	{
