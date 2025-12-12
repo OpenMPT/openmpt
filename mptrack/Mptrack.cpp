@@ -931,7 +931,7 @@ SettingsContainer &CTrackApp::GetSongSettings()
 
 const mpt::PathString &CTrackApp::GetSongSettingsFilename() const
 {
-	return m_pSongSettingsIniFile->GetFilename();
+	return m_pSongSettingsIniFile->Filename();
 }
 
 

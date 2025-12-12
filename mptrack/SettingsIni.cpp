@@ -13,6 +13,7 @@
 
 #include "SettingsIni.h"
 
+#include "mpt/binary/hex.hpp"
 #include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/outputfile.hpp"
 #include "mpt/parse/parse.hpp"
@@ -22,9 +23,85 @@
 #include "../common/mptStringBuffer.h"
 
 #include <algorithm>
+#include <utility>
+
 
 
 OPENMPT_NAMESPACE_BEGIN
+
+
+
+WindowsIniFileBase::WindowsIniFileBase(mpt::PathString filename_)
+	: filename(std::move(filename_))
+	, file(filename)
+{
+	return;
+}
+
+void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
+{
+	// Force ini file to be encoded in UTF16.
+	// This causes WINAPI ini file functions to keep it in UTF16 encoding
+	// and thus support storing unicode strings uncorrupted.
+	// This is backwards compatible because even ANSI WINAPI behaves the
+	// same way in this case.
+	// Do not convert when not runing a UNICODE build.
+	// Do not convert when running on Windows 2000 or earlier
+	// because of missing Unicode support on Win9x,
+#if defined(UNICODE)
+	if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinXP))
+	{
+		return;
+	}
+	{
+		std::lock_guard l{file};
+		const std::vector<std::byte> data = file.read();
+		if(!data.empty() && IsTextUnicode(data.data(), mpt::saturate_cast<int>(data.size()), NULL))
+		{
+			return;
+		}
+		{
+			const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
+			mpt::IO::atomic_shared_file_ref backup{backupFilename};
+			std::lock_guard bl{backup};
+			backup.write(mpt::as_span(data));
+		}
+		static_assert(sizeof(wchar_t) == 2);
+		std::ostringstream inifile{std::ios::binary};
+		inifile.imbue(std::locale::classic());
+		const char UTF16LE_BOM[] = { static_cast<char>(0xff), static_cast<char>(0xfe) };
+		inifile.write(UTF16LE_BOM, 2);
+		const std::wstring str = mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data));
+		inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
+		file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
+	}
+#else
+	MPT_UNUSED(backupTag);
+#endif
+}
+
+const mpt::PathString &WindowsIniFileBase::Filename() const
+{
+	return filename;
+}
+
+mpt::PathString WindowsIniFileBase::GetFilename() const
+{
+	return filename;
+}
+
+
+
+mpt::winstring IniFileHelpers::GetSection(const SettingPath &path)
+{
+	return mpt::ToWin(path.GetSection());
+}
+
+mpt::winstring IniFileHelpers::GetKey(const SettingPath &path)
+{
+	return mpt::ToWin(path.GetKey());
+}
+
 
 
 std::vector<std::byte> ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const
@@ -76,7 +153,6 @@ bool ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &p
 	return ::GetPrivateProfileInt(GetSection(path).c_str(), GetKey(path).c_str(), def?1:0, filename.AsNative().c_str()) ? true : false;
 }
 
-
 void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const std::vector<std::byte> &val)
 {
 	MPT_ASSERT(mpt::in_range<UINT>(val.size()));
@@ -126,73 +202,16 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring
 	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
-
-mpt::winstring ImmediateWindowsIniFileSettingsBackend::GetSection(const SettingPath &path)
+ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_)
+	: WindowsIniFileBase(std::move(filename_))
 {
-	return mpt::ToWin(path.GetSection());
-}
-mpt::winstring ImmediateWindowsIniFileSettingsBackend::GetKey(const SettingPath &path)
-{
-	return mpt::ToWin(path.GetKey());
-}
-
-
-
-ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(const mpt::PathString &filename)
-	: filename(filename)
-	, file(filename)
-{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	return;
 }
 
 ImmediateWindowsIniFileSettingsBackend::~ImmediateWindowsIniFileSettingsBackend()
 {
 	return;
-}
-
-static void WriteFileUTF16LE(mpt::IO::atomic_shared_file_ref &file, const std::wstring &str)
-{
-	static_assert(sizeof(wchar_t) == 2);
-	std::ostringstream inifile{std::ios::binary};
-	const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
-	inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
-	inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
-	file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
-}
-
-void ImmediateWindowsIniFileSettingsBackend::ConvertToUnicode(const mpt::ustring &backupTag)
-{
-	// Force ini file to be encoded in UTF16.
-	// This causes WINAPI ini file functions to keep it in UTF16 encoding
-	// and thus support storing unicode strings uncorrupted.
-	// This is backwards compatible because even ANSI WINAPI behaves the
-	// same way in this case.
-	// Do not convert when not runing a UNICODE build.
-	// Do not convert when running on Windows 2000 or earlier
-	// because of missing Unicode support on Win9x,
-#if defined(UNICODE)
-	if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinXP))
-	{
-		return;
-	}
-	{
-		std::lock_guard l{file};
-		const std::vector<std::byte> data = file.read();
-		if(!data.empty() && IsTextUnicode(data.data(), mpt::saturate_cast<int>(data.size()), NULL))
-		{
-			return;
-		}
-		{
-			const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
-			mpt::IO::atomic_shared_file_ref backup{backupFilename};
-			std::lock_guard bl{backup};
-			backup.write(mpt::as_span(data));
-		}
-		WriteFileUTF16LE(file, mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data)));
-	}
-#else
-	MPT_UNUSED(backupTag);
-#endif
 }
 
 SettingValue ImmediateWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
@@ -238,14 +257,14 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &s
 
 
 
-
-
-IniFileSettingsContainer::IniFileSettingsContainer(const mpt::PathString &filename)
-	: ImmediateWindowsIniFileSettingsBackend(filename)
+IniFileSettingsContainer::IniFileSettingsContainer(mpt::PathString filename_)
+	: ImmediateWindowsIniFileSettingsBackend(std::move(filename_))
 	, SettingsContainer(this)
 {
 	return;
 }
+
+
 
 IniFileSettingsContainer::~IniFileSettingsContainer()
 {
