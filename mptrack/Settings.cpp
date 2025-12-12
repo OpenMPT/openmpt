@@ -120,13 +120,13 @@ void SettingValue::SetFromString(const AnyStringLocale &newVal)
 
 SettingsBatching SettingsContainer::BackendsSettingsBatching() const
 {
-	if(std::holds_alternative<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend))
+	if(std::holds_alternative<ISettingsBackend<SettingsBatching::Single>*>(backend))
 	{
 		return SettingsBatching::Single;
-	} else if(std::holds_alternative<ISettingsBackendFlavour<SettingsBatching::Section>*>(backend))
+	} else if(std::holds_alternative<ISettingsBackend<SettingsBatching::Section>*>(backend))
 	{
 		return SettingsBatching::Section;
-	} else if(std::holds_alternative<ISettingsBackendFlavour<SettingsBatching::All>*>(backend))
+	} else if(std::holds_alternative<ISettingsBackend<SettingsBatching::All>*>(backend))
 	{
 		return SettingsBatching::All;
 	} else
@@ -142,11 +142,11 @@ void SettingsContainer::BackendsInvalidateCache()
 	ASSERT(batching == SettingsBatching::Single || batching == SettingsBatching::Section || batching == SettingsBatching::All);
 	if(batching == SettingsBatching::All)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::All>*>(backend)->InvalidateCache();
+		std::get<ISettingsBackend<SettingsBatching::All>*>(backend)->InvalidateCache();
 		return;
 	} else if(batching == SettingsBatching::Section)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Section>*>(backend)->InvalidateCache();
+		std::get<ISettingsBackend<SettingsBatching::Section>*>(backend)->InvalidateCache();
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -158,13 +158,13 @@ SettingValue SettingsContainer::BackendsReadSetting(const SettingPath &path, con
 	ASSERT(batching == SettingsBatching::Single || batching == SettingsBatching::Section || batching == SettingsBatching::All);
 	if(batching == SettingsBatching::All)
 	{
-		return std::get<ISettingsBackendFlavour<SettingsBatching::All>*>(backend)->ReadSetting(path, def);
+		return std::get<ISettingsBackend<SettingsBatching::All>*>(backend)->ReadSetting(path, def);
 	} else if(batching == SettingsBatching::Section)
 	{
-		return std::get<ISettingsBackendFlavour<SettingsBatching::Section>*>(backend)->ReadSetting(path, def);
+		return std::get<ISettingsBackend<SettingsBatching::Section>*>(backend)->ReadSetting(path, def);
 	} else if(batching == SettingsBatching::Single)
 	{
-		return std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->ReadSetting(path, def);
+		return std::get<ISettingsBackend<SettingsBatching::Single>*>(backend)->ReadSetting(path, def);
 	}
 	MPT_ASSERT_NOTREACHED();
 	throw std::bad_variant_access{};
@@ -176,7 +176,7 @@ void SettingsContainer::BackendsWriteSetting(const SettingPath &path, const Sett
 	ASSERT(batching == SettingsBatching::Single);
 	if(batching == SettingsBatching::Single)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->WriteSetting(path, val);
+		std::get<ISettingsBackend<SettingsBatching::Single>*>(backend)->WriteSetting(path, val);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -188,7 +188,7 @@ void SettingsContainer::BackendsRemoveSetting(const SettingPath &path)
 	ASSERT(batching == SettingsBatching::Single);
 	if(batching == SettingsBatching::Single)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->RemoveSetting(path);
+		std::get<ISettingsBackend<SettingsBatching::Single>*>(backend)->RemoveSetting(path);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -200,7 +200,7 @@ void SettingsContainer::BackendsRemoveSection(const mpt::ustring &section)
 	ASSERT(batching == SettingsBatching::Single);
 	if(batching == SettingsBatching::Single)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Single>*>(backend)->RemoveSection(section);
+		std::get<ISettingsBackend<SettingsBatching::Single>*>(backend)->RemoveSection(section);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -212,7 +212,7 @@ void SettingsContainer::BackendsWriteRemovedSections(const std::set<mpt::ustring
 	ASSERT(batching == SettingsBatching::Section);
 	if(batching == SettingsBatching::Section)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Section>*>(backend)->WriteRemovedSections(removeSections);
+		std::get<ISettingsBackend<SettingsBatching::Section>*>(backend)->WriteRemovedSections(removeSections);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -224,7 +224,7 @@ void SettingsContainer::BackendsWriteMultipleSettings(const std::map<SettingPath
 	ASSERT(batching == SettingsBatching::Section);
 	if(batching == SettingsBatching::Section)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::Section>*>(backend)->WriteMultipleSettings(settings);
+		std::get<ISettingsBackend<SettingsBatching::Section>*>(backend)->WriteMultipleSettings(settings);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -236,7 +236,7 @@ void SettingsContainer::BackendsWriteAllSettings(const std::set<mpt::ustring> &r
 	ASSERT(batching == SettingsBatching::All);
 	if(batching == SettingsBatching::All)
 	{
-		std::get<ISettingsBackendFlavour<SettingsBatching::All>*>(backend)->WriteAllSettings(removeSections, settings);
+		std::get<ISettingsBackend<SettingsBatching::All>*>(backend)->WriteAllSettings(removeSections, settings);
 		return;
 	}
 	MPT_ASSERT_NOTREACHED();
@@ -456,19 +456,19 @@ SettingsContainer::~SettingsContainer()
 }
 
 
-SettingsContainer::SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Single> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend)
 	: backend(backend)
 {
 	MPT_ASSERT(backend);
 }
 
-SettingsContainer::SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Section> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend)
 	: backend(backend)
 {
 	MPT_ASSERT(backend);
 }
 
-SettingsContainer::SettingsContainer(ISettingsBackendFlavour<SettingsBatching::All> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend)
 	: backend(backend)
 {
 	MPT_ASSERT(backend);

@@ -408,21 +408,14 @@ enum class SettingsBatching
 	All,
 };
 
-class ISettingsBackend
+template <SettingsBatching batching>
+class ISettingsBackend;
+
+template <>
+class ISettingsBackend<SettingsBatching::Single>
 {
 protected:
 	virtual ~ISettingsBackend() = default;
-};
-
-template <SettingsBatching batching>
-class ISettingsBackendFlavour;
-
-template <>
-class ISettingsBackendFlavour<SettingsBatching::Single>
-	: virtual public ISettingsBackend
-{
-protected:
-	virtual ~ISettingsBackendFlavour() = default;
 public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
@@ -431,11 +424,10 @@ public:
 };
 
 template <>
-class ISettingsBackendFlavour<SettingsBatching::Section>
-	: virtual public ISettingsBackend
+class ISettingsBackend<SettingsBatching::Section>
 {
 protected:
-	virtual ~ISettingsBackendFlavour() = default;
+	virtual ~ISettingsBackend() = default;
 public:
 	virtual void InvalidateCache() = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
@@ -444,11 +436,10 @@ public:
 };
 
 template <>
-class ISettingsBackendFlavour<SettingsBatching::All>
-	: virtual public ISettingsBackend
+class ISettingsBackend<SettingsBatching::All>
 {
 protected:
-	virtual ~ISettingsBackendFlavour() = default;
+	virtual ~ISettingsBackend() = default;
 public:
 	virtual void InvalidateCache() = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
@@ -473,7 +464,7 @@ public:
 	using SettingsMap = std::map<SettingPath, std::optional<SettingState>>;
 	using SectionsSet = std::set<mpt::ustring>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
-	using BackendVariant = std::variant<std::monostate, ISettingsBackendFlavour<SettingsBatching::Single>*, ISettingsBackendFlavour<SettingsBatching::Section>*, ISettingsBackendFlavour<SettingsBatching::All>*>;
+	using BackendVariant = std::variant<std::monostate, ISettingsBackend<SettingsBatching::Single>*, ISettingsBackend<SettingsBatching::Section>*, ISettingsBackend<SettingsBatching::All>*>;
 public:
 	void WriteSettings();
 private:
@@ -506,9 +497,9 @@ private:
 public:
 	SettingsContainer(SettingsContainer &&other) = default; 
 public:
-	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Single> *backend);
-	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::Section> *backend);
-	SettingsContainer(ISettingsBackendFlavour<SettingsBatching::All> *backend);
+	SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend);
+	SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend);
+	SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend);
 public:
 	void InvalidateCache();
 	template <typename T>
