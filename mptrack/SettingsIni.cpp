@@ -257,20 +257,4 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &s
 
 
 
-IniFileSettingsContainer::IniFileSettingsContainer(mpt::PathString filename_)
-	: ImmediateWindowsIniFileSettingsBackend(std::move(filename_))
-	, SettingsContainer(this)
-{
-	return;
-}
-
-
-
-IniFileSettingsContainer::~IniFileSettingsContainer()
-{
-	return;
-}
-
-
-
 OPENMPT_NAMESPACE_END

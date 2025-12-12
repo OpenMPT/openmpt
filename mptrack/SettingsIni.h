@@ -83,12 +83,9 @@ public:
 #endif
 
 
-class IniFileSettingsContainer : private ImmediateWindowsIniFileSettingsBackend, public SettingsContainer
-{
-public:
-	IniFileSettingsContainer(mpt::PathString filename_);
-	~IniFileSettingsContainer() override;
-};
+#ifndef IniFileSettingsContainer
+#define IniFileSettingsContainer FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>
+#endif
 
 
 OPENMPT_NAMESPACE_END
