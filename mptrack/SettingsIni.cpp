@@ -69,8 +69,8 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 		static_assert(sizeof(wchar_t) == 2);
 		std::ostringstream inifile{std::ios::binary};
 		inifile.imbue(std::locale::classic());
-		const char UTF16LE_BOM[] = { static_cast<char>(0xff), static_cast<char>(0xfe) };
-		inifile.write(UTF16LE_BOM, 2);
+		const uint8 UTF16LE_BOM[] = { 0xff, 0xfe };
+		inifile.write(reinterpret_cast<const char*>(UTF16LE_BOM), 2);
 		const std::wstring str = mpt::ToWide(mpt::Charset::Locale, mpt::buffer_cast<std::string>(data));
 		inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
 		file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
