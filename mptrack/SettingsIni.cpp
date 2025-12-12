@@ -102,6 +102,85 @@ mpt::winstring IniFileHelpers::GetKey(const SettingPath &path)
 	return mpt::ToWin(path.GetKey());
 }
 
+mpt::ustring IniFileHelpers::FormatValueAsIni(const SettingValue &value)
+{
+	switch(value.GetType())
+	{
+		case SettingTypeBool:
+			return mpt::ufmt::val(value.as<bool>());
+			break;
+		case SettingTypeInt:
+			return mpt::ufmt::val(value.as<int32>());
+			break;
+		case SettingTypeFloat:
+			return mpt::ufmt::val(value.as<double>());
+			break;
+		case SettingTypeString:
+			return value.as<mpt::ustring>();
+			break;
+		case SettingTypeBinary:
+			{
+				std::vector<std::byte> data = value.as<std::vector<std::byte>>();
+				uint8 checksum = 0;
+				for(const std::byte x : data) {
+					checksum += mpt::byte_cast<uint8>(x);
+				}
+				return mpt::encode_hex(mpt::as_span(data)) + mpt::ufmt::HEX0<2>(checksum);
+			}
+			break;
+		case SettingTypeNone:
+		default:
+			return mpt::ustring();
+			break;
+	}
+}
+
+SettingValue IniFileHelpers::ParseValueFromIni(const mpt::ustring &str, const SettingValue &def)
+{
+	switch(def.GetType())
+	{
+		case SettingTypeBool:
+			return SettingValue(mpt::parse_or<bool>(mpt::trim(str), def.as<bool>()), def.GetTypeTag());
+			break;
+		case SettingTypeInt:
+			return SettingValue(mpt::parse_or<int32>(mpt::trim(str), def.as<int32>()), def.GetTypeTag());
+			break;
+		case SettingTypeFloat:
+			return SettingValue(mpt::parse_or<double>(mpt::trim(str), def.as<double>()), def.GetTypeTag());
+			break;
+		case SettingTypeString:
+			return SettingValue(str, def.GetTypeTag());
+			break;
+		case SettingTypeBinary:
+			{
+				if((str.length() % 2) != 0)
+				{
+					return SettingValue(def.as<std::vector<std::byte>>(), def.GetTypeTag());
+				}
+				std::vector<std::byte> data = mpt::decode_hex(str);
+				if(data.size() < 1)
+				{
+					return SettingValue(def.as<std::vector<std::byte>>(), def.GetTypeTag());
+				}
+				const uint8 storedchecksum = mpt::byte_cast<uint8>(data[data.size() - 1]);
+				data.resize(data.size() - 1);
+				uint8 calculatedchecksum = 0;
+				for(const std::byte x : data) {
+					calculatedchecksum += mpt::byte_cast<uint8>(x);
+				}
+				if(calculatedchecksum != storedchecksum)
+				{
+					return SettingValue(def.as<std::vector<std::byte>>(), def.GetTypeTag());
+				}
+				return SettingValue(data, def.GetTypeTag());
+			}
+			break;
+		default:
+			return SettingValue();
+			break;
+	}
+}
+
 
 
 std::vector<std::byte> ImmediateWindowsIniFileSettingsBackend::ReadSettingRaw(const SettingPath &path, const std::vector<std::byte> &def) const
@@ -253,6 +332,223 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &s
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	RemoveSectionRaw(section);
+}
+
+
+
+void CachedBatchedWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
+{
+	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
+}
+
+CachedBatchedWindowsIniFileSettingsBackend::CachedBatchedWindowsIniFileSettingsBackend(mpt::PathString filename_)
+	: WindowsIniFileBase(std::move(filename_))
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	ConvertToUnicode();
+	cache = ReadAllSectionsRaw();
+}
+
+void CachedBatchedWindowsIniFileSettingsBackend::InvalidateCache()
+{
+	cache = ReadAllSectionsRaw();
+}
+
+CachedBatchedWindowsIniFileSettingsBackend::~CachedBatchedWindowsIniFileSettingsBackend()
+{
+	return;
+}
+
+SettingValue CachedBatchedWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	const auto sectionit = cache.find(path.GetRefSection());
+	if(sectionit != cache.end())
+	{
+		if(sectionit->second.has_value())
+		{
+			const std::map<mpt::ustring, std::optional<mpt::ustring>> &section = sectionit->second.value();
+			const auto it = section.find(path.GetRefKey());
+			if(it != section.end())
+			{
+				if(it->second.has_value())
+				{
+					return ParseValueFromIni(it->second.value(), def);
+				} else
+				{
+					return def;
+				}
+			} else
+			{
+				return def;
+			}
+		} else
+		{
+			return def;
+		}
+	} else
+	{
+		return def;
+	}
+}
+
+std::set<mpt::ustring> CachedBatchedWindowsIniFileSettingsBackend::ReadSectionNamesRaw() const
+{
+	std::set<mpt::ustring> result;
+	const std::vector<TCHAR> sectionsstr = [&]()
+		{
+			std::vector<TCHAR> buf;
+			buf.resize(mpt::IO::BUFFERSIZE_SMALL);
+			while(true)
+			{
+				DWORD bufused = ::GetPrivateProfileSectionNames(buf.data(), mpt::saturate_cast<DWORD>(buf.size()), filename.AsNative().c_str());
+				if(bufused >= (buf.size() - 2))
+				{
+					std::size_t newsize = mpt::exponential_grow(buf.size());
+					buf.resize(0);
+					buf.resize(newsize);
+					continue;
+				}
+				if(bufused >= 1)
+				{
+					bufused -= 1;  // terminating \0
+				}
+				buf.resize(bufused);
+				break;
+			};
+			return buf;
+		}();
+	const std::vector<mpt::winstring> sections = mpt::split(mpt::winstring(sectionsstr.data(), sectionsstr.size()), mpt::winstring(_T("\0"), 1));
+	for(const auto &section : sections)
+	{
+		result.insert(mpt::ToUnicode(section));
+	}
+	return result;
+}
+
+std::map<mpt::ustring, std::optional<mpt::ustring>> CachedBatchedWindowsIniFileSettingsBackend::ReadNamedSectionRaw(const mpt::ustring &section) const
+{
+	std::map<mpt::ustring, std::optional<mpt::ustring>> result;
+	const std::vector<TCHAR> keyvalsstr = [&]()
+		{
+			std::vector<TCHAR> buf;
+			buf.resize(mpt::IO::BUFFERSIZE_SMALL);
+			while(true)
+			{
+				DWORD bufused = ::GetPrivateProfileSection(mpt::ToWin(section).c_str(), buf.data(), mpt::saturate_cast<DWORD>(buf.size()), filename.AsNative().c_str());
+				if(bufused >= (buf.size() - 2))
+				{
+					std::size_t newsize = mpt::exponential_grow(buf.size());
+					buf.resize(0);
+					buf.resize(newsize);
+					continue;
+				}
+				if(bufused >= 1)
+				{
+					bufused -= 1;  // terminating \0
+				}
+				buf.resize(bufused);
+				break;
+			};
+			return buf;
+		}();
+	const std::vector<mpt::winstring> keyvals = mpt::split(mpt::winstring(keyvalsstr.data(), keyvalsstr.size()), mpt::winstring(_T("\0"), 1));
+	for(const auto &keyval : keyvals)
+	{
+		const auto equalpos = keyval.find(_T("="));
+		if(equalpos == mpt::winstring::npos)
+		{
+			continue;
+		}
+		if(equalpos == 0)
+		{
+			continue;
+		}
+		result.insert(std::make_pair(mpt::ToUnicode(keyval.substr(0, equalpos)), std::make_optional(mpt::ToUnicode(keyval.substr(equalpos + 1)))));
+	}
+	return result;
+}
+
+std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> CachedBatchedWindowsIniFileSettingsBackend::ReadAllSectionsRaw() const
+{
+	std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> result;
+	const std::set<mpt::ustring> sectionnames = ReadSectionNamesRaw();
+	for(const mpt::ustring &sectionname : sectionnames)
+	{
+		result.insert(std::make_pair(sectionname, std::make_optional(ReadNamedSectionRaw(sectionname))));
+	}
+	return result;
+}
+
+void CachedBatchedWindowsIniFileSettingsBackend::WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues)
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	mpt::winstring keyvals;
+	for(const auto &[key, val] : keyvalues)
+	{
+		if(val.has_value())
+		{
+			keyvals.append(mpt::ToWin(key));
+			keyvals.append(_T("="));
+			keyvals.append(mpt::ToWin(val.value()));
+			keyvals.append(mpt::winstring(_T("\0"), 1));
+		}
+	}
+	keyvals.append(mpt::winstring(_T("\0"), 1));
+	::WritePrivateProfileSection(mpt::ToWin(section).c_str(), keyvals.c_str(), filename.AsNative().c_str());
+}
+
+void CachedBatchedWindowsIniFileSettingsBackend::WriteRemovedSections(const std::set<mpt::ustring> &removeSections)
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	for(const auto &section : removeSections)
+	{
+		const auto it = cache.find(section);
+		if(it != cache.end())
+		{
+			it->second = std::nullopt;
+		}
+	}
+	for(const auto &[section, keyvalues] : cache)
+	{
+		if(!keyvalues.has_value())
+		{
+			RemoveSectionRaw(section);
+		}
+	}
+	for(const auto &section : removeSections)
+	{
+		cache.erase(section);
+	}
+}
+
+void CachedBatchedWindowsIniFileSettingsBackend::WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings)
+{
+	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	std::map<mpt::ustring, std::map<SettingPath, std::optional<SettingValue>>> sectionssettings;
+	for(const auto &[path, value] : settings)
+	{
+		sectionssettings[path.GetRefSection()][path] = value;
+	}
+	for(const auto &[section, sectionsettings] : sectionssettings)
+	{
+		if(!cache[section].has_value())
+		{
+			cache[section].emplace();
+		}
+		std::map<mpt::ustring, std::optional<mpt::ustring>> &workingsectionsettings = cache[section].value();
+		for(const auto &[path, value] : sectionsettings)
+		{
+			if(value.has_value())
+			{
+				workingsectionsettings[path.GetRefKey()] = FormatValueAsIni(value.value());
+			} else
+			{
+				workingsectionsettings.erase(path.GetRefKey());
+			}
+		}
+		WriteSectionRaw(section, workingsectionsettings);
+	}
 }
 
 

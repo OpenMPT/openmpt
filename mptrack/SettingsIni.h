@@ -18,6 +18,7 @@
 #include "mpt/io_file_atomic/atomic_file.hpp"
 
 #include <map>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -30,6 +31,8 @@ class IniFileHelpers
 protected:
 	static mpt::winstring GetSection(const SettingPath &path);
 	static mpt::winstring GetKey(const SettingPath &path);
+	static mpt::ustring FormatValueAsIni(const SettingValue &value);
+	static SettingValue ParseValueFromIni(const mpt::ustring &str, const SettingValue &def);
 };
 
 
@@ -75,6 +78,30 @@ public:
 	virtual void RemoveSection(const mpt::ustring &section) override;
 	virtual void RemoveSetting(const SettingPath &path) override;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
+};
+
+
+class CachedBatchedWindowsIniFileSettingsBackend
+	: public ISettingsBackend<SettingsBatching::Section>
+	, public WindowsIniFileBase
+	, protected IniFileHelpers
+{
+private:
+	std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> cache;
+private:
+	std::set<mpt::ustring> ReadSectionNamesRaw() const;
+	std::map<mpt::ustring, std::optional<mpt::ustring>> ReadNamedSectionRaw(const mpt::ustring &section) const;
+	std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> ReadAllSectionsRaw() const;
+	void RemoveSectionRaw(const mpt::ustring &section);
+	void WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues);
+public:
+	CachedBatchedWindowsIniFileSettingsBackend(mpt::PathString filename_);
+	~CachedBatchedWindowsIniFileSettingsBackend() override;
+public:
+	virtual void InvalidateCache() override;
+	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
+	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) override;
+	virtual void WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings) override;
 };
 
 
