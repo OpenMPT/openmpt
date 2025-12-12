@@ -761,4 +761,23 @@ public:
 };
 
 
+template <typename Backend>
+class FileSettingsContainer
+	: private Backend
+	, public SettingsContainer
+{
+public:
+	FileSettingsContainer(mpt::PathString filename_)
+		: Backend(std::move(filename_))
+		, SettingsContainer(this)
+	{
+		return;
+	}
+	~FileSettingsContainer()
+	{
+		return;
+	}
+};
+
+
 OPENMPT_NAMESPACE_END
