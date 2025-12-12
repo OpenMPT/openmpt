@@ -464,7 +464,16 @@ std::map<mpt::ustring, std::optional<mpt::ustring>> CachedBatchedWindowsIniFileS
 		{
 			continue;
 		}
-		result.insert(std::make_pair(mpt::ToUnicode(keyval.substr(0, equalpos)), std::make_optional(mpt::ToUnicode(keyval.substr(equalpos + 1)))));
+		mpt::winstring key = keyval.substr(0, equalpos);
+		mpt::winstring val = keyval.substr(equalpos + 1);
+		if(val.length() >= 2)
+		{
+			if(val[0] == _T('\"') && val[val.length() - 1] == _T('\"'))
+			{
+				val = val.substr(1, val.length() - 2);
+			}
+		}
+		result.insert(std::make_pair(mpt::ToUnicode(key), std::make_optional(mpt::ToUnicode(val))));
 	}
 	return result;
 }
