@@ -2913,6 +2913,46 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 	}
 #endif
 
+	// whitespace and control characters
+	mpt::ustring spacespacecharspacespace = MPT_USTRING("  X  ");
+	mpt::ustring threespaces = MPT_USTRING("   ");
+	mpt::ustring tab = MPT_USTRING("\t");
+	mpt::ustring tokens = MPT_USTRING("[]=;");
+	mpt::ustring xcrlfy = MPT_USTRING("x\r\ny");
+	mpt::ustring cc0;
+	for(mpt::uchar c = 0; c < 0x20; ++c)
+	{
+		cc0.push_back(c);
+	}
+
+	{
+		{
+			IniFileSettingsContainer conf{filename};
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace")), spacespacecharspacespace);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces")), threespaces);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab")), tab);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens")), tokens);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy")), xcrlfy);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0")), cc0);
+		}
+		{
+			IniFileSettingsContainer conf{filename};
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace"))), spacespacecharspacespace);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces"))), threespaces);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab"))), tab);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens"))), tokens);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy"))), xcrlfy);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0"))), cc0);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace"))), mpt::trim(spacespacecharspacespace));
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces"))), mpt::trim(threespaces));
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab"))), mpt::trim(tab));
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens"))), tokens);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy"))), xcrlfy);
+			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0"))), U_(""));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
 #endif // MODPLUG_TRACKER
 
 }
