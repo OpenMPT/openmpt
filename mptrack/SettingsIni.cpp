@@ -336,12 +336,12 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &s
 
 
 
-void CachedBatchedWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
+void BatchedWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
 {
 	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
-CachedBatchedWindowsIniFileSettingsBackend::CachedBatchedWindowsIniFileSettingsBackend(mpt::PathString filename_)
+BatchedWindowsIniFileSettingsBackend::BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_)
 	: WindowsIniFileBase(std::move(filename_))
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
@@ -349,17 +349,17 @@ CachedBatchedWindowsIniFileSettingsBackend::CachedBatchedWindowsIniFileSettingsB
 	cache = ReadAllSectionsRaw();
 }
 
-void CachedBatchedWindowsIniFileSettingsBackend::InvalidateCache()
+void BatchedWindowsIniFileSettingsBackend::InvalidateCache()
 {
 	cache = ReadAllSectionsRaw();
 }
 
-CachedBatchedWindowsIniFileSettingsBackend::~CachedBatchedWindowsIniFileSettingsBackend()
+BatchedWindowsIniFileSettingsBackend::~BatchedWindowsIniFileSettingsBackend()
 {
 	return;
 }
 
-SettingValue CachedBatchedWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
+SettingValue BatchedWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	const auto sectionit = cache.find(path.GetRefSection());
@@ -392,7 +392,7 @@ SettingValue CachedBatchedWindowsIniFileSettingsBackend::ReadSetting(const Setti
 	}
 }
 
-std::set<mpt::ustring> CachedBatchedWindowsIniFileSettingsBackend::ReadSectionNamesRaw() const
+std::set<mpt::ustring> BatchedWindowsIniFileSettingsBackend::ReadSectionNamesRaw() const
 {
 	std::set<mpt::ustring> result;
 	const std::vector<TCHAR> sectionsstr = [&]()
@@ -426,7 +426,7 @@ std::set<mpt::ustring> CachedBatchedWindowsIniFileSettingsBackend::ReadSectionNa
 	return result;
 }
 
-std::map<mpt::ustring, std::optional<mpt::ustring>> CachedBatchedWindowsIniFileSettingsBackend::ReadNamedSectionRaw(const mpt::ustring &section) const
+std::map<mpt::ustring, std::optional<mpt::ustring>> BatchedWindowsIniFileSettingsBackend::ReadNamedSectionRaw(const mpt::ustring &section) const
 {
 	std::map<mpt::ustring, std::optional<mpt::ustring>> result;
 	const std::vector<TCHAR> keyvalsstr = [&]()
@@ -478,7 +478,7 @@ std::map<mpt::ustring, std::optional<mpt::ustring>> CachedBatchedWindowsIniFileS
 	return result;
 }
 
-std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> CachedBatchedWindowsIniFileSettingsBackend::ReadAllSectionsRaw() const
+std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> BatchedWindowsIniFileSettingsBackend::ReadAllSectionsRaw() const
 {
 	std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::ustring>>>> result;
 	const std::set<mpt::ustring> sectionnames = ReadSectionNamesRaw();
@@ -489,7 +489,7 @@ std::map<mpt::ustring, std::optional<std::map<mpt::ustring, std::optional<mpt::u
 	return result;
 }
 
-void CachedBatchedWindowsIniFileSettingsBackend::WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues)
+void BatchedWindowsIniFileSettingsBackend::WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	mpt::winstring keyvals;
@@ -507,7 +507,7 @@ void CachedBatchedWindowsIniFileSettingsBackend::WriteSectionRaw(const mpt::ustr
 	::WritePrivateProfileSection(mpt::ToWin(section).c_str(), keyvals.c_str(), filename.AsNative().c_str());
 }
 
-void CachedBatchedWindowsIniFileSettingsBackend::WriteRemovedSections(const std::set<mpt::ustring> &removeSections)
+void BatchedWindowsIniFileSettingsBackend::WriteRemovedSections(const std::set<mpt::ustring> &removeSections)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	for(const auto &section : removeSections)
@@ -527,7 +527,7 @@ void CachedBatchedWindowsIniFileSettingsBackend::WriteRemovedSections(const std:
 	}
 }
 
-void CachedBatchedWindowsIniFileSettingsBackend::WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings)
+void BatchedWindowsIniFileSettingsBackend::WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	std::map<mpt::ustring, std::map<SettingPath, std::optional<SettingValue>>> sectionssettings;

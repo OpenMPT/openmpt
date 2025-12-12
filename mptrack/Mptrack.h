@@ -34,7 +34,7 @@ class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
 class ImmediateWindowsIniFileSettingsBackend;
-class CachedBatchedWindowsIniFileSettingsBackend;
+class BatchedWindowsIniFileSettingsBackend;
 template <typename Backend> class FileSettingsContainer;
 #ifndef IniFileSettingsBackend
 #define IniFileSettingsBackend ImmediateWindowsIniFileSettingsBackend

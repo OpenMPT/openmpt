@@ -81,7 +81,7 @@ public:
 };
 
 
-class CachedBatchedWindowsIniFileSettingsBackend
+class BatchedWindowsIniFileSettingsBackend
 	: public ISettingsBackend<SettingsBatching::Section>
 	, public WindowsIniFileBase
 	, protected IniFileHelpers
@@ -95,8 +95,8 @@ private:
 	void RemoveSectionRaw(const mpt::ustring &section);
 	void WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues);
 public:
-	CachedBatchedWindowsIniFileSettingsBackend(mpt::PathString filename_);
-	~CachedBatchedWindowsIniFileSettingsBackend() override;
+	BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_);
+	~BatchedWindowsIniFileSettingsBackend() override;
 public:
 	virtual void InvalidateCache() override;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;

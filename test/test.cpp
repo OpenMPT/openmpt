@@ -3040,7 +3040,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 
 	TestIniSettingsBackendRead<ImmediateWindowsIniFileSettingsBackend>(filename);
 
-	TestIniSettingsBackendRead<CachedBatchedWindowsIniFileSettingsBackend>(filename);
+	TestIniSettingsBackendRead<BatchedWindowsIniFileSettingsBackend>(filename);
 
 	{
 		IniFileSettingsContainer conf{filename};
