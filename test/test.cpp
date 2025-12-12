@@ -2728,6 +2728,22 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
 
+	// whitespace trimming in section
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[ Test ]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
 	// junk after section
 	{
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
