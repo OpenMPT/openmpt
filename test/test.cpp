@@ -2650,6 +2650,366 @@ namespace Test {
 #endif // MODPLUG_TRACKER
 
 
+#ifdef MODPLUG_TRACKER
+
+template <typename Backend>
+static void TestIniSettingsBackendRead(const mpt::PathString &filename)
+{
+
+	// test duplicate sections and keys
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream(); 
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("[S1]")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=1")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=2")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("bar1=a")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("[S1]")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=3")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=4")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("bar2=a")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("foo")}, 0).as<int>(), 1);
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar1")}, U_("empty")).as<mpt::ustring>(), U_("a"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar2")}, U_("empty")).as<mpt::ustring>(), U_("empty"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// test last value without line ending
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteText(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// whitespace trimming
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = bar ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// whitespace trimming in section
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, " [Test] ");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// junk after section
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test] hurz");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// junk section
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// junk section
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("[Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// whitespace trimming in section name
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[ Test ]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// commented section (failure)
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[;Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_(";Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// commented key
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(";Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// commented key with whitespace
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" ;Foo=bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// comment on line (failure)
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar ; baz")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar ; baz"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// quoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"bar\" ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// quoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"bar \" ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar "));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// misquoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=\"")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\""));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// misquoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"bar")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\"bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// misquoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"ba\"r\" ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("ba\"r"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// misquoted strings
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"ba\" r ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\"ba\" r"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// quoted integer
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"1\" ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, 9).as<int32>(), 1);
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// quoted section and key (failure)
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, " [ \"Test\" ] ");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" \"Foo\" = bar ")));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("\"Test\""), U_("\"Foo\"")}, U_("")).as<mpt::ustring>(), U_("bar"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// Unicode in UTF-16LE-BOM mode
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			auto WriteUTF16LE = [](auto & outputstream, mpt::span<const WCHAR> data) {
+					mpt::IO::WriteRaw(outputstream, reinterpret_cast<const std::byte*>(data.data()), data.size() * 2);
+				};
+			std::vector<WCHAR> utf16lebom = {0xfeff};
+			WriteUTF16LE(outputstream, mpt::as_span(utf16lebom));
+			WriteUTF16LE(outputstream, mpt::as_span(std::wstring(L"[Test]\r\n")));
+			WriteUTF16LE(outputstream, mpt::as_span(mpt::ToWide(MPT_UTF8("Umlauts=\xC3\xA4\r\n"))));
+		}
+		{
+			Backend inifile{filename};
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Umlauts")}, U_("")).as<mpt::ustring>(), MPT_UTF8("\xC3\xA4"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+}
+
+#endif // MODPLUG_TRACKER
+
+
 MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 {
 
@@ -2661,6 +3021,10 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 	const mpt::PathString filename = theApp.GetConfigPath() + P_("test.ini");
 
 	DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+
+	TestIniSettingsBackendRead<ImmediateWindowsIniFileSettingsBackend>(filename);
+
+	TestIniSettingsBackendRead<CachedBatchedWindowsIniFileSettingsBackend>(filename);
 
 	{
 		IniFileSettingsContainer conf{filename};
@@ -2718,323 +3082,6 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 		CustomSettingsTestType dummy = dummyVar;
 		VERIFY_EQUAL(dummy.x, 0.125f);
 		VERIFY_EQUAL(dummy.y, 32.0f);
-	}
-
-	// test duplicate sections and keys
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream(); 
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("[S1]")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=1")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=2")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("bar1=a")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("[S1]")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=3")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("foo=4")));
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::Locale, U_("bar2=a")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("foo")}, 0).as<int>(), 1);
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar1")}, U_("empty")).as<mpt::ustring>(), U_("a"));
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar2")}, U_("empty")).as<mpt::ustring>(), U_("empty"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// test last value without line ending
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteText(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// whitespace trimming
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = bar ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// whitespace trimming in section
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, " [Test] ");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// junk after section
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test] hurz");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// junk section
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// junk section
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("[Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// whitespace trimming in section name
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[ Test ]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// commented section (failure)
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[;Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_(";Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// commented key
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(";Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// commented key with whitespace
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" ;Foo=bar")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// comment on line (failure)
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8("Foo=bar ; baz")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar ; baz"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// quoted strings
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"bar\" ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// quoted strings
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"bar \" ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar "));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// misquoted strings
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"ba\"r\" ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("ba\"r"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// misquoted strings
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"ba\" r ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\"ba\" r"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// quoted integer
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" Foo = \"1\" ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, 9).as<int32>(), 1);
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// quoted section and key (failure)
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			mpt::IO::WriteTextCRLF(outputstream, " [ \"Test\" ] ");
-			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, MPT_UTF8(" \"Foo\" = bar ")));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("\"Test\""), U_("\"Foo\"")}, U_("")).as<mpt::ustring>(), U_("bar"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-	}
-
-	// Unicode in UTF-16LE-BOM mode
-	{
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
-		{
-			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
-			mpt::IO::ofstream & outputstream = outputfile.stream();
-			auto WriteUTF16LE = [](auto & outputstream, mpt::span<const WCHAR> data) {
-					mpt::IO::WriteRaw(outputstream, reinterpret_cast<const std::byte*>(data.data()), data.size() * 2);
-				};
-			std::vector<WCHAR> utf16lebom = {0xfeff};
-			WriteUTF16LE(outputstream, mpt::as_span(utf16lebom));
-			WriteUTF16LE(outputstream, mpt::as_span(std::wstring(L"[Test]\r\n")));
-			WriteUTF16LE(outputstream, mpt::as_span(mpt::ToWide(MPT_UTF8("Umlauts=\xC3\xA4\r\n"))));
-		}
-		{
-			IniFileSettingsBackend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Umlauts")}, U_("")).as<mpt::ustring>(), MPT_UTF8("\xC3\xA4"));
-		}
-		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
 
 #if 0
