@@ -49,6 +49,11 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 	// Do not convert when running on Windows 2000 or earlier
 	// because of missing Unicode support on Win9x,
 #if defined(UNICODE)
+#if MPT_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable : 26110)
+#pragma warning(disable : 26117)
+#endif // MPT_COMPILER_MSVC
 	if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinXP))
 	{
 		return;
@@ -63,6 +68,8 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 		{
 			const mpt::PathString backupFilename = filename + mpt::PathString::FromUnicode(backupTag.empty() ? U_(".ansi.bak") : U_(".ansi.") + backupTag + U_(".bak"));
 			mpt::IO::atomic_shared_file_ref backup{backupFilename};
+			// cppcheck bogus warning
+			// cppcheck-suppress localMutex
 			std::lock_guard bl{backup};
 			backup.write(mpt::as_span(data));
 		}
@@ -75,6 +82,9 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 		inifile.write(reinterpret_cast<const char*>(str.c_str()), str.length() * sizeof(std::wstring::value_type));
 		file.write(mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(inifile.str())));
 	}
+#if MPT_COMPILER_MSVC
+#pragma warning(pop)
+#endif // MPT_COMPILER_MSVC
 #else
 	MPT_UNUSED(backupTag);
 #endif
