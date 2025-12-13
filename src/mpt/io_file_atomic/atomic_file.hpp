@@ -183,6 +183,7 @@ public:
 	atomic_shared_file_ref(const atomic_shared_file_ref &) = delete;
 	atomic_shared_file_ref & operator=(const atomic_shared_file_ref &) = delete;
 
+	// cppcheck-suppress duplInheritedMember
 	void lock() {
 		if (m_locks == 0) {
 			OVERLAPPED overlapped{};
@@ -196,16 +197,19 @@ public:
 		m_locks += 1;
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	std::vector<std::byte> read() {
 		atomic_file_lock_guard g{*this};
 		return atomic_file_ref::read();
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	void write(mpt::const_byte_span data, bool sync = false) {
 		atomic_file_lock_guard g{*this};
 		atomic_file_ref::write(data, sync);
 	}
 
+	// cppcheck-suppress duplInheritedMember
 	void unlock() {
 		assert(m_locks > 0);
 		m_locks -= 1;
