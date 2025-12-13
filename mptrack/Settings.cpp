@@ -452,6 +452,9 @@ void SettingsContainer::UnRegister(ISettingChanged *listener, const SettingPath 
 
 SettingsContainer::~SettingsContainer()
 {
+	// cppcheck complains about potentially throwing std::bad_variant_access in dtor,
+	// however that cannot happen in practive here.
+	// cppcheck-suppress throwInNoexceptFunction
 	WriteSettings();
 }
 
