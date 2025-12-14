@@ -288,7 +288,7 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 		}
 		static_assert(sizeof(wchar_t) == 2);
 		MPT_ASSERT(mpt::endian_is_little());
-		file.write(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding::UTF16LE, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename)));
+		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding::UTF16LE, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))));
 	}
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
