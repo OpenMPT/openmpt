@@ -24,7 +24,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v0.30.0
+      uses: cross-platform-actions/action@1ec539ef8d2c52533c9080254650d10be660dce0
       with:
         architecture: x86_64
         memory: 4G
@@ -35,7 +35,7 @@ jobs:
         shutdown_vm: false
         run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v0.30.0
+      uses: cross-platform-actions/action@1ec539ef8d2c52533c9080254650d10be660dce0
       with:
         architecture: x86_64
         memory: 4G
@@ -53,7 +53,7 @@ jobs:
           sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
           sudo pkgin -y install doxygen help2man
     - name: Build
-      uses: cross-platform-actions/action@v0.30.0
+      uses: cross-platform-actions/action@1ec539ef8d2c52533c9080254650d10be660dce0
       with:
         architecture: x86_64
         memory: 4G
@@ -65,7 +65,7 @@ jobs:
         run: |
           export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
     - name: Shutdown VM
-      uses: cross-platform-actions/action@v0.30.0
+      uses: cross-platform-actions/action@1ec539ef8d2c52533c9080254650d10be660dce0
       with:
         architecture: x86_64
         memory: 4G
