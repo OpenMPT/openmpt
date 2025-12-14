@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.4-pre
+### libopenmpt 0.8.4 (2025-12-14)
 
  *  [**Bug**] openmpt123: libsndfile float32 output was broken since 0.8.1.
  *  [**Bug**] `build/download_externals.txt` was missing from `makefile` and
