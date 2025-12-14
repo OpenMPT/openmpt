@@ -303,6 +303,11 @@ ImmediateWindowsIniFileSettingsBackend::~ImmediateWindowsIniFileSettingsBackend(
 	return;
 }
 
+CaseSensitivity ImmediateWindowsIniFileSettingsBackend::GetCaseSensitivity() const
+{
+	return CaseSensitivity::Insensitive;
+}
+
 SettingValue ImmediateWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
@@ -367,6 +372,11 @@ void BatchedWindowsIniFileSettingsBackend::InvalidateCache()
 BatchedWindowsIniFileSettingsBackend::~BatchedWindowsIniFileSettingsBackend()
 {
 	return;
+}
+
+CaseSensitivity BatchedWindowsIniFileSettingsBackend::GetCaseSensitivity() const
+{
+	return CaseSensitivity::Sensitive;
 }
 
 SettingValue BatchedWindowsIniFileSettingsBackend::ReadSetting(const SettingPath &path, const SettingValue &def) const

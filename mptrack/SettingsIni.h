@@ -74,6 +74,7 @@ public:
 	ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_);
 	~ImmediateWindowsIniFileSettingsBackend() override;
 public:
+	virtual CaseSensitivity GetCaseSensitivity() const override;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
 	virtual void RemoveSection(const mpt::ustring &section) override;
 	virtual void RemoveSetting(const SettingPath &path) override;
@@ -98,6 +99,7 @@ public:
 	BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_);
 	~BatchedWindowsIniFileSettingsBackend() override;
 public:
+	virtual CaseSensitivity GetCaseSensitivity() const override;
 	virtual void InvalidateCache() override;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
 	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) override;

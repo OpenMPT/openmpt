@@ -408,6 +408,12 @@ enum class SettingsBatching
 	All,
 };
 
+enum class CaseSensitivity
+{
+	Sensitive,
+	Insensitive,
+};
+
 template <SettingsBatching batching>
 class ISettingsBackend;
 
@@ -417,6 +423,7 @@ class ISettingsBackend<SettingsBatching::Single>
 protected:
 	virtual ~ISettingsBackend() = default;
 public:
+	virtual CaseSensitivity GetCaseSensitivity() const = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
 	virtual void RemoveSetting(const SettingPath &path) = 0;
@@ -429,6 +436,7 @@ class ISettingsBackend<SettingsBatching::Section>
 protected:
 	virtual ~ISettingsBackend() = default;
 public:
+	virtual CaseSensitivity GetCaseSensitivity() const = 0;
 	virtual void InvalidateCache() = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) = 0;
@@ -441,6 +449,7 @@ class ISettingsBackend<SettingsBatching::All>
 protected:
 	virtual ~ISettingsBackend() = default;
 public:
+	virtual CaseSensitivity GetCaseSensitivity() const = 0;
 	virtual void InvalidateCache() = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void WriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings) = 0;
