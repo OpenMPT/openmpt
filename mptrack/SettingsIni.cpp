@@ -491,6 +491,9 @@ std::map<mpt::ustring, std::optional<mpt::ustring>> BatchedWindowsIniFileSetting
 			if(val[0] == _T('\"') && val[val.length() - 1] == _T('\"'))
 			{
 				val = val.substr(1, val.length() - 2);
+			} else if(val[0] == _T('\'') && val[val.length() - 1] == _T('\''))
+			{
+				val = val.substr(1, val.length() - 2);
 			}
 		}
 		result.insert(std::make_pair(mpt::ToUnicode(key), std::make_optional(mpt::ToUnicode(val))));
