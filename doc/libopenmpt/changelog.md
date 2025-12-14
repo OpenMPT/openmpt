@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.17-pre
+### libopenmpt 0.7.17 (2025-12-14)
 
  *  [**Bug**] openmpt123: libsndfile float32 output was broken since 0.7.14.
 
