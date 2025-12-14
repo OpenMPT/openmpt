@@ -18,6 +18,7 @@
 #include "mpt/base/integer.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
+#include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/utility.hpp"
 #include "mpt/binary/hex.hpp"
 #include "mpt/format/message_macros.hpp"
@@ -77,7 +78,7 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 		encoding = TextFileEncoding::ANSI;
 		data_offset = 0;
 	}
-	mpt::const_byte_span textdata = filedata.subspan(data_offset);
+	mpt::const_byte_span textdata = filedata.subspan(mpt::saturate_cast<std::size_t>(data_offset));
 	mpt::ustring filetext;
 	switch(encoding)
 	{
