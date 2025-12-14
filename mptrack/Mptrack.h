@@ -34,14 +34,9 @@ class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
 class ImmediateWindowsIniFileSettingsBackend;
-class BatchedWindowsIniFileSettingsBackend;
 template <typename Backend> class FileSettingsContainer;
-#ifndef IniFileSettingsBackend
-#define IniFileSettingsBackend ImmediateWindowsIniFileSettingsBackend
-#endif
-#ifndef IniFileSettingsContainer
-#define IniFileSettingsContainer FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>
-#endif
+using IniFileSettingsBackend = ImmediateWindowsIniFileSettingsBackend;
+using IniFileSettingsContainer = FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>;
 class SettingsContainer;
 class ComponentManagerSettings;
 namespace mpt

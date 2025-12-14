@@ -135,14 +135,9 @@ public:
 };
 
 
-#ifndef IniFileSettingsBackend
-#define IniFileSettingsBackend ImmediateWindowsIniFileSettingsBackend
-#endif
+using IniFileSettingsBackend = ImmediateWindowsIniFileSettingsBackend;
 
-
-#ifndef IniFileSettingsContainer
-#define IniFileSettingsContainer FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>
-#endif
+using IniFileSettingsContainer = FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>;
 
 
 OPENMPT_NAMESPACE_END
