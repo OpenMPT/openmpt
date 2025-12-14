@@ -34,6 +34,7 @@
 
 #include <windows.h>
 #include <io.h>
+#include <stdlib.h>
 
 static wchar_t *utf8_to_utf16(const char *input)
 {
