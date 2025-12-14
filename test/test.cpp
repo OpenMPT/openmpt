@@ -3026,7 +3026,36 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 template <typename Backend>
 static void TestIniSettingsBackendReadCaseInsensitive(const mpt::PathString &filename)
 {
-	MPT_UNUSED(filename);
+	// case
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo=a")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("foo=b")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("bar=a")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Bar=b")));
+		}
+		{
+			Backend inifile{filename};
+			if(inifile.GetCaseSensitivity() == CaseSensitivity::Insensitive)
+			{
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Bar")}, U_("")).as<mpt::ustring>(), U_("a"));
+			}
+		}
+		{
+			Backend inifile{filename};
+			if(inifile.GetCaseSensitivity() == CaseSensitivity::Insensitive)
+			{
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("foo")}, U_("")).as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("bar")}, U_("")).as<mpt::ustring>(), U_("a"));
+			}
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
 }
 
 #endif // MODPLUG_TRACKER
@@ -3048,6 +3077,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 	TestIniSettingsBackendRead<BatchedWindowsIniFileSettingsBackend>(filename);
 
 	TestIniSettingsBackendReadCaseInsensitive<ImmediateWindowsIniFileSettingsBackend>(filename);
+	TestIniSettingsBackendReadCaseInsensitive<BatchedWindowsIniFileSettingsBackend>(filename);
 
 	{
 		IniFileSettingsContainer conf{filename};
