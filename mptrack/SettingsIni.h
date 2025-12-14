@@ -26,6 +26,25 @@
 OPENMPT_NAMESPACE_BEGIN
 
 
+enum class TextFileEncoding
+{
+	UTF32BE,
+	UTF32LE,
+	UTF16BE,
+	UTF16LE,
+	UTF8,
+	ANSI,
+};
+
+
+class TextFileHelpers
+{
+public:
+	static mpt::ustring DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename);
+	static std::vector<std::byte> EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text);
+};
+
+
 class IniFileHelpers
 {
 protected:
@@ -36,19 +55,28 @@ protected:
 };
 
 
-class WindowsIniFileBase
+class IniFileBase
 {
 protected:
 	const mpt::PathString filename;
 	mpt::IO::atomic_shared_file_ref file;
 protected:
+	IniFileBase(mpt::PathString filename_);
+	~IniFileBase() = default;
+public:
+	const mpt::PathString &Filename() const;
+	mpt::PathString GetFilename() const;
+};
+
+
+class WindowsIniFileBase
+	: public IniFileBase
+{
+protected:
 	WindowsIniFileBase(mpt::PathString filename_);
 	~WindowsIniFileBase() = default;
 public:
 	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
-public:
-	const mpt::PathString &Filename() const;
-	mpt::PathString GetFilename() const;
 };
 
 
