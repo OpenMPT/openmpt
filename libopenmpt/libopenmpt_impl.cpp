@@ -129,9 +129,16 @@ static std::string get_library_version_string() {
 	str += mpt::format_value_default<std::string>(OPENMPT_API_VERSION_MINOR);
 	str += ".";
 	str += mpt::format_value_default<std::string>(OPENMPT_API_VERSION_PATCH);
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#endif // MPT_COMPILER_CLANG
 	if ( std::string(OPENMPT_API_VERSION_PREREL).length() > 0 ) {
 		str += OPENMPT_API_VERSION_PREREL;
 	}
+#if MPT_COMPILER_CLANG
+#pragma clang diagnostic push
+#endif // MPT_COMPILER_CLANG
 	std::vector<std::string> fields;
 	if ( sourceInfo.Revision() ) {
 		fields.push_back( "r" + mpt::format_value_default<std::string>( sourceInfo.Revision() ) );
