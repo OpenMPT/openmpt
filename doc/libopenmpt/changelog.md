@@ -11,6 +11,8 @@ is just a high-level summary.
  *  [**Bug**] `build/download_externals.txt` was missing from `makefile` and
     `msvc` source archives.
 
+ *  PT36: Some MODs with samples larger than 64k inside PT36 containers were not
+    read correctly.
  *  IT: Files are no longer interpreted as ModPlug-made (thus disabling all
     compatibility settings) just because instrument extensions are found (no
     such files are currently known to exist in the wild).
