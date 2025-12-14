@@ -72,14 +72,14 @@ extern "C" {
 #endif
 
 /**\defgroup error_codes Error Codes*/
-/*@{*/
+/**@{*/
 /**\name List of possible error codes
    Many of the functions in this library return a negative error code when a
     function fails.
    This list provides a brief explanation of the common errors.
    See each individual function for more details on what a specific error code
     means in that context.*/
-/*@{*/
+/**@{*/
 
 
 /* Bump this when we change the API. */
@@ -101,9 +101,8 @@ extern "C" {
 #define OPE_WRITE_FAIL -34
 #define OPE_CLOSE_FAIL -35
 
-/*@}*/
-/*@}*/
-
+/**@}*/
+/**@}*/
 
 /* These are the "raw" request values -- they should usually not be used. */
 #define OPE_SET_DECISION_DELAY_REQUEST      14000
@@ -121,39 +120,45 @@ extern "C" {
 #define OPE_GET_NB_STREAMS_REQUEST          14013
 #define OPE_GET_NB_COUPLED_STREAMS_REQUEST  14015
 
+/* Macros to trigger compilation errors when the wrong types are provided to a CTL. */
+/* These macros are not part of the API and are only for use within the macros below. */
+#define ope_check_int(x) (((void)((x) == (opus_int32)0)), (opus_int32)(x))
+#define ope_check_int_ptr(ptr) ((ptr) + ((ptr) - (opus_int32*)(ptr)))
+#define ope_check_packet_func(x) ((void)((void (*)(void *, const unsigned char *, opus_int32, opus_uint32))0 == (x)), (x))
+#define ope_check_void_ptr(x) ((void)((void *)0 == (x)), (x))
+
 /**\defgroup encoder_ctl Encoding Options*/
-/*@{*/
+/**@{*/
 
 /**\name Control parameters
 
    Macros for setting encoder options.*/
-/*@{*/
+/**@{*/
 
-#define OPE_SET_DECISION_DELAY(x) OPE_SET_DECISION_DELAY_REQUEST, __opus_check_int(x)
-#define OPE_GET_DECISION_DELAY(x) OPE_GET_DECISION_DELAY_REQUEST, __opus_check_int_ptr(x)
-#define OPE_SET_MUXING_DELAY(x) OPE_SET_MUXING_DELAY_REQUEST, __opus_check_int(x)
-#define OPE_GET_MUXING_DELAY(x) OPE_GET_MUXING_DELAY_REQUEST, __opus_check_int_ptr(x)
-#define OPE_SET_COMMENT_PADDING(x) OPE_SET_COMMENT_PADDING_REQUEST, __opus_check_int(x)
-#define OPE_GET_COMMENT_PADDING(x) OPE_GET_COMMENT_PADDING_REQUEST, __opus_check_int_ptr(x)
-#define OPE_SET_SERIALNO(x) OPE_SET_SERIALNO_REQUEST, __opus_check_int(x)
-#define OPE_GET_SERIALNO(x) OPE_GET_SERIALNO_REQUEST, __opus_check_int_ptr(x)
-/* FIXME: Add type-checking macros to these. */
-#define OPE_SET_PACKET_CALLBACK(x,u) OPE_SET_PACKET_CALLBACK_REQUEST, (x), (u)
+#define OPE_SET_DECISION_DELAY(x) OPE_SET_DECISION_DELAY_REQUEST, ope_check_int(x)
+#define OPE_GET_DECISION_DELAY(x) OPE_GET_DECISION_DELAY_REQUEST, ope_check_int_ptr(x)
+#define OPE_SET_MUXING_DELAY(x) OPE_SET_MUXING_DELAY_REQUEST, ope_check_int(x)
+#define OPE_GET_MUXING_DELAY(x) OPE_GET_MUXING_DELAY_REQUEST, ope_check_int_ptr(x)
+#define OPE_SET_COMMENT_PADDING(x) OPE_SET_COMMENT_PADDING_REQUEST, ope_check_int(x)
+#define OPE_GET_COMMENT_PADDING(x) OPE_GET_COMMENT_PADDING_REQUEST, ope_check_int_ptr(x)
+#define OPE_SET_SERIALNO(x) OPE_SET_SERIALNO_REQUEST, ope_check_int(x)
+#define OPE_GET_SERIALNO(x) OPE_GET_SERIALNO_REQUEST, ope_check_int_ptr(x)
+#define OPE_SET_PACKET_CALLBACK(x,u) OPE_SET_PACKET_CALLBACK_REQUEST, ope_check_packet_func(x), ope_check_void_ptr(u)
 /*#define OPE_GET_PACKET_CALLBACK(x,u) OPE_GET_PACKET_CALLBACK_REQUEST, (x), (u)*/
-#define OPE_SET_HEADER_GAIN(x) OPE_SET_HEADER_GAIN_REQUEST, __opus_check_int(x)
-#define OPE_GET_HEADER_GAIN(x) OPE_GET_HEADER_GAIN_REQUEST, __opus_check_int_ptr(x)
-#define OPE_GET_NB_STREAMS(x) OPE_GET_NB_STREAMS_REQUEST, __opus_check_int_ptr(x)
-#define OPE_GET_NB_COUPLED_STREAMS(x) OPE_GET_NB_COUPLED_STREAMS_REQUEST, __opus_check_int_ptr(x)
-/*@}*/
-/*@}*/
+#define OPE_SET_HEADER_GAIN(x) OPE_SET_HEADER_GAIN_REQUEST, ope_check_int(x)
+#define OPE_GET_HEADER_GAIN(x) OPE_GET_HEADER_GAIN_REQUEST, ope_check_int_ptr(x)
+#define OPE_GET_NB_STREAMS(x) OPE_GET_NB_STREAMS_REQUEST, ope_check_int_ptr(x)
+#define OPE_GET_NB_COUPLED_STREAMS(x) OPE_GET_NB_COUPLED_STREAMS_REQUEST, ope_check_int_ptr(x)
+/**@}*/
+/**@}*/
 
 /**\defgroup callbacks Callback Functions */
-/*@{*/
+/**@{*/
 
 /**\name Callback functions
 
    These are the callbacks that can be implemented for an encoder.*/
-/*@{*/
+/**@{*/
 
 /** Called for writing a page.
  \param user_data user-defined data passed to the callback
@@ -188,8 +193,8 @@ typedef struct {
   /** Callback for closing the stream. */
   ope_close_func close;
 } OpusEncCallbacks;
-/*@}*/
-/*@}*/
+/**@}*/
+/**@}*/
 
 /** Opaque comments struct. */
 typedef struct OggOpusComments OggOpusComments;
@@ -198,12 +203,12 @@ typedef struct OggOpusComments OggOpusComments;
 typedef struct OggOpusEnc OggOpusEnc;
 
 /**\defgroup comments Comments Handling */
-/*@{*/
+/**@{*/
 
 /**\name Functions for handling comments
 
    These functions make it possible to add comments and pictures to Ogg Opus files.*/
-/*@{*/
+/**@{*/
 
 /** Create a new comments object.
     \return Newly-created comments object. */
@@ -252,16 +257,16 @@ OPE_EXPORT int ope_comments_add_picture(OggOpusComments *comments, const char *f
  */
 OPE_EXPORT int ope_comments_add_picture_from_memory(OggOpusComments *comments, const char *ptr, size_t size, int picture_type, const char *description);
 
-/*@}*/
-/*@}*/
+/**@}*/
+/**@}*/
 
 /**\defgroup encoding Encoding */
-/*@{*/
+/**@{*/
 
 /**\name Functions for encoding Ogg Opus files
 
    These functions make it possible to encode Ogg Opus files.*/
-/*@{*/
+/**@{*/
 
 /** Create a new OggOpus file.
     \param path       Path where to create the file
@@ -394,8 +399,8 @@ OPE_EXPORT const char *ope_get_version_string(void);
     \return An integer representing the ABI version */
 OPE_EXPORT int ope_get_abi_version(void);
 
-/*@}*/
-/*@}*/
+/**@}*/
+/**@}*/
 
 # if defined(__cplusplus)
 }

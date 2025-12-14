@@ -79,7 +79,7 @@ struct OggOpusComments {
 };
 
 /* Create a new comments object. The vendor string is optional. */
-OggOpusComments *ope_comments_create() {
+OggOpusComments *ope_comments_create(void) {
   OggOpusComments *c;
   const char *libopus_str;
   char vendor_str[1024];
@@ -356,13 +356,17 @@ fail:
   return NULL;
 }
 
+static void stream_generate_serialno(EncStream *stream) {
+  stream->serialno = rand();
+  stream->serialno_is_set = 1;
+}
+
 static void stream_destroy(EncStream *stream) {
   if (stream->comment) free(stream->comment);
   free(stream);
 }
 
-/* Create a new OggOpus file (callback-based). */
-OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void *user_data,
+static OggOpusEnc *ope_encoder_create_callbacks_impl(const OpusEncCallbacks *callbacks, void *user_data,
     OggOpusComments *comments, opus_int32 rate, int channels, int family, int *error) {
   OggOpusEnc *enc=NULL;
   int ret;
@@ -395,11 +399,11 @@ OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void
   enc->oggp = NULL;
   /* Not initializing anything is an unrecoverable error. */
   enc->unrecoverable = family == -1 ? OPE_TOO_LATE : 0;
-  enc->pull_api = 0;
   enc->packet_callback = NULL;
   enc->rate = rate;
   enc->channels = channels;
   enc->frame_size = 960;
+  enc->frame_size_request = OPUS_FRAMESIZE_20_MS;
   enc->decision_delay = 96000;
   enc->max_ogg_delay = 48000;
   enc->chaining_keyframe = NULL;
@@ -447,8 +451,12 @@ OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void
   if (callbacks != NULL)
   {
     enc->callbacks = *callbacks;
+    enc->pull_api = 0;
+  } else {
+    enc->pull_api = 1;
   }
   enc->streams->user_data = user_data;
+  enc->streams->end_granule = 0;
   if (error) *error = OPE_OK;
   return enc;
 fail:
@@ -462,11 +470,19 @@ fail:
   return NULL;
 }
 
+/* Create a new OggOpus stream (callback-based). */
+OggOpusEnc *ope_encoder_create_callbacks(const OpusEncCallbacks *callbacks, void *user_data,
+    OggOpusComments *comments, opus_int32 rate, int channels, int family, int *error) {
+  if (callbacks == NULL) {
+    if (error) *error = OPE_BAD_ARG;
+    return NULL;
+  }
+  return ope_encoder_create_callbacks_impl(callbacks, user_data, comments, rate, channels, family, error);
+}
+
 /* Create a new OggOpus stream, pulling one page at a time. */
 OggOpusEnc *ope_encoder_create_pull(OggOpusComments *comments, opus_int32 rate, int channels, int family, int *error) {
-  OggOpusEnc *enc = ope_encoder_create_callbacks(NULL, NULL, comments, rate, channels, family, error);
-  if (enc) enc->pull_api = 1;
-  return enc;
+  return ope_encoder_create_callbacks_impl(NULL, NULL, comments, rate, channels, family, error);
 }
 
 int ope_encoder_deferred_init_with_mapping(OggOpusEnc *enc, int family, int streams,
@@ -501,9 +517,7 @@ int ope_encoder_deferred_init_with_mapping(OggOpusEnc *enc, int family, int stre
 
 static void init_stream(OggOpusEnc *enc) {
   assert(!enc->streams->stream_is_init);
-  if (!enc->streams->serialno_is_set) {
-    enc->streams->serialno = rand();
-  }
+  if (!enc->streams->serialno_is_set) stream_generate_serialno(enc->streams);
 
   if (enc->oggp != NULL) oggp_chain(enc->oggp, enc->streams->serialno);
   else {
@@ -808,9 +822,9 @@ int ope_encoder_drain(OggOpusEnc *enc) {
   if (enc->unrecoverable) return enc->unrecoverable;
   /* Check if it's already been drained. */
   if (enc->streams == NULL) return OPE_TOO_LATE;
+  if (!enc->streams->stream_is_init) init_stream(enc);
   if (enc->re) resampler_drain = speex_resampler_get_output_latency(enc->re);
   pad_samples = MAX(LPC_PADDING, enc->global_granule_offset + enc->frame_size + resampler_drain + 1);
-  if (!enc->streams->stream_is_init) init_stream(enc);
   shift_buffer(enc);
   assert(enc->buffer_end + pad_samples <= BUFFER_SAMPLES);
   memset(&enc->buffer[enc->channels*enc->buffer_end], 0, pad_samples*enc->channels*sizeof(enc->buffer[0]));
@@ -1060,6 +1074,11 @@ int ope_encoder_ctl(OggOpusEnc *enc, int request, ...) {
     case OPE_GET_SERIALNO_REQUEST:
     {
       opus_int32 *value = va_arg(ap, opus_int32*);
+      if (!enc->last_stream) {
+        ret = OPE_TOO_LATE;
+        break;
+      }
+      if (!enc->last_stream->serialno_is_set) stream_generate_serialno(enc->last_stream);
       *value = enc->last_stream->serialno;
     }
     break;
