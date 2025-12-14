@@ -3023,6 +3023,12 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 
 }
 
+template <typename Backend>
+static void TestIniSettingsBackendReadCaseInsensitive(const mpt::PathString &filename)
+{
+	MPT_UNUSED(filename);
+}
+
 #endif // MODPLUG_TRACKER
 
 
@@ -3039,8 +3045,9 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 	DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 
 	TestIniSettingsBackendRead<ImmediateWindowsIniFileSettingsBackend>(filename);
-
 	TestIniSettingsBackendRead<BatchedWindowsIniFileSettingsBackend>(filename);
+
+	TestIniSettingsBackendReadCaseInsensitive<ImmediateWindowsIniFileSettingsBackend>(filename);
 
 	{
 		IniFileSettingsContainer conf{filename};
@@ -3134,7 +3141,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 
 	{
 		{
-			IniFileSettingsContainer conf{filename};
+			FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend> conf{filename};
 			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace")), spacespacecharspacespace);
 			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces")), threespaces);
 			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab")), tab);
@@ -3143,7 +3150,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0")), cc0);
 		}
 		{
-			IniFileSettingsContainer conf{filename};
+			FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend> conf{filename};
 			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace"))), spacespacecharspacespace);
 			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces"))), threespaces);
 			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab"))), tab);
@@ -3156,6 +3163,26 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens"))), tokens);
 			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy"))), xcrlfy);
 			//VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0"))), U_(""));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// escaping
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo1 = ^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo2 = ^^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo3 = ^^^")));
+		}
+		{
+			FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend> inifile{filename};
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo1")}, U_("")), U_("^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo2")}, U_("")), U_("^^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo3")}, U_("")), U_("^^^"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
