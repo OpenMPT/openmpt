@@ -49,6 +49,14 @@ struct TextFileEncoding
 	};
 	Type type;
 	Header header;
+	friend inline constexpr bool operator==(TextFileEncoding a, TextFileEncoding b)
+	{
+		return (a.type == b.type) && (a.header == b.header);
+	}
+	friend inline constexpr bool operator!=(TextFileEncoding a, TextFileEncoding b)
+	{
+		return (a.type != b.type) || (a.header != b.header);
+	}
 	inline constexpr mpt::IO::Offset TextOffset() const
 	{
 		mpt::IO::Offset result = 0;
@@ -92,8 +100,9 @@ class TextFileHelpers
 public:
 	static TextFileEncoding GetPreferredEncoding();
 	static TextFileEncoding ProbeEncoding(mpt::const_byte_span filedata);
-	static mpt::ustring DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename);
-	static std::vector<std::byte> EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text);
+	static mpt::ustring DecodeText(mpt::const_byte_span filedata, const mpt::PathString &filename);
+	static mpt::ustring DecodeText(TextFileEncoding encoding, mpt::const_byte_span filedata, const mpt::PathString &filename);
+	static std::vector<std::byte> EncodeText(TextFileEncoding encoding_hint, const mpt::ustring &text);
 };
 
 

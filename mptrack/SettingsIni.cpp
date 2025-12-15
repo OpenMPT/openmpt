@@ -116,9 +116,13 @@ TextFileEncoding TextFileHelpers::ProbeEncoding(mpt::const_byte_span filedata)
 	return result;
 }
 
-mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename)
+mpt::ustring TextFileHelpers::DecodeText(mpt::const_byte_span filedata, const mpt::PathString &filename)
 {
-	const TextFileEncoding encoding = ProbeEncoding(filedata);
+	return DecodeText(ProbeEncoding(filedata), filedata, filename);
+}
+
+mpt::ustring TextFileHelpers::DecodeText(TextFileEncoding encoding, mpt::const_byte_span filedata, const mpt::PathString &filename)
+{
 	mpt::const_byte_span textdata = filedata.subspan(mpt::saturate_cast<std::size_t>(encoding.TextOffset()));
 	mpt::ustring filetext;
 	switch(encoding.type)
@@ -250,7 +254,7 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 	return filetext;
 }
 
-std::vector<std::byte> TextFileHelpers::EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text)
+std::vector<std::byte> TextFileHelpers::EncodeText(TextFileEncoding encoding_hint, const mpt::ustring &text)
 {
 	std::vector<std::byte> result;
 	switch(encoding_hint.type)
@@ -327,28 +331,24 @@ WindowsIniFileBase::WindowsIniFileBase(mpt::PathString filename_, std::optional<
 
 void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint, const mpt::ustring &backupTag)
 {
-	// Force ini file to be encoded in UTF16.
-	// This causes WINAPI ini file functions to keep it in UTF16 encoding
+	// Force ini file to be encoded in UTF16LEBOM or UTF8BOM (on Wine).
+	// This causes WINAPI ini file functions to keep it in Unicode encoding
 	// and thus support storing unicode strings uncorrupted.
 	// This is backwards compatible because even ANSI WINAPI behaves the
 	// same way in this case.
-	// Do not convert when not runing a UNICODE build.
 	// Do not convert when running on Windows 2000 or earlier
 	// because of missing Unicode support on Win9x,
-#if defined(UNICODE)
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 26110)
 #pragma warning(disable : 26117)
 #endif // MPT_COMPILER_MSVC
-	if(mpt::osinfo::windows::Version::Current().IsBefore(mpt::osinfo::windows::Version::WinXP))
-	{
-		return;
-	}
 	{
 		std::lock_guard l{file};
 		const std::vector<std::byte> filedata = file.read();
-		if(!filedata.empty() && IsTextUnicode(filedata.data(), mpt::saturate_cast<int>(filedata.size()), NULL))
+		const TextFileEncoding desired_encoding = TextFileHelpers::GetPreferredEncoding();
+		const TextFileEncoding current_encoding = TextFileHelpers::ProbeEncoding(filedata);
+		if(current_encoding == desired_encoding)
 		{
 			return;
 		}
@@ -362,14 +362,11 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint, cons
 		}
 		static_assert(sizeof(wchar_t) == 2);
 		MPT_ASSERT(mpt::endian_is_little());
-		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM}, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
+		file.write(mpt::as_span(TextFileHelpers::EncodeText(desired_encoding, TextFileHelpers::DecodeText(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
 	}
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
-#else
-	MPT_UNUSED(backupTag);
-#endif
 }
 
 
