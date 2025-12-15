@@ -47,22 +47,22 @@ OPENMPT_NAMESPACE_BEGIN
 
 TextFileEncoding TextFileHelpers::GetPreferredEncoding()
 {
-	TextFileEncoding result = TextFileEncoding::UTF8;
+	TextFileEncoding result = TextFileEncoding{TextFileEncoding::Type::UTF8, TextFileEncoding::Header::none};
 #if MPT_OS_WINDOWS
 #if defined(UNICODE)
-	result = TextFileEncoding::UTF16LE;
+	result = TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
 #else
 	if(mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP))
 	{
-		result = TextFileEncoding::UTF16LE;
+		result = TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
 	} else
 	{
-		result = TextFileEncoding::ANSI;
+		result = TextFileEncoding{TextFileEncoding::Type::ANSI, TextFileEncoding::Header::none};
 	}
 #endif
-	if((result == TextFileEncoding::UTF16LE) && mpt::OS::Windows::IsWine())
+	if((result.type == TextFileEncoding::Type::UTF16LE) && mpt::OS::Windows::IsWine())
 	{
-		result = TextFileEncoding::UTF8BOM;
+		result = TextFileEncoding{TextFileEncoding::Type::UTF8, TextFileEncoding::Header::BOM};
 	}
 #else
 	result = TextFileEncoding::Locale;
@@ -70,10 +70,13 @@ TextFileEncoding TextFileHelpers::GetPreferredEncoding()
 	return result;
 }
 
-std::pair<TextFileEncoding, mpt::IO::Offset> TextFileHelpers::ProbeEncoding(mpt::const_byte_span filedata)
+TextFileEncoding TextFileHelpers::ProbeEncoding(mpt::const_byte_span filedata)
 {
-	TextFileEncoding encoding = TextFileEncoding::ANSI;
-	mpt::IO::Offset data_offset = 0;
+#if MPT_OS_WINDOWS
+	TextFileEncoding result = {TextFileEncoding::Type::ANSI, TextFileEncoding::Header::none};
+#else
+	TextFileEncoding result = {TextFileEncoding::Type::Locale, TextFileEncoding::Header::none};
+#endif
 	const std::array<std::byte, 4> bom_utf32be = {mpt::byte_cast<std::byte>(uint8{0x00}), mpt::byte_cast<std::byte>(uint8{0x00}), mpt::byte_cast<std::byte>(uint8{0xfe}), mpt::byte_cast<std::byte>(uint8{0xff})};
 	const std::array<std::byte, 4> bom_utf32le = {mpt::byte_cast<std::byte>(uint8{0xff}), mpt::byte_cast<std::byte>(uint8{0xfe}), mpt::byte_cast<std::byte>(uint8{0x00}), mpt::byte_cast<std::byte>(uint8{0x00})};
 	const std::array<std::byte, 2> bom_utf16be = {mpt::byte_cast<std::byte>(uint8{0xfe}), mpt::byte_cast<std::byte>(uint8{0xff})};
@@ -81,54 +84,46 @@ std::pair<TextFileEncoding, mpt::IO::Offset> TextFileHelpers::ProbeEncoding(mpt:
 	const std::array<std::byte, 3> bom_utf8 = {mpt::byte_cast<std::byte>(uint8{0xEF}), mpt::byte_cast<std::byte>(uint8{0xBB}), mpt::byte_cast<std::byte>(uint8{0xBF})};
 	if((filedata.size() >= bom_utf32be.size()) && (std::memcmp(filedata.data(), bom_utf32be.data(), bom_utf32be.size()) == 0))
 	{
-		encoding = TextFileEncoding::UTF32BE;
-		data_offset = 4;
+		result = {TextFileEncoding::Type::UTF32BE, TextFileEncoding::Header::BOM};
 	} else if((filedata.size() >= bom_utf32le.size()) && (std::memcmp(filedata.data(), bom_utf32le.data(), bom_utf32le.size()) == 0))
 	{
-		encoding = TextFileEncoding::UTF32LE;
-		data_offset = 4;
+		result = {TextFileEncoding::Type::UTF32LE, TextFileEncoding::Header::BOM};
 	} else if((filedata.size() >= bom_utf16be.size()) && (std::memcmp(filedata.data(), bom_utf16be.data(), bom_utf16be.size()) == 0))
 	{
-		encoding = TextFileEncoding::UTF16BE;
-		data_offset = 2;
+		result = {TextFileEncoding::Type::UTF16BE, TextFileEncoding::Header::BOM};
 	} else if((filedata.size() >= bom_utf16le.size()) && (std::memcmp(filedata.data(), bom_utf16le.data(), bom_utf16le.size()) == 0))
 	{
-		encoding = TextFileEncoding::UTF16LE;
-		data_offset = 2;
+		result = {TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
 	} else if((filedata.size() >= bom_utf8.size()) && (std::memcmp(filedata.data(), bom_utf8.data(), bom_utf8.size()) == 0))
 	{
-		encoding = TextFileEncoding::UTF8BOM;
-		data_offset = 3;
+		result = {TextFileEncoding::Type::UTF8, TextFileEncoding::Header::BOM};
 #if MPT_OS_WINDOWS
 	} else if(!filedata.empty() && IsTextUnicode(filedata.data(), mpt::saturate_cast<int>(filedata.size()), NULL))
 	{
-		encoding = TextFileEncoding::UTF16LE;
-		data_offset = 0;
+		result = {TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::none};
 #endif
 	} else if(mpt::is_utf8(mpt::buffer_cast<std::string>(filedata)))
 	{
-		encoding = TextFileEncoding::UTF8;
-		data_offset = 0;
+		result = {TextFileEncoding::Type::UTF8, TextFileEncoding::Header::none};
 	} else
 	{
 #if MPT_OS_WINDOWS
-		encoding = TextFileEncoding::ANSI;
+		result = {TextFileEncoding::Type::ANSI, TextFileEncoding::Header::none};
 #else
-		encoding = TextFileEncoding::Locale;
+		result = {TextFileEncoding::Type::Locale, TextFileEncoding::Header::none};
 #endif
-		data_offset = 0;
 	}
-	return std::make_pair(encoding, data_offset);
+	return result;
 }
 
 mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename)
 {
-	const auto [encoding, data_offset] = ProbeEncoding(filedata);
-	mpt::const_byte_span textdata = filedata.subspan(mpt::saturate_cast<std::size_t>(data_offset));
+	const TextFileEncoding encoding = ProbeEncoding(filedata);
+	mpt::const_byte_span textdata = filedata.subspan(mpt::saturate_cast<std::size_t>(encoding.TextOffset()));
 	mpt::ustring filetext;
-	switch(encoding)
+	switch(encoding.type)
 	{
-		case TextFileEncoding::UTF32BE:
+		case TextFileEncoding::Type::UTF32BE:
 			{
 				if((textdata.size() % sizeof(char32_t)) != 0)
 				{
@@ -154,7 +149,7 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 				}
 			}
 			break;
-		case TextFileEncoding::UTF32LE:
+		case TextFileEncoding::Type::UTF32LE:
 			{
 				if((textdata.size() % sizeof(char32_t)) != 0)
 				{
@@ -180,7 +175,7 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 				}
 			}
 			break;
-		case TextFileEncoding::UTF16BE:
+		case TextFileEncoding::Type::UTF16BE:
 			{
 				if((textdata.size() % sizeof(char16_t)) != 0)
 				{
@@ -206,7 +201,7 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 				}
 			}
 			break;
-		case TextFileEncoding::UTF16LE:
+		case TextFileEncoding::Type::UTF16LE:
 			{
 				if((textdata.size() % sizeof(char16_t)) != 0)
 				{
@@ -239,18 +234,15 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 				}
 			}
 			break;
-		case TextFileEncoding::UTF8BOM:
-			filetext = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, mpt::buffer_cast<std::string>(textdata));
-			break;
-		case TextFileEncoding::UTF8:
+		case TextFileEncoding::Type::UTF8:
 			filetext = mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, mpt::buffer_cast<std::string>(textdata));
 			break;
 #if MPT_OS_WINDOWS
-		case TextFileEncoding::ANSI:
+		case TextFileEncoding::Type::ANSI:
 			filetext = mpt::transcode<mpt::ustring>(mpt::logical_encoding::locale, mpt::buffer_cast<std::string>(textdata));
 			break;
 #else
-		case TextFileEncoding::Locale:
+		case TextFileEncoding::Type::Locale:
 			filetext = mpt::transcode<mpt::ustring>(mpt::logical_encoding::locale, mpt::buffer_cast<std::string>(textdata));
 			break;
 #endif
@@ -261,38 +253,43 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 std::vector<std::byte> TextFileHelpers::EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text)
 {
 	std::vector<std::byte> result;
-	switch(encoding_hint)
+	switch(encoding_hint.type)
 	{
-		case TextFileEncoding::UTF32BE:
+		case TextFileEncoding::Type::UTF32BE:
 			[[fallthrough]];
-		case TextFileEncoding::UTF32LE:
+		case TextFileEncoding::Type::UTF32LE:
 			[[fallthrough]];
-		case TextFileEncoding::UTF16BE:
+		case TextFileEncoding::Type::UTF16BE:
 			[[fallthrough]];
-		case TextFileEncoding::UTF16LE:
+		case TextFileEncoding::Type::UTF16LE:
 			{
-				const std::array<std::byte, 2> utf16le_bom = {mpt::byte_cast<std::byte>(uint8{0xff}), mpt::byte_cast<std::byte>(uint8{0xfe})};
-				mpt::append(result, utf16le_bom);
+				if(encoding_hint.header == TextFileEncoding::Header::BOM)
+				{
+					const std::array<std::byte, 2> utf16le_bom = {mpt::byte_cast<std::byte>(uint8{0xff}), mpt::byte_cast<std::byte>(uint8{0xfe})};
+					mpt::append(result, utf16le_bom);
+				}
 				std::wstring wtext = mpt::transcode<std::wstring>(text);
 				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(wtext.data()), wtext.size() * sizeof(wchar_t)));
 			}
 			break;
-		case TextFileEncoding::UTF8BOM:
+		case TextFileEncoding::Type::UTF8:
 			{
-				const std::array<std::byte, 3> utf8_bom = {mpt::byte_cast<std::byte>(uint8{0xef}), mpt::byte_cast<std::byte>(uint8{0xbb}), mpt::byte_cast<std::byte>(uint8{0xbf})};
-				mpt::append(result, utf8_bom);
+				if(encoding_hint.header == TextFileEncoding::Header::BOM)
+				{
+					const std::array<std::byte, 3> utf8_bom = {mpt::byte_cast<std::byte>(uint8{0xef}), mpt::byte_cast<std::byte>(uint8{0xbb}), mpt::byte_cast<std::byte>(uint8{0xbf})};
+					mpt::append(result, utf8_bom);
+				}
 				mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, text))));
 			}
 			break;
-		case TextFileEncoding::UTF8:
-			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, text))));
-			break;
 #if MPT_OS_WINDOWS
-		case TextFileEncoding::ANSI:
+		case TextFileEncoding::Type::ANSI:
+			MPT_ASSERT(encoding_hint.header != TextFileEncoding::Header::BOM);
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::logical_encoding::locale, text))));
 			break;
 #else
-		case TextFileEncoding::Locale:
+		case TextFileEncoding::Type::Locale:
+			MPT_ASSERT(encoding_hint.header != TextFileEncoding::Header::BOM);
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::logical_encoding::locale, text))));
 			break;
 #endif
@@ -365,7 +362,7 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint, cons
 		}
 		static_assert(sizeof(wchar_t) == 2);
 		MPT_ASSERT(mpt::endian_is_little());
-		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding::UTF16LE, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
+		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM}, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
 	}
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)

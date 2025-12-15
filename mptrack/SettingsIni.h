@@ -21,26 +21,69 @@
 #include <map>
 #include <optional>
 #include <set>
-#include <utility>
 #include <vector>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-enum class TextFileEncoding
+struct TextFileEncoding
 {
-	UTF32BE,
-	UTF32LE,
-	UTF16BE,
-	UTF16LE,
-	UTF8BOM,
-	UTF8,
+	enum class Type
+	{
+		UTF32BE,
+		UTF32LE,
+		UTF16BE,
+		UTF16LE,
+		UTF8,
 #if MPT_OS_WINDOWS
-	ANSI,
+		ANSI,
 #else
-	Locale,
+		Locale,
 #endif
+	};
+	enum class Header
+	{
+		none,
+		BOM,
+	};
+	Type type;
+	Header header;
+	inline constexpr mpt::IO::Offset TextOffset() const
+	{
+		mpt::IO::Offset result = 0;
+		if(header == Header::BOM)
+		{
+			switch(type)
+			{
+				case Type::UTF32BE:
+					result = 4;
+					break;
+				case Type::UTF32LE:
+					result = 4;
+					break;
+				case Type::UTF16BE:
+					result = 2;
+					break;
+				case Type::UTF16LE:
+					result = 2;
+					break;
+				case Type::UTF8:
+					result = 3;
+					break;
+#if MPT_OS_WINDOWS
+				case Type::ANSI:
+					result = 0;
+					break;
+#else
+				case Type::Locale:
+					result = 0;
+					break;
+#endif
+			}
+		}
+		return result;
+	}
 };
 
 
@@ -48,7 +91,7 @@ class TextFileHelpers
 {
 public:
 	static TextFileEncoding GetPreferredEncoding();
-	static std::pair<TextFileEncoding, mpt::IO::Offset> ProbeEncoding(mpt::const_byte_span filedata);
+	static TextFileEncoding ProbeEncoding(mpt::const_byte_span filedata);
 	static mpt::ustring DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename);
 	static std::vector<std::byte> EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text);
 };
