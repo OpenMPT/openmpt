@@ -230,14 +230,28 @@ void SettingsContainer::BackendsWriteMultipleSettings(const std::map<SettingPath
 	MPT_ASSERT_NOTREACHED();
 }
 
-void SettingsContainer::BackendsWriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings)
+void SettingsContainer::BackendsWriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings, std::optional<Caching> sync_hint)
 {
 	const SettingsBatching batching = BackendsSettingsBatching();
 	ASSERT(batching == SettingsBatching::All);
 	if(batching == SettingsBatching::All)
 	{
-		std::get<ISettingsBackend<SettingsBatching::All>*>(backend)->WriteAllSettings(removeSections, settings);
+		std::get<ISettingsBackend<SettingsBatching::All>*>(backend)->WriteAllSettings(removeSections, settings, sync_hint.has_value() ? sync_hint : sync_fallback);
 		return;
+	}
+	MPT_ASSERT_NOTREACHED();
+}
+
+void SettingsContainer::BackendsSync(std::optional<Caching> sync_hint)
+{
+	const SettingsBatching batching = BackendsSettingsBatching();
+	ASSERT(batching == SettingsBatching::Single || batching == SettingsBatching::Section);
+	if(batching == SettingsBatching::Section)
+	{
+		return std::get<ISettingsBackend<SettingsBatching::Section>*>(backend)->Sync(sync_hint.has_value() ? sync_hint : sync_fallback);
+	} else if(batching == SettingsBatching::Single)
+	{
+		return std::get<ISettingsBackend<SettingsBatching::Single>*>(backend)->Sync(sync_hint.has_value() ? sync_hint : sync_fallback);
 	}
 	MPT_ASSERT_NOTREACHED();
 }
@@ -361,7 +375,7 @@ void SettingsContainer::NotifyListeners(const SettingPath &path)
 	}
 }
 
-void SettingsContainer::WriteSettings()
+void SettingsContainer::WriteSettings(std::optional<Caching> sync_hint)
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
@@ -387,6 +401,7 @@ void SettingsContainer::WriteSettings()
 		{
 			map.erase(path);
 		}
+		BackendsSync(sync_hint);
 	} else if(BackendsSettingsBatching() == SettingsBatching::Section || BackendsSettingsBatching() == SettingsBatching::All)
 	{
 		std::map<SettingPath, std::optional<SettingValue>> settings;
@@ -407,9 +422,10 @@ void SettingsContainer::WriteSettings()
 		{
 			BackendsWriteRemovedSections(removedSections);
 			BackendsWriteMultipleSettings(settings);
+			BackendsSync(sync_hint);
 		} else if(BackendsSettingsBatching() == SettingsBatching::All)
 		{
-			BackendsWriteAllSettings(removedSections, settings);
+			BackendsWriteAllSettings(removedSections, settings, sync_hint);
 		}
 		std::set<SettingPath> removedsettings;
 		for(auto &[path, value] : map)
@@ -433,11 +449,16 @@ void SettingsContainer::WriteSettings()
 	}
 }
 
-void SettingsContainer::Flush()
+void SettingsContainer::SetSync(std::optional<Caching> sync_hint)
+{
+	sync_fallback = sync_hint;
+}
+
+void SettingsContainer::Flush(std::optional<Caching> sync_hint)
 {
 	ASSERT(theApp.InGuiThread());
 	ASSERT(!CMainFrame::GetMainFrame() || (CMainFrame::GetMainFrame() && !CMainFrame::GetMainFrame()->InNotifyHandler())); // This is a slow path, use CachedSetting for stuff that is accessed in notify handler.
-	WriteSettings();
+	WriteSettings(sync_hint);
 }
 
 void SettingsContainer::Register(ISettingChanged *listener, const SettingPath &path)
@@ -455,24 +476,27 @@ SettingsContainer::~SettingsContainer()
 	// cppcheck complains about potentially throwing std::bad_variant_access in dtor,
 	// however that cannot happen in practive here.
 	// cppcheck-suppress throwInNoexceptFunction
-	WriteSettings();
+	WriteSettings(sync_fallback);
 }
 
 
-SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend, std::optional<Caching> sync_hint)
 	: backend(backend)
+	, sync_fallback(sync_hint)
 {
 	MPT_ASSERT(backend);
 }
 
-SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend, std::optional<Caching> sync_hint)
 	: backend(backend)
+	, sync_fallback(sync_hint)
 {
 	MPT_ASSERT(backend);
 }
 
-SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend)
+SettingsContainer::SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend, std::optional<Caching> sync_hint)
 	: backend(backend)
+	, sync_fallback(sync_hint)
 {
 	MPT_ASSERT(backend);
 }

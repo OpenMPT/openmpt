@@ -401,6 +401,12 @@ inline bool operator == (const SettingPath &left, const SettingPath &right) { re
 inline bool operator != (const SettingPath &left, const SettingPath &right) { return left.compare(right) != 0; }
 
 
+enum class CaseSensitivity
+{
+	Sensitive,
+	Insensitive,
+};
+
 enum class SettingsBatching
 {
 	Single,
@@ -408,10 +414,10 @@ enum class SettingsBatching
 	All,
 };
 
-enum class CaseSensitivity
+enum class Caching
 {
-	Sensitive,
-	Insensitive,
+	WriteBack,
+	WriteThrough,
 };
 
 template <SettingsBatching batching>
@@ -428,6 +434,7 @@ public:
 	virtual void RemoveSection(const mpt::ustring &section) = 0;
 	virtual void RemoveSetting(const SettingPath &path) = 0;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) = 0;
+	virtual void Sync(std::optional<Caching> sync_hint) = 0;
 };
 
 template <>
@@ -441,6 +448,7 @@ public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
 	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) = 0;
 	virtual void WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings) = 0;
+	virtual void Sync(std::optional<Caching> sync_hint) = 0;
 };
 
 template <>
@@ -452,7 +460,7 @@ public:
 	virtual CaseSensitivity GetCaseSensitivity() const = 0;
 	virtual void InvalidateCache() = 0;
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const = 0;
-	virtual void WriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings) = 0;
+	virtual void WriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings, std::optional<Caching> sync_hint) = 0;
 };
 
 
@@ -478,6 +486,7 @@ private:
 	mutable SettingsMap map;
 	mutable SettingsListenerMap mapListeners;
 	mutable SectionsSet removedSections;
+	std::optional<Caching> sync_fallback;
 
 private:
 	BackendVariant backend;
@@ -490,7 +499,8 @@ private:
 	void BackendsRemoveSection(const mpt::ustring &section);
 	void BackendsWriteRemovedSections(const std::set<mpt::ustring> &removeSections);
 	void BackendsWriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings);
-	void BackendsWriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings);
+	void BackendsWriteAllSettings(const std::set<mpt::ustring> &removeSections, const std::map<SettingPath, std::optional<SettingValue>> &settings, std::optional<Caching> sync_hint);
+	void BackendsSync(std::optional<Caching> sync_hint);
 	void NotifyListeners(const SettingPath &path);
 	SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const;
 	bool IsDefaultSetting(const SettingPath &path) const;
@@ -498,16 +508,16 @@ private:
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
 	void RemoveSection(const mpt::ustring &section);
-	void WriteSettings();
+	void WriteSettings(std::optional<Caching> sync_hint);
 private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
 public:
 	SettingsContainer(SettingsContainer &&other) = default; 
 public:
-	SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend);
-	SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend);
-	SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend);
+	SettingsContainer(ISettingsBackend<SettingsBatching::Single> *backend, std::optional<Caching> sync_hint = std::nullopt);
+	SettingsContainer(ISettingsBackend<SettingsBatching::Section> *backend, std::optional<Caching> sync_hint = std::nullopt);
+	SettingsContainer(ISettingsBackend<SettingsBatching::All> *backend, std::optional<Caching> sync_hint = std::nullopt);
 public:
 	void InvalidateCache();
 	template <typename T>
@@ -558,7 +568,8 @@ public:
 	{
 		RemoveSection(section);
 	}
-	void Flush();
+	void SetSync(std::optional<Caching> sync_hint);
+	void Flush(std::optional<Caching> sync_hint = std::nullopt);
 	~SettingsContainer();
 
 public:
@@ -775,8 +786,8 @@ class FileSettingsContainer
 	, public SettingsContainer
 {
 public:
-	FileSettingsContainer(mpt::PathString filename_)
-		: Backend(std::move(filename_))
+	FileSettingsContainer(mpt::PathString filename_, std::optional<Caching> sync_hint = std::nullopt)
+		: Backend(std::move(filename_), sync_hint)
 		, SettingsContainer(this)
 	{
 		return;

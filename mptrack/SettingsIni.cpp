@@ -226,9 +226,10 @@ std::vector<std::byte> TextFileHelpers::EncodeTextWithBOM(TextFileEncoding encod
 
 
 
-IniFileBase::IniFileBase(mpt::PathString filename_)
+IniFileBase::IniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint)
 	: filename(std::move(filename_))
 	, file(filename)
+	, sync_default(sync_hint)
 {
 	return;
 }
@@ -245,13 +246,13 @@ mpt::PathString IniFileBase::GetFilename() const
 
 
 
-WindowsIniFileBase::WindowsIniFileBase(mpt::PathString filename_)
-	: IniFileBase(std::move(filename_))
+WindowsIniFileBase::WindowsIniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint)
+	: IniFileBase(std::move(filename_), sync_hint)
 {
 	return;
 }
 
-void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
+void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint, const mpt::ustring &backupTag)
 {
 	// Force ini file to be encoded in UTF16.
 	// This causes WINAPI ini file functions to keep it in UTF16 encoding
@@ -284,11 +285,11 @@ void WindowsIniFileBase::ConvertToUnicode(const mpt::ustring &backupTag)
 			// cppcheck bogus warning
 			// cppcheck-suppress localMutex
 			std::lock_guard bl{backup};
-			backup.write(mpt::as_span(filedata));
+			backup.write(mpt::as_span(filedata), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
 		}
 		static_assert(sizeof(wchar_t) == 2);
 		MPT_ASSERT(mpt::endian_is_little());
-		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding::UTF16LE, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))));
+		file.write(mpt::as_span(TextFileHelpers::EncodeTextWithBOM(TextFileEncoding::UTF16LE, TextFileHelpers::DecodeTextWithBOM(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
 	}
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
@@ -457,7 +458,7 @@ void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &
 		if(ReadSettingRaw(path, mpt::ustring()) != val)
 		{
 			// The ini file is probably ANSI encoded.
-			ConvertToUnicode();
+			ConvertToUnicode(sync_default);
 			// Re-write non-ansi-representable value.
 			::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
 		}
@@ -489,8 +490,8 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring
 	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
-ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_)
-	: WindowsIniFileBase(std::move(filename_))
+ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_, std::optional<Caching> sync_hint)
+	: WindowsIniFileBase(std::move(filename_), sync_hint)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
 	return;
@@ -547,6 +548,14 @@ void ImmediateWindowsIniFileSettingsBackend::RemoveSection(const mpt::ustring &s
 	RemoveSectionRaw(section);
 }
 
+void ImmediateWindowsIniFileSettingsBackend::Sync(std::optional<Caching> sync_hint)
+{
+	if(sync_hint.value_or(sync_default.value_or(Caching::WriteThrough)) == Caching::WriteThrough)
+	{
+		file.sync();
+	}
+}
+
 
 
 void BatchedWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &section)
@@ -554,11 +563,11 @@ void BatchedWindowsIniFileSettingsBackend::RemoveSectionRaw(const mpt::ustring &
 	::WritePrivateProfileString(mpt::ToWin(section).c_str(), NULL, NULL, filename.AsNative().c_str());
 }
 
-BatchedWindowsIniFileSettingsBackend::BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_)
-	: WindowsIniFileBase(std::move(filename_))
+BatchedWindowsIniFileSettingsBackend::BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_, std::optional<Caching> sync_hint)
+	: WindowsIniFileBase(std::move(filename_), sync_hint)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
-	ConvertToUnicode();
+	ConvertToUnicode(sync_hint);
 	cache = ReadAllSectionsRaw();
 }
 
@@ -774,6 +783,14 @@ void BatchedWindowsIniFileSettingsBackend::WriteMultipleSettings(const std::map<
 			}
 		}
 		WriteSectionRaw(section, workingsectionsettings);
+	}
+}
+
+void BatchedWindowsIniFileSettingsBackend::Sync(std::optional<Caching> sync_hint)
+{
+	if(sync_hint.value_or(sync_default.value_or(Caching::WriteThrough)) == Caching::WriteThrough)
+	{
+		file.sync();
 	}
 }
 

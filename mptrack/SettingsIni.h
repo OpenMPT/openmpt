@@ -60,8 +60,9 @@ class IniFileBase
 protected:
 	const mpt::PathString filename;
 	mpt::IO::atomic_shared_file_ref file;
+	std::optional<Caching> sync_default;
 protected:
-	IniFileBase(mpt::PathString filename_);
+	IniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint);
 	~IniFileBase() = default;
 public:
 	const mpt::PathString &Filename() const;
@@ -73,10 +74,10 @@ class WindowsIniFileBase
 	: public IniFileBase
 {
 protected:
-	WindowsIniFileBase(mpt::PathString filename_);
+	WindowsIniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint);
 	~WindowsIniFileBase() = default;
 public:
-	void ConvertToUnicode(const mpt::ustring &backupTag = mpt::ustring());
+	void ConvertToUnicode(std::optional<Caching> sync_hint, const mpt::ustring &backupTag = mpt::ustring());
 };
 
 
@@ -99,7 +100,7 @@ private:
 	void WriteSettingRaw(const SettingPath &path, int32 val);
 	void WriteSettingRaw(const SettingPath &path, bool val);
 public:
-	ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_);
+	ImmediateWindowsIniFileSettingsBackend(mpt::PathString filename_, std::optional<Caching> sync_hint = std::nullopt);
 	~ImmediateWindowsIniFileSettingsBackend() override;
 public:
 	virtual CaseSensitivity GetCaseSensitivity() const override;
@@ -107,6 +108,7 @@ public:
 	virtual void RemoveSection(const mpt::ustring &section) override;
 	virtual void RemoveSetting(const SettingPath &path) override;
 	virtual void WriteSetting(const SettingPath &path, const SettingValue &val) override;
+	virtual void Sync(std::optional<Caching> sync_hint) override;
 };
 
 
@@ -124,7 +126,7 @@ private:
 	void RemoveSectionRaw(const mpt::ustring &section);
 	void WriteSectionRaw(const mpt::ustring &section, const std::map<mpt::ustring, std::optional<mpt::ustring>> &keyvalues);
 public:
-	BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_);
+	BatchedWindowsIniFileSettingsBackend(mpt::PathString filename_, std::optional<Caching> sync_hint = std::nullopt);
 	~BatchedWindowsIniFileSettingsBackend() override;
 public:
 	virtual CaseSensitivity GetCaseSensitivity() const override;
@@ -132,6 +134,7 @@ public:
 	virtual SettingValue ReadSetting(const SettingPath &path, const SettingValue &def) const override;
 	virtual void WriteRemovedSections(const std::set<mpt::ustring> &removeSections) override;
 	virtual void WriteMultipleSettings(const std::map<SettingPath, std::optional<SettingValue>> &settings) override;
+	virtual void Sync(std::optional<Caching> sync_hint) override;
 };
 
 
