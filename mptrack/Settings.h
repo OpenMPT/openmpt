@@ -435,7 +435,6 @@ class SettingsContainer
 public:
 	using SettingsMap = std::map<SettingPath,SettingState>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
-	void WriteSettings();
 private:
 	mutable SettingsMap map;
 	mutable SettingsListenerMap mapListeners;
@@ -455,6 +454,7 @@ private:
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
 	void RemoveSection(const mpt::ustring &section);
+	void WriteSettings();
 private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
