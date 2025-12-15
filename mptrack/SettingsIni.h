@@ -32,14 +32,20 @@ enum class TextFileEncoding
 	UTF32LE,
 	UTF16BE,
 	UTF16LE,
+	UTF8BOM,
 	UTF8,
+#if MPT_OS_WINDOWS
 	ANSI,
+#else
+	Locale,
+#endif
 };
 
 
 class TextFileHelpers
 {
 public:
+	static TextFileEncoding GetPreferredEncoding();
 	static mpt::ustring DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename);
 	static std::vector<std::byte> EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text);
 };
