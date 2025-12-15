@@ -486,10 +486,9 @@ private:
 	mutable SettingsMap map;
 	mutable SettingsListenerMap mapListeners;
 	mutable SectionsSet removedSections;
-	std::optional<Caching> sync_fallback;
-
 private:
 	BackendVariant backend;
+	std::optional<Caching> sync_fallback;
 private:
 	SettingsBatching BackendsSettingsBatching() const;
 	void BackendsInvalidateCache();
