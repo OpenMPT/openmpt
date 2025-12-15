@@ -156,6 +156,10 @@ public:
 		}
 	}
 
+	void sync() {
+		mpt::windows::CheckBOOL(FlushFileBuffers(m_hFile));
+	}
+
 	void unlock() {
 	}
 
@@ -207,6 +211,11 @@ public:
 	void write(mpt::const_byte_span data, bool sync = false) {
 		atomic_file_lock_guard g{*this};
 		atomic_file_ref::write(data, sync);
+	}
+
+	// cppcheck-suppress duplInheritedMember
+	void sync() {
+		atomic_file_ref::sync();
 	}
 
 	// cppcheck-suppress duplInheritedMember
