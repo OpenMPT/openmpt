@@ -786,8 +786,9 @@ class FileSettingsContainer
 	, public SettingsContainer
 {
 public:
-	FileSettingsContainer(mpt::PathString filename_, std::optional<Caching> sync_hint = std::nullopt)
-		: Backend(std::move(filename_), sync_hint)
+	template <typename ... Args>
+	FileSettingsContainer(mpt::PathString filename_, Args && ... args)
+		: Backend(std::move(filename_), std::forward<Args>(args) ...)
 		, SettingsContainer(this)
 	{
 		return;
