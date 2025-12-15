@@ -474,8 +474,6 @@ public:
 	using SectionsSet = std::set<mpt::ustring>;
 	using SettingsListenerMap = std::map<SettingPath,std::set<ISettingChanged*>>;
 	using BackendVariant = std::variant<std::monostate, ISettingsBackend<SettingsBatching::Single>*, ISettingsBackend<SettingsBatching::Section>*, ISettingsBackend<SettingsBatching::All>*>;
-public:
-	void WriteSettings();
 private:
 	mutable SettingsMap map;
 	mutable SettingsListenerMap mapListeners;
@@ -500,6 +498,7 @@ private:
 	void ForgetSetting(const SettingPath &path);
 	void RemoveSetting(const SettingPath &path);
 	void RemoveSection(const mpt::ustring &section);
+	void WriteSettings();
 private:
 	SettingsContainer(const SettingsContainer &other); // disable
 	SettingsContainer& operator = (const SettingsContainer &other); // disable
