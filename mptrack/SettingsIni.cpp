@@ -98,6 +98,12 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 	{
 		encoding = TextFileEncoding::UTF8BOM;
 		data_offset = 3;
+#if MPT_OS_WINDOWS
+	} else if(!filedata.empty() && IsTextUnicode(filedata.data(), mpt::saturate_cast<int>(filedata.size()), NULL))
+	{
+		encoding = TextFileEncoding::UTF16LE;
+		data_offset = 0;
+#endif
 	} else if(mpt::is_utf8(mpt::buffer_cast<std::string>(filedata)))
 	{
 		encoding = TextFileEncoding::UTF8;
