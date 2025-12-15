@@ -347,7 +347,7 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint, cons
 		std::lock_guard l{file};
 		const std::vector<std::byte> filedata = file.read();
 		const TextFileEncoding desired_encoding = TextFileHelpers::GetPreferredEncoding();
-		const TextFileEncoding current_encoding = TextFileHelpers::ProbeEncoding(filedata);
+		const TextFileEncoding current_encoding = TextFileHelpers::ProbeEncoding(mpt::as_span(filedata));
 		if(current_encoding == desired_encoding)
 		{
 			return;
