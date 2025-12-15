@@ -324,7 +324,7 @@ void COptionsAdvanced::OnOptionDblClick(NMHDR *, LRESULT *)
 void COptionsAdvanced::OnSaveNow()
 {
 	TrackerSettings::Instance().SaveSettings();
-	theApp.GetSettings().WriteSettings();
+	theApp.GetSettings().Flush();
 }
 
 
