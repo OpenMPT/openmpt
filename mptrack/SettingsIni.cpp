@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cstddef>
@@ -69,7 +70,7 @@ TextFileEncoding TextFileHelpers::GetPreferredEncoding()
 	return result;
 }
 
-mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename)
+std::pair<TextFileEncoding, mpt::IO::Offset> TextFileHelpers::ProbeEncoding(mpt::const_byte_span filedata)
 {
 	TextFileEncoding encoding = TextFileEncoding::ANSI;
 	mpt::IO::Offset data_offset = 0;
@@ -117,6 +118,12 @@ mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, c
 #endif
 		data_offset = 0;
 	}
+	return std::make_pair(encoding, data_offset);
+}
+
+mpt::ustring TextFileHelpers::DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename)
+{
+	const auto [encoding, data_offset] = ProbeEncoding(filedata);
 	mpt::const_byte_span textdata = filedata.subspan(mpt::saturate_cast<std::size_t>(data_offset));
 	mpt::ustring filetext;
 	switch(encoding)

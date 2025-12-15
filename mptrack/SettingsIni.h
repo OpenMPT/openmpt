@@ -15,11 +15,13 @@
 
 #include "Settings.h"
 
+#include "mpt/io/base.hpp"
 #include "mpt/io_file_atomic/atomic_file.hpp"
 
 #include <map>
 #include <optional>
 #include <set>
+#include <utility>
 #include <vector>
 
 
@@ -46,6 +48,7 @@ class TextFileHelpers
 {
 public:
 	static TextFileEncoding GetPreferredEncoding();
+	static std::pair<TextFileEncoding, mpt::IO::Offset> ProbeEncoding(mpt::const_byte_span filedata);
 	static mpt::ustring DecodeTextWithBOM(mpt::const_byte_span filedata, const mpt::PathString &filename);
 	static std::vector<std::byte> EncodeTextWithBOM(TextFileEncoding encoding_hint, const mpt::ustring &text);
 };
