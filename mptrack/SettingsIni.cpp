@@ -248,45 +248,93 @@ mpt::ustring TextFileHelpers::DecodeText(TextFileEncoding encoding, mpt::const_b
 	return filetext;
 }
 
-std::vector<std::byte> TextFileHelpers::EncodeText(TextFileEncoding encoding_hint, const mpt::ustring &text)
+std::vector<std::byte> TextFileHelpers::EncodeText(TextFileEncoding encoding, const mpt::ustring &text)
 {
 	std::vector<std::byte> result;
-	switch(encoding_hint.type)
+	if(encoding.Header().size() > 0)
+	{
+		mpt::append(result, encoding.Header());
+	}
+	switch(encoding.type)
 	{
 		case TextFileEncoding::Type::UTF32BE:
-			[[fallthrough]];
+			{
+				std::u32string utf32text = mpt::transcode<std::u32string>(text);
+				MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+				{
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
+				} else
+				{
+					std::vector<mpt::uint32be> utf32betext;
+					utf32betext.resize(utf32text.size());
+					std::copy(utf32text.begin(), utf32text.end(), utf32betext.begin());
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32betext.data()), utf32betext.size() * sizeof(mpt::uint32be)));
+				}
+			}
+			break;
 		case TextFileEncoding::Type::UTF32LE:
-			[[fallthrough]];
+			{
+				std::u32string utf32text = mpt::transcode<std::u32string>(text);
+				MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+				{
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
+				} else
+				{
+					std::vector<mpt::uint32le> utf32letext;
+					utf32letext.resize(utf32text.size());
+					std::copy(utf32text.begin(), utf32text.end(), utf32letext.begin());
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32letext.data()), utf32letext.size() * sizeof(mpt::uint32le)));
+				}
+			}
+			break;
 		case TextFileEncoding::Type::UTF16BE:
-			[[fallthrough]];
+			{
+				std::u16string utf16text = mpt::transcode<std::u16string>(text);
+				MPT_MAYBE_CONSTANT_IF(mpt::endian_is_big())
+				{
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
+				} else
+				{
+					std::vector<mpt::uint16be> utf16betext;
+					utf16betext.resize(utf16text.size());
+					std::copy(utf16text.begin(), utf16text.end(), utf16betext.begin());
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16betext.data()), utf16betext.size() * sizeof(mpt::uint16be)));
+				}
+			}
+			break;
 		case TextFileEncoding::Type::UTF16LE:
 			{
-				const TextFileEncoding ecoding = TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
-				if(ecoding.Header().size() > 0)
+				MPT_MAYBE_CONSTANT_IF(MPT_OS_WINDOWS)
 				{
-					mpt::append(result, ecoding.Header());
+					std::wstring wtext = mpt::transcode<std::wstring>(text);
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(wtext.data()), wtext.size() * sizeof(wchar_t)));
+				} else MPT_MAYBE_CONSTANT_IF(mpt::endian_is_little())
+				{
+					std::u16string utf16text = mpt::transcode<std::u16string>(text);
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
+				} else
+				{
+					std::u16string utf16text = mpt::transcode<std::u16string>(text);
+					std::vector<mpt::uint16le> utf16letext;
+					utf16letext.resize(utf16text.size());
+					std::copy(utf16text.begin(), utf16text.end(), utf16letext.begin());
+					mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16letext.data()), utf16letext.size() * sizeof(mpt::uint16le)));
 				}
-				std::wstring wtext = mpt::transcode<std::wstring>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(wtext.data()), wtext.size() * sizeof(wchar_t)));
 			}
 			break;
 		case TextFileEncoding::Type::UTF8:
 			{
-				if(encoding_hint.Header().size() > 0)
-				{
-					mpt::append(result, encoding_hint.Header());
-				}
 				mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, text))));
 			}
 			break;
 #if MPT_OS_WINDOWS
 		case TextFileEncoding::Type::ANSI:
-			MPT_ASSERT(encoding_hint.header != TextFileEncoding::Header::BOM);
+			MPT_ASSERT(encoding.header != TextFileEncoding::Header::BOM);
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::logical_encoding::locale, text))));
 			break;
 #else
 		case TextFileEncoding::Type::Locale:
-			MPT_ASSERT(encoding_hint.header != TextFileEncoding::Header::BOM);
+			MPT_ASSERT(encoding.header != TextFileEncoding::Header::BOM);
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::logical_encoding::locale, text))));
 			break;
 #endif

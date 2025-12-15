@@ -114,7 +114,7 @@ public:
 	static TextFileEncoding ProbeEncoding(mpt::const_byte_span filedata);
 	static mpt::ustring DecodeText(mpt::const_byte_span filedata, const mpt::PathString &filename);
 	static mpt::ustring DecodeText(TextFileEncoding encoding, mpt::const_byte_span filedata, const mpt::PathString &filename);
-	static std::vector<std::byte> EncodeText(TextFileEncoding encoding_hint, const mpt::ustring &text);
+	static std::vector<std::byte> EncodeText(TextFileEncoding encoding, const mpt::ustring &text);
 };
 
 
