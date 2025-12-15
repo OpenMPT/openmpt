@@ -15,13 +15,16 @@
 
 #include "Settings.h"
 
-#include "mpt/io/base.hpp"
+#include "mpt/base/span.hpp"
 #include "mpt/io_file_atomic/atomic_file.hpp"
 
+#include <array>
 #include <map>
 #include <optional>
 #include <set>
 #include <vector>
+
+#include <cstddef>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -29,6 +32,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 struct TextFileEncoding
 {
+	static inline constexpr	const std::array<std::byte, 4> bom_utf32be = {std::byte{0x00}, std::byte{0x00}, std::byte{0xfe}, std::byte{0xff}};
+	static inline constexpr	const std::array<std::byte, 4> bom_utf32le = {std::byte{0xff}, std::byte{0xfe}, std::byte{0x00}, std::byte{0x00}};
+	static inline constexpr	const std::array<std::byte, 2> bom_utf16be = {std::byte{0xfe}, std::byte{0xff}};
+	static inline constexpr	const std::array<std::byte, 2> bom_utf16le = {std::byte{0xff}, std::byte{0xfe}};
+	static inline constexpr	const std::array<std::byte, 3> bom_utf8 = {std::byte{0xef}, std::byte{0xbb}, std::byte{0xbf}};
 	enum class Type
 	{
 		UTF32BE,
@@ -57,40 +65,44 @@ struct TextFileEncoding
 	{
 		return (a.type != b.type) || (a.header != b.header);
 	}
-	inline constexpr mpt::IO::Offset TextOffset() const
+	inline mpt::const_byte_span Header() const
 	{
-		mpt::IO::Offset result = 0;
+		mpt::const_byte_span result{};
 		if(header == Header::BOM)
 		{
 			switch(type)
 			{
 				case Type::UTF32BE:
-					result = 4;
+					result = bom_utf32be;
 					break;
 				case Type::UTF32LE:
-					result = 4;
+					result = bom_utf32le;
 					break;
 				case Type::UTF16BE:
-					result = 2;
+					result = bom_utf16be;
 					break;
 				case Type::UTF16LE:
-					result = 2;
+					result = bom_utf16le;
 					break;
 				case Type::UTF8:
-					result = 3;
+					result = bom_utf8;
 					break;
 #if MPT_OS_WINDOWS
 				case Type::ANSI:
-					result = 0;
+					result = mpt::const_byte_span{};
 					break;
 #else
 				case Type::Locale:
-					result = 0;
+					result = mpt::const_byte_span{};
 					break;
 #endif
 			}
 		}
 		return result;
+	}
+	inline std::size_t TextOffset() const
+	{
+		return Header().size();
 	}
 };
 
