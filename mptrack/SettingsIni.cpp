@@ -520,19 +520,6 @@ void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &
 void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, const mpt::ustring &val)
 {
 	::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
-
-	if(mpt::ToUnicode(mpt::Charset::Locale, mpt::ToCharset(mpt::Charset::Locale, val)) != val) // explicit round-trip
-	{
-		// Value is not representable in ANSI CP.
-		// Now check if the string got stored correctly.
-		if(ReadSettingRaw(path, mpt::ustring()) != val)
-		{
-			// The ini file is probably ANSI encoded.
-			ConvertToUnicode(sync_default);
-			// Re-write non-ansi-representable value.
-			::WritePrivateProfileString(GetSection(path).c_str(), GetKey(path).c_str(), mpt::ToWin(val).c_str(), filename.AsNative().c_str());
-		}
-	}
 }
 
 void ImmediateWindowsIniFileSettingsBackend::WriteSettingRaw(const SettingPath &path, double val)
@@ -564,6 +551,7 @@ ImmediateWindowsIniFileSettingsBackend::ImmediateWindowsIniFileSettingsBackend(m
 	: WindowsIniFileBase(std::move(filename_), sync_hint)
 {
 	OPENMPT_PROFILE_FUNCTION(Profiler::Settings);
+	ConvertToUnicode(sync_hint);
 	return;
 }
 
