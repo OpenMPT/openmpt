@@ -224,7 +224,7 @@ std::string get_string( const std::string & key ) {
 #endif // MPT_COMPILER_CLANG
 		return ( std::string(OPENMPT_API_VERSION_PREREL).length() == 0 ) ? "1" : "0";
 #if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
+#pragma clang diagnostic pop
 #endif // MPT_COMPILER_CLANG
 	} else if ( key == "library_features" ) {
 		return get_library_features_string();
