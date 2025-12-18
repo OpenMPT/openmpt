@@ -1,8 +1,10 @@
 libopus library version 1.6 (2025-12-15).
 The following changes have been made:
- *  Commit
+ *  Commits
+    <https://gitlab.xiph.org/xiph/opus/-/commit/ae5f6927893c752b43e56ab8f768759387959f14>,
+    and
     <https://gitlab.xiph.org/xiph/opus/-/commit/516feba5f56fb0682f9c7f727fda4b88e2be99b1>
-    has been applied.
+    have been applied.
  *  Obviously, unnecessary folders and files have been removed.
  *  celt/float_cast.h has been modified to compile on ARM64EC.
  *  celt/x86/vq_sse2.c has been modified to check for OPUS_X86_MAY_HAVE_SSE2.
