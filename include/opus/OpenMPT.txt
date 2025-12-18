@@ -1,4 +1,4 @@
-libopus library version 1.5.2 (2024-04-12).
+libopus library version 1.6 (2025-12-15).
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
  *  celt/float_cast.h has been modified to compile on ARM64EC.
@@ -6,11 +6,8 @@ The following changes have been made:
  *  celt/x86/x86_arch_macros.c has been modified to support AVX and AVX2.
  *  A warning in dnn/dred_encoder.c has been silenced.
  *  Performance warning in dnn/nnet.c has been silenced.
- *  Performance warning in dnn/nnet.h has been silenced.
  *  dnn/nnet_avx2.c has been modified to check for
     OPUS_MAY_HAVE_AVX2 || OPUS_PRESUME_AVX2.
- *  dnn/vec_avx.h has been fixed to not rely on AVX or SSSE3 in plain SSE2
-    builds.
  *  silk/float/x86/inner_product_FLP_avx2 has been modified to check for
     OPUS_X86_MAY_HAVE_AVX2.
  *  silk/x86/*sse4_1.c has been modified to check for OPUS_X86_MAY_HAVE_SSE4_1.

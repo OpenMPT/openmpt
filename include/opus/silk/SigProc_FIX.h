@@ -600,11 +600,13 @@ static OPUS_INLINE opus_int64 silk_max_64(opus_int64 a, opus_int64 b)
 #define RAND_INCREMENT                      907633515
 #define silk_RAND(seed)                     (silk_MLA_ovflw((RAND_INCREMENT), (seed), (RAND_MULTIPLIER)))
 
-/*  Add some multiplication functions that can be easily mapped to ARM. */
+/*  Add some multiplication functions that can be easily mapped to ARM/MIPS32. */
 
 /*    silk_SMMUL: Signed top word multiply.
           ARMv6        2 instruction cycles.
-          ARMv3M+      3 instruction cycles. use SMULL and ignore LSB registers.(except xM)*/
+          ARMv3M+      3 instruction cycles. use SMULL and ignore LSB registers.(except xM)
+          MIPS32       2 instructions mul+mfhi
+          MIPS32r6     1 instruction muh */
 /*#define silk_SMMUL(a32, b32)                (opus_int32)silk_RSHIFT(silk_SMLAL(silk_SMULWB((a32), (b32)), (a32), silk_RSHIFT_ROUND((b32), 16)), 16)*/
 /* the following seems faster on x86 */
 #define silk_SMMUL(a32, b32)                (opus_int32)silk_RSHIFT64(silk_SMULL((a32), (b32)), 32)
@@ -631,8 +633,12 @@ static OPUS_INLINE opus_int64 silk_max_64(opus_int64 a, opus_int64 b)
 #include "arm/SigProc_FIX_armv5e.h"
 #endif
 
-#if defined(MIPSr1_ASM)
+#if defined(FIXED_POINT) && defined(__mips_dsp) && __mips == 32
 #include "mips/sigproc_fix_mipsr1.h"
+#endif
+
+#ifdef OPUS_XTENSA_LX7
+#include "xtensa/SigProc_FIX_lx7.h"
 #endif
 
 

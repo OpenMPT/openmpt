@@ -281,6 +281,9 @@
     <ClCompile Include="..\..\..\include\opus\celt\mdct.c">
       <Filter>celt</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\celt\mini_kfft.c">
+      <Filter>celt</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\modes.c">
       <Filter>celt</Filter>
     </ClCompile>

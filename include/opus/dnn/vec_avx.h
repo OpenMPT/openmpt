@@ -168,9 +168,9 @@ typedef struct {
   __m128i lo;
   __m128i hi;
 } mm256i_emu;
-#if defined(__AVX__)  /* OpenMPT */
+#ifdef __AVX__
 typedef __m256i real_m256i;
-#endif  /* OpenMPT */
+#endif
 #define __m256i mm256i_emu
 
 static inline mm256i_emu mm256_setzero_si256(void) {

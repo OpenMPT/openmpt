@@ -93,11 +93,7 @@ void lpcnet_plc_fec_add(LPCNetPLCState *st, const float *features) {
     st->fec_skip++;
     return;
   }
-  if (st->fec_fill_pos == PLC_MAX_FEC) {
-    OPUS_MOVE(&st->fec[0][0], &st->fec[st->fec_read_pos][0], (st->fec_fill_pos-st->fec_read_pos)*NB_FEATURES);
-    st->fec_fill_pos = st->fec_fill_pos-st->fec_read_pos;
-    st->fec_read_pos -= st->fec_read_pos;
-  }
+  celt_assert(st->fec_fill_pos < PLC_MAX_FEC);
   OPUS_COPY(&st->fec[st->fec_fill_pos][0], features, NB_FEATURES);
   st->fec_fill_pos++;
 }
@@ -197,8 +193,8 @@ int lpcnet_plc_conceal(LPCNetPLCState *st, opus_int16 *pcm) {
   st->plc_bak[1] = st->plc_net;
   if (get_fec_or_pred(st, st->features)) st->loss_count = 0;
   else st->loss_count++;
-  if (st->loss_count >= 10) st->features[0] = MAX16(-10, st->features[0]+att_table[9] - 2*(st->loss_count-9));
-  else st->features[0] = MAX16(-10, st->features[0]+att_table[st->loss_count]);
+  if (st->loss_count >= 10) st->features[0] = MAX16(-15, st->features[0]+att_table[9] - 2*(st->loss_count-9));
+  else st->features[0] = MAX16(-15, st->features[0]+att_table[st->loss_count]);
   fargan_synthesize_int(&st->fargan, pcm, &st->features[0]);
   queue_features(st, st->features);
   if (st->analysis_pos - FRAME_SIZE >= 0) st->analysis_pos -= FRAME_SIZE;

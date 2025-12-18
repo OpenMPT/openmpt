@@ -66,7 +66,11 @@ void compute_generic_dense(const LinearLayer *layer, float *output, const float 
 }
 
 #ifdef ENABLE_OSCE
+#ifdef ENABLE_OSCE_BWE
+#define MAX_RNN_NEURONS_ALL IMAX(IMAX(IMAX(IMAX(FARGAN_MAX_RNN_NEURONS, PLC_MAX_RNN_UNITS), DRED_MAX_RNN_NEURONS), OSCE_MAX_RNN_NEURONS), OSCE_BWE_MAX_RNN_NEURONS)
+#else
 #define MAX_RNN_NEURONS_ALL IMAX(IMAX(IMAX(FARGAN_MAX_RNN_NEURONS, PLC_MAX_RNN_UNITS), DRED_MAX_RNN_NEURONS), OSCE_MAX_RNN_NEURONS)
+#endif
 #else
 #define MAX_RNN_NEURONS_ALL IMAX(IMAX(FARGAN_MAX_RNN_NEURONS, PLC_MAX_RNN_UNITS), DRED_MAX_RNN_NEURONS)
 #endif
@@ -117,7 +121,7 @@ void compute_glu(const LinearLayer *layer, float *output, const float *input, in
    }
 }
 
-#define MAX_CONV_INPUTS_ALL DRED_MAX_CONV_INPUTS
+#define MAX_CONV_INPUTS_ALL IMAX(DRED_MAX_CONV_INPUTS, 1024)
 
 void compute_generic_conv1d(const LinearLayer *layer, float *output, float *mem, const float *input, int input_size, int activation, int arch)
 {

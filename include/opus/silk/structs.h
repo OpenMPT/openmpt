@@ -249,12 +249,17 @@ typedef struct {
     OSCEState state;
     int method;
 } silk_OSCE_struct;
+
+typedef struct {
+    OSCEBWEFeatureState features;
+    OSCEBWEState state;
+} silk_OSCE_BWE_struct;
 #endif
 
 /* Struct for Packet Loss Concealment */
 typedef struct {
     opus_int32                  pitchL_Q8;                          /* Pitch lag to use for voiced concealment                          */
-    opus_int16                  LTPCoef_Q14[ LTP_ORDER ];           /* LTP coeficients to use for voiced concealment                    */
+    opus_int16                  LTPCoef_Q14[ LTP_ORDER ];           /* LTP coefficients to use for voiced concealment                   */
     opus_int16                  prevLPC_Q12[ MAX_LPC_ORDER ];
     opus_int                    last_frame_lost;                    /* Was previous frame lost                                          */
     opus_int32                  rand_seed;                          /* Seed for unvoiced signal generation                              */
@@ -285,6 +290,9 @@ typedef struct {
 typedef struct {
 #ifdef ENABLE_OSCE
     silk_OSCE_struct            osce;
+#ifdef ENABLE_OSCE_BWE
+    silk_OSCE_BWE_struct        osce_bwe;
+#endif
 #endif
 #define SILK_DECODER_STATE_RESET_START prev_gain_Q16
     opus_int32                  prev_gain_Q16;
