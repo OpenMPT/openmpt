@@ -2,6 +2,7 @@ libopus library version 1.6 (2025-12-15).
 The following changes have been made:
  *  Commits
     <https://gitlab.xiph.org/xiph/opus/-/commit/ae5f6927893c752b43e56ab8f768759387959f14>,
+    <https://gitlab.xiph.org/xiph/opus/-/commit/206eeee0ebb3cccb67ff69e5afa5ef6ecf7e43d3>,
     and
     <https://gitlab.xiph.org/xiph/opus/-/commit/516feba5f56fb0682f9c7f727fda4b88e2be99b1>
     have been applied.
