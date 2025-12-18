@@ -134,7 +134,7 @@ static int sample_loss_impl(
   compute_generic_gru_lossgen(&model->lossgen_gru1_input, &model->lossgen_gru1_recurrent, st->gru1_state, tmp, 0);
   compute_generic_gru_lossgen(&model->lossgen_gru2_input, &model->lossgen_gru2_recurrent, st->gru2_state, st->gru1_state, 0);
   compute_generic_dense_lossgen(&model->lossgen_dense_out, &out, st->gru2_state, ACTIVATION_SIGMOID, 0);
-  loss = (float)rand()/RAND_MAX < out;
+  loss = (float)rand()/(float)RAND_MAX < out;
   st->last_loss = loss;
   return loss;
 }
@@ -147,7 +147,7 @@ int sample_loss(
       so we skip them. */
    if (!st->used) {
       int i;
-      for (i=0;i<100;i++) sample_loss_impl(st, percent_loss);
+      for (i=0;i<1000;i++) sample_loss_impl(st, percent_loss);
       st->used = 1;
    }
    return sample_loss_impl(st, percent_loss);
@@ -157,11 +157,7 @@ void lossgen_init(LossGenState *st)
 {
   int ret;
   OPUS_CLEAR(st, 1);
-#ifndef USE_WEIGHTS_FILE
   ret = init_lossgen(&st->model, lossgen_arrays);
-#else
-  ret = 0;
-#endif
   celt_assert(ret == 0);
   (void)ret;
 }

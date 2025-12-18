@@ -54,8 +54,13 @@
 
 #define SAMP_MIN -SAMP_MAX
 
-
+#ifdef ENABLE_QEXT
+#   define S_MUL(a,b) MULT32_32_P31(b, a)
+#   define S_MUL2(a,b) MULT32_32_P31(b, a)
+#else
 #   define S_MUL(a,b) MULT16_32_Q15(b, a)
+#   define S_MUL2(a,b) MULT16_32_Q16(b, a)
+#endif
 
 #   define C_MUL(m,a,b) \
       do{ (m).r = SUB32_ovflw(S_MUL((a).r,(b).r) , S_MUL((a).i,(b).i)); \
@@ -97,13 +102,14 @@
 #if defined(OPUS_ARM_INLINE_EDSP)
 #include "arm/kiss_fft_armv5e.h"
 #endif
-#if defined(MIPSr1_ASM)
+#if defined(__mips)
 #include "mips/kiss_fft_mipsr1.h"
 #endif
 
 #else  /* not FIXED_POINT*/
 
 #   define S_MUL(a,b) ( (a)*(b) )
+#   define S_MUL2(a,b) ( (a)*(b) )
 #define C_MUL(m,a,b) \
     do{ (m).r = (a).r*(b).r - (a).i*(b).i;\
         (m).i = (a).r*(b).i + (a).i*(b).r; }while(0)

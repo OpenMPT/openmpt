@@ -60,6 +60,9 @@
     <ClInclude Include="..\..\..\include\opus\celt\arm\kiss_fft_armv5e.h">
       <Filter>celt\arm</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\opus\celt\arm\mathops_arm.h">
+      <Filter>celt\arm</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\opus\celt\arm\mdct_arm.h">
       <Filter>celt\arm</Filter>
     </ClInclude>
@@ -345,6 +348,9 @@
       <Filter>celt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\mdct.c">
+      <Filter>celt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\opus\celt\mini_kfft.c">
       <Filter>celt</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\opus\celt\modes.c">

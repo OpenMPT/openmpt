@@ -41,8 +41,11 @@ OPUS_EXPORT opus_int64 celt_mips=0;
 extern opus_int64 celt_mips;
 #endif
 
+#define MULT16_16U(a,b) ((opus_uint32)(a)*(opus_uint32)(b))
 #define MULT16_16SU(a,b) ((opus_val32)(opus_val16)(a)*(opus_val32)(opus_uint16)(b))
 #define MULT32_32_Q31(a,b) ADD32(ADD32(SHL32(MULT16_16(SHR32((a),16),SHR((b),16)),1), SHR32(MULT16_16SU(SHR32((a),16),((b)&0x0000ffff)),15)), SHR32(MULT16_16SU(SHR32((b),16),((a)&0x0000ffff)),15))
+#define MULT32_32_P31(a,b) ADD32(SHL32(MULT16_16(SHR((a),16),SHR((b),16)),1), SHR32(128+(opus_int32)(MULT16_16U(((a)&0x0000ffff),((b)&0x0000ffff))>>(16+7)) + SHR32(MULT16_16SU(SHR((a),16),((b)&0x0000ffff)),7) + SHR32(MULT16_16SU(SHR((b),16),((a)&0x0000ffff)),7), 8) )
+#define MULT32_32_Q32(a,b) ADD32(ADD32(MULT16_16(SHR((a),16),SHR((b),16)), SHR(MULT16_16SU(SHR((a),16),((b)&0x0000ffff)),16)), SHR(MULT16_16SU(SHR((b),16),((a)&0x0000ffff)),16))
 
 /** 16x32 multiplication, followed by a 16-bit shift right. Results fits in 32 bits */
 #define MULT16_32_Q16(a,b) ADD32(MULT16_16((a),SHR32((b),16)), SHR32(MULT16_16SU((a),((b)&0x0000ffff)),16))
@@ -50,7 +53,9 @@ extern opus_int64 celt_mips;
 #define MULT16_32_P16(a,b) MULT16_32_PX(a,b,16)
 
 #define QCONST16(x,bits) ((opus_val16)(.5+(x)*(((opus_val32)1)<<(bits))))
-#define QCONST32(x,bits) ((opus_val32)(.5+(x)*(((opus_val32)1)<<(bits))))
+#define QCONST32(x,bits) ((opus_val32)(.5+(x)*(((opus_val64)1)<<(bits))))
+#define GCONST2(x,bits) ((celt_glog)(.5+(x)*(((celt_glog)1)<<(bits))))
+#define GCONST(x) GCONST2((x),DB_SHIFT)
 
 #define VERIFY_SHORT(x) ((x)<=32767&&(x)>=-32768)
 #define VERIFY_INT(x) ((x)<=2147483647LL&&(x)>=-2147483648LL)
@@ -66,6 +71,10 @@ extern opus_int64 celt_mips;
 /* Avoid MSVC warning C4146: unary minus operator applied to unsigned type */
 /** Negate 32-bit value, ignore any overflows */
 #define NEG32_ovflw(a) (celt_mips+=2,(opus_val32)(0-(opus_uint32)(a)))
+/** 32-bit shift left, ignoring overflows */
+#define SHL32_ovflw(a,shift) ((opus_int32)((opus_uint32)(a)<<(shift)))
+/** 32-bit arithmetic shift right with rounding-to-nearest, ignoring overflows */
+#define PSHR32_ovflw(a,shift) (SHR32(ADD32_ovflw(a, (EXTEND32(1)<<(shift)>>1)),shift))
 
 static OPUS_INLINE short NEG16(int x)
 {
@@ -233,6 +242,8 @@ static OPUS_INLINE int SHL32_(opus_int64 a, int shift, char *file, int line)
 
 #define PSHR32(a,shift) (celt_mips--,SHR32(ADD32((a),(((opus_val32)(1)<<((shift))>>1))),shift))
 #define VSHR32(a, shift) (((shift)>0) ? SHR32(a, shift) : SHL32(a, -(shift)))
+
+#define SHR64(a,shift) (celt_mips++,(a) >> (shift))
 
 #define ROUND16(x,a) (celt_mips--,EXTRACT16(PSHR32((x),(a))))
 #define SROUND16(x,a) (celt_mips--,EXTRACT16(SATURATE(PSHR32(x,a), 32767)));

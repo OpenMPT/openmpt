@@ -1,16 +1,19 @@
-libopus library version 1.5.2 (2024-04-12).
+libopus library version 1.6 (2025-12-15).
 The following changes have been made:
+ *  Commits
+    <https://gitlab.xiph.org/xiph/opus/-/commit/ae5f6927893c752b43e56ab8f768759387959f14>,
+    <https://gitlab.xiph.org/xiph/opus/-/commit/206eeee0ebb3cccb67ff69e5afa5ef6ecf7e43d3>,
+    and
+    <https://gitlab.xiph.org/xiph/opus/-/commit/516feba5f56fb0682f9c7f727fda4b88e2be99b1>
+    have been applied.
  *  Obviously, unnecessary folders and files have been removed.
  *  celt/float_cast.h has been modified to compile on ARM64EC.
  *  celt/x86/vq_sse2.c has been modified to check for OPUS_X86_MAY_HAVE_SSE2.
  *  celt/x86/x86_arch_macros.c has been modified to support AVX and AVX2.
  *  A warning in dnn/dred_encoder.c has been silenced.
  *  Performance warning in dnn/nnet.c has been silenced.
- *  Performance warning in dnn/nnet.h has been silenced.
  *  dnn/nnet_avx2.c has been modified to check for
     OPUS_MAY_HAVE_AVX2 || OPUS_PRESUME_AVX2.
- *  dnn/vec_avx.h has been fixed to not rely on AVX or SSSE3 in plain SSE2
-    builds.
  *  silk/float/x86/inner_product_FLP_avx2 has been modified to check for
     OPUS_X86_MAY_HAVE_AVX2.
  *  silk/x86/*sse4_1.c has been modified to check for OPUS_X86_MAY_HAVE_SSE4_1.

@@ -59,21 +59,23 @@
 			"../../include/opus/celt/opus_custom_demo.c",
 			"../../include/opus/src/opus_compare.c",
 			"../../include/opus/src/opus_demo.c",
+			"../../include/opus/src/qext_compare.c",
 			"../../include/opus/src/repacketizer_demo.c",
 		}
 	filter {}
 		defines {
 			"OPUS_BUILD=1",
-			"PACKAGE_VERISON=\"1.5.2\"",
+			"PACKAGE_VERISON=\"1.6\"",
 			"ENABLE_HARDENING=1",
 			"HAVE_STDINT_H=1",
 			"HAVE_STDIO_H=1",
 			"HAVE_STDLIB_H=1",
 			"HAVE_STRING_H=1",
+			"SUPPRESS_PERF_WARNINGS=1",
 			"USE_ALLOCA=1",
 		}
 	filter {}
-		if false then -- NoLACE (OSCE) / LACE (OSCE) / DEEP-PLC (DEEP_PLC || DRED) / DRED (DRED).
+		if false then -- NoLACE (OSCE) / LACE (OSCE) / DEEP-PLC (DEEP_PLC || DRED) / DRED (DRED) / QEXT (Opus HD)
 			filter {}
 				files {
 					"../../include/opus/dnn/*.c",
@@ -83,6 +85,8 @@
 					"ENABLE_DEEP_PLC=1",
 					"ENABLE_DRED=1",
 					"ENABLE_OSCE=1",
+					"ENABLE_OSCE_BWE=1",
+					"ENABLE_QEXT=1",
 				}
 			filter {}
 			filter { "architecture:x86 or x86_64" }
@@ -98,6 +102,8 @@
 				}
 			filter {}
 				excludes {
+					"../../include/opus/dnn/bwe_demo.c",
+					"../../include/opus/dnn/dred_compare.c",
 					"../../include/opus/dnn/dump_data.c",
 					"../../include/opus/dnn/fargan_demo.c",
 					"../../include/opus/dnn/lossgen.c",

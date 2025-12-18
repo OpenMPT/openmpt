@@ -149,13 +149,15 @@ static opus_val32 silk_resampler_down2_hp(
         out32_hp  = ADD32( out32_hp, X );
         S[ 2 ] = ADD32( -in32, X );
 
-        hp_ener += out32_hp*(opus_val64)out32_hp;
+        /* len2 can be up to 480, so we shift by 8 to make it fit. */
+        hp_ener += SHR64(out32_hp*(opus_val64)out32_hp, 8);
         /* Add, convert back to int16 and store to output */
         out[ k ] = HALF32(out32);
     }
 #ifdef FIXED_POINT
-    /* len2 can be up to 480, so we shift by 8 more to make it fit. */
-    hp_ener = hp_ener >> (2*SIG_SHIFT + 8);
+    /* Fitting in 32 bits. */
+    hp_ener = hp_ener >> (2*SIG_SHIFT);
+    if (hp_ener > 2147483647) hp_ener = 2147483647;
 #endif
     return (opus_val32)hp_ener;
 }
@@ -163,7 +165,6 @@ static opus_val32 silk_resampler_down2_hp(
 static opus_val32 downmix_and_resample(downmix_func downmix, const void *_x, opus_val32 *y, opus_val32 S[3], int subframe, int offset, int c1, int c2, int C, int Fs)
 {
    VARDECL(opus_val32, tmp);
-   opus_val32 scale;
    int j;
    opus_val32 ret = 0;
    SAVE_STACK;
@@ -177,20 +178,15 @@ static opus_val32 downmix_and_resample(downmix_func downmix, const void *_x, opu
       subframe = subframe*2/3;
       offset = offset*2/3;
    }
+   else if (Fs != 24000) celt_assert(0);
    ALLOC(tmp, subframe, opus_val32);
 
    downmix(_x, tmp, subframe, offset, c1, c2, C);
-#ifdef FIXED_POINT
-   scale = (1<<SIG_SHIFT);
-#else
-   scale = 1.f/32768;
-#endif
-   if (c2==-2)
-      scale /= C;
-   else if (c2>-1)
-      scale /= 2;
-   for (j=0;j<subframe;j++)
-      tmp[j] *= scale;
+   if ((c2==-2 && C==2) || c2>-1) {
+      for (j=0;j<subframe;j++) {
+         tmp[j] = HALF32(tmp[j]);
+      }
+   }
    if (Fs == 48000)
    {
       ret = silk_resampler_down2_hp(S, y, tmp, subframe);
@@ -211,6 +207,9 @@ static opus_val32 downmix_and_resample(downmix_func downmix, const void *_x, opu
       silk_resampler_down2_hp(S, y, tmp3x, 3*subframe);
    }
    RESTORE_STACK;
+#ifndef FIXED_POINT
+   ret *= 1.f/32768/32768;
+#endif
    return ret;
 }
 
@@ -422,7 +421,7 @@ static const float std_feature_bias[9] = {
 #define SCALE_COMPENS (1.f/((opus_int32)1<<(15+SIG_SHIFT)))
 #define SCALE_ENER(e) ((SCALE_COMPENS*SCALE_COMPENS)*(e))
 #else
-#define SCALE_ENER(e) (e)
+#define SCALE_ENER(e) ((1.f/32768/32768)*e)
 #endif
 
 #ifdef FIXED_POINT

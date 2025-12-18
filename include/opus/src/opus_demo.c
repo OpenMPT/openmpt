@@ -43,7 +43,13 @@
 #include "lossgen.h"
 #endif
 
-#define MAX_PACKET 1500
+#define MAX_PACKET 15000
+
+#ifdef ENABLE_QEXT
+#define MAX_SAMPLING_RATE 96000
+#else
+#define MAX_SAMPLING_RATE 48000
+#endif
 
 #ifdef USE_WEIGHTS_FILE
 # if __unix__
@@ -119,7 +125,7 @@ void print_usage( char* argv[] )
         "<bits per second>  [options] <input> <output>\n", argv[0]);
     fprintf(stderr, "       %s -d <sampling rate (Hz)> <channels (1/2)> "
         "[options] <input> <output>\n\n", argv[0]);
-    fprintf(stderr, "application: voip | audio | restricted-lowdelay\n" );
+    fprintf(stderr, "application: voip | audio | restricted-lowdelay | restricted-silk | restricted-celt\n" );
     fprintf(stderr, "options:\n" );
     fprintf(stderr, "-e                   : only runs the encoder (output the bit-stream)\n" );
     fprintf(stderr, "-d                   : only runs the decoder (reads the bit-stream as input)\n" );
@@ -140,7 +146,25 @@ void print_usage( char* argv[] )
 #endif
     fprintf(stderr, "-lossfile <file>     : simulate packet loss, reading loss from file\n" );
     fprintf(stderr, "-dred <frames>       : add Deep REDundancy (in units of 10-ms frames)\n" );
+    fprintf(stderr, "-enc_loss            : Apply loss on the encoder side (store empty packets)\n" );
+#ifdef ENABLE_OSCE_BWE
+    fprintf(stderr, "-enable_osce_bwe     : enable OSCE bandwidth extension for wideband signals (48 kHz sampling rate only), raises dec_complexity to 4\n");
+#endif
+#ifdef ENABLE_QEXT
+    fprintf(stderr, "-qext                : enable QEXT\n" );
+#endif
 }
+
+#define FORMAT_S16_LE 0
+#define FORMAT_S24_LE 1
+#define FORMAT_F32_LE 2
+
+static const int format_size[3] = {2, 3, 4};
+
+typedef union {
+    opus_int32 i;
+    float f;
+} float_bits;
 
 static void int_to_char(opus_uint32 i, unsigned char ch[4])
 {
@@ -190,6 +214,29 @@ static const int silk16_test[][4] = {
       {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND, 960*2, 2},
       {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND, 960,   2},
       {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND, 480,   2}
+};
+
+static const int silk_bw_switch_test[][4] = {
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND,       960, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_NARROWBAND,     960, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_MEDIUMBAND,     960, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_SUPERWIDEBAND,  960, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_FULLBAND,       960, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND,       960, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_NARROWBAND,     960, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_MEDIUMBAND,     960, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_SUPERWIDEBAND,  960, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_FULLBAND,       960, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND,       480, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_NARROWBAND,     480, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_MEDIUMBAND,     480, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_SUPERWIDEBAND,  480, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_FULLBAND,       480, 1},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_WIDEBAND,       480, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_NARROWBAND,     480, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_MEDIUMBAND,     480, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_SUPERWIDEBAND,  480, 2},
+    {MODE_SILK_ONLY, OPUS_BANDWIDTH_FULLBAND,       480, 2}
 };
 
 static const int hybrid24_test[][4] = {
@@ -250,17 +297,17 @@ static const int celt_test[][4] = {
 };
 
 static const int celt_hq_test[][4] = {
-      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      960, 2},
-      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      480, 2},
-      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      240, 2},
       {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      120, 2},
+      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      240, 2},
+      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      480, 2},
+      {MODE_CELT_ONLY, OPUS_BANDWIDTH_FULLBAND,      960, 2},
 };
 
 #if 0 /* This is a hack that replaces the normal encoder/decoder with the multistream version */
 #define OpusEncoder OpusMSEncoder
 #define OpusDecoder OpusMSDecoder
-#define opus_encode opus_multistream_encode
-#define opus_decode opus_multistream_decode
+#define opus_encode24 opus_multistream_encode24
+#define opus_decode24 opus_multistream_decode24
 #define opus_encoder_ctl opus_multistream_encoder_ctl
 #define opus_decoder_ctl opus_multistream_decoder_ctl
 #define opus_encoder_create ms_opus_encoder_create
@@ -294,7 +341,7 @@ static OpusDecoder *ms_opus_decoder_create(opus_int32 Fs, int channels, int *err
 #define PACKET_LOSS_PERC_MAX 50
 #define PACKET_LOSS_PERC_STEP 5
 
-#define CBR_BITRATE_LIMIT 8000
+#define CBR_BITRATE_LIMIT 80000
 
 #define NUM_BITRATES 102
 static int bitrates[NUM_BITRATES] = {
@@ -380,9 +427,10 @@ int main(int argc, char *argv[])
     opus_int32 count=0, count_act=0;
     int k;
     opus_int32 skip=0;
+    int format=FORMAT_S16_LE;
     int stop=0;
-    short *in=NULL;
-    short *out=NULL;
+    opus_int32 *in=NULL;
+    opus_int32 *out=NULL;
     int application=OPUS_APPLICATION_AUDIO;
     double bits=0.0, bits_max=0.0, bits_act=0.0, bits2=0.0, nrg;
     double tot_samples=0;
@@ -393,7 +441,7 @@ int main(int argc, char *argv[])
     opus_uint32 enc_final_range;
     opus_uint32 dec_final_range;
     int encode_only=0, decode_only=0;
-    int max_frame_size = 48000*2;
+    int max_frame_size = MAX_SAMPLING_RATE*2;
     size_t num_read;
     int curr_read=0;
     int sweep_bps = 0;
@@ -413,9 +461,17 @@ int main(int argc, char *argv[])
     int lost_count=0;
     FILE *packet_loss_file=NULL;
     int dred_duration=0;
+    int ignore_extensions=0;
+    int encoder_loss=0;
+#ifdef ENABLE_QEXT
+    int enable_qext=0;
+#endif
 #ifdef ENABLE_OSCE_TRAINING_DATA
     int silk_random_switching = 0;
     int silk_frame_counter = 0;
+#endif
+#if defined(ENABLE_OSCE) && defined(ENABLE_OSCE_BWE)
+    int enable_osce_bwe = 0;
 #endif
 #ifdef USE_WEIGHTS_FILE
     int blob_len;
@@ -455,6 +511,10 @@ int main(int argc, char *argv[])
           application = OPUS_APPLICATION_VOIP;
        else if (strcmp(argv[args], "restricted-lowdelay")==0)
           application = OPUS_APPLICATION_RESTRICTED_LOWDELAY;
+       else if (strcmp(argv[args], "restricted-silk")==0)
+          application = OPUS_APPLICATION_RESTRICTED_SILK;
+       else if (strcmp(argv[args], "restricted-celt")==0)
+          application = OPUS_APPLICATION_RESTRICTED_CELT;
        else if (strcmp(argv[args], "audio")!=0) {
           fprintf(stderr, "unknown application: %s\n", argv[args]);
           print_usage(argv);
@@ -467,10 +527,18 @@ int main(int argc, char *argv[])
 
     if (sampling_rate != 8000 && sampling_rate != 12000
      && sampling_rate != 16000 && sampling_rate != 24000
-     && sampling_rate != 48000)
+     && sampling_rate != 48000
+#ifdef ENABLE_QEXT
+     && sampling_rate != 96000
+#endif
+     )
     {
-        fprintf(stderr, "Supported sampling rates are 8000, 12000, "
-                "16000, 24000 and 48000.\n");
+        fprintf(stderr, "Supported sampling rates are 8000, 12000, 16000, 24000"
+#ifdef ENABLE_QEXT
+              ", 48000 and 96000.\n");
+#else
+              " and 48000.\n");
+#endif
         goto failure;
     }
     frame_size = sampling_rate/50;
@@ -564,6 +632,15 @@ int main(int argc, char *argv[])
             check_decoder_option(encode_only, "-dec_complexity");
             dec_complexity = atoi( argv[ args + 1 ] );
             args += 2;
+        } else if( strcmp( argv[ args ], "-16" ) == 0 ) {
+           format = FORMAT_S16_LE;
+           args++;
+        } else if( strcmp( argv[ args ], "-24" ) == 0 ) {
+           format = FORMAT_S24_LE;
+           args++;
+        } else if( strcmp( argv[ args ], "-f32" ) == 0 ) {
+           format = FORMAT_F32_LE;
+           args++;
         } else if( strcmp( argv[ args ], "-inbandfec" ) == 0 ) {
             use_inbandfec = 1;
             args++;
@@ -602,6 +679,10 @@ int main(int argc, char *argv[])
         } else if( strcmp( argv[ args ], "-dred" ) == 0 ) {
             dred_duration = atoi( argv[ args + 1 ] );
             args += 2;
+        } else if( strcmp( argv[ args ], "-enc_loss") == 0 ) {
+            check_encoder_option(decode_only, "-enc_loss");
+            encoder_loss = 1;
+            args++;
         } else if( strcmp( argv[ args ], "-sweep" ) == 0 ) {
             check_encoder_option(decode_only, "-sweep");
             sweep_bps = atoi( argv[ args + 1 ] );
@@ -633,6 +714,11 @@ int main(int argc, char *argv[])
             mode_list = silk16_test;
             nb_modes_in_list = 8;
             args++;
+        } else if( strcmp( argv[ args ], "-silk_bw_switch_test" ) == 0 ) {
+            check_encoder_option(decode_only, "-silk_bw_switch_test");
+            mode_list = silk_bw_switch_test;
+            nb_modes_in_list = 20;
+            args++;
         } else if( strcmp( argv[ args ], "-hybrid24k_test" ) == 0 ) {
             check_encoder_option(decode_only, "-hybrid24k_test");
             mode_list = hybrid24_test;
@@ -653,11 +739,26 @@ int main(int argc, char *argv[])
             mode_list = celt_hq_test;
             nb_modes_in_list = 4;
             args++;
+        } else if( strcmp( argv[ args ], "-ignore_extensions" ) == 0 ) {
+            check_decoder_option(encode_only, "-ignore_extensions");
+            ignore_extensions = 1;
+            args++;
+#ifdef ENABLE_QEXT
+        } else if( strcmp( argv[ args ], "-qext" ) == 0 ) {
+            check_encoder_option(decode_only, "-qext");
+            enable_qext = 1;
+            args++;
+#endif
 #ifdef ENABLE_OSCE_TRAINING_DATA
         } else if( strcmp( argv[ args ], "-silk_random_switching" ) == 0 ){
             silk_random_switching = atoi( argv[ args + 1 ] );
             printf("switching encoding parameters every %dth frame\n", silk_random_switching);
             args += 2;
+#endif
+#if defined(ENABLE_OSCE) && defined(ENABLE_OSCE_BWE)
+        } else if( strcmp( argv[ args ], "-enable_osce_bwe" ) == 0 ) {
+            enable_osce_bwe = 1;
+            args++;
 #endif
         } else {
             printf( "Error: unrecognized setting: %s\n\n", argv[ args ] );
@@ -686,11 +787,14 @@ int main(int argc, char *argv[])
     if (mode_list)
     {
        int size;
+       int sample_size=2;
+       if (format == FORMAT_S24_LE) sample_size=3;
+       else if (format == FORMAT_F32_LE) sample_size=4;
        fseek(fin, 0, SEEK_END);
        size = ftell(fin);
        fprintf(stderr, "File size is %d bytes\n", size);
        fseek(fin, 0, SEEK_SET);
-       mode_switch_time = size/sizeof(short)/channels/nb_modes_in_list;
+       mode_switch_time = size/sample_size/channels/nb_modes_in_list;
        fprintf(stderr, "Switching mode every %d samples\n", mode_switch_time);
     }
 
@@ -721,12 +825,19 @@ int main(int argc, char *argv[])
        opus_encoder_ctl(enc, OPUS_SET_PACKET_LOSS_PERC(packet_loss_perc));
 
        opus_encoder_ctl(enc, OPUS_GET_LOOKAHEAD(&skip));
-       opus_encoder_ctl(enc, OPUS_SET_LSB_DEPTH(16));
+       opus_encoder_ctl(enc, OPUS_SET_LSB_DEPTH((format == FORMAT_S16_LE) ? 16 : 24));
        opus_encoder_ctl(enc, OPUS_SET_EXPERT_FRAME_DURATION(variable_duration));
        if (dred_duration > 0)
        {
           opus_encoder_ctl(enc, OPUS_SET_DRED_DURATION(dred_duration));
        }
+#ifdef ENABLE_OSCE_TRAINING_DATA
+       opus_encoder_ctl(enc, OPUS_SET_FORCE_MODE(MODE_SILK_ONLY));
+       srand(0);
+#endif
+#ifdef ENABLE_QEXT
+       opus_encoder_ctl(enc, OPUS_SET_QEXT(enable_qext));
+#endif
     }
     if (!encode_only)
     {
@@ -736,7 +847,14 @@ int main(int argc, char *argv[])
           fprintf(stderr, "Cannot create decoder: %s\n", opus_strerror(err));
           goto failure;
        }
+#ifdef ENABLE_OSCE_BWE
+       if (enable_osce_bwe) {
+            opus_decoder_ctl(dec, OPUS_SET_OSCE_BWE(1));
+            if (dec_complexity < 4) {dec_complexity = 4;}
+       }
+#endif
        opus_decoder_ctl(dec, OPUS_SET_COMPLEXITY(dec_complexity));
+       opus_decoder_ctl(dec, OPUS_SET_IGNORE_EXTENSIONS(ignore_extensions));
     }
     switch(bandwidth)
     {
@@ -772,10 +890,10 @@ int main(int argc, char *argv[])
                        (long)sampling_rate, bitrate_bps*0.001,
                        bandwidth_string, frame_size);
 
-    in = (short*)malloc(max_frame_size*channels*sizeof(short));
-    out = (short*)malloc(max_frame_size*channels*sizeof(short));
+    in = (opus_int32*)malloc(max_frame_size*channels*sizeof(opus_int32));
+    out = (opus_int32*)malloc(max_frame_size*channels*sizeof(opus_int32));
     /* We need to allocate for 16-bit PCM data, but we store it as unsigned char. */
-    fbytes = (unsigned char*)malloc(max_frame_size*channels*sizeof(short));
+    fbytes = (unsigned char*)malloc(max_frame_size*channels*sizeof(opus_int32));
     data = (unsigned char*)calloc(max_payload_bytes,sizeof(unsigned char));
     if(delayed_decision)
     {
@@ -798,7 +916,7 @@ int main(int argc, char *argv[])
        else
           variable_duration = OPUS_FRAMESIZE_120_MS;
        opus_encoder_ctl(enc, OPUS_SET_EXPERT_FRAME_DURATION(variable_duration));
-       frame_size = 2*48000;
+       frame_size = 2*sampling_rate;
     }
     dred_dec = opus_dred_decoder_create(&err);
     dred = opus_dred_alloc(&err);
@@ -870,7 +988,7 @@ int main(int argc, char *argv[])
                 opus_encoder_ctl(enc, OPUS_SET_BANDWIDTH(mode_list[curr_mode][1]));
                 opus_encoder_ctl(enc, OPUS_SET_FORCE_MODE(mode_list[curr_mode][0]));
                 opus_encoder_ctl(enc, OPUS_SET_FORCE_CHANNELS(mode_list[curr_mode][3]));
-                frame_size = mode_list[curr_mode][2];
+                frame_size = mode_list[curr_mode][2]*sampling_rate/48000;
             }
 #ifdef ENABLE_OSCE_TRAINING_DATA
             if (silk_random_switching)
@@ -881,15 +999,32 @@ int main(int argc, char *argv[])
                 }
             }
 #endif
-            num_read = fread(fbytes, sizeof(short)*channels, frame_size-remaining, fin);
+            num_read = fread(fbytes, format_size[format]*channels, frame_size-remaining, fin);
             curr_read = (int)num_read;
             tot_in += curr_read;
-            for(i=0;i<curr_read*channels;i++)
-            {
-                opus_int32 s;
-                s=fbytes[2*i+1]<<8|fbytes[2*i];
-                s=((s&0xFFFF)^0x8000)-0x8000;
-                in[i+remaining*channels]=s;
+            if (format == FORMAT_S16_LE) {
+               for(i=0;i<frame_size*channels;i++)
+               {
+                  opus_int32 s;
+                  s=fbytes[2*i+1]<<8|fbytes[2*i];
+                  s=((s&0xFFFF)^0x8000)-0x8000;
+                  in[i]=s*256;
+               }
+            } else if (format == FORMAT_S24_LE) {
+               for(i=0;i<frame_size*channels;i++)
+               {
+                  opus_int32 s;
+                  s=fbytes[3*i+2]<<16|fbytes[3*i+1]<<8|fbytes[3*i];
+                  s=((s&0xFFFFFF)^0x800000)-0x800000;
+                  in[i]=s;
+               }
+            } else if (format == FORMAT_F32_LE) {
+               for(i=0;i<frame_size*channels;i++)
+               {
+                  float_bits s;
+                  s.i=(opus_uint32)fbytes[4*i+3]<<24|fbytes[4*i+2]<<16|fbytes[4*i+1]<<8|fbytes[4*i];
+                  in[i]=(int)floor(.5 + s.f*8388608);
+               }
             }
             if (curr_read+remaining < frame_size)
             {
@@ -898,7 +1033,7 @@ int main(int argc, char *argv[])
                 if (encode_only || decode_only)
                    stop = 1;
             }
-            len = opus_encode(enc, in, frame_size, data, max_payload_bytes);
+            len = opus_encode24(enc, in, frame_size, data, max_payload_bytes);
             if (len < 0)
             {
                 fprintf (stderr, "opus_encode() returned %d\n", len);
@@ -944,9 +1079,26 @@ int main(int argc, char *argv[])
            len = new_len;
         }
 #endif
+        if (encode_only && !encoder_loss) {
+            lost = 0;
+        } else if (packet_loss_file != NULL) {
+            if ( fscanf(packet_loss_file, "%d", &lost) != 1) {
+                lost = 0;
+            }
+#ifdef ENABLE_LOSSGEN
+        } else if (lossgen_perc >= 0) {
+            lost = sample_loss(&lossgen, lossgen_perc*.01f);
+#endif
+        } else {
+            lost = (packet_loss_perc>0) && (rand()%100 < packet_loss_perc);
+        }
         if (encode_only)
         {
             unsigned char int_field[4];
+            if (lost) {
+               enc_final_range = 0;
+               len = 0;
+            }
             int_to_char(len, int_field);
             if (fwrite(int_field, 1, 4, fout) != 4) {
                fprintf(stderr, "Error writing.\n");
@@ -967,17 +1119,6 @@ int main(int argc, char *argv[])
             int run_decoder;
             int dred_input=0;
             int dred_end=0;
-            if (packet_loss_file != NULL) {
-                if ( fscanf(packet_loss_file, "%d", &lost) != 1) {
-                    lost = 0;
-                }
-#ifdef ENABLE_LOSSGEN
-            } else if (lossgen_perc >= 0) {
-               lost = sample_loss(&lossgen, lossgen_perc*.01f);
-#endif
-            } else {
-              lost = (packet_loss_perc>0) && (rand()%100 < packet_loss_perc);
-            }
             if (len == 0) lost = 1;
             if (lost)
             {
@@ -993,7 +1134,7 @@ int main(int argc, char *argv[])
                 opus_decoder_ctl(dec, OPUS_GET_LAST_PACKET_DURATION(&output_samples));
                 dred_input = lost_count*output_samples;
                 /* Only decode the amount we need to fill in the gap. */
-                ret = opus_dred_parse(dred_dec, dred, data, len, IMIN(48000, IMAX(0, dred_input)), sampling_rate, &dred_end, 0);
+                ret = opus_dred_parse(dred_dec, dred, data, len, IMIN(sampling_rate, IMAX(0, dred_input)), sampling_rate, &dred_end, 0);
                 dred_input = ret > 0 ? ret : 0;
             }
             /* FIXME: Figure out how to trigger the decoder when the last packet of the file is lost. */
@@ -1001,16 +1142,16 @@ int main(int argc, char *argv[])
                 opus_int32 output_samples=0;
                 if (fr == lost_count-1 && opus_packet_has_lbrr(data, len)) {
                    opus_decoder_ctl(dec, OPUS_GET_LAST_PACKET_DURATION(&output_samples));
-                   output_samples = opus_decode(dec, data, len, out, output_samples, 1);
+                   output_samples = opus_decode24(dec, data, len, out, output_samples, 1);
                 } else if (fr < lost_count) {
                    opus_decoder_ctl(dec, OPUS_GET_LAST_PACKET_DURATION(&output_samples));
                    if (dred_input > 0)
-                      output_samples = opus_decoder_dred_decode(dec, dred, (lost_count-fr)*output_samples, out, output_samples);
+                      output_samples = opus_decoder_dred_decode24(dec, dred, (lost_count-fr)*output_samples, out, output_samples);
                    else
-                      output_samples = opus_decode(dec, NULL, 0, out, output_samples, 0);
+                      output_samples = opus_decode24(dec, NULL, 0, out, output_samples, 0);
                 } else {
                    output_samples = max_frame_size;
-                   output_samples = opus_decode(dec, data, len, out, output_samples, 0);
+                   output_samples = opus_decode24(dec, data, len, out, output_samples, 0);
                 }
                 if (output_samples>0)
                 {
@@ -1021,14 +1162,40 @@ int main(int argc, char *argv[])
                     }
                     if (output_samples>skip) {
                        int i;
-                       for(i=0;i<(output_samples-skip)*channels;i++)
-                       {
-                          short s;
-                          s=out[i+(skip*channels)];
-                          fbytes[2*i]=s&0xFF;
-                          fbytes[2*i+1]=(s>>8)&0xFF;
+                       if (format == FORMAT_S16_LE) {
+                          for(i=0;i<(output_samples-skip)*channels;i++)
+                          {
+                             opus_int32 s;
+                             s=out[i+(skip*channels)];
+                             if (s > 0x007fff00) s = 0x007fff00;
+                             if (s < -0x007fff00) s = -0x007fff00;
+                             s=(s+128)>>8;
+                             fbytes[2*i]=s&0xFF;
+                             fbytes[2*i+1]=(s>>8)&0xFF;
+                          }
+                       } else if (format == FORMAT_S24_LE) {
+                          for(i=0;i<(output_samples-skip)*channels;i++)
+                          {
+                             opus_int32 s;
+                             s=out[i+(skip*channels)];
+                             if (s > 0x007fffff) s = 0x007fffff;
+                             if (s < -0x007fffff) s = -0x007fffff;
+                             fbytes[3*i]=s&0xFF;
+                             fbytes[3*i+1]=(s>>8)&0xFF;
+                             fbytes[3*i+2]=(s>>16)&0xFF;
+                          }
+                       } else if (format == FORMAT_F32_LE) {
+                          for(i=0;i<(output_samples-skip)*channels;i++)
+                          {
+                             float_bits s;
+                             s.f=out[i+(skip*channels)]*(1.f/8388608.f);
+                             fbytes[4*i]=s.i&0xFF;
+                             fbytes[4*i+1]=(s.i>>8)&0xFF;
+                             fbytes[4*i+2]=(s.i>>16)&0xFF;
+                             fbytes[4*i+3]=(s.i>>24)&0xFF;
+                          }
                        }
-                       if (fwrite(fbytes, sizeof(short)*channels, output_samples-skip, fout) != (unsigned)(output_samples-skip)){
+                       if (fwrite(fbytes, format_size[format]*channels, output_samples-skip, fout) != (unsigned)(output_samples-skip)){
                           fprintf(stderr, "Error writing.\n");
                           goto failure;
                        }
@@ -1066,7 +1233,7 @@ int main(int argc, char *argv[])
             /* count bits */
             bits += len*8;
             bits_max = ( len*8 > bits_max ) ? len*8 : bits_max;
-            bits2 += len*len*64;
+            bits2 += len*(double)len*64;
             if (!decode_only)
             {
                 nrg = 0.0;
