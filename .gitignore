@@ -552,6 +552,7 @@
 /include/opus/tests
 /include/opus/celt/meson.build
 /include/opus/celt/tests
+/include/opus/celt/arm/meson.build
 /include/opus/dnn/README.md
 /include/opus/dnn/meson.build
 /include/opus/include/meson.build
