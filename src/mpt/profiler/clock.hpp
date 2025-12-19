@@ -24,7 +24,7 @@ namespace profiler {
 
 
 //                                  performance precision  resolution monotonic walltime coreid
-// 
+//
 // rdtsc                                 +++    +          +++ 1clk   -         -        -      TSC          relaxed
 // sfence;rdtsc                          +++    +          +++ 1clk   -         -        -      TSC+SSE      consume
 // lfence;rdtsc                          ++     ++         +++ 1clk   -         -        -      TSC+SSE2     aquire
@@ -35,40 +35,40 @@ namespace profiler {
 // lfence;rdtscp                         ++     ++         +++ 1clk   ~         -        +      SSE2+RDTSCP  aquire
 // lfence;rdtscp + mfence;lfence;rdtscp  ++     +++        +++ 1clk   ~         -        +      SSE2+RDTSCP  aquire+release
 // cpuid;rdtscp                          -      -          +++ 1clk   ~         -        +      CPUID+RDTSCP seq_cst
-// 
+//
 // QueryPerformanceCounter               -      +   1us    ++  1us    ~         -
-// 
+//
 // clock_gettime(CLOCK_MONOTONIC)        ++     +++ ?      +   1ns    +         -
 // clock_gettime(CLOCK_MONOTONIC_COARSE) +++    ++  ?      +   1ns    +         -
 // timtGetTime                           +      +   1ms    -   1ms    +         -
 // GetTickCount64                        ++     -   15ms   -   1ms    +         -
-// 
+//
 // clock_gettime(CLOCK_REALTIME)         ++     +++ ?      +   1ns    -         +
 // clock_gettime(CLOCK_REALTIME_COARSE)  +++    ++  ?      +   1ns    -         +
 // gettimeofday                          +      ++  ?      ++  1us    -         +
 // GetSystemTimeAsFileTime               +      +   1us    +++ 100ns  -         +
 // GetSystemTimePreciseAsFileTime        -      +++ 100ns  +++ 100ns  -         +
 // std::time                             +      -   1s     --  1s     -         +
-// 
+//
 // std::chrono::system_clock             ?      -          ?          -         +
 // std::chrono::steady_clock             ?      -          ?          +         -
 // std::chrono::high_resolution_clock    ?      +          ?          -         -
-// 
+//
 // MSVC
 // std::chrono::system_clock          GetSystemTimePreciseAsFileTime
 // std::chrono::steady_clock          QueryPerformanceCounter
 // std::chrono::high_resolution_clock steady_clock
-// 
+//
 // Clang-Windows
 // std::chrono::system_clock          GetSystemTimePreciseAsFileTime / GetSystemTimeAsFileTime
 // std::chrono::steady_clock          QueryPerformanceCounter
 // std::chrono::high_resolution_clock steady_clock / system_clock
-// 
+//
 // Clang-Linux
 // std::chrono::system_clock          clock_gettime(CLOCK_REALTIME) / gettimeofday
 // std::chrono::steady_clock          clock_gettime(CLOCK_MONOTONIC)
 // std::chrono::high_resolution_clock steady_clock / system_clock
-// 
+//
 // GCC
 // std::chrono::system_clock          clock_gettime(CLOCK_REALTIME) / gettimeofday / std::time
 // std::chrono::steady_clock          clock_gettime(CLOCK_MONOTONIC) / system_clock

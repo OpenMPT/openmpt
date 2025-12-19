@@ -104,10 +104,9 @@ struct measurement_base {
 		return;
 	}
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE constexpr measurement_base() noexcept
-	: wallclock(std::chrono::system_clock::time_point{})
-	, perfclock(T{})
-	, valid(false)
-	{}
+		: wallclock(std::chrono::system_clock::time_point{})
+		, perfclock(T{})
+		, valid(false) { }
 };
 template <typename T>
 struct alignas(cacheline_size_max) data_base {
@@ -123,9 +122,9 @@ struct alignas(cacheline_size_max) data_base {
 template <typename Clock>
 class frequency_estimator {
 private:
-	#if defined(MPT_ARCH_X86_CX8)
-		static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
-	#endif
+#if defined(MPT_ARCH_X86_CX8)
+	static_assert(std::atomic<mpt::somefloat64>::is_always_lock_free);
+#endif
 	using measurement = measurement_base<typename Clock::rep>;
 	using data = data_base<typename Clock::rep>;
 	inline static data g_data{};

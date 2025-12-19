@@ -49,7 +49,7 @@ namespace clock {
 
 
 
-#if defined(MPT_ARCH_X86_TSC) 
+#if defined(MPT_ARCH_X86_TSC)
 
 
 
@@ -73,6 +73,7 @@ struct tsc {
 		}
 		return static_cast<double>(frequency);
 	}
+	// clang-format off
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw([[maybe_unused]] std::memory_order order = std::memory_order_relaxed, uint32 * core_id = nullptr) noexcept {
 		std::atomic_signal_fence(order);
 		#if defined(MPT_ARCH_X86_RDTSCP) && defined(MPT_ARCH_INTRINSICS_X86_RDTSCP)
@@ -156,6 +157,7 @@ struct tsc {
 			return 0xffff'ffff'ffff'ffffull;
 		#endif
 	}
+	// clang-format on
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw_enter(std::memory_order order = std::memory_order_relaxed, uint32 * core_id = nullptr) noexcept {
 		if (order == std::memory_order_acq_rel) {
 			order = std::memory_order_acquire;
@@ -173,7 +175,7 @@ struct tsc {
 #endif
 };
 
-#endif // MPT_ARCH_X86_TSC 
+#endif // MPT_ARCH_X86_TSC
 
 
 
@@ -201,18 +203,18 @@ struct tsc_runtime {
 		return static_cast<double>(frequency);
 	}
 
-	inline static rep(* rdtsc_relaxed)() noexcept = nullptr;
-	inline static rep(* rdtsc_consume)() noexcept = nullptr;
-	inline static rep(* rdtsc_acquire)() noexcept = nullptr;
-	inline static rep(* rdtsc_release)() noexcept = nullptr;
-	inline static rep(* rdtsc_acq_rel)() noexcept = nullptr;
-	inline static rep(* rdtsc_seq_cst)() noexcept = nullptr;
-	inline static rep(* rdtscp_relaxed)(uint32 * core_id) noexcept = nullptr;
-	inline static rep(* rdtscp_consume)(uint32 * core_id) noexcept = nullptr;
-	inline static rep(* rdtscp_acquire)(uint32 * core_id) noexcept = nullptr;
-	inline static rep(* rdtscp_release)(uint32 * core_id) noexcept = nullptr;
-	inline static rep(* rdtscp_acq_rel)(uint32 * core_id) noexcept = nullptr;
-	inline static rep(* rdtscp_seq_cst)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtsc_relaxed)() noexcept = nullptr;
+	inline static rep (*rdtsc_consume)() noexcept = nullptr;
+	inline static rep (*rdtsc_acquire)() noexcept = nullptr;
+	inline static rep (*rdtsc_release)() noexcept = nullptr;
+	inline static rep (*rdtsc_acq_rel)() noexcept = nullptr;
+	inline static rep (*rdtsc_seq_cst)() noexcept = nullptr;
+	inline static rep (*rdtscp_relaxed)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtscp_consume)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtscp_acquire)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtscp_release)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtscp_acq_rel)(uint32 * core_id) noexcept = nullptr;
+	inline static rep (*rdtscp_seq_cst)(uint32 * core_id) noexcept = nullptr;
 
 	static rep rdtsc_relaxed_dummy() noexcept {
 		return 0xffff'ffff'ffff'ffffull;
@@ -385,7 +387,7 @@ struct tsc_runtime {
 
 		rdtsc_relaxed = &rdtsc_relaxed_dummy;
 		rdtscp_relaxed = &rdtscp_relaxed_dummy;
-		
+
 #if defined(MPT_ARCH_INTRINSICS_X86_TSC)
 		if (cpu_info.has_features(mpt::arch::current::feature::tsc)) {
 			mpt::arch::feature_fence_guard arch_feature_guard;
@@ -501,7 +503,6 @@ struct tsc_runtime {
 		if (!rdtscp_seq_cst) {
 			rdtscp_seq_cst = rdtscp_acq_rel;
 		}
-
 	}
 
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static rep now_raw([[maybe_unused]] std::memory_order order = std::memory_order_relaxed, uint32 * core_id = nullptr) noexcept {
@@ -570,7 +571,6 @@ struct tsc_runtime {
 #if !defined(MPT_LIBCXX_QUIRK_NO_CHRONO)
 	//[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static time_point now() noexcept;
 #endif
-
 };
 
 
