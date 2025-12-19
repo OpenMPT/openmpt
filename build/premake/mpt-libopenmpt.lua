@@ -63,6 +63,8 @@ include_dependency "ext-zlib.lua"
 		"../../src/mpt/library/**.hpp",
 		"../../src/mpt/main/**.cpp",
 		"../../src/mpt/main/**.hpp",
+		"../../src/mpt/profiler/**.cpp",
+		"../../src/mpt/profiler/**.hpp",
 		"../../src/mpt/terminal/**.cpp",
 		"../../src/mpt/terminal/**.hpp",
 		"../../src/mpt/test/**.cpp",

@@ -55,6 +55,8 @@
 		"../../src/mpt/library/**.hpp",
 		"../../src/mpt/main/**.cpp",
 		"../../src/mpt/main/**.hpp",
+		"../../src/mpt/profiler/**.cpp",
+		"../../src/mpt/profiler/**.hpp",
 		"../../src/mpt/test/**.cpp",
 		"../../src/mpt/test/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",

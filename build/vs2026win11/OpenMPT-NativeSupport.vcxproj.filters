@@ -178,6 +178,9 @@
     <Filter Include="src\mpt\path">
       <UniqueIdentifier>{4984D703-35E7-66A8-DE6C-9F5ECAAE322B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\profiler">
+      <UniqueIdentifier>{1FFA2D82-0BF3-4CD4-3425-3259207D2CE0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\random">
       <UniqueIdentifier>{3DBF705C-298D-6462-1221-D588FE8D40C7}</UniqueIdentifier>
     </Filter>
@@ -989,6 +992,33 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\path\path.hpp">
       <Filter>src\mpt\path</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_base.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_get_tick_count.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_query_performance_counter.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_std_chrono.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_system.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\clock_tsc.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\frequency.hpp">
+      <Filter>src\mpt\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\profiler\profiler.hpp">
+      <Filter>src\mpt\profiler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\random\any_engine.hpp">
       <Filter>src\mpt\random</Filter>

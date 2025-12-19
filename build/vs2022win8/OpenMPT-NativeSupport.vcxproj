@@ -1235,6 +1235,15 @@
     <ClInclude Include="..\..\src\mpt\path\os_path.hpp" />
     <ClInclude Include="..\..\src\mpt\path\os_path_long.hpp" />
     <ClInclude Include="..\..\src\mpt\path\path.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_base.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_get_tick_count.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_query_performance_counter.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_std_chrono.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_system.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\clock_tsc.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\frequency.hpp" />
+    <ClInclude Include="..\..\src\mpt\profiler\profiler.hpp" />
     <ClInclude Include="..\..\src\mpt\random\any_engine.hpp" />
     <ClInclude Include="..\..\src\mpt\random\crand.hpp" />
     <ClInclude Include="..\..\src\mpt\random\default_engines.hpp" />

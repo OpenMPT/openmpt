@@ -138,6 +138,7 @@ svn export ./src/mpt/out_of_memory                    bin/dist-autotools/src/mpt
 svn export ./src/mpt/osinfo                           bin/dist-autotools/src/mpt/osinfo
 svn export ./src/mpt/parse                            bin/dist-autotools/src/mpt/parse
 svn export ./src/mpt/path                             bin/dist-autotools/src/mpt/path
+#svn export ./src/mpt/profiler                         bin/dist-autotools/src/mpt/profiler
 svn export ./src/mpt/random                           bin/dist-autotools/src/mpt/random
 svn export ./src/mpt/string                           bin/dist-autotools/src/mpt/string
 svn export ./src/mpt/string_transcode                 bin/dist-autotools/src/mpt/string_transcode
@@ -218,6 +219,7 @@ cp -r ./src/mpt/out_of_memory                         bin/dist-autotools/src/mpt
 cp -r ./src/mpt/osinfo                                bin/dist-autotools/src/mpt/osinfo
 cp -r ./src/mpt/parse                                 bin/dist-autotools/src/mpt/parse
 cp -r ./src/mpt/path                                  bin/dist-autotools/src/mpt/path
+#cp -r ./src/mpt/profiler                              bin/dist-autotools/src/mpt/profiler
 cp -r ./src/mpt/random                                bin/dist-autotools/src/mpt/random
 cp -r ./src/mpt/string                                bin/dist-autotools/src/mpt/string
 cp -r ./src/mpt/string_transcode                      bin/dist-autotools/src/mpt/string_transcode

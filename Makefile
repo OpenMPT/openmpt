@@ -2166,6 +2166,7 @@ bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION).makefile.tar: b
 	svn export ./src/mpt/osinfo                   bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo
 	svn export ./src/mpt/parse                    bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/parse
 	svn export ./src/mpt/path                     bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/path
+	#svn export ./src/mpt/profiler                 bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/profiler
 	svn export ./src/mpt/random                   bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random
 	svn export ./src/mpt/string                   bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string
 	svn export ./src/mpt/string_transcode         bin/$(FLAVOUR_DIR)dist-tar/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_transcode
@@ -2274,6 +2275,7 @@ bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION).msvc.zip: bin/$
 	svn export ./src/mpt/osinfo                   bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/osinfo                   --native-eol CRLF
 	svn export ./src/mpt/parse                    bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/parse                    --native-eol CRLF
 	svn export ./src/mpt/path                     bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/path                     --native-eol CRLF
+	#svn export ./src/mpt/profiler                 bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/profiler                 --native-eol CRLF
 	svn export ./src/mpt/random                   bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/random                   --native-eol CRLF
 	svn export ./src/mpt/string                   bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string                   --native-eol CRLF
 	svn export ./src/mpt/string_transcode         bin/$(FLAVOUR_DIR)dist-zip/libopenmpt-$(DIST_LIBOPENMPT_VERSION)/src/mpt/string_transcode         --native-eol CRLF
