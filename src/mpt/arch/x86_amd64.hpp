@@ -549,7 +549,7 @@ public:
 
 #if MPT_COMPILER_MSVC || MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
-	[[nodiscard]] static cpuid_result cpuid(uint32 function) noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static cpuid_result cpuid(uint32 function) noexcept {
 
 #if MPT_COMPILER_MSVC
 
@@ -599,7 +599,7 @@ public:
 		result.d = d;
 		return result;
 
-#elif 0
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 		cpuid_result result;
 		unsigned int a{};
@@ -625,7 +625,7 @@ public:
 #endif // MPT_COMPILER
 	}
 
-	[[nodiscard]] static cpuid_result cpuidex(uint32 function_a, uint32 function_c) noexcept {
+	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static cpuid_result cpuidex(uint32 function_a, uint32 function_c) noexcept {
 
 #if MPT_COMPILER_MSVC
 
@@ -675,7 +675,7 @@ public:
 		result.d = d;
 		return result;
 
-#elif 0
+#elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 
 		cpuid_result result;
 		unsigned int a{};
