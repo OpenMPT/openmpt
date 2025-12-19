@@ -16,6 +16,7 @@
 #include <new>
 #include <numeric>
 #include <optional>
+#include <type_traits>
 
 #include <cassert>
 #include <cstddef>
