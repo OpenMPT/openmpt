@@ -56,6 +56,9 @@
 #include "mpt/io_file/fstream.hpp"
 #include "mpt/io_file/inputfile.hpp"
 #include "mpt/io_file_read/inputfile_filecursor.hpp"
+#include "mpt/profiler/clock.hpp"
+#include "mpt/profiler/frequency.hpp"
+#include "mpt/profiler/profiler.hpp"
 #include "mpt/string/utility.hpp"
 #include "openmpt/sounddevice/SoundDevice.hpp"
 #include "openmpt/sounddevice/SoundDeviceBuffer.hpp"
@@ -2276,6 +2279,7 @@ void CMainFrame::OnTimerGUI()
 
 #ifdef USE_PROFILER
 	{
+
 		Profiler::Update();
 
 		CWnd * cwnd = CWnd::FromHandle(this->m_hWndMDIClient);
@@ -2295,19 +2299,123 @@ void CMainFrame::OnTimerGUI()
 			cwnd->GetClientRect(&rect);
 			rect.left += width;
 			rect.top += i * height;
-			auto s = mpt::ToCString(mpt::Charset::ASCII, mpt::afmt::right(6, mpt::afmt::fix(cats[i] * 100.0, 3)) + "% " + catnames[i]);
-			dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
+			CString s = MPT_CFORMAT("{}{} {}")(mpt::cfmt::right(6, mpt::cfmt::fix(cats[i] * 100.0, 3)), TEXT("%"), mpt::ToCString(mpt::Charset::ASCII, catnames[i]));
+			dc.DrawText(s, -1, &rect, DT_LEFT);
 		}
 
+		CString text;
+
+		dc.SetBkMode(OPAQUE);
+		dc.SetBkColor(RGB(192,192,192));
+
+		text += mpt::ToCString(mpt::Charset::ASCII, Profiler::DumpProfiles());
+
+		{
+			auto measure =
+				[&](auto s, auto f) {
+					mpt::profiler::default_clock::rep sum{};
+					std::size_t count = 1000;
+					volatile std::invoke_result<decltype(f)>::type dummy = 0;
+					for (std::size_t i = 0; i < count; ++i) {
+						mpt::profiler::default_clock::rep beg = mpt::profiler::default_clock::now_raw();
+						dummy = std::invoke(f);
+						mpt::profiler::default_clock::rep end = mpt::profiler::default_clock::now_raw();
+						sum += (end - beg);
+					}
+					text += MPT_CFORMAT("{} {}\r\n")(mpt::cfmt::dec0<8>(sum / count), s);
+				};
+			uint32 dummy{};
+			measure(TEXT("default       "), []() { return mpt::profiler::default_clock::now_raw(); });
+			measure(TEXT("highres       "), []() { return mpt::profiler::highres_clock::now_raw(); });
+			measure(TEXT("exact         "), []() { return mpt::profiler::exact_clock::now_raw(); });
+			measure(TEXT("fast          "), []() { return mpt::profiler::fast_clock::now_raw(); });
+#if MPT_PROFILER_CLOCK_TSC_RUNTIME
+			measure(TEXT("tsc rt        "), []() { return mpt::profiler::clock::tsc_runtime::now_raw(); });
+			measure(TEXT("tsc rt relaxed"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_relaxed); });
+			measure(TEXT("tsc rt consume"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_consume); });
+			measure(TEXT("tsc rt acquire"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_acquire); });
+			measure(TEXT("tsc rt release"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_release); });
+			measure(TEXT("tsc rt acq_rel"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_acq_rel); });
+			measure(TEXT("tsc rt seq_cst"), []() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_seq_cst); });
+			measure(TEXT("tscprt relaxed"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_relaxed, &dummy); });
+			measure(TEXT("tscprt consume"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_consume, &dummy); });
+			measure(TEXT("tscprt acquire"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_acquire, &dummy); });
+			measure(TEXT("tscprt release"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_release, &dummy); });
+			measure(TEXT("tscprt acq_rel"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_acq_rel, &dummy); });
+			measure(TEXT("tscprt seq_cst"), [&]() { return mpt::profiler::clock::tsc_runtime::now_raw(std::memory_order_seq_cst, &dummy); });
+#endif
+#if MPT_PROFILER_CLOCK_TSC
+			measure(TEXT("tsc           "), []() { return mpt::profiler::clock::tsc::now_raw(); });
+			measure(TEXT("tsc  relaxed  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_relaxed); });
+			measure(TEXT("tsc  consume  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_consume); });
+			measure(TEXT("tsc  acquire  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_acquire); });
+			measure(TEXT("tsc  release  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_release); });
+			measure(TEXT("tsc  acq_rel  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_acq_rel); });
+			measure(TEXT("tsc  seq_cst  "), []() { return mpt::profiler::clock::tsc::now_raw(std::memory_order_seq_cst); });
+#endif
+#if MPT_PROFILER_CLOCK_QUERY_PERFORMANCE_COUNTER
+			measure(TEXT("qpc           "), []() { return mpt::profiler::clock::query_performance_counter::now_raw(); });
+#endif
+#if MPT_PROFILER_CLOCK_GET_TICK_COUNT
+			measure(TEXT("gtc           "), []() { return mpt::profiler::clock::get_tick_count::now_raw(); });
+#endif
+#if MPT_PROFILER_CLOCK_STD_CHRONO
+			measure(TEXT("stdhighres    "), []() { return mpt::profiler::clock::chrono_high_resolution::now_raw(); });
+			measure(TEXT("stdsteady     "), []() { return mpt::profiler::clock::chrono_steady::now_raw(); });
+			measure(TEXT("stdsystem     "), []() { return mpt::profiler::clock::chrono_system::now_raw(); });
+#endif
+#if MPT_PROFILER_CLOCK_SYSTEM
+			measure(TEXT("system        "), []() { return mpt::profiler::clock::system::now_raw(); });
+#endif
+		}
+		{
+			auto format_frequency =
+				[](mpt::somefloat64 f) {
+					if (f >= 1'000'000'000.0_sf64) {
+						return MPT_CFORMAT("{} GHz")(mpt::cfmt::fix(f * 0.000'000'001, 3));
+					} else if (f >= 1'000'000.0_sf64) {
+						return MPT_CFORMAT("{} MHz")(mpt::cfmt::fix(f * 0.000'001, 3));
+					} else if (f >= 1'000.0_sf64) {
+						return MPT_CFORMAT("{} kHz")(mpt::cfmt::fix(f * 0.001, 3));
+					} else {
+						return MPT_CFORMAT("{} Hz")(mpt::cfmt::fix(f * 1.0, 3));
+					}
+				};
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("default   "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::default_clock>().value_or(0.0_sf64)));
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("highres   "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::highres_clock>().value_or(0.0_sf64)));
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("exact     "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::exact_clock>().value_or(0.0_sf64)));
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("fast      "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::fast_clock>().value_or(0.0_sf64)));
+#if MPT_PROFILER_CLOCK_TSC_RUNTIME
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("TSCruntime"), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::tsc_runtime>().value_or(0.0_sf64)));
+#endif
+#if MPT_PROFILER_CLOCK_TSC
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("TSC       "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::tsc>().value_or(0.0_sf64)));
+#endif
+#if MPT_PROFILER_CLOCK_QUERY_PERFORMANCE_COUNTER
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("QPC       "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::query_performance_counter>().value_or(0.0_sf64)));
+#endif
+#if MPT_PROFILER_CLOCK_GET_TICK_COUNT
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("GTC       "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::get_tick_count>().value_or(0.0_sf64)));
+#endif
+#if MPT_PROFILER_CLOCK_STD_CHRONO
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("stdhighres"), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::chrono_high_resolution>().value_or(0.0_sf64)));
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("stdsteady "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::chrono_steady>().value_or(0.0_sf64)));
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("stdsystem "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::chrono_system>().value_or(0.0_sf64)));
+#endif
+#if MPT_PROFILER_CLOCK_SYSTEM
+			text += MPT_CFORMAT("{} Frequency: {}\r\n")(TEXT("system    "), format_frequency(mpt::profiler::get_frequency<mpt::profiler::clock::system>().value_or(0.0_sf64)));
+#endif
+		}
+		
 		RECT rect;
 		cwnd->GetClientRect(&rect);
 		rect.top += Profiler::CategoriesCount * height;
-		auto s = mpt::ToCString(mpt::Charset::ASCII, Profiler::DumpProfiles());
-		dc.DrawText(s, s.GetLength(), &rect, DT_LEFT);
+		dc.DrawText(text, -1, &rect, DT_LEFT);
 
 		cwnd->Detach();
+
 	}
-#endif
+#endif // USE_PROFILER
 
 }
 
