@@ -1412,12 +1412,12 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// Create paths to store configuration in
 	CreatePaths();
 
-	m_pSettingsIniFile = new IniFileSettingsBackend(m_szConfigFileName);
-	m_pSettings = new SettingsContainer(m_pSettingsIniFile);
+	m_pSettingsIniFile = std::make_unique<IniFileSettingsBackend>(m_szConfigFileName);
+	m_pSettings = std::make_unique<SettingsContainer>(m_pSettingsIniFile.get());
 
-	m_pDebugSettings = new DebugSettings(*m_pSettings);
+	m_pDebugSettings = std::make_unique<DebugSettings>(*m_pSettings);
 
-	m_pTrackerSettings = new TrackerSettings(*m_pSettings);
+	m_pTrackerSettings = std::make_unique<TrackerSettings>(*m_pSettings);
 
 	MPT_LOG_GLOBAL(LogInformation, "", U_("OpenMPT settings initialized."));
 
@@ -1433,13 +1433,13 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	IPCWindow::Open(m_hInstance);
 
-	m_pSongSettingsIniFile = new IniFileSettingsBackend(GetConfigPath() + P_("SongSettings.ini"));
-	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
+	m_pSongSettingsIniFile = std::make_unique<IniFileSettingsBackend>(GetConfigPath() + P_("SongSettings.ini"));
+	m_pSongSettings = std::make_unique<SettingsContainer>(m_pSongSettingsIniFile.get());
 
-	m_pPluginState = new IniFileSettingsContainer(m_PluginStateFileName);
-	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
+	m_pPluginState = std::make_unique<IniFileSettingsContainer>(m_PluginStateFileName);
+	m_pPluginCache = std::make_unique<IniFileSettingsContainer>(m_szPluginCacheFileName);
 
-	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
+	m_pComponentManagerSettings = std::make_unique<ComponentManagerSettings>(TrackerSettings::Instance(), GetConfigPath());
 
 	// Load standard INI file options (without MRU)
 	// requires SetupPaths+CreatePaths called
@@ -1762,8 +1762,8 @@ int CTrackApp::ExitInstanceImpl()
 {
 	IPCWindow::Close();
 
-	m_pSoundDevicesManager = nullptr;
-	m_pAllSoundDeviceComponents = nullptr;
+	m_pSoundDevicesManager.reset();
+	m_pAllSoundDeviceComponents.reset();
 	ExportMidiConfig(theApp.GetSettings());
 	AddScannedDLSBanks();
 	SaveDefaultDLSBanks();
@@ -1774,24 +1774,15 @@ int CTrackApp::ExitInstanceImpl()
 
 	ComponentManager::Release();
 
-	delete m_pPluginCache;
-	m_pPluginCache = nullptr;
-	delete m_pPluginState;
-	m_pPluginState = nullptr;
-	delete m_pComponentManagerSettings;
-	m_pComponentManagerSettings = nullptr;
-	delete m_pTrackerSettings;
-	m_pTrackerSettings = nullptr;
-	delete m_pDebugSettings;
-	m_pDebugSettings = nullptr;
-	delete m_pSettings;
-	m_pSettings = nullptr;
-	delete m_pSettingsIniFile;
-	m_pSettingsIniFile = nullptr;
-	delete m_pSongSettings;
-	m_pSongSettings = nullptr;
-	delete m_pSongSettingsIniFile;
-	m_pSongSettingsIniFile = nullptr;
+	m_pPluginCache.reset();
+	m_pPluginState.reset();
+	m_pComponentManagerSettings.reset();
+	m_pTrackerSettings.reset();
+	m_pDebugSettings.reset();
+	m_pSettings.reset();
+	m_pSettingsIniFile.reset();
+	m_pSongSettings.reset();
+	m_pSongSettingsIniFile.reset();
 
 	if(mpt::OS::Windows::IsWine())
 	{

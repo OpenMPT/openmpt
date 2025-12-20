@@ -157,18 +157,18 @@ protected:
 
 	std::shared_ptr<mpt::OS::Wine::VersionContext> m_WineVersion;
 
-	IniFileSettingsBackend *m_pSettingsIniFile = nullptr;
-	SettingsContainer *m_pSettings = nullptr;
-	DebugSettings *m_pDebugSettings = nullptr;
-	TrackerSettings *m_pTrackerSettings = nullptr;
+	std::unique_ptr<IniFileSettingsBackend> m_pSettingsIniFile;
+	std::unique_ptr<SettingsContainer> m_pSettings;
+	std::unique_ptr<DebugSettings> m_pDebugSettings;
+	std::unique_ptr<TrackerSettings> m_pTrackerSettings;
 
-	IniFileSettingsBackend *m_pSongSettingsIniFile = nullptr;
-	SettingsContainer *m_pSongSettings = nullptr;
+	std::unique_ptr<IniFileSettingsBackend> m_pSongSettingsIniFile;
+	std::unique_ptr<SettingsContainer> m_pSongSettings;
 
-	IniFileSettingsContainer *m_pPluginState = nullptr;
-	IniFileSettingsContainer *m_pPluginCache = nullptr;
+	std::unique_ptr<IniFileSettingsContainer> m_pPluginState;
+	std::unique_ptr<IniFileSettingsContainer> m_pPluginCache;
 
-	ComponentManagerSettings *m_pComponentManagerSettings = nullptr;
+	std::unique_ptr<ComponentManagerSettings> m_pComponentManagerSettings;
 
 	std::shared_ptr<mpt::Wine::Context> m_Wine;
 	mpt::PathString m_WineWrapperDllName;
@@ -252,7 +252,7 @@ public:
 	mpt::PathString GetConfigFileName() const { return m_szConfigFileName; }
 	SettingsContainer *GetpSettings()
 	{
-		return m_pSettings;
+		return m_pSettings.get();
 	}
 	SettingsContainer &GetSettings()
 	{
