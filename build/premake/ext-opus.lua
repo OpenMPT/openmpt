@@ -75,7 +75,8 @@
 			"USE_ALLOCA=1",
 		}
 	filter {}
-		if false then -- NoLACE (OSCE) / LACE (OSCE) / DEEP-PLC (DEEP_PLC || DRED) / DRED (DRED) / QEXT (Opus HD)
+		opus_enable_dnn = false
+		if opus_enable_dnn then -- NoLACE (OSCE) / LACE (OSCE) / DEEP-PLC (DEEP_PLC || DRED) / DRED (DRED) / QEXT (Opus HD)
 			filter {}
 				files {
 					"../../include/opus/dnn/*.c",
@@ -171,6 +172,12 @@
 				}
 			filter {}
 		else
+			if opus_enable_dnn and MPT_MSVC_AT_LEAST(2026) then
+			-- work-around VS2026 Internal Compiler Error:
+			-- DNN fails to build with SSE2 or SSE4.1
+			-- Because Opus does not handle having AVX while not having SSE gracefully,
+			-- just disable both.
+			else
 			filter { "architecture:x86" }
 			defines {
 				"OPUS_HAVE_RTCD=1",
@@ -186,6 +193,7 @@
 					"OPUS_X86_PRESUME_SSE2",
 				}
 			filter {}
+			end
 		end
 		filter {}
 		filter { "architecture:x86_64" }
