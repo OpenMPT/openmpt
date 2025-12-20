@@ -31,10 +31,17 @@
 
 #include "x86/x86_arch_macros.h"
 
+#if defined(OPUS_X86_MAY_HAVE_SSE4_1) || defined(OPUS_X86_PRESUME_SSE4_1)  /* OpenMPT */
+
+#if 0  /*OpenMPT*/
 #ifndef __SSE4_1__
 #error nnet_sse4_1.c is being compiled without SSE4.1 enabled
 #endif
+#endif  /* OpenMPT */
 
 #define RTCD_ARCH sse4_1
+#define OPUS_DNN_VEC_SELECT_IMPL_SSE4_1  /* OpenMPT */
 
 #include "nnet_arch.h"
+
+#endif  /* OpenMPT */

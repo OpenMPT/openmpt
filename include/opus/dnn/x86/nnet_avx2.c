@@ -29,15 +29,18 @@
 #include "config.h"
 #endif
 
-#if defined(OPUS_X86_MAY_HAVE_AVX2) || defined(OPUS_X86_PRESUME_AVX2)  /* OpenMPT */
-
 #include "x86/x86_arch_macros.h"
 
+#if defined(OPUS_X86_MAY_HAVE_AVX2) || defined(OPUS_X86_PRESUME_AVX2)  /* OpenMPT */
+
+#if 0  /* OpenMPT */
 #ifndef __AVX2__
 #error nnet_avx2.c is being compiled without AVX2 enabled
 #endif
+#endif  /* OpenMPT */
 
 #define RTCD_ARCH avx2
+#define OPUS_DNN_VEC_SELECT_IMPL_AVX2  /* OpenMPT */
 
 #include "nnet_arch.h"
 

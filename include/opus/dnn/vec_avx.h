@@ -40,7 +40,11 @@
 
 #define USE_SU_BIAS
 
+#if 0  /* OpenMPT */
 #ifndef __SSE_4_1__
+#endif  /* OpenMPT */
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_SSE4_1) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 static inline __m128 mm_floor_ps(__m128 x) {
   __m128 half = _mm_set1_ps(0.5);
   return _mm_cvtepi32_ps(_mm_cvtps_epi32(_mm_sub_ps(x, half)));
@@ -52,6 +56,8 @@ static inline __m128 mm_floor_ps(__m128 x) {
 
 /* If we don't have AVX available, emulate what we need with SSE up to 4.1. */
 #ifndef __AVX__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_SSE2) || defined(OPUS_DNN_VEC_SELECT_IMPL_SSE4_1)  /* OpenMPT */
 
 typedef struct {
   __m128 lo;
@@ -163,6 +169,8 @@ static inline mm256_emu mm256_insertf128_ps(mm256_emu dst, __m128 src, int i) {
 
 /* If we don't have AVX2 available, emulate what we need with SSE up to 4.1. */
 #ifndef __AVX2__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_SSE2) || defined(OPUS_DNN_VEC_SELECT_IMPL_SSE4_1) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX)  /* OpenMPT */
 
 typedef struct {
   __m128i lo;
@@ -252,6 +260,8 @@ static inline mm256i_emu mm256_maddubs_epi16(mm256i_emu a, mm256i_emu b) {
 /* Emulating the conversion functions is tricky because they use __m256i but are defined in AVX.
    So we need to make a special when only AVX is available. */
 #ifdef __AVX__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_AVX) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 
 typedef union {
   mm256i_emu fake;
@@ -298,11 +308,15 @@ static inline mm256i_emu mm256_cvtps_epi32(mm256_emu a) {
 
 /* In case we don't have FMA, make it a mul and an add. */
 #if !(defined(__FMA__) && defined(__AVX__))
+#endif  /* OpenMPT */
+#if 1  /* OpenMPT */
 #define _mm256_fmadd_ps(a,b,c) _mm256_add_ps(_mm256_mul_ps(a, b), c)
 #define _mm_fmadd_ps(a,b,c) _mm_add_ps(_mm_mul_ps(a, b), c)
 #endif
 
 #ifdef __AVX2__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 static inline __m256 exp8_approx(__m256 X)
 {
    const __m256 K0 = _mm256_set1_ps(0.99992522f);
@@ -387,6 +401,8 @@ static inline void vector_ps_to_epi8(unsigned char *x, const float *_x, int len)
 
 
 #ifdef __AVX__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_AVX) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 
 /* Approximating tanh() using a Padé-like rational function:
    tanh(x) ~= x * (N0 + N1*x^2 + N2*x^4)/(D0 + D1*x^2 + D2*x^4)
@@ -556,6 +572,8 @@ static inline void softmax(float *y, const float *x, int N)
 }
 
 #ifdef __AVX__
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_AVX) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 static inline void vec_tanh(float *y, const float *x, int N)
 {
     int i;
@@ -622,11 +640,16 @@ static inline void vec_sigmoid(float *y, const float *x, int N)
 
 #endif
 
+#if 0  /* OpenMPT */
 #if defined(__AVXVNNI__) || defined(__AVX512VNNI__)
+#endif  /* OpenMPT */
 
 #define opus_mm256_dpbusds_epi32(src, a, b) _mm256_dpbusds_epi32(src, a, b)
 
+#if 0  /* OpenMPT */
 #elif defined(__AVX2__)
+#endif  /* OpenMPT */
+#elif defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
 
 static inline __m256i opus_mm256_dpbusds_epi32(__m256i src, __m256i a, __m256i b) {
   __m256i ones, tmp;
@@ -636,7 +659,10 @@ static inline __m256i opus_mm256_dpbusds_epi32(__m256i src, __m256i a, __m256i b
   return _mm256_add_epi32(src, tmp);
 }
 
+#if 0  /* OpenMPT */
 #elif defined(__SSSE3__)
+#endif  /* OpenMPT */
+#elif defined(OPUS_DNN_VEC_SELECT_IMPL_SSE4_1) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX)  /* OpenMPT */
 
 static inline mm256i_emu opus_mm256_dpbusds_epi32(mm256i_emu src, mm256i_emu a, mm256i_emu b) {
   mm256i_emu ones, tmp;
@@ -646,7 +672,10 @@ static inline mm256i_emu opus_mm256_dpbusds_epi32(mm256i_emu src, mm256i_emu a, 
   return _mm256_add_epi32(src, tmp);
 }
 
+#if 0  /* OpenMPT */
 #elif defined(__SSE2__)
+#endif  /* OpenMPT */
+#elif defined(OPUS_DNN_VEC_SELECT_IMPL_SSE2)  /* OpenMPT */
 
 static inline __m128i mm_dpbusds_epi32(__m128i src, __m128i a, __m128i b) {
   __m128i ah, al, bh, bl, tmp;

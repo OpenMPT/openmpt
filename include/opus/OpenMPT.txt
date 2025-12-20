@@ -9,11 +9,18 @@ The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
  *  celt/float_cast.h has been modified to compile on ARM64EC.
  *  celt/x86/vq_sse2.c has been modified to check for OPUS_X86_MAY_HAVE_SSE2.
- *  celt/x86/x86_arch_macros.c has been modified to support AVX and AVX2.
+ *  celt/x86/x86_arch_macros.h has been modified to not set architecture macros.
  *  A warning in dnn/dred_encoder.c has been silenced.
- *  Performance warning in dnn/nnet.c has been silenced.
- *  dnn/nnet_avx2.c has been modified to check for
-    OPUS_MAY_HAVE_AVX2 || OPUS_PRESUME_AVX2.
+ *  The following files have been fixed to check for Opus architecture macros
+    instead of relying on compiler-specific ones which the code was really
+    really confused about:
+     *  dnn/nnet.c
+     *  dnn/nnet_default.c
+     *  dnn/vec.h
+     *  dnn/vec_avx.h
+     *  dnn/x86/nnet_avx2.h
+     *  dnn/x86/nnet_sse2.h
+     *  dnn/x86/nnet_sse4_1.h
  *  silk/float/x86/inner_product_FLP_avx2 has been modified to check for
     OPUS_X86_MAY_HAVE_AVX2.
  *  silk/x86/*sse4_1.c has been modified to check for OPUS_X86_MAY_HAVE_SSE4_1.

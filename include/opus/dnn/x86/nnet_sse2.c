@@ -31,10 +31,17 @@
 
 #include "x86/x86_arch_macros.h"
 
+#if defined(OPUS_X86_MAY_HAVE_SSE2) || defined(OPUS_X86_PRESUME_SSE2)  /* OpenMPT */
+
+#if 0  /* OpenMPT */
 #ifndef __SSE2__
 #error nnet_sse2.c is being compiled without SSE2 enabled
 #endif
+#endif  /* OpenMPT */
 
 #define RTCD_ARCH sse2
+#define OPUS_DNN_VEC_SELECT_IMPL_SSE2  /* OpenMPT */
 
 #include "nnet_arch.h"
+
+#endif  /* OpenMPT */

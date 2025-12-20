@@ -26,6 +26,8 @@
 
 #ifdef _MSC_VER
 
+#if 0  /* OpenMPT */
+
 # ifdef OPUS_X86_MAY_HAVE_SSE
 #  ifndef __SSE__
 #   define __SSE__
@@ -44,13 +46,6 @@
 #  endif
 # endif
 
-# ifdef OPUS_X86_MAY_HAVE_AVX2  /* OpenMPT */
-#  ifndef __AVX__  /* OpenMPT */
-#   define __AVX__  /* OpenMPT */
-#  endif  /* OpenMPT */
-#  ifndef __AVX2__  /* OpenMPT */
-#   define __AVX2__  /* OpenMPT */
-#  endif  /* OpenMPT */
-# endif  /* OpenMPT */
+#endif  /* OpenMPT */
 
 #endif
