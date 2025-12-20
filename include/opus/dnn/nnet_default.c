@@ -31,5 +31,6 @@
 
 
 #define RTCD_ARCH c
+#define OPUS_DNN_VEC_SELECT_IMPL_C  /* OpenMPT */
 
 #include "nnet_arch.h"

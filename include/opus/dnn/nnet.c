@@ -30,6 +30,8 @@
 #include "config.h"
 #endif
 
+#define OPUS_DNN_VEC_SELECT_IMPL_C  /* OpenMPT */
+
 #include <stdlib.h>
 #include <math.h>
 #include "opus_types.h"

@@ -35,11 +35,19 @@
 #include "x86/x86_arch_macros.h"
 
 
+#if 0  /* OpenMPT */
 #if defined(__AVX__) || defined(__SSE2__)
 #include "vec_avx.h"
 #elif (defined(__ARM_NEON__) || defined(__ARM_NEON)) && !defined(DISABLE_NEON)
 #include "vec_neon.h"
 #else
+#endif  /* OpenMPT */
+#endif  /* OpenMPT */
+#if defined(OPUS_DNN_VEC_SELECT_IMPL_SSE2) || defined(OPUS_DNN_VEC_SELECT_IMPL_SSE4_1) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX) || defined(OPUS_DNN_VEC_SELECT_IMPL_AVX2)  /* OpenMPT */
+#include "vec_avx.h"  /* OpenMPT */
+#elif !defined(OPUS_DNN_VEC_SELECT_IMPL_C) && ((defined(__ARM_NEON__) || defined(__ARM_NEON)) && !defined(DISABLE_NEON))  /* OpenMPT */
+#include "vec_neon.h"  /* OpenMPT */
+#elif defined(OPUS_DNN_VEC_SELECT_IMPL_C)  /* OpenMPT */
 
 #include "os_support.h"
 
@@ -384,6 +392,10 @@ static inline void vec_sigmoid(float *y, const float *x, int N)
 
 #define SCALE (128.f*127.f)
 #define SCALE_1 (1.f/128.f/127.f)
+
+#else  /* OpenMPT */
+
+#error "unspecified SIMD"  /* OpenMPT */
 
 #endif /*no optimizations*/
 #endif /*VEC_H*/
