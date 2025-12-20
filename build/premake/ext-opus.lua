@@ -207,6 +207,13 @@
 				"OPUS_X86_PRESUME_SSE",
 				"OPUS_X86_PRESUME_SSE2",
 			}
+			if MPT_WIN_AT_LEAST(MPT_WIN["11_24H2"]) then
+				if MPT_MSVC_AT_LEAST(2022) then
+					defines {
+						"OPUS_X86_PRESUME_SSE4_1",
+					}
+				end
+			end
 		filter {}
 		filter { "architecture:arm" }
 			excludes {
