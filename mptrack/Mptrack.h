@@ -128,34 +128,10 @@ public:
 	static std::vector<std::unique_ptr<CDLSBank>> gpDLSBanks;
 
 protected:
+
 	mpt::recursive_mutex_with_lock_count m_GlobalMutex;
 
-	DWORD m_GuiThreadId = 0;
-
-	std::future<std::vector<std::unique_ptr<CDLSBank>>> m_scannedDlsBanks;
-	std::atomic<bool> m_scannedDlsBanksAvailable = false;
-
-	std::unique_ptr<mpt::random_device> m_RD;
-	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng>> m_PRNG;
-
-	std::unique_ptr<GdiplusRAII> m_Gdiplus;
-
-	std::shared_ptr<mpt::OS::Wine::VersionContext> m_WineVersion;
-
-	IniFileSettingsBackend *m_pSettingsIniFile;
-	SettingsContainer *m_pSettings = nullptr;
-	DebugSettings *m_pDebugSettings = nullptr;
-	TrackerSettings *m_pTrackerSettings = nullptr;
-	IniFileSettingsBackend *m_pSongSettingsIniFile = nullptr;
-	SettingsContainer *m_pSongSettings = nullptr;
-	ComponentManagerSettings *m_pComponentManagerSettings = nullptr;
-	IniFileSettingsContainer *m_pPluginState = nullptr;
-	IniFileSettingsContainer *m_pPluginCache = nullptr;
-	CModDocTemplate *m_pModTemplate = nullptr;
-	CVstPluginManager *m_pPluginManager = nullptr;
 	mpt::log::GlobalLogger m_GlobalLogger{};
-	std::unique_ptr<AllSoundDeviceComponents> m_pAllSoundDeviceComponents;
-	std::unique_ptr<SoundDevice::Manager> m_pSoundDevicesManager;
 
 	mpt::PathString m_InstallPath;         // i.e. "C:\Program Files\OpenMPT\" (installer mode) or "G:\OpenMPT\" (portable mode)
 	mpt::PathString m_InstallBinPath;      // i.e. "C:\Program Files\OpenMPT\bin\" (multi-arch mode) or InstallPath (legacy mode)
@@ -168,14 +144,49 @@ protected:
 	mpt::PathString m_PluginStateFileName;
 	mpt::PathString m_szPluginCacheFileName;
 
-	std::shared_ptr<mpt::Wine::Context> m_Wine;
-	mpt::PathString m_WineWrapperDllName;
-	// Default macro configuration
-	MIDIMacroConfig m_MidiCfg;
-	DWORD m_dwLastPluginIdleCall = 0;
 	bool m_bInstallerMode = false;
 	bool m_bPortableMode = false;
 	bool m_bSourceTreeMode = false;
+
+	DWORD m_GuiThreadId = 0;
+
+	std::unique_ptr<mpt::random_device> m_RD;
+	std::unique_ptr<mpt::thread_safe_prng<mpt::default_prng>> m_PRNG;
+
+	std::unique_ptr<GdiplusRAII> m_Gdiplus;
+
+	std::shared_ptr<mpt::OS::Wine::VersionContext> m_WineVersion;
+
+	IniFileSettingsBackend *m_pSettingsIniFile = nullptr;
+	SettingsContainer *m_pSettings = nullptr;
+	DebugSettings *m_pDebugSettings = nullptr;
+	TrackerSettings *m_pTrackerSettings = nullptr;
+
+	IniFileSettingsBackend *m_pSongSettingsIniFile = nullptr;
+	SettingsContainer *m_pSongSettings = nullptr;
+
+	IniFileSettingsContainer *m_pPluginState = nullptr;
+	IniFileSettingsContainer *m_pPluginCache = nullptr;
+
+	ComponentManagerSettings *m_pComponentManagerSettings = nullptr;
+
+	std::shared_ptr<mpt::Wine::Context> m_Wine;
+	mpt::PathString m_WineWrapperDllName;
+
+	CModDocTemplate *m_pModTemplate = nullptr;
+
+	std::unique_ptr<AllSoundDeviceComponents> m_pAllSoundDeviceComponents;
+	std::unique_ptr<SoundDevice::Manager> m_pSoundDevicesManager;
+
+	std::future<std::vector<std::unique_ptr<CDLSBank>>> m_scannedDlsBanks;
+	std::atomic<bool> m_scannedDlsBanksAvailable = false;
+
+	CVstPluginManager *m_pPluginManager = nullptr;
+
+	// Default macro configuration
+	MIDIMacroConfig m_MidiCfg;
+
+	DWORD m_dwLastPluginIdleCall = 0;
 
 public:
 	CTrackApp();

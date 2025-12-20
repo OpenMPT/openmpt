@@ -1436,10 +1436,10 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	m_pSongSettingsIniFile = new IniFileSettingsBackend(GetConfigPath() + P_("SongSettings.ini"));
 	m_pSongSettings = new SettingsContainer(m_pSongSettingsIniFile);
 
-	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
-
 	m_pPluginState = new IniFileSettingsContainer(m_PluginStateFileName);
 	m_pPluginCache = new IniFileSettingsContainer(m_szPluginCacheFileName);
+
+	m_pComponentManagerSettings = new ComponentManagerSettings(TrackerSettings::Instance(), GetConfigPath());
 
 	// Load standard INI file options (without MRU)
 	// requires SetupPaths+CreatePaths called
