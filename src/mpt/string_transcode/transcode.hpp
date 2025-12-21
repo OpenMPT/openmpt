@@ -461,6 +461,8 @@ inline Tdststring encode_utf8(const mpt::widestring & str, typename Tdststring::
 		std::size_t charsleft = numchars;
 		while (charsleft > 0) {
 			if (charsleft == numchars) {
+				// cppcheck false-positive
+				// cppcheck-suppress arrayIndexOutOfBounds
 				out.push_back(utf8[charsleft - 1] | (((1 << numchars) - 1) << (8 - numchars)));
 			} else {
 				// cppcheck false-positive
