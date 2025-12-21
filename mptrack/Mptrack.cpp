@@ -1475,7 +1475,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	// create main MDI Frame window
 	CMainFrame *pMainFrame = new CMainFrame();
 	if(!pMainFrame->LoadFrame(IDR_MAINFRAME))
+	{
 		return FALSE;
+	}
 	m_pMainWnd = pMainFrame;
 
 	// Show splash screen
@@ -1543,13 +1545,18 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	CSoundFile::SetDefaultNoteNames();
 
 	// Load Soundfonts and default MIDI Library
-	if (!cmdInfo.m_noDls)
+	if(!cmdInfo.m_noDls)
+	{
 		m_scannedDlsBanks = LoadDefaultDLSBanks();
+	}
 	// Load user-defined MIDI Library
 	ImportMidiConfig(theApp.GetSettings(), {}, true);
 
 	// Initialize Plugins
-	if (!cmdInfo.m_noPlugins) InitializeDXPlugins();
+	if(!cmdInfo.m_noPlugins)
+	{
+		InitializeDXPlugins();
+	}
 
 	// Initialize CMainFrame
 	pMainFrame->Initialize();
@@ -1586,7 +1593,6 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	pMainFrame->UpdateWindow();
 
 	EndWaitCursor();
-
 
 	// Perform startup tasks.
 
@@ -1625,7 +1631,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 #ifdef ENABLE_TESTS
 	if(!cmdInfo.m_noTests)
+	{
 		Test::DoTests();
+	}
 #endif
 
 	theApp.GetSettings().Flush();
@@ -1762,27 +1770,33 @@ int CTrackApp::ExitInstanceImpl()
 {
 	IPCWindow::Close();
 
-	m_pSoundDevicesManager.reset();
-	m_pAllSoundDeviceComponents.reset();
+	// Uninitialize Plugins
+	UninitializeDXPlugins();
+
 	ExportMidiConfig(theApp.GetSettings());
 	AddScannedDLSBanks();
 	SaveDefaultDLSBanks();
 	gpDLSBanks.clear();
 
-	// Uninitialize Plugins
-	UninitializeDXPlugins();
+	m_pSoundDevicesManager.reset();
+	m_pAllSoundDeviceComponents.reset();
+
+	// implicitly unload Wine Integration in next step
 
 	ComponentManager::Release();
 
+	m_pComponentManagerSettings.reset();
+
 	m_pPluginCache.reset();
 	m_pPluginState.reset();
-	m_pComponentManagerSettings.reset();
+
+	m_pSongSettings.reset();
+	m_pSongSettingsIniFile.reset();
+
 	m_pTrackerSettings.reset();
 	m_pDebugSettings.reset();
 	m_pSettings.reset();
 	m_pSettingsIniFile.reset();
-	m_pSongSettings.reset();
-	m_pSongSettingsIniFile.reset();
 
 	if(mpt::OS::Windows::IsWine())
 	{
