@@ -30,6 +30,9 @@ public:
 	FolderScanner(mpt::PathString path, FlagSet<ScanType> type, mpt::PathString filter = P_("*.*"));
 	~FolderScanner();
 
+	FolderScanner(const FolderScanner&) = delete;
+	FolderScanner &operator=(const FolderScanner&) = delete;
+
 	// Return one file or directory at a time in parameter file. Returns true if a file was found (file parameter is valid), false if no more files can be found (file parameter is not touched).
 	bool Next(mpt::PathString &file, WIN32_FIND_DATA *fileInfo = nullptr);
 
