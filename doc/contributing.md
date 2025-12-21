@@ -24,6 +24,9 @@ For patch submissions, please also see
 [OpenMPT style guide](openmpt_styleguide.md) and
 [libopenmpt style guide](libopenmpt_styleguide.md).
 
+We will not accept any contribution fully or partially developed by or assisted
+by the use of LLMs or other forms of AI.
+
 ### Contributing via GitHub
 
 As OpenMPT is developed in a Subversion repository and the GitHub repository is
