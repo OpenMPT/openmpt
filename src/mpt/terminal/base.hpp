@@ -17,7 +17,7 @@
 #include <stdio.h>
 #endif
 
-#if !MPT_OS_WINDOWS
+#if !MPT_OS_WINDOWS && MPT_OS_HAS_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -48,33 +48,37 @@ namespace detail {
 
 
 
+#if MPT_OS_WINDOWS || MPT_OS_HAS_UNISTD_H
+
 inline int get_fd(stdio_fd e) {
 	int fd = -1;
 	switch (e) {
 		case stdio_fd::in:
 #if MPT_OS_WINDOWS
 			fd = _fileno(stdin);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 			fd = STDIN_FILENO;
 #endif
 			break;
 		case stdio_fd::out:
 #if MPT_OS_WINDOWS
 			fd = _fileno(stdout);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 			fd = STDOUT_FILENO;
 #endif
 			break;
 		case stdio_fd::err:
 #if MPT_OS_WINDOWS
 			fd = _fileno(stderr);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 			fd = STDERR_FILENO;
 #endif
 			break;
 	}
 	return fd;
 }
+
+#endif // MPT_OS_WINDOWS || MPT_OS_HAS_UNISTD_H
 
 
 

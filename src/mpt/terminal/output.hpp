@@ -235,7 +235,7 @@ public:
 #endif
 		: s(s_)
 		, handle(detail::get_HANDLE(e).value_or(static_cast<HANDLE>(NULL)))
-		, console(is_terminal(e)) {
+		, console(is_terminal(e).value_or(false)) {
 		s.flush();
 #if MPT_WIN_AT_LEAST(MPT_WIN_10_1809)
 		if (GetConsoleMode(handle, &mode) == FALSE) {

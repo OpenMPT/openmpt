@@ -4,6 +4,7 @@
 #define MPT_TERMINAL_IS_TERMINAL_HPP
 
 #include "mpt/base/detect.hpp"
+#include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/terminal/base.hpp"
 
@@ -28,7 +29,7 @@ namespace terminal {
 
 
 
-inline bool is_terminal(stdio_fd e) {
+inline std::optional<bool> is_terminal(stdio_fd e) {
 #if MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10)
 	if (!_isatty(detail::get_fd(e))) {
 		return false;
@@ -39,8 +40,11 @@ inline bool is_terminal(stdio_fd e) {
 	}
 	DWORD mode = 0;
 	return (GetConsoleMode(handle.value(), &mode) != FALSE);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 	return isatty(detail::get_fd(e)) ? true : false;
+#else
+	MPT_UNUSED(e);
+	return std::nullopt;
 #endif
 }
 

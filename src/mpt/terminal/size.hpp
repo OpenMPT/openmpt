@@ -20,7 +20,7 @@
 #if MPT_OS_DJGPP
 #include <pc.h>
 #endif
-#if !MPT_OS_WINDOWS
+#if !MPT_OS_WINDOWS && MPT_OS_HAS_UNISTD_H
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -56,7 +56,7 @@ inline void query_size(int & terminal_width, int & terminal_height) {
 			}
 		}
 	}
-#else // !(MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10))
+#elif MPT_OS_HAS_UNISTD_H // !(MPT_OS_WINDOWS && !MPT_WINRT_BEFORE(MPT_WIN_10))
 	if (isatty(STDERR_FILENO)) {
 		if (terminal_width <= 0) {
 			const char * env_columns = std::getenv("COLUMNS");

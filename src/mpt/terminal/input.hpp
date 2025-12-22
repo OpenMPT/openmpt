@@ -14,10 +14,12 @@
 #include <unistd.h>
 #elif MPT_OS_WINDOWS
 #include <conio.h>
-#else
+#elif MPT_OS_HAS_UNISTD_H
 #include <termios.h>
 #include <unistd.h>
 #include <sys/poll.h>
+#else
+#include <stdio.h>
 #endif
 
 
@@ -43,7 +45,7 @@ public:
 	~input_guard() = default;
 };
 
-#else
+#elif MPT_OS_HAS_UNISTD_H
 
 class input_guard {
 private:
@@ -73,6 +75,18 @@ public:
 	}
 };
 
+#else
+
+class input_guard {
+public:
+	input_guard() = default;
+	input_guard(const input_guard &) = delete;
+	input_guard(input_guard &&) = delete;
+	input_guard & operator=(const input_guard &) = delete;
+	input_guard & operator=(input_guard &&) = delete;
+	~input_guard() = default;
+};
+
 #endif
 
 
@@ -86,7 +100,7 @@ public:
 		return _kbhit() ? true : false;
 #elif MPT_OS_WINDOWS
 		return _kbhit() ? true : false;
-#else
+#elif MPT_OS_HAS_UNISTD_H
 		pollfd pollfds;
 		pollfds.fd = STDIN_FILENO;
 		pollfds.events = POLLIN;
@@ -95,6 +109,16 @@ public:
 			return false;
 		}
 		return true;
+#elif 0
+		// blocking, no portable non-blocking solution available
+		int c = fgetc(stdin);
+		if (c == EOF) {
+			return false;
+		}
+		ungetc(c, stdin);
+		return true;
+#else
+		return false;
 #endif
 	}
 	static inline std::optional<int> read_input_char() {
@@ -107,12 +131,18 @@ public:
 #elif MPT_OS_WINDOWS
 		int c = _getch();
 		return static_cast<int>(c);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 		char c = 0;
 		if (read(STDIN_FILENO, &c, 1) != 1) {
 			return std::nullopt;
 		}
 		return static_cast<int>(c);
+#else
+		int c = fgetc(stdin);
+		if (c == EOF) {
+			return std::nullopt;
+		}
+		return c;
 #endif
 	}
 };

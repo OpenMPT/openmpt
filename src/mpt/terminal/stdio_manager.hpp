@@ -180,15 +180,17 @@ public:
 		return std::cin;
 	}
 #endif
+#if MPT_OS_WINDOWS || MPT_OS_HAS_UNISTD_H
 	int stdin_fd_data() {
 		assert((in_api == api::posix) || (in_api == api::crt));
 		assert(in_mode == stdin_mode::binary);
 #if MPT_OS_WINDOWS
 		return _fileno(stdin);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 		return STDIN_FILENO;
 #endif
 	}
+#endif
 	std::FILE * stdin_file_data() {
 		assert(in_api == api::stdfile);
 		assert(in_mode == stdin_mode::binary);
@@ -199,15 +201,17 @@ public:
 		assert(in_mode == stdin_mode::binary);
 		return std::cin;
 	}
+#if MPT_OS_WINDOWS || MPT_OS_HAS_UNISTD_H
 	int stdout_fd_data() {
 		assert((out_api == api::posix) || (out_api == api::crt));
 		assert(out_mode == stdout_mode::binary);
 #if MPT_OS_WINDOWS
 		return _fileno(stdout);
-#else
+#elif MPT_OS_HAS_UNISTD_H
 		return STDOUT_FILENO;
 #endif
 	}
+#endif
 	std::FILE * stdout_file_data() {
 		assert(out_api == api::stdfile);
 		assert(out_mode == stdout_mode::binary);
