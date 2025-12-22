@@ -457,25 +457,15 @@ inline mpt::ustring ToUnicode(uint16 codepage, Tencoding &&fallback, Tsrc &&str)
 
 
 
-inline char ToLowerCaseAscii(char c)
-{
-	return mpt::to_lower_ascii(c);
-}
-
-inline char ToUpperCaseAscii(char c)
-{
-	return mpt::to_upper_ascii(c);
-}
-
 inline std::string ToLowerCaseAscii(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::ToLowerCaseAscii));
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::to_lower_ascii));
 	return s;
 }
 
 inline std::string ToUpperCaseAscii(std::string s)
 {
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::ToUpperCaseAscii));
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char(*)(char)>(&mpt::to_upper_ascii));
 	return s;
 }
 
@@ -483,8 +473,8 @@ inline int CompareNoCaseAscii(const char *a, const char *b, std::size_t n)
 {
 	while(n--)
 	{
-		unsigned char ac = mpt::char_value(mpt::ToLowerCaseAscii(*a));
-		unsigned char bc = mpt::char_value(mpt::ToLowerCaseAscii(*b));
+		unsigned char ac = mpt::char_value(mpt::to_lower_ascii(*a));
+		unsigned char bc = mpt::char_value(mpt::to_lower_ascii(*b));
 		if(ac != bc)
 		{
 			return ac < bc ? -1 : 1;
@@ -502,8 +492,8 @@ inline int CompareNoCaseAscii(std::string_view a, std::string_view b)
 {
 	for(std::size_t i = 0; i < std::min(a.length(), b.length()); ++i)
 	{
-		unsigned char ac = mpt::char_value(mpt::ToLowerCaseAscii(a[i]));
-		unsigned char bc = mpt::char_value(mpt::ToLowerCaseAscii(b[i]));
+		unsigned char ac = mpt::char_value(mpt::to_lower_ascii(a[i]));
+		unsigned char bc = mpt::char_value(mpt::to_lower_ascii(b[i]));
 		if(ac != bc)
 		{
 			return ac < bc ? -1 : 1;

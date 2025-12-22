@@ -136,7 +136,7 @@ static bool FindNameTableEntryImpl(TFile &file, const FileHeader &fileHeader, co
 			char c = 0;
 			while((c = file.ReadUint8()) != 0)
 			{
-				c = mpt::ToLowerCaseAscii(c);
+				c = mpt::to_lower_ascii(c);
 				if(pos < nameLen)
 				{
 					match = match && (c == name[pos]);
