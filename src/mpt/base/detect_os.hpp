@@ -95,7 +95,12 @@
 
 
 // The order of the checks matters!
-#if defined(__DJGPP__)
+#if defined(MPT_OS_GENERIC)
+#undef MPT_OS_GENERIC
+#define MPT_OS_GENERIC 1
+
+
+#elif defined(__DJGPP__)
 #define MPT_OS_DJGPP 1
 
 
@@ -426,6 +431,9 @@ static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
 #endif
 
 
+#ifndef MPT_OS_GENERIC
+#define MPT_OS_GENERIC 0
+#endif
 #ifndef MPT_OS_DJGPP
 #define MPT_OS_DJGPP 0
 #endif
