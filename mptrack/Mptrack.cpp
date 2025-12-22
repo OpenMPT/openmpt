@@ -2235,12 +2235,6 @@ CString GetWindowTextString(const CWnd &wnd)
 }
 
 
-mpt::ustring GetWindowTextUnicode(const CWnd &wnd)
-{
-	return mpt::ToUnicode(GetWindowTextString(wnd));
-}
-
-
 CString FormatFileSize(uint64 fileSize)
 {
 	static constexpr std::array<const TCHAR *, 4> Unit = {_T(" B"), _T(" KB"), _T(" MB"), _T(" GB")};

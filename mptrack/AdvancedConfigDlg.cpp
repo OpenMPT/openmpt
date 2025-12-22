@@ -109,7 +109,7 @@ void COptionsAdvanced::ReInit()
 	m_groups.clear();
 	int numGroups = 0;
 
-	mpt::ustring findStr = mpt::ToLowerCase(GetWindowTextUnicode(*GetDlgItem(IDC_EDIT1)));
+	mpt::ustring findStr = mpt::ToLowerCase(mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_EDIT1))));
 
 	LVITEMW lvi;
 	lvi.mask = LVIF_TEXT | LVIF_PARAM;

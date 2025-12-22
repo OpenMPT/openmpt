@@ -158,7 +158,7 @@ BOOL COptionsGeneral::OnInitDialog()
 
 void COptionsGeneral::OnOK()
 {
-	TrackerSettings::Instance().defaultArtist = GetWindowTextUnicode(m_defaultArtist);
+	TrackerSettings::Instance().defaultArtist = mpt::ToUnicode(GetWindowTextString(m_defaultArtist));
 	TrackerSettings::Instance().defaultModType = static_cast<MODTYPE>(m_defaultFormat.GetItemData(m_defaultFormat.GetCurSel()));
 	TrackerSettings::Instance().defaultTemplateFile = mpt::PathString::FromCString(GetWindowTextString(m_defaultTemplate));
 
