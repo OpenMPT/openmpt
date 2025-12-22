@@ -517,7 +517,7 @@ inline int CompareNoCaseAscii(const std::string &a, const std::string &b)
 
 #if defined(MODPLUG_TRACKER)
 
-inline mpt::ustring ToLowerCase(const mpt::ustring &s)
+inline mpt::ustring ToLowerCase(mpt::ustring_view s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
@@ -526,13 +526,21 @@ inline mpt::ustring ToLowerCase(const mpt::ustring &s)
 			return mpt::transcode<mpt::ustring>(mpt::transcode<CStringW>(s).MakeLower());
 		#endif // UNICODE
 	#else // !MPT_WITH_MFC
-		std::wstring ws = mpt::transcode<std::wstring>(s);
-		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
-		return mpt::transcode<mpt::ustring>(ws);
+		if constexpr(std::is_same<mpt::ustring, std::wstring>::value)
+		{
+			mpt::ustring ws{s};
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
+			return ws;
+		} else
+		{
+			std::wstring ws = mpt::transcode<std::wstring>(s);
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
+			return mpt::transcode<mpt::ustring>(ws);
+		}
 	#endif // MPT_WITH_MFC
 }
 
-inline mpt::ustring ToUpperCase(const mpt::ustring &s)
+inline mpt::ustring ToUpperCase(mpt::ustring_view s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
@@ -541,9 +549,61 @@ inline mpt::ustring ToUpperCase(const mpt::ustring &s)
 			return mpt::transcode<mpt::ustring>(mpt::transcode<CStringW>(s).MakeUpper());
 		#endif // UNICODE
 	#else // !MPT_WITH_MFC
-		std::wstring ws = mpt::transcode<std::wstring>(s);
-		std::transform(ws.begin(), ws.end(), ws.begin(), &std::towupper);
-		return mpt::transcode<mpt::ustring>(ws);
+		if constexpr(std::is_same<mpt::ustring, std::wstring>::value)
+		{
+			mpt::ustring ws{s};
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towupper);
+			return ws;
+		} else
+		{
+			std::wstring ws = mpt::transcode<std::wstring>(s);
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towupper);
+			return mpt::transcode<mpt::ustring>(ws);
+		}
+	#endif // MPT_WITH_MFC
+}
+
+inline mpt::ustring ToLowerCase(mpt::ustring s)
+{
+	#if defined(MPT_WITH_MFC)
+		#if defined(UNICODE)
+			return mpt::transcode<mpt::ustring>(mpt::transcode<CString>(std::move(s)).MakeLower());
+		#else // !UNICODE
+			return mpt::transcode<mpt::ustring>(mpt::transcode<CStringW>(std::move(s)).MakeLower());
+		#endif // UNICODE
+	#else // !MPT_WITH_MFC
+		if constexpr(std::is_same<mpt::ustring, std::wstring>::value)
+		{
+			std::transform(s.begin(), s.end(), s.begin(), &std::towlower);
+			return s;
+		} else
+		{
+			std::wstring ws = mpt::transcode<std::wstring>(std::move(s));
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towlower);
+			return mpt::transcode<mpt::ustring>(ws);
+		}
+	#endif // MPT_WITH_MFC
+}
+
+inline mpt::ustring ToUpperCase(mpt::ustring s)
+{
+	#if defined(MPT_WITH_MFC)
+		#if defined(UNICODE)
+			return mpt::transcode<mpt::ustring>(mpt::transcode<CString>(std::move(s)).MakeUpper());
+		#else // !UNICODE
+			return mpt::transcode<mpt::ustring>(mpt::transcode<CStringW>(std::move(s)).MakeUpper());
+		#endif // UNICODE
+	#else // !MPT_WITH_MFC
+		if constexpr(std::is_same<mpt::ustring, std::wstring>::value)
+		{
+			std::transform(s.begin(), s.end(), s.begin(), &std::towupper);
+			return s;
+		} else
+		{
+			std::wstring ws = mpt::transcode<std::wstring>(std::move(s));
+			std::transform(ws.begin(), ws.end(), ws.begin(), &std::towupper);
+			return mpt::transcode<mpt::ustring>(ws);
+		}
 	#endif // MPT_WITH_MFC
 }
 
