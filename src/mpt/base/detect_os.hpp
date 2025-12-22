@@ -420,7 +420,7 @@ static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
 #define MPT_OS_NETBSD 1
 
 
-#elif defined(__unix__)
+#elif defined(__unix__) || defined(__unix) || defined(unix)
 #define MPT_OS_GENERIC_UNIX 1
 
 
