@@ -535,6 +535,17 @@ static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
 #endif
 
 
+#ifndef MPT_OS_HAS_UNISTD_H
+#if MPT_OS_GENERIC
+#define MPT_OS_HAS_UNISTD_H 0
+#elif __has_include(<unistd.h>)
+#define MPT_OS_HAS_UNISTD_H 1
+#else
+#define MPT_OS_HAS_UNISTD_H 0
+#endif
+#endif
+
+
 
 #define MPT_MODE_KERNEL 0
 
