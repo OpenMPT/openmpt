@@ -14,6 +14,7 @@
 
 #include "mpt/string/types.hpp"
 #include "mpt/string/utility.hpp"
+#include "mpt/string_transcode/macros.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
 #include <algorithm>
@@ -418,7 +419,7 @@ inline CString ToCString(Tencoding &&from, Tsrc &&str)
 // i.e. it is NOT generally available at compile time.
 // Use explicit UTF8 encoding,
 // i.e. U+00FC (LATIN SMALL LETTER U WITH DIAERESIS) would be written as "\xC3\xBC".
-#define MPT_UTF8(x) mpt::transcode<mpt::ustring>(mpt::common_encoding::utf8, x)
+#define MPT_UTF8(x) MPT_USTRING_UTF8(x)
 
 
 

@@ -53,7 +53,7 @@ private:
 		{
 			return std::string();
 		}
-		return MPT_AFORMAT_MESSAGE("{}={}\n")(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::replace(tag, MPT_USTRING("="), MPT_UTF8_STRING("\xEF\xBF\xBD"))));  // U+FFFD
+		return MPT_AFORMAT_MESSAGE("{}={}\n")(field, mpt::transcode<std::string>(mpt::common_encoding::utf8, mpt::replace(tag, MPT_USTRING("="), MPT_USTRING_UTF8("\xEF\xBF\xBD"))));  // U+FFFD
 	}
 
 public:
