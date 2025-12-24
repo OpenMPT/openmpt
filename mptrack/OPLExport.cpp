@@ -405,7 +405,7 @@ public:
 		FileDialog dlg = SaveFileDialog()
 			.DefaultExtension(extension)
 			.DefaultFilename(m_modDoc.GetPathNameMpt().GetFilenameBase().ReplaceExtension(P_(".") + extension))
-			.ExtensionFilter(MPT_UFORMAT("{} Files|*.{}||")(mpt::ToUpperCaseLocale(extension.ToUnicode()), extension))
+			.ExtensionFilter(MPT_UFORMAT("{} Files|*.{}||")(mpt::ToUpperCaseAscii(extension.ToUnicode()), extension))
 			.WorkingDirectory(TrackerSettings::Instance().PathExport.GetWorkingDir());
 		if(!dlg.Show())
 		{
