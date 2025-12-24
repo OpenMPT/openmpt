@@ -300,7 +300,7 @@ BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
 void CSelectPluginDlg::OnNameFilterChanged()
 {
 	// Update name filter text
-	m_nameFilter = mpt::ToLowerCase(mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_NAMEFILTER))));
+	m_nameFilter = mpt::ToLowerCaseLocale(mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_NAMEFILTER))));
 
 	UpdatePluginsList();
 }
@@ -376,7 +376,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				bool matches = false;
 				// Search in plugin names
 				{
-					mpt::ustring displayName = mpt::ToLowerCase(plug.libraryName.ToUnicode());
+					mpt::ustring displayName = mpt::ToLowerCaseLocale(plug.libraryName.ToUnicode());
 					if(displayName.find(m_nameFilter, 0) != displayName.npos)
 					{
 						matches = true;
@@ -385,7 +385,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				// Search in plugin tags
 				if(!matches)
 				{
-					mpt::ustring tags = mpt::ToLowerCase(plug.tags);
+					mpt::ustring tags = mpt::ToLowerCaseLocale(plug.tags);
 					for(const auto &tag : currentTags)
 					{
 						if(!tag.empty() && tags.find(tag, 0) != tags.npos)
@@ -398,7 +398,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				// Search in plugin vendors
 				if(!matches)
 				{
-					mpt::ustring vendor = mpt::ToLowerCase(mpt::ToUnicode(plug.vendor));
+					mpt::ustring vendor = mpt::ToLowerCaseLocale(mpt::ToUnicode(plug.vendor));
 					if(vendor.find(m_nameFilter, 0) != vendor.npos)
 					{
 						matches = true;

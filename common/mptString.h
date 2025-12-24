@@ -518,7 +518,7 @@ inline int CompareNoCaseAscii(const std::string &a, const std::string &b)
 
 #if defined(MODPLUG_TRACKER)
 
-inline mpt::ustring ToLowerCase(mpt::ustring_view s)
+inline mpt::ustring ToLowerCaseLocale(mpt::ustring_view s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
@@ -541,7 +541,7 @@ inline mpt::ustring ToLowerCase(mpt::ustring_view s)
 	#endif // MPT_WITH_MFC
 }
 
-inline mpt::ustring ToUpperCase(mpt::ustring_view s)
+inline mpt::ustring ToUpperCaseLocale(mpt::ustring_view s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
@@ -564,7 +564,7 @@ inline mpt::ustring ToUpperCase(mpt::ustring_view s)
 	#endif // MPT_WITH_MFC
 }
 
-inline mpt::ustring ToLowerCase(mpt::ustring s)
+inline mpt::ustring ToLowerCaseLocale(mpt::ustring s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)
@@ -586,7 +586,7 @@ inline mpt::ustring ToLowerCase(mpt::ustring s)
 	#endif // MPT_WITH_MFC
 }
 
-inline mpt::ustring ToUpperCase(mpt::ustring s)
+inline mpt::ustring ToUpperCaseLocale(mpt::ustring s)
 {
 	#if defined(MPT_WITH_MFC)
 		#if defined(UNICODE)

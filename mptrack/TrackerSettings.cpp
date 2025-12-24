@@ -867,7 +867,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 		auto device = m_SoundDeviceIdentifier.Get();
 		if(device.substr(0, 5) == UL_("ASIO_"))
 		{
-			device = mpt::ToUpperCase(device);
+			device = mpt::ToUpperCaseLocale(device);
 			m_SoundDeviceIdentifier = device;
 		}
 	}

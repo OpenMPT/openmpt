@@ -463,7 +463,7 @@ template<> inline SettingValue ToSettingValue(const SampleEditorDefaultFormat &v
 }
 template<> inline SampleEditorDefaultFormat FromSettingValue(const SettingValue &val)
 {
-	mpt::ustring format = mpt::ToLowerCase(val.as<mpt::ustring>());
+	mpt::ustring format = mpt::ToLowerCaseLocale(val.as<mpt::ustring>());
 	if(format == U_("wav"))
 		return dfWAV;
 	if(format == U_("raw"))
