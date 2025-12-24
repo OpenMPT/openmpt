@@ -458,63 +458,25 @@ inline mpt::ustring ToUnicode(uint16 codepage, Tencoding &&fallback, Tsrc &&str)
 
 
 
-template <typename Tchar>
-inline std::basic_string<Tchar> ToLowerCaseAscii(std::basic_string<Tchar> s)
+template <typename Tstring>
+inline auto ToLowerCaseAscii(const Tstring &s_) -> typename mpt::make_string_type<Tstring>::type
 {
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_lower_ascii));
+	using string_type = typename mpt::make_string_type<Tstring>::type;
+	using char_type = typename mpt::string_traits<typename mpt::make_string_type<Tstring>::type>::char_type;
+	string_type s{s_};
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char_type (*)(char_type)>(&mpt::to_lower_ascii));
 	return s;
 }
-template <typename Tchar>
-inline std::basic_string<Tchar> ToUpperCaseAscii(std::basic_string<Tchar> s)
+template <typename Tstring>
+inline auto ToUpperCaseAscii(const Tstring &s_) -> typename mpt::make_string_type<Tstring>::type
 {
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_upper_ascii));
-	return s;
-}
-
-template <typename Tchar>
-inline std::basic_string<Tchar> ToLowerCaseAscii(std::basic_string_view<Tchar> sv)
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_lower_ascii));
-	return s;
-}
-template <typename Tchar>
-inline std::basic_string<Tchar> ToUpperCaseAscii(std::basic_string_view<Tchar> sv)
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_upper_ascii));
+	using string_type = typename mpt::make_string_type<Tstring>::type;
+	using char_type = typename mpt::string_traits<typename mpt::make_string_type<Tstring>::type>::char_type;
+	string_type s{s_};
+	std::transform(s.begin(), s.end(), s.begin(), static_cast<char_type (*)(char_type)>(&mpt::to_upper_ascii));
 	return s;
 }
 
-template <typename Tchar, std::size_t N>
-inline std::basic_string<Tchar> ToLowerCaseAscii(const Tchar (&sv)[N])
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_lower_ascii));
-	return s;
-}
-template <typename Tchar, std::size_t N>
-inline std::basic_string<Tchar> ToUpperCaseAscii(const Tchar (&sv)[N])
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_upper_ascii));
-	return s;
-}
-
-template <typename Tchar>
-inline std::basic_string<Tchar> ToLowerCaseAscii(const Tchar *sv)
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_lower_ascii));
-	return s;
-}
-template <typename Tchar>
-inline std::basic_string<Tchar> ToUpperCaseAscii(const Tchar *sv)
-{
-	std::basic_string<Tchar> s{sv};
-	std::transform(s.begin(), s.end(), s.begin(), static_cast<Tchar(*)(Tchar)>(&mpt::to_upper_ascii));
-	return s;
-}
 
 template <typename Tchar>
 inline int CompareNoCaseAscii(const Tchar *a, const Tchar *b, std::size_t n)
