@@ -615,6 +615,20 @@ inline mpt::ustring ToUpperCaseLocale(mpt::ustring s)
 	#endif // MPT_WITH_MFC
 }
 
+#if defined(MPT_WITH_MFC)
+
+inline CString ToLowerCaseLocale(CString s)
+{
+	return s.MakeLower();
+}
+
+inline CString ToUpperCaseLocale(CString s)
+{
+	return s.MakeUpper();
+}
+
+#endif // MPT_WITH_MFC
+
 #endif // MODPLUG_TRACKER
 
 

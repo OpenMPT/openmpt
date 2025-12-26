@@ -300,7 +300,7 @@ BOOL CSelectPluginDlg::PreTranslateMessage(MSG *pMsg)
 void CSelectPluginDlg::OnNameFilterChanged()
 {
 	// Update name filter text
-	m_nameFilter = mpt::ToLowerCaseLocale(mpt::ToUnicode(GetWindowTextString(*GetDlgItem(IDC_NAMEFILTER))));
+	m_nameFilter = mpt::ToUnicode(mpt::ToLowerCaseLocale(GetWindowTextString(*GetDlgItem(IDC_NAMEFILTER))));
 
 	UpdatePluginsList();
 }
@@ -398,7 +398,7 @@ void CSelectPluginDlg::UpdatePluginsList(const VSTPluginLib *forceSelect)
 				// Search in plugin vendors
 				if(!matches)
 				{
-					mpt::ustring vendor = mpt::ToLowerCaseLocale(mpt::ToUnicode(plug.vendor));
+					mpt::ustring vendor = mpt::ToUnicode(mpt::ToLowerCaseLocale(plug.vendor));
 					if(vendor.find(m_nameFilter, 0) != vendor.npos)
 					{
 						matches = true;
