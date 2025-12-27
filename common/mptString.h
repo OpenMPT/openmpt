@@ -307,20 +307,6 @@ struct Charset
 
 
 
-// Checks if the std::string represents an UTF8 string.
-// This is currently implemented as converting to std::wstring and back assuming UTF8 both ways,
-// and comparing the result to the original string.
-// Caveats:
-//  - can give false negatives because of possible unicode normalization during conversion
-//  - can give false positives if the 8bit encoding contains high-ascii only in valid utf8 groups
-//  - slow because of double conversion
-inline bool IsUTF8(const std::string &str)
-{
-	return mpt::is_utf8(str);
-}
-
-
-
 template <typename Tsrc>
 inline mpt::ustring ToUnicode(Tsrc &&str)
 {

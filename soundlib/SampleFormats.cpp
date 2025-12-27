@@ -2182,7 +2182,7 @@ bool CSoundFile::ReadAUSample(SAMPLEINDEX nSample, FileReader &file, bool mayNor
 	file.ReadString<mpt::String::maybeNullTerminated>(annotation, dataOffset - 24);
 	annotation = mpt::replace(annotation, std::string("\r\n"), std::string("\n"));
 	annotation = mpt::replace(annotation, std::string("\r"), std::string("\n"));
-	mpt::Charset charset = mpt::IsUTF8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
+	mpt::Charset charset = mpt::is_utf8(annotation) ? mpt::Charset::UTF8 : mpt::Charset::ISO8859_1;
 	const auto lines = mpt::split(annotation, std::string("\n"));
 	bool hasFields = false;
 	for(const auto &line : lines)

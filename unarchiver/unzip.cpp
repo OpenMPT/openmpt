@@ -153,7 +153,7 @@ CZipArchive::CZipArchive(FileReader &file)
 				if(unzGetGlobalComment(zipFile, commentData.data(), info.size_comment) >= 0)
 				{
 					commentData[info.size_comment - 1] = '\0';
-					comment = mpt::ToUnicode(mpt::IsUTF8(commentData.data()) ? mpt::Charset::UTF8 : mpt::Charset::CP437, commentData.data());
+					comment = mpt::ToUnicode(mpt::is_utf8(commentData.data()) ? mpt::Charset::UTF8 : mpt::Charset::CP437, commentData.data());
 				}
 			}
 		}
