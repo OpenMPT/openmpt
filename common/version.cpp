@@ -565,12 +565,12 @@ mpt::ustring GetFullCreditsString()
 		"libopenmpt (based on OpenMPT / ModPlug Tracker)\n"
 #endif
 		"\n"
-		"Copyright \xC2\xA9 2004-2025 Contributors\n"
+		"Copyright \xC2\xA9 2004-2026 Contributors\n"
 		"Copyright \xC2\xA9 1997-2003 Olivier Lapicque\n"
 		"\n"
 		"Contributors:\n"
-		"Johannes Schultz (2008-2025)\n"
-		"J\xC3\xB6rn Heusipp (2012-2025)\n"
+		"Johannes Schultz (2008-2026)\n"
+		"J\xC3\xB6rn Heusipp (2012-2026)\n"
 		"Ahti Lepp\xC3\xA4nen (2005-2011)\n"
 		"Robin Fernandes (2004-2007)\n"
 		"Sergiy Pylypenko (2007)\n"
@@ -760,7 +760,7 @@ mpt::ustring GetFullCreditsString()
 mpt::ustring GetLicenseString()
 {
 	return MPT_UTF8(
-		"Copyright (c) 2004-2025, OpenMPT contributors" "\n"
+		"Copyright (c) 2004-2026, OpenMPT contributors" "\n"
 		"Copyright (c) 1997-2003, Olivier Lapicque" "\n"
 		"All rights reserved." "\n"
 		"" "\n"
