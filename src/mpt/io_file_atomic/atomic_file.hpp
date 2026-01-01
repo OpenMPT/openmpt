@@ -187,6 +187,19 @@ public:
 	atomic_shared_file_ref(const atomic_shared_file_ref &) = delete;
 	atomic_shared_file_ref & operator=(const atomic_shared_file_ref &) = delete;
 
+	void lock_shared() {
+		if (m_locks == 0) {
+			OVERLAPPED overlapped{};
+			overlapped.Internal = 0;
+			overlapped.InternalHigh = 0;
+			overlapped.Offset = 0x00000000;
+			overlapped.OffsetHigh = 0x00000000;
+			overlapped.hEvent = NULL;
+			mpt::windows::CheckBOOL(LockFileEx(m_hFile, 0, 0, 0xffffffff, 0xffffffff, &overlapped));
+		}
+		m_locks += 1;
+	}
+
 	// cppcheck-suppress duplInheritedMember
 	void lock() {
 		if (m_locks == 0) {
@@ -220,6 +233,20 @@ public:
 
 	// cppcheck-suppress duplInheritedMember
 	void unlock() {
+		assert(m_locks > 0);
+		m_locks -= 1;
+		if (m_locks == 0) {
+			OVERLAPPED overlapped{};
+			overlapped.Internal = 0;
+			overlapped.InternalHigh = 0;
+			overlapped.Offset = 0x00000000;
+			overlapped.OffsetHigh = 0x00000000;
+			overlapped.hEvent = NULL;
+			mpt::windows::CheckBOOL(UnlockFileEx(m_hFile, 0, 0xffffffff, 0xffffffff, &overlapped));
+		}
+	}
+
+	void unlock_shared() {
 		assert(m_locks > 0);
 		m_locks -= 1;
 		if (m_locks == 0) {
