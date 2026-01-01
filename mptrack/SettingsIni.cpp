@@ -31,6 +31,8 @@
 
 #include <algorithm>
 #include <array>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <utility>
 #include <vector>
