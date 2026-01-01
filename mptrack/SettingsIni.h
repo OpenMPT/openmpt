@@ -140,6 +140,8 @@ protected:
 public:
 	const mpt::PathString &Filename() const;
 	mpt::PathString GetFilename() const;
+public:
+	void MakeBackup(const mpt::PathString &tag, std::optional<Caching> sync_hint);
 };
 
 
@@ -150,7 +152,7 @@ protected:
 	WindowsIniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint);
 	~WindowsIniFileBase() = default;
 public:
-	void ConvertToUnicode(std::optional<Caching> sync_hint, const mpt::ustring &backupTag = mpt::ustring());
+	void ConvertToUnicode(std::optional<Caching> sync_hint);
 };
 
 
