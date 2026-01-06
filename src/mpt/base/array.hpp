@@ -94,25 +94,25 @@ using std::to_array;
 #else // !C++20
 
 namespace detail {
-	template <typename T, std::size_t N, std::size_t... I>
-	constexpr std::array<typename std::remove_cv<T>::type, N> to_array_impl(T (&a)[N], std::index_sequence<I...>) {
-		return {{a[I]...}};
-	}
+template <typename T, std::size_t N, std::size_t... I>
+constexpr std::array<typename std::remove_cv<T>::type, N> to_array_impl(T (&a)[N], std::index_sequence<I...>) {
+	return {{a[I]...}};
 }
- 
-template<class T, std::size_t N>
+} // namespace detail
+
+template <typename T, std::size_t N>
 constexpr std::array<typename std::remove_cv<T>::type, N> to_array(T (&a)[N]) {
 	return detail::to_array_impl(a, std::make_index_sequence<N>{});
 }
 
 namespace detail {
-	template<class T, std::size_t N, std::size_t... I>
-	constexpr std::array<typename std::remove_cv<T>::type, N> to_array_impl(T (&&a)[N], std::index_sequence<I...>) {
-		return {{std::move(a[I])...}};
-	}
+template <typename T, std::size_t N, std::size_t... I>
+constexpr std::array<typename std::remove_cv<T>::type, N> to_array_impl(T (&&a)[N], std::index_sequence<I...>) {
+	return {{std::move(a[I])...}};
 }
- 
-template<class T, std::size_t N>
+} // namespace detail
+
+template <typename T, std::size_t N>
 constexpr std::array<typename std::remove_cv<T>::type, N> to_array(T (&&a)[N]) {
 	return detail::to_array_impl(std::move(a), std::make_index_sequence<N>{});
 }
