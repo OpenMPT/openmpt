@@ -31,6 +31,9 @@ echo ok &
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2017 --windows-version=winxpx64 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
+${PREMAKE} --file=build/premake/premake.lua --os=windows vs2017 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
+echo ok &
+
 ${PREMAKE} --file=build/premake/premake.lua --os=windows vs2019 --windows-version=win7 --windows-family=desktop --windows-charset=Unicode && \
 echo ok &
 
