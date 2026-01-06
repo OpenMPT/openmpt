@@ -47,11 +47,11 @@
   <url>https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp 0.50/innounp050.rar</url>
   <url>https://deac-fra.dl.sourceforge.net/project/innounp/innounp/innounp 0.50/innounp050.rar</url>
  </file>
- <file name="build/externals/innosetup-6.6.1.exe">
-  <size>9947600</size>
-  <hash type="sha-512">a8f1a1efde23ece3ac3f9af8d0c6f6242bddb5c14cfb174baface06c935b5a4650b31697453656f1752f5460e5f4621c1e63ee5a40059a771afd24c616facf2c</hash>
-  <url>https://files.jrsoftware.org/is/6/innosetup-6.6.1.exe</url>
-  <url>https://files.innosetup.nl/innosetup-6.6.1.exe</url>
+ <file name="build/externals/innosetup-6.7.0.exe">
+  <size>10591312</size>
+  <hash type="sha-512">9f1148cc15e13417a8f43b5f5f21cb1452d27e3080c4cea76a84a9714ee996da551007c53d91122a9c4254444ac6849485592abd86ea457a058750c4eac4738b</hash>
+  <url>https://files.jrsoftware.org/is/6/innosetup-6.7.0.exe</url>
+  <url>https://files.innosetup.nl/innosetup-6.7.0.exe</url>
  </file>
  <file name="build/externals/isetup-5.5.8-unicode.exe">
   <size>2342456</size>
