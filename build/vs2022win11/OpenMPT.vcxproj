@@ -596,7 +596,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -635,7 +635,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -672,7 +672,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -709,7 +709,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -754,7 +754,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -798,7 +798,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -842,7 +842,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -886,7 +886,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -931,7 +931,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -975,7 +975,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1019,7 +1019,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1063,7 +1063,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1101,7 +1101,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1139,7 +1139,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1176,7 +1176,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1213,7 +1213,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1258,7 +1258,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1302,7 +1302,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1346,7 +1346,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1390,7 +1390,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1435,7 +1435,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1479,7 +1479,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1523,7 +1523,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1567,7 +1567,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win10.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -2431,6 +2431,7 @@
     <None Include="..\..\mptrack\res\moddoc.ico" />
     <None Include="..\..\mptrack\res\nodrag.cur" />
     <None Include="..\vs\win10.manifest" />
+    <None Include="..\vs\win11-locale-legacy.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc" />

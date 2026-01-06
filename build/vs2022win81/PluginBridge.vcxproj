@@ -435,7 +435,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -470,7 +470,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -504,7 +504,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -546,7 +546,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -587,7 +587,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -628,7 +628,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -670,7 +670,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -711,7 +711,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -752,7 +752,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -787,7 +787,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -821,7 +821,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -855,7 +855,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -897,7 +897,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -938,7 +938,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -979,7 +979,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1021,7 +1021,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1062,7 +1062,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1103,7 +1103,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>../vs/win81.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>../vs/win81.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1318,6 +1318,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\pluginBridge\PluginBridge.manifest" />
+    <None Include="..\vs\win11-locale-legacy.manifest" />
     <None Include="..\vs\win81.manifest" />
   </ItemGroup>
   <ItemGroup>

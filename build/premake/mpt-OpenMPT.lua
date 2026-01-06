@@ -46,6 +46,9 @@ end
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
+	files {
+		"../../build/vs/win11-locale-legacy.manifest",
+	}
 if stringmode and stringmode == "UTF8" then
    targetname "OpenMPT-UTF8"
 elseif charset and charset == "MBCS" then

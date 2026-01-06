@@ -2857,6 +2857,9 @@
     <None Include="..\vs\win10.manifest">
       <Filter>build\vs</Filter>
     </None>
+    <None Include="..\vs\win11-locale-legacy.manifest">
+      <Filter>build\vs</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\mptrack\mptrack.rc">

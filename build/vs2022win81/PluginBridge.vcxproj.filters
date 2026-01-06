@@ -805,6 +805,9 @@
     <None Include="..\..\pluginBridge\PluginBridge.manifest">
       <Filter>pluginBridge</Filter>
     </None>
+    <None Include="..\vs\win11-locale-legacy.manifest">
+      <Filter>build\vs</Filter>
+    </None>
     <None Include="..\vs\win81.manifest">
       <Filter>build\vs</Filter>
     </None>

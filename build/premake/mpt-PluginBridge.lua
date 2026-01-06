@@ -6,6 +6,9 @@ include_dependency "../../build/premake/ext-vst.lua"
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
+	files {
+		"../../build/vs/win11-locale-legacy.manifest",
+	}
 
 	mpt_use_vst()
 	defines { "MPT_WITH_VST" }
@@ -77,6 +80,9 @@ include_dependency "../../build/premake/ext-vst.lua"
   language "C++"
   vpaths { ["*"] = "../../" }
   mpt_kind "GUI"
+	files {
+		"../../build/vs/win11-locale-legacy.manifest",
+	}
 
 	mpt_use_vst()
 	defines { "MPT_WITH_VST" }
