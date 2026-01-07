@@ -415,15 +415,15 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint)
 			case TextFileEncoding::Type::UTF8:
 				backupTag = P_("utf8");
 				break;
-	#if MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
 			case TextFileEncoding::Type::ANSI:
 				backupTag = P_("ansi");
 				break;
-	#else
+#else
 			case TextFileEncoding::Type::Locale:
 				backupTag = P_("locale");
 				break;
-	#endif
+#endif
 		}
 		MakeBackup(backupTag, sync_hint);
 	}
@@ -437,17 +437,17 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint)
 	}
 }
 
-
-
-mpt::winstring IniFileHelpers::GetSection(const SettingPath &path)
+mpt::winstring WindowsIniFileBase::GetSection(const SettingPath &path)
 {
 	return mpt::ToWin(path.GetSection());
 }
 
-mpt::winstring IniFileHelpers::GetKey(const SettingPath &path)
+mpt::winstring WindowsIniFileBase::GetKey(const SettingPath &path)
 {
 	return mpt::ToWin(path.GetKey());
 }
+
+
 
 mpt::ustring IniFileHelpers::FormatValueAsIni(const SettingValue &value)
 {

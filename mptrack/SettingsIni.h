@@ -121,8 +121,6 @@ public:
 class IniFileHelpers
 {
 protected:
-	static mpt::winstring GetSection(const SettingPath &path);
-	static mpt::winstring GetKey(const SettingPath &path);
 	static mpt::ustring FormatValueAsIni(const SettingValue &value);
 	static SettingValue ParseValueFromIni(const mpt::ustring &str, const SettingValue &def);
 };
@@ -151,6 +149,9 @@ class WindowsIniFileBase
 protected:
 	WindowsIniFileBase(mpt::PathString filename_, std::optional<Caching> sync_hint);
 	~WindowsIniFileBase() = default;
+protected:
+	static mpt::winstring GetSection(const SettingPath &path);
+	static mpt::winstring GetKey(const SettingPath &path);
 public:
 	void ConvertToUnicode(std::optional<Caching> sync_hint);
 };
