@@ -281,10 +281,7 @@ public:
 		return mpt::UUID::UUIDFromWin32(guid);
 #elif MPT_WINRT_BEFORE(MPT_WIN_8)
 		return mpt::UUID::RFC4122Random(rng);
-#elif MPT_WINNT_AT_LEAST(MPT_WIN_XP)
-		// Available since Win2000, but we check for WinXP in order to not use this
-		// function in Win32old builds. It is not available on some non-fully
-		// patched Win98SE installs in the wild.
+#elif MPT_WINNT_AT_LEAST(MPT_WIN_2000)
 		::UUID uuid = ::UUID();
 		RPC_STATUS status = ::UuidCreateSequential(&uuid);
 		if (status != RPC_S_OK && status != RPC_S_UUID_LOCAL_ONLY) {
