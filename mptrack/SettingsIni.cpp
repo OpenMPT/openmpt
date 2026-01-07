@@ -392,7 +392,7 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint)
 		std::shared_lock l{file};
 		const std::vector<std::byte> filedata = file.read();
 		const TextFileEncoding desired_encoding = TextFileHelpers::GetPreferredEncoding();
-		const TextFileEncoding current_encoding = TextFileHelpers::ProbeEncoding(mpt::as_span(filedata));
+		const TextFileEncoding current_encoding = TextFileHelpers::ProbeEncoding(filedata);
 		if(current_encoding == desired_encoding)
 		{
 			return;
@@ -433,7 +433,7 @@ void WindowsIniFileBase::ConvertToUnicode(std::optional<Caching> sync_hint)
 		const TextFileEncoding desired_encoding = TextFileHelpers::GetPreferredEncoding();
 		static_assert(sizeof(wchar_t) == 2);
 		MPT_ASSERT(mpt::endian_is_little());
-		file.write(mpt::as_span(TextFileHelpers::EncodeText(desired_encoding, TextFileHelpers::DecodeText(mpt::as_span(filedata), filename))), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
+		file.write(TextFileHelpers::EncodeText(desired_encoding, TextFileHelpers::DecodeText(filedata, filename)), sync_hint.value_or(sync_default.value_or(Caching::WriteBack)) == Caching::WriteThrough);
 	}
 }
 
