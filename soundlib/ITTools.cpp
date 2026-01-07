@@ -172,8 +172,8 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 
 	// Volume / Panning
 	fadeout = std::min(static_cast<uint16>(mptIns.nFadeOut >> 5), uint16(256));
-	gbv = static_cast<uint8>(std::min(mptIns.nGlobalVol * 2u, uint32(128)));
-	dfp = static_cast<uint8>(std::min(mptIns.nPan / 4u, uint32(64)));
+	gbv = std::min(mpt::saturate_cast<uint8>(mptIns.nGlobalVol * 2u), uint8(128));
+	dfp = std::min(mpt::saturate_cast<uint8>(mptIns.nPan / 4u), uint8(64));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
 
 	// Random Variation
