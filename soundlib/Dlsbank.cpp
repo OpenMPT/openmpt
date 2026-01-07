@@ -1926,10 +1926,10 @@ static uint16 ScaleEnvelope(uint32 time, float tempoScale)
 }
 
 
-uint32 DLSENVELOPE::Envelope::ConvertToMPT(InstrumentEnvelope &mptEnv, const EnvelopeType envType, const float tempoScale, const int16 valueScale) const
+uint16 DLSENVELOPE::Envelope::ConvertToMPT(InstrumentEnvelope &mptEnv, const EnvelopeType envType, const float tempoScale, const int16 valueScale) const
 {
 	if(!attack && decay >= 20 * 50 && (!sustainLevel && envType != ENV_PITCH) && release >= 20 * 50)
-		return uint32_max;
+		return uint16_max;
 
 	const EnvelopeNode::value_t neutralValue = (envType == ENV_VOLUME) ? 0 : ENVELOPE_MID;
 	
@@ -2039,13 +2039,13 @@ uint32 DLSENVELOPE::Envelope::ConvertToMPT(InstrumentEnvelope &mptEnv, const Env
 		mptEnv.push_back(lStartTime + releaseTicks, neutralValue);
 		if(releaseTicks > 0)
 		{
-			return 32768 / releaseTicks;
+			return static_cast<uint16>(32768 / releaseTicks);
 		}
 	} else if(!lastIsNeutral)
 	{
 		mptEnv.push_back(mptEnv.back().tick + 1u, neutralValue);
 	}
-	return uint32_max;
+	return uint16_max;
 }
 
 
@@ -2280,7 +2280,7 @@ bool CDLSBank::ExtractInstrument(CSoundFile &sndFile, INSTRUMENTINDEX nInstr, ui
 	if ((nEnv) && (nEnv <= m_Envelopes.size()))
 	{
 		const DLSENVELOPE &part = m_Envelopes[nEnv - 1];
-		if(const auto fadeout = part.volumeEnv.ConvertToMPT(pIns->VolEnv, ENV_VOLUME, tempoScale, 3200); fadeout != uint32_max)
+		if(const auto fadeout = part.volumeEnv.ConvertToMPT(pIns->VolEnv, ENV_VOLUME, tempoScale, 3200); fadeout != uint16_max)
 			pIns->nFadeOut = fadeout;
 		if(std::abs(part.pitchEnvDepth) >= 50)
 			part.pitchEnv.ConvertToMPT(pIns->PitchEnv, ENV_PITCH, tempoScale, part.pitchEnvDepth);

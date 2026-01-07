@@ -60,7 +60,7 @@ XMInstrument::SampleList XMInstrument::ConvertToXM(const ModInstrument &mptIns, 
 	MemsetZero(*this);
 
 	// FFF is maximum in the FT2 GUI, but it can also accept other values. MilkyTracker just allows 0...4095 and 32767 ("cut")
-	volFade = static_cast<uint16>(std::min(mptIns.nFadeOut, uint32(32767)));
+	volFade = std::min(mptIns.nFadeOut, uint16(32767));
 
 	// Convert envelopes
 	ConvertEnvelopeToXM(mptIns.VolEnv, volPoints, volFlags, volSustain, volLoopStart, volLoopEnd, EnvTypeVol);

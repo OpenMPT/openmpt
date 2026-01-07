@@ -1408,7 +1408,7 @@ bool CSoundFile::ReadGT2(FileReader &file, ModLoadingFlags loadFlags)
 		if(instr.defaultPan > 0)
 		{
 			mptIns->dwFlags.set(INS_SETPANNING);
-			mptIns->nPan = Util::muldivr_unsigned(instr.defaultPan, 256, 4095);
+			mptIns->nPan = static_cast<uint16>(Util::muldivr_unsigned(instr.defaultPan, 256, 4095));
 		}
 		for(uint8 i = 0; i < std::min(std::size(mptIns->Keyboard), std::size(instr.samples)); i++)
 		{

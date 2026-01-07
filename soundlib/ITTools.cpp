@@ -171,7 +171,7 @@ uint32 ITInstrument::ConvertToIT(const ModInstrument &mptIns, bool compatExport,
 	mpt::String::WriteBuf(mpt::String::nullTerminated, name) = mptIns.name;
 
 	// Volume / Panning
-	fadeout = static_cast<uint16>(std::min(mptIns.nFadeOut >> 5, uint32(256)));
+	fadeout = std::min(static_cast<uint16>(mptIns.nFadeOut >> 5), uint16(256));
 	gbv = static_cast<uint8>(std::min(mptIns.nGlobalVol * 2u, uint32(128)));
 	dfp = static_cast<uint8>(std::min(mptIns.nPan / 4u, uint32(64)));
 	if(!mptIns.dwFlags[INS_SETPANNING]) dfp |= ITInstrument::ignorePanning;
@@ -264,7 +264,7 @@ uint32 ITInstrument::ConvertToMPT(ModInstrument &mptIns, MODTYPE modFormat) cons
 	// Volume / Panning
 	mptIns.nFadeOut = fadeout << 5;
 	mptIns.nGlobalVol = gbv / 2;
-	LimitMax(mptIns.nGlobalVol, 64u);
+	LimitMax(mptIns.nGlobalVol, uint16(64));
 	mptIns.nPan = (dfp & 0x7F) * 4;
 	if(mptIns.nPan > 256) mptIns.nPan = 128;
 	mptIns.dwFlags.set(INS_SETPANNING, !(dfp & ITInstrument::ignorePanning));

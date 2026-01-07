@@ -2225,13 +2225,13 @@ void CCtrlInstruments::OnFadeOutVolChanged()
 	{
 		int minval = 0, maxval = 32767;
 		m_SpinFadeOut.GetRange(minval, maxval);
-		int nVol = GetDlgItemInt(IDC_EDIT7);
-		Limit(nVol, minval, maxval);
+		int fadeout = GetDlgItemInt(IDC_EDIT7);
+		Limit(fadeout, minval, maxval);
 
-		if(nVol != (int)pIns->nFadeOut)
+		if(fadeout != pIns->nFadeOut)
 		{
 			if(!m_startedEdit) PrepareUndo("Set Fade Out");
-			pIns->nFadeOut = nVol;
+			pIns->nFadeOut = static_cast<uint16>(fadeout);
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}
@@ -2249,7 +2249,7 @@ void CCtrlInstruments::OnGlobalVolChanged()
 		{
 			if(!m_startedEdit) PrepareUndo("Set Global Volume");
 			// Live-adjust volume
-			pIns->nGlobalVol = nVol;
+			pIns->nGlobalVol = static_cast<uint16>(nVol);
 			for(auto &chn : m_sndFile.m_PlayState.Chn)
 			{
 				if(chn.pModInstrument == pIns)
@@ -2317,12 +2317,11 @@ void CCtrlInstruments::OnPanningChanged()
 		int nPan = GetDlgItemInt(IDC_EDIT9);
 		if(m_modDoc.GetModType() & MOD_TYPE_IT)	// IT panning ranges from 0 to 64
 			nPan *= 4;
-		if (nPan < 0) nPan = 0;
-		if (nPan > 256) nPan = 256;
+		Limit(nPan, 0, 256);
 		if (nPan != (int)pIns->nPan)
 		{
 			if(!m_startedEdit) PrepareUndo("Set Panning");
-			pIns->nPan = nPan;
+			pIns->nPan = static_cast<uint16>(nPan);
 			SetModified(InstrumentHint().Info(), false);
 		}
 	}

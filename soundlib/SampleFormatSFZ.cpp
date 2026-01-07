@@ -901,9 +901,9 @@ bool CSoundFile::ReadSFZInstrument(INSTRUMENTINDEX nInstr, FileReader &file)
 		if(region.ampEnv.release > 0)
 		{
 			const double tickDuration = m_PlayState.m_nSamplesPerTick / static_cast<double>(GetSampleRate());
-			pIns->nFadeOut = std::min(mpt::saturate_trunc<uint32>(32768.0 * tickDuration / region.ampEnv.release), uint32(32767));
+			pIns->nFadeOut = std::min(mpt::saturate_trunc<uint16>(32768.0 * tickDuration / region.ampEnv.release), uint16(32767));
 			if(GetType() == MOD_TYPE_IT)
-				pIns->nFadeOut = std::min((pIns->nFadeOut + 16u) & ~31u, uint32(8192));
+				pIns->nFadeOut = std::min(static_cast<uint16>((pIns->nFadeOut + 16u) & ~31u), uint16(8192));
 		}
 		
 		sample.rootNote = region.keyRoot + NOTE_MIN;

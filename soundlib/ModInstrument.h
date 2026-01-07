@@ -72,9 +72,9 @@ struct InstrumentEnvelope : public std::vector<EnvelopeNode>
 // Instrument Struct
 struct ModInstrument
 {
-	uint32 nFadeOut = 256;   // Instrument fadeout speed
-	uint32 nGlobalVol = 64;  // Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
-	uint32 nPan = 32 * 4;    // Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
+	uint16 nFadeOut = 256;   // Instrument fadeout speed
+	uint16 nGlobalVol = 64;  // Global volume (0...64, all sample volumes are multiplied with this - TODO: This is 0...128 in Impulse Tracker)
+	uint16 nPan = 32 * 4;    // Default pan (0...256), if the appropriate flag is set. Sample panning overrides instrument panning.
 
 	uint16 nVolRampUp = 0;  // Default sample ramping up, 0 = use global default
 

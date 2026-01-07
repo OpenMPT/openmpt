@@ -50,7 +50,7 @@ struct DLSENVELOPE
 		uint16 release = 0;        // Release Time: 0-1000, 1 = 20ms (1/50s) -> [0-20s]
 		uint8 sustainLevel = 128;  // Sustain Level: 0-128, 128=100%
 
-		uint32 ConvertToMPT(InstrumentEnvelope &mptEnv, const EnvelopeType envType, const float tempoScale, const int16 valueScale) const;
+		uint16 ConvertToMPT(InstrumentEnvelope &mptEnv, const EnvelopeType envType, const float tempoScale, const int16 valueScale) const;
 	};
 	
 	Envelope volumeEnv, pitchEnv;

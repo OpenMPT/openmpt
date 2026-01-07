@@ -3067,7 +3067,7 @@ std::optional<int> CViewPattern::GetDefaultVolume(const ModCommand &m, ModComman
 			return std::min(sample.nVolume, uint16(256)) / 4u;
 	} else if(m.instr > 0 && m.instr <= sndFile.GetNumInstruments() && sndFile.Instruments[m.instr] != nullptr && sndFile.Instruments[m.instr]->HasValidMIDIChannel())
 	{
-		return std::min(sndFile.Instruments[m.instr]->nGlobalVol, uint32(64));  // For instrument plugins
+		return std::min(sndFile.Instruments[m.instr]->nGlobalVol, uint16(64));  // For instrument plugins
 	}
 	return std::nullopt;
 }

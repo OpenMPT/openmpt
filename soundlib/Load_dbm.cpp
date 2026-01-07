@@ -101,7 +101,7 @@ struct DBMInstrument
 		mptIns.name = mpt::String::ReadBuf(mpt::String::maybeNullTerminated, name);
 		mptIns.nFadeOut = 0;
 		mptIns.nPan = static_cast<uint16>(panning + 128);
-		LimitMax(mptIns.nPan, uint32(256));
+		LimitMax(mptIns.nPan, uint16(256));
 		mptIns.dwFlags.set(INS_SETPANNING);
 	}
 
