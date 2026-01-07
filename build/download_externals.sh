@@ -34,10 +34,22 @@ function download () {
   URL="$(echo ""$1"" | sed 's/ /%20/g')"
   if [ ! -f "$MPT_GET_FILE_NAME" ]; then
    echo "Downloading '$MPT_GET_FILE_NAME' from '$URL' ..."
-   if command -v curl &> /dev/null ; then
-    curl --location -o "$MPT_GET_FILE_NAME" "$URL" || true
-   elif command -v wget &> /dev/null ; then
-    wget -O "$MPT_GET_FILE_NAME" "$URL" || true
+   if [ -t 1 ] ; then
+    if command -v wcurl &> /dev/null ; then
+     wcurl --curl-options="--progress-bar" "$URL" --output "$MPT_GET_FILE_NAME" || true
+    elif command -v curl &> /dev/null ; then
+     curl --progress-bar --location -o "$MPT_GET_FILE_NAME" "$URL" || true
+    elif command -v wget &> /dev/null ; then
+     wget --progress=bar:force -O "$MPT_GET_FILE_NAME" "$URL" || true
+    fi
+   else
+    if command -v wcurl &> /dev/null ; then
+     wcurl --curl-options="--no-progress-meter" "$URL" --output "$MPT_GET_FILE_NAME" || true
+    elif command -v curl &> /dev/null ; then
+     curl --silent --show-error --location -o "$MPT_GET_FILE_NAME" "$URL" || true
+    elif command -v wget &> /dev/null ; then
+     wget --no-verbose -O "$MPT_GET_FILE_NAME" "$URL" || true
+    fi
    fi
    echo "Verifying '$URL' ..."
    if [ -f "$MPT_GET_FILE_NAME" ]; then
