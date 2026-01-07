@@ -34,7 +34,11 @@
   <size>3509072</size>
   <hash type="sha-512">d91371244ea98c691b4674ee266c4a2496a296800c176adae069d21f5c52c0763b21cc7859cfffa865b89e50171a2c99a6d14620c32f7d72c0ef04045348f856</hash>
   <url>https://web.archive.org/web/20200918004813id_/https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
+  <url>https://web.archive.org/web/20160423015142id_/https://download.microsoft.com/download/0/a/9/0a939ef6-e31c-430f-a3df-dfae7960d564/htmlhelp.exe</url>
+  <url>https://web.archive.org/web/20160301111642id_/https://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
   <url>https://web.archive.org/web/20200918004813id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
+  <url>https://web.archive.org/web/20160423015142id_/http://download.microsoft.com/download/0/a/9/0a939ef6-e31c-430f-a3df-dfae7960d564/htmlhelp.exe</url>
+  <url>https://web.archive.org/web/20160301111642id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
  </file>
  <file name="build/externals/python-3.14.2-embed-amd64.zip">
   <size>12011844</size>
