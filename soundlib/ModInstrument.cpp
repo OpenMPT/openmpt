@@ -265,7 +265,7 @@ void ModInstrument::GetSamples(std::vector<bool> &referencedSamples) const
 
 void ModInstrument::Sanitize(MODTYPE modType)
 {
-	LimitMax(nFadeOut, uint16_max);
+	LimitMax(nFadeOut, uint16(32768));
 	LimitMax(nGlobalVol, uint16(64));
 	LimitMax(nPan, uint16(256));
 
