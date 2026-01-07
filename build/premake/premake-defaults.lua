@@ -80,6 +80,21 @@
 			end
 		end
 	end
+	
+	function mpt_locale(locale)
+		if MPT_MSVC_AT_LEAST(2019) or MPT_CLANGCL_AT_LEAST(2019) then
+			if locale == "UTF8" then
+				files {
+					"../../build/vs/win10-locale-utf8.manifest",
+				}
+			end
+			if locale == "Legacy" then
+				files {
+					"../../build/vs/win11-locale-legacy.manifest",
+				}
+			end
+		end
+	end
 
 	filter {}
 		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" )

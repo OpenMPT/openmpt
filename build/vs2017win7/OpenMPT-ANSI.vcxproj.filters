@@ -2815,9 +2815,6 @@
     <None Include="..\..\mptrack\res\nodrag.cur">
       <Filter>mptrack\res</Filter>
     </None>
-    <None Include="..\vs\win11-locale-legacy.manifest">
-      <Filter>build\vs</Filter>
-    </None>
     <None Include="..\vs\win7.manifest">
       <Filter>build\vs</Filter>
     </None>
