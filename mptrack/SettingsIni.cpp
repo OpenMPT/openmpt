@@ -53,7 +53,7 @@ TextFileEncoding TextFileHelpers::GetPreferredEncoding()
 #if defined(UNICODE)
 	result = TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
 #else
-	if(mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::WinXP))
+	if(mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000))
 	{
 		result = TextFileEncoding{TextFileEncoding::Type::UTF16LE, TextFileEncoding::Header::BOM};
 	} else
