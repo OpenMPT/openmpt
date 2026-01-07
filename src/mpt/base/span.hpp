@@ -96,6 +96,12 @@ public:
 		, m_size(arr.size()) {
 	}
 
+	template <typename Cont>
+	span(const Cont & cont)
+		: m_data(cont.data())
+		, m_size(cont.size()) {
+	}
+
 	span(const span & other) noexcept = default;
 
 	template <typename U>
