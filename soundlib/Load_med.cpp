@@ -1255,7 +1255,7 @@ bool CSoundFile::ReadMED(FileReader &file, ModLoadingFlags loadFlags)
 				needInstruments = true;
 			}
 			if(size > offsetof(MMDInstrExt, volume))
-				instr.nGlobalVol = (instrExt.volume + 1u) / 2u;
+				instr.nGlobalVol = static_cast<uint16>((instrExt.volume + 1u) / 2u);
 			if(size > offsetof(MMDInstrExt, midiBank))
 				instr.wMidiBank = instrExt.midiBank;
 #ifdef MPT_WITH_VST

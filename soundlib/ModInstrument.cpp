@@ -217,7 +217,7 @@ void ModInstrument::Convert(MODTYPE fromType, MODTYPE toType)
 	if(toType & MOD_TYPE_IT)
 	{
 		LimitMax(nFadeOut, uint16(8192));
-		nFadeOut = ((nFadeOut + 16) / 32) * 32;
+		nFadeOut = static_cast<uint16>(((nFadeOut + 16) / 32) * 32);
 	}
 
 	// MPT-specific features - remove instrument tunings, Pitch/Tempo Lock, cutoff / resonance swing and filter mode for other formats

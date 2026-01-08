@@ -654,7 +654,7 @@ bool CSoundFile::ReadMDL(FileReader &file, ModLoadingFlags loadFlags)
 				CopyEnvelope(mptIns->VolEnv, sampleHeader.volEnvFlags, volEnvs);
 				CopyEnvelope(mptIns->PanEnv, sampleHeader.panEnvFlags, panEnvs);
 				CopyEnvelope(mptIns->PitchEnv, sampleHeader.freqEnvFlags, pitchEnvs);
-				mptIns->nFadeOut = (sampleHeader.fadeout + 1u) / 2u;
+				mptIns->nFadeOut = static_cast<uint16>((sampleHeader.fadeout + 1u) / 2u);
 #ifdef MODPLUG_TRACKER
 				if((mptIns->VolEnv.dwFlags & (ENV_ENABLED | ENV_LOOP)) == ENV_ENABLED)
 				{
