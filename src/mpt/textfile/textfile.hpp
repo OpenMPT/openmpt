@@ -46,11 +46,11 @@ namespace textfile {
 
 
 struct encoding {
-	static inline constexpr	const std::array<std::byte, 4> bom_utf32be = {std::byte{0x00}, std::byte{0x00}, std::byte{0xfe}, std::byte{0xff}};
-	static inline constexpr	const std::array<std::byte, 4> bom_utf32le = {std::byte{0xff}, std::byte{0xfe}, std::byte{0x00}, std::byte{0x00}};
-	static inline constexpr	const std::array<std::byte, 2> bom_utf16be = {std::byte{0xfe}, std::byte{0xff}};
-	static inline constexpr	const std::array<std::byte, 2> bom_utf16le = {std::byte{0xff}, std::byte{0xfe}};
-	static inline constexpr	const std::array<std::byte, 3> bom_utf8 = {std::byte{0xef}, std::byte{0xbb}, std::byte{0xbf}};
+	static inline constexpr const std::array<std::byte, 4> bom_utf32be = {std::byte{0x00}, std::byte{0x00}, std::byte{0xfe}, std::byte{0xff}};
+	static inline constexpr const std::array<std::byte, 4> bom_utf32le = {std::byte{0xff}, std::byte{0xfe}, std::byte{0x00}, std::byte{0x00}};
+	static inline constexpr const std::array<std::byte, 2> bom_utf16be = {std::byte{0xfe}, std::byte{0xff}};
+	static inline constexpr const std::array<std::byte, 2> bom_utf16le = {std::byte{0xff}, std::byte{0xfe}};
+	static inline constexpr const std::array<std::byte, 3> bom_utf8 = {std::byte{0xef}, std::byte{0xbb}, std::byte{0xbf}};
 	enum class type {
 		utf32be,
 		utf32le,
@@ -258,52 +258,52 @@ inline std::vector<std::byte> encode(encoding encoding, const mpt::ustring & tex
 		case encoding::type::utf32be:
 			MPT_MAYBE_CONSTANT_IF (mpt::endian_is_big()) {
 				std::u32string utf32text = mpt::transcode<std::u32string>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
 			} else {
 				std::u32string utf32text = mpt::transcode<std::u32string>(text);
 				std::vector<mpt::uint32be> utf32betext;
 				utf32betext.resize(utf32text.size());
 				std::copy(utf32text.begin(), utf32text.end(), utf32betext.begin());
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32betext.data()), utf32betext.size() * sizeof(mpt::uint32be)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf32betext.data()), utf32betext.size() * sizeof(mpt::uint32be)));
 			}
 			break;
 		case encoding::type::utf32le:
 			MPT_MAYBE_CONSTANT_IF (mpt::endian_is_little()) {
 				std::u32string utf32text = mpt::transcode<std::u32string>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf32text.data()), utf32text.size() * sizeof(char32_t)));
 			} else {
 				std::u32string utf32text = mpt::transcode<std::u32string>(text);
 				std::vector<mpt::uint32le> utf32letext;
 				utf32letext.resize(utf32text.size());
 				std::copy(utf32text.begin(), utf32text.end(), utf32letext.begin());
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf32letext.data()), utf32letext.size() * sizeof(mpt::uint32le)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf32letext.data()), utf32letext.size() * sizeof(mpt::uint32le)));
 			}
 			break;
 		case encoding::type::utf16be:
 			MPT_MAYBE_CONSTANT_IF (mpt::endian_is_big()) {
 				std::u16string utf16text = mpt::transcode<std::u16string>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
 			} else {
 				std::u16string utf16text = mpt::transcode<std::u16string>(text);
 				std::vector<mpt::uint16be> utf16betext;
 				utf16betext.resize(utf16text.size());
 				std::copy(utf16text.begin(), utf16text.end(), utf16betext.begin());
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16betext.data()), utf16betext.size() * sizeof(mpt::uint16be)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf16betext.data()), utf16betext.size() * sizeof(mpt::uint16be)));
 			}
 			break;
 		case encoding::type::utf16le:
 			MPT_MAYBE_CONSTANT_IF (MPT_OS_WINDOWS) {
 				std::wstring wtext = mpt::transcode<std::wstring>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(wtext.data()), wtext.size() * sizeof(wchar_t)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(wtext.data()), wtext.size() * sizeof(wchar_t)));
 			} else MPT_MAYBE_CONSTANT_IF (mpt::endian_is_little()) {
 				std::u16string utf16text = mpt::transcode<std::u16string>(text);
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf16text.data()), utf16text.size() * sizeof(char16_t)));
 			} else {
 				std::u16string utf16text = mpt::transcode<std::u16string>(text);
 				std::vector<mpt::uint16le> utf16letext;
 				utf16letext.resize(utf16text.size());
 				std::copy(utf16text.begin(), utf16text.end(), utf16letext.begin());
-				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte*>(utf16letext.data()), utf16letext.size() * sizeof(mpt::uint16le)));
+				mpt::append(result, mpt::as_span(reinterpret_cast<const std::byte *>(utf16letext.data()), utf16letext.size() * sizeof(mpt::uint16le)));
 			}
 			break;
 		case encoding::type::utf8:
