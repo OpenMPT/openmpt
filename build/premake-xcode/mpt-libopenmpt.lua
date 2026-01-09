@@ -59,6 +59,8 @@
 		"../../src/mpt/profiler/**.hpp",
 		"../../src/mpt/test/**.cpp",
 		"../../src/mpt/test/**.hpp",
+		"../../src/mpt/textfile/**.cpp",
+		"../../src/mpt/textfile/**.hpp",
 		"../../src/mpt/uuid_namespace/**.cpp",
 		"../../src/mpt/uuid_namespace/**.hpp",
 		"../../src/openmpt/sounddevice/**.cpp",

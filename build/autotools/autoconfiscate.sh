@@ -145,6 +145,7 @@ svn export ./src/mpt/string_transcode                 bin/dist-autotools/src/mpt
 svn export ./src/mpt/system_error                     bin/dist-autotools/src/mpt/system_error
 svn export ./src/mpt/terminal                         bin/dist-autotools/src/mpt/terminal
 svn export ./src/mpt/test                             bin/dist-autotools/src/mpt/test
+#svn export ./src/mpt/textfile                         bin/dist-autotools/src/mpt/textfile
 svn export ./src/mpt/uuid                             bin/dist-autotools/src/mpt/uuid
 #svn export ./src/mpt/uuid_namespace                   bin/dist-autotools/src/mpt/uuid_namespace
 mkdir -p                                              bin/dist-autotools/src/openmpt
@@ -226,6 +227,7 @@ cp -r ./src/mpt/string_transcode                      bin/dist-autotools/src/mpt
 cp -r ./src/mpt/system_error                          bin/dist-autotools/src/mpt/system_error
 cp -r ./src/mpt/terminal                              bin/dist-autotools/src/mpt/terminal
 cp -r ./src/mpt/test                                  bin/dist-autotools/src/mpt/test
+#cp -r ./src/mpt/textfile                              bin/dist-autotools/src/mpt/textfile
 cp -r ./src/mpt/uuid                                  bin/dist-autotools/src/mpt/uuid
 #cp -r ./src/mpt/uuid_namespace                        bin/dist-autotools/src/mpt/uuid_namespace
 mkdir -p                                              bin/dist-autotools/src/openmpt

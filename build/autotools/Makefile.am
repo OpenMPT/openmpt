@@ -287,6 +287,7 @@ MPT_FILES_SRC_MPT += src/mpt/terminal/stdio_manager.hpp
 MPT_FILES_SRC_MPT += src/mpt/terminal/transliterate.hpp
 MPT_FILES_SRC_MPT += src/mpt/test/test.hpp
 MPT_FILES_SRC_MPT += src/mpt/test/test_macros.hpp
+#MPT_FILES_SRC_MPT += src/mpt/textfile/textfile.hpp
 MPT_FILES_SRC_MPT += src/mpt/uuid/guid.hpp
 MPT_FILES_SRC_MPT += src/mpt/uuid/uuid.hpp
 #MPT_FILES_SRC_MPT += src/mpt/uuid_namespace/uuid_namespace.hpp

@@ -196,6 +196,9 @@
     <Filter Include="src\mpt\test">
       <UniqueIdentifier>{BCC6D903-A829-69A8-51AF-A15E3DF1342B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\textfile">
+      <UniqueIdentifier>{814B7A60-6D44-99B2-9676-7E3782CE78BE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\uuid">
       <UniqueIdentifier>{D395DA03-BFF8-69A8-687E-A25E54C0352B}</UniqueIdentifier>
     </Filter>
@@ -1040,6 +1043,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\test\test_macros.hpp">
       <Filter>src\mpt\test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\textfile\textfile.hpp">
+      <Filter>src\mpt\textfile</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\uuid\guid.hpp">
       <Filter>src\mpt\uuid</Filter>

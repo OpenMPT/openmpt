@@ -940,6 +940,7 @@
     <ClInclude Include="..\..\src\mpt\system_error\system_error.hpp" />
     <ClInclude Include="..\..\src\mpt\test\test.hpp" />
     <ClInclude Include="..\..\src\mpt\test\test_macros.hpp" />
+    <ClInclude Include="..\..\src\mpt\textfile\textfile.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid\guid.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid\tests\tests_uuid.hpp" />
     <ClInclude Include="..\..\src\mpt\uuid\uuid.hpp" />
