@@ -33,7 +33,7 @@ inline bool current_is_wine() {
 #if MPT_OS_WINDOWS && !MPT_OS_WINDOWS_WINRT
 #if MPT_WINNT_AT_LEAST(MPT_WIN_8)
 	const bool hasKB2533623 = true;
-#else // !Win8
+#else  // !Win8
 	bool hasKB2533623 = false;
 	mpt::osinfo::windows::Version WindowsVersion = mpt::osinfo::windows::Version::Current();
 	if (WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win8)) {
