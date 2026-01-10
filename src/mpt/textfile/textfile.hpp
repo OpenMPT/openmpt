@@ -18,6 +18,8 @@
 #include "mpt/io_read/filecursor_filename_traits.hpp"
 #include "mpt/io_read/filecursor_traits_filedata.hpp"
 #include "mpt/io_read/filereader.hpp"
+#include "mpt/osinfo/windows_version.hpp"
+#include "mpt/osinfo/windows_wine_version.hpp"
 #include "mpt/string/types.hpp"
 #include "mpt/string_transcode/transcode.hpp"
 
