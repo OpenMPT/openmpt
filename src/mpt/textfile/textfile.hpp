@@ -111,6 +111,8 @@ inline encoding get_preferred_encoding() {
 #if MPT_OS_WINDOWS
 #if defined(UNICODE)
 	result = encoding{encoding::type::utf16le, encoding::header::bom};
+#elif MPT_WINNT_AT_LEAST(MPT_WIN_2000)
+	result = encoding{encoding::type::utf16le, encoding::header::bom};
 #else
 	if (mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000)) {
 		result = encoding{encoding::type::utf16le, encoding::header::bom};
