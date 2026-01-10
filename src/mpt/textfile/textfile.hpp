@@ -310,7 +310,7 @@ inline std::vector<std::byte> encode(encoding encoding, const mpt::ustring & tex
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::common_encoding::utf8, text))));
 			break;
 		case encoding::type::locale:
-			assert(encoding.header != TextFileEncoding::Header::BOM);
+			assert(encoding.header != encoding::header::bom);
 			mpt::append(result, mpt::byte_cast<mpt::const_byte_span>(mpt::as_span(mpt::transcode<std::string>(mpt::logical_encoding::locale, text))));
 			break;
 	}
