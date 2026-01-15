@@ -264,7 +264,7 @@ void DoTests()
 						}
 						return result;
 					};
-					std::cout << "FCW: " << std::hex << std::setfill('0') << std::setw(4) << fpstate.x87fcw << std::endl;
+					std::cout << "FCW: " << std::hex << std::setfill('0') << std::setw(4) << fpstate.x87fcw << std::dec << std::endl;
 					std::cout << " " << format_rounding(fpstate.x87fcw);
 					std::cout << " " << format_precision(fpstate.x87fcw);
 					if (fpstate.x87_level <= 2) {
@@ -293,7 +293,7 @@ void DoTests()
 						}
 						return result;
 					};
-					std::cout << "MXCSR (mask): " << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr << " (" << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr_mask << ")" << std::endl;
+					std::cout << "MXCSR (mask): " << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr << std::dec << " (" << std::hex << std::setfill('0') << std::setw(8) << fpstate.mxcsr_mask << std::dec << ")" << std::endl;
 					std::cout << " " << format_rounding(fpstate.mxcsr);
 					if(fpstate.mxcsr & fpstate.mxcsr_mask & mpt::arch::x86::floating_point::MXCSR_FTZ)
 					{
