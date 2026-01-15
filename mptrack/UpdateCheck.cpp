@@ -306,6 +306,10 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 				download_supported = false;
 			}
 
+			if(mpt::OS::Windows::IsWine() && !theApp.GetWineVersion()->Version().IsValid())
+			{
+				download_supported = false;
+			}
 			if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
 			{
 				if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update))))
