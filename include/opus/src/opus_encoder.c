@@ -766,6 +766,7 @@ void downmix_float(const void *_x, opus_val32 *y, int subframe, int offset, int 
             y[j] += FLOAT2SIG(x[(j+offset)*C+c]);
       }
    }
+#ifndef FIXED_POINT
    /* Cap signal to +6 dBFS to avoid problems in the analysis. */
    for (j=0;j<subframe;j++)
    {
@@ -773,6 +774,7 @@ void downmix_float(const void *_x, opus_val32 *y, int subframe, int offset, int 
       if (y[j] >  65536.f) y[j] =  65536.f;
       if (celt_isnan(y[j])) y[j] = 0;
    }
+#endif
 }
 #endif
 
@@ -857,9 +859,11 @@ opus_val16 compute_stereo_width(const opus_res *pcm, int frame_size, opus_int32 
    int frame_rate;
    int i;
    opus_val16 short_alpha;
-
+#ifdef FIXED_POINT
+   int shift = celt_ilog2(frame_size)-2;
+#endif
    frame_rate = Fs/frame_size;
-   short_alpha = Q15ONE - MULT16_16(25, Q15ONE)/IMAX(50,frame_rate);
+   short_alpha = MULT16_16(25, Q15ONE)/IMAX(50,frame_rate);
    xx=xy=yy=0;
    /* Unroll by 4. The frame size is always a multiple of 4 *except* for
       2.5 ms frames at 12 kHz. Since this setting is very rare (and very
@@ -891,9 +895,9 @@ opus_val16 compute_stereo_width(const opus_res *pcm, int frame_size, opus_int32 
       pxy += SHR32(MULT16_16(x,y),2);
       pyy += SHR32(MULT16_16(y,y),2);
 
-      xx += SHR32(pxx, 10);
-      xy += SHR32(pxy, 10);
-      yy += SHR32(pyy, 10);
+      xx += SHR32(pxx, shift);
+      xy += SHR32(pxy, shift);
+      yy += SHR32(pyy, shift);
    }
 #ifndef FIXED_POINT
    if (!(xx < 1e9f) || celt_isnan(xx) || !(yy < 1e9f) || celt_isnan(yy))
@@ -902,7 +906,9 @@ opus_val16 compute_stereo_width(const opus_res *pcm, int frame_size, opus_int32 
    }
 #endif
    mem->XX += MULT16_32_Q15(short_alpha, xx-mem->XX);
-   mem->XY += MULT16_32_Q15(short_alpha, xy-mem->XY);
+   /*mem->XY += MULT16_32_Q15(short_alpha, xy-mem->XY);*/
+   /* Rewritten to avoid overflows on abrupt sign change. */
+   mem->XY = MULT16_32_Q15(Q15ONE - short_alpha, mem->XY) + MULT16_32_Q15(short_alpha, xy);
    mem->YY += MULT16_32_Q15(short_alpha, yy-mem->YY);
    mem->XX = MAX32(0, mem->XX);
    mem->XY = MAX32(0, mem->XY);
@@ -1920,7 +1926,7 @@ static opus_int32 opus_encode_frame_native(OpusEncoder *st, const opus_res *pcm,
     else if (st->mode == MODE_CELT_ONLY) {
        opus_val32 noise_energy = compute_frame_energy(pcm, frame_size, st->channels, st->arch);
        /* Boosting peak energy a bit because we didn't just average the active frames. */
-       activity = 2*st->peak_signal_energy < (QCONST16(PSEUDO_SNR_THRESHOLD, 0) * (opus_val64)noise_energy);
+       activity = st->peak_signal_energy < (QCONST16(PSEUDO_SNR_THRESHOLD, 0) * (opus_val64)HALF32(noise_energy));
     }
 
     /* For the first frame at a new SILK bandwidth */
@@ -2603,7 +2609,7 @@ static opus_int32 opus_encode_frame_native(OpusEncoder *st, const opus_res *pcm,
        dred_chunks = IMIN((st->dred_duration+5)/4, DRED_NUM_REDUNDANCY_FRAMES/2);
        if (st->use_vbr) dred_chunks = IMIN(dred_chunks, st->dred_target_chunks);
        /* Remaining space for DRED, accounting for cost the 3 extra bytes for code 3, padding length, and extension number. */
-       dred_bytes_left = IMIN(DRED_MAX_DATA_SIZE, max_data_bytes-ret-3);
+       dred_bytes_left = IMIN(DRED_MAX_DATA_SIZE, orig_max_data_bytes-ret-3);
        /* Account for the extra bytes required to signal large padding length. */
        dred_bytes_left -= (dred_bytes_left+1+DRED_EXPERIMENTAL_BYTES)/255;
        /* Check whether we actually have something to encode. */
@@ -2624,7 +2630,7 @@ static opus_int32 opus_encode_frame_native(OpusEncoder *st, const opus_res *pcm,
               extension.frame = 0;
               extension.data = buf;
               extension.len = dred_bytes;
-              ret = opus_packet_pad_impl(data, ret, max_data_bytes, !st->use_vbr, &extension, 1);
+              ret = opus_packet_pad_impl(data, ret, orig_max_data_bytes, !st->use_vbr, &extension, 1);
               if (ret < 0)
               {
                  RESTORE_STACK;

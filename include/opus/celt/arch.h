@@ -177,7 +177,6 @@ typedef opus_val16 opus_res;
 #endif
 
 #define RES2VAL16(a)    RES2INT16(a)
-#define FLOAT2SIG(a)    float2int(((opus_int32)32768<<SIG_SHIFT)*(a))
 #define INT16TOSIG(a)   SHL32(EXTEND32(a), SIG_SHIFT)
 #define INT24TOSIG(a)   SHL32(a, SIG_SHIFT-8)
 
@@ -348,6 +347,7 @@ static OPUS_INLINE int celt_isnan(float x)
 #define MULT32_32_Q16(a,b)     ((a)*(b))
 #define MULT32_32_Q31(a,b)     ((a)*(b))
 #define MULT32_32_P31(a,b)     ((a)*(b))
+#define MULT32_32_P31_ovflw(a,b) ((a)*(b))
 
 #define MAC16_32_Q15(c,a,b)     ((c)+(a)*(b))
 #define MAC16_32_Q16(c,a,b)     ((c)+(a)*(b))
