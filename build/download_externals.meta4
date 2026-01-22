@@ -26,8 +26,8 @@
   <url>https://web.archive.org/web/20131217072017id_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe</url>
  </file>
  <file name="build/externals/xmp-sdk.zip">
-  <size>325166</size>
-  <hash type="sha-512">e1abd5ec2ef62461eadd08a08afa4d6be6c4e92da0dab77dc2b09a88898704ad0983135395913919358fa27da6165f6b33b31b29e1b36a3a9d62680f97f682bb</hash>
+  <size>326626</size>
+  <hash type="sha-512">8310230e678a73228c0d647c21db13030a88cab65a24ce890f22e3d730482325325d0a8b96c6ddf721be26f77f02f0c80b9d5e3d3db818f2cb7c1444e6b329ba</hash>
   <url>https://www.un4seen.com/files/xmp-sdk.zip</url>
  </file>
  <file name="build/externals/htmlhelp.exe">
