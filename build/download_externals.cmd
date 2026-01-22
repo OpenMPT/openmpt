@@ -61,7 +61,7 @@ if "%MPT_DOWNLOAD%" == "yes" (
  call build\scriptlib\download.cmd "https://www.python.org/ftp/python/3.7.2/python-3.7.2.post1-embed-win32.zip"                      "build\externals\python-3.7.2.post1-embed-win32.zip" || goto error
 
  call build\scriptlib\download.cmd "https://deac-fra.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.48/innounp048.rar"  "build\externals\innounp048.rar"               || goto error
- call build\scriptlib\download.cmd "http://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  || goto error
+ call build\scriptlib\download.cmd "https://files.jrsoftware.org/is/5/innosetup-5.6.1-unicode.exe"                                    "build\externals\innosetup-5.6.1-unicode.exe"  || goto error
 
 )
 
