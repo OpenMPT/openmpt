@@ -99,7 +99,7 @@ download "build/externals/allegro-4.2.3.1-hg.8+r8500.zip" 3872466 46cd8d4d7138b7
 download "build/externals/csdpmi7b.zip"                     71339 58c24691d27cead1cec92d334af551f37a3ba31de25a687d99399c28d822ec9f6ffccc9332bfce35e65dae4dd1210b54e54b223a4de17f5adcb11e2da004b834 "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7b.zip https://djgpp.mirror.garr.it/current/v2misc/csdpmi7b.zip"
 download "build/externals/csdpmi7s.zip"                     89872 ea5652d31850d8eb0d15a919de0b51849f58efea0d16ad2aa4687fac4abd223d0ca34a2d1b616b02fafe84651dbef3e506df9262cfb399eb6d9909bffc89bfd3 "https://lib.openmpt.org/files/libopenmpt/contrib/djgpp/cwsdpmi/csdpmi7s.zip https://djgpp.mirror.garr.it/current/v2misc/csdpmi7s.zip"
 download "build/externals/WA5.55_SDK.exe"                  336166 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 "http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe https://web.archive.org/web/20131217072017id_/http://download.nullsoft.com/winamp/plugin-dev/WA5.55_SDK.exe"
-download "build/externals/xmp-sdk.zip"                     325166 e1abd5ec2ef62461eadd08a08afa4d6be6c4e92da0dab77dc2b09a88898704ad0983135395913919358fa27da6165f6b33b31b29e1b36a3a9d62680f97f682bb "https://www.un4seen.com/files/xmp-sdk.zip"
+download "build/externals/xmp-sdk.zip"                     326626 8310230e678a73228c0d647c21db13030a88cab65a24ce890f22e3d730482325325d0a8b96c6ddf721be26f77f02f0c80b9d5e3d3db818f2cb7c1444e6b329ba "https://www.un4seen.com/files/xmp-sdk.zip"
 
 unpack "include/allegro42" "build/externals/allegro-4.2.3.1-hg.8+r8500.zip" "."
 unpack "include/cwsdpmi"   "build/externals/csdpmi7b.zip"                   "."
