@@ -42,7 +42,7 @@ if "%MPT_DOWNLOAD%" == "yes" (
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp048.rar || del /Q build\externals\innounp048.rar
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || del /Q build\externals\premake-5.0.0-alpha13-src.zip
   powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || del /Q build\externals\WA5.55_SDK.exe
-  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e1abd5ec2ef62461eadd08a08afa4d6be6c4e92da0dab77dc2b09a88898704ad0983135395913919358fa27da6165f6b33b31b29e1b36a3a9d62680f97f682bb -filesize  325166 -filename build/externals/xmp-sdk.zip || del /Q build\externals\xmp-sdk.zip
+  powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 8310230e678a73228c0d647c21db13030a88cab65a24ce890f22e3d730482325325d0a8b96c6ddf721be26f77f02f0c80b9d5e3d3db818f2cb7c1444e6b329ba -filesize  326626 -filename build/externals/xmp-sdk.zip || del /Q build\externals\xmp-sdk.zip
  )
 
  call build\scriptlib\download.cmd "https://www.7-zip.org/a/7za920.zip"                                                              "build\externals\7za920.zip"      || goto error
@@ -76,7 +76,7 @@ powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hash
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 99d468de185dd62aba845410babe04f70bc4a32ea71a86763c8ad1b8adb04d8425a8cf2e8c581b3e42bc555abc27facd07862ef74b4c322db26c9f388b2f44c4 -filesize  141049 -filename build/externals/innounp048.rar || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 406bd108bb16450ad34d49a0c8111bdfbed4efef4923ba3f1ee8c437ca9ea4e8b453c5a2d298ac69a79a22a9309a83403954d271d26f051f26dc5e7b5ac65b6f -filesize 5565797 -filename build/externals/premake-5.0.0-alpha13-src.zip || goto error
 powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 394375db8a16bf155b5de9376f6290488ab339e503dbdfdc4e2f5bede967799e625c559cca363bc988324f1a8e86e5fd28a9f697422abd7bb3dcde4a766607b5 -filesize  336166 -filename build/externals/WA5.55_SDK.exe || goto error
-powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue e1abd5ec2ef62461eadd08a08afa4d6be6c4e92da0dab77dc2b09a88898704ad0983135395913919358fa27da6165f6b33b31b29e1b36a3a9d62680f97f682bb -filesize  325166 -filename build/externals/xmp-sdk.zip || goto error
+powershell -ExecutionPolicy Unrestricted .\build\scriptlib\Verify-File.ps1 -hashvalue 8310230e678a73228c0d647c21db13030a88cab65a24ce890f22e3d730482325325d0a8b96c6ddf721be26f77f02f0c80b9d5e3d3db818f2cb7c1444e6b329ba -filesize  326626 -filename build/externals/xmp-sdk.zip || goto error
 
 call :killdir "build\tools\7zipold" || goto error
 call :killdir "build\tools\7zipa" || goto error
