@@ -1763,8 +1763,8 @@ static XMPIN xmpin = {
 	/*VisRender,*/nullptr,
 	VisRenderDC,
 	/*VisButton,*/nullptr,
+	/*VisConfig*/nullptr,
 
-	nullptr, // reserved2
 	openmpt_GetConfig,
 	openmpt_SetConfig,
 
