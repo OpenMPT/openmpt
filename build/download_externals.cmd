@@ -47,7 +47,7 @@ call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://web.archive.org/we
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://www.python.org/ftp/python/3.13.2/python-3.13.2-embed-amd64.zip" "build\externals\python-3.13.2-embed-amd64.zip" a87d1d8e74efd79de42459ab18761406d398a246cddba4832f748bc3bfe3d9b8945ff4d0a29e95c770ca9a13d120c924b7ea514af6db5905e5821ace2ec53723 10854852 || goto error
 
 
-call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://netcologne.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
+call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://deac-fra.dl.sourceforge.net/project/innounp/innounp/innounp%%%%200.50/innounp050.rar"  "build\externals\innounp050.rar"               dbbc809308267a866db9d6b751fdeda6d179e1a65d8ddb14bb51984431ae91493f9a76105e1789b245732043a2c696c869ed10964b48cf59f81e55bd52f85330  141621 || goto error
 
 call build\scriptlib\download.cmd %MPT_DOWNLOAD% x%1 "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"                                            "build\externals\innosetup-6.2.2.exe"  496375b1ce9c0d2f8eb3930ebd8366f5c4c938bc1eda47aed415e3f02bd8651a84a770a15f2825bf3c8ed9dbefa355b9eb805dd76bc782f6d8c8096d80443099 4722512 || goto error
 
