@@ -433,6 +433,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -468,6 +469,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -502,6 +504,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -544,6 +547,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -585,6 +589,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -626,6 +631,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -668,6 +674,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -709,6 +716,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -750,6 +758,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -785,6 +794,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -819,6 +829,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -853,6 +864,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -895,6 +907,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -936,6 +949,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -977,6 +991,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1019,6 +1034,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1060,6 +1076,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1101,6 +1118,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ole32.lib;rpcrt4.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.3 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win81.manifest;../../libopenmpt/libopenmpt_test/libopenmpt_test.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

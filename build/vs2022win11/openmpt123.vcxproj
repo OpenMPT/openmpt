@@ -567,7 +567,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -604,7 +604,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -639,7 +639,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -674,7 +674,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -717,7 +717,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -759,7 +759,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -801,7 +801,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -843,7 +843,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -886,7 +886,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -928,7 +928,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -970,7 +970,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1012,7 +1012,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1048,7 +1048,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1084,7 +1084,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1119,7 +1119,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1154,7 +1154,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1197,7 +1197,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1239,7 +1239,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1281,7 +1281,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1323,7 +1323,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1366,7 +1366,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1408,7 +1408,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1450,7 +1450,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1492,7 +1492,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

@@ -298,6 +298,7 @@
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -333,7 +334,7 @@
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -376,6 +377,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -417,7 +419,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -460,6 +462,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -501,7 +504,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -537,6 +540,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -571,7 +575,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -614,6 +618,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -655,7 +660,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -698,6 +703,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DataExecutionPrevention>false</DataExecutionPrevention>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -739,7 +745,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <DataExecutionPrevention>false</DataExecutionPrevention>
-      <AdditionalOptions>/HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>

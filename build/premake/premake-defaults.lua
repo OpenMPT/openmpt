@@ -79,6 +79,17 @@
 				-- nothing
 			end
 		end
+		filter {}
+		filter { "kind:ConsoleApp" }
+			if MPT_BUILD_MSBUILD then
+				linkoptions { "/SUBSYSTEM:CONSOLE," .. string.format("%d", (MPT_WIN_VERSION >> 24) & 0xff) .. "." .. string.format("%d", (MPT_WIN_VERSION >> 16) & 0xff) }
+			end
+		filter {}
+		filter { "kind:WindowedApp" }
+			if MPT_BUILD_MSBUILD then
+				linkoptions { "/SUBSYSTEM:WINDOWS," .. string.format("%d", (MPT_WIN_VERSION >> 24) & 0xff) .. "." .. string.format("%d", (MPT_WIN_VERSION >> 16) & 0xff) }
+			end
+		filter {}
 	end
 	
 	function mpt_locale(locale)

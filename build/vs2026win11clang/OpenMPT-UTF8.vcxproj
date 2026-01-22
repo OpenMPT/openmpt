@@ -427,7 +427,7 @@
       <AdditionalDependencies>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -464,7 +464,7 @@
       <AdditionalDependencies>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -501,7 +501,7 @@
       <AdditionalDependencies>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcdd.lib;uafxcwd.lib;libcmtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -545,7 +545,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -588,7 +588,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -631,7 +631,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -676,7 +676,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -720,7 +720,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -764,7 +764,7 @@
       <AdditionalDependencies>afxnmcd.lib;uafxcw.lib;libcmt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>afxnmcd.lib;uafxcw.lib;libcmt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -802,7 +802,7 @@
       <AdditionalDependencies>mfc140ud.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140ud.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -839,7 +839,7 @@
       <AdditionalDependencies>mfc140ud.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140ud.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -876,7 +876,7 @@
       <AdditionalDependencies>mfc140ud.lib;msvcrtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140ud.lib;msvcrtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -920,7 +920,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -963,7 +963,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1006,7 +1006,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1051,7 +1051,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1095,7 +1095,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
@@ -1139,7 +1139,7 @@
       <AdditionalDependencies>mfc140u.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>mfc140u.lib;msvcrt.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>/DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>

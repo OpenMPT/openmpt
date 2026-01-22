@@ -565,6 +565,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -596,6 +597,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -626,6 +628,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -656,6 +659,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -694,6 +698,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -731,6 +736,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -768,6 +774,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -805,6 +812,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -843,6 +851,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -880,6 +889,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -917,6 +927,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -954,6 +965,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -985,6 +997,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1016,6 +1029,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1046,6 +1060,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1076,6 +1091,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1114,6 +1130,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1151,6 +1168,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1188,6 +1206,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1225,6 +1244,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1263,6 +1283,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1300,6 +1321,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1337,6 +1359,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1374,6 +1397,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

@@ -321,7 +321,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -354,7 +354,7 @@
       <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -393,7 +393,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -431,7 +431,7 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -470,7 +470,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -508,7 +508,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -541,7 +541,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -573,7 +573,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -612,7 +612,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -650,7 +650,7 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -689,7 +689,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -727,7 +727,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>ksuser.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalOptions>wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.2 wsetargv.obj %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>../../openmpt123/openmpt123.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
