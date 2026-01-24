@@ -406,7 +406,9 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				else if(noteVal > 0 && noteVal < 128)
 				{
-					m.note = static_cast<ModCommand::NOTE>(NOTE_MIN + noteVal - 1);
+					// SoundSmith note = octave * 12 + semitone
+					// Add 24 (2 octaves) to match original pitch
+					m.note = static_cast<ModCommand::NOTE>(NOTE_MIN + noteVal + 24);
 					m.instr = inst;
 				}
 
@@ -470,7 +472,9 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 				}
 				else if(noteVal > 0 && noteVal < 128)
 				{
-					m.note = static_cast<ModCommand::NOTE>(NOTE_MIN + noteVal - 1);
+					// SoundSmith note = octave * 12 + semitone
+					// Add 24 (2 octaves) to match original pitch
+					m.note = static_cast<ModCommand::NOTE>(NOTE_MIN + noteVal + 24);
 					m.instr = inst;
 				}
 
@@ -564,10 +568,9 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 				Samples[smp].nLength = docData.waveSizes[i];
 				Samples[smp].nC5Speed = 8363;  // Default sample rate
 
-				// Set volume from instrument header
-				Samples[smp].nVolume = static_cast<uint16>(((ssInst.GetVolume() >> 1) + 1) >> 1) * 4;
-				if(Samples[smp].nVolume > 256)
-					Samples[smp].nVolume = 256;
+				// Set volume from instrument header (0 means full volume)
+				uint16 vol = ssInst.GetVolume();
+				Samples[smp].nVolume = (vol == 0) ? 256 : std::min<uint16>(vol, 256);
 
 				// Set loop info based on DOC mode
 				if(docData.wavelists[i].IsLooping() && docData.waveSizes[i] > 0)
@@ -630,10 +633,9 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 							Samples[smp].nLength = static_cast<SmpLength>(asifData.waveData.size());
 							Samples[smp].nC5Speed = 8363;
 
-							// Set volume from instrument header
-							Samples[smp].nVolume = static_cast<uint16>(((ssInst.GetVolume() >> 1) + 1) >> 1) * 4;
-							if(Samples[smp].nVolume > 256)
-								Samples[smp].nVolume = 256;
+							// Set volume from instrument header (0 means full volume)
+							uint16 vol = ssInst.GetVolume();
+							Samples[smp].nVolume = (vol == 0) ? 256 : std::min<uint16>(vol, 256);
 
 							// Set loop info based on DOC mode
 							if(asifData.wavelist.IsLooping() && !asifData.waveData.empty())
@@ -688,11 +690,10 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 			m_szNames[smp] = mpt::String::ReadBuf(mpt::String::spacePadded,
 				ssInst.name, std::min<size_t>(ssInst.nameLength, 21));
 
-			// Initialize empty sample with correct volume
+			// Initialize empty sample with correct volume (0 means full volume)
 			Samples[smp].Initialize();
-			Samples[smp].nVolume = static_cast<uint16>(((ssInst.GetVolume() >> 1) + 1) >> 1) * 4;
-			if(Samples[smp].nVolume > 256)
-				Samples[smp].nVolume = 256;
+			uint16 vol = ssInst.GetVolume();
+			Samples[smp].nVolume = (vol == 0) ? 256 : std::min<uint16>(vol, 256);
 		}
 	}
 
