@@ -331,16 +331,16 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 	m_modFormat.madeWithTracker = UL_("SoundSmith");
 	m_modFormat.charset = mpt::Charset::ASCII;
 
-	// Set song name from first instrument with a name
+	// Set song name from filename
 	m_songName.clear();
-	for(int i = 0; i < 15 && m_songName.empty(); i++)
+	if(file.GetOptionalFileName())
 	{
-		if(fileHeader.instruments[i].nameLength > 0)
-		{
-			m_songName = mpt::String::ReadBuf(mpt::String::spacePadded,
-				fileHeader.instruments[i].name,
-				std::min<size_t>(fileHeader.instruments[i].nameLength, 21));
-		}
+#if defined(MPT_LIBCXX_QUIRK_NO_OPTIONAL_VALUE)
+		mpt::PathString filePath = *(file.GetOptionalFileName());
+#else
+		mpt::PathString filePath = file.GetOptionalFileName().value();
+#endif
+		m_songName = mpt::ToCharset(GetCharsetInternal(), filePath.GetFilenameBase().ToUnicode());
 	}
 
 	// Create order list
