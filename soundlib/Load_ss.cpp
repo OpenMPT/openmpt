@@ -518,7 +518,8 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 
 		// Try to load DOC RAM file first (various extensions)
 		DOCRAMData docData;
-		const mpt::PathString docExts[] = {P_(".D"), P_(".d"), P_(".W"), P_(".w"), P_(".DOC"), P_(".doc")};
+		const mpt::PathString docExts[] = {P_(".D"), P_(".d"), P_(".W"), P_(".w"),
+										   P_(".DOC"), P_(".doc"), P_(".wb"), P_(".WB") };
 		for(const auto &ext : docExts)
 		{
 			mpt::PathString docPath = baseDir + baseName + ext;
@@ -583,7 +584,20 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 				// Allocate and copy sample data (8-bit unsigned)
 				if(docData.waveSizes[i] > 0 && Samples[smp].AllocateSample())
 				{
-					std::memcpy(Samples[smp].samplev(), docData.waves[i].data(), docData.waveSizes[i]);
+					// Convert the data from GS format to standard PCM, during copy
+					for (int idx = 0; idx < docData.waveSizes[i]; ++idx)
+					{
+						int8 sample = (int8)docData.waves[i][ idx ];
+
+						if (sample != 0)
+						{
+							sample+=0x80;
+						}
+
+						Samples[smp].sample8()[ idx ] = sample;
+					}
+
+
 					m_nSamples = smp;
 				}
 
