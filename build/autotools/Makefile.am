@@ -450,6 +450,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_puma.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_rtm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_s3m.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_sfx.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_ss.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_stk.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_stm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_stp.cpp
