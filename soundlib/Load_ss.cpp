@@ -646,7 +646,19 @@ bool CSoundFile::ReadSS(FileReader &file, ModLoadingFlags loadFlags)
 							// Allocate and copy sample data
 							if(!asifData.waveData.empty() && Samples[smp].AllocateSample())
 							{
-								std::memcpy(Samples[smp].samplev(), asifData.waveData.data(), asifData.waveData.size());
+								// Convert the data from GS format to standard PCM, during copy
+								for (int idx = 0; idx < asifData.waveData.size(); ++idx)
+								{
+									int8 sample = (int8)asifData.waveData[ idx ];
+
+									if (sample != 0)
+									{
+										sample+=0x80;
+									}
+
+									Samples[smp].sample8()[ idx ] = sample;
+								}
+
 								m_nSamples = std::max(m_nSamples, smp);
 								loadedSamples = true;
 							}
