@@ -377,7 +377,7 @@ static_assert(NTDDI_WIN11_GE == MPT_WIN_11_24H2);
 #if defined(_WIN32_IE)
 #define MPT_WIN_VERSION      ((_WIN32_WINDOWS << 16)) | ((_WIN32_IE & 0xffff) >> 6))
 #else
-#define MPT_WIN_VERSION      (_WIN32_WINDOWS << 16)
+#define MPT_WIN_VERSION (_WIN32_WINDOWS << 16)
 #endif
 #elif defined(WINVER)
 #define MPT_OS_WINDOWS_WINNT 0
