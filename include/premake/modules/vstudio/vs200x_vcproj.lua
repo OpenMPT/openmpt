@@ -728,7 +728,7 @@
 
 	function m.additionalCompilerOptions(cfg)
 		local opts = cfg.buildoptions
-		if cfg.flags.MultiProcessorCompile then
+		if cfg.multiprocessorcompile == p.ON then
 			table.insert(opts, "/MP")
 		end
 		if #opts > 0 then
@@ -765,19 +765,11 @@
 
 	function m.additionalExternalCompilerOptions(cfg, toolset)
 		local buildoptions = table.join(toolset.getcxxflags(cfg), cfg.buildoptions)
-		if not cfg.flags.NoPCH and cfg.pchheader then
+		if cfg.enablepch ~= p.OFF and cfg.pchheader then
 			table.insert(buildoptions, '--use_pch="$(IntDir)/$(TargetName).pch"')
 		end
 		if #buildoptions > 0 then
 			p.x('AdditionalOptions="%s"', table.concat(buildoptions, " "))
-		end
-	end
-
-
-
-	function m.additionalImageOptions(cfg)
-		if #cfg.imageoptions > 0 then
-			p.x('AdditionalOptions="%s"', table.concat(cfg.imageoptions, " "))
 		end
 	end
 
@@ -870,17 +862,27 @@
 		if not filecfg
 			and not config.isOptimizedBuild(cfg)
 			and cfg.clr == p.OFF
-			and not cfg.flags.NoRuntimeChecks
 		then
-			p.w('BasicRuntimeChecks="3"')
+			local runtimechecks = cfg.runtimechecks or "Default"
+			local map = {
+				Off = 0,
+				StackFrames = 1,
+				UninitializedVariables = 2,
+				FastChecks = 3,
+				Default = 3
+			}
+
+			p.w('BasicRuntimeChecks="%s"', map[runtimechecks])
 		end
 	end
 
 
 
 	function m.bufferSecurityCheck(cfg)
-		if cfg.flags.NoBufferSecurityCheck then
+		if cfg.buffersecuritycheck == p.OFF then
 			p.w('BufferSecurityCheck="false"')
+		elseif cfg.buffersecuritycheck == p.ON then
+			p.w('BufferSecurityCheck="true"')
 		end
 	end
 
@@ -1016,7 +1018,7 @@
 	function m.detect64BitPortabilityProblems(cfg)
 		local prjcfg, filecfg = config.normalize(cfg)
 		if _ACTION < "vs2008" and cfg.clr == p.OFF and cfg.warnings ~= p.OFF and not filecfg then
-			p.w('Detect64BitPortabilityProblems="%s"', tostring(not cfg.flags.No64BitChecks))
+			p.w('Detect64BitPortabilityProblems="%s"', tostring(cfg.enable64bitchecks ~= p.OFF))
 		end
 	end
 
@@ -1076,7 +1078,7 @@
 
 
 	function m.excludedFromBuild(filecfg)
-		if not filecfg or filecfg.flags.ExcludeFromBuild then
+		if not filecfg or filecfg.excludefrombuild then
 			p.w('ExcludedFromBuild="true"')
 		end
 	end
@@ -1149,7 +1151,7 @@
 
 
 	function m.generateManifest(cfg, toolset)
-		if cfg.flags.NoManifest then
+		if cfg.manifest == p.OFF then
 			p.w('GenerateManifest="false"')
 		end
 	end
@@ -1157,7 +1159,7 @@
 
 
 	function m.ignoreImportLibrary(cfg, toolset)
-		if cfg.flags.NoImportLib and not toolset then
+		if cfg.useimportlib == p.OFF and not toolset then
 			p.w('IgnoreImportLibrary="true"')
 		end
 	end
@@ -1169,7 +1171,7 @@
 			local implibdir = cfg.linktarget.abspath
 
 			-- I can't actually stop the import lib, but I can hide it in the objects directory
-			if cfg.flags.NoImportLib then
+			if cfg.useimportlib == p.OFF then
 				implibdir = path.join(cfg.objdir, path.getname(implibdir))
 			end
 
@@ -1229,9 +1231,9 @@
 	function m.minimalRebuild(cfg)
 		if config.isDebugBuild(cfg) and
 		   cfg.debugformat ~= "c7" and
-		   not cfg.flags.NoMinimalRebuild and
+		   cfg.minimalrebuild ~= p.OFF and
 		   cfg.clr == p.OFF and
-		   not cfg.flags.MultiProcessorCompile
+		   cfg.multiprocessorcompile ~= p.ON
 		then
 			p.w('MinimalRebuild="true"')
 		end
@@ -1262,7 +1264,7 @@
 
 
 	function m.omitDefaultLib(cfg)
-		if cfg.flags.OmitDefaultLibrary then
+		if cfg.nodefaultlib == "On" then
 			p.w('OmitDefaultLibName="true"')
 		end
 	end
@@ -1310,14 +1312,6 @@
 
 	function m.outputFile(cfg)
 		p.x('OutputFile="$(OutDir)\\%s"', cfg.buildtarget.name)
-	end
-
-
-
-	function m.outputFileName(cfg)
-		if cfg.imagepath ~= nil then
-			p.x('OutputFileName="%s"', path.translate(cfg.imagepath))
-		end
 	end
 
 
@@ -1553,19 +1547,19 @@
 		local prj, file = config.normalize(cfg)
 		if file then
 			if prj.pchsource == file.abspath and
-			   not prj.flags.NoPCH and
+			   prj.enablepch ~= p.OFF and
 			   prj.system == p.WINDOWS
 			then
 				p.w('UsePrecompiledHeader="1"')
-			elseif file.flags.NoPCH then
+			elseif file.enablepch == p.OFF then
 				p.w('UsePrecompiledHeader="0"')
 			end
 		else
-			if not prj.flags.NoPCH and prj.pchheader then
+			if prj.enablepch ~= "Off" and prj.pchheader then
 				p.w('UsePrecompiledHeader="%s"', iif(_ACTION < "vs2005", 3, 2))
 				p.x('PrecompiledHeaderThrough="%s"', prj.pchheader)
 			else
-				p.w('UsePrecompiledHeader="%s"', iif(_ACTION > "vs2003" or prj.flags.NoPCH, 0, 2))
+				p.w('UsePrecompiledHeader="%s"', iif(_ACTION > "vs2003" or prj.enablepch == "Off", 0, 2))
 			end
 		end
 	end
@@ -1614,7 +1608,7 @@
 
 
 	function m.wholeProgramOptimization(cfg)
-		if cfg.linktimeoptimization == "On" then
+		if cfg.linktimeoptimization == "On" or cfg.linktimeoptimization == "Fast" then
 			p.x('WholeProgramOptimization="true"')
 		elseif cfg.linktimeoptimization == "Off" then
 			p.x('WholeProgramOptimization="false"')

@@ -150,19 +150,6 @@
 -- not be generated.
 --
 
-	function suite.warningLevel_onNoWarningsOverOtherWarningsFlags()
-		flags { "FatalWarnings" }
-		warnings "Off"
-		prepare()
-		test.capture [[
-<ClCompile>
-	<PrecompiledHeader>NotUsing</PrecompiledHeader>
-	<WarningLevel>TurnOffAllWarnings</WarningLevel>
-	<Optimization>Disabled</Optimization>
-		]]
-	end
-
-
 	function suite.warningLevel_onNoWarningsOverOtherWarningsAPI()
 		fatalwarnings { "All" }
 		warnings "Off"
@@ -558,17 +545,6 @@
 -- Add <TreatWarningAsError> if FatalWarnings flag is set.
 --
 
-	function suite.treatWarningsAsError_onFatalWarningsViaFlag()
-		flags { "FatalCompileWarnings" }
-		prepare()
-		test.capture [[
-<ClCompile>
-	<PrecompiledHeader>NotUsing</PrecompiledHeader>
-	<WarningLevel>Level3</WarningLevel>
-	<TreatWarningAsError>true</TreatWarningAsError>
-		]]
-	end
-
 
 	function suite.treatWarningsAsError_onFatalWarningsViaAPI()
 		fatalwarnings { "All" }
@@ -737,7 +713,7 @@
 		]]
 	end
 
-	function suite.runtimeTypeInfo_onNoBufferSecurityCheck()
+	function suite.runtimeTypeInfo_onNoBufferSecurityCheck_ViaFlag()
 		flags "NoBufferSecurityCheck"
 		prepare()
 		test.capture [[
@@ -749,6 +725,29 @@
 		]]
 	end
 
+	function suite.runtimeTypeInfo_onNoBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "Off"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<BufferSecurityCheck>false</BufferSecurityCheck>
+		]]
+	end
+
+	function suite.runtimeTypeInfo_onBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "On"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<BufferSecurityCheck>true</BufferSecurityCheck>
+		]]
+	end
 
 --
 -- On Win32 builds, use the Edit-and-Continue debug information format.
@@ -896,11 +895,72 @@
 
 
 --
+-- Check handling of the runtimechecks API with "Off" value.
+--
+
+	function suite.onRuntimeChecks_Off()
+		runtimechecks "Off"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+		]]
+	end
+
+
+--
+-- Check handling of the runtimechecks API with "FastChecks" value.
+--
+
+	function suite.onRuntimeChecks_FastChecks()
+		runtimechecks "FastChecks"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+		]]
+	end
+
+
+--
+-- Check handling of the runtimechecks API with "Default" value.
+--
+
+	function suite.onRuntimeChecks_Default()
+		runtimechecks "Default"
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+		]]
+	end
+
+
+--
 -- Check handling of the EnableMultiProcessorCompile flag.
 --
 
-	function suite.onMultiProcessorCompile()
+	function suite.onMultiProcessorCompile_Flag()
 		flags { "MultiProcessorCompile" }
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<MinimalRebuild>false</MinimalRebuild>
+	<MultiProcessorCompilation>true</MultiProcessorCompilation>
+		]]
+	end
+
+	function suite.onMultiProcessorCompile_API()
+		multiprocessorcompile "On"
 		prepare()
 		test.capture [[
 <ClCompile>

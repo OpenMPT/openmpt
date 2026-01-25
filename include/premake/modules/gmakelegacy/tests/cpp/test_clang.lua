@@ -44,8 +44,8 @@ ifeq ($(config),debug)
 		]]
 	end
 
-	function suite.usesCorrectCompilersAndLinkTimeOptimizationViaFlag()
-		flags { "LinkTimeOptimization" }
+	function suite.usesCorrectCompilersAndLinkTimeOptimizationViaAPI()
+		linktimeoptimization "On"
 		make.cppConfigs(prj)
 		test.capture [[
 ifeq ($(config),debug)
@@ -61,8 +61,8 @@ ifeq ($(config),debug)
 		]]
 	end
 
-	function suite.usesCorrectCompilersAndLinkTimeOptimizationViaAPI()
-		linktimeoptimization "On"
+	function suite.usesCorrectCompilersAndFastLinkTimeOptimizationViaAPI()
+		linktimeoptimization "Fast"
 		make.cppConfigs(prj)
 		test.capture [[
 ifeq ($(config),debug)

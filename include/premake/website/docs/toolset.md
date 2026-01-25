@@ -25,7 +25,7 @@ Project configurations.
 
 ### Availability ###
 
-Premake 5.0 and later. Versions are currently only implemented for Visual Studio 2010+.
+Premake 5.0.0-alpha1 and later. Versions are currently only implemented for Visual Studio 2010+.
 
 ### Examples ###
 
@@ -45,4 +45,10 @@ toolset "clang" -- VS 2019 and newer
 Use the toolset for Windows XP
 ```lua
 toolset "v140_xp"
+```
+
+Specify version 4.8 of GCC for Android
+```lua
+filter { "system:android" }
+   toolset "gcc-4.8"
 ```

@@ -121,12 +121,6 @@
 		test.contains({ "-Weverything" }, gcc.getcflags(cfg))
 	end
 
-	function suite.cflags_onFatalWarningsViaFlag()
-		flags { "FatalWarnings" }
-		prepare()
-		test.contains({ "-Werror" }, gcc.getcflags(cfg))
-	end
-
 	function suite.cflags_onFatalWarningsViaAPI()
 		fatalwarnings { "All" }
 		prepare()
@@ -435,10 +429,22 @@
 		test.contains({ "-fno-exceptions" }, gcc.getcxxflags(cfg))
 	end
 
-	function suite.cxxflags_onNoBufferSecurityCheck()
+	function suite.cxxflags_onNoBufferSecurityCheck_ViaFlag()
 		flags { "NoBufferSecurityCheck" }
 		prepare()
 		test.contains({ "-fno-stack-protector" }, gcc.getcxxflags(cfg))
+	end
+
+	function suite.cxxflags_onNoBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "Off"
+		prepare()
+		test.contains({ "-fno-stack-protector" }, gcc.getcxxflags(cfg))
+	end
+
+	function suite.cxxflags_onBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "On"
+		prepare()
+		test.contains({ "-fstack-protector" }, gcc.getcxxflags(cfg))
 	end
 
 	function suite.cxxflags_onSanitizeAddress()
@@ -638,16 +644,30 @@
 		test.contains({ "-arch x86_64" }, gcc.getldflags(cfg))
 	end
 
-	function suite.cflags_macosx_onarm64()
+	function suite.cflags_macosx_onAARCH64()
 		system "macosx"
-		architecture "arm64"
+		architecture "AARCH64"
 		prepare()
 		test.contains({ "-arch arm64" }, gcc.getcflags(cfg))
 	end
 
-	function suite.ldflags_macosx_onarm64()
+	function suite.cflags_macosx_onARM64()
 		system "macosx"
-		architecture "arm64"
+		architecture "ARM64"
+		prepare()
+		test.contains({ "-arch arm64" }, gcc.getcflags(cfg))
+	end
+
+	function suite.ldflags_macosx_onAARCH64()
+		system "macosx"
+		architecture "AARCH64"
+		prepare()
+		test.contains({ "-arch arm64" }, gcc.getldflags(cfg))
+	end
+
+	function suite.ldflags_macosx_onARM64()
+		system "macosx"
+		architecture "ARM64"
 		prepare()
 		test.contains({ "-arch arm64" }, gcc.getldflags(cfg))
 	end
@@ -957,22 +977,16 @@ end
 -- Check handling of link time optimization flag.
 --
 
-	function suite.cflags_onLinkTimeOptimizationViaFlag()
-		flags "LinkTimeOptimization"
-		prepare()
-		test.contains("-flto", gcc.getcflags(cfg))
-	end
-
 	function suite.cflags_onLinkTimeOptimizationViaAPI()
 		linktimeoptimization "On"
 		prepare()
 		test.contains("-flto", gcc.getcflags(cfg))
 	end
 
-	function suite.ldflags_onLinkTimeOptimizationViaFlag()
-		flags "LinkTimeOptimization"
+	function suite.cflags_onFastLinkTimeOptimizationViaAPI()
+		linktimeoptimization "Fast"
 		prepare()
-		test.contains("-flto", gcc.getldflags(cfg))
+		test.contains("-flto", gcc.getcflags(cfg))
 	end
 
 	function suite.ldflags_onLinkTimeOptimizationViaAPI()
@@ -981,6 +995,29 @@ end
 		test.contains("-flto", gcc.getldflags(cfg))
 	end
 
+	function suite.ldflags_onFastLinkTimeOptimizationViaAPI()
+		linktimeoptimization "Fast"
+		prepare()
+		test.contains("-flto", gcc.getldflags(cfg))
+	end
+
+
+--
+-- Check the handling of map file generation.
+--
+
+	function suite.ldflags_onMapFileViaAPI()
+		mapfile "On"
+		prepare()
+		test.contains({ "-Wl,-Map=bin/Debug/MyProject.map" }, gcc.getldflags(cfg))
+	end
+
+	function suite.ldflags_onMapFileViaAPI_WithPath()
+		mapfile "On"
+		mapfilepath "maps/MyProject.map"
+		prepare()
+		test.contains({ '-Wl,-Map=maps/MyProject.map' }, gcc.getldflags(cfg))
+	end
 
 --
 -- Check link mode preference for system libraries.
@@ -1376,4 +1413,37 @@ end
 		test.contains({ "-pg" }, gcc.getcflags(cfg))
 		test.contains({ "-pg" }, gcc.getcxxflags(cfg))
 		test.contains({ "-pg" }, gcc.getldflags(cfg))
+	end
+
+--
+-- Test runpath dirs
+--
+
+	function suite.runpathdirs_onRelativeDir()	
+		local paths = { "libs" }
+		
+		runpathdirs(paths)
+		prepare()
+    
+		test.contains({ "-Wl,-rpath,'$$ORIGIN/libs'" }, gcc.getrunpathdirs(cfg, paths))
+	end
+
+
+	function suite.runpathdirs_onRelativeDir_macosx()	
+		local paths = { "libs" }
+		
+		system("MacOSX")
+		runpathdirs(paths)
+		prepare()
+	
+		test.contains({ "-Wl,-rpath,'@loader_path/libs'" }, gcc.getrunpathdirs(cfg, paths))
+	end
+
+	function suite.runpathdirs_onAbsoluteDir()	
+		local paths = { "/usr/local/lib/mylibs" }
+		
+		runpathdirs(paths)
+		prepare()
+	
+		test.contains({ "-Wl,-rpath,'/usr/local/lib/mylibs'" }, gcc.getrunpathdirs(cfg, paths))
 	end

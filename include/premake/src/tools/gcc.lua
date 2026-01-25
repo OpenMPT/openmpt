@@ -56,7 +56,7 @@
 		architecture = {
 			x86 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch i386", "-m32") end,
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
-			ARM64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
+			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
 		fatalwarnings = {
 			All = "-Werror",
@@ -71,6 +71,7 @@
 		},
 		linktimeoptimization = {
 			On = "-flto",
+			Fast = "-flto",
 		},
 		strictaliasing = {
 			Off = "-fno-strict-aliasing",
@@ -174,6 +175,10 @@
 		},
 		profile = {
 			On = "-pg",
+		},
+		useshortenums = {
+			On = "-fshort-enums",
+			Off = "-fno-short-enums",
 		}
 	}
 
@@ -242,9 +247,6 @@
 		exceptionhandling = {
 			Off = "-fno-exceptions"
 		},
-		flags = {
-			NoBufferSecurityCheck = "-fno-stack-protector",
-		},
 		cppdialect = {
 			["C++98"] = "-std=c++98",
 			["C++0x"] = "-std=c++0x",
@@ -269,6 +271,10 @@
 			["gnu++2b"] = "-std=gnu++2b",
 			["gnu++23"] = "-std=gnu++23",
 			["C++latest"] = "-std=c++23",
+		},
+		buffersecuritycheck = {
+			Off = "-fno-stack-protector",
+			On = "-fstack-protector"
 		},
 		rtti = {
 			Off = "-fno-rtti"
@@ -379,7 +385,7 @@
 	-- relative pch file path if any
 	function gcc.getpch(cfg)
 		-- If there is no header, or if PCH has been disabled, I can early out
-		if not cfg.pchheader or cfg.flags.NoPCH then
+		if not cfg.pchheader or cfg.enablepch == p.OFF then
 			return nil
 		end
 
@@ -437,19 +443,29 @@
 		end
 
 		for _, fullpath in ipairs(dirs) do
+			-- Try to make rpath relative to target dir
 			local rpath = path.getrelative(cfg.buildtarget.directory, fullpath)
-			if table.contains(os.getSystemTags(cfg.system), "darwin") then
-				rpath = "@loader_path/" .. rpath
-			elseif (cfg.system == p.LINUX) then
-				rpath = iif(rpath == ".", "", "/" .. rpath)
-				rpath = "$$ORIGIN" .. rpath
-			end
 
-			if mode == "linker" then
-				rpath = "-Wl,-rpath,'" .. rpath .. "'"
-			end
+			if path.isabsolute(rpath) then				
+				if mode == "linker" then
+					rpath = "-Wl,-rpath,'" .. rpath .. "'"
+				end
 
-			table.insert(result, rpath)
+				table.insert(result, rpath)
+			else
+				if table.contains(os.getSystemTags(cfg.system), "darwin") then
+					rpath = "@loader_path/" .. rpath
+				elseif (cfg.system == p.LINUX) then
+					rpath = iif(rpath == ".", "", "/" .. rpath)
+					rpath = "$$ORIGIN" .. rpath
+				end
+
+				if mode == "linker" then
+					rpath = "-Wl,-rpath,'" .. rpath .. "'"
+				end
+
+				table.insert(result, rpath)
+			end
 		end
 
 		return result
@@ -488,7 +504,7 @@
 		architecture = {
 			x86 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch i386", "-m32") end,
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
-			ARM64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
+			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
@@ -497,7 +513,7 @@
 		kind = {
 			SharedLib = function(cfg)
 				local r = { gcc.getsharedlibarg(cfg) }
-				if cfg.system == p.WINDOWS and not cfg.flags.NoImportLib then
+				if cfg.system == p.WINDOWS and cfg.useimportlib ~= p.OFF then
 					table.insert(r, '-Wl,--out-implib="' .. cfg.linktarget.relpath .. '"')
 				elseif cfg.system == p.LINUX then
 					table.insert(r, '-Wl,-soname=' .. p.quoted(cfg.linktarget.name))
@@ -513,6 +529,14 @@
 		linker = {
 			Default = "",
 			LLD = "-fuse-ld=lld"
+		},
+		mapfile = {
+			On = function(cfg)
+				-- If a map file path has been explicitly provided, use that
+				-- otherwise, just use the default link target path with a .map extension (no lib, exe, etc)
+				local path = cfg.mapfilepath or path.replaceextension(cfg.linktarget.relpath, ".map")
+				return "-Wl,-Map=" .. p.quoted(p.tools.getrelative(cfg.project, path))
+			end,
 		},
 		profile = {
 			On = "-pg",
@@ -581,7 +605,7 @@
 			end
 		end
 
-		if cfg.flags.RelativeLinks then
+		if cfg.userelativelinks == p.ON then
 			for _, dir in ipairs(config.getlinks(cfg, "siblings", "directory")) do
 				local libFlag = "-L" .. p.tools.getrelative(cfg.project, dir)
 				if not table.contains(flags, libFlag) then
@@ -610,7 +634,7 @@
 		local result = {}
 
 		if not systemonly then
-			if cfg.flags.RelativeLinks then
+			if cfg.userelativelinks == p.ON then
 				local libFiles = config.getlinks(cfg, "siblings", "basename")
 				for _, link in ipairs(libFiles) do
 					if string.startswith(link, "lib") then
@@ -638,15 +662,12 @@
 			elseif path.isobjectfile(link) then
 				table.insert(result, link)
 			else
-				local endswith = function(s, ptrn)
-					return ptrn == string.sub(s, -string.len(ptrn))
-				end
 				local name = path.getname(link)
 				-- Check whether link mode decorator is present
-				if endswith(name, ":static") then
+				if name:endswith(":static") then
 					name = string.sub(name, 0, -8)
 					table.insert(static_syslibs, "-l" .. name)
-				elseif endswith(name, ":shared") then
+				elseif name:endswith(":shared") then
 					name = string.sub(name, 0, -8)
 					table.insert(shared_syslibs, "-l" .. name)
 				else

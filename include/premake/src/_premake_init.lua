@@ -27,7 +27,7 @@
 			p.X86,
 			p.X86_64,
 			p.ARM,
-			p.ARM64,
+			p.AARCH64,
 			p.RISCV64,
 			p.LOONGARCH64,
 			p.PPC,
@@ -38,12 +38,16 @@
 			p.MIPS64EL
 		},
 		aliases = {
-			i386  = p.X86,
-			amd64 = p.X86_64,
-			x32   = p.X86,	-- these should be DEPRECATED
-			x64   = p.X86_64,
+			i386    = p.X86,
+			amd64   = p.X86_64,
+			x32     = p.X86,
+			x64     = p.X86_64,
+			ARM64   = p.AARCH64,
 		},
 	}
+
+	api.deprecateAlias("architecture", "i386", "Use 'x86' instead with `buildoptions { '-march=i386' }`.")
+	api.deprecateAlias("architecture", "x32", "Use 'x86' instead. There is no x32 ABI support currently.")
 
 	api.register {
 		name = "basedir",
@@ -338,22 +342,14 @@
 			"DebugEnvsDontMerge",
 			"DebugEnvsInherit",
 			"ExcludeFromBuild",
-			"FatalCompileWarnings",	-- DEPRECATED
-			"FatalLinkWarnings",	-- DEPRECATED
-			"FatalWarnings",		-- DEPRECATED
-			"LinkTimeOptimization", -- DEPRECATED
 			"Maps",
-			"MFC",
 			"MultiProcessorCompile",
 			"No64BitChecks",
-			"NoCopyLocal",
-			"NoImplicitLink",
 			"NoImportLib",         -- DEPRECATED
 			"NoIncrementalLink",
 			"NoManifest",
 			"NoMinimalRebuild",
 			"NoPCH",
-			"NoRuntimeChecks",
 			"NoBufferSecurityCheck",
 			"OmitDefaultLibrary",
 			"RelativeLinks",
@@ -867,6 +863,7 @@
 			"bsd",
 			"emscripten",
 			"haiku",
+			"hurd",
 			"ios",
 			"linux",
 			"macosx",
@@ -1110,18 +1107,6 @@
 		tokens = true
 	}
 
-	api.register {   -- DEPRECATED 2021-11-16
-		name = "sysincludedirs",
-		scope = "config",
-		kind = "list:directory",
-		tokens = true,
-	}
-
-	api.deprecateField("sysincludedirs", 'Use `externalincludedirs` instead.',
-	function(value)
-		externalincludedirs(value)
-	end)
-
 	api.register {
 		name = "linktimeoptimization",
 		scope = "config",
@@ -1129,18 +1114,10 @@
 		allowed = {
 			"Default",
 			"On",
+			"Fast",
 			"Off"
 		}
 	}
-
-	--27 November 2024
-	api.deprecateValue("flags", "LinkTimeOptimization", "Use `linktimeoptimization` instead.",
-	function(value)
-		linktimeoptimization("On")
-	end,
-	function(value)
-		linktimeoptimization("Default")
-	end)
 
 	--25 November 2024
 	api.deprecateValue("flags", "WPF", 'Use `dotnetsdk "WindowsDesktop"` instead.',
@@ -1149,29 +1126,6 @@
 	end,
 	function(value)
 		dotnetsdk "Default"
-	end)
-	api.deprecateValue("flags", "FatalWarnings", "Use `fatalwarnings { \"All\" }` instead.",
-	function(value)
-		fatalwarnings({ "All" })
-	end,
-	function(value)
-		removefatalwarnings({ "All" })
-	end)
-
-	api.deprecateValue("flags", "FatalCompileWarnings", "Use `fatalwarnings { \"All\" }` instead.",
-	function(value)
-		fatalwarnings({ "All" })
-	end,
-	function(value)
-		removefatalwarnings({ "All" })
-	end)
-
-	api.deprecateValue("flags", "FatalLinkWarnings", "Use `linkerfatalwarnings { \"All\" }` instead.",
-	function(value)
-		linkerfatalwarnings({ "All" })
-	end,
-	function(value)
-		removelinkerfatalwarnings({ "All" })
 	end)
 
 	premake.filterFatalWarnings = function(tbl)
@@ -1218,6 +1172,318 @@
 		kind = "string"
 	}
 
+	api.register {
+		name = "mapfile",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.register {
+		name = "mapfilepath",
+		scope = "config",
+		kind = "string",
+	}
+
+	api.deprecateValue("flags", "Maps", "Use `mapfile` instead.",
+	function(value)
+		mapfile("On")
+	end,
+	function(value)
+		mapfile("Default")
+	end)
+
+	api.register {
+		name = "enable64bitchecks",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateValue("flags", "No64BitChecks", "Use `enable64bitchecks` instead.",
+	function(value)
+		enable64bitchecks("Off")
+	end,
+	function(value)
+		enable64bitchecks("Default")
+	end)
+
+	api.register {
+		name = "multiprocessorcompile",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+	
+	api.deprecateValue("flags", "MultiProcessorCompile", "Use `multiprocessorcompile` instead.",
+	function(value)
+		multiprocessorcompile("On")
+	end,
+	function(value)
+		multiprocessorcompile("Default")
+	end)
+
+	api.register {
+		name = "buffersecuritycheck",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateValue("flags", "NoBufferSecurityCheck", "Use `buffersecuritycheck` instead.",
+	function(value)
+		buffersecuritycheck("Off")
+	end,
+	function(value)
+		buffersecuritycheck("Default")
+	end)
+
+	api.register {
+		name = "useimportlib",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateValue("flags", "NoImportLib", "Use `useimportlib` instead.",
+	function(value)
+		useimportlib("Off")
+	end,
+	function(value)
+		useimportlib("Default")
+	end)
+
+	api.register {
+		name = "incrementallink",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateValue("flags", "NoIncrementalLink", "Use `incrementallink` instead.",
+	function(value)
+		incrementallink("Off")
+	end,
+	function(value)
+		incrementallink("Default")
+	end)
+
+	api.register {
+		name = "manifest",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		}
+	}
+
+	api.deprecateValue("flags", "NoManifest", "Use `manifest` instead.",
+	function(value)
+		manifest("Off")
+	end,
+	function(value)
+		manifest("Default")
+	end)
+
+	api.register {
+		name = "minimalrebuild",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateValue("flags", "NoMinimalRebuild", "Use `minimalrebuild` instead.",
+	function(value)
+		minimalrebuild("Off")
+	end,
+	function(value)
+		minimalrebuild("Default")
+	end)
+
+	api.register {
+		name = "enablepch",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "NoPCH", "Use `enablepch` instead.",
+	function(value)
+		enablepch("Off")
+	end,
+	function(value)
+		enablepch("Default")
+	end)
+
+	api.register {
+		name = "nodefaultlib",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "OmitDefaultLibrary", "Use `nodefaultlib` instead.",
+	function(value)
+		nodefaultlib "On"
+	end,
+	function(value)
+		nodefaultlib "Default"
+	end)
+
+	api.register {
+		name = "userelativelinks",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "RelativeLinks", "Use `userelativelinks` instead.",
+	function(value)
+		userelativelinks("On")
+	end,
+	function(value)
+		userelativelinks("Default")
+	end)
+
+	api.register {
+		name = "wpf",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "WPF", "Use `wpf` instead.",
+	function(value)
+		wpf("On")
+	end,
+	function(value)
+		wpf("Default")
+	end)
+
+	api.register {
+		name = "debugenvsinherit",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "DebugEnvsInherit", "Use `debugenvsinherit` instead.",
+	function(value)
+		debugenvsinherit("On")
+	end,
+	function(value)
+		debugenvsinherit("Default")
+	end)
+
+	api.register {
+		name = "debugenvsmerge",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off",
+		},
+	}
+
+	api.deprecateValue("flags", "DebugEnvsDontMerge", "Use `debugenvsmerge` instead.",
+	function(value)
+		debugenvsmerge("Off")
+	end,
+	function(value)
+		debugenvsmerge("Default")
+	end)
+
+	api.deprecateValue("flags", "ShadowedVariables", "Use `buildoptions` to add warnings instead.",
+	function(value)
+	end,
+	function(value)
+	end)
+
+	api.deprecateValue("flags", "UndefinedIdentifiers", "Use `buildoptions` to add warnings instead.",
+	function(value)
+	end,
+	function(value)
+	end)
+
+	api.register {
+		name = "excludefrombuild",
+		scope = "config",
+		kind = "boolean",
+	}
+
+	api.deprecateValue("flags", "ExcludeFromBuild", "Use `excludefrombuild` API instead.",
+	function(value)
+		excludefrombuild("On")
+	end,
+	function(value)
+		excludefrombuild("Off")
+	end)
+
+	api.register {
+		name = "useshortenums",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	api.deprecateField("flags", "Use dedicated APIs instead.",
+	function(value)
+	end)
 
 -----------------------------------------------------------------------------
 --
@@ -1248,7 +1514,7 @@
 		allowed = {
 			{ "clang", "Clang (clang)" },
 			{ "gcc", "GNU GCC (gcc/g++)" },
-			{ "mingw", "MinGW GCC (gcc/g++)" },
+			{ "mingw", "MinGW GCC (gcc/g++)" }, -- deprecated
 			{ "msc-v80", "Microsoft compiler (Visual Studio 2005)" },
 			{ "msc-v90", "Microsoft compiler (Visual Studio 2008)" },
 			{ "msc-v100", "Microsoft compiler (Visual Studio 2010)" },
@@ -1265,6 +1531,11 @@
 			end
 		}
 	}
+
+	if _OPTIONS[cc] == "mingw" then
+		p.warn("--cc=mingw is deprecated, use --cc=gcc instead")
+		_OPTIONS[cc] = "gcc"
+	end
 
 	newoption
 	{

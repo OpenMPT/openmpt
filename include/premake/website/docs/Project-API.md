@@ -64,7 +64,6 @@
 | [editorintegration](editorintegration.md)                 | Enable or disable IDE integration |
 | [enableunitybuild](enableunitybuild.md)                   |  |
 | [enablewarnings](enablewarnings.md)                       |  |
-| [endian](endian.md)                                       |  |
 | [entrypoint](entrypoint.md)                               | Specify the program entry point function |
 | [exceptionhandling](exceptionhandling.md)                 | Enable or disable exception handling |
 | [external](external.md)                                   |  |
@@ -78,19 +77,16 @@
 | [files](files.md)                                         |  |
 | [filter](filter.md)                                       |  |
 | [flags](flags.md)                                         |  |
+| [floatabi](floatabi.md)                                   |  |
 | [floatingpoint](floatingpoint.md)                         |  |
 | [floatingpointexceptions](floatingpointexceptions.md)     |  |
 | [forceincludes](forceincludes.md)                         |  |
 | [forceusings](forceusings.md)                             |  |
-| [fpu](fpu.md)                                             |  |
-| [framework](framework.md)                                 |  |
 | [functionlevellinking](functionlevellinking.md)           |  |
 | [gccprefix](gccprefix.md)                                 |  |
 | [group](group.md)                                         |  |
 | [icon](icon.md)                                           |  |
 | [ignoredefaultlibraries](ignoredefaultlibraries.md)       | Specify a list of default libraries to ignore |
-| [imageoptions](imageoptions.md)                           |  |
-| [imagepath](imagepath.md)                                 |  |
 | [implibdir](implibdir.md)                                 |  |
 | [implibextension](implibextension.md)                     |  |
 | [implibname](implibname.md)                               |  |
@@ -148,7 +144,6 @@
 | [stringpooling](stringpooling.md)                         |  |
 | [symbols](symbols.md)                                     | Turn symbol generation on/off |
 | [symbolspath](symbolspath.md)                             | Allows you to specify the target location of the symbols |
-| [sysincludedirs](sysincludedirs.md)                       |  |
 | [syslibdirs](syslibdirs.md)                               |  |
 | [system](system.md)                                       |  |
 | [tags](tags.md)                                           |  |

@@ -169,7 +169,7 @@
 		description = "Set the architecture of the binary to be built.",
 		allowed = {
 			{ "ARM", "ARM (On macOS, same as ARM64.)" },
-			{ "ARM64", "ARM64" },
+			{ "AARCH64", "AARCH64" },
 			{ "x86", "x86 (On macOS, same as x86_64.)" },
 			{ "x86_64", "x86_64" },
 			{ "ppc", "PowerPC 32-bit" },
@@ -178,6 +178,7 @@
 			--
 			{ "Win32", "Same as x86" },
 			{ "x64", "Same as x86_64" },
+			{ "ARM64", "Same as AARCH64" },
 		},
 		-- "Generates default platforms for targets, x86 and x86_64 projects for Windows." }
 		default = nil,
@@ -221,7 +222,7 @@
 		configurations { "Release", "Debug" }
 		location ( _OPTIONS["to"] )
 
-		flags { "MultiProcessorCompile" }
+		multiprocessorcompile "On"
 		warnings "Extra"
 
 		filter { "options:not zlib-src=none" }
@@ -235,7 +236,7 @@
 		filter { "options:lua-src=contrib" }
 			defines { "LUA_STATICLIB" }
 
-		filter { "system:macosx", "options:arch=ARM or arch=ARM64" }
+		filter { "system:macosx", "options:arch=ARM or arch=AARCH64" }
 			buildoptions { "-arch arm64" }
 			linkoptions { "-arch arm64" }
 
@@ -258,7 +259,7 @@
 		filter { "system:windows", "options:arch=ARM" }
 			platforms { "ARM" }
 
-		filter { "system:windows", "options:arch=ARM64" }
+		filter { "system:windows", "options:arch=AARCH64" }
 			platforms { "ARM64" }
 
 		filter { "system:windows", "options:arch=x86 or arch=Win32" }
@@ -267,7 +268,7 @@
 		filter { "system:windows", "options:arch=x86_64 or arch=x64" }
 			platforms { "x64" }
 
-		filter { "system:windows", "options:not arch=" }
+		filter { "system:windows", "options:arch=" }
 			platforms { "x86", "x64" }
 
 		filter "configurations:Debug"
@@ -275,20 +276,21 @@
 			symbols	    "On"
 
 		filter "configurations:Release"
-			defines     "NDEBUG"
-			optimize    "Full"
-			flags       { "NoBufferSecurityCheck", "NoRuntimeChecks" }
+			defines             "NDEBUG"
+			optimize            "Full"
+			runtimechecks       "Off"
+			buffersecuritycheck "Off"
 
 		filter "action:vs*"
 			defines     { "_CRT_SECURE_NO_DEPRECATE", "_CRT_SECURE_NO_WARNINGS", "_CRT_NONSTDC_NO_WARNINGS" }
 
 		filter { "system:windows", "configurations:Release" }
-			flags       { "NoIncrementalLink" }
+			incrementallink "Off"
 
 		-- MinGW AR does not handle LTO out of the box and need a plugin to be setup
-		filter { "system:windows", "configurations:Release", "toolset:not mingw" }
-			flags		{ "LinkTimeOptimization" }
-		
+		filter { "system:windows", "configurations:Release", "toolset:not gcc" }
+			linktimeoptimization "On"
+
 		filter { "system:windows", "configurations:Release", "toolset:clang", "action:not vs*" }
 			linkoptions { "-fuse-ld=lld" }
 
@@ -350,9 +352,11 @@
 
 		filter "system:windows"
 			links       { "ole32", "ws2_32", "advapi32", "version" }
-			files { "src/**.rc" }
 
-		filter "toolset:mingw"
+		filter { "system:windows", "toolset:msc*" }
+			files       { "src/**.rc" }
+
+		filter { "system:windows", "toolset:not msc" }
 			links		{ "crypt32", "bcrypt" }
 
 		filter { "system:windows", "toolset:clang", "action:not vs*" }

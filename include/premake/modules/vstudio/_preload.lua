@@ -201,20 +201,6 @@
 	}
 
 	p.api.register {
-		name = "imageoptions",
-		scope = "config",
-		kind = "list:string",
-		tokens = true,
-	}
-
-	p.api.register {
-		name = "imagepath",
-		scope = "config",
-		kind = "path",
-		tokens = true,
-	}
-
-	p.api.register {
 		name = "inheritdependencies",
 		scope = "config",
 		kind = "boolean",
@@ -456,23 +442,6 @@
 		tokens = true,
 	}
 
-	p.api.register {   -- DEPRECATED 2019-10-21
-		name = "debuggerflavor",
-		scope = "config",
-		kind = "string",
-		allowed = {
-			"Local",
-			"Remote",
-			"WebBrowser",
-			"WebService"
-		}
-	}
-
-	p.api.deprecateField("debuggerflavor", 'Use `debugger` instead.',
-	function(value)
-		debugger('VisualStudio' .. value)
-	end)
-
 	p.api.register {
 		name = "scanformoduledependencies",
 		scope = "config",
@@ -636,38 +605,9 @@
 		}
 	}
 
-	p.api.deprecateValue("flags", "MFC", 'Use `mfc` instead.',
-	function(value)
-		mfc("On")
-	end,
-	function(value)
-		mfc("Off")
-	end)
-
 --
 -- Register Android properties
 --
-
-	p.api.register {
-		name = "endian",
-		scope = "config",
-		kind = "string",
-		allowed = {
-			"Default",
-			"Little",
-			"Big",
-		},
-	}
-
-	p.api.register {
-		name = "fpu",
-		scope = "config",
-		kind = "string",
-		allowed = {
-			"Software",
-			"Hardware",
-		}
-	}
 
 	p.api.addAllowed("toolchainversion", {
 		"4.6", -- NDK GCC versions
@@ -677,16 +617,26 @@
 		"3.5",
 		"3.6",
 		"3.8",
-		"5.0", })
+		"5.0",
+	})
+
+	p.api.deprecateField("toolchainversion", "Use `toolchain 'gcc-<version>'` or `toolchain 'clang-<version>'` instead.",
+	function(value)
+		if value == "4.6" or value == "4.8" or value == "4.9" then
+			toolset("gcc-" .. value)
+		elseif value == "3.4" or value == "3.5" or value == "3.6" or value == "3.8" or value == "5.0" then
+			toolset("clang-" .. value)
+		end
+	end)
 
 	p.api.register {
 		name = "floatabi",
 		scope = "config",
 		kind = "string",
 		allowed = {
-			"soft",
-			"softfp",
-			"hard",
+			"Soft",
+			"SoftFP",
+			"Hard",
 		},
 	}
 
@@ -748,10 +698,68 @@
 	}
 
 	p.api.addAllowed("system", p.ANDROID)
-	p.api.addAllowed("architecture", { "armv5", "armv7", "aarch64", "mips", "mips64", "arm" })
 	p.api.addAllowed("vectorextensions", { "NEON", "MXU" })
 	p.api.addAllowed("exceptionhandling", {"UnwindTables"})
 	p.api.addAllowed("kind", p.PACKAGING)
+	p.api.addAllowed("flags", { "NoImplicitLink", "NoCopyLocal", "NoRuntimeChecks" })
+
+	p.api.register {
+		name = "implicitlink",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.deprecateValue("flags", "NoImplicitLink", "Use `implicitlink` instead.",
+	function(value)
+		implicitlink("Off")
+	end,
+	function(value)
+		implicitlink("Default")
+	end)
+
+	p.api.register {
+		name = "allowcopylocal",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
+	}
+
+	p.api.deprecateValue("flags", "NoCopyLocal", "Use `allowcopylocal {}` instead.", function(value)
+		allowcopylocal("Off")
+	end,
+	function(value)
+		allowcopylocal("Default")
+	end)
+
+	p.api.register {
+		name = "runtimechecks",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"Off",
+			"StackFrames",
+			"UninitializedVariables",
+			"FastChecks",
+		}
+	}
+
+	p.api.deprecateValue("flags", "NoRuntimeChecks", "Use `runtimechecks` instead.",
+	function(value)
+		runtimechecks("Off")
+	end,
+	function(value)
+		runtimechecks("Default")
+	end)
 
 --
 -- Decide when the full module should be loaded.

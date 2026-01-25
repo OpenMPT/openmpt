@@ -397,12 +397,12 @@
 				m.intDir,
 				m.targetName,
 				m.targetExt,
-				m.includePath,
 				m.libraryPath,
 				m.extensionsToDeleteOnClean,
 				m.executablePath,
 
 				-- Linux
+				m.linuxExternalIncludeDirs,
 				m.linuxMultiProcNumber
 			}
 		end
@@ -508,8 +508,7 @@
 				m.buildLog,
 			}
 		else
-
-			local elements = {
+			return {
 				m.clCompile,
 				m.buildStep,
 				m.fxCompile,
@@ -520,15 +519,6 @@
 				m.ruleVars,
 				m.buildLog,
 			}
-
-			if cfg.system == p.ANDROID and _ACTION < "vs2015" then
-				elements = table.join(elements, {
-					m.androidAntBuildPreVS2015,
-				})
-			end
-
-			return elements
-
 		end
 	end
 
@@ -657,7 +647,7 @@
 			m.androidClCompilePreprocessorDefinitions,
 			m.androidDebugInformationFormat,
 			m.androidStrictAliasing,
-			m.androidFpu,
+			m.androidFloatAbi,
 			m.androidPIC,
 			m.androidShortEnums,
 			m.androidLinkSections,
@@ -667,7 +657,6 @@
 			m.androidEnableEnhancedInstructionSet,
 			m.androidExceptionHandling,
 			m.androidRuntimeTypeInfo,
-			m.androidAdditionalCompileOptions,
 			m.gccClangAdditionalCompileOptions,
 		}
 
@@ -1178,7 +1167,7 @@
 			-- Android
 			m.androidDebugInformationFormat,
 			m.androidStrictAliasing,
-			m.androidFpu,
+			m.androidFloatAbi,
 			m.androidPIC,
 			m.androidShortEnums,
 			m.androidLinkSections,
@@ -1653,7 +1642,6 @@
 			end
 
 		else
-
 			for cfg in project.eachconfig(prj) do
 				local fcfg = fileconfig.getconfig(file, cfg)
 				if fcfg then
@@ -2218,15 +2206,23 @@
 
 	function m.basicRuntimeChecks(cfg, condition)
 		local prjcfg, filecfg = p.config.normalize(cfg)
-		local runtime = config.getruntime(prjcfg) or iif(config.isDebugBuild(cfg), "Debug", "Release")
-		if filecfg then
-			if filecfg.flags.NoRuntimeChecks or (config.isOptimizedBuild(filecfg) and runtime:endswith("Debug")) then
-				m.element("BasicRuntimeChecks", condition, "Default")
-			end
-		else
-			if prjcfg.flags.NoRuntimeChecks or (config.isOptimizedBuild(prjcfg) and runtime:endswith("Debug")) then
-				m.element("BasicRuntimeChecks", nil, "Default")
-			end
+
+		local function getruntimecheck(c)
+			local checks = {
+				Off = "Default", -- Per MSVC SDK docs, "Default" means no runtime checks
+				StackFrames = "StackFrameRuntimeCheck",
+				UninitializedVariables = "UninitializedLocalUsageCheck",
+				FastChecks = "EnableFastChecks",
+			}
+
+			local runtimecheck = c.runtimechecks
+			return checks[runtimecheck]
+			
+		end
+
+		local check = getruntimecheck(filecfg or prjcfg)
+		if check then
+			m.element("BasicRuntimeChecks", condition, check)
 		end
 	end
 
@@ -2298,7 +2294,7 @@
 
 
 	function m.wholeProgramOptimization(cfg)
-		if cfg.linktimeoptimization == "On" then
+		if cfg.linktimeoptimization == "On" or cfg.linktimeoptimization == "Fast" then
 			m.element("WholeProgramOptimization", nil, "true")
 		elseif cfg.linktimeoptimization == "Off" then
 			m.element("WholeProgramOptimization", nil, "false")
@@ -2473,7 +2469,7 @@
 
 
 	function m.excludedFromBuild(filecfg, condition)
-		if not filecfg or filecfg.flags.ExcludeFromBuild then
+		if not filecfg or filecfg.excludefrombuild then
 			m.element("ExcludedFromBuild", condition, "true")
 		end
 	end
@@ -2613,15 +2609,20 @@
 
 
 	function m.generateManifest(cfg)
-		if cfg.flags.NoManifest then
+		if cfg.manifest == p.OFF then
 			m.element("GenerateManifest", nil, "false")
 		end
 	end
 
 
 	function m.generateMapFile(cfg)
-		if cfg.flags.Maps then
+		if cfg.mapfile == p.ON then
 			m.element("GenerateMapFile", nil, "true")
+			if cfg.mapfilepath then
+				m.element("MapFileName", nil, vstudio.path(cfg, cfg.mapfilepath))
+			end
+		elseif cfg.mapfile == p.OFF then
+			m.element("GenerateMapFile", nil, "false")
 		end
 	end
 
@@ -2655,7 +2656,7 @@
 
 	function m.ignoreImportLibrary(cfg)
 		if cfg.kind == p.SHAREDLIB then
-			if cfg.flags.NoImportLib then
+			if cfg.useimportlib == p.OFF then
 				m.element("IgnoreImportLibrary", nil, "true")
 			elseif cfg.system == p.UWP then
 				m.element("IgnoreImportLibrary", nil, "false")
@@ -2937,11 +2938,11 @@
 		-- Left to its own devices, VS will happily link against a project dependency
 		-- that has been excluded from the build. As a workaround, disable dependency
 		-- linking and list all siblings explicitly
-		if explicit then
-			p.push('<ProjectReference>')
-			m.element("LinkLibraryDependencies", nil, "false")
-			p.pop('</ProjectReference>')
+		p.push('<ProjectReference>')
+		if explicit or cfg.implicitlink ~= nil then
+			m.element("LinkLibraryDependencies", nil, iif(explicit, "false", "true"))
 		end
+		p.pop('</ProjectReference>')
 	end
 
 
@@ -2954,11 +2955,13 @@
 
 	function m.minimalRebuild(cfg)
 		if config.isOptimizedBuild(cfg) or
-		   cfg.flags.NoMinimalRebuild or
-		   cfg.flags.MultiProcessorCompile or
+		   cfg.minimalrebuild == "Off" or
+		   cfg.multiprocessorcompile == p.ON or
 		   cfg.debugformat == "c7"
 		then
 			m.element("MinimalRebuild", nil, "false")
+		elseif cfg.minimalrebuild == "On" then
+			m.element("MinimalRebuild", nil, "true")
 		end
 	end
 
@@ -2972,7 +2975,7 @@
 
 
 	function m.multiProcessorCompilation(cfg)
-		if cfg.flags.MultiProcessorCompile then
+		if cfg.multiprocessorcompile == p.ON then
 			m.element("MultiProcessorCompilation", nil, "true")
 		end
 	end
@@ -3019,8 +3022,7 @@
 		if cfg.system == p.WINDOWS then
 			if cfg.architecture == p.ARM then
 				p.w('<WindowsSDKDesktopARMSupport>true</WindowsSDKDesktopARMSupport>')
-			end
-			if cfg.architecture == p.ARM64 then
+			elseif cfg.architecture == p.AARCH64 then
 				p.w('<WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>')
 			end
 		end
@@ -3054,7 +3056,7 @@
 
 
 	function m.omitDefaultLib(cfg)
-		if cfg.flags.OmitDefaultLibrary then
+		if cfg.nodefaultlib == p.ON then
 			m.element("OmitDefaultLibName", nil, "true")
 		end
 	end
@@ -3080,6 +3082,8 @@
 	function m.linkTimeCodeGeneration(cfg)
 		if cfg.linktimeoptimization == "On" then
 			m.element("LinkTimeCodeGeneration", nil, "UseLinkTimeCodeGeneration")
+		elseif cfg.linktimeoptimization == "Fast" then
+			m.element("LinkTimeCodeGeneration", nil, "UseFastLinkTimeCodeGeneration")
 		end
 	end
 
@@ -3188,13 +3192,13 @@
 	function m.precompiledHeader(cfg, condition)
 		local prjcfg, filecfg = p.config.normalize(cfg)
 		if filecfg then
-			if prjcfg.pchsource == filecfg.abspath and not prjcfg.flags.NoPCH then
+			if prjcfg.pchsource == filecfg.abspath and prjcfg.enablepch ~= "Off" then
 				m.element('PrecompiledHeader', condition, 'Create')
-			elseif filecfg.flags.NoPCH then
+			elseif filecfg.enablepch == p.OFF then
 				m.element('PrecompiledHeader', condition, 'NotUsing')
 			end
 		else
-			if not prjcfg.flags.NoPCH and prjcfg.pchheader then
+			if prjcfg.enablepch ~= "Off" and prjcfg.pchheader then
 				m.element("PrecompiledHeader", nil, "Use")
 
 				if cfg.system == p.ANDROID then
@@ -3372,8 +3376,10 @@
 
 	function m.bufferSecurityCheck(cfg)
 		local tool, toolVersion = p.config.toolset(cfg)
-		if cfg.flags.NoBufferSecurityCheck or (toolVersion and toolVersion:startswith("LLVM-vs")) then
+		if cfg.buffersecuritycheck == p.OFF or (toolVersion and toolVersion:startswith("LLVM-vs")) then
 			m.element("BufferSecurityCheck", nil, "false")
+		elseif cfg.buffersecuritycheck == p.ON then
+			m.element("BufferSecurityCheck", nil, "true")
 		end
 	end
 
@@ -3892,6 +3898,29 @@
 
 	end
 
+	function m.linuxExternalIncludeDirs(cfg)
+
+		local externaldirs = table.join(cfg.externalincludedirs, cfg.includedirsafter)
+		local dirs = vstudio.path(cfg, externaldirs)
+		if #dirs > 0 then
+
+			-- Take note of the directories that exist locally, to be able to copy
+			local existingdirs = {}
+
+			for _, dir in ipairs(dirs or {}) do
+				local absolutedir = path.getabsolute(dir)
+
+				-- If directory exists on local machine, it's good to copy across to remote machine
+				if os.isdir(absolutedir) then
+					table.insert(existingdirs, dir)
+				end
+			end
+
+			m.element("AdditionalSourcesToCopyMapping", nil, "%s;$(AdditionalSourcesToCopyMapping)", table.concat(existingdirs, ";"))
+		end
+
+	end
+
 	function m.linuxLanguageStandardCpp(cfg)
 		local cpp_langmap = {
 			["C++98"]   = "c++98",
@@ -3964,12 +3993,9 @@
 	end
 
 	function m.linuxPlatformToolset(cfg)
-		local tool, version = p.config.toolset(cfg)
-
-		if not version then
-			local value = p.action.current().toolset
-			tool, version = p.tools.canonical(value)
-		end
+		local toolset = p.tools.normalize(cfg.toolset):explode("-", true, 1)
+		local tool = toolset[1]
+		local version = toolset[2]
 
 		local gcc_map = {
 			["remote"] = "Remote_GCC_1_0",
@@ -3983,17 +4009,34 @@
 			["wsl2"] = "WSL2_Clang_1_0",
 		}
 
-		if cfg.toolchainversion then
-
-			local map = iif(cfg.toolset == "gcc", gcc_map, clang_map)
-			version  = map[cfg.toolchainversion]
-
-		end
+		local toolset_map = {
+			gcc = gcc_map,
+			clang = clang_map,
+		}
 
 		if version then
-			m.element("PlatformToolset", nil, version)
+			local map = toolset_map[tool]
+			if not map then
+				p.error('Invalid toolset (%s) for Linux platform.', tool)
+			end
+
+			local ts = map[version]
+			if not ts then
+				p.error('Invalid version (%s) for the selected toolset (%s).', version, cfg.toolset)
+			end
+
+			m.element("PlatformToolset", nil, ts)
+		elseif cfg.toolchainversion then
+			local map = iif(cfg.toolset == "gcc", gcc_map, clang_map)
+			local ts  = map[cfg.toolchainversion]
+
+			if ts then
+				m.element("PlatformToolset", nil, ts)
+			else
+				p.error('Invalid toolchainversion (%s) for the selected toolset (%s).', cfg.toolchainversion, cfg.toolset)
+			end
 		else
-			p.error('Invalid toolchainversion (%s) for the selected toolset (%s).', cfg.toolchainversion, cfg.toolset)
+			p.error('Specify a toolchain version for the selected toolset (%s). (%s - %s)', cfg.toolset, tool, version)
 		end
 	end
 
@@ -4016,7 +4059,7 @@
 	end
 
 	function m.linuxWholeProgramOptimization(cfg)
-		if cfg.linktimeoptimization == "On" then
+		if cfg.linktimeoptimization == "On" or cfg.linktimeoptimization == "Fast" then
 			m.element("LinkTimeOptimization", nil, "true")
 		elseif cfg.linktimeoptimization == "Off" then
 			m.element("LinkTimeOptimization", nil, "false")
@@ -4026,13 +4069,13 @@
 	function m.linuxMultiProcNumber(cfg)
 		-- Linux equivalent of 'MultiProcessorCompilation'
 		-- Default to 8 parallel jobs
-		if cfg.flags.MultiProcessorCompile then
+		if cfg.multiprocessorcompile == p.ON then
 			m.element("MultiProcNumber", nil, "8")
 		end
 	end
 
 	function m.linuxLinkTimeCodeGeneration(cfg)
-		if cfg.linktimeoptimization == "On" then
+		if cfg.linktimeoptimization == "On" or cfg.linktimeoptimization == "Fast" then
 			m.element("LinkTimeOptimization", nil, "true")
 		end
 	end
@@ -4082,32 +4125,21 @@
 			Off = "Disabled",
 			UnwindTables = "UnwindTables",
 		}
-		if _ACTION >= "vs2015" then
-			if exceptions[cfg.exceptionhandling] ~= nil then
-				m.element("ExceptionHandling", condition, exceptions[cfg.exceptionhandling])
-			end
-		else
-			if cfg.exceptionhandling == premake.ON then
-				m.element("GccExceptionHandling", condition, "true")
-			end
+		if exceptions[cfg.exceptionhandling] ~= nil then
+			m.element("ExceptionHandling", condition, exceptions[cfg.exceptionhandling])
 		end
 	end
 
 	function m.androidRuntimeTypeInfo(cfg, condition)
-		-- Note: Android defaults to 'off'
-		if cfg.rtti == premake.ON then
-			m.element("RuntimeTypeInfo", condition, "true")
+		if cfg.rtti ~= nil and cfg.rtti ~= "Default" then
+			m.element("RuntimeTypeInfo", condition, iif(cfg.rtti == p.ON, "true", "false"))
 		end
 	end
 
 	function m.androidWarningLevel(cfg, condition)
 
-		if _ACTION >= "vs2015" then
-			if cfg.warnings and cfg.warnings ~= "Off" then
-				m.element("WarningLevel", nil, "EnableAllWarnings")
-			else
-				m.warningLevel(cfg, condition)
-			end
+		if cfg.warnings and cfg.warnings ~= "Off" then
+			m.element("WarningLevel", nil, "EnableAllWarnings")
 		else
 			m.warningLevel(cfg, condition)
 		end
@@ -4148,101 +4180,16 @@
 		end
 	end
 
-	function m.androidAdditionalCompileOptions(cfg)
+	function m.androidFloatAbi(cfg)
+		local floatabi = {
+			Soft = "soft",
+			SoftFP = "softfp",
+			Hard = "hard",
+		}
 
-		if _ACTION >= "vs2015" then
-
-		else
-			local function alreadyHas(t, key)
-				for _, k in ipairs(t) do
-					if string.find(k, key) then
-						return true
-					end
-				end
-				return false
-			end
-
-			if not cfg.architecture or string.startswith(cfg.architecture, "arm") then
-				-- we might want to define the arch to generate better code
---				if not alreadyHas(cfg.buildoptions, "-march=") then
---					if cfg.architecture == "armv6" then
---						table.insert(cfg.buildoptions, "-march=armv6")
---					elseif cfg.architecture == "armv7" then
---						table.insert(cfg.buildoptions, "-march=armv7")
---					end
---				end
-
-				-- ARM has a comprehensive set of floating point options
-				if cfg.fpu ~= "Software" and cfg.floatabi ~= "soft" then
-
-					if cfg.architecture == "armv7" then
-
-						-- armv7 always has VFP, may not have NEON
-
-						if not alreadyHas(cfg.buildoptions, "-mfpu=") then
-							if cfg.vectorextensions == "NEON" then
-								table.insert(cfg.buildoptions, "-mfpu=neon")
-							elseif cfg.fpu == "Hardware" or cfg.floatabi == "softfp" or cfg.floatabi == "hard" then
-								table.insert(cfg.buildoptions, "-mfpu=vfpv3-d16") -- d16 is the lowest common denominator
-							end
-						end
-
-						if not alreadyHas(cfg.buildoptions, "-mfloat-abi=") then
-							if cfg.floatabi == "hard" then
-								table.insert(cfg.buildoptions, "-mfloat-abi=hard")
-							else
-								-- Android should probably use softfp by default for compatibility
-								table.insert(cfg.buildoptions, "-mfloat-abi=softfp")
-							end
-						end
-
-					else
-
-						-- armv5/6 may not have VFP
-
-						if not alreadyHas(cfg.buildoptions, "-mfpu=") then
-							if cfg.fpu == "Hardware" or cfg.floatabi == "softfp" or cfg.floatabi == "hard" then
-								table.insert(cfg.buildoptions, "-mfpu=vfp")
-							end
-						end
-
-						if not alreadyHas(cfg.buildoptions, "-mfloat-abi=") then
-							if cfg.floatabi == "softfp" then
-								table.insert(cfg.buildoptions, "-mfloat-abi=softfp")
-							elseif cfg.floatabi == "hard" then
-								table.insert(cfg.buildoptions, "-mfloat-abi=hard")
-							end
-						end
-
-					end
-
-				elseif cfg.floatabi == "soft" then
-
-					table.insert(cfg.buildoptions, "-mfloat-abi=soft")
-
-				end
-
-				if cfg.endian == "Little" then
-					table.insert(cfg.buildoptions, "-mlittle-endian")
-				elseif cfg.endian == "Big" then
-					table.insert(cfg.buildoptions, "-mbig-endian")
-				end
-
-			elseif cfg.architecture == "mips" then
-
-				-- TODO...
-
-				if cfg.vectorextensions == "MXU" then
-					table.insert(cfg.buildoptions, "-mmxu")
-				end
-
-			elseif cfg.architecture == "x86" then
-
-				-- TODO...
-
-			end
+		if cfg.floatabi ~= nil and floatabi[cfg.floatabi] ~= nil then
+			m.element("FloatABI", nil, floatabi[cfg.floatabi])
 		end
-	
 	end
 
 	function m.androidOptimization(cfg, condition)
@@ -4272,65 +4219,46 @@
 	end
 
 	function m.androidPlatformToolset(cfg)
+		local gcc_map = {
+			["4.6"] = "GCC_4_6",
+			["4.8"] = "GCC_4_8",
+			["4.9"] = "GCC_4_9",
+		}
+		local clang_map = {
+			["3.4"] = "Clang_3_4",
+			["3.5"] = "Clang_3_5",
+			["3.6"] = "Clang_3_6",
+			["3.8"] = "Clang_3_8",
+			["5.0"] = "Clang_5_0",
+		}
 
-		if _ACTION >= "vs2015" then
-			local gcc_map = {
-				["4.6"] = "GCC_4_6",
-				["4.8"] = "GCC_4_8",
-				["4.9"] = "GCC_4_9",
-			}
-			local clang_map = {
-				["3.4"] = "Clang_3_4",
-				["3.5"] = "Clang_3_5",
-				["3.6"] = "Clang_3_6",
-				["3.8"] = "Clang_3_8",
-				["5.0"] = "Clang_5_0",
-			}
+		local toolset_map = {
+			gcc = gcc_map,
+			clang = clang_map,
+		}
 
-			if cfg.toolchainversion ~= nil then
-				local map = iif(cfg.toolset == "gcc", gcc_map, clang_map)
-				local ts  = map[cfg.toolchainversion]
+		local toolset = p.tools.normalize(cfg.toolset):explode("-", true, 1)
+		local tool = toolset[1]
+		local version = toolset[2]
+
+		if version then
+			local tool_mapping = toolset_map[tool]
+			if tool_mapping then
+				local ts = tool_mapping[version]
 				if ts == nil then
-					p.error('Invalid toolchainversion for the selected toolset (%s).', cfg.toolset or "clang")
+					p.error('Invalid version (%s) for the selected toolset (%s).', version, tool)
 				end
 
 				m.element("PlatformToolset", nil, ts)
 			end
-		else
-			local archMap = {
-				arm = "armv5te", -- should arm5 be default? vs-android thinks so...
-				arm5 = "armv5te",
-				arm7 = "armv7-a",
-				mips = "mips",
-				x86 = "x86",
-			}
-			local arch = cfg.architecture or "arm"
-
-			if (cfg.architecture ~= nil or cfg.toolchainversion ~= nil) and archMap[arch] ~= nil then
-				local defaultToolsetMap = {
-					arm = "arm-linux-androideabi-",
-					armv5 = "arm-linux-androideabi-",
-					armv7 = "arm-linux-androideabi-",
-					aarch64 = "aarch64-linux-android-",
-					mips = "mipsel-linux-android-",
-					mips64 = "mips64el-linux-android-",
-					x86 = "x86-",
-					x86_64 = "x86_64-",
-				}
-				local toolset = defaultToolsetMap[arch]
-
-				if cfg.toolset == "clang" then
-					error("The clang toolset is not yet supported by vs-android", 2)
-					toolset = toolset .. "clang"
-				elseif cfg.toolset and cfg.toolset ~= "gcc" then
-					error("Toolset not supported by the android NDK: " .. cfg.toolset, 2)
-				end
-
-				local version = cfg.toolchainversion or iif(cfg.toolset == "clang", "3.5", "4.9")
-
-				m.element("PlatformToolset", nil, toolset .. version)
-				m.element("AndroidArch", nil, archMap[arch])
+		elseif cfg.toolchainversion ~= nil then
+			local map = iif(cfg.toolset == "gcc", gcc_map, clang_map)
+			local ts  = map[cfg.toolchainversion]
+			if ts == nil then
+				p.error('Invalid toolchainversion for the selected toolset (%s).', cfg.toolset or "clang")
 			end
+
+			m.element("PlatformToolset", nil, ts)
 		end
 	end
 
@@ -4347,11 +4275,7 @@
 			local postfix = iif(cfg.staticruntime == "On", "_static", "_shared")
 			local runtimeLib = iif(cfg.stl == "none", "system", stlType[cfg.stl] .. postfix)
 
-			if _ACTION >= "vs2015" then
-				m.element("UseOfStl", nil, runtimeLib)
-			else
-				m.element("AndroidStlType", nil, runtimeLib)
-			end
+			m.element("UseOfStl", nil, runtimeLib)
 		end
 	end
 
@@ -4367,16 +4291,9 @@
 		end
 	end
 
-	function m.androidFpu(cfg)
-		if cfg.fpu ~= nil then
-			-- TODO REVIEW THIS
-			_p(3,'<SoftFloat>true</SoftFloat>', iif(cfg.fpu == "Software", "true", "false"))
-		end
-	end
-
 	function m.androidShortEnums(cfg)
-		if cfg.flags.UseShortEnums ~= nil then
-			m.element(UseShortEnums, nil, "true")
+		if cfg.useshortenums then
+			m.element("UseShortEnums", nil, iif(cfg.useshortenums == "On", "true", "false"))
 		end
 	end
 
@@ -4409,7 +4326,7 @@
 	end
 
 	function m.androidGenerateMapFile(cfg)
-		if cfg.flags.Maps then
+		if cfg.mapfile == p.ON then
 			-- Android specifies a name. Other platforms use the project name
 			-- so we do the same thing here
 			m.element("GenerateMapFile", nil, cfg.project.name..".map")
@@ -4418,7 +4335,7 @@
 
 	function m.androidUseMultiToolTask(cfg)
 		-- Android equivalent of 'MultiProcessorCompilation'
-		if cfg.flags.MultiProcessorCompile then
+		if cfg.multiprocessorcompile == p.ON then
 			m.element("UseMultiToolTask", nil, "true")
 		end
 	end
@@ -4449,16 +4366,6 @@
 
 	end
 
-	function m.androidAntBuildPreVS2015(cfg)
-		if cfg.kind == premake.STATICLIB or cfg.kind == premake.SHAREDLIB then
-			return
-		end
-
-		_p(2,'<AntBuild>')
-		_p(3,'<AntBuildType>%s</AntBuildType>', iif(premake.config.isDebugBuild(cfg), "Debug", "Release"))
-		_p(2,'</AntBuild>')
-	end
-
 	--
 	-- Shared project generation functions
 	--
@@ -4474,7 +4381,18 @@
 
 		-- -fvisibility=<>
 		if cfg.visibility ~= nil then
-			table.insert(opts, p.tools.gcc.cxxflags.visibility[cfg.visibility])
+			table.insert(opts, p.tools.gcc.shared.visibility[cfg.visibility])
+		end
+
+		-- -isystem="path1"
+		-- Systems like Android put external includes in the ExternalIncludePath
+		if cfg.system == p.LINUX then
+			local externaldirs = table.join(cfg.externalincludedirs, cfg.includedirsafter)
+			local dirs = vstudio.path(cfg, externaldirs)
+			for _, dir in ipairs(dirs or {}) do
+				relativedir = p.tools.getrelative(cfg.project, dir)
+				table.insert(opts, '-isystem ' .. p.quoted(relativedir))
+			end
 		end
 
 		if #opts > 0 then

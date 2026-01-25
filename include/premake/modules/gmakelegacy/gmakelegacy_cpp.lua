@@ -292,7 +292,7 @@ end
 				local custom = false
 				for cfg in project.eachconfig(prj) do
 					local filecfg = fileconfig.getconfig(node, cfg)
-					if filecfg and not filecfg.flags.ExcludeFromBuild and filecfg.buildaction ~= "None" then
+					if filecfg and filecfg.buildaction ~= "None" and not filecfg.excludefrombuild then
 						incfg[cfg] = filecfg
 						custom = fileconfig.hasCustomBuildRule(filecfg)
 					else
@@ -513,7 +513,7 @@ end
 
 	function make.forceInclude(cfg, toolset)
 		local includes = toolset.getforceincludes(cfg)
-		if not cfg.flags.NoPCH and cfg.pchheader then
+		if cfg.enablepch ~= p.OFF and cfg.pchheader then
 			table.insert(includes, 1, "-include $(OBJDIR)/$(notdir $(PCH))")
 		end
 		_x('  FORCE_INCLUDE +=%s', make.list(includes))

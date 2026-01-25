@@ -263,6 +263,33 @@
 		]]
 	end
 
+	function suite.excludedFromBuild_onBuildActionNone()
+		files { "hello.cpp" }
+		filter "files:hello.cpp"
+		buildaction "None"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<None Include="hello.cpp" />
+</ItemGroup>
+		]]
+	end
+
+	function suite.excludedFromBuild_onAPI()
+		files { "hello.cpp" }
+		filter "files:hello.cpp"
+		excludefrombuild "On"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ClCompile Include="hello.cpp">
+		<ExcludedFromBuild>true</ExcludedFromBuild>
+	</ClCompile>
+</ItemGroup>
+		]]
+	end
+
+
 	function suite.excludedFromBuild_onResourceFile_excludedFile()
 		files { "hello.rc" }
 		filter "Debug"
@@ -291,11 +318,52 @@
 		]]
 	end
 
+	function suite.excludedFromBuild_onResourceFile_buildActionNone()
+		files { "hello.rc" }
+		filter "files:hello.rc"
+		buildaction "None"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<None Include="hello.rc" />
+</ItemGroup>
+		]]
+	end
+
+	function suite.excludedFromBuild_onResourceFile_viaAPI()
+		files { "hello.rc" }
+		filter "files:hello.rc"
+		excludefrombuild "On"
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ResourceCompile Include="hello.rc">
+		<ExcludedFromBuild>true</ExcludedFromBuild>
+	</ResourceCompile>
+</ItemGroup>
+		]]
+	end
+
 	function suite.excludedFromBuild_onResourceFile_excludeFlag_nonWindows()
 		files { "hello.rc" }
 		system "Linux"
 		filter "files:hello.rc"
 		flags { "ExcludeFromBuild" }
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<ResourceCompile Include="hello.rc">
+		<ExcludedFromBuild>true</ExcludedFromBuild>
+	</ResourceCompile>
+</ItemGroup>
+		]]
+	end
+
+	function suite.excludedFromBuild_onResourceFile_viaAPI_nonWindows()
+		files { "hello.rc" }
+		system "Linux"
+		filter "files:hello.rc"
+		excludefrombuild "On"
 		prepare()
 		test.capture [[
 <ItemGroup>
@@ -355,13 +423,33 @@
 		]]
 	end
 
-	function suite.excludedFromBuild_onCustomBuildRule_withNoCommands()
+	function suite.excludedFromBuild_onCustomBuildRule_withNoCommands_excludeViaFlag()
 		files { "hello.cg" }
 		filter { "files:**.cg", "Debug" }
 			buildcommands { "cgc $(InputFile)" }
 			buildoutputs { "$(InputName).obj" }
 		filter { "files:**.cg" }
 			flags { "ExcludeFromBuild" }
+		prepare()
+		test.capture [[
+<ItemGroup>
+	<CustomBuild Include="hello.cg">
+		<FileType>Document</FileType>
+		<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+		<Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cgc $(InputFile)</Command>
+		<Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(InputName).obj</Outputs>
+	</CustomBuild>
+</ItemGroup>
+		]]
+	end
+
+	function suite.excludedFromBuild_onCustomBuildRule_withNoCommands_excludeViaAPI()
+		files { "hello.cg" }
+		filter { "files:**.cg", "Debug" }
+			buildcommands { "cgc $(InputFile)" }
+			buildoutputs { "$(InputName).obj" }
+		filter { "files:**.cg" }
+			excludefrombuild "On"
 		prepare()
 		test.capture [[
 <ItemGroup>

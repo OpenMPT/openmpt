@@ -24,11 +24,11 @@
 
 	vstudio.vs200x_architectures =
 	{
-		win32   = "x86",
-		x86     = "x86",
-		x86_64  = "x64",
-		ARM     = "ARM",
-		ARM64   = "ARM64",
+		win32     = "x86",
+		x86       = "x86",
+		x86_64    = "x64",
+		ARM       = "ARM",
+		AARCH64   = "ARM64",
 	}
 
 	vstudio.vs2010_architectures =
@@ -367,7 +367,7 @@
 
 	function vstudio.needsExplicitLink(cfg)
 		if not cfg._needsExplicitLink then
-			local ex = cfg.flags.NoImplicitLink
+			local ex = cfg.implicitlink == p.OFF
 			if not ex then
 				local prjdeps = project.getdependencies(cfg.project, "linkOnly")
 				local cfgdeps = config.getlinks(cfg, "dependencies", "object")

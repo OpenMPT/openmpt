@@ -152,10 +152,16 @@
 --
 
 	function config.canLinkIncremental(cfg)
+		-- Explicit "On" overrides all other checks
+		if cfg.incrementallink == p.ON then
+			return true
+		end
+		
 		if cfg.kind == "StaticLib"
 				or config.isOptimizedBuild(cfg)
-				or cfg.flags.NoIncrementalLink
-				or cfg.linktimeoptimization == "On" then
+				or cfg.incrementallink == p.OFF
+				or cfg.linktimeoptimization == p.ON
+				or cfg.linktimeoptimization == "Fast" then
 			return false
 		end
 		return true
@@ -209,7 +215,7 @@
 		-- is provided, change the kind as import libraries are static.
 		local kind = cfg.kind
 		if project.isnative(cfg.project)  then
-			if cfg.system == p.WINDOWS and kind == p.SHAREDLIB and not cfg.flags.NoImportLib then
+			if cfg.system == p.WINDOWS and kind == p.SHAREDLIB and cfg.useimportlib ~= p.OFF then
 				kind = p.STATICLIB
 			end
 		end
@@ -267,11 +273,8 @@
 
 			-- Strip linking decorators from link, to determine if the link
 			-- is a "sibling" project.
-			local endswith = function(s, ptrn)
-				return ptrn == string.sub(s, -string.len(ptrn))
-			end
 			local name = link
-			if endswith(name, ":static") or endswith(name, ":shared") then
+			if name:endswith(":static") or name:endswith(":shared") then
 				name = string.sub(name, 0, -8)
 			end
 
@@ -448,7 +451,7 @@
 --
 
 	function config.isCopyLocal(cfg, linkname, default)
-		if cfg.flags.NoCopyLocal then
+		if cfg.allowcopylocal == p.OFF then
 			return false
 		end
 

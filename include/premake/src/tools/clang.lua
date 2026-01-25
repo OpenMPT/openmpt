@@ -68,8 +68,12 @@
 		structmemberalign = gcc.shared.structmemberalign,
 		visibility = gcc.shared.visibility,
 		inlinesvisibility = gcc.shared.inlinesvisibility,
-		linktimeoptimization = gcc.shared.linktimeoptimization,
+		linktimeoptimization = {
+			On = "-flto",
+			Fast = "-flto=thin",
+		},
 		profile = gcc.shared.profile,
+		useshortenums = gcc.shared.useshortenums,
 	}
 
 	clang.cflags = table.merge(gcc.cflags, {
@@ -184,6 +188,24 @@
 
 
 --
+-- Returns the proper precompiled header file for the given configuration.
+-- For GCC-like toolsets, this is the header file path with .gch appended.
+--
+-- @param cfg
+--    The project configuration.
+-- @return
+--    The path to the precompiled header file, relative to the project.
+--
+
+	function clang.getpch(cfg)
+
+		-- Clang uses the same PCH handling as GCC
+		return gcc.getpch(cfg)
+
+	end
+
+
+--
 -- Returns a list of include file search directories, decorated for
 -- the compiler command line.
 --
@@ -244,7 +266,7 @@
 		kind = {
 			SharedLib = function(cfg)
 				local r = { clang.getsharedlibarg(cfg) }
-				if cfg.system == "windows" and not cfg.flags.NoImportLib then
+				if cfg.system == "windows" and cfg.useimportlib ~= p.OFF then
 					table.insert(r, '-Wl,--out-implib="' .. cfg.linktarget.relpath .. '"')
 				elseif cfg.system == p.LINUX then
 					table.insert(r, '-Wl,-soname=' .. p.quoted(cfg.linktarget.name))
@@ -258,6 +280,7 @@
 			end,
 		},
 		linker = gcc.ldflags.linker,
+		mapfile = gcc.ldflags.mapfile,
 		profile = gcc.ldflags.profile,
 		sanitize = table.merge(gcc.ldflags.sanitize, {
 			Fuzzer = "-fsanitize=fuzzer",
@@ -349,7 +372,7 @@
 	clang.tools = {
 		cc = "clang",
 		cxx = "clang++",
-		ar = function(cfg) return iif(cfg.linktimeoptimization == "On", "llvm-ar", "ar") end,
+		ar = function(cfg) return iif(cfg.linktimeoptimization == "On" or cfg.linktimeoptimization == "Fast", "llvm-ar", "ar") end,
 		rc = "windres"
 	}
 

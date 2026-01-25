@@ -247,7 +247,7 @@
 -- Check that the "no buffer security check" flag is applied correctly.
 --
 
-	function suite.noBufferSecurityFlagSet_onBufferSecurityCheck()
+	function suite.noBufferSecurityFlagSet_onBufferSecurityCheck_ViaFlag()
 		flags { "NoBufferSecurityCheck" }
 		prepare()
 		test.capture [[
@@ -256,6 +256,42 @@
 	Optimization="0"
 	BasicRuntimeChecks="3"
 	BufferSecurityCheck="false"
+	RuntimeLibrary="2"
+	EnableFunctionLevelLinking="true"
+	UsePrecompiledHeader="0"
+	WarningLevel="3"
+	DebugInformationFormat="0"
+/>
+		]]
+	end
+
+	function suite.noBufferSecurityFlagSet_onBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "Off"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	BufferSecurityCheck="false"
+	RuntimeLibrary="2"
+	EnableFunctionLevelLinking="true"
+	UsePrecompiledHeader="0"
+	WarningLevel="3"
+	DebugInformationFormat="0"
+/>
+		]]
+	end
+
+	function suite.bufferSecurityFlagSet_onBufferSecurityCheck_ViaAPI()
+		buffersecuritycheck "On"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	BufferSecurityCheck="true"
 	RuntimeLibrary="2"
 	EnableFunctionLevelLinking="true"
 	UsePrecompiledHeader="0"
@@ -354,25 +390,6 @@
 -- Verify the correct warnings settings are used when FatalWarnings are enabled.
 --
 
-	function suite.runtimeLibraryIsDebug_onFatalWarningsViaFlag()
-		flags { "FatalWarnings" }
-		prepare()
-		test.capture [[
-<Tool
-	Name="VCCLCompilerTool"
-	Optimization="0"
-	BasicRuntimeChecks="3"
-	RuntimeLibrary="2"
-	EnableFunctionLevelLinking="true"
-	UsePrecompiledHeader="0"
-	WarningLevel="3"
-	WarnAsError="true"
-	DebugInformationFormat="0"
-/>
-		]]
-	end
-
-
 	function suite.runtimeLibraryIsDebug_onFatalWarningsViaAPI()
 		fatalwarnings { "All" }
 		prepare()
@@ -395,25 +412,6 @@
 --
 -- Verify the correct warnings settings are used when no warnings are enabled.
 --
-
-	function suite.runtimeLibraryIsDebug_onNoWarnings_whichDisablesAllOtherWarningsFlagsViaFlag()
-		flags { "FatalWarnings" }
-		warnings "Off"
-		prepare()
-		test.capture [[
-<Tool
-	Name="VCCLCompilerTool"
-	Optimization="0"
-	BasicRuntimeChecks="3"
-	RuntimeLibrary="2"
-	EnableFunctionLevelLinking="true"
-	UsePrecompiledHeader="0"
-	WarningLevel="0"
-	DebugInformationFormat="0"
-/>
-		]]
-	end
-
 
 	function suite.runtimeLibraryIsDebug_onNoWarnings_whichDisablesAllOtherWarningsFlagsViaAPI()
 		fatalwarnings { "All" }
@@ -451,6 +449,63 @@
 	UsePrecompiledHeader="0"
 	WarningLevel="3"
 	Detect64BitPortabilityProblems="true"
+	DebugInformationFormat="0"
+/>
+		]]
+	end
+
+	function suite._64BitPortabilityOn_onVS2005_API()
+		p.action.set("vs2005")
+		enable64bitchecks "On"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	RuntimeLibrary="2"
+	EnableFunctionLevelLinking="true"
+	UsePrecompiledHeader="0"
+	WarningLevel="3"
+	Detect64BitPortabilityProblems="true"
+	DebugInformationFormat="0"
+/>
+		]]
+	end
+
+	function suite._64BitPortabilityOff_onVS2005_Flags()
+		p.action.set("vs2005")
+		flags { "No64BitChecks" }
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	RuntimeLibrary="2"
+	EnableFunctionLevelLinking="true"
+	UsePrecompiledHeader="0"
+	WarningLevel="3"
+	Detect64BitPortabilityProblems="false"
+	DebugInformationFormat="0"
+/>
+		]]
+	end
+
+	function suite._64BitPortabilityOff_onVS2005_API()
+		p.action.set("vs2005")
+		enable64bitchecks "Off"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	RuntimeLibrary="2"
+	EnableFunctionLevelLinking="true"
+	UsePrecompiledHeader="0"
+	WarningLevel="3"
+	Detect64BitPortabilityProblems="false"
 	DebugInformationFormat="0"
 />
 		]]
@@ -546,18 +601,98 @@
 <Tool
 	Name="VCCLCompilerTool"
 	Optimization="0"
+	BasicRuntimeChecks="0"
 	RuntimeLibrary="2"
 		]]
 	end
 
+
+--
+-- Check handling of the runtimechecks API with "Off" value.
+--
+
+	function suite.onRuntimeChecks_Off()
+		runtimechecks "Off"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="0"
+	RuntimeLibrary="2"
+		]]
+	end
+
+
+--
+-- Check handling of the runtimechecks API with "StackFrames" value.
+--
+
+	function suite.onRuntimeChecks_StackFrames()
+		runtimechecks "StackFrames"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="1"
+	RuntimeLibrary="2"
+		]]
+	end
+
+
+--
+-- Check handling of the runtimechecks API with "UninitializedVariables" value.
+--
+
+	function suite.onRuntimeChecks_UninitializedVariables()
+		runtimechecks "UninitializedVariables"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="2"
+	RuntimeLibrary="2"
+		]]
+	end
+
+
+--
+-- Check handling of the runtimechecks API with "FastChecks" value.
+--
+
+	function suite.onRuntimeChecks_FastChecks()
+		runtimechecks "FastChecks"
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+	RuntimeLibrary="2"
+		]]
+	end
 
 
 --
 -- Check handling of the EnableMultiProcessorCompile flag.
 --
 
-	function suite.onMultiProcessorCompile()
+	function suite.onMultiProcessorCompile_Flag()
 		flags { "MultiProcessorCompile" }
+		prepare()
+		test.capture [[
+<Tool
+	Name="VCCLCompilerTool"
+	AdditionalOptions="/MP"
+	Optimization="0"
+	BasicRuntimeChecks="3"
+		]]
+	end
+
+	function suite.onMultiProcessorCompile_API()
+		multiprocessorcompile "On"
 		prepare()
 		test.capture [[
 <Tool
@@ -608,8 +743,8 @@
 -- Check the LinkTimeOptimization flag.
 --
 
-	function suite.flags_onLinkTimeOptimizationViaFlag()
-		flags { "LinkTimeOptimization" }
+	function suite.flags_onLinkTimeOptimization()
+		linktimeoptimization "On"
 		prepare()
 		test.capture [[
 <Tool
@@ -620,8 +755,8 @@
 
 	end
 
-	function suite.flags_onLinkTimeOptimization()
-		linktimeoptimization "On"
+	function suite.flags_onLinkTimeOptimizationFast()
+		linktimeoptimization "Fast"
 		prepare()
 		test.capture [[
 <Tool

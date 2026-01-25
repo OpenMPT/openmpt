@@ -1303,7 +1303,7 @@
 						-- ms this seems to work on visual studio !!!
 						-- why not in xcode ??
 						local filecfg = fileconfig.getconfig(node, cfg)
-						if not filecfg or filecfg.flags.ExcludeFromBuild or filecfg.buildaction == "None" then
+						if not filecfg or filecfg.buildaction == "None" or filecfg.excludefrombuild then
 						--fileNameList = fileNameList .. " " ..filecfg.name
 							table.insert(fileNameList, xcode.escapeArg(node.name))
 						end
@@ -1499,10 +1499,10 @@
 			settings['GCC_ENABLE_OBJC_EXCEPTIONS'] = 'NO'
 		end
 
-		local optimizeMap = { On = 3, Size = 's', Speed = 3, Full = 'fast', Debug = 'g' }
+		local optimizeMap = { On = 3, Size = 's', Speed = 3, Full = 3, Debug = 'g' }
 		settings['GCC_OPTIMIZATION_LEVEL'] = optimizeMap[cfg.optimize] or 0
 
-		if cfg.pchheader and not cfg.flags.NoPCH then
+		if cfg.pchheader and cfg.enablepch ~= p.OFF then
 			settings['GCC_PRECOMPILE_PREFIX_HEADER'] = 'YES'
 			settings['GCC_PREFIX_HEADER'] = cfg.pchheader
 		end
@@ -1565,7 +1565,7 @@
 
 		-- build list of "other" C/C++ flags
 		local checks = {
-			["-ffast-math"]             = cfg.floatingpoint == "Fast",
+			["-ffast-math"]             = cfg.floatingpoint == "Fast" or cfg.optimize == "Full",
 			["-fomit-frame-pointer"]    = cfg.omitframepointer == "On",
 			["-fno-omit-frame-pointer"] = cfg.omitframepointer == "Off",
 			["-fopenmp"]                = cfg.openmp == "On"

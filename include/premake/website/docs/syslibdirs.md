@@ -16,7 +16,7 @@ Project configurations.
 
 ### Availability ###
 
-Premake 5.0 or later.
+Premake 5.0.0-alpha1 or later.
 
 ### Examples ###
 
@@ -36,4 +36,3 @@ syslibdirs { "../libs/**" }
 
 * [externalincludedirs](externalincludedirs.md)
 * [libdirs](libdirs.md)
-* [sysincludedirs](sysincludedirs.md)

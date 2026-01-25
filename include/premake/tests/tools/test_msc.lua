@@ -101,28 +101,28 @@
 		test.excludes("/Oy", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_onLinkTimeOptimizationsViaFlag()
-		flags "LinkTimeOptimization"
-		prepare()
-		test.contains("/GL", msc.getcflags(cfg))
-	end
-
 	function suite.cflags_onLinkTimeOptimizationsViaAPI()
 		linktimeoptimization "On"
 		prepare()
 		test.contains("/GL", msc.getcflags(cfg))
 	end
 
-	function suite.ldflags_onLinkTimeOptimizationsViaFlag()
-		flags "LinkTimeOptimization"
+	function suite.cflags_onFastLinkTimeOptimizationsViaAPI()
+		linktimeoptimization "Fast"
 		prepare()
-		test.contains("/LTCG", msc.getldflags(cfg))
+		test.contains("/GL", msc.getcflags(cfg))
 	end
 
 	function suite.ldflags_onLinkTimeOptimizationsViaAPI()
 		linktimeoptimization "On"
 		prepare()
 		test.contains("/LTCG", msc.getldflags(cfg))
+	end
+
+	function suite.ldflags_onFastLinkTimeOptimizationsViaAPI()
+		linktimeoptimization "Fast"
+		prepare()
+		test.contains("/LTCG:incremental", msc.getldflags(cfg))
 	end
 
 	function suite.cflags_onStringPoolingOn()
@@ -294,12 +294,6 @@
 		warnings "Everything"
 		prepare()
 		test.contains("/Wall", msc.getcflags(cfg))
-	end
-
-	function suite.cflags_OnFatalWarningsViaFlag()
-		flags "FatalWarnings"
-		prepare()
-		test.contains("/WX", msc.getcflags(cfg))
 	end
 
 	function suite.cflags_OnFatalWarningsViaAPI()
@@ -599,8 +593,14 @@ end
 		test.contains("/Gm-", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_onMultiProcessorCompile()
+	function suite.cflags_onMultiProcessorCompile_Flag()
 		flags "MultiProcessorCompile"
+		prepare()
+		test.contains("/MP", msc.getcflags(cfg))
+	end
+
+	function suite.cflags_onMultiProcessorCompile_API()
+		multiprocessorcompile "On"
 		prepare()
 		test.contains("/MP", msc.getcflags(cfg))
 	end
@@ -816,13 +816,13 @@ end
 --
 
 	function suite.mixedToolFlags_onCFlags()
-		flags { "FatalCompileWarnings" }
+		fatalwarnings "All"
 		prepare()
 		test.isequal({ "/WX", "/MD" }, msc.getcflags(cfg))
 	end
 
 	function suite.mixedToolFlags_onCxxFlags()
-		flags { "FatalCompileWarnings" }
+		fatalwarnings "All"
 		prepare()
 		test.isequal({ "/WX", "/MD", "/EHsc" }, msc.getcxxflags(cfg))
 	end
