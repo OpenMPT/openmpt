@@ -72,7 +72,7 @@ else
 $(error unknown WINDOWS_VERSION)
 endif
 
-LDLIBS_LIBOPENMPTTEST += -ladv32api -lole32 -lrpcrt4
+LDLIBS_LIBOPENMPTTEST += -ladvapi32 -lole32 -lrpcrt4
 LDLIBS_OPENMPT123 += -lwinmm
 
 LDFLAGS  += -static -static-libgcc -static-libstdc++
@@ -90,7 +90,7 @@ MPT_COMPILER_NOALLOCAH=1
 CXXFLAGS += -march=i386 -m80387 -mtune=i486
 CFLAGS   += -march=i386 -m80387 -mtune=i486
 
-PC_LIBS_PRIVATE += -ladv32api -lole32 -lrpcrt4
+PC_LIBS_PRIVATE += -ladvapi32 -lole32 -lrpcrt4
 
 # See <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115049>.
 MPT_COMPILER_NOIPARA=1
