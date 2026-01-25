@@ -735,7 +735,7 @@ mpt::ustring GetFullCreditsString()
 #endif
 #if defined(MPT_WITH_OPUSENC)
 		"Xiph.Org Foundation, Jean-Marc Valin and contributors for libopusenc\n"
-		"https://git.xiph.org/?p=libopusenc.git;a=summary\n"
+		"https://opus-codec.org/\n"
 		"\n"
 #endif
 #if defined(MPT_WITH_LAME)
