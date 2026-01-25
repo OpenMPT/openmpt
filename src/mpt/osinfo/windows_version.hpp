@@ -416,6 +416,8 @@ public:
 	// MinGW sdkddkver.h
 
 
+	// clang-format off
+
 	template <typename TGetVersion>
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<Version> ParseGetVersion(TGetVersion pGetVersion) noexcept {
 		DWORD version = pGetVersion();
@@ -489,7 +491,7 @@ public:
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<Version> ParseGetVersionExOSVERSIONINFOEX(TGetVersionEx pGetVersionEx) noexcept {
 		OSVERSIONINFOEX versioninfoex{};
 		versioninfoex.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		if (pGetVersionEx((OSVERSIONINFO*)&versioninfoex) == FALSE) {
+		if (pGetVersionEx((OSVERSIONINFO *)&versioninfoex) == FALSE) {
 			return std::nullopt;
 		}
 		return Version{
@@ -510,7 +512,7 @@ public:
 	[[nodiscard]] MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE static std::optional<Version> ParseGetVersionExOSVERSIONINFOEX(TGetVersionEx pGetVersionEx, std::optional<OSVERSIONINFOEX> & oversioninfoex) noexcept {
 		OSVERSIONINFOEX versioninfoex{};
 		versioninfoex.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		if (pGetVersionEx((OSVERSIONINFO*)&versioninfoex) == FALSE) {
+		if (pGetVersionEx((OSVERSIONINFO *)&versioninfoex) == FALSE) {
 			oversioninfoex = std::nullopt;
 			return std::nullopt;
 		}
@@ -605,11 +607,12 @@ public:
 		return dwProduct;
 	}
 
+	// clang-format on
 
 	MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static Version GatherWindowsVersionBaseOS() noexcept {
 
 		Version result = FromSDK();
-		
+
 #if MPT_OS_WINDOWS_WINRT
 
 		result = ParseGetVersionExOSVERSIONINFOEX(&::GetVersionEx).value_or(result);
@@ -643,7 +646,7 @@ public:
 			return result;
 		}
 
-		using PGetProductInfo = BOOL (WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
+		using PGetProductInfo = BOOL(WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
 		PGetProductInfo pGetProductInfo = (PGetProductInfo)::GetProcAddress(hKernel32DLL, "GetProductInfo");
 		if (!pGetProductInfo) {
 			return result;
@@ -673,7 +676,7 @@ public:
 			return result;
 		}
 
-		using PGetProductInfo = BOOL (WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
+		using PGetProductInfo = BOOL(WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
 		PGetProductInfo pGetProductInfo = (PGetProductInfo)::GetProcAddress(hKernel32DLL, "GetProductInfo");
 		if (!pGetProductInfo) {
 			return result;
@@ -694,13 +697,13 @@ public:
 			return result;
 		}
 
-		using PGetVersionEx = BOOL (WINAPI *)(LPOSVERSIONINFO lpVersionInformation);
+		using PGetVersionEx = BOOL(WINAPI *)(LPOSVERSIONINFO lpVersionInformation);
 		PGetVersionEx pGetVersionEx = nullptr;
-		#if defined(UNICODE)
-			pGetVersionEx = (PGetVersionEx)::GetProcAddress(hKernel32DLL, "GetVersionExW");
-		#else
-			pGetVersionEx = (PGetVersionEx)::GetProcAddress(hKernel32DLL, "GetVersionExA");
-		#endif
+#if defined(UNICODE)
+		pGetVersionEx = (PGetVersionEx)::GetProcAddress(hKernel32DLL, "GetVersionExW");
+#else
+		pGetVersionEx = (PGetVersionEx)::GetProcAddress(hKernel32DLL, "GetVersionExA");
+#endif
 		if (!pGetVersionEx) {
 			return result;
 		}
@@ -721,7 +724,7 @@ public:
 			return result;
 		}
 
-		using PGetProductInfo = BOOL (WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
+		using PGetProductInfo = BOOL(WINAPI *)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
 		PGetProductInfo pGetProductInfo = (PGetProductInfo)::GetProcAddress(hKernel32DLL, "GetProductInfo");
 		if (!pGetProductInfo) {
 			return result;
@@ -731,7 +734,6 @@ public:
 #endif
 
 		return result;
-
 	}
 
 
@@ -813,7 +815,7 @@ public:
 		}
 		if ((m_Build == 0) || (build == 0)) {
 			return true;
-		} 
+		}
 		return (m_Build >= build);
 	}
 

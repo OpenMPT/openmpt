@@ -112,31 +112,31 @@ private:
 	}
 public:
 	static std::optional<VersionContext> Current() {
-		#if MPT_OS_WINDOWS
-			std::optional<mpt::library> NTDLL = mpt::library::load_optional({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
-			mpt::library::optional_function<const char * __cdecl(void)> wine_get_version{NTDLL, "wine_get_version"};
-			mpt::library::optional_function<const char * __cdecl(void)> wine_get_build_id{NTDLL, "wine_get_build_id"};
-			mpt::library::optional_function<void __cdecl(const char * *, const char * *)> wine_get_host_version{NTDLL, "wine_get_host_version"};
-			if (!wine_get_version) {
-				return std::nullopt;
-			}
-			const char * wine_version = nullptr;
-			const char * wine_build_id = nullptr;
-			const char * wine_host_sysname = nullptr;
-			const char * wine_host_release = nullptr;
-			wine_version = wine_get_version().value_or("");
-			wine_build_id = wine_get_build_id().value_or("");
-			wine_get_host_version(&wine_host_sysname, &wine_host_release);
-			std::string RawVersion = wine_version ? wine_version : "";
-			std::string RawBuildID = wine_build_id ? wine_build_id : "";
-			std::string RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
-			std::string RawHostRelease = wine_host_release ? wine_host_release : "";
-			mpt::osinfo::windows::wine::version Version = ParseVersion(RawVersion);
-			mpt::osinfo::osclass HostClass = mpt::osinfo::get_class_from_sysname(RawHostSysName);
-			return VersionContext{Version, HostClass, RawVersion, RawBuildID, RawHostSysName, RawHostRelease};
-		#else // !MPT_OS_WINDOWS
+#if MPT_OS_WINDOWS
+		std::optional<mpt::library> NTDLL = mpt::library::load_optional({mpt::library::path_search::system, mpt::library::path_prefix::none, MPT_NATIVE_PATH("ntdll.dll"), mpt::library::path_suffix::none});
+		mpt::library::optional_function<const char * __cdecl(void)> wine_get_version{NTDLL, "wine_get_version"};
+		mpt::library::optional_function<const char * __cdecl(void)> wine_get_build_id{NTDLL, "wine_get_build_id"};
+		mpt::library::optional_function<void __cdecl(const char **, const char **)> wine_get_host_version{NTDLL, "wine_get_host_version"};
+		if (!wine_get_version) {
 			return std::nullopt;
-		#endif // MPT_OS_WINDOWS
+		}
+		const char * wine_version = nullptr;
+		const char * wine_build_id = nullptr;
+		const char * wine_host_sysname = nullptr;
+		const char * wine_host_release = nullptr;
+		wine_version = wine_get_version().value_or("");
+		wine_build_id = wine_get_build_id().value_or("");
+		wine_get_host_version(&wine_host_sysname, &wine_host_release);
+		std::string RawVersion = wine_version ? wine_version : "";
+		std::string RawBuildID = wine_build_id ? wine_build_id : "";
+		std::string RawHostSysName = wine_host_sysname ? wine_host_sysname : "";
+		std::string RawHostRelease = wine_host_release ? wine_host_release : "";
+		mpt::osinfo::windows::wine::version Version = ParseVersion(RawVersion);
+		mpt::osinfo::osclass HostClass = mpt::osinfo::get_class_from_sysname(RawHostSysName);
+		return VersionContext{Version, HostClass, RawVersion, RawBuildID, RawHostSysName, RawHostRelease};
+#else  // !MPT_OS_WINDOWS
+		return std::nullopt;
+#endif // MPT_OS_WINDOWS
 	}
 };
 

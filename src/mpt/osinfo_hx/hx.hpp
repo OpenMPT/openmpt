@@ -46,7 +46,7 @@ inline std::optional<version> current() {
 	if (!hDKRNL32) {
 		return std::nullopt;
 	}
-	using PGetDKrnl32Version = DWORD (WINAPI *)(void);
+	using PGetDKrnl32Version = DWORD(WINAPI *)(void);
 	PGetDKrnl32Version pGetDKrnl32Version = (PGetDKrnl32Version)::GetProcAddress(hDKRNL32, "GetDKrnl32Version");
 	if (!pGetDKrnl32Version) {
 		OSVERSIONINFOA versioninfo{};
