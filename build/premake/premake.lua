@@ -160,59 +160,85 @@ end
 
 MPT_WIN = {
 
-	["WIN32S"]   = MPT_WIN_MAKE_VERSION(0x03, 0x00, 0x00, 0x00),
+	["WIN3"]   = MPT_WIN_MAKE_VERSION(3, 0x00, 0, 0),
+	["WIN31"]  = MPT_WIN_MAKE_VERSION(3, 0x10, 0, 0),
+	["WIN311"] = MPT_WIN_MAKE_VERSION(3, 0x11, 0, 0),
 
-	["WIN95"]    = MPT_WIN_MAKE_VERSION(0x04, 0x00, 0x00, 0x00),
-	["WIN98"]    = MPT_WIN_MAKE_VERSION(0x04, 0x10, 0x00, 0x00),
-	["WINME"]    = MPT_WIN_MAKE_VERSION(0x04, 0x90, 0x00, 0x00),
+	["WIN95"]          = MPT_WIN_MAKE_VERSION(4, 0x00, 0, 0),
+	["WIN95_IE1"]      = MPT_WIN_MAKE_VERSION(4, 0x00, 0, 1),
+	--["WIN95PLUS_IE1"]  = MPT_WIN_MAKE_VERSION(4, 0x00, 0, 1),
+	["WIN95OSR1_IE2"]  = MPT_WIN_MAKE_VERSION(4, 0x00, 0, 2),
+	["WIN95OSR2_IE3"]  = MPT_WIN_MAKE_VERSION(4, 0x00, 0, 3),
+	["WIN95OSR21"]     = MPT_WIN_MAKE_VERSION(4, 0x01, 0, 0),
+	["WIN95OSR21_IE3"] = MPT_WIN_MAKE_VERSION(4, 0x01, 0, 3),
+	["WIN95C"]         = MPT_WIN_MAKE_VERSION(4, 0x03, 0, 0),
+	["WIN95C_IE4"]     = MPT_WIN_MAKE_VERSION(4, 0x03, 0, 4),
+	["WIN98"]          = MPT_WIN_MAKE_VERSION(4, 0x10, 0, 0),
+	["WIN98_IE4"]      = MPT_WIN_MAKE_VERSION(4, 0x10, 0, 4),
+	--["WIN98SE"]        = MPT_WIN_MAKE_VERSION(4, 0x10, 0, 0),
+	["WIN98SE_IE5"]    = MPT_WIN_MAKE_VERSION(4, 0x10, 0, 5),
+	["WINME"]          = MPT_WIN_MAKE_VERSION(4, 0x90, 0, 0),
+	["WINME_IE5"]      = MPT_WIN_MAKE_VERSION(4, 0x90, 0, 5),
 
-	["NT3"]      = MPT_WIN_MAKE_VERSION(0x03, 0x00, 0x00, 0x00),
-	["NT4"]      = MPT_WIN_MAKE_VERSION(0x04, 0x00, 0x00, 0x00),
-	["2000"]     = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x00, 0x00),
-	["2000SP1"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x01, 0x00),
-	["2000SP2"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x02, 0x00),
-	["2000SP3"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x03, 0x00),
-	["2000SP4"]  = MPT_WIN_MAKE_VERSION(0x05, 0x00, 0x04, 0x00),
-	["XP"]       = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x00, 0x00),
-	["XPSP1"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x01, 0x00),
-	["XPSP2"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x02, 0x00),
-	["XPSP3"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x03, 0x00),
-	["XPSP4"]    = MPT_WIN_MAKE_VERSION(0x05, 0x01, 0x04, 0x00), -- unused
-	["XP64"]     = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x00, 0x00), -- unused
-	["XP64SP1"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x01, 0x00),
-	["XP64SP2"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x02, 0x00),
-	["XP64SP3"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x03, 0x00), -- unused
-	["XP64SP4"]  = MPT_WIN_MAKE_VERSION(0x05, 0x02, 0x04, 0x00), -- unused
-	["VISTA"]    = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x00, 0x00),
-	["VISTASP1"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x01, 0x00),
-	["VISTASP2"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x02, 0x00),
-	["VISTASP3"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x03, 0x00), -- unused
-	["VISTASP4"] = MPT_WIN_MAKE_VERSION(0x06, 0x00, 0x04, 0x00), -- unused
-	["7"]        = MPT_WIN_MAKE_VERSION(0x06, 0x01, 0x00, 0x00),
-	["8"]        = MPT_WIN_MAKE_VERSION(0x06, 0x02, 0x00, 0x00),
-	["81"]       = MPT_WIN_MAKE_VERSION(0x06, 0x03, 0x00, 0x00),
+	["NT31"]     = MPT_WIN_MAKE_VERSION(3, 0x10, 0, 0),
+	["NT35"]     = MPT_WIN_MAKE_VERSION(3, 0x50, 0, 0),
+	["NT351"]    = MPT_WIN_MAKE_VERSION(3, 0x51, 0, 0),
 
-	["10_PRE"]   = MPT_WIN_MAKE_VERSION(0x06, 0x04, 0x00, 0x00),
-	["10"]       = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x00), -- NTDDI_WIN10      1507
-	["10_1511"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x01), -- NTDDI_WIN10_TH2  1511
-	["10_1607"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x02), -- NTDDI_WIN10_RS1  1607
-	["10_1703"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x03), -- NTDDI_WIN10_RS2  1703
-	["10_1709"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x04), -- NTDDI_WIN10_RS3  1709
-	["10_1803"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x05), -- NTDDI_WIN10_RS4  1803
-	["10_1809"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x06), -- NTDDI_WIN10_RS5  1809
-	["10_1903"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x07), -- NTDDI_WIN10_19H1 1903/19H1
-	--["10_1909"]                                                                    1909/19H2
-	["10_2004"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x08), -- NTDDI_WIN10_VB   2004/20H1
-	--["10_20H2"]                                                                    20H2
-	--["10_21H1"]                                                                    21H1
-	--["10_21H2"]                                                                    21H2
-	--["10_22H2"]                                                                    22H2
+	["NT4"]      = MPT_WIN_MAKE_VERSION(4, 0, 0, 0),
+	["NT4SP1"]   = MPT_WIN_MAKE_VERSION(4, 0, 1, 0),
+	["NT4SP2"]   = MPT_WIN_MAKE_VERSION(4, 0, 2, 0),
+	["NT4SP3"]   = MPT_WIN_MAKE_VERSION(4, 0, 3, 0),
+	["NT4SP4"]   = MPT_WIN_MAKE_VERSION(4, 0, 4, 0),
+	["NT4SP5"]   = MPT_WIN_MAKE_VERSION(4, 0, 5, 0),
+	["NT4SP6"]   = MPT_WIN_MAKE_VERSION(4, 0, 6, 0),
 
-	["11"]       = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0b), -- NTDDI_WIN10_CO   21H2
-	["11_22H2"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0c), -- NTDDI_WIN10_NI   22H2
-	--["11_23H2"]                                                                    23H2
-	["11_24H2"]  = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10), -- NTDDI_WIN11_GE   24H2
-	--["11_25H2"]                                                                    25H2
+	["2000"]     = MPT_WIN_MAKE_VERSION(5, 0, 0, 0),
+	["2000SP1"]  = MPT_WIN_MAKE_VERSION(5, 0, 1, 0),
+	["2000SP2"]  = MPT_WIN_MAKE_VERSION(5, 0, 2, 0),
+	["2000SP3"]  = MPT_WIN_MAKE_VERSION(5, 0, 3, 0),
+	["2000SP4"]  = MPT_WIN_MAKE_VERSION(5, 0, 4, 0),
+	["XP"]       = MPT_WIN_MAKE_VERSION(5, 1, 0, 0),
+	["XPSP1"]    = MPT_WIN_MAKE_VERSION(5, 1, 1, 0),
+	["XPSP2"]    = MPT_WIN_MAKE_VERSION(5, 1, 2, 0),
+	["XPSP3"]    = MPT_WIN_MAKE_VERSION(5, 1, 3, 0),
+	["XPSP4"]    = MPT_WIN_MAKE_VERSION(5, 1, 4, 0), -- unused
+	["XP64"]     = MPT_WIN_MAKE_VERSION(5, 2, 0, 0), -- unused
+	["XP64SP1"]  = MPT_WIN_MAKE_VERSION(5, 2, 1, 0),
+	["XP64SP2"]  = MPT_WIN_MAKE_VERSION(5, 2, 2, 0),
+	["XP64SP3"]  = MPT_WIN_MAKE_VERSION(5, 2, 3, 0), -- unused
+	["XP64SP4"]  = MPT_WIN_MAKE_VERSION(5, 2, 4, 0), -- unused
+
+	["VISTA"]    = MPT_WIN_MAKE_VERSION(6, 0, 0, 0),
+	["VISTASP1"] = MPT_WIN_MAKE_VERSION(6, 0, 1, 0),
+	["VISTASP2"] = MPT_WIN_MAKE_VERSION(6, 0, 2, 0),
+	["VISTASP3"] = MPT_WIN_MAKE_VERSION(6, 0, 3, 0), -- unused
+	["VISTASP4"] = MPT_WIN_MAKE_VERSION(6, 0, 4, 0), -- unused
+	["7"]        = MPT_WIN_MAKE_VERSION(6, 1, 0, 0),
+	["7SP1"]     = MPT_WIN_MAKE_VERSION(6, 1, 1, 0),
+	["8"]        = MPT_WIN_MAKE_VERSION(6, 2, 0, 0),
+	["81"]       = MPT_WIN_MAKE_VERSION(6, 3, 0, 0),
+
+	["10_PRE"]  = MPT_WIN_MAKE_VERSION(0x06, 0x04, 0x00, 0x00),
+	["10"]      = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x00), -- NTDDI_WIN10      1507
+	["10_1511"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x01), -- NTDDI_WIN10_TH2  1511
+	["10_1607"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x02), -- NTDDI_WIN10_RS1  1607
+	["10_1703"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x03), -- NTDDI_WIN10_RS2  1703
+	["10_1709"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x04), -- NTDDI_WIN10_RS3  1709
+	["10_1803"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x05), -- NTDDI_WIN10_RS4  1803
+	["10_1809"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x06), -- NTDDI_WIN10_RS5  1809
+	["10_1903"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x07), -- NTDDI_WIN10_19H1 1903/19H1
+	--["10_1909"]                                                                   1909/19H2
+	["10_2004"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x08), -- NTDDI_WIN10_VB   2004/20H1
+	--["10_20H2"]                                                                   20H2
+	--["10_21H1"]                                                                   21H1
+	--["10_21H2"]                                                                   21H2
+	--["10_22H2"]                                                                   22H2
+
+	["11"]      = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0b), -- NTDDI_WIN10_CO   21H2
+	["11_22H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0c), -- NTDDI_WIN10_NI   22H2
+	--["11_23H2"]                                                                   23H2
+	["11_24H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10), -- NTDDI_WIN11_GE   24H2
+	--["11_25H2"]                                                                   25H2
 
 }
 
