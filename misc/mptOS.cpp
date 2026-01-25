@@ -575,9 +575,9 @@ namespace Wine
 
 mpt::osinfo::windows::wine::version GetMinimumWineVersion()
 {
-	mpt::osinfo::windows::wine::version minimumWineVersion = mpt::osinfo::windows::wine::version(0,0,0);
+	mpt::osinfo::windows::wine::version minimumWineVersion = mpt::osinfo::windows::wine::version{0,0,0};
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
-		minimumWineVersion = mpt::osinfo::windows::wine::version(1,8,0);
+		minimumWineVersion = mpt::osinfo::windows::wine::version{1,8,0};
 	#endif
 	return minimumWineVersion;
 }
