@@ -11,7 +11,9 @@
 #include "mpt/base/macros.hpp"
 #include "mpt/base/namespace.hpp"
 #include "mpt/base/utility.hpp"
+#if MPT_WINNT_BEFORE(MPT_WIN_2000)
 #include "mpt/osinfo/windows_version.hpp"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -800,7 +802,11 @@ private:
 #elif MPT_OS_WINDOWS
 
 		uint8 result = 0;
-#if MPT_WINNT_AT_LEAST(MPT_WIN_NT4)
+#if MPT_WINNT_AT_LEAST(MPT_WIN_2000)
+		if (IsProcessorFeaturePresent(PF_FLOATING_POINT_EMULATED) == 0) {
+			result = 3;
+		}
+#elif MPT_WINNT_AT_LEAST(MPT_WIN_NT4)
 		if (mpt::osinfo::windows::Version::Current().IsAtLeast(mpt::osinfo::windows::Version::Win2000)) {
 			if (IsProcessorFeaturePresent(PF_FLOATING_POINT_EMULATED) == 0) {
 				result = 3;
