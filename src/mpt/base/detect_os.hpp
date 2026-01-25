@@ -375,7 +375,7 @@ static_assert(NTDDI_WIN11_GE == MPT_WIN_11_24H2);
 #define MPT_OS_WINDOWS_WIN32 0
 // for Win9x, we encode the IE version in the lowest byte
 #if defined(_WIN32_IE)
-#define MPT_WIN_VERSION      ((_WIN32_WINDOWS << 16)) | ((_WIN32_IE & 0xffff) >> 6))
+#define MPT_WIN_VERSION      ((_WIN32_WINDOWS << 16)) | ((_WIN32_IE & 0xffff) >> 8))
 #else
 #define MPT_WIN_VERSION (_WIN32_WINDOWS << 16)
 #endif
