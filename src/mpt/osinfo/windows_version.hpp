@@ -633,7 +633,7 @@ public:
 		std::optional<OSVERSIONINFOEX> oversioninfoex;
 		result = ParseGetVersionExOSVERSIONINFOEX(&::GetVersionEx, oversioninfoex).value_or(result);
 
-		if (!result.IsAtLeast(Epoch::WinNT, Version::WinVista, ServicePack{0, 0}, 0)) {
+		if (!result.IsAtLeast(Epoch::WinNT, Version::WinVista, ServicePack{0, 0}, InternetExplorer{0, 0}, 0)) {
 			return result;
 		}
 
@@ -651,7 +651,7 @@ public:
 		if (!pGetProductInfo) {
 			return result;
 		}
-		result.m_Product = ParseGetProductInfo(&::GetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
+		result.m_Product = ParseGetProductInfo(pGetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
 
 #elif (MPT_OS_WINDOWS_WIN9X || MPT_WINNT_AT_LEAST(MPT_WIN_NT35))
 
@@ -681,7 +681,7 @@ public:
 		if (!pGetProductInfo) {
 			return result;
 		}
-		result.m_Product = ParseGetProductInfo(&::GetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
+		result.m_Product = ParseGetProductInfo(pGetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
 
 #else
 
@@ -729,7 +729,7 @@ public:
 		if (!pGetProductInfo) {
 			return result;
 		}
-		result.m_Product = ParseGetProductInfo(&::GetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
+		result.m_Product = ParseGetProductInfo(pGetProductInfo, oversioninfoex.value()).value_or(result.m_Product);
 
 #endif
 
