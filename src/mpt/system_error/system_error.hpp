@@ -141,7 +141,21 @@ inline void CheckLRESULT(LRESULT result) {
 }
 
 
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+
 inline void CheckLSTATUS(LSTATUS result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+		throw windows::error(result);
+	}
+}
+
+#endif
+
+
+inline void CheckLONG(LONG result) {
 	if (result != ERROR_SUCCESS) {
 		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
 			mpt::throw_out_of_memory();
@@ -183,7 +197,21 @@ inline LRESULT CheckLRESULTOutOfMemory(LRESULT result) {
 }
 
 
+#if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
+
 inline LSTATUS CheckLSTATUSOutOfMemory(LSTATUS result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+	}
+	return result;
+}
+
+#endif
+
+
+inline LONG CheckLONGOutOfMemory(LONG result) {
 	if (result != ERROR_SUCCESS) {
 		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
 			mpt::throw_out_of_memory();
