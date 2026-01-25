@@ -131,6 +131,26 @@ inline HANDLE CheckHANDLE(HANDLE handle) {
 }
 
 
+inline void CheckLRESULT(LRESULT result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+		throw windows::error(static_cast<DWORD>(result));
+	}
+}
+
+
+inline void CheckLSTATUS(LSTATUS result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+		throw windows::error(result);
+	}
+}
+
+
 inline void CheckBOOL(BOOL result) {
 	if (result == FALSE) {
 		DWORD err = ::GetLastError();
@@ -150,6 +170,37 @@ inline void ExpectError(DWORD expected) {
 		}
 		throw windows::error(err);
 	}
+}
+
+
+inline LRESULT CheckLRESULTOutOfMemory(LRESULT result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+	}
+	return result;
+}
+
+
+inline LSTATUS CheckLSTATUSOutOfMemory(LSTATUS result) {
+	if (result != ERROR_SUCCESS) {
+		if ((result == ERROR_NOT_ENOUGH_MEMORY) || (result == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+	}
+	return result;
+}
+
+
+inline BOOL CheckBOOLOutOfMemory(BOOL result) {
+	if (result == FALSE) {
+		DWORD err = ::GetLastError();
+		if ((err == ERROR_NOT_ENOUGH_MEMORY) || (err == ERROR_OUTOFMEMORY)) {
+			mpt::throw_out_of_memory();
+		}
+	}
+	return result;
 }
 
 
