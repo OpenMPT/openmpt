@@ -170,7 +170,7 @@ protected:
 
 	std::unique_ptr<ComponentManagerSettings> m_pComponentManagerSettings;
 
-	std::shared_ptr<mpt::Wine::Context> m_Wine;
+	std::shared_ptr<mpt::Wine::Context> m_WineIntegration;
 	mpt::PathString m_WineWrapperDllName;
 
 	CModDocTemplate *m_pModTemplate = nullptr;
@@ -298,11 +298,6 @@ public:
 	SettingsContainer &GetSongSettings();
 	const mpt::PathString &GetSongSettingsFilename() const;
 
-	void SetWineVersion(std::shared_ptr<mpt::OS::Wine::VersionContext> wineVersion)
-	{
-		MPT_ASSERT_ALWAYS(mpt::OS::Windows::IsWine());
-		m_WineVersion = wineVersion;
-	}
 	std::shared_ptr<mpt::OS::Wine::VersionContext> GetWineVersion() const
 	{
 		MPT_ASSERT_ALWAYS(mpt::OS::Windows::IsWine());
@@ -310,13 +305,13 @@ public:
 		return m_WineVersion;
 	}
 
-	void SetWine(std::shared_ptr<mpt::Wine::Context> wine)
+	void SetWineIntegration(std::shared_ptr<mpt::Wine::Context> wine)
 	{
-		m_Wine = wine;
+		m_WineIntegration = wine;
 	}
-	std::shared_ptr<mpt::Wine::Context> GetWine() const
+	std::shared_ptr<mpt::Wine::Context> GetWineIntegration() const
 	{
-		return m_Wine;
+		return m_WineIntegration;
 	}
 
 	void SetWineWrapperDllFilename(mpt::PathString filename)

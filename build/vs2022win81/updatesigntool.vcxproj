@@ -1299,8 +1299,11 @@
     <ClInclude Include="..\..\src\mpt\osinfo\class.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\dos_memory.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\dos_version.hpp" />
+    <ClInclude Include="..\..\src\mpt\osinfo\windows_hx_version.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp" />
     <ClInclude Include="..\..\src\mpt\osinfo\windows_wine_version.hpp" />
+    <ClInclude Include="..\..\src\mpt\osinfo_hx\hx.hpp" />
+    <ClInclude Include="..\..\src\mpt\osinfo_wine\wine.hpp" />
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\parse.hpp" />
     <ClInclude Include="..\..\src\mpt\parse\split.hpp" />

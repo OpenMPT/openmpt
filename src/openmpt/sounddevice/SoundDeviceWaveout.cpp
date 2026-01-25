@@ -110,7 +110,7 @@ SoundDevice::Caps CWaveDevice::InternalGetDeviceCaps()
 	caps.CanDriverPanel = false;
 	caps.HasInternalDither = false;
 	caps.ExclusiveModeDescription = MPT_USTRING("Use direct mode");
-	if(GetSysInfo().IsWine)
+	if(GetSysInfo().IsWindowsWine())
 	{
 		caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
 	} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))

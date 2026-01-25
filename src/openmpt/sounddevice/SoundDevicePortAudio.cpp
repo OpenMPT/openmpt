@@ -228,7 +228,7 @@ bool CPortaudioDevice::InternalOpen()
 				}
 			} else
 			{
-				if(!GetSysInfo().IsWine && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
+				if(!GetSysInfo().IsWindowsWine() && GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::Win7))
 				{  // retry with automatic stream format conversion (i.e. resampling)
 #if MPT_OS_WINDOWS
 					m_WasapiStreamInfo.flags |= paWinWasapiAutoConvert;
@@ -470,7 +470,7 @@ SoundDevice::Caps CPortaudioDevice::InternalGetDeviceCaps()
 		}
 	} else if(m_HostApiType == paMME)
 	{
-		if(GetSysInfo().IsWine)
+		if(GetSysInfo().IsWindowsWine())
 		{
 			caps.DefaultSettings.sampleFormat = SampleFormat::Int16;
 		} else if(GetSysInfo().WindowsVersion.IsAtLeast(mpt::osinfo::windows::Version::WinVista))

@@ -196,6 +196,12 @@
     <Filter Include="src\mpt\osinfo">
       <UniqueIdentifier>{EA69B456-D637-A85C-BFCB-1883AB3884C1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mpt\osinfo_hx">
+      <UniqueIdentifier>{A9BB4984-15D2-471A-5E49-D33BCA9E18A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\mpt\osinfo_wine">
+      <UniqueIdentifier>{5C52AFBD-C8B3-8CCB-5121-D37DBD81C38A}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\mpt\out_of_memory">
       <UniqueIdentifier>{208F8479-8CFB-3F74-55EF-D7D1C11A62DC}</UniqueIdentifier>
     </Filter>
@@ -1557,11 +1563,20 @@
     <ClInclude Include="..\..\src\mpt\osinfo\dos_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo\windows_hx_version.hpp">
+      <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\mpt\osinfo\windows_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\osinfo\windows_wine_version.hpp">
       <Filter>src\mpt\osinfo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo_hx\hx.hpp">
+      <Filter>src\mpt\osinfo_hx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\mpt\osinfo_wine\wine.hpp">
+      <Filter>src\mpt\osinfo_wine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\out_of_memory\out_of_memory.hpp">
       <Filter>src\mpt\out_of_memory</Filter>

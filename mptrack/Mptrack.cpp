@@ -1232,9 +1232,9 @@ static bool SystemCanRunCurrentBuild()
 		{
 			return false;
 		}
-	} else if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+	} else if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->IsValid())
 	{
-		if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::GetMinimumWineVersion()))
+		if(theApp.GetWineVersion()->IsBefore(mpt::OS::Wine::GetMinimumWineVersion()))
 		{
 			return false;
 		}
@@ -1406,7 +1406,7 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 
 	if(mpt::OS::Windows::IsWine())
 	{
-		SetWineVersion(std::make_shared<mpt::OS::Wine::VersionContext>());
+		m_WineVersion = std::make_shared<mpt::OS::Wine::VersionContext>(mpt::OS::Wine::VersionContext::Current().value());
 	}
 
 	// Create paths to store configuration in
@@ -1521,9 +1521,9 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	{
 		if(mpt::OS::Windows::IsWine())
 		{
-			return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), mpt::OS::Windows::IsWine(), GetWineVersion()->HostClass(), GetWineVersion()->Version());
+			return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), GetWineVersion()->Version(), GetWineVersion()->HostClass());
 		}
-		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), mpt::OS::Windows::IsWine(), mpt::osinfo::osclass::Unknown, mpt::osinfo::windows::wine::version());
+		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current());
 	};
 	SoundDevice::SysInfo sysInfo = GetSysInfo();
 	SoundDevice::AppInfo appInfo;
@@ -1800,7 +1800,7 @@ int CTrackApp::ExitInstanceImpl()
 
 	if(mpt::OS::Windows::IsWine())
 	{
-		SetWineVersion(nullptr);
+		m_WineVersion.reset();
 	}
 
 	m_Gdiplus.reset();

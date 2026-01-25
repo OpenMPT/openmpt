@@ -4,6 +4,8 @@
 #include "NativeSoundDevice.h"
 #include "NativeUtils.h"
 
+#include "mpt/osinfo/windows_hx_version.hpp"
+#include "mpt/osinfo_hx/hx.hpp"
 #include "mpt/out_of_memory/out_of_memory.hpp"
 
 #include "openmpt/sounddevice/SoundDevice.hpp"
@@ -41,10 +43,18 @@ private:
 private:
 	static SoundDevice::SysInfo GetSysInfo()
 	{
-		mpt::OS::Wine::VersionContext wineVersionContext;
-		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), mpt::OS::Windows::IsWine(), wineVersionContext.HostClass(), wineVersionContext.Version());
+		std::optional<mpt::osinfo::windows::hx::version> hxVersion = mpt::osinfo::windows::hx::current();
+		std::optional<mpt::OS::Wine::VersionContext> wineVersionContext = mpt::OS::Wine::VersionContext::Current();
+		if(hxVersion)
+		{
+			return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), hxVersion.value());
+		}
+		if(wineVersionContext)
+		{
+			return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current(), wineVersionContext->Version(), wineVersionContext->HostClass());
+		}
+		return SoundDevice::SysInfo(mpt::osinfo::get_class(), mpt::osinfo::windows::Version::Current());
 	}
-
 public:
 	ComponentSoundDeviceManager()
 		: manager(logger, GetSysInfo(), SoundDevice::AppInfo())

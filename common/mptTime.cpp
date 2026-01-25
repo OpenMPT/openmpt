@@ -124,7 +124,7 @@ mpt::chrono::unix_clock::time_point unix_from_local(mpt::Date::Local timeLocal)
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
 	{
-		if(mpt::osinfo::windows::current_is_wine())
+		MPT_MAYBE_CONSTANT_IF(mpt::osinfo::windows::wine::current_is_wine())
 		{
 			throw mpt::Date::detail::tz_error{};
 		}
@@ -207,7 +207,7 @@ mpt::Date::Local local_from_unix(mpt::chrono::unix_clock::time_point tp)
 #if defined(MPT_FALLBACK_TIMEZONE_WINDOWS_HISTORIC)
 	try
 	{
-		if(mpt::osinfo::windows::current_is_wine())
+		MPT_MAYBE_CONSTANT_IF(mpt::osinfo::windows::wine::current_is_wine())
 		{
 			throw mpt::Date::detail::tz_error{};
 		}

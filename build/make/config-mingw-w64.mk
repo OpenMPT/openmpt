@@ -74,10 +74,10 @@ endif
 LDLIBS   += -lm
 ARFLAGS  := rcs
 
-LDLIBS_LIBOPENMPTTEST += -lole32 -lrpcrt4
+LDLIBS_LIBOPENMPTTEST += -ladv32api -lole32 -lrpcrt4
 LDLIBS_OPENMPT123 += -lwinmm
 
-PC_LIBS_PRIVATE += -lole32 -lrpcrt4
+PC_LIBS_PRIVATE += -ladv32api -lole32 -lrpcrt4
 
 ifeq ($(WINDOWS_FAMILY),)
 # nothing

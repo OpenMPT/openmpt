@@ -52,7 +52,7 @@ Context::Context(mpt::OS::Wine::VersionContext versionContext)
 	{
 		throw mpt::Wine::Exception("Wine not detected.");
 	}
-	if(!m_VersionContext.Version().IsValid())
+	if(!m_VersionContext.IsValid())
 	{
 		throw mpt::Wine::Exception("Unknown Wine version detected.");
 	}

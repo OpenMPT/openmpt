@@ -295,10 +295,11 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 			}
 
 			const mpt::osinfo::windows::Version download_required_windows_version = mpt::osinfo::windows::Version(
-					mpt::osinfo::windows::Version::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
-					mpt::osinfo::windows::Version::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
-					mpt::osinfo::windows::Version::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build)),
-					0
+					mpt::osinfo::windows::Epoch::WinNT,
+					mpt::osinfo::windows::System(mpt::saturate_cast<uint32>(download.required_windows_version->version_major), mpt::saturate_cast<uint32>(download.required_windows_version->version_minor)),
+					mpt::osinfo::windows::ServicePack(mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_major), mpt::saturate_cast<uint16>(download.required_windows_version->servicepack_minor)),
+					mpt::osinfo::windows::InternetExplorer(0, 0),
+					mpt::osinfo::windows::Build(mpt::saturate_cast<uint32>(download.required_windows_version->build))
 				);
 
 			if(mpt::osinfo::windows::Version::Current().IsBefore(download_required_windows_version))
@@ -306,13 +307,13 @@ static UpdateInfo GetBestDownload(const Update::versions &versions)
 				download_supported = false;
 			}
 
-			if(mpt::OS::Windows::IsWine() && !theApp.GetWineVersion()->Version().IsValid())
+			if(mpt::OS::Windows::IsWine() && !theApp.GetWineVersion()->IsValid())
 			{
 				download_supported = false;
 			}
-			if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsValid())
+			if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->IsValid())
 			{
-				if(theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update))))
+				if(theApp.GetWineVersion()->IsBefore(mpt::osinfo::windows::wine::version{mpt::saturate_cast<uint8>(download.required_windows_version->wine_major), mpt::saturate_cast<uint8>(download.required_windows_version->wine_minor), mpt::saturate_cast<uint8>(download.required_windows_version->wine_update)}))
 				{
 					download_supported = false;
 				}
@@ -626,7 +627,7 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	j["System"]["Windows"]["Build"] = mpt::osinfo::windows::Version::Current().GetBuild();
 	j["System"]["Windows"]["Architecture"] = mpt::OS::Windows::Name(mpt::OS::Windows::GetHostArchitecture());
 	j["System"]["Windows"]["IsWine"] = mpt::OS::Windows::IsWine();
-	j["System"]["Windows"]["TypeRaw"] = MPT_UFORMAT("0x{}")(mpt::ufmt::HEX0<8>(mpt::osinfo::windows::Version::Current().GetTypeId()));
+	j["System"]["Windows"]["TypeRaw"] = MPT_UFORMAT("0x{}")(mpt::ufmt::HEX0<8>(mpt::osinfo::windows::Version::Current().GetProduct()));
 	std::vector<mpt::OS::Windows::Architecture> architectures = mpt::OS::Windows::GetSupportedProcessArchitectures(mpt::OS::Windows::GetHostArchitecture());
 	for(const auto & arch : architectures)
 	{
@@ -634,15 +635,15 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 	}
 	j["System"]["Memory"] = mpt::OS::Windows::GetSystemMemorySize() / 1024 / 1024;  // MB
 	j["System"]["Threads"] = std::thread::hardware_concurrency();
-	if(mpt::OS::Windows::IsWine())
+	if(mpt::OS::Windows::IsWine() && theApp.GetWineVersion())
 	{
-		mpt::OS::Wine::VersionContext v;
+		const mpt::OS::Wine::VersionContext & v = *theApp.GetWineVersion().get();
 		j["System"]["Windows"]["Wine"]["Version"]["Raw"] = mpt::ToUnicode(mpt::Charset::UTF8, v.RawVersion());
-		if(v.Version().IsValid())
+		if(v.IsValid())
 		{
-			j["System"]["Windows"]["Wine"]["Version"]["Major"] = v.Version().GetMajor();
-			j["System"]["Windows"]["Wine"]["Version"]["Minor"] = v.Version().GetMinor();
-			j["System"]["Windows"]["Wine"]["Version"]["Update"] = v.Version().GetUpdate();
+			j["System"]["Windows"]["Wine"]["Version"]["Major"] = v.Version().major;
+			j["System"]["Windows"]["Wine"]["Version"]["Minor"] = v.Version().minor;
+			j["System"]["Windows"]["Wine"]["Version"]["Update"] = v.Version().update;
 		}
 		j["System"]["Windows"]["Wine"]["HostSysName"] = mpt::ToUnicode(mpt::Charset::UTF8, v.RawHostSysName());
 	}

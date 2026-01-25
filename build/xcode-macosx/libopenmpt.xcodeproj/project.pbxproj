@@ -511,6 +511,7 @@
 		A33106C935BED0BB9E977509 /* load_j2b.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = load_j2b.cpp; path = ../../soundlib/load_j2b.cpp; sourceTree = "<group>"; };
 		A34959973B963F4969DD3FD7 /* filedata.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = filedata.hpp; path = ../../src/mpt/io_read/filedata.hpp; sourceTree = "<group>"; };
 		A35EA1E7E7AD475929D48027 /* PlayState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PlayState.h; path = ../../soundlib/PlayState.h; sourceTree = "<group>"; };
+		A4B529DC013C2E4E89DEE81C /* windows_hx_version.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = windows_hx_version.hpp; path = ../../src/mpt/osinfo/windows_hx_version.hpp; sourceTree = "<group>"; };
 		A527626137B52C53A08DD0A1 /* int24.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = int24.hpp; path = ../../src/mpt/endian/int24.hpp; sourceTree = "<group>"; };
 		A63E9B4238CC6534A1A50982 /* size.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = size.hpp; path = ../../src/mpt/terminal/size.hpp; sourceTree = "<group>"; };
 		A78B5E5FFEF0D151B0FEEC9F /* MIDIEvents.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MIDIEvents.cpp; path = ../../soundlib/MIDIEvents.cpp; sourceTree = "<group>"; };
@@ -929,6 +930,7 @@
 				E7811C8A7A0EE67CE2E78ACA /* class.hpp */,
 				9FCB791A628BD98CBFC0B75A /* dos_memory.hpp */,
 				0F8105B483DB4AA601BED3F4 /* dos_version.hpp */,
+				A4B529DC013C2E4E89DEE81C /* windows_hx_version.hpp */,
 				C885A07E2286B770E9CDAEBE /* windows_version.hpp */,
 				92AB21E22B230F54570A0022 /* windows_wine_version.hpp */,
 			);

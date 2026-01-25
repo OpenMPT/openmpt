@@ -1737,7 +1737,7 @@ void MsgBoxHidable(enMsgBoxHidableMessage enMsg)
 
 #if MPT_WINNT_AT_LEAST(MPT_WIN_VISTA) && defined(UNICODE)
 	if(CTaskDialog::IsSupported()
-	   && !(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->Version().IsBefore(mpt::OS::Wine::Version(3, 13, 0))))
+	   && !(mpt::OS::Windows::IsWine() && theApp.GetWineVersion()->IsBefore(mpt::osinfo::windows::wine::version{3, 13, 0})))
 	{
 		CTaskDialog taskDialog(msg.message, msg.mainTitle ? CString{msg.mainTitle} : CString{}, AfxGetAppName(), TDCBF_OK_BUTTON);
 		taskDialog.SetVerificationCheckboxText(_T("Do not show this message again"));

@@ -481,13 +481,13 @@ mpt::ustring CAboutDlg::GetTabText(int tab)
 		case 5:
 			try
 			{
-				if(!theApp.GetWine())
+				if(!theApp.GetWineIntegration())
 				{
 					text += UL_("Wine integration not available.\n");
 				} else
 				{
 
-					mpt::Wine::Context & wine = *theApp.GetWine();
+					mpt::Wine::Context & wine = *theApp.GetWineIntegration();
 					
 					text += MPT_UFORMAT("Windows: {}\n")
 						( mpt::osinfo::windows::Version::Current().IsWindows() ? yes : no

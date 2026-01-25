@@ -120,7 +120,7 @@ inline encoding get_preferred_encoding() {
 		result = encoding{encoding::type::locale, encoding::header::none};
 	}
 #endif
-	if ((result.type == encoding::type::utf16le) && mpt::osinfo::windows::current_is_wine()) {
+	if ((result.type == encoding::type::utf16le) && mpt::osinfo::windows::wine::current_is_wine()) {
 		result = encoding{encoding::type::utf8, encoding::header::bom};
 	}
 #else

@@ -144,7 +144,7 @@ mpt::ustring WineGetSystemInfoString(mpt::OS::Wine::VersionContext & wineVersion
 	msg += U_("\n");
 
 	msg += MPT_UFORMAT("OpenMPT detected Wine {} running on {}.\n")
-		( wineVersion.Version().AsString()
+		( mpt::ToUnicode(mpt::Charset::UTF8, wineVersion.VersionAsString())
 		, wineVersion.HostClass() == mpt::osinfo::osclass::Linux ? U_("Linux") : U_("unknown system")
 		);
 
@@ -172,12 +172,12 @@ bool WineSetupIsSupported(mpt::OS::Wine::VersionContext & wineVersion, std::vect
 			reasons.push_back(MPT_UFORMAT("Unsupported host OS type: {}")(mpt::ToUnicode(mpt::Charset::UTF8, wineVersion.RawHostSysName())));
 		}
 	}
-	if(!wineVersion.Version().IsValid())
+	if(!wineVersion.IsValid())
 	{
 		supported = false;
 		reasons.push_back(MPT_UFORMAT("Failed to parse Wine version: {}")(mpt::ToUnicode(mpt::Charset::UTF8, wineVersion.RawVersion())));
 	}
-	if(wineVersion.Version().IsAtLeast(mpt::osinfo::windows::wine::version{10, 11, 0}) && wineVersion.Version().IsBefore(mpt::osinfo::windows::wine::version{10, 12, 0}))
+	if(wineVersion.IsAtLeast(mpt::osinfo::windows::wine::version{10, 11, 0}) && wineVersion.IsBefore(mpt::osinfo::windows::wine::version{10, 12, 0}))
 	{
 		// Blacklisted due to <https://bugs.openmpt.org/view.php?id=1904>.
 		// Probably caused by <https://gitlab.winehq.org/wine/wine/-/commit/96cd811903e3d3f227c39e12235725baf793f4b9>,
@@ -280,7 +280,7 @@ static std::map<std::string, std::vector<char>> UnzipToMap(mpt::PathString filen
 
 bool IsSupported()
 {
-	return theApp.GetWine() ? true : false;
+	return theApp.GetWineIntegration() ? true : false;
 }
 
 
@@ -319,7 +319,7 @@ void Initialize()
 			Reporting::Notification(MPT_UFORMAT("OpenMPT does not support Wine integration on your current Wine setup.\nReasons:\n{}")(mpt::join(reasons, MPT_USTRING("\n"))), WineGetWindowTitle());
 			return;
 		}
-		theApp.SetWine(std::make_shared<mpt::Wine::Context>(wine));
+		theApp.SetWineIntegration(std::make_shared<mpt::Wine::Context>(wine));
 	} catch(const std::exception & e)
 	{
 		mpt::ustring msg =
@@ -329,7 +329,7 @@ void Initialize()
 		Reporting::Error(msg, WineGetWindowTitle());
 		return;
 	}
-	mpt::Wine::Context wine = *theApp.GetWine();
+	mpt::Wine::Context wine = *theApp.GetWineIntegration();
 
 	try
 	{

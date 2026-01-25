@@ -1309,13 +1309,13 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMisc2()
 
 #if defined(MODPLUG_TRACKER)
 
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.1.44" )).AsString() , U_("1.1.44"));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.6.2"  )).AsString() , U_("1.6.2" ));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("1.8"    )).AsString() , U_("1.8.0" ));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0-rc" )).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0-rc4")).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.0"    )).AsString() , U_("2.0.0" ));
-	VERIFY_EQUAL(mpt::OS::Wine::Version(U_("2.4"    )).AsString() , U_("2.4.0" ));
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("1.1.44" )), "1.1.44");
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("1.6.2"  )), "1.6.2" );
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("1.8"    )), "1.8.0" );
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("2.0-rc" )), "2.0.0" );
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("2.0-rc4")), "2.0.0" );
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("2.0"    )), "2.0.0" );
+	VERIFY_EQUAL(mpt::osinfo::windows::wine::VersionContext::VersionAsString(mpt::osinfo::windows::wine::VersionContext::ParseVersion("2.4"    )), "2.4.0" );
 
 #endif // MODPLUG_TRACKER
 
