@@ -45,7 +45,7 @@
 			"../../include/opus/silk/x86/*.h",
 		}
 	filter {}
-	filter { "architecture:arm or arm64" }
+	filter { "architecture:arm or aarch64" }
 		files {
 			"../../include/opus/celt/arm/*.c",
 			"../../include/opus/celt/arm/*.h",
@@ -96,7 +96,7 @@
 					"../../include/opus/dnn/x86/*.h",
 				}
 			filter {}
-			filter { "architecture:arm or arm64" }
+			filter { "architecture:arm or aarch64" }
 				files {
 					"../../include/opus/dnn/arm/*.c",
 					"../../include/opus/dnn/arm/*.h",
@@ -150,7 +150,7 @@
 				"../../include/opus/dnn/arm/nnet_neon.c",
 			}
 		filter {}
-		filter { "architecture:arm64" }
+		filter { "architecture:aarch64" }
 			excludes {
 				"../../include/opus/celt/arm/celt_fft_ne10.c",
 				"../../include/opus/celt/arm/celt_mdct_ne10.c",
@@ -234,7 +234,7 @@
 				--"OPUS_ARM_MAY_HAVE_NEON_INTR=1",
 			}
 		filter {}
-		filter { "architecture:arm64" }
+		filter { "architecture:aarch64" }
 			excludes {
 				"../../include/opus/celt/arm/celt_fft_ne10.c",
 				"../../include/opus/celt/arm/celt_mdct_ne10.c",

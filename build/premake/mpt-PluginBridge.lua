@@ -68,7 +68,7 @@ include_dependency "../../build/premake/ext-vst.lua"
    targetsuffix "-amd64"
   filter { "architecture:ARM" }
    targetsuffix "-arm"
-  filter { "architecture:ARM64" }
+  filter { "architecture:AARCH64" }
    targetsuffix "-arm64"
   filter { "architecture:ARM64EC" }
    targetsuffix "-arm64ec"
@@ -137,7 +137,7 @@ include_dependency "../../build/premake/ext-vst.lua"
 		dataexecutionprevention "Off"
 	filter { "action:vs*", "architecture:ARM" }
 		-- dataexecutionprevention "Off" -- not supported by windows loader on arm64
-	filter { "action:vs*", "architecture:ARM64" }
+	filter { "action:vs*", "architecture:AARCH64" }
 		-- dataexecutionprevention "Off" -- not supported by windows loader on arm64
 	filter {}
 	if _OPTIONS["windows-charset"] ~= "Unicode" then
@@ -151,7 +151,7 @@ include_dependency "../../build/premake/ext-vst.lua"
    targetsuffix "-amd64"
   filter { "architecture:ARM" }
    targetsuffix "-arm"
-  filter { "architecture:ARM64" }
+  filter { "architecture:AARCH64" }
    targetsuffix "-arm64"
   filter { "architecture:ARM64EC" }
    targetsuffix "-arm64ec"
@@ -159,7 +159,7 @@ include_dependency "../../build/premake/ext-vst.lua"
 	filter {}
 	filter { "action:vs*", "architecture:x86_64" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
-	filter { "action:vs*", "architecture:ARM64" }
+	filter { "action:vs*", "architecture:AARCH64" }
 		linkoptions { "/HIGHENTROPYVA:NO" }
 	filter { "action:vs*", "architecture:ARM64EC" }
 		linkoptions { "/HIGHENTROPYVA:NO" }

@@ -17,9 +17,9 @@
 	filter { "platforms:arm" }
 		system "Windows"
 		architecture "ARM"
-	filter { "platforms:arm64" }
+	filter { "platforms:ARM64" }
 		system "Windows"
-		architecture "ARM64"
+		architecture "AARCH64"
 	filter { "platforms:arm64ec" }
 		system "Windows"
 		architecture "ARM64EC"
@@ -108,7 +108,20 @@
 	end
 
 	filter {}
-		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" )
+	filter { "platforms:x86" }
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" .. "/" .. "x86" .. "/" .. "%{cfg.buildcfg}" )
+	filter {}
+	filter { "platforms:x86_64" }
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" .. "/" .. "x86_64" .. "/" .. "%{cfg.buildcfg}" )
+	filter {}
+	filter { "platforms:arm" }
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" .. "/" .. "arm" .. "/" .. "%{cfg.buildcfg}" )
+	filter {}
+	filter { "platforms:ARM64" }
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" .. "/" .. "arm64" .. "/" .. "%{cfg.buildcfg}" )
+	filter {}
+	filter { "platforms:arm64ec" }
+		objdir ( "../../build/obj/" .. mpt_projectpathname .. "/" .. "%{prj.name}" .. "/" .. "arm64ec" .. "/" .. "%{cfg.buildcfg}" )
 	filter {}
 
 	filter {}
@@ -164,15 +177,30 @@
 		resdefines { "VER_ARCHNAME=\"amd64\"" }
 	filter { "action:vs*", "architecture:ARM" }
 		resdefines { "VER_ARCHNAME=\"arm\"" }
-	filter { "action:vs*", "architecture:ARM64" }
+	filter { "action:vs*", "architecture:AARCH64" }
 		resdefines { "VER_ARCHNAME=\"arm64\"" }
 	filter { "action:vs*", "architecture:ARM64EC" }
 		resdefines { "VER_ARCHNAME=\"arm64ec\"" }
 	filter {}
 
-  filter { "kind:StaticLib" }
-	targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/%{cfg.architecture}/%{cfg.buildcfg}" )
-  	
+	filter {}
+	filter { "kind:StaticLib", "platforms:x86" }
+		targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86/%{cfg.buildcfg}" )
+	filter {}
+	filter { "kind:StaticLib", "platforms:x86_64" }
+		targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/x86_64/%{cfg.buildcfg}" )
+	filter {}
+	filter { "kind:StaticLib", "platforms:arm" }
+		targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/ARM/%{cfg.buildcfg}" )
+	filter {}
+	filter { "kind:StaticLib", "platforms:ARM64" }
+		targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/ARM64/%{cfg.buildcfg}" )
+	filter {}
+	filter { "kind:StaticLib", "platforms:arm64ec" }
+		targetdir ( "../../build/lib/" .. mpt_projectpathname .. "/ARM64EC/%{cfg.buildcfg}" )
+	filter {}
+	filter {}
+
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:x86" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/x86" )
   filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:x86" }
@@ -210,17 +238,17 @@
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm" )
   filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm" )
-  filter { "kind:not StaticLib", "configurations:Debug", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:Debug", "architecture:AARCH64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
-  filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:DebugShared", "architecture:AARCH64" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
-  filter { "kind:not StaticLib", "configurations:Checked", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:Checked", "architecture:AARCH64" }
 		targetdir ( "../../bin/checked/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
-  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:CheckedShared", "architecture:AARCH64" }
 		targetdir ( "../../bin/checked/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
-  filter { "kind:not StaticLib", "configurations:Release", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:Release", "architecture:AARCH64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64" )
-  filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:ARM64" }
+  filter { "kind:not StaticLib", "configurations:ReleaseShared", "architecture:AARCH64" }
 		targetdir ( "../../bin/release/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-shared/arm64" )
   filter { "kind:not StaticLib", "configurations:Debug", "architecture:ARM64EC" }
 		targetdir ( "../../bin/debug/" .. _ACTION .. "-" .. mpt_bindirsuffix .. "-static/arm64ec" )
@@ -237,13 +265,13 @@
 
 	filter { "configurations:Debug", "architecture:ARM" }
 		editandcontinue "Off"
-	filter { "configurations:Debug", "architecture:ARM64" }
+	filter { "configurations:Debug", "architecture:AARCH64" }
 		editandcontinue "Off"
 	filter { "configurations:Debug", "architecture:ARM64EC" }
 		editandcontinue "Off"
 	filter { "configurations:DebugShared", "architecture:ARM" }
 		editandcontinue "Off"
-	filter { "configurations:DebugShared", "architecture:ARM64" }
+	filter { "configurations:DebugShared", "architecture:AARCH64" }
 		editandcontinue "Off"
 	filter { "configurations:DebugShared", "architecture:ARM64EC" }
 		editandcontinue "Off"
@@ -254,11 +282,11 @@
 	if MPT_MSVC_AT_LEAST(2017) and MPT_MSVC_BEFORE(2026) then
 		filter { "configurations:Debug", "architecture:ARM" }
 			symbols "On"
-		filter { "configurations:Debug", "architecture:ARM64" }
+		filter { "configurations:Debug", "architecture:AARCH64" }
 			symbols "On"
 		filter { "configurations:Debug", "architecture:ARM64EC" }
 			symbols "On"
-		filter { "configurations:Debug", "architecture:not ARM", "architecture:not ARM64", "architecture:not ARM64EC" }
+		filter { "configurations:Debug", "architecture:not ARM", "architecture:not AARCH64", "architecture:not ARM64EC" }
 			symbols "FastLink"
 	else
 		filter { "configurations:Debug" }
@@ -327,8 +355,7 @@
    defines { "NDEBUG" }
    symbols "On"
 		if MPT_COMPILER_MSVC then
-			linktimeoptimization "Default"
-			linktimeoptimization2 "Fast"
+			linktimeoptimization "Fast"
 		end
 		if MPT_MSVC_AT_LEAST(2022) then
 			buildoptions { "/Gw" }
@@ -347,7 +374,7 @@
 
 	filter {}
 		if MPT_BUILD_MSBUILD and MPT_COMPILER_MSVC then
-			flags { "MultiProcessorCompile" }
+			multiprocessorcompile "On"
 		end
 
 	if MPT_WIN_BEFORE(MPT_WIN["7"]) then

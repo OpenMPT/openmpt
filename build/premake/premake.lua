@@ -65,7 +65,7 @@ premake.api.register {
 		premake.X86,
 		premake.X86_64,
 		premake.ARM,
-		premake.ARM64,
+		premake.AARCH64,
 		premake.ARM64EC,
 	},
 	aliases = {
@@ -82,7 +82,7 @@ premake.vstudio.vs200x_architectures =
 	x86     = "x86",
 	x86_64  = "x64",
 	ARM     = "ARM",
-	ARM64   = "ARM64",
+	AARCH64 = "ARM64",
 	ARM64EC = "ARM64EC",
 }
 
@@ -126,51 +126,6 @@ premake.override(premake.vstudio.vc2010.elements, "configurationProperties", fun
 	table.insertafter(calls, premake.vstudio.vc2010.wholeProgramOptimization, premake.vstudio.vc2010.spectreMitigations)
 	return calls
 end)
-
-
-
-premake.api.register {
-	name = "linktimeoptimization2",
-	scope = "config",
-	kind = "string",
-	allowed = {
-		"Default",
-		"On",
-		"Off",
-		"Fast",
-	}
-}
-
-function premake.vstudio.vc2010.wholeProgramOptimization2(cfg)
-	if cfg.linktimeoptimization2 == "On" then
-		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "true")
-	elseif cfg.linktimeoptimization2 == "Fast" then
-		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "true")
-	elseif cfg.linktimeoptimization2 == "Off" then
-		premake.vstudio.vc2010.element("WholeProgramOptimization", nil, "false")
-	end
-end
-
-function premake.vstudio.vc2010.linkTimeCodeGeneration2(cfg)
-	if cfg.linktimeoptimization2 == "On" then
-		premake.vstudio.vc2010.element("LinkTimeCodeGeneration", nil, "UseLinkTimeCodeGeneration")
-	elseif cfg.linktimeoptimization2 == "Fast" then
-		premake.vstudio.vc2010.element("LinkTimeCodeGeneration", nil, "UseFastLinkTimeCodeGeneration")
-	end
-end
-
-premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
-	local calls = base(prj)
-	table.insertafter(calls, premake.vstudio.vc2010.wholeProgramOptimization, premake.vstudio.vc2010.wholeProgramOptimization2)
-	return calls
-end)
-
-premake.override(premake.vstudio.vc2010.elements, "link", function(base, prj)
-	local calls = base(prj)
-	table.insertafter(calls, premake.vstudio.vc2010.linkTimeCodeGeneration, premake.vstudio.vc2010.linkTimeCodeGeneration2)
-	return calls
-end)
-
 
 
 
@@ -428,15 +383,15 @@ end
 function MPT_WIN_PLATFORMS(v)
 	if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
 		if MPT_MSVC_AT_LEAST(2019) then
-			return { "x86", "x86_64", "arm64", "arm64ec" }
+			return { "x86", "x86_64", "ARM64", "arm64ec" }
 		else
-			return { "x86", "x86_64", "arm64" }
+			return { "x86", "x86_64", "ARM64" }
 		end
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["10_1709"]) then
 		if MPT_MSVC_BEFORE(2026) then
-			return { "x86", "x86_64", "arm", "arm64" }
+			return { "x86", "x86_64", "arm", "ARM64" }
 		else
-			return { "x86", "x86_64", "arm64" }
+			return { "x86", "x86_64", "ARM64" }
 		end
 	elseif MPT_WIN_AT_LEAST(MPT_WIN["8"]) then
 		if MPT_MSVC_BEFORE(2026) then
