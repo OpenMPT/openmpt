@@ -164,19 +164,19 @@ mpt::ustring Version::GetCurrentName()
 
 mpt::osinfo::windows::Version Version::GetMinimumKernelLevel() noexcept
 {
-	uint64 minimumKernelVersion = 0;
 	#if MPT_OS_WINDOWS && MPT_COMPILER_MSVC
 		#if MPT_MSVC_AT_LEAST(2026, 0)
-			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::Win10));
+			return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::WinNT, mpt::osinfo::windows::Version::Win10, mpt::osinfo::windows::ServicePack{0, 0}, mpt::osinfo::windows::InternetExplorer{0, 0}, 10240);
 		#elif MPT_MSVC_AT_LEAST(2022, 0)
-			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::Win7));
+			return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::WinNT, mpt::osinfo::windows::Version::Win7, mpt::osinfo::windows::ServicePack{0, 0}, mpt::osinfo::windows::InternetExplorer{0, 0}, 0);
 		#elif MPT_WINNT_AT_LEAST(MPT_WIN_VISTA)
-			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::WinVista));
+			return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::WinNT, mpt::osinfo::windows::Version::WinVista, mpt::osinfo::windows::ServicePack{0, 0}, mpt::osinfo::windows::InternetExplorer{0, 0}, 0);
 		#else
-			minimumKernelVersion = std::max(minimumKernelVersion, static_cast<uint64>(mpt::osinfo::windows::Version::WinXP));
+			return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::WinNT, mpt::osinfo::windows::Version::WinXP, mpt::osinfo::windows::ServicePack{0, 0}, mpt::osinfo::windows::InternetExplorer{0, 0}, 0);
 		#endif
+	#else
+		return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::Win32s, mpt::osinfo::windows::System{0, 0}, mpt::osinfo::windows::ServicePack{0, 0}, mpt::osinfo::windows::InternetExplorer{0, 0}, 0);
 	#endif
-	return mpt::osinfo::windows::Version(mpt::osinfo::windows::Epoch::WinNT, mpt::osinfo::windows::System(minimumKernelVersion), mpt::osinfo::windows::ServicePack(0, 0), mpt::osinfo::windows::InternetExplorer(0, 0), 0);
 }
 
 
