@@ -594,6 +594,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -632,6 +634,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -669,6 +673,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -706,6 +712,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -751,6 +759,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -795,6 +805,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -839,6 +851,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -883,6 +897,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -928,6 +944,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -972,6 +990,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1016,6 +1036,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1060,6 +1082,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1098,6 +1122,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1135,6 +1161,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1172,6 +1200,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1209,6 +1239,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1254,6 +1286,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1298,6 +1332,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1342,6 +1378,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1386,6 +1424,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1431,6 +1471,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1475,6 +1517,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1519,6 +1563,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1563,6 +1609,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /DELAYLOAD:mf.dll /DELAYLOAD:mfplat.dll /DELAYLOAD:mfreadwrite.dll /DELAYLOAD:propsys.dll %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

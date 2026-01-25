@@ -178,6 +178,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -209,6 +211,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -240,6 +244,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -265,6 +271,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -296,6 +304,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -327,6 +337,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,5.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>

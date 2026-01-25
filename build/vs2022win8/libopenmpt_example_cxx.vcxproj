@@ -435,6 +435,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -468,6 +470,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -500,6 +504,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -540,6 +546,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -579,6 +587,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -618,6 +628,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -658,6 +670,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -697,6 +711,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -736,6 +752,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -769,6 +787,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -801,6 +821,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -833,6 +855,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -873,6 +897,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -912,6 +938,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -951,6 +979,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -991,6 +1021,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -1030,6 +1062,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
@@ -1069,6 +1103,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:CONSOLE,6.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win8.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>

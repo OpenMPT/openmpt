@@ -407,6 +407,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -440,6 +442,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -473,6 +477,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -513,6 +519,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -552,6 +560,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -591,6 +601,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -632,6 +644,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -672,6 +686,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -712,6 +728,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -746,6 +764,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -779,6 +799,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -812,6 +834,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -852,6 +876,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -891,6 +917,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -930,6 +958,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -971,6 +1001,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1011,6 +1043,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1051,6 +1085,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

@@ -334,6 +334,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -363,6 +365,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -398,6 +402,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -432,6 +438,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -467,6 +475,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -501,6 +511,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -530,6 +542,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -558,6 +572,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -593,6 +609,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -627,6 +645,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -662,6 +682,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -696,6 +718,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>

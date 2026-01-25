@@ -452,6 +452,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -484,6 +486,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -515,6 +519,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -554,6 +560,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -592,6 +600,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -630,6 +640,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -669,6 +681,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -707,6 +721,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -745,6 +761,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -777,6 +795,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -808,6 +828,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -839,6 +861,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -878,6 +902,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -916,6 +942,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -954,6 +982,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -993,6 +1023,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\x86\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1031,6 +1063,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\amd64\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1069,6 +1103,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\arm\in_openmpt_wa2.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>

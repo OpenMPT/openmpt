@@ -429,6 +429,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -456,6 +458,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -482,6 +486,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-static\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -516,6 +522,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -549,6 +557,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -582,6 +592,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-static\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -616,6 +628,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -649,6 +663,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -682,6 +698,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-static\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -709,6 +727,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -735,6 +755,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -761,6 +783,8 @@
       <ImportLibrary>..\..\bin\debug\vs2022-win8-shared\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -795,6 +819,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -828,6 +854,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -861,6 +889,8 @@
       <ImportLibrary>..\..\bin\release\vs2022-win8-shared\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -895,6 +925,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -928,6 +960,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -961,6 +995,8 @@
       <ImportLibrary>..\..\bin\checked\vs2022-win8-shared\arm\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>

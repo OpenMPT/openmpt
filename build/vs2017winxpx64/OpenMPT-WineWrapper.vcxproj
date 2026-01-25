@@ -317,6 +317,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -341,6 +343,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -371,6 +375,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -400,6 +406,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -430,6 +438,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-static\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -459,6 +469,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-static\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -483,6 +495,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -506,6 +520,8 @@
       <ImportLibrary>..\..\bin\debug\vs2017-winxpx64-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -536,6 +552,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -565,6 +583,8 @@
       <ImportLibrary>..\..\bin\release\vs2017-winxpx64-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -595,6 +615,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-shared\x86\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -624,6 +646,8 @@
       <ImportLibrary>..\..\bin\checked\vs2017-winxpx64-shared\amd64\OpenMPT-WineWrapper.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>

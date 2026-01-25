@@ -563,6 +563,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-static\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -591,6 +593,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-static\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -618,6 +622,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-static\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -645,6 +651,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-static\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -680,6 +688,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-static\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -714,6 +724,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-static\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -748,6 +760,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-static\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -782,6 +796,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-static\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -817,6 +833,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-static\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -851,6 +869,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-static\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -885,6 +905,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-static\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -919,6 +941,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-static\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -947,6 +971,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-shared\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -975,6 +1001,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-shared\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1002,6 +1030,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-shared\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1029,6 +1059,8 @@
       <ImportLibrary>..\..\bin\debug\vs2026-win11-shared\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1064,6 +1096,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-shared\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1098,6 +1132,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-shared\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1132,6 +1168,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-shared\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1166,6 +1204,8 @@
       <ImportLibrary>..\..\bin\release\vs2026-win11-shared\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1201,6 +1241,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-shared\x86\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1235,6 +1277,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-shared\amd64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1269,6 +1313,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-shared\arm64\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1303,6 +1349,8 @@
       <ImportLibrary>..\..\bin\checked\vs2026-win11-shared\arm64ec\OpenMPT-NativeSupport.lib</ImportLibrary>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>

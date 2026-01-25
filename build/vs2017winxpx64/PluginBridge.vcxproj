@@ -322,6 +322,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -355,6 +357,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -394,6 +398,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -432,6 +438,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -471,6 +479,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -509,6 +519,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -542,6 +554,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -574,6 +588,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -613,6 +629,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -651,6 +669,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -690,6 +710,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -728,6 +750,8 @@
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,5.2 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

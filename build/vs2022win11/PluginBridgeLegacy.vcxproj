@@ -568,6 +568,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -605,6 +607,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -639,6 +643,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -673,6 +679,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -716,6 +724,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -758,6 +768,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -799,6 +811,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -840,6 +854,8 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -883,6 +899,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -925,6 +943,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -966,6 +986,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1007,6 +1029,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1043,6 +1067,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1079,6 +1105,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1113,6 +1141,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1147,6 +1177,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1190,6 +1222,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1232,6 +1266,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1273,6 +1309,8 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1314,6 +1352,8 @@
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1357,6 +1397,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1399,6 +1441,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1440,6 +1484,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -1481,6 +1527,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,10.0 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

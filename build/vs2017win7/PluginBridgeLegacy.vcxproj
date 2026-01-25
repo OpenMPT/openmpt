@@ -297,6 +297,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -329,6 +331,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -367,6 +371,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -404,6 +410,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -442,6 +450,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -479,6 +489,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -511,6 +523,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -542,6 +556,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -580,6 +596,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -617,6 +635,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -655,6 +675,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -692,6 +714,8 @@
       <DataExecutionPrevention>false</DataExecutionPrevention>
       <AdditionalOptions>/SUBSYSTEM:WINDOWS,6.1 /HIGHENTROPYVA:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win7.manifest;../../pluginBridge/PluginBridge.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

@@ -404,6 +404,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -427,6 +429,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -450,6 +454,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -480,6 +486,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -509,6 +517,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
@@ -538,6 +548,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
     <ClCompile>
@@ -569,6 +581,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
     <ClCompile>
@@ -599,6 +613,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
     <ClCompile>
@@ -629,6 +645,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
     <ClCompile>
@@ -653,6 +671,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
@@ -676,6 +696,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
     <ClCompile>
@@ -699,6 +721,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
@@ -729,6 +753,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
@@ -758,6 +784,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
     <ClCompile>
@@ -787,6 +815,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <ClCompile>
@@ -818,6 +848,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <ClCompile>
@@ -848,6 +880,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
     <ClCompile>
@@ -878,6 +912,8 @@
       <ModuleDefinitionFile>../../../include/lame/include/lame.def</ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
+    <ProjectReference>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\lame\include\lame.h" />
