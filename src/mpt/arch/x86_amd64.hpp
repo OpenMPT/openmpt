@@ -1063,7 +1063,7 @@ private:
 #endif // MPT_COMPILER
 	}
 
-	[[nodiscard]] static bool detect_nexgen() noexcept {
+	[[nodiscard]] MPT_NOINLINE static bool detect_nexgen() noexcept {
 
 #if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
@@ -1117,7 +1117,7 @@ private:
 #endif
 	}
 
-	[[nodiscard]] static bool detect_cyrix() noexcept {
+	[[nodiscard]] MPT_NOINLINE static bool detect_cyrix() noexcept {
 
 #if MPT_ARCH_X86 && MPT_COMPILER_MSVC
 
