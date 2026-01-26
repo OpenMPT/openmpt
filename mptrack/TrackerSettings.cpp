@@ -352,8 +352,8 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, UpdateChannel(conf, UL_("Update"), UL_("Channel"), UpdateChannelRelease)
 	, UpdateUpdateURL_DEPRECATED(conf, UL_("Update"), UL_("UpdateURL"), UL_("https://update.openmpt.org/check/$VERSION/$GUID"))
 	, UpdateAPIURL(conf, UL_("Update"), UL_("APIURL"), CUpdateCheck::GetDefaultAPIURL())
-	, UpdateStatisticsConsentAsked(conf, UL_("Update"), UL_("StatistisConsentAsked"), false)
-	, UpdateStatistics(conf, UL_("Update"), UL_("Statistis"), false)
+	, UpdateStatisticsConsentAsked(conf, UL_("Update"), UL_("StatisticsConsentAsked"), false)
+	, UpdateStatistics(conf, UL_("Update"), UL_("Statistics"), false)
 	, UpdateSendGUID_DEPRECATED(conf, UL_("Update"), UL_("SendGUID"), false)
 	, UpdateShowUpdateHint(conf, UL_("Update"), UL_("ShowUpdateHint"), true)
 	, UpdateIgnoreVersion(conf, UL_("Update"), UL_("IgnoreVersion"), _T(""))
@@ -857,6 +857,13 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	if(storedVersion < MPT_V("1.31.00.12"))
 	{
 		UpdateLastUpdateCheck = mpt::chrono::default_system_clock::time_point{};
+	}
+	if(storedVersion < MPT_V("1.33.00.20"))
+	{
+		UpdateStatisticsConsentAsked = conf.Read<bool>(UL_("Update"), UL_("StatistisConsentAsked"), false);
+		UpdateStatistics = conf.Read<bool>(UL_("Update"), UL_("Statistis"), false);
+		conf.Forget(UL_("Update"), UL_("StatistisConsentAsked"));
+		conf.Forget(UL_("Update"), UL_("Statistis"));
 	}
 #endif // MPT_ENABLE_UPDATE
 
