@@ -2511,7 +2511,7 @@ void CTrackApp::InitializeDXPlugins()
 		if(plugPath == failedPlugin)
 		{
 			GetPluginState().Remove(U_("VST Plugins"), U_("FailedPlugin"));
-			GetPluginState().Flush();
+			GetPluginState().Flush(TrackerSettings::Instance().BrokenPluginsWorkaroundSyncStartupCrashRecovery ? Caching::WriteThrough : Caching::WriteBack);
 			if(skipFailed == cnfCancel)
 			{
 				const CString text = MPT_CFORMAT("The following plugin has previously crashed OpenMPT during initialisation:\n\n{}\n\nDo you still want to load it?")

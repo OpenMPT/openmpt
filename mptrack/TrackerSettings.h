@@ -986,6 +986,7 @@ public:
 
 	// Broken Plugins Workarounds
 
+	Setting<bool> BrokenPluginsWorkaroundSyncStartupCrashRecovery;
 	Setting<bool> BrokenPluginsWorkaroundVSTMaskAllCrashes;
 	Setting<bool> BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin;
 

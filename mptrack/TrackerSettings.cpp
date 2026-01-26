@@ -340,6 +340,7 @@ TrackerSettings::TrackerSettings(SettingsContainer &conf)
 	, vstHostVendorString(conf, UL_("VST Plugins"), UL_("HostVendorString"), "OpenMPT project")
 	, vstHostVendorVersion(conf, UL_("VST Plugins"), UL_("HostVendorVersion"), Version::Current().GetRawVersion())
 	// Broken Plugins Workarounds
+	, BrokenPluginsWorkaroundSyncStartupCrashRecovery(conf, UL_("Broken Plugins Workarounds"), UL_("SyncStartupCrashRecovery"), false)
 	, BrokenPluginsWorkaroundVSTMaskAllCrashes(conf, UL_("Broken Plugins Workarounds"), UL_("VSTMaskAllCrashes"), true)  // TODO: really should be false
 	, BrokenPluginsWorkaroundVSTNeverUnloadAnyPlugin(conf, UL_("Broken Plugins Workarounds"), UL_("VSTNeverUnloadAnyPlugin"), false)
 #if defined(MPT_ENABLE_UPDATE)
