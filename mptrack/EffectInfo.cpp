@@ -140,9 +140,9 @@ static constexpr MPTEffectInfo gFXInfo[] =
 };
 
 
-static mpt::tstring FormatPanning(int32 value, int32 center)
+static mpt::tstring FormatPanning(int32 value, int32 center, bool hex = false)
 {
-	mpt::tstring s = mpt::tfmt::val(value);
+	mpt::tstring s = hex ? mpt::tfmt::HEX(value) : mpt::tfmt::dec(value);
 	if(value == center)
 		s += _T(" (Center)");
 	else
@@ -1038,10 +1038,13 @@ bool EffectInfo::GetVolCmdParamInfo(const ModCommand &m, CString *s, bool hex) c
 	else
 		volume = mpt::cfmt::dec(m.vol);
 
+	if(hex && m.volcmd == VOLCMD_VOLUME)
+		volume += MPT_CFORMAT(" ({})")(mpt::cfmt::dec(m.vol));
+
 	switch(m.volcmd)
 	{
 	case VOLCMD_PANNING:
-		*s = FormatPanning(m.vol, 32).c_str();
+		*s = FormatPanning(m.vol, 32, hex).c_str();
 		break;
 
 	case VOLCMD_VOLSLIDEUP:
