@@ -335,7 +335,8 @@ void COptionsKeyboard::DefineCommandCategories()
 
 	{
 		auto &commands = commandCategories.emplace_back(_T("  Instrument Editor"), kCtxCtrlInstruments).commandRanges;
-		commands.emplace_back(kcStartInstrumentCtrl, kcEndInstrumentCtrl, _T(""));
+		commands.emplace_back(kcStartInstrumentCtrl, kcEndInstrumentCtrl, _T("Miscellaneous"));
+		commands.emplace_back(kcStartInsNoteMap, kcEndInsNoteMap, _T("Note Map"));
 	}
 
 	{
