@@ -78,6 +78,9 @@ public:
 	CVstPlugin(bool maskCrashes, HMODULE hLibrary, VSTPluginLib &factory, SNDMIXPLUGIN &mixPlugin, Vst::AEffect &effect, CSoundFile &sndFile);
 	~CVstPlugin();
 
+	CVstPlugin(const CVstPlugin &) = delete;
+	CVstPlugin &operator=(const CVstPlugin &) = delete;
+
 	enum class BridgeMode
 	{
 		Automatic,
