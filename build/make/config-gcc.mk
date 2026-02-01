@@ -53,8 +53,8 @@ LDFLAGS  += -fuse-ld=gold
 endif
 
 ifeq ($(OPTIMIZE_LTO),1)
-CXXFLAGS += -flto
-CFLAGS   += -flto
+CXXFLAGS += -flto=auto -fuse-linker-plugin -fno-fat-lto-objects
+CFLAGS   += -flto=auto -fuse-linker-plugin -fno-fat-lto-objects
 endif
 
 ifeq ($(ANALYZE),1)
