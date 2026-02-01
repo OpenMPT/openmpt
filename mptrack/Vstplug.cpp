@@ -1031,11 +1031,15 @@ void CVstPlugin::Initialize()
 			}
 		}
 
-		// For some reason, this call crashes in a call to free() in AdmiralQuality NaiveLPF / SCAMP 1.2 (newer versions are fine).
+		// CSI4: For some reason, this call crashes in a call to free() in AdmiralQuality NaiveLPF / SCAMP 1.2 (newer versions are fine).
 		// This does not happen when running the plugin in pretty much any host, or when running in OpenMPT 1.22 and older
 		// (EXCEPT when recompiling those old versions with VS2010), so it sounds like an ASLR issue to me.
 		// AdmiralQuality also doesn't know what to do.
-		if(GetUID() != FourCC("CSI4"))
+		// Fw3Q: MaxSynths DR-910 offers four stereo output pairs. However, when sending our standard speaker arrangement
+		// (but I also tried a few other speaker arrangements causing the same effect), output 1 is only heard on the right speaker,
+		// output 2 and 3 are not heard at all, and output 4 is only heard on the left speaker. Not sending the speaker arrangement
+		// works around this issue.
+		if(GetUID() != FourCC("CSI4") && GetUID() != FourCC("Fw3Q"))
 		{
 			// For now, input setup = output setup.
 			Dispatch(effSetSpeakerArrangement, 0, ToIntPtr(&sa), &sa, 0.0f);
