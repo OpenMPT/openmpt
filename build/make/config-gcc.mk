@@ -49,6 +49,9 @@ CFLAGS   += -march=native
 endif
 
 ifeq ($(MODERN),1)
+endif
+
+ifeq ($(GCC_LINKER),gold)
 LDFLAGS  += -fuse-ld=gold
 endif
 
