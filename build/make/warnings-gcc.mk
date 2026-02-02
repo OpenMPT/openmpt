@@ -14,11 +14,13 @@ ifeq ($(MODERN),1)
 CFLAGS_WARNINGS += -Wframe-larger-than=4000
 #CXXFLAGS_WARNINGS += -Wshadow -Wswitch-enum 
 CXXFLAGS_WARNINGS += -Wconversion
-# gold
-LDFLAGS_WARNINGS  += -Wl,--detect-odr-violations
 # GCC 8
 CXXFLAGS_WARNINGS += -Wcast-align=strict
 CFLAGS_WARNINGS   += -Wcast-align=strict
+endif
+
+ifeq ($(GCC_LINKER),gold)
+LDFLAGS_WARNINGS  += -Wl,--detect-odr-violations
 endif
 
 CFLAGS_SILENT += -Wno-cast-qual
