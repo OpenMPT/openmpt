@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.18-pre
 
+ *  miniz: Update to v3.1.1 (2026-02-03).
+
 ### libopenmpt 0.7.17 (2025-12-14)
 
  *  [**Bug**] openmpt123: libsndfile float32 output was broken since 0.7.14.
