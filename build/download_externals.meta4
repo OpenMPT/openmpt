@@ -49,10 +49,10 @@
   <url>https://web.archive.org/web/20160423015142id_/http://download.microsoft.com/download/0/a/9/0a939ef6-e31c-430f-a3df-dfae7960d564/htmlhelp.exe</url>
   <url>https://web.archive.org/web/20160301111642id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
  </file>
- <file name="build/externals/python-3.14.2-embed-amd64.zip">
-  <size>12011844</size>
-  <hash type="sha-512">d72d4f036c4dd563c4ac15c7162bf63406d3fd83a44877300ff87e4168f211d66b8209fdd3ad39ea549b8bc46c092b4ecab3b24b0da2f8950e0e5642828e99f2</hash>
-  <url>https://www.python.org/ftp/python/3.14.2/python-3.14.2-embed-amd64.zip</url>
+ <file name="build/externals/python-3.14.3-embed-amd64.zip">
+  <size>12023245</size>
+  <hash type="sha-512">e68b18305927618ee2bb2b8eaf0f70c901eaf1047282f913ce6d03dce9962e237430eaacd29c12984e89e87220edeb9a6fb82be973ee2aacee7dcacac6188cae</hash>
+  <url>https://www.python.org/ftp/python/3.14.3/python-3.14.3-embed-amd64.zip</url>
  </file>
  <file name="build/externals/innounp050.rar">
   <size>141621</size>
