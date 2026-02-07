@@ -9,7 +9,7 @@ Things to update when the year has changed
  *  `pluginBridge/PluginBridge.rc` (1 occurence)
  *  `installer/install-multi-arch.iss` (1 occurence)
  *  `installer/install-multi-arch-retro.iss` (1 occurence)
- *  `libopenmpt/libopenmpt_version.rc`) (1 occurrence)
+ *  `libopenmpt/libopenmpt_version.rc` (1 occurrence)
  *  `openmpt123/openmpt123.cpp` (3 occurrences)
  *  `libopenmpt/xmp-openmpt/xmp-openmpt.cpp` (1 occurrence)
  *  `libopenmpt/in_openmpt/in_openmpt.cpp` (1 occurrence)
