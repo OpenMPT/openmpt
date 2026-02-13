@@ -48,6 +48,7 @@
 // https://en.wikipedia.org/wiki/Windows_10_version_history
 // https://en.wikipedia.org/wiki/Windows_11_version_history
 // https://www.windowslatest.com/2021/09/03/windows-11-build-22449-is-now-available-with-new-loading-animation/
+// https://en.wikipedia.org/wiki/List_of_Microsoft_codenames#Windows_platform_engineering_milestones
 
 //      Release          NTDDI-version                                   NTDDI-constant  Release     Build.Sub  Codename      Semester     Semester Semester Marketing-Name    min-SDK-Version WDK_NTDDI_VERSION
 //                                                                                            .Version                                     Codename  Date
@@ -83,7 +84,8 @@
 //                       MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0e) // NTDDI_WIN11_ZN         23H2                                       Zinc      23H2                         10.0.26100.? NTDDI_WIN11_GE
 //                       MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0f) // NTDDI_WIN11_GA         24H1                                       Gallium   24H1                         10.0.26100.? NTDDI_WIN11_GE
 #define MPT_WIN_11_24H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10) // NTDDI_WIN11_GE   Win11.24H2 26100      Hudson Valley Germanium R1 Germanium 24H2    2024 Update          10.0.26100.? NTDDI_WIN11_GE
-//      MPT_WIN_11_25H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10) //                  Win11.24H2 26200      ?             ?            ?         25H2    2025 Update          10.0.26200.? NTDDI_WIN11_GE
+//      MPT_WIN_11_25H2  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10) //                  Win11.25H2 26200      ?             ?            ?         25H2    2025 Update          10.0.26100.? NTDDI_WIN11_GE
+//      MPT_WIN_11_26H1  MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10) //                  Win11.26H1 28000      ?             ?            Bromine   26H2                         10.0.26100.? NTDDI_WIN11_GE
 
 // MPT_WIN_API_DESKTOP     : Windows 8/10 Desktop Application (Win32)
 // MPT_WIN_API_UNIVERSAL   : Windows 10 Store App / Universal App
