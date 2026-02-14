@@ -441,6 +441,7 @@ MPT_FILES_SOUNDLIB += soundlib/Load_mod.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_mt2.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_mtm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_mus_km.cpp
+MPT_FILES_SOUNDLIB += soundlib/Load_nru.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_okt.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_plm.cpp
 MPT_FILES_SOUNDLIB += soundlib/Load_psm.cpp

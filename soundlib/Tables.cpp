@@ -95,6 +95,7 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("MadTracker 2"),                       "mt2" },
 	{ UL_("MultiTracker"),                       "mtm" },
 	{ UL_("Karl Morton Music Format"),           "mus" },
+	{ UL_("NoiseRunner"),                        "nru" },
 	{ UL_("NoiseTracker"),                       "nst" },
 	{ UL_("Oktalyzer"),                          "okt" },
 	{ UL_("Disorder Tracker 2"),                 "plm" },

@@ -81,6 +81,7 @@ Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAsso
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mt2"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mtm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mus"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".nru"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".okt"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".oxm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKLM; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".plm"; ValueData: {#OpenMPTFile}; Components: {#Component}

@@ -2423,6 +2423,9 @@
     <ClCompile Include="..\..\soundlib\Load_mus_km.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\soundlib\Load_nru.cpp">
+      <Filter>soundlib</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\soundlib\Load_okt.cpp">
       <Filter>soundlib</Filter>
     </ClCompile>

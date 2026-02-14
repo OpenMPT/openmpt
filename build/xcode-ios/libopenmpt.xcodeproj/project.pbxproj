@@ -151,6 +151,7 @@
 		EA420947C95F2379A5687F87 /* Load_sfx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C950084F5BDDD241C4B6768F /* Load_sfx.cpp */; };
 		EDE4FB2CD37C025E96C1116C /* serialization_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 96E89174F0E9A866B8309FB4 /* serialization_utils.cpp */; };
 		F0D031F98EB132AB662F7839 /* ModInstrument.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CC1927E18ED98853EC0E6621 /* ModInstrument.cpp */; };
+		F453FDCFD3711801AF7A740F /* Load_nru.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8333005715C0CA497E996E97 /* Load_nru.cpp */; };
 		F4EF37CFD40C5201B015AE0F /* Load_ult.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7FD19A57125F64497B380897 /* Load_ult.cpp */; };
 		F57A8B7BD497A5ADB0A101BB /* Load_xmf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2EF17543C17F3F352A57E383 /* Load_xmf.cpp */; };
 		F59363E88FB7591A3FDD3A28 /* SymMODEcho.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4738D7F0BB931CE23976A630 /* SymMODEcho.cpp */; };
@@ -448,6 +449,7 @@
 		8209AB5BF32C4C4DA8F2F99B /* MODTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MODTools.h; path = ../../soundlib/MODTools.h; sourceTree = "<group>"; };
 		82EA4C5D44A2DDCFEBBDAA9D /* tests_base_wrapping_divide.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = tests_base_wrapping_divide.hpp; path = ../../src/mpt/base/tests/tests_base_wrapping_divide.hpp; sourceTree = "<group>"; };
 		830F3566F431D658A9F883A6 /* Logging.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Logging.cpp; path = ../../common/Logging.cpp; sourceTree = "<group>"; };
+		8333005715C0CA497E996E97 /* Load_nru.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_nru.cpp; path = ../../soundlib/Load_nru.cpp; sourceTree = "<group>"; };
 		84A787B7269123A91DB835F7 /* Chorus.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Chorus.cpp; path = ../../soundlib/plugins/dmo/Chorus.cpp; sourceTree = "<group>"; };
 		85812219180EEC0B80E79059 /* secure.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = secure.hpp; path = ../../src/mpt/base/secure.hpp; sourceTree = "<group>"; };
 		85A36D37F9FDB22977E13B77 /* os_path_long.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = os_path_long.hpp; path = ../../src/mpt/path/os_path_long.hpp; sourceTree = "<group>"; };
@@ -1377,6 +1379,7 @@
 				0E85EC13A113B60509EC5A53 /* Load_mt2.cpp */,
 				0990B3299C1E7D1B04F72169 /* Load_mtm.cpp */,
 				02F4B8C5C982B0373784D705 /* Load_mus_km.cpp */,
+				8333005715C0CA497E996E97 /* Load_nru.cpp */,
 				6AE995E9FD775FDB66500429 /* Load_okt.cpp */,
 				4E4D213FE0DAEB3149B38F7F /* Load_plm.cpp */,
 				F1208C2D83AE561FEC86FA6D /* Load_psm.cpp */,
@@ -1726,6 +1729,7 @@
 				C746074BA663217D826C7D8B /* Load_mt2.cpp in Sources */,
 				56DD54C135FA6EF31203CB01 /* Load_mtm.cpp in Sources */,
 				63B0011DD79878CFF9E6275D /* Load_mus_km.cpp in Sources */,
+				F453FDCFD3711801AF7A740F /* Load_nru.cpp in Sources */,
 				49C7038128E41DB304ED79C1 /* Load_okt.cpp in Sources */,
 				247D3937039A5369DFA3AF77 /* Load_plm.cpp in Sources */,
 				0CEBFC05EC091637C8127245 /* Load_psm.cpp in Sources */,
