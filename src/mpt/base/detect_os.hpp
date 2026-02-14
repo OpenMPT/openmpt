@@ -103,19 +103,38 @@
 
 #elif defined(__EMSCRIPTEN__)
 #define MPT_OS_EMSCRIPTEN 1
-#if !defined(__EMSCRIPTEN_major__) || !defined(__EMSCRIPTEN_minor__) || !defined(__EMSCRIPTEN_tiny__)
+#if !defined(__EMSCRIPTEN_MAJOR__) || !defined(__EMSCRIPTEN_MINOR__) || !defined(__EMSCRIPTEN_TINY__) || !defined(__EMSCRIPTEN_major__) || !defined(__EMSCRIPTEN_minor__) || !defined(__EMSCRIPTEN_tiny__)
 #include <emscripten/version.h>
 #endif
-#if defined(__EMSCRIPTEN_major__) && defined(__EMSCRIPTEN_minor__)
-#if (__EMSCRIPTEN_major__ > 3)
+#if defined(__EMSCRIPTEN_MAJOR__)
+#define MPT_OS_EMSCRIPTEN_VERSION_MAJOR __EMSCRIPTEN_MAJOR__
+#elif defined(__EMSCRIPTEN_major__)
+#define MPT_OS_EMSCRIPTEN_VERSION_MAJOR __EMSCRIPTEN_major__
+#else
+#define MPT_OS_EMSCRIPTEN_VERSION_MAJOR 0
+#endif
+#if defined(__EMSCRIPTEN_MINOR__)
+#define MPT_OS_EMSCRIPTEN_VERSION_MINOR __EMSCRIPTEN_MINOR__
+#elif defined(__EMSCRIPTEN_minor__)
+#define MPT_OS_EMSCRIPTEN_VERSION_MINOR __EMSCRIPTEN_minor__
+#else
+#define MPT_OS_EMSCRIPTEN_VERSION_MINOR 0
+#endif
+#if defined(__EMSCRIPTEN_TINY__)
+#define MPT_OS_EMSCRIPTEN_VERSION_TINY __EMSCRIPTEN_TINY__
+#elif defined(__EMSCRIPTEN_tiny__)
+#define MPT_OS_EMSCRIPTEN_VERSION_TINY __EMSCRIPTEN_tiny__
+#else
+#define MPT_OS_EMSCRIPTEN_VERSION_TINY 0
+#endif
+#if (MPT_OS_EMSCRIPTEN_VERSION_MAJOR > 3)
 // ok
-#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ > 1)
+#elif (MPT_OS_EMSCRIPTEN_VERSION_MAJOR == 3) && (MPT_OS_EMSCRIPTEN_VERSION_MINOR > 1)
 // ok
-#elif (__EMSCRIPTEN_major__ == 3) && (__EMSCRIPTEN_minor__ == 1) && (__EMSCRIPTEN_tiny__ >= 51)
+#elif (MPT_OS_EMSCRIPTEN_VERSION_MAJOR == 3) && (MPT_OS_EMSCRIPTEN_VERSION_MINOR == 1) && (MPT_OS_EMSCRIPTEN_VERSION_TINY >= 51)
 // ok
 #else
 #error "Emscripten >= 3.1.51 is required."
-#endif
 #endif
 
 
