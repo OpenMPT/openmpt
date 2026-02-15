@@ -58,7 +58,7 @@ struct NRUFileHeader
 
 			const uint32 addr = sample.sampleAddr;
 			const uint32 loopStartAddr = sample.loopStartAddr;
-			if(addr > 0x7F'FFFF || (addr & 1))
+			if(addr > 0x1F'FFFF || (addr & 1))
 				return {};
 
 			if(sample.length == 0)
@@ -81,7 +81,7 @@ struct NRUFileHeader
 
 			if(const int16 finetune = sample.finetune; finetune < 0)
 			{
-				if(finetune < -(72 * 16) || (finetune % 72))
+				if(finetune < -(72 * 15) || (finetune % 72))
 					return {};
 			}
 		}

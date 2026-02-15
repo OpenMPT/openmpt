@@ -40,7 +40,7 @@ struct GMCSampleHeader
 
 	bool IsValid() const
 	{
-		if(offset > 0x7F'FFFF || (offset & 1) || address > 0x7F'FFFF || (address & 1))
+		if(offset > 0x1F'FFFF || (offset & 1) || address > 0x1F'FFFF || (address & 1))
 			return false;
 		if(length > 0x7FFF || dataStart > 0x7FFF || (dataStart & 1))
 			return false;
