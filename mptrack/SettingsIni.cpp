@@ -1020,7 +1020,7 @@ static inline std::size_t find_unescaped_last(mpt::ustring_view text, mpt::uchar
 }
 
 struct line_endings {
-#if MPT_MSVC_BEFORE(2019, 0)
+#if MPT_CXX_BEFORE(20)
 	uint8 CRLF = 1;  // (Atari, DOS, OS/2, Windows)
 	uint8 LFCR = 1;  // (Acorn)
 	uint8 LF   = 1;  // U+0000'000A LINE FEED (Amiga, POSIX, Unix)
@@ -1579,7 +1579,11 @@ void CachedIniFileSettingsBackend::WriteCacheIntoFile(std::optional<Caching> syn
 	{
 		cache.erase(path.first.GetRefSection());
 	}
+#if MPT_CXX_BEFORE(20) && MPT_USTRING_MODE_UTF8
+	const mpt::ustring newline = MPT_USTRING("\r\n");
+#else
 	const mpt::uchar *newline = MPT_ULITERAL("\r\n");
+#endif
 	mpt::ustring last_section;
 	for(const auto &[path, value] : header)
 	{
