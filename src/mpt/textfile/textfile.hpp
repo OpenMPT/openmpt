@@ -133,6 +133,9 @@ inline encoding get_preferred_encoding() {
 
 inline encoding probe_encoding(mpt::const_byte_span filedata) {
 	encoding result = {encoding::type::locale, encoding::header::none};
+	if (filedata.size() == 0) {
+		return result;
+	}
 	if ((filedata.size() >= encoding::bom_utf32be.size()) && (std::memcmp(filedata.data(), encoding::bom_utf32be.data(), encoding::bom_utf32be.size()) == 0)) {
 		result = {encoding::type::utf32be, encoding::header::bom};
 	} else if ((filedata.size() >= encoding::bom_utf32le.size()) && (std::memcmp(filedata.data(), encoding::bom_utf32le.data(), encoding::bom_utf32le.size()) == 0)) {
