@@ -13,6 +13,6 @@ checkclean || ( echo "error: Working copy not clean" ; exit 1 )
 
 ./build/svn/apply_auto-props.sh
 
-checkclean || ( echo "warning: Formatting does not adhere to enforced clang-format rules." ; svn diff )
+checkclean || ( echo "warning: svn properties are not set according to svn:auto-props." ; svn diff )
 
 svn revert -R .
