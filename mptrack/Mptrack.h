@@ -33,10 +33,10 @@ struct AllSoundDeviceComponents;
 class CDLSBank;
 class DebugSettings;
 class TrackerSettings;
-class ImmediateWindowsIniFileSettingsBackend;
+class CachedIniFileSettingsBackend;
 template <typename Backend> class FileSettingsContainer;
-using IniFileSettingsBackend = ImmediateWindowsIniFileSettingsBackend;
-using IniFileSettingsContainer = FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend>;
+using IniFileSettingsBackend = CachedIniFileSettingsBackend;
+using IniFileSettingsContainer = FileSettingsContainer<CachedIniFileSettingsBackend>;
 class SettingsContainer;
 class ComponentManagerSettings;
 namespace mpt

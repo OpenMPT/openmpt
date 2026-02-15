@@ -3075,9 +3075,11 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 
 	TestIniSettingsBackendRead<ImmediateWindowsIniFileSettingsBackend>(filename);
 	TestIniSettingsBackendRead<BatchedWindowsIniFileSettingsBackend>(filename);
+	TestIniSettingsBackendRead<CachedIniFileSettingsBackend>(filename);
 
 	TestIniSettingsBackendReadCaseInsensitive<ImmediateWindowsIniFileSettingsBackend>(filename);
 	TestIniSettingsBackendReadCaseInsensitive<BatchedWindowsIniFileSettingsBackend>(filename);
+	TestIniSettingsBackendReadCaseInsensitive<CachedIniFileSettingsBackend>(filename);
 
 	{
 		IniFileSettingsContainer conf{filename};
@@ -3197,6 +3199,28 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
 
+	{
+		{
+			FileSettingsContainer<CachedIniFileSettingsBackend> conf{filename};
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace")), spacespacecharspacespace);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces")), threespaces);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab")), tab);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens")), tokens);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy")), xcrlfy);
+			conf.Write<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0")), cc0);
+		}
+		{
+			FileSettingsContainer<CachedIniFileSettingsBackend> conf{filename};
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("spacespacecharspacespace"))), spacespacecharspacespace);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("threespaces"))), threespaces);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tab"))), tab);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("tokens"))), tokens);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("xcrlfy"))), xcrlfy);
+			VERIFY_EQUAL(conf.Read<mpt::ustring>(SettingPath(MPT_USTRING("Test"), MPT_USTRING("cc0"))), cc0);
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
 	// escaping
 	{
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
@@ -3215,6 +3239,69 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo3")}, U_("")), U_("^^^"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo1 = ^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo2 = ^^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo3 = ^^^")));
+		}
+		{
+			FileSettingsContainer<CachedIniFileSettingsBackend> inifile{filename};
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo1")}, U_("")), U_("^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo2")}, U_("")), U_("^^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo3")}, U_("")), U_("^^^"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+	{
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+		{
+			mpt::IO::SafeOutputFile outputfile{filename, std::ios::binary};
+			mpt::IO::ofstream & outputstream = outputfile.stream();
+			mpt::IO::WriteTextCRLF(outputstream, "[!Type]");
+			mpt::IO::WriteTextCRLF(outputstream, "!Format=org.openmpt.fileformat.ini");
+			mpt::IO::WriteTextCRLF(outputstream, "!VersionMajor=4");
+			mpt::IO::WriteTextCRLF(outputstream, "!VersionMinor=0");
+			mpt::IO::WriteTextCRLF(outputstream, "!VersionPatch=0");
+			mpt::IO::WriteTextCRLF(outputstream, "[Test]");
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo1 = ^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo2 = ^^")));
+			mpt::IO::WriteTextCRLF(outputstream, mpt::ToCharset(mpt::Charset::UTF8, U_("Foo3 = ^^^")));
+		}
+		{
+			FileSettingsContainer<CachedIniFileSettingsBackend> inifile{filename};
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo1")}, U_("")), U_("^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo2")}, U_("")), U_("^"));
+			VERIFY_EQUAL(inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo3")}, U_("")), U_("^^"));
+		}
+		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
+	}
+
+	// case sensitivity
+	{
+		{	
+			FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend> inifile{filename};
+			inifile.Write<mpt::ustring>(SettingPath{U_("Test"), U_("foo")}, U_("a"));
+		}
+		{	
+			FileSettingsContainer<ImmediateWindowsIniFileSettingsBackend> inifile{filename};
+			inifile.Read<mpt::ustring>(SettingPath{U_("Test"), U_("Foo")}, U_("b"));
+			inifile.Write<mpt::ustring>(SettingPath{U_("Test"), U_("Foo")}, U_("c"));
+		}
+		{	
+#if MPT_SETTINGS_INI_CASE_INSENSITIVE
+			CachedIniFileSettingsBackend inifile{filename, CaseSensitivity::Sensitive};
+#else
+			CachedIniFileSettingsBackend inifile{filename};
+#endif
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, SettingValue{U_("")}).as<mpt::ustring>(), U_(""));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("foo")}, SettingValue{U_("")}).as<mpt::ustring>(), U_("c"));
+		}
 	}
 
 #endif // MODPLUG_TRACKER
