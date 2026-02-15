@@ -1020,6 +1020,18 @@ static inline std::size_t find_unescaped_last(mpt::ustring_view text, mpt::uchar
 }
 
 struct line_endings {
+#if MPT_MSVC_BEFORE(2019, 0)
+	uint8 CRLF = 1;  // (Atari, DOS, OS/2, Windows)
+	uint8 LFCR = 1;  // (Acorn)
+	uint8 LF   = 1;  // U+0000'000A LINE FEED (Amiga, POSIX, Unix)
+	uint8 VT   = 0;  // U+0000'000B VERTICAL TAB
+	uint8 FF   = 0;  // U+0000'000C FORM FEED
+	uint8 CR   = 1;  // U+0000'000D CARRIAGE RETURN (C64, Mac OS Classic)
+	uint8 RS   = 0;  // U+0000'001E RECORD SEPARATOR (QNX < v4)
+	uint8 NEL  = 0;  // U+0000'0085 NEXT LINE (z/OS)
+	uint8 LS   = 0;  // U+0000'2028 LINE SEPARATOR
+	uint8 PS   = 0;  // U+0000'2029 PARAGRAPH SEPARATOR
+#else
 	uint8 CRLF : 1 = 1;  // (Atari, DOS, OS/2, Windows)
 	uint8 LFCR : 1 = 1;  // (Acorn)
 	uint8 LF   : 1 = 1;  // U+0000'000A LINE FEED (Amiga, POSIX, Unix)
@@ -1030,6 +1042,7 @@ struct line_endings {
 	uint8 NEL  : 1 = 0;  // U+0000'0085 NEXT LINE (z/OS)
 	uint8 LS   : 1 = 0;  // U+0000'2028 LINE SEPARATOR
 	uint8 PS   : 1 = 0;  // U+0000'2029 PARAGRAPH SEPARATOR
+#endif
 	[[nodiscard]] inline constexpr static line_endings Windows() noexcept
 	{
 		return {1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
