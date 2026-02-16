@@ -1413,7 +1413,11 @@ void COrderList::OnMergePatterns()
 
 void COrderList::OnPatternCopy()
 {
-	m_pParent.PostMessage(WM_COMMAND, ID_PATTERNCOPY);
+	PATTERNINDEX pat = PATTERNINDEX_INVALID;
+	OrdSelection selection = GetCurSel();
+	if(selection.firstOrd < Order().size())
+		pat = Order()[selection.firstOrd];
+	m_pParent.PostViewMessage(VIEWMSG_COPYPATTERN, pat);
 }
 
 

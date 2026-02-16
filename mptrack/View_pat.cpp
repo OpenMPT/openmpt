@@ -4322,9 +4322,12 @@ LRESULT CViewPattern::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 	case VIEWMSG_COPYPATTERN:
 	{
 		const CSoundFile *pSndFile = GetSoundFile();
-		if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(m_nPattern))
+		PATTERNINDEX pat = static_cast<PATTERNINDEX>(lParam);
+		if(!pSndFile->Patterns.IsValidPat(pat))
+			pat = m_nPattern;
+		if(pSndFile != nullptr && pSndFile->Patterns.IsValidPat(pat))
 		{
-			CopyPattern(m_nPattern, PatternRect(PatternCursor(0, 0), PatternCursor(pSndFile->Patterns[m_nPattern].GetNumRows() - 1, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)));
+			CopyPattern(pat, PatternRect(PatternCursor(0, 0), PatternCursor(pSndFile->Patterns[pat].GetNumRows() - 1, pSndFile->GetNumChannels() - 1, PatternCursor::lastColumn)));
 		}
 		break;
 	}
