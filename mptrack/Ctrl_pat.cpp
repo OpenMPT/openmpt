@@ -69,7 +69,6 @@ BEGIN_MESSAGE_MAP(CCtrlPatterns, CModControlDlg)
 	ON_COMMAND(ID_ORDERLIST_NEW,              &CCtrlPatterns::OnPatternNew)
 	ON_COMMAND(ID_ORDERLIST_COPY,             &CCtrlPatterns::OnPatternDuplicate)
 	ON_COMMAND(ID_ORDERLIST_MERGE,            &CCtrlPatterns::OnPatternMerge)
-	ON_COMMAND(ID_PATTERNCOPY,                &CCtrlPatterns::OnPatternCopy)
 	ON_COMMAND(ID_PATTERNPASTE,               &CCtrlPatterns::OnPatternPaste)
 	ON_COMMAND(ID_EDIT_UNDO,                  &CCtrlPatterns::OnEditUndo)
 	ON_COMMAND(ID_PATTERNDETAIL_DROPDOWN,     &CCtrlPatterns::OnDetailSwitch)
@@ -1142,13 +1141,6 @@ void CCtrlPatterns::OnPatternProperties()
 void CCtrlPatterns::OnPatternExpand()
 {
 	SendViewMessage(VIEWMSG_EXPANDPATTERN);
-	SwitchToViewIfMouse();
-}
-
-
-void CCtrlPatterns::OnPatternCopy()
-{
-	SendViewMessage(VIEWMSG_COPYPATTERN);
 	SwitchToViewIfMouse();
 }
 

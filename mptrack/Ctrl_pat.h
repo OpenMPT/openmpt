@@ -250,7 +250,6 @@ protected:
 	afx_msg void OnPatternExpand();
 	afx_msg void OnPatternShrink();
 	afx_msg void OnPatternAmplify();
-	afx_msg void OnPatternCopy();
 	afx_msg void OnPatternPaste();
 	afx_msg void OnToggleMetronome();
 	afx_msg void OnMetronomeSettings();
