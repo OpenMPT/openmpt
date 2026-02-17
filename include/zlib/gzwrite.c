@@ -79,7 +79,11 @@ local int gz_comp(gz_statep state, int flush) {
             put = strm->avail_in > max ? max : strm->avail_in;
             writ = (int)write(state->fd, strm->next_in, put);
             if (writ < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK)
+#if defined(EWOULDBLOCK)  /* OpenMPT */
+              if (errno == EAGAIN || errno == EWOULDBLOCK)
+#else  /* OpenMPT */
+              if (errno == EAGAIN)  /* OpenMPT */
+#endif  /* OpenMPT */
                     state->again = 1;
                 gz_error(state, Z_ERRNO, zstrerror());
                 return -1;
