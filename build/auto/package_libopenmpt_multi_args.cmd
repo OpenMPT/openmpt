@@ -76,7 +76,7 @@ rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Li
 rem copy /y ..\..\include\unrar\license.txt                                 .\Licenses\License.UnRAR.txt || goto error
 copy /y ..\..\include\vorbis\COPYING                                    .\Licenses\License.Vorbis.txt || goto error
 copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
-rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt           .\Licenses\License.minizip.txt || goto error
+rem copy /y ..\..\include\zlib\contrib\minizip\LICENSE.Info-Zip             .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\ || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
@@ -202,7 +202,7 @@ rem copy /y ..\..\include\stb_vorbis\stb_vorbis.c                           .\Li
 rem copy /y ..\..\include\unrar\license.txt                                 .\Licenses\License.UnRAR.txt || goto error
 copy /y ..\..\include\vorbis\COPYING                                    .\Licenses\License.Vorbis.txt || goto error
 copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
-rem copy /y ..\..\include\zlib\contrib\minizip\MiniZip64_info.txt           .\Licenses\License.minizip.txt || goto error
+rem copy /y ..\..\include\zlib\contrib\minizip\LICENSE.Info-Zip             .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\doc\libopenmpt\changelog.md .\changelog.md || goto error
 copy /y ..\..\libopenmpt\libopenmpt.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
