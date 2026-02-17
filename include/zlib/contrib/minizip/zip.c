@@ -1912,6 +1912,12 @@ extern int ZEXPORT zipRemoveExtraInfoBlock(char* pData, int* dataLen, short sHea
     return ZIP_PARAMERROR;
 
   pNewHeader = (char*)ALLOC((unsigned)*dataLen);
+  if (pNewHeader==NULL)  /* OpenMPT */
+  {  /* OpenMPT */
+    errno = ENOMEM;  /* OpenMPT */
+    return ZIP_ERRNO;  /* OpenMPT */
+  }  /* OpenMPT */
+
   pTmp = pNewHeader;
 
   while(p < (pData + *dataLen))
