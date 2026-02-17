@@ -124,10 +124,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderNRU(MemoryFileReader file, co
 	if(!result.totalSampleSize)
 		return ProbeFailure;
 
-	if(pfilesize && *pfilesize < sizeof(NRUFileHeader) + result.numPatterns * 1024u)
-		return ProbeFailure;
-
-	return ProbeSuccess;
+	return ProbeAdditionalSize(file, pfilesize, result.numPatterns * 1024u);
 }
 
 
