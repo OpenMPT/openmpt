@@ -24,6 +24,9 @@
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\crypt.h">
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\zlib\contrib\minizip\ints.h">
+      <Filter>include\zlib\contrib\minizip</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\ioapi.h">
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClInclude>
@@ -31,6 +34,9 @@
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\mztools.h">
+      <Filter>include\zlib\contrib\minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\zlib\contrib\minizip\skipset.h">
       <Filter>include\zlib\contrib\minizip</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\unzip.h">
