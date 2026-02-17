@@ -797,9 +797,13 @@
 /include/xmplay/*
 /include/zlib/*.d
 /include/zlib/*.o
+/include/zlib/.cmake-format.yaml
+/include/zlib/BUILD.bazel
 /include/zlib/CMakeLists.txt
+/include/zlib/MODULE.bazel
 /include/zlib/Makefile
 /include/zlib/Makefile.in
+/include/zlib/README-cmake.md
 /include/zlib/amiga
 /include/zlib/configure
 /include/zlib/doc
@@ -822,8 +826,11 @@
 /include/zlib/zlib.pc.cmakein
 /include/zlib/zlib.pc.in
 /include/zlib/zlib2ansi
+/include/zlib/zlibConfig.cmake.in
+/include/zlib/contrib/CMakeLists.txt
 /include/zlib/contrib/ada
 /include/zlib/contrib/blast
+/include/zlib/contrib/crc32vx
 /include/zlib/contrib/delphi
 /include/zlib/contrib/dotzlib
 /include/zlib/contrib/gcc_gvmat64
@@ -837,6 +844,8 @@
 /include/zlib/contrib/testzlib
 /include/zlib/contrib/untgz
 /include/zlib/contrib/vstudio
+/include/zlib/contrib/zlib1-dll
+/include/zlib/contrib/minizip/CMakeLists.txt
 /include/zlib/contrib/minizip/Makefile
 /include/zlib/contrib/minizip/Makefile.am
 /include/zlib/contrib/minizip/configure.ac
@@ -844,6 +853,9 @@
 /include/zlib/contrib/minizip/miniunzip.1
 /include/zlib/contrib/minizip/minizip.1
 /include/zlib/contrib/minizip/minizip.pc.in
+/include/zlib/contrib/minizip/minizip.pc.txt
+/include/zlib/contrib/minizip/minizipConfig.cmake.in
+/include/zlib/contrib/minizip/test
 /installer/*.7z
 /installer/*.digests
 /installer/*.exe
