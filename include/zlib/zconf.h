@@ -443,13 +443,17 @@ typedef uLong FAR uLongf;
    typedef unsigned long z_crc_t;
 #endif
 
+#ifdef HAVE_UNISTD_H  /* OpenMPT */
 #if HAVE_UNISTD_H-0     /* may be set to #if 1 by ./configure */
 #  define Z_HAVE_UNISTD_H
 #endif
+#endif  /* OpenMPT */
 
+#ifdef HAVE_STDARG_H  /* OpenMPT */
 #if HAVE_STDARG_H-0     /* may be set to #if 1 by ./configure */
 #  define Z_HAVE_STDARG_H
 #endif
+#endif  /* OpenMPT */
 
 #ifdef STDC
 #  ifndef Z_SOLO
