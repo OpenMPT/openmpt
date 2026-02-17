@@ -606,9 +606,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\crypt.h" />
+    <ClInclude Include="..\..\..\include\zlib\contrib\minizip\ints.h" />
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\ioapi.h" />
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\iowin32.h" />
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\mztools.h" />
+    <ClInclude Include="..\..\..\include\zlib\contrib\minizip\skipset.h" />
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\unzip.h" />
     <ClInclude Include="..\..\..\include\zlib\contrib\minizip\zip.h" />
   </ItemGroup>

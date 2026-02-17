@@ -23,9 +23,11 @@ include_dependency "ext-zlib.lua"
   }
   files {
    "../../include/zlib/contrib/minizip/crypt.h",
+   "../../include/zlib/contrib/minizip/ints.h",
    "../../include/zlib/contrib/minizip/ioapi.h",
    "../../include/zlib/contrib/minizip/iowin32.h",
    "../../include/zlib/contrib/minizip/mztools.h",
+   "../../include/zlib/contrib/minizip/skipset.h",
    "../../include/zlib/contrib/minizip/unzip.h",
    "../../include/zlib/contrib/minizip/zip.h",
   }
