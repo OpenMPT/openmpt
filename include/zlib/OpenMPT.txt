@@ -3,7 +3,8 @@ Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
  *  `zconf.h` has been modified to avoid preprocessor warnings.
  *  `gzread.c` and `gzwrite.c` have been modified to work on platforms without
-    EWOULDBLOCK..
+    EWOULDBLOCK and to not cause warnings on platforms where
+    `EAGAIN == EWOULDBLOCK`.
  *  `contrib/minizip/iowin32.c` has been modified to only use Windows 8 WinRT
     API when actually compiling for Windows 8 or later.
  *  `contrib/minizip/zip.c` has been modified to check for allocation failure. A
