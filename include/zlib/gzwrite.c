@@ -80,7 +80,11 @@ local int gz_comp(gz_statep state, int flush) {
             writ = (int)write(state->fd, strm->next_in, put);
             if (writ < 0) {
 #if defined(EWOULDBLOCK)  /* OpenMPT */
+#if (EAGAIN == EWOULDBLOCK)  /* OpenMPT */
+              if (errno == EAGAIN)  /* OpenMPT */
+#else  /* OpenMPT */
               if (errno == EAGAIN || errno == EWOULDBLOCK)
+#endif  /* OpenMPT */
 #else  /* OpenMPT */
               if (errno == EAGAIN)  /* OpenMPT */
 #endif  /* OpenMPT */
@@ -119,7 +123,11 @@ local int gz_comp(gz_statep state, int flush) {
                 writ = (int)write(state->fd, state->x.next, put);
                 if (writ < 0) {
 #if defined(EWOULDBLOCK)  /* OpenMPT */
+#if (EAGAIN == EWOULDBLOCK)  /* OpenMPT */
+                    if (errno == EAGAIN)  /* OpenMPT */
+#else  /* OpenMPT */
                     if (errno == EAGAIN || errno == EWOULDBLOCK)
+#endif  /* OpenMPT */
 #else  /* OpenMPT */
                     if (errno == EAGAIN)  /* OpenMPT */
 #endif  /* OpenMPT */

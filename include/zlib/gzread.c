@@ -34,7 +34,11 @@ local int gz_load(gz_statep state, unsigned char *buf, unsigned len,
     } while (*have < len);
     if (ret < 0) {
 #if defined(EWOULDBLOCK)  /* OpenMPT */
+#if (EAGAIN == EWOULDBLOCK)  /* OpenMPT */
+        if (errno == EAGAIN) {  /* OpenMPT */
+#else  /* OpenMPT */
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
+#endif  /* OpenMPT */
 #else  /* OpenMPT */
         if (errno == EAGAIN) {  /* OpenMPT */
 #endif  /* OpenMPT */
