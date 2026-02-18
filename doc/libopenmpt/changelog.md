@@ -7,6 +7,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.5-pre
 
+ *  zlib: Update to v1.3.2 (2026-02-17).
  *  miniz: Update to v3.1.1 (2026-02-03).
 
 ### libopenmpt 0.8.4 (2025-12-14)
