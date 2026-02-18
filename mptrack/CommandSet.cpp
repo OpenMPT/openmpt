@@ -2030,6 +2030,7 @@ CString KeyCombination::GetContextText(InputTargetContext ctx)
 		case kCtxCtrlOrderlist:			return _T("Orderlist");
 		case kCtxVSTGUI:				return _T("Plugin GUI Context");
 		case kCtxChannelSettings:		return _T("Quick Channel Settings Context");
+		case kCtxInsNoteMap:			return _T("Instrument Note Map");
 		case kCtxUnknownContext:
 		default:						return _T("Unknown Context");
 	}
