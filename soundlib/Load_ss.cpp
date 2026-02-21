@@ -105,7 +105,7 @@ struct ASIFWaveLists
 	WaveList oscA;
 	WaveList oscB;
 
-	void ConvertToMPT(const mpt::span<std::byte> waveData, ModSample &mptSmp) const
+	void ConvertToMPT(const mpt::const_byte_span waveData, ModSample &mptSmp) const
 	{
 		// The Ensoniq ES-5503-DOC stops playing a sample as soon as it encounters a 0 byte.
 		const size_t trimmedLength = std::distance(waveData.begin(), std::find(waveData.begin() + waveData.size() / 2, waveData.end(), std::byte{0}));
