@@ -373,3 +373,8 @@ puma="inst"
 puma="insf"
 
 rtm="RTMM "
+
+# SoundSmith / MegaTracker
+ss="SONGOK"
+ss="IAN9OK"
+ss="IAN92a"

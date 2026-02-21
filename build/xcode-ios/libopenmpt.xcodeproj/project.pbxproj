@@ -73,6 +73,7 @@
 		7F5CA93E3358C270150AFF7E /* openmpt-vorbis.lib in Frameworks */ = {isa = PBXBuildFile; fileRef = AB169C264570851881A8EA66 /* openmpt-vorbis.lib */; };
 		7FDA539F18273951466E39DF /* Load_it.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 62235C27A6720199E8993A67 /* Load_it.cpp */; };
 		80EEA677809189A9BAE63CB7 /* MIDIMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FB747FA860E7715A6F02BF /* MIDIMacros.cpp */; };
+		813BA011198885C347CF8651 /* Load_ss.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59EE8E799E3D33EBE0646CB9 /* Load_ss.cpp */; };
 		81C26ED360DF89053CE8E513 /* Load_gmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D668A71B68F6710DD1CF155B /* Load_gmc.cpp */; };
 		8479AC1F9F461AD1A316B25F /* Load_digi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D14936A73E714519400434E7 /* Load_digi.cpp */; };
 		84A9E60B844CC93DBEA17C4B /* MixerLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B810F0D30F7663C5C1847F13 /* MixerLoops.cpp */; };
@@ -374,6 +375,7 @@
 		567D9E616834DE53DDA2CCA1 /* InstrumentExtensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InstrumentExtensions.cpp; path = ../../soundlib/InstrumentExtensions.cpp; sourceTree = "<group>"; };
 		57E617F588CA0FE79BE24635 /* Reverb.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Reverb.h; path = ../../sounddsp/Reverb.h; sourceTree = "<group>"; };
 		597941C14D788B33D263A001 /* libopenmpt_cxx.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = libopenmpt_cxx.cpp; path = ../../libopenmpt/libopenmpt_cxx.cpp; sourceTree = "<group>"; };
+		59EE8E799E3D33EBE0646CB9 /* Load_ss.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Load_ss.cpp; path = ../../soundlib/Load_ss.cpp; sourceTree = "<group>"; };
 		5AF83E8DC8204CFFC9B33CCD /* pointer.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = pointer.hpp; path = ../../src/mpt/base/pointer.hpp; sourceTree = "<group>"; };
 		5BE26A37EE7034295748D877 /* modcommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = modcommand.h; path = ../../soundlib/modcommand.h; sourceTree = "<group>"; };
 		5CDA3BEFB6DB52E17E224A2F /* SampleFormatVorbis.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SampleFormatVorbis.cpp; path = ../../soundlib/SampleFormatVorbis.cpp; sourceTree = "<group>"; };
@@ -1389,6 +1391,7 @@
 				079A67139A2831050300D553 /* Load_rtm.cpp */,
 				1F41A2D3B1CF6CC51AA81113 /* Load_s3m.cpp */,
 				C950084F5BDDD241C4B6768F /* Load_sfx.cpp */,
+				59EE8E799E3D33EBE0646CB9 /* Load_ss.cpp */,
 				1D12DDB1AFA0A7A318794BF1 /* Load_stk.cpp */,
 				0735F17599C3BB67029C5FB5 /* Load_stm.cpp */,
 				666A8F1BF8F8590D61D0FD5B /* Load_stp.cpp */,
@@ -1739,6 +1742,7 @@
 				E234B24BC151CC7D9D5B288B /* Load_rtm.cpp in Sources */,
 				9715CA0B7632E43D523C404B /* Load_s3m.cpp in Sources */,
 				EA420947C95F2379A5687F87 /* Load_sfx.cpp in Sources */,
+				813BA011198885C347CF8651 /* Load_ss.cpp in Sources */,
 				A88063C9879D7DFB63A6DA09 /* Load_stk.cpp in Sources */,
 				97AC91CD76C9ABFF52D3080D /* Load_stm.cpp in Sources */,
 				FE6ED6D3DD8BF105B9954D13 /* Load_stp.cpp in Sources */,

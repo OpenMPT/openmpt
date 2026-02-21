@@ -80,6 +80,7 @@ Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssoc
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mo3"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mt2"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mtm"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mtp"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".mus"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".nru"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".okt"; ValueData: {#OpenMPTFile}; Components: {#Component}
@@ -92,6 +93,7 @@ Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssoc
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".rtm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".sfx2"; ValueData: {#OpenMPTFile}; Components: {#Component}
+Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".ss"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".st26"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stm"; ValueData: {#OpenMPTFile}; Components: {#Component}
 Root: HKA; Subkey: "SOFTWARE\Clients\Media\{#OpenMPTarch}\Capabilities\FileAssociations"; ValueType: string; ValueName: ".stp"; ValueData: {#OpenMPTFile}; Components: {#Component}

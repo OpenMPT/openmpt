@@ -192,6 +192,7 @@ LOCAL_SRC_FILES += \
 	soundlib/Load_rtm.cpp \
 	soundlib/Load_s3m.cpp \
 	soundlib/Load_sfx.cpp \
+	soundlib/Load_ss.cpp \
 	soundlib/Load_stk.cpp \
 	soundlib/Load_stm.cpp \
 	soundlib/Load_stp.cpp \
