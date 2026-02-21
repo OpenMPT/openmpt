@@ -135,6 +135,8 @@ struct ASIFWaveLists
 MPT_BINARY_STRUCT(ASIFWaveLists, 12)
 
 
+#if defined(MPT_EXTERNAL_SAMPLES) || defined(MPT_BUILD_FUZZER)
+
 static bool LoadDOCRAMFile(FileReader &file, mpt::span<ModSample> samples)
 {
 	file.Rewind();
@@ -215,6 +217,8 @@ static bool LoadASIFFile(ChunkReader file, ModSample &mptSmp)
 	}
 	return false;
 }
+
+#endif
 
 
 CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSS(MemoryFileReader file, const uint64 *pfilesize)
