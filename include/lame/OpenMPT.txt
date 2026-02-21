@@ -1,6 +1,12 @@
 lame library version 3.100.
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
+ *  <https://sourceforge.net/p/lame/svn/6438/> has been applied to fix
+    <https://sourceforge.net/p/lame/bugs/496/>.
+ *  <https://sourceforge.net/p/lame/svn/6444/> has been applied to fix
+    <https://sourceforge.net/p/lame/bugs/500/>.
+ *  <https://sourceforge.net/p/lame/svn/6445/> has been applied to fix
+    <https://sourceforge.net/p/lame/bugs/501/>.
  *  negative-shift warning in VbrTag.c has been fixed.
  *  function prototype mismatch has been fixed for on_pe() and
     L3psycho_anal_vbr().
