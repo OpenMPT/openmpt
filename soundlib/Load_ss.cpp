@@ -233,7 +233,7 @@ CSoundFile::ProbeResult CSoundFile::ProbeFileHeaderSS(MemoryFileReader file, con
 #else
 	MPT_UNUSED(file);
 	MPT_UNUSED(pfilesize);
-	return false;
+	return ProbeFailure;
 #endif
 }
 
