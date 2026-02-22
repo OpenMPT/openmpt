@@ -94,7 +94,9 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("MultiMedia Sound"),                   "mms" },
 	{ UL_("MadTracker 2"),                       "mt2" },
 	{ UL_("MultiTracker"),                       "mtm" },
+#ifdef MPT_EXTERNAL_SAMPLES
 	{ UL_("MegaTracker"),                        "mtp" },
+#endif
 	{ UL_("Karl Morton Music Format"),           "mus" },
 	{ UL_("NoiseRunner"),                        "nru" },
 	{ UL_("NoiseTracker"),                       "nst" },
@@ -108,7 +110,9 @@ static constexpr ModFormatInfo modFormatInfo[] =
 	{ UL_("SoundFX"),                            "sfx" },
 	{ UL_("SoundFX"),                            "sfx2" },
 	{ UL_("Future Composer"),                    "smod" },
+#ifdef MPT_EXTERNAL_SAMPLES
 	{ UL_("SoundSmith"),                         "ss" },
+#endif
 	{ UL_("SoundTracker 2.6"),                   "st26" },
 	{ UL_("Soundtracker"),                       "stk" },
 	{ UL_("Scream Tracker 2"),                   "stm" },
