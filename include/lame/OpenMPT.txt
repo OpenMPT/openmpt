@@ -1,6 +1,7 @@
 lame library version 3.100.
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
+ *  `include/lame.h` has been modified to not touch WinAPI macro `CDECL`
  *  Forced library name in lame.def has been removed.
  *  All modifications have been marked with /* OpenMPT */.
  *  For building, premake is used to generate Visual Studio project files.
