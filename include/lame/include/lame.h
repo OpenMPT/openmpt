@@ -38,10 +38,15 @@ extern "C" {
 typedef void (*lame_report_function)(const char *format, va_list ap);
 
 #if defined(WIN32) || defined(_WIN32)
+#include <windows.h>  /* OpenMPT */
+#if 0  /* OpenMPT */
 #undef CDECL
 #define CDECL __cdecl
+#endif  /* OpenMPT */
 #else
+#ifndef CDECL  /* OpenMPT */
 #define CDECL
+#endif  /* OpenMPT */
 #endif
 
 #define DEPRECATED_OR_OBSOLETE_CODE_REMOVED 1
