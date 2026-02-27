@@ -3,7 +3,7 @@
  *
  *      Copyright (c) 1999-2000 Mark Taylor
  *      Copyright (c) 1999-2003 Takehiro Tominaga
- *      Copyright (c) 2000-2011 Robert Hegemann
+ *      Copyright (c) 2000-2019 Robert Hegemann
  *      Copyright (c) 2001-2005 Gabriel Bouvigne
  *
  * This library is free software; you can redistribute it and/or
@@ -1768,7 +1768,8 @@ static void
 calc_target_bits(lame_internal_flags * gfc,
                  const FLOAT pe[2][2],
                  FLOAT const ms_ener_ratio[2],
-                 int targ_bits[2][2], int *analog_silence_bits, int *max_frame_bits)
+                 int targ_bits_out[2][2], int *analog_silence_bits_out,
+                 int *max_frame_bits_out)
 {
     SessionConfig_t const *const cfg = &gfc->cfg;
     EncResult_t *const eov = &gfc->ov_enc;
@@ -1776,13 +1777,14 @@ calc_target_bits(lame_internal_flags * gfc,
     FLOAT   res_factor;
     int     gr, ch, totbits, mean_bits;
     int     framesize = 576 * cfg->mode_gr;
+    int     max_frame_bits=0, analog_silence_bits=0, targ_bits[2][2]={0};
 
     eov->bitrate_index = cfg->vbr_max_bitrate_index;
-    *max_frame_bits = ResvFrameBegin(gfc, &mean_bits);
+    max_frame_bits = ResvFrameBegin(gfc, &mean_bits);
 
     eov->bitrate_index = 1;
     mean_bits = getframebits(gfc) - cfg->sideinfo_len * 8;
-    *analog_silence_bits = mean_bits / (cfg->mode_gr * cfg->channels_out);
+    analog_silence_bits = mean_bits / (cfg->mode_gr * cfg->channels_out);
 
     mean_bits = cfg->vbr_avg_bitrate_kbps * framesize * 1000;
     if (gfc->sv_qnt.substep_shaping & 1)
@@ -1872,14 +1874,31 @@ calc_target_bits(lame_internal_flags * gfc,
 
     /*  repartion target bits if needed
      */
-    if (totbits > *max_frame_bits && totbits > 0) {
+    if (totbits > max_frame_bits && max_frame_bits > 0) {
+        int const act_totbits = totbits;
+        totbits = 0;
         for (gr = 0; gr < cfg->mode_gr; gr++) {
             for (ch = 0; ch < cfg->channels_out; ch++) {
-                targ_bits[gr][ch] *= *max_frame_bits;
-                targ_bits[gr][ch] /= totbits;
+                targ_bits[gr][ch] *= max_frame_bits;
+                targ_bits[gr][ch] /= act_totbits;
+                totbits += targ_bits[gr][ch];
             }
         }
     }
+    assert( totbits <= max_frame_bits );
+
+    /*  set output arguments
+     */
+    for (gr = 0; gr < cfg->mode_gr; gr++) {
+        for (ch = 0; ch < cfg->channels_out; ch++) {
+            int const gr_ch_bits = targ_bits[gr][ch];
+            targ_bits_out[gr][ch] = gr_ch_bits;
+            if (analog_silence_bits > gr_ch_bits)
+                analog_silence_bits = gr_ch_bits;
+        }
+    }
+    *analog_silence_bits_out = analog_silence_bits;
+    *max_frame_bits_out = max_frame_bits;
 }
 
 
@@ -1955,6 +1974,8 @@ ABR_iteration_loop(lame_internal_flags * gfc, const FLOAT pe[2][2],
                 (void) outer_loop(gfc, cod_info, l3_xmin, xrpow, ch, targ_bits[gr][ch]);
             }
             iteration_finish_one(gfc, gr, ch);
+            assert(cod_info->part2_3_length <= MAX_BITS_PER_CHANNEL);
+            assert(cod_info->part2_3_length <= targ_bits[gr][ch]);
         }               /* ch */
     }                   /* gr */
 

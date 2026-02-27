@@ -60,11 +60,12 @@ static const FLOAT costab[TRI_SIZE * 2] = {
 
 
 SSE_FUNCTION void
-init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT * sum)
+init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int max_nz, FLOAT * sum)
 {
     int     i;
     float   tmp_max = 0;
     float   tmp_sum = 0;
+    int     upper = max_nz + 1;
     int     upper4 = (upper / 4) * 4;
     int     rest = upper-upper4;
 
@@ -74,8 +75,8 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int upper, FLOAT
     vecfloat_union vec_sum;
     vecfloat_union vec_tmp;
 
-    _mm_prefetch((char *) cod_info->xr, _MM_HINT_T0);
-    _mm_prefetch((char *) xrpow, _MM_HINT_T0);
+    _mm_prefetch((char const *) cod_info->xr, _MM_HINT_T0);
+    _mm_prefetch((char const *) xrpow, _MM_HINT_T0);
 
     vec_xrpow_max._m128 = _mm_set_ps1(0);
     vec_sum._m128 = _mm_set_ps1(0);
@@ -206,7 +207,7 @@ fht_SSE2(FLOAT * fz, int n)
                 __m128 p, q, r;
 
                 q = _mm_setr_ps(fi[k1], fi[k3], gi[k1], gi[k3]); /* Q := {fi_k1,fi_k3,gi_k1,gi_k3}*/
-                p = _mm_mul_ps(_mm_set_ps1(s2), q);              /* P := s2 * Q */
+                p = _mm_mul_ps(v_s2, q);                         /* P := s2 * Q */
                 q = _mm_mul_ps(v_c2, q);                         /* Q := c2 * Q */
                 q = _mm_shuffle_ps(q, q, _MM_SHUFFLE(1,0,3,2));  /* Q := {-c2*gi_k1,-c2*gi_k3,c2*fi_k1,c2*fi_k3} */
                 p = _mm_add_ps(p, q);
