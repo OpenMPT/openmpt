@@ -7,6 +7,7 @@ The following changes have been made:
     <https://sourceforge.net/p/lame/bugs/500/>.
  *  <https://sourceforge.net/p/lame/svn/6445/> has been applied to fix
     <https://sourceforge.net/p/lame/bugs/501/>.
+ *  `include/lame.h` has been modified to not touch WinAPI macro `CDECL`
  *  negative-shift warning in VbrTag.c has been fixed.
  *  function prototype mismatch has been fixed for on_pe() and
     L3psycho_anal_vbr().
