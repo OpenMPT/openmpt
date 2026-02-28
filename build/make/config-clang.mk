@@ -56,6 +56,11 @@ ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=thin
 CFLAGS   += -flto=thin
 LDFLAGS  += -Wl,--thinlto-jobs=all
+ifeq ($(CACHE),1)
+CACHE_LLVM_THINLTO_DIR=$(CACHE_DIR)/llvm/thinlto
+LDFLAGS += -Wl,--thinlto-cache-dir=$(CACHE_LLVM_THINLTO_DIR)
+LDFLAGS += -Wl,--thinlto-cache-policy=cache_size=0%:cache_size_bytes=$(CACHE_SIZE):cache_size_files=0
+endif
 endif
 
 ifeq ($(CHECKED_ADDRESS),1)

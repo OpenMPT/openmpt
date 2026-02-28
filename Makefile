@@ -231,6 +231,10 @@ CHECKED_UNDEFINED=0
 
 REQUIRES_RUNPREFIX=0
 
+CACHE_SIZE=10g
+CACHE_COUNT=10000
+CACHE_DIR=$(HOME)/.cache
+
 
 # get commandline or defaults
 

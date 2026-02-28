@@ -58,6 +58,11 @@ endif
 ifeq ($(OPTIMIZE_LTO),1)
 CXXFLAGS += -flto=auto -fuse-linker-plugin -fno-fat-lto-objects
 CFLAGS   += -flto=auto -fuse-linker-plugin -fno-fat-lto-objects
+ifeq ($(CACHE),1)
+CACHE_GCC_LTO_INCREMENTAL_DIR=$(CACHE_DIR)/gcc/lto/incremental
+CXXFLAGS += -flto-partition=cache -flto-incremental=$(CACHE_GCC_LTO_INCREMENTAL_DIR) -flto-incremental-cache-size=$(CACHE_COUNT)
+CFLAGS   += -flto-partition=cache -flto-incremental=$(CACHE_GCC_LTO_INCREMENTAL_DIR) -flto-incremental-cache-size=$(CACHE_COUNT)
+endif
 endif
 
 ifeq ($(ANALYZE),1)

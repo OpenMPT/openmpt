@@ -11,6 +11,8 @@ is just a high-level summary.
     which the currently playing subsong belongs:
     `openmpt::module::get_current sequence()` (C++) and
     `openmpt_module_get_current_sequence()` (C).
+ *  [**New**] `Makefile` now suports `CACHE=1` with `OPTIMIZE_LTO=1`, enabling
+    LTO caching.
 
  *  [**Change**] in_openmpt: We now provide a separate `in_openmpt_wa2.dll`
     which is compatible with Winamp 2 for all build variants in the `Winamp2/`
