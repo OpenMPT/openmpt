@@ -13,6 +13,7 @@
 #include "Ctrl_ins.h"
 #include "Childfrm.h"
 #include "dlg_misc.h"
+#include "Dlsbank.h"
 #include "FileDialog.h"
 #include "Globals.h"
 #include "HighDPISupport.h"
@@ -1284,15 +1285,6 @@ LRESULT CCtrlInstruments::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 			return OpenInstrument(*reinterpret_cast<const mpt::PathString *>(lParam));
 		break;
 
-	case CTRLMSG_INS_SONGDROP:
-		if(lParam)
-		{
-			const auto &dropInfo = *reinterpret_cast<const DRAGONDROP *>(lParam);
-			if(dropInfo.sndFile)
-				return OpenInstrument(*dropInfo.sndFile, static_cast<INSTRUMENTINDEX>(dropInfo.dropItem));
-		}
-		break;
-
 	case CTRLMSG_INS_NEWINSTRUMENT:
 		return InsertInstrument(false) ? 1 : 0;
 
@@ -1745,6 +1737,148 @@ bool CCtrlInstruments::OpenInstrument(const CSoundFile &sndFile, INSTRUMENTINDEX
 	}
 	EndWaitCursor();
 	return true;
+}
+
+
+
+
+bool CCtrlInstruments::OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo)
+{
+	bool canDrop = false;
+	switch (dropInfo.dropType)
+	{
+	case DRAGONDROP_INSTRUMENT:
+		if(!dropInfo.dropItem)
+			return canDrop;
+		if(dropInfo.sndFile == &m_sndFile)
+			canDrop = dropInfo.dropItem <= m_sndFile.GetNumInstruments();
+		else
+			canDrop = dropInfo.dropParam || dropInfo.sndFile;
+		break;
+
+	case DRAGONDROP_DLS:
+		canDrop = (dropInfo.dropItem < CTrackApp::gpDLSBanks.size()) && CTrackApp::gpDLSBanks[dropInfo.dropItem];
+		break;
+
+	case DRAGONDROP_SOUNDFILE:
+	case DRAGONDROP_MIDIINSTR:
+		canDrop = !dropInfo.GetPath().empty();
+		break;
+
+	default:
+		break;
+	}
+
+	const bool insertNew = m_sndFile.GetNumInstruments() > 0 && ((dropInfo.insertType == DRAGONDROP::InsertType::Unspecified)
+		? CInputHandler::ShiftPressed()
+		: dropInfo.insertType == DRAGONDROP::InsertType::InsertNew);
+
+	if(insertNew && !m_sndFile.CanAddMoreInstruments())
+		canDrop = false;
+
+	if(!canDrop || !doDrop)
+		return canDrop;
+
+	if(!m_sndFile.GetNumInstruments() && m_sndFile.GetModSpecifications().instrumentsMax > 0)
+		InsertInstrument(false);
+	if(!m_nInstrument || m_nInstrument > m_sndFile.GetNumInstruments())
+		return false;
+
+	// Do the drop
+	bool modified = false;
+	BeginWaitCursor();
+	switch (dropInfo.dropType)
+	{
+	case DRAGONDROP_INSTRUMENT:
+		if(dropInfo.sndFile == &m_sndFile)
+		{
+			SetCurrentInstrument(static_cast<INSTRUMENTINDEX>(dropInfo.dropItem));
+		} else if(dropInfo.sndFile)
+		{
+			if(insertNew && !InsertInstrument(false))
+				canDrop = false;
+			else
+				return OpenInstrument(*dropInfo.sndFile, static_cast<INSTRUMENTINDEX>(dropInfo.dropItem));
+		}
+		break;
+
+	case DRAGONDROP_MIDIINSTR:
+		if(CDLSBank::IsDLSBank(dropInfo.GetPath()))
+		{
+			CDLSBank dlsbank;
+			if(dlsbank.Open(dropInfo.GetPath()))
+			{
+				const DLSINSTRUMENT *pDlsIns;
+				UINT nIns = 0, nRgn = 0xFF;
+				if(dropInfo.dropItem & 0x80)
+				{
+					// Drums
+					UINT key = dropInfo.dropItem & 0x7F;
+					pDlsIns = dlsbank.FindInstrument(true, 0xFFFF, 0xFF, key, &nIns);
+					if(pDlsIns)
+						nRgn = dlsbank.GetRegionFromKey(nIns, key);
+				} else
+				{
+					// Melodic
+					pDlsIns = dlsbank.FindInstrument(false, 0xFFFF, dropInfo.dropItem, 60, &nIns);
+					if(pDlsIns)
+						nRgn = dlsbank.GetRegionFromKey(nIns, 60);
+				}
+				canDrop = false;
+				if(pDlsIns)
+				{
+					if(!insertNew || InsertInstrument(false))
+					{
+						CriticalSection cs;
+						m_modDoc.GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
+						canDrop = modified = dlsbank.ExtractInstrument(m_sndFile, m_nInstrument, nIns, nRgn);
+					}
+				}
+				break;
+			}
+		}
+		// Instrument file -> fall through
+		[[fallthrough]];
+	case DRAGONDROP_SOUNDFILE:
+		if(!insertNew || InsertInstrument(false))
+			OpenInstrument(*reinterpret_cast<const mpt::PathString*>(dropInfo.dropParam));
+		break;
+
+	case DRAGONDROP_DLS:
+	{
+		uint32 drumRgn = uint32_max;
+		// Drums: (0x80000000) | (Region << 16) | (Instrument)
+		if(dropInfo.dropParam & 0x80000000)
+			drumRgn = (dropInfo.dropParam & 0x7FFF0000) >> 16;
+
+		if(!insertNew || InsertInstrument(false))
+		{
+			CriticalSection cs;
+			m_modDoc.GetInstrumentUndo().PrepareUndo(m_nInstrument, "Replace Instrument");
+			canDrop = modified = CTrackApp::gpDLSBanks[dropInfo.dropItem]->ExtractInstrument(m_sndFile, m_nInstrument, dropInfo.dropParam & 0xFFFF, drumRgn);
+		}
+	}
+	break;
+
+	default:
+		break;
+	}
+
+	if(modified)
+	{
+		SetModified(InstrumentHint().Info().Envelope().Names(), true);
+		m_modDoc.UpdateAllViews(nullptr, SampleHint().Info().Names().Data(), this);
+	}
+
+	CMDIChildWnd *pMDIFrame = static_cast<CMDIChildWnd *>(GetParentFrame());
+	if(pMDIFrame)
+	{
+		pMDIFrame->MDIActivate();
+		pMDIFrame->SetActiveView(&m_parent);
+	}
+	SwitchToView();
+	EndWaitCursor();
+	return canDrop;
 }
 
 

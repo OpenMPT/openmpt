@@ -186,7 +186,7 @@ public:
 	void OnDPIChanged() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
-	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
+	bool OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo) override { return GetControlDlg()->OnDragonDrop(doDrop, dropInfo); }
 	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	LRESULT OnPlayerNotify(Notification *) override;
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;

@@ -97,10 +97,12 @@ public:
 	virtual LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam);
 	virtual void OnActivatePage(LPARAM) {}
 	virtual void OnDeactivatePage() {}
+	virtual bool OnDragonDrop(bool /*doDrop*/, const DRAGONDROP &/*dropInfo*/) { return false; }
 	//}}AFX_VIRTUAL
 	//{{AFX_MSG(CModControlDlg)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnUnlockControls(WPARAM, LPARAM) { if (m_nLockCount > 0) m_nLockCount--; return 0; }
+	afx_msg LRESULT OnDragonDropping(WPARAM doDrop, LPARAM dropInfo) { return (dropInfo && OnDragonDrop(doDrop != 0, *reinterpret_cast<const DRAGONDROP*>(dropInfo))) ? 1 : 0; }
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -227,7 +229,7 @@ public:
 	virtual void OnDPIChanged() { Invalidate(); }
 	virtual void UpdateView(UpdateHint, CObject *) {}
 	virtual LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnDragonDrop(BOOL, const DRAGONDROP *) { return FALSE; }
+	virtual bool OnDragonDrop(bool /*doDrop*/, const DRAGONDROP &/*dropInfo*/) { return false; }
 	virtual LRESULT OnPlayerNotify(Notification *) { return 0; }
 	//}}AFX_VIRTUAL
 
@@ -242,7 +244,7 @@ protected:
 	afx_msg LRESULT OnReceiveModViewMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnMouseWheel(UINT fFlags, short zDelta, CPoint point);
 	afx_msg void OnMouseHWheel(UINT fFlags, short zDelta, CPoint point);
-	afx_msg LRESULT OnDragonDropping(WPARAM bDoDrop, LPARAM lParam) { return OnDragonDrop((BOOL)bDoDrop, (const DRAGONDROP *)lParam); }
+	afx_msg LRESULT OnDragonDropping(WPARAM doDrop, LPARAM dropInfo) { return (dropInfo && OnDragonDrop(doDrop != 0, *reinterpret_cast<const DRAGONDROP*>(dropInfo))) ? 1 : 0; }
 	afx_msg LRESULT OnUpdatePosition(WPARAM, LPARAM);
 	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	//}}AFX_MSG

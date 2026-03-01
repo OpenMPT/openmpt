@@ -149,6 +149,7 @@ public:
 	LRESULT OnModCtrlMsg(WPARAM wParam, LPARAM lParam) override;
 	CString GetToolTipText(UINT uId, HWND hwnd) const override;
 	BOOL PreTranslateMessage(MSG* pMsg) override;
+	bool OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo) override;
 	//}}AFX_VIRTUAL
 protected:
 	void PrepareUndo(const char *description);

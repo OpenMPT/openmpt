@@ -100,6 +100,7 @@ public:
 	CString GetToolTipText(UINT uId, HWND hwnd) const override;
 	BOOL PreTranslateMessage(MSG* pMsg) override;
 	void OnDPIChanged() override;
+	bool OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo) override;
 	//}}AFX_VIRTUAL
 protected:
 	//{{AFX_MSG(CCtrlSamples)

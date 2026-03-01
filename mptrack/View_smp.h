@@ -170,7 +170,7 @@ public:
 	void OnInitialUpdate() override;
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr) override;
 	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
-	BOOL OnDragonDrop(BOOL, const DRAGONDROP *) override;
+	bool OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo) override { return GetControlDlg()->OnDragonDrop(doDrop, dropInfo); }
 	LRESULT OnPlayerNotify(Notification *) override;
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;

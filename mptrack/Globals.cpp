@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CModControlDlg, DialogBase)
 	//{{AFX_MSG_MAP(CModControlDlg)
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS, &CModControlDlg::OnUnlockControls)
+	ON_MESSAGE(WM_MOD_DRAGONDROPPING, &CModControlDlg::OnDragonDropping)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 

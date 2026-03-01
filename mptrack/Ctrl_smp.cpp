@@ -14,6 +14,7 @@
 #include "Autotune.h"
 #include "Childfrm.h"
 #include "dlg_misc.h"
+#include "Dlsbank.h"
 #include "FileDialog.h"
 #include "Globals.h"
 #include "HighDPISupport.h"
@@ -453,15 +454,6 @@ LRESULT CCtrlSamples::OnModCtrlMsg(WPARAM wParam, LPARAM lParam)
 	case CTRLMSG_SMP_OPENFILE:
 		if(lParam)
 			return OpenSample(*reinterpret_cast<const mpt::PathString *>(lParam));
-		break;
-
-	case CTRLMSG_SMP_SONGDROP:
-		if(lParam)
-		{
-			const auto &dropInfo = *reinterpret_cast<const DRAGONDROP *>(lParam);
-			if(dropInfo.sndFile)
-				return OpenSample(*dropInfo.sndFile, static_cast<SAMPLEINDEX>(dropInfo.dropItem)) ? TRUE : FALSE;
-		}
 		break;
 
 	case CTRLMSG_SMP_SETZOOM:
@@ -1161,6 +1153,155 @@ bool CCtrlSamples::OpenSample(const CSoundFile &sndFile, SAMPLEINDEX nSample)
 	EndWaitCursor();
 
 	return true;
+}
+
+
+bool CCtrlSamples::OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo)
+{
+	bool canDrop = false;
+	switch (dropInfo.dropType)
+	{
+	case DRAGONDROP_SAMPLE:
+		if(!dropInfo.dropItem)
+			return canDrop;
+		if(dropInfo.sndFile == &m_sndFile)
+			canDrop = dropInfo.dropItem <= m_sndFile.GetNumSamples();
+		else
+			canDrop = dropInfo.dropParam || dropInfo.sndFile;
+		break;
+
+	case DRAGONDROP_DLS:
+		canDrop = ((dropInfo.dropItem < CTrackApp::gpDLSBanks.size()) && CTrackApp::gpDLSBanks[dropInfo.dropItem]);
+		break;
+
+	case DRAGONDROP_SOUNDFILE:
+	case DRAGONDROP_MIDIINSTR:
+		canDrop = !dropInfo.GetPath().empty();
+		break;
+
+	default:
+		break;
+	}
+
+	const bool insertNew = (dropInfo.insertType == DRAGONDROP::InsertType::Unspecified)
+		? CInputHandler::ShiftPressed()
+		: dropInfo.insertType == DRAGONDROP::InsertType::InsertNew;
+
+	if(insertNew && !m_sndFile.CanAddMoreSamples())
+		canDrop = false;
+
+	if(!canDrop || !doDrop)
+		return canDrop;
+
+	// Do the drop
+	BeginWaitCursor();
+	bool modified = false;
+	switch (dropInfo.dropType)
+	{
+	case DRAGONDROP_SAMPLE:
+		if(dropInfo.sndFile == &m_sndFile)
+		{
+			SetCurrentSample(static_cast<SAMPLEINDEX>(dropInfo.dropItem), -1, true);
+		} else if(dropInfo.sndFile)
+		{
+			if(insertNew && !InsertSample(false))
+				canDrop = false;
+			else
+				return OpenSample(*dropInfo.sndFile, static_cast<SAMPLEINDEX>(dropInfo.dropItem));
+		}
+		break;
+
+	case DRAGONDROP_MIDIINSTR:
+		if(CDLSBank::IsDLSBank(dropInfo.GetPath()))
+		{
+			CDLSBank dlsbank;
+			if(dlsbank.Open(dropInfo.GetPath()))
+			{
+				const DLSINSTRUMENT *pDlsIns;
+				UINT nIns = 0, nRgn = 0xFF;
+				int transpose = 0;
+				if(dropInfo.dropItem & 0x80)
+				{
+					// Drums
+					UINT key = dropInfo.dropItem & 0x7F;
+					pDlsIns = dlsbank.FindInstrument(true, 0xFFFF, 0xFF, key, &nIns);
+					if(pDlsIns)
+					{
+						nRgn = dlsbank.GetRegionFromKey(nIns, key);
+						const auto& region = pDlsIns->Regions[nRgn];
+						if(region.tuning != 0)
+							transpose = (region.uKeyMin + (region.uKeyMax - region.uKeyMin) / 2) - 60;
+					}
+				} else
+				{
+					// Melodic
+					pDlsIns = dlsbank.FindInstrument(false, 0xFFFF, dropInfo.dropItem, 60, &nIns);
+					if(pDlsIns)
+						nRgn = dlsbank.GetRegionFromKey(nIns, 60);
+				}
+				canDrop = false;
+				if(pDlsIns)
+				{
+					if(!insertNew || InsertSample(false))
+					{
+						CriticalSection cs;
+						m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+						canDrop = modified = dlsbank.ExtractSample(m_sndFile, m_nSample, nIns, nRgn, transpose);
+					}
+				}
+				break;
+			}
+		}
+		// Instrument file -> fall through
+		[[fallthrough]];
+	case DRAGONDROP_SOUNDFILE:
+		if(!insertNew || InsertSample(false))
+			return OpenSample(*reinterpret_cast<const mpt::PathString*>(dropInfo.dropParam));
+		break;
+
+	case DRAGONDROP_DLS:
+	{
+		const CDLSBank &dlsBank = *CTrackApp::gpDLSBanks[dropInfo.dropItem];
+		UINT nIns = dropInfo.dropParam & 0xFFFF;
+		UINT nRgn;
+		int transpose = 0;
+		if(dropInfo.dropParam & 0x80000000)
+		{
+			// Drums: (0x80000000) | (Region << 16) | (Instrument)
+			nRgn = (dropInfo.dropParam & 0x7FFF0000) >> 16;
+			const auto &region = dlsBank.GetInstrument(nIns)->Regions[nRgn];
+			if(region.tuning != 0)
+				transpose = (region.uKeyMin + (region.uKeyMax - region.uKeyMin) / 2) - 60;
+		} else
+		{
+			// Melodic: (Instrument)
+			nRgn = dlsBank.GetRegionFromKey(nIns, 60);
+		}
+		if(!insertNew || InsertSample(false))
+		{
+			CriticalSection cs;
+			m_modDoc.GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Replace");
+			canDrop = modified = dlsBank.ExtractSample(m_sndFile, m_nSample, nIns, nRgn, transpose);
+		}
+	}
+	break;
+
+	default:
+		break;
+	}
+
+	if(modified)
+		SetModified(SampleHint().Info().Data().Names(), true, false);
+
+	CMDIChildWnd *pMDIFrame = static_cast<CMDIChildWnd *>(GetParentFrame());
+	if(pMDIFrame)
+	{
+		pMDIFrame->MDIActivate();
+		pMDIFrame->SetActiveView(&m_parent);
+	}
+	SwitchToView();
+	EndWaitCursor();
+	return canDrop;
 }
 
 
