@@ -20,8 +20,8 @@ LDFLAGS_WARNINGS  += -Wl,--no-undefined
 endif
 
 ifeq ($(MODERN),1)
-CXXFLAGS_WARNINGS += 
-CFLAGS_WARNINGS   += 
+CXXFLAGS_WARNINGS += -Wno-gnu-line-marker
+CFLAGS_WARNINGS   += -Wno-gnu-line-marker
 LDFLAGS_WARNINGS  += 
 endif
 
