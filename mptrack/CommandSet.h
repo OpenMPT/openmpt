@@ -1268,7 +1268,11 @@ public:
 	KeyCombination GetKey(CommandID cmd, UINT key) const { return m_commands[cmd].kcList[key]; }
 	mpt::span<const KeyCombination> GetKeyChoices(CommandID cmd) const { return mpt::as_span(m_commands[cmd].kcList); }
 	bool IsHidden(UINT c) const { return m_commands[c].IsHidden(); }
+	// cppcheck false-positive
+	// cppcheck-suppress negativeContainerIndex
 	int GetKeyListSize(CommandID cmd) const { return (cmd != kcNull) ? static_cast<int>(m_commands[cmd].kcList.size()) : 0; }
+	// cppcheck false-positive
+	// cppcheck-suppress negativeContainerIndex
 	CString GetCommandText(CommandID cmd) const { return m_commands[cmd].name; }
 	CString GetKeyTextFromCommand(CommandID c, UINT key = uint32_max) const;
 	CString FormatConflict(KeyCombination kc, CommandID conflictCommand, KeyCombination conflictCombination) const;
