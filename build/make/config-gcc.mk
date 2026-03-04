@@ -51,8 +51,8 @@ endif
 ifeq ($(MODERN),1)
 endif
 
-ifeq ($(GCC_LINKER),gold)
-LDFLAGS  += -fuse-ld=gold
+ifneq ($(LINKER),)
+LDFLAGS  += -fuse-ld=$(LINKER)
 endif
 
 ifeq ($(OPTIMIZE_LTO),1)

@@ -48,8 +48,8 @@ CXXFLAGS += -march=native
 CFLAGS   += -march=native
 endif
 
-ifeq ($(MODERN),1)
-LDFLAGS  += -fuse-ld=lld
+ifneq ($(LINKER),)
+LDFLAGS  += -fuse-ld=$(LINKER)
 endif
 
 ifeq ($(OPTIMIZE_LTO),1)
