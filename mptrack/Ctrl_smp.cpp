@@ -1256,7 +1256,7 @@ bool CCtrlSamples::OnDragonDrop(bool doDrop, const DRAGONDROP &dropInfo)
 		[[fallthrough]];
 	case DRAGONDROP_SOUNDFILE:
 		if(!insertNew || InsertSample(false))
-			return OpenSample(*reinterpret_cast<const mpt::PathString*>(dropInfo.dropParam));
+			OpenSample(*reinterpret_cast<const mpt::PathString*>(dropInfo.dropParam));
 		break;
 
 	case DRAGONDROP_DLS:
