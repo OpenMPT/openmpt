@@ -16,146 +16,86 @@ jobs:
           - { host: macos-26, compiler: '26.4', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.4', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.4', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '26.4' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '26.4' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.4', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.3', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.3', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.3', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.3', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.3', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '26.2' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '26.2' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.3', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.2', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.2', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.2', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.2', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.2', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '26.2' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '26.2' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.2', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.1', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.1', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.1', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.1', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.1', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '26.1' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '26.1' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.1', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.0', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.0', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.0', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.0', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.0', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '26'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.6' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '26.0' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '26.0' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.0', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
@@ -163,24 +103,14 @@ jobs:
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15.5' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15.5' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15.3' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.4', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.4', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
@@ -189,20 +119,16 @@ jobs:
           - { host: macos-15, compiler: '16.3', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.3', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-15, compiler: '16.3', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '15.4' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '15.4' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.3', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.3', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.3', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.3', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
@@ -213,18 +139,14 @@ jobs:
           - { host: macos-15, compiler: '16.2', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-15, compiler: '16.2', arch: arm64 , target: '15.2' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.2', arch: x86_64, target: '15.2' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.2', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.2', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.2', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.2', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
@@ -235,16 +157,14 @@ jobs:
           - { host: macos-15, compiler: '16.1', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-15, compiler: '16.1', arch: arm64 , target: '15.1' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.1', arch: x86_64, target: '15.1' , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.1', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.1', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.1', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.1', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
@@ -253,16 +173,16 @@ jobs:
           - { host: macos-15, compiler: '16.0', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.0', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-15, compiler: '16.0', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '15'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '15.0' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '15.0' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-15, compiler: '16.0', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.0', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.0', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-15, compiler: '16.0', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
@@ -271,14 +191,14 @@ jobs:
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '14'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '13'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '12'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '11'   , deps: local, check: true , ancient: false }
-          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '11'   , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '14.5' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '14.5' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-14, compiler: '15.4', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.15', deps: local, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.14', deps: local, check: true , ancient: false }
           - { host: macos-14, compiler: '15.4', arch: x86_64, target: '10.13', deps: local, check: true , ancient: false }
