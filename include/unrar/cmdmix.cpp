@@ -2,7 +2,7 @@ void CommandData::OutTitle()
 {
   if (BareOutput || DisableCopyright)
     return;
-#if defined(__GNUC__) && defined(SFX_MODULE)
+#ifdef SFX_MODULE
   mprintf(St(MCopyrightS));
 #else
 #ifndef SILENT
@@ -75,8 +75,6 @@ void CommandData::OutHelp(RAR_EXIT ExitCode)
   for (uint I=0;I<ASIZE(Help);I++)
   {
 #ifndef SFX_MODULE
-    if (CmpMSGID(Help[I],MCHelpSwV))
-      continue;
 #ifndef _WIN_ALL
     static MSGID Win32Only[]={
       MCHelpSwIEML,MCHelpSwVD,MCHelpSwAO,MCHelpSwOS,MCHelpSwIOFF,

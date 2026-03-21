@@ -33,6 +33,9 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.32.07.00 (22 March 2026, revision 24626)
+-------------------------------------------
+
 v1.32.06.00 (14 December 2025, revision 24626)
 ----------------------------------------------
 Sample tab
