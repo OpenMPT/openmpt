@@ -51,15 +51,15 @@ cd include/genie
 
 make
 
-mkdir -p build/vs2015
-./bin/linux/genie --to=../build/vs2015 vs2015
+#mkdir -p build/vs2015
+#./bin/linux/genie --to=../build/vs2015 vs2015
 
-mkdir -p build/vs2017
-./bin/linux/genie --to=../build/vs2017 vs2015
+#mkdir -p build/vs2017
+#./bin/linux/genie --to=../build/vs2017 vs2015
 
 cd ../..
 
-cp -ar include/genie/build/vs* build/genie/genie/build/
+#cp -ar include/genie/build/vs* build/genie/genie/build/
 
 
 
@@ -68,7 +68,7 @@ download_and_unpack "premake" "https://github.com/premake/premake-core/releases/
 cd include/premake
 
 cd build/gmake.unix
-make
+make CPPFLAGS="--include=unistd.h"
 cd ../..
 echo "Test suite is broken in premake-5.0.0-alpha12."
 #bin/release/premake5 test
