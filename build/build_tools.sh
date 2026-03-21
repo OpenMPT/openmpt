@@ -45,8 +45,8 @@ make clean
 make
 
 mkdir -p build/vs2017
-./bin/linux/genie --to=../build/vs2017 vs2017
-./bin/linux/genie --to=../build/vs2019 vs2019
+#./bin/linux/genie --to=../build/vs2017 vs2017
+#./bin/linux/genie --to=../build/vs2019 vs2019
 
 cd ../..
 
