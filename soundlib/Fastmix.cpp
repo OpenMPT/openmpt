@@ -227,24 +227,28 @@ struct MixLoopState
 		{
 			if(nPosInt >= lookaheadStart)
 			{
+				// We are close to the loop end
 				if(nInc.IsNegative())
 				{
+					// Going backward -> only go up to start of lookahead area
 					nSmpCount = DistanceToBufferLength(SamplePosition(lookaheadStart, 0), nPos, nInv);
 					chn.pCurrentSample = lookaheadPointer;
 				} else if(nPosInt <= chn.nLoopEnd)
 				{
-					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, 0), nInv);
+					// Going forward, approaching loop end -> only go up to end of loop
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLoopEnd, SamplePosition::fractMax), nInv);
 					chn.pCurrentSample = lookaheadPointer;
 				} else
 				{
-					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, 0), nInv);
+					// We are already past the end of the loop
+					nSmpCount = DistanceToBufferLength(nPos, SamplePosition(chn.nLength, SamplePosition::fractMax), nInv);
 				}
 				checkDest = false;
 			} else if(chn.dwFlags[CHN_WRAPPED_LOOP] && isAtLoopStart)
 			{
 				// We just restarted the loop, so interpolate correctly after wrapping around
-				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationLookaheadBufferSize, 0), nInv);
-				chn.pCurrentSample = lookaheadPointer + (chn.nLength - nLoopStart) * chn.pModSample->GetBytesPerSample();
+				nSmpCount = DistanceToBufferLength(nPos, SamplePosition(nLoopStart + InterpolationLookaheadBufferSize, SamplePosition::fractMax), nInv);
+				chn.pCurrentSample = lookaheadPointer + (chn.nLoopEnd - nLoopStart) * chn.pModSample->GetBytesPerSample();
 				checkDest = false;
 			} else if(nInc.IsPositive() && static_cast<SmpLength>(nPosDest) >= lookaheadStart && nSmpCount > 1)
 			{
