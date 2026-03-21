@@ -43,15 +43,15 @@ cd include/genie
 
 make
 
-mkdir -p build/vs2015
-./bin/linux/genie --to=../build/vs2015 vs2015
+#mkdir -p build/vs2015
+#./bin/linux/genie --to=../build/vs2015 vs2015
 
-mkdir -p build/vs2017
-./bin/linux/genie --to=../build/vs2017 vs2015
+#mkdir -p build/vs2017
+#./bin/linux/genie --to=../build/vs2017 vs2015
 
 cd ../..
 
-cp -ar include/genie/build/vs* build/genie/genie/build/
+#cp -ar include/genie/build/vs* build/genie/genie/build/
 
 echo "78817a9707c1a02e845fb38b3adcc5353b02d377" > include/genie/OpenMPT-version.txt
 
