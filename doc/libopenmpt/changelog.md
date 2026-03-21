@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.18-pre
 
+ *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
+    of reverse sample playback + offset past sample loop. (r25043).
+
+ *  MOD: ProTracker arpeggio wrapraound results in an effective period of 65536
+    on Paula, not pausing the sample entirely.
+ *  ULT: Loop points were incorrectly limited for 16-bit samples.
+
  *  zlib: Update to v1.3.2 (2026-02-17).
  *  miniz: Update to v3.1.1 (2026-02-03).
 
