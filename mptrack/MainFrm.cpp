@@ -431,7 +431,7 @@ BOOL CMainFrame::DestroyWindow()
 		KillTimer(m_nTimer);
 		m_nTimer = 0;
 	}
-	if(shMidiIn)
+	if(midiInData.inHandle)
 		midiCloseDevice();
 	// Delete bitmaps
 	delete bmpNotes;
@@ -504,7 +504,7 @@ void CMainFrame::OnClose()
 
 BOOL CMainFrame::OnDeviceChange(UINT nEventType, DWORD_PTR dwData)
 {
-	if(nEventType == DBT_DEVNODES_CHANGED && shMidiIn)
+	if(nEventType == DBT_DEVNODES_CHANGED && midiInData.inHandle)
 	{
 		// Calling this (or most other MIDI input related functions) makes the MIDI driver realize
 		// that the connection to USB MIDI devices was lost and send a MIM_CLOSE message.
@@ -1966,7 +1966,7 @@ void CMainFrame::SetupMidi(FlagSet<MidiSetup> d, UINT n)
 	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
 	TrackerSettings::Instance().midiSetup = d;
 	TrackerSettings::Instance().SetMIDIDevice(n);
-	if(deviceChanged && shMidiIn)
+	if(deviceChanged && midiInData.inHandle)
 	{
 		// Device has changed, close the old one.
 		midiCloseDevice();

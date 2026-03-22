@@ -27,6 +27,8 @@
 
 #include <Msctf.h>
 
+#include <functional>
+
 OPENMPT_NAMESPACE_BEGIN
 
 class CAutoSaver;
@@ -174,7 +176,20 @@ public:
 
 	// Midi Input
 public:
-	static HMIDIIN shMidiIn;
+	struct MidiInData
+	{
+		struct SysExBuffer
+		{
+			MIDIHDR header;
+			std::vector<std::byte> data;
+		};
+
+		std::vector<SysExBuffer> sysexBuffers;
+		mpt::mutex dataMutex;
+		HMIDIIN inHandle = nullptr;
+	};
+
+	MidiInData midiInData;
 
 public:
 	CImageListEx m_MiscIcons, m_MiscIconsDisabled;			// Misc Icons
@@ -188,6 +203,7 @@ protected:
 	CMainToolBar m_wndToolBar;
 	CSoundFile *m_pSndFile = nullptr; // != NULL only when currently playing or rendering
 	HWND m_hWndMidi = nullptr;
+	std::function<void(mpt::const_byte_span)> m_midiSysExCallback;
 	samplecount_t m_dwTimeSec = 0;
 	UINT_PTR m_nTimer = 0;
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
@@ -256,8 +272,13 @@ public:
 public:
 	bool midiOpenDevice(bool showSettings = true);
 	void midiCloseDevice();
-	void SetMidiRecordWnd(HWND hwnd) { m_hWndMidi = hwnd; }
+	void SetMidiRecordWnd(HWND hwnd, std::function<void(mpt::const_byte_span)> sysExCallback = {})
+	{
+		m_hWndMidi = hwnd;
+		m_midiSysExCallback = std::move(sysExCallback);
+	}
 	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
+	auto GetMidiSysexCallback() const { return m_midiSysExCallback; }
 	void LoadMetronomeSamples();
 	void UpdateMetronomeSamples();
 	void UpdateMetronomeVolume();

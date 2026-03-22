@@ -27,10 +27,6 @@ OPENMPT_NAMESPACE_BEGIN
 #define MPTMIDI_RECORDLOG
 #endif
 
-
-// Midi Input globals
-HMIDIIN CMainFrame::shMidiIn = nullptr;
-
 //Get Midi message(dwParam1), apply MIDI settings having effect on volume, and return
 //the volume value [0, 256]. In addition value -1 is used as 'use default value'-indicator.
 int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, uint8 midiChannelVolume)
@@ -56,24 +52,24 @@ int CMainFrame::ApplyVolumeRelatedSettings(const DWORD &dwParam1, uint8 midiChan
 }
 
 
-void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
+void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &midiMsg)
 {
 	const FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
 	if(midiSetup[MidiSetup::TransposeKeyboard]
-		&& (MIDIEvents::GetChannelFromEvent(dwParam1) != 9))
+		&& (MIDIEvents::GetChannelFromEvent(midiMsg) != 9))
 	{
 		int nTranspose = rMainFrm.GetBaseOctave() - 4;
 		if (nTranspose)
 		{
-			int note = MIDIEvents::GetDataByte1FromEvent(dwParam1);
+			int note = MIDIEvents::GetDataByte1FromEvent(midiMsg);
 			if (note < 0x80)
 			{
 				note += nTranspose * 12;
 				Limit(note, 0, NOTE_MAX - NOTE_MIN);
 
-				dwParam1 &= 0xffff00ff;
+				midiMsg &= 0xffff00ff;
 
-				dwParam1 |= (note << 8);
+				midiMsg |= (note << 8);
 			}
 		}
 	}
@@ -83,24 +79,23 @@ void ApplyTransposeKeyboardSetting(CMainFrame &rMainFrm, uint32 &dwParam1)
 /////////////////////////////////////////////////////////////////////////////
 // MMSYSTEM Midi Record
 
-void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+void CALLBACK MidiInCallBack(HMIDIIN inHandle, UINT wMsg, DWORD_PTR instance, DWORD_PTR midiMsg, DWORD_PTR timestamp)
 {
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-	HWND hWndMidi;
+	CMainFrame *pMainFrm = reinterpret_cast<CMainFrame *>(instance);
+	if(!pMainFrm)
+		return;
 
-	if (!pMainFrm) return;
 #ifdef MPTMIDI_RECORDLOG
-	DWORD dwMidiStatus = dwParam1 & 0xFF;
-	DWORD dwMidiByte1 = (dwParam1 >> 8) & 0xFF;
-	DWORD dwMidiByte2 = (dwParam1 >> 16) & 0xFF;
-	DWORD dwTimeStamp = (DWORD)dwParam2;
-	MPT_LOG_GLOBAL(LogDebug, "MIDI", MPT_UFORMAT("time={}ms status={} data={}.{}")(mpt::ufmt::dec(dwTimeStamp), mpt::ufmt::HEX0<2>(dwMidiStatus), mpt::ufmt::HEX0<2>(dwMidiByte1), mpt::ufmt::HEX0<2>(dwMidiByte2)));
+	DWORD dwMidiStatus = midiMsg & 0xFF;
+	DWORD dwMidiByte1 = (midiMsg >> 8) & 0xFF;
+	DWORD dwMidiByte2 = (midiMsg >> 16) & 0xFF;
+	MPT_LOG_GLOBAL(LogDebug, "MIDI", MPT_UFORMAT("time={}ms status={} data={}.{}")(mpt::ufmt::dec(timestamp), mpt::ufmt::HEX0<2>(dwMidiStatus), mpt::ufmt::HEX0<2>(dwMidiByte1), mpt::ufmt::HEX0<2>(dwMidiByte2)));
 #endif
 
-	hWndMidi = pMainFrm->GetMidiRecordWnd();
+	HWND hWndMidi = pMainFrm->GetMidiRecordWnd();
 	if(wMsg == MIM_DATA || wMsg == MIM_MOREDATA)
 	{
-		uint32 data = static_cast<uint32>(dwParam1);
+		uint32 data = static_cast<uint32>(midiMsg);
 		if(::IsWindow(hWndMidi))
 		{
 			switch(MIDIEvents::GetTypeFromEvent(data))
@@ -110,7 +105,7 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 				ApplyTransposeKeyboardSetting(*pMainFrm, data);
 				[[fallthrough]];
 			default:
-				if(::PostMessage(hWndMidi, WM_MOD_MIDIMSG, data, dwParam2))
+				if(::PostMessage(hWndMidi, WM_MOD_MIDIMSG, data, timestamp))
 					return;	// Message has been handled
 				break;
 			}
@@ -119,12 +114,19 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 		CMainFrame::GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, data);
 	} else if(wMsg == MIM_LONGDATA)
 	{
-		// SysEx...
-	} else if (wMsg == MIM_CLOSE)
+		// SysEx
+		if(MIDIHDR &sysex = *reinterpret_cast<MIDIHDR *>(midiMsg); sysex.dwBytesRecorded)
+		{
+			std::lock_guard<mpt::mutex> guard{pMainFrm->midiInData.dataMutex};
+			if(auto callback = pMainFrm->GetMidiSysexCallback())
+				callback(mpt::const_byte_span{mpt::byte_cast<const std::byte *>(sysex.lpData), sysex.dwBytesRecorded});
+			midiInAddBuffer(inHandle, &sysex, sizeof(sysex));
+		}
+	} else if(wMsg == MIM_CLOSE)
 	{
 		// midiInClose will trigger this, but also disconnecting a USB MIDI device (although delayed, seems to be coupled to calling something like midiInGetNumDevs).
 		// In the latter case, we need to inform the UI.
-		if(CMainFrame::shMidiIn != nullptr)
+		if(pMainFrm->midiInData.inHandle != nullptr)
 		{
 			pMainFrm->SendMessage(WM_COMMAND, ID_MIDI_RECORD);
 		}
@@ -134,11 +136,11 @@ void CALLBACK MidiInCallBack(HMIDIIN, UINT wMsg, DWORD_PTR, DWORD_PTR dwParam1, 
 
 bool CMainFrame::midiOpenDevice(bool showSettings)
 {
-	if (shMidiIn) return true;
+	if (midiInData.inHandle) return true;
 	
-	if (midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+	if (midiInOpen(&midiInData.inHandle, TrackerSettings::Instance().GetCurrentMIDIDevice(), reinterpret_cast<DWORD_PTR>(MidiInCallBack), reinterpret_cast<DWORD_PTR>(this), CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 	{
-		shMidiIn = nullptr;
+		midiInData.inHandle = nullptr;
 
 		// Show MIDI configuration on fail.
 		if(showSettings)
@@ -148,24 +150,46 @@ bool CMainFrame::midiOpenDevice(bool showSettings)
 		}
 
 		// Let's see if the user updated the settings.
-		if(midiInOpen(&shMidiIn, TrackerSettings::Instance().GetCurrentMIDIDevice(), (DWORD_PTR)MidiInCallBack, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
+		if(midiInOpen(&midiInData.inHandle, TrackerSettings::Instance().GetCurrentMIDIDevice(), reinterpret_cast<DWORD_PTR>(MidiInCallBack), reinterpret_cast<DWORD_PTR>(this), CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
 		{
-			shMidiIn = nullptr;
+			midiInData.inHandle = nullptr;
 			return false;
 		}
 	}
-	midiInStart(shMidiIn);
+
+	midiInData.sysexBuffers.resize(16);
+	for(auto &buffer : midiInData.sysexBuffers)
+	{
+		buffer.data.resize(4096);
+		buffer.header.lpData = mpt::byte_cast<char *>(buffer.data.data());
+		buffer.header.dwBufferLength = mpt::saturate_cast<DWORD>(buffer.data.size());
+		buffer.header.dwFlags = 0;
+
+		midiInPrepareHeader(midiInData.inHandle, &buffer.header, sizeof(buffer.header));
+		midiInAddBuffer(midiInData.inHandle, &buffer.header, sizeof(buffer.header));
+	}
+
+	midiInStart(midiInData.inHandle);
 	return true;
 }
 
 
 void CMainFrame::midiCloseDevice()
 {
-	if (shMidiIn)
+	if(midiInData.inHandle)
 	{
 		// Prevent infinite loop in MIM_CLOSE
-		auto handle = shMidiIn;
-		shMidiIn = nullptr;
+		auto handle = midiInData.inHandle;
+		midiInData.inHandle = nullptr;
+
+		std::lock_guard<mpt::mutex> guard{midiInData.dataMutex};
+		midiInReset(handle);
+		midiInStop(handle);
+
+		for(auto &buffer : midiInData.sysexBuffers)
+		{
+			midiInUnprepareHeader(handle, &buffer.header, sizeof(buffer.header));
+		}
 		midiInClose(handle);
 	}
 }
@@ -173,7 +197,7 @@ void CMainFrame::midiCloseDevice()
 
 void CMainFrame::OnMidiRecord()
 {
-	if (shMidiIn)
+	if(midiInData.inHandle)
 	{
 		midiCloseDevice();
 	} else
@@ -185,7 +209,7 @@ void CMainFrame::OnMidiRecord()
 
 void CMainFrame::OnUpdateMidiRecord(CCmdUI *pCmdUI)
 {
-	if (pCmdUI) pCmdUI->SetCheck((shMidiIn) ? TRUE : FALSE);
+	if (pCmdUI) pCmdUI->SetCheck((midiInData.inHandle) ? TRUE : FALSE);
 }
 
 

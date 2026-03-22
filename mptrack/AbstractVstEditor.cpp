@@ -150,7 +150,11 @@ void CAbstractVstEditor::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimized)
 {
 	ResizableDialog::OnActivate(nState, pWndOther, bMinimized);
-	if(nState != WA_INACTIVE) CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
+	if(nState != WA_INACTIVE)
+	{
+		auto callback = [&plugin = m_VstPlugin](mpt::const_byte_span sysex) { plugin.MidiSend(sysex); };
+		CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd(), callback);
+	}
 }
 
 
