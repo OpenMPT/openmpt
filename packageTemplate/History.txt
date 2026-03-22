@@ -33,8 +33,35 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
-v1.32.07.00 (22 March 2026, revision 24626)
+v1.32.07.00 (22 March 2026, revision 25055)
 -------------------------------------------
+Pattern tab
+- [Mod] <js> Effect info now shows volume and panning volume command parameters as both hex and decimal if hex volume column was enabled (http://bugs.openmpt.org/view.php?id=1943).
+- [Fix] <js> Effect info for volume command panning was shown in decimal even if hex volume column was enabled (http://bugs.openmpt.org/view.php?id=1943).
+- [Fix] <js> Choosing "Copy Pattern" from the order list context menu always copied the currently displayed pattern, not the one on which the context menu was invoked.
+
+VST / DMO Plugins
+- [Imp] <js> Plugin editors can now receive SysEx messages from OpenMPT's MIDI recording.
+- [Fix] <js> Work around apparently broken channel negotiation in MaxSynths DR-910 plugin (http://forum.openmpt.org/index.php?topic=7442.0).
+
+Playback
+- [Fix] <js> Avoid potential read past end of sample data in a specific combination of reverse sample playback + offset past sample loop.
+
+MOD
+- [Fix] <js> ProTracker arpeggio wrapraound results in an effective period of 65536 on Paula, not pausing the sample entirely (tx eightbitbubsy).
+
+Other formats
+- [Fix] <js> ULT: Loop points were incorrectly limited for 16-bit samples (http://bugs.openmpt.org/view.php?id=1953).
+
+Misc
+- [Fix] <js> MIDI Recording: On recent versions of Windows 11, MIDI recording stopped working after receiving a SysEx message (http://forum.openmpt.org/index.php?topic=7456.0).
+- [Fix] <js> MIDI Export: Exporting from MOD or S3M did not correctly export implicit note-offs when playing a new note on the same channel (http://bugs.openmpt.org/view.php?id=1946).
+- [Fix] <js> Keyboard Settings: The instrument note map category was missing (http://bugs.openmpt.org/view.php?id=1945).
+- [Fix] <js> Display Settings: Changing DPI awareness didn't mark the settings page as modified.
+
+Third-Party Libraries
+- [Imp] Update libopusenc (v0.3), mpg123 (v1.33.4), opus (v1.6.1), unrar(v7.2.4) and zlib (v1.3.2)
+
 
 v1.32.06.00 (14 December 2025, revision 24626)
 ----------------------------------------------
@@ -527,7 +554,7 @@ Stream Export
 - [Fix] <js> Aborting was not possible during the normalization step.
 
 Misc
-- [Imp] <js> Keyboard Config Dialog: New shortcuts are now accepted by pressing the new "Set" button or by double-clicking into the shortcut field to improve accesibility (http://bugs.openmpt.org/view.php?id=1825).
+- [Imp] <js> Keyboard Settings: New shortcuts are now accepted by pressing the new "Set" button or by double-clicking into the shortcut field to improve accesibility (http://bugs.openmpt.org/view.php?id=1825).
 - [Mod] <js> "Find MPT Hacks" now detects IT instruments with fadeout values that are not multiples of 32, and warns about patterns shorter than 32 rows.
 - [Fix] <js> The "update available" tooltip could cause a really long hang if the previous OpenMPT session was ended in a minimized window state (http://bugs.openmpt.org/view.php?id=1723).
 - [Fix] <js> Prevent "Close All" keyboard shortcut from being activated when a dialog is open. It was not possible to close any files in this situation, but the modified status of all files was reset.
@@ -772,7 +799,7 @@ Misc
 - [Fix] <js> Opening links through the Open File / Save File dialogs could lead to a crash (http://bugs.openmpt.org/view.php?id=1739).
 - [Fix] <js> Allow end-of-tune optimizations for XM F00 command to also work with MIDI / OPL export (http://bugs.openmpt.org/view.php?id=1741).
 - [Fix] <jh> OpenMPT no longer ran on Windows N editions without the Media Feature Pack installed since OpenMPT 1.31.01.00 (http://bugs.openmpt.org/view.php?id=1749).
-- [Fix] <js> Keyboard configuration: Switching between categories broke in OpenMPT 1.31.04.00.
+- [Fix] <js> Keyboard Settings: Switching between categories broke in OpenMPT 1.31.04.00.
 - [Fix] <js> Moving a plugin didn't update its MIDI mapping directives.
 - [Fix] <js> MIDI Export: Exported drum keys were off by one since OpenMPT 1.30.03.00 unless Mapped mode was chosen.
 - [Fix] <js> Copying an instrument from another module (through the tree view or when appending modules) that referenced a tuning didn't copy that tuning over to the current module, eventually leading to a crash when the other module was closed.
@@ -805,7 +832,7 @@ Bundled plugins
 Misc
 - [Imp] <js> MIDI pitch bend is now applied to samples outside of the pattern view as well (e.g. sample / instrument / comments tab).
 - [Fix] <js> Improve scrolling support for laptops with precision touchpads (http://bugs.openmpt.org/view.php?id=1638).
-- [Fix] <js> Clear find text boxes in keyboard configuration when manually switching categories dropdown to avoid inconsistent display.
+- [Fix] <js> Clear find text boxes in keyboard settings when manually switching categories dropdown to avoid inconsistent display.
 
 Third-Party Libraries
 - [Imp] Update ancient (v2.1.1), Crypto++ (v8.8.0), FLAC (v1.4.3), unrar (v6.2.10) and zlib (v.1.3)
@@ -1107,7 +1134,7 @@ Stream Export
 
 Misc
 - [New] <js> Added Play / Stop shortcut (http://bugs.openmpt.org/view.php?id=1619).
-- [Imp] <js> Keyboard configuration: If no choices are set, the Restore button now restores all default choices for the given shortcut (http://bugs.openmpt.org/view.php?id=1630).
+- [Imp] <js> Keyboard Settings: If no choices are set, the Restore button now restores all default choices for the given shortcut (http://bugs.openmpt.org/view.php?id=1630).
 - [Fix] <js> OPL Export: Pressing the Cancel button didn't abort the conversion process.
 - [Fix] <kk & js> Most keyboard shortcuts were not accessible with Microsoft's RDP client for iOS and potentially other virtual keyboards (http://bugs.openmpt.org/view.php?id=1634).
 
@@ -1874,7 +1901,7 @@ Other formats
 Misc
 - [Imp] <js> When inverting icons in high contrast / dark themes, only invert their brightness but keep the hue.
 - [Fix] <js> Since OpenMPT 1.29.01.00, Note Off / Cut / Fade shortcuts were missing in new installations, when resetting keys to defaults or when importing very old OpenMPT keyboard configurations (http://bugs.openmpt.org/view.php?id=1385).
-- [Fix] <js> Keyboard configuration: Fixed possible crash in the keyboard setup when resetting a key mapping while a separator item was focussed.
+- [Fix] <js> Keyboard Settings: Fixed possible crash in the keyboard setup when resetting a key mapping while a separator item was focussed.
 - [Fix] <js> MIDI Export: In "Melodic (any)" mode, exported MIDI channels were inconsistent between notes / tracker events and Zxx macros past channel 10 (http://forum.openmpt.org/index.php?topic=6504.0).
 
 Third-Party Libraries
@@ -5750,7 +5777,7 @@ Misc
 - [New] <js> Added "Close All" shortcut + menu item (tx Wayfinder).
 - [New] <js> Added Finnish FT2 style keymap by cce.
 - [Imp] <js> Shortcuts are not processed anymore when a message box is shown.
-- [Imp] <js> Keyboard Config Dialog: Added a button to restore default configuration and a text field for searching keyboard shortcuts by name.
+- [Imp] <js> Keyboard Settings: Added a button to restore default configuration and a text field for searching keyboard shortcuts by name.
 - [Imp] <js> Added "/Portable" command line switch, which saves all settings in OpenMPT's directory (just like "UseAppDataDirectory=0" in the [Paths] section of mptrack.ini).
 - [Imp] <js> Compatibility export menu item is now greyed out for S3M and MPTM modules.
 - [Imp] <js> Plugin Manager: Buttons have mnemonics now, keyboard handler is disabled while the dialog is open, and the plugin list does not collapse anymore when removing a plugin (http://bugs.openmpt.org/view.php?id=186).
@@ -7647,7 +7674,7 @@ v1.16.0214a
 - [New] <ec> polyphase resampler tuning and fixes (enabled polyphase on filtered samples...)
 - [New] <rf> Added "copy and lose selection" command as a general pattern command, for those who like the cursor to be restored when they copy.
              You obviously don't have to map a key to this command if you don't want to use it.
-- [New] <rf> Automatic chord detection, a la Ericus: Assuming you're in a channel with note recording enabled and you have other channels with note recording enabled, if you hit two note keys within a given time, MPT should put the notes on the same row. You can set the interval time in keyboard config dialog.
+- [New] <rf> Automatic chord detection, a la Ericus: Assuming you're in a channel with note recording enabled and you have other channels with note recording enabled, if you hit two note keys within a given time, MPT should put the notes on the same row. You can set the interval time in keyboard settings.
 - [Mod] <rf> added button on wave writer dialog to open player settings rather than checkbox to enable "HQ resampling".
 - [Mod] <ec> new internal instrument format
 - [Mod] <rf> MIDI-In now uses same note entry code as normal keyboard note entry. (tx Squirrel Havoc)
