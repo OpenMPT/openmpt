@@ -33,6 +33,12 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.32.07.00 (24 March 2026, revision 25097)
+-------------------------------------------
+Playback
+- [Fix] <js> A regression in OpenMPT 1.32.07.00 caused some chip sample loops to be detuned, most notably in MOD files.
+
+
 v1.32.07.00 (22 March 2026, revision 25055)
 -------------------------------------------
 Pattern tab
