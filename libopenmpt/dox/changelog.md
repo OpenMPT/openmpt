@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.28-pre
 
+ *  [**Sec**] The security fix in libopenmpt 0.6.28 (r25044) was incomplete,
+    causing a regression when playing short looped ("chip") samples (r25086).
+
 ### libopenmpt 0.6.27 (2026-03-22)
 
  *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
