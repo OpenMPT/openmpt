@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.7.20-pre
+
 ### libopenmpt 0.7.19 (2026-03-24)
 
  *  [**Sec**] The security fix in libopenmpt 0.7.18 (r25043) was incomplete,
