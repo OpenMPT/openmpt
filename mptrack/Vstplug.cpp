@@ -443,7 +443,7 @@ intptr_t VSTCALLBACK CVstPlugin::MasterCallBack(AEffect *effect, VstOpcodeToHost
 				if(sndFile->m_playBehaviour[kLegacyPPQpos])
 					timeInfo.ppqPos = (timeInfo.samplePos / timeInfo.sampleRate) * (sndFile->GetCurrentBPM() / 60.0);
 				else
-					timeInfo.ppqPos = sndFile->m_PlayState.m_ppqPosBeat + sndFile->m_PlayState.m_ppqPosFract;
+					timeInfo.ppqPos = sndFile->m_PlayState.PPQPos();
 
 				ROWINDEX rpm = pVstPlugin->GetSoundFile().m_PlayState.m_nCurrentRowsPerMeasure;
 				if(!rpm)

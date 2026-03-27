@@ -61,6 +61,12 @@ void PlayState::UpdatePPQ(bool patternTransition) noexcept
 }
 
 
+double PlayState::PPQPos() const noexcept
+{
+	return m_ppqPosBeat + m_ppqPosFract + static_cast<double>(m_nSamplesPerTick - m_nBufferCount) / m_nSamplesPerTick;
+}
+
+
 mpt::span<ModChannel> PlayState::PatternChannels(const CSoundFile &sndFile) noexcept
 {
 	return mpt::as_span(Chn).subspan(0, std::min(Chn.size(), static_cast<size_t>(sndFile.GetNumChannels())));

@@ -441,10 +441,10 @@ void MidiInOut::Process(float *, float *, uint32 numFrames)
 		}
 		m_nextClock -= numFrames;
 
-		if(m_sendTimingInfo && !m_positionChanged && m_SndFile.m_PlayState.m_ppqPosFract == 0.0)
+		if(m_sendTimingInfo && !m_positionChanged && m_SndFile.m_PlayState.m_ppqPosFract == 0.0 && m_SndFile.m_PlayState.AtStartOfTick())
 		{
 			// Send Song Position on every pattern change or start of new measure
-			uint16 ppq = mpt::saturate_trunc<uint16>((m_SndFile.m_PlayState.m_ppqPosBeat + m_SndFile.m_PlayState.m_ppqPosFract) * 4.0);
+			uint16 ppq = mpt::saturate_trunc<uint16>((m_SndFile.m_PlayState.PPQPos()) * 4.0);
 			if(ppq < 16384)
 			{
 				uint32 midiCode = MIDIEvents::SongPosition(ppq);
@@ -574,7 +574,7 @@ void MidiInOut::PositionChanged()
 	if(m_sendTimingInfo && !m_SndFile.IsPaused())
 	{
 		MidiSend(0xFC);  // Stop
-		uint16 ppq = mpt::saturate_trunc<uint16>((m_SndFile.m_PlayState.m_ppqPosBeat + m_SndFile.m_PlayState.m_ppqPosFract) * 4.0);
+		uint16 ppq = mpt::saturate_trunc<uint16>((m_SndFile.m_PlayState.PPQPos()) * 4.0);
 		if(ppq < 16384)
 			MidiSend(MIDIEvents::SongPosition(ppq));
 		MidiSend(0xFA);  // Start
