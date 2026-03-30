@@ -367,7 +367,7 @@ LRESULT CMainToolBar::OnDPIChangedAfterParent(WPARAM, LPARAM)
 }
 
 
-LRESULT CMainToolBar::OnSettingChange(WPARAM wParam, LPARAM lParam)
+LRESULT CMainToolBar::OnSettingChange(WPARAM, LPARAM)
 {
 	// Workaround: When locking the screen or invoking a UAC prompt, spin buttons with auto-buddy property become invisible.
 	// One common thing between those two events is that they result in a WM_SETTINGCHANGE message being sent to the toolbar.

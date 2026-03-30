@@ -149,7 +149,7 @@ protected:
 	//{{AFX_MSG(CMainToolBar)
 	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg LRESULT OnSettingChange(WPARAM, LPARAM);
-	afx_msg LRESULT OnDeferredRefreshToolbar(WPARAM, LPARAM);
+	afx_msg LRESULT OnRefreshToolbar(WPARAM, LPARAM);
 	afx_msg void OnVScroll(UINT, UINT, CScrollBar *);
 	afx_msg void OnTbnDropDownToolBar(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnToolTipText(UINT, NMHDR* pNMHDR, LRESULT* pResult);
