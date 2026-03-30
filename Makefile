@@ -1200,3 +1200,17 @@ clean-dist:
 	$(INFO) clean-dist ...
 	$(SILENT)$(RM) $(call FIXPATH,$(DIST_OUTPUTS))
 	$(SILENT)$(RMTREE) $(call FIXPATH,$(DIST_OUTPUTDIRS))
+
+.PHONY: download
+download:
+	$(SILENT)./build/download_externals.sh
+
+.PHONY: tools
+tools:
+	$(SILENT)true
+
+.PHONY: full
+full:
+	$(MAKE) download
+	$(MAKE) tools
+	$(MAKE)
