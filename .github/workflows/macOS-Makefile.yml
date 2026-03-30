@@ -221,6 +221,12 @@ jobs:
     - name: fixup GitHub Homebrew python breakage
       if: ${{ matrix.host == 'macos-13' }}
       run: brew unlink python@3.12 && brew unlink python@3.13 && brew link --overwrite python@3.12 && brew link --overwrite python@3.13
+    - name: fixup GitHub Homebrew ruby breakage
+      if: ${{ matrix.host == 'macos-14' }}
+      run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
+    - name: fixup GitHub Homebrew ruby breakage
+      if: ${{ matrix.host == 'macos-15' }}
+      run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
     - name: upgrade packages
       if: ${{ matrix.host != 'macos-13' }}
       run: brew upgrade
