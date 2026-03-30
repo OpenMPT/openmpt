@@ -589,7 +589,7 @@ CString CCtrlSamples::GetToolTipText(UINT uId, HWND) const
 		case IDC_SAMPLE_AMPLIFY: s = _T("Amplify"); cmd = kcSampleAmplify; break;
 		case IDC_SAMPLE_DCOFFSET: s = _T("Remove DC Offset and Normalize (hold shift to process all samples)"); cmd = kcSampleRemoveDCOffset; break;
 		case IDC_SAMPLE_STEREOSEPARATION: s = _T("Change Stereo Separation / Stereo Width of the sample"); cmd = kcSampleStereoSep; break;
-		case IDC_SAMPLE_RESAMPLE: s = _T("Resample"); cmd = kcSampleResample; break;
+		case IDC_SAMPLE_RESAMPLE: s = _T("Resample (hold shift to resample all samples)"); cmd = kcSampleResample; break;
 		case IDC_SAMPLE_REVERSE: s = _T("Reverse"); cmd = kcSampleReverse; break;
 		case IDC_SAMPLE_SILENCE: s = _T("Silence"); cmd = kcSampleSilence; break;
 		case IDC_SAMPLE_INVERT: s = _T("Invert Phase"); cmd = kcSampleInvert; break;

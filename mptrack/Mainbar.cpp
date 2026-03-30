@@ -161,6 +161,8 @@ void CToolBarEx::SetButtonVisibility(int index, bool visible)
 /////////////////////////////////////////////////////////////////////
 // CMainToolBar
 
+static constexpr UINT WM_TOOLBAR_REFRESH = WM_USER + 1;
+
 enum ToolbarItemIndex
 {
 	FILE_NEW_INDEX = 0,
@@ -280,6 +282,8 @@ BEGIN_MESSAGE_MAP(CMainToolBar, CToolBarEx)
 	ON_NOTIFY_REFLECT(TBN_DROPDOWN, &CMainToolBar::OnTbnDropDownToolBar)
 	ON_COMMAND_RANGE(ID_SELECT_MIDI_DEVICE, ID_SELECT_MIDI_DEVICE + MAX_MIDI_DEVICES, &CMainToolBar::OnSelectMIDIDevice)
 	ON_MESSAGE(WM_DPICHANGED_AFTERPARENT, &CMainToolBar::OnDPIChangedAfterParent)
+	ON_MESSAGE(WM_SETTINGCHANGE,          &CMainToolBar::OnSettingChange)
+	ON_MESSAGE(WM_TOOLBAR_REFRESH,        &CMainToolBar::OnRefreshToolbar)
 
 	ON_EN_CHANGE(IDC_EDIT_CURRENTSPEED, &CMainToolBar::OnSpeedChanged)
 	ON_EN_CHANGE(IDC_EDIT_CURRENTTEMPO, &CMainToolBar::OnTempoChanged)
@@ -360,6 +364,23 @@ LRESULT CMainToolBar::OnDPIChangedAfterParent(WPARAM, LPARAM)
 	UpdateSizes();
 	RefreshToolbar();
 	return result;
+}
+
+
+LRESULT CMainToolBar::OnSettingChange(WPARAM wParam, LPARAM lParam)
+{
+	// Workaround: When locking the screen or invoking a UAC prompt, spin buttons with auto-buddy property become invisible.
+	// One common thing between those two events is that they result in a WM_SETTINGCHANGE message being sent to the toolbar.
+	// If we try to refresh the toolbar right in this event, nothing happens, but if we defer it via PostMessage, the spin buttons reappear.
+	PostMessage(WM_TOOLBAR_REFRESH);
+	return Default();
+}
+
+
+LRESULT CMainToolBar::OnRefreshToolbar(WPARAM, LPARAM)
+{
+	RefreshToolbar();
+	return 0;
 }
 
 
