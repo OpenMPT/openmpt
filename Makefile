@@ -2186,3 +2186,17 @@ distversion-pure:
 .PHONY: distversion-tarball
 distversion-tarball:
 	$(SILENT)echo "$(DIST_LIBOPENMPT_TARBALL_VERSION)"
+
+.PHONY: download
+download:
+	$(SILENT)./build/download_externals.sh
+
+.PHONY: tools
+tools:
+	$(SILENT)./build/build_tools.sh
+
+.PHONY: full
+full:
+	$(MAKE) download
+	$(MAKE) tools
+	$(MAKE)
