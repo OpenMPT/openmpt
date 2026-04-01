@@ -33,6 +33,22 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.32.09.00 (1 April 2026, revision 25160)
+------------------------------------------
+VST / DMO Plugins
+- [Fix] <js> In OpenMPT 1.32.07.00 and 1.32.08.00, trying to play notes from a bridged plugin window could cause a crash (http://bugs.openmpt.org/view.php?id=1962).
+- [Fix] <js> The PPQ position reported to plugins was not updated if a module tick spanned multiple VST processing calls.
+
+Other formats
+- [Fix] <js> MID: Continued SysEx events on a MIDI track currently mapped to anything but the first MIDI port were treated like the start of a SysEx message instead.
+
+Misc
+- [Fix] <js> Since OpenMPT 1.32.01.00, spin buttons in the main toolbar could disappear when locking the screen or invoking a UAC prompt (http://bugs.openmpt.org/view.php?id=1929).
+
+Bundled plugins
+- [Fix] <js> MIDI I/O Plugin: Sometimes, multiple duplicate song position pointers were sent.
+
+
 v1.32.08.00 (24 March 2026, revision 25097)
 -------------------------------------------
 Playback
