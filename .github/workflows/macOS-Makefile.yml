@@ -11,6 +11,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { host: macos-26, compiler: '26.5', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '26.4' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '26.4' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '15.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '14.8' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '13.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '12.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: arm64 , target: '11.7' , deps: local, check: true , ancient: false }
+          - { host: macos-26, compiler: '26.5', arch: x86_64, target: '11.7' , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.4', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.4', arch: arm64 , target: ''     , deps: local, check: true , ancient: false }
           - { host: macos-26, compiler: '26.4', arch: x86_64, target: ''     , deps: local, check: true , ancient: false }
