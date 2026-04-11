@@ -63,7 +63,8 @@ void PlayState::UpdatePPQ(bool patternTransition) noexcept
 
 double PlayState::PPQPos() const noexcept
 {
-	return m_ppqPosBeat + m_ppqPosFract + static_cast<double>(m_nSamplesPerTick - m_nBufferCount) / m_nSamplesPerTick;
+	const ROWINDEX rpb = m_nCurrentRowsPerBeat ? m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
+	return m_ppqPosBeat + m_ppqPosFract + static_cast<double>(m_nSamplesPerTick - m_nBufferCount) / (m_nSamplesPerTick * rpb * TicksOnRow());
 }
 
 
