@@ -309,7 +309,7 @@ AS_IF([test "x$with_portaudiocpp" != "xno"],
    ],
    [
     have_portaudiocpp=0
-    AC_MSG_ERROR([Unable to find libportaudiocpp.])
+    AC_MSG_WARN([Unable to find libportaudiocpp.])
    ]
   )
  ],
