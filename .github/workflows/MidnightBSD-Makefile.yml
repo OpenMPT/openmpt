@@ -1,0 +1,86 @@
+name: MidnightBSD Makefile
+
+on:
+  push:
+    branches: [ OpenMPT-1.32 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '4.0.4', deps: sys   }
+          - { version: '4.0.4', deps: local }
+          - { version: '4.0.4', deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo mport index
+          sudo mport upgrade
+          sudo mport install subversion p5-XML-TreePP git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2 || true
+    - name: Build
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: Test
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          gmake -j$(sysctl -n hw.ncpu) STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true

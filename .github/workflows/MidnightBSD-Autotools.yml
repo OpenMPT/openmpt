@@ -1,0 +1,72 @@
+name: MidnightBSD Autotools
+
+on:
+  push:
+    branches: [ OpenMPT-1.32 ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '4.0.4' }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Startup VM
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: runner-to-vm
+        shutdown_vm: false
+        run: true
+    - name: Install dependencies
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          sudo mport index
+          sudo mport upgrade
+          sudo mport install subversion p5-XML-TreePP git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2 || true
+    - name: Build
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: false
+        run: |
+          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
+    - name: Shutdown VM
+      uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: midnightbsd
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+        shutdown_vm: true
+        run: true
