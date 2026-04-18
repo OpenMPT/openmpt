@@ -233,7 +233,7 @@ BOOL CCtrlSamples::OnInitDialog()
 		{_T("1:512"), 10},
 	};
 	m_ComboZoom.SetRedraw(FALSE);
-	m_ComboZoom.InitStorage(static_cast<int>(std::size(ZoomLevels)), 4);
+	m_ComboZoom.InitStorage(static_cast<int>(std::size(ZoomLevels)), static_cast<UINT>(std::size(ZoomLevels) * 5));
 	for(const auto &[str, data] : ZoomLevels)
 	{
 		m_ComboZoom.SetItemData(m_ComboZoom.AddString(str), static_cast<DWORD_PTR>(data));
@@ -265,7 +265,7 @@ BOOL CCtrlSamples::OnInitDialog()
 	m_SpinVolume.SetRange(0, 64);
 	m_SpinGlobalVol.SetRange(0, 64);
 
-	m_CbnBaseNote.InitStorage(BASENOTE_MAX - BASENOTE_MIN, 4);
+	m_CbnBaseNote.InitStorage(BASENOTE_MAX - BASENOTE_MIN, static_cast<UINT>((BASENOTE_MAX - BASENOTE_MIN) * 4 * sizeof(TCHAR)));
 	m_CbnBaseNote.SetRedraw(FALSE);
 	for(ModCommand::NOTE i = BASENOTE_MIN; i <= BASENOTE_MAX; i++)
 	{
@@ -276,7 +276,7 @@ BOOL CCtrlSamples::OnInitDialog()
 
 	// Pitch selection
 	// Allow pitch from -12 (1 octave down) to +12 (1 octave up)
-	m_ComboPitch.InitStorage(25, 4);
+	m_ComboPitch.InitStorage(25, 25 * 4 * sizeof(TCHAR));
 	m_ComboPitch.SetRedraw(FALSE);
 	for(int i = -12 ; i <= 12 ; i++)
 	{

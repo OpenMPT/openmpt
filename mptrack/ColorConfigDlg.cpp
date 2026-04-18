@@ -225,7 +225,8 @@ BOOL COptionsColors::OnInitDialog()
 	SetDlgItemText(IDC_BUTTON10, FormatFontName(commentFont));
 
 	m_ComboPreset.SetRedraw(FALSE);
-	m_ComboPreset.InitStorage(static_cast<int>(2 + std::size(ColorSchemes)), 20 * sizeof(TCHAR));
+	const size_t numItems = 2 + std::size(ColorSchemes);
+	m_ComboPreset.InitStorage(static_cast<int>(numItems), static_cast<UINT>(numItems * 20 * sizeof(TCHAR)));
 	m_ComboPreset.AddString(_T("Choose a Colour Scheme..."));
 	m_ComboPreset.AddString(_T("OpenMPT (Default)"));
 	for(const auto &preset : ColorSchemes)

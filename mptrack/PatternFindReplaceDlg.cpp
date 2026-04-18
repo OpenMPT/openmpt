@@ -68,8 +68,10 @@ protected:
 			AppendNotesToControl(m_cbnMax, static_cast<ModCommand::NOTE>(m_minVal), static_cast<ModCommand::NOTE>(m_maxVal));
 		} else
 		{
-			m_cbnMin.InitStorage(m_minVal - m_maxVal + 1, 4);
-			m_cbnMax.InitStorage(m_minVal - m_maxVal + 1, 4);
+			const int numItems = m_minVal - m_maxVal + 1;
+			const UINT strSize = static_cast<UINT>(numItems * 4 * sizeof(TCHAR));
+			m_cbnMin.InitStorage(numItems, strSize);
+			m_cbnMax.InitStorage(numItems, strSize);
 			const TCHAR *formatString;
 			if(m_displayMode == kHex && m_maxVal <= 0x0F)
 				formatString = _T("%01X");
@@ -223,7 +225,7 @@ BOOL CFindReplaceTab::OnInitDialog()
 	{
 		int sel = -1;
 		m_cbnNote.SetRedraw(FALSE);
-		m_cbnNote.InitStorage(150, 6);
+		m_cbnNote.InitStorage(150, 150 * 6 * sizeof(TCHAR));
 		m_cbnNote.SetItemData(m_cbnNote.AddString(_T("...")), NOTE_NONE);
 		if (m_isReplaceTab)
 		{
@@ -270,10 +272,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 
 	// Volume Command
 	m_cbnVolCmd.SetRedraw(FALSE);
-	m_cbnVolCmd.InitStorage(m_effectInfo.GetNumVolCmds(), 15);
-	m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(_T(" None")), (DWORD_PTR)-1);
 	UINT count = m_effectInfo.GetNumVolCmds();
-	for (UINT n=0; n<count; n++)
+	m_cbnVolCmd.InitStorage(count, static_cast<UINT>(count * 15 * sizeof(TCHAR)));
+	m_cbnVolCmd.SetItemData(m_cbnVolCmd.AddString(_T(" None")), (DWORD_PTR)-1);
+	for (UINT n = 0; n < count; n++)
 	{
 		if(m_effectInfo.GetVolCmdInfo(n, &s) && !s.IsEmpty())
 		{
@@ -294,10 +296,10 @@ BOOL CFindReplaceTab::OnInitDialog()
 	// Command
 	{
 		m_cbnCommand.SetRedraw(FALSE);
-		m_cbnCommand.InitStorage(m_effectInfo.GetNumEffects(), 20);
-		m_cbnCommand.SetItemData(m_cbnCommand.AddString(_T(" None")), (DWORD_PTR)-1);
 		count = m_effectInfo.GetNumEffects();
-		for (UINT n=0; n<count; n++)
+		m_cbnCommand.InitStorage(count, static_cast<UINT>(count * 20 * sizeof(TCHAR)));
+		m_cbnCommand.SetItemData(m_cbnCommand.AddString(_T(" None")), (DWORD_PTR)-1);
+		for (UINT n = 0; n < count; n++)
 		{
 			if(m_effectInfo.GetEffectInfo(n, &s, true) && !s.IsEmpty())
 			{
@@ -343,7 +345,8 @@ void CFindReplaceTab::UpdateInstrumentList()
 	int sel = (oldSelection == 0) ? 0 : -1;
 	m_cbnInstr.SetRedraw(FALSE);
 	m_cbnInstr.ResetContent();
-	m_cbnInstr.InitStorage((isPCEvent ? MAX_MIXPLUGINS : MAX_INSTRUMENTS) + 3, 32);
+	const int numItems = (isPCEvent ? MAX_MIXPLUGINS : MAX_INSTRUMENTS) + 3;
+	m_cbnInstr.InitStorage(numItems, static_cast<UINT>(numItems * 32 * sizeof(TCHAR)));
 	m_cbnInstr.SetItemData(m_cbnInstr.AddString(_T("..")), 0);
 	if (m_isReplaceTab)
 	{
@@ -444,7 +447,7 @@ void CFindReplaceTab::UpdateParamList()
 		Limit(newpos, 0, newcount - 1);
 		m_cbnParam.SetRedraw(FALSE);
 		m_cbnParam.ResetContent();
-		m_cbnParam.InitStorage(newcount + 2, 4);
+		m_cbnParam.InitStorage(newcount + 2, static_cast<UINT>((newcount + 2) * 4 * sizeof(TCHAR)));
 
 		if(m_isReplaceTab)
 		{
@@ -518,8 +521,9 @@ void CFindReplaceTab::UpdateVolumeList()
 			AddPluginParameternamesToCombobox(m_cbnPCParam, *m_sndFile.m_MixPlugins[plug].pMixPlugin);
 		} else
 		{
-			m_cbnPCParam.InitStorage(ModCommand::maxColumnValue + 1, 20);
-			for(int i = 0; i <= ModCommand::maxColumnValue; i++)
+			const int numItems = ModCommand::maxColumnValue + 1;
+			m_cbnPCParam.InitStorage(numItems, static_cast<UINT>(numItems * 20 * sizeof(TCHAR)));
+			for(int i = 0; i < numItems; i++)
 			{
 				wsprintf(s, _T("%02u: Parameter %02u"), static_cast<unsigned int>(i), static_cast<unsigned int>(i));
 				m_cbnPCParam.SetItemData(m_cbnPCParam.AddString(s), i);
@@ -574,7 +578,7 @@ void CFindReplaceTab::UpdateVolumeList()
 		Limit(newpos, 0, newcount - 1);
 		m_cbnVolume.SetRedraw(FALSE);
 		m_cbnVolume.ResetContent();
-		m_cbnVolume.InitStorage(newcount + 2, 4);
+		m_cbnVolume.InitStorage(newcount + 2, static_cast<UINT>((newcount + 2) * 4 * sizeof(TCHAR)));
 		if(m_isReplaceTab)
 		{
 			wsprintf(s, _T("+ %d"), m_settings.replaceVolume);

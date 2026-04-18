@@ -1375,7 +1375,8 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 
 	// Octave modifier
 	m_CbnOctaveModifier.SetRedraw(FALSE);
-	m_CbnSplitVolume.InitStorage(SplitKeyboardSettings::splitOctaveRange * 2 + 1, 9);
+	int numItems = SplitKeyboardSettings::splitOctaveRange * 2 + 1;
+	m_CbnSplitVolume.InitStorage(numItems, static_cast<UINT>(numItems * 9 * sizeof(TCHAR)));
 	for(int i = -SplitKeyboardSettings::splitOctaveRange; i < SplitKeyboardSettings::splitOctaveRange + 1; i++)
 	{
 		s.Format(i < 0 ? _T("Octave -%d") : i > 0 ? _T("Octave +%d") : _T("No Change"), std::abs(i));
@@ -1388,7 +1389,7 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 
 	// Volume
 	m_CbnSplitVolume.SetRedraw(FALSE);
-	m_CbnSplitVolume.InitStorage(65, 4);
+	m_CbnSplitVolume.InitStorage(65, 65 * 4 * sizeof(TCHAR));
 	m_CbnSplitVolume.AddString(_T("No Change"));
 	m_CbnSplitVolume.SetItemData(0, 0);
 	for(int i = 1; i <= 64; i++)
@@ -1402,7 +1403,8 @@ BOOL CSplitKeyboardSettings::OnInitDialog()
 
 	// Instruments
 	m_CbnSplitInstrument.SetRedraw(FALSE);
-	m_CbnSplitInstrument.InitStorage(1 + (sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples()), 16);
+	numItems = 1 + (sndFile.GetNumInstruments() ? sndFile.GetNumInstruments() : sndFile.GetNumSamples());
+	m_CbnSplitInstrument.InitStorage(numItems, static_cast<UINT>(numItems * 16 * sizeof(TCHAR)));
 	m_CbnSplitInstrument.SetItemData(m_CbnSplitInstrument.AddString(_T("No Change")), 0);
 
 	if(sndFile.GetNumInstruments())
