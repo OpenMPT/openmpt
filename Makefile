@@ -363,6 +363,9 @@ endif
 ifeq ($(UNAME_S),DragonFly)
 HOST_FLAVOUR=DRAGONFLY
 endif
+ifeq ($(UNAME_S),MidnightBSD)
+HOST_FLAVOUR=MIDNIGHTBSD
+endif
 ifeq ($(UNAME_S),Haiku)
 HOST_FLAVOUR=HAIKU
 endif
