@@ -226,7 +226,7 @@ protected:
 	CSoundFile m_WaveFile;
 	ModSample m_metronomeMeasure{}, m_metronomeBeat{};
 
-	TCHAR m_szUserText[512], m_szInfoText[512], m_szXInfoText[512];
+	CString m_userText, m_infoText, m_xInfoText;
 
 	mpt::heap_value<CAutoSaver> m_AutoSaver;
 	mpt::heap_value<CInputHandler> m_InputHandler;
@@ -297,10 +297,10 @@ public:
 public:
 	CFont &GetCommentsFont() { return m_hCommentsFont; }
 
-	void SetUserText(LPCTSTR lpszText);
-	void SetInfoText(LPCTSTR lpszText);
-	void SetXInfoText(LPCTSTR lpszText);
-	void SetHelpText(LPCTSTR lpszText);
+	void SetUserText(const TCHAR *text);
+	void SetInfoText(const TCHAR *text);
+	void SetXInfoText(const TCHAR *text);
+	void SetHelpText(const TCHAR *text);
 	CString GetHelpText() const;
 	UINT GetBaseOctave() const;
 	CModDoc *GetActiveDoc() const;

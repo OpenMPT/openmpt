@@ -206,10 +206,6 @@ CMainFrame::CMainFrame()
 	, m_SoundDeviceFillBufferCriticalSection(CriticalSection::InitialState::Unlocked)
 	, m_InputHandler{this}
 {
-	m_szUserText[0] = 0;
-	m_szInfoText[0] = 0;
-	m_szXInfoText[0]= 0;
-
 	InitCommonControls();
 	MemsetZero(gcolrefVuMeter);
 }
@@ -1975,39 +1971,39 @@ void CMainFrame::SetupMidi(FlagSet<MidiSetup> d, UINT n)
 }
 
 
-void CMainFrame::SetUserText(LPCTSTR lpszText)
+void CMainFrame::SetUserText(const TCHAR *text)
 {
-	if (lpszText[0] | m_szUserText[0])
+	if(text[0] || !m_userText.IsEmpty())
 	{
-		_tcscpy(m_szUserText, lpszText);
+		m_userText = text;
 		OnUpdateUser(nullptr);
 	}
 }
 
 
-void CMainFrame::SetInfoText(LPCTSTR lpszText)
+void CMainFrame::SetInfoText(const TCHAR *text)
 {
-	if (lpszText[0] | m_szInfoText[0])
+	if(text[0] || !m_infoText.IsEmpty())
 	{
-		_tcscpy(m_szInfoText, lpszText);
+		m_infoText = text;
 		OnUpdateInfo(nullptr);
 	}
 }
 
 
-void CMainFrame::SetXInfoText(LPCTSTR lpszText)
+void CMainFrame::SetXInfoText(const TCHAR *text)
 {
-	if (lpszText[0] | m_szXInfoText[0])
+	if(text[0] || !m_xInfoText.IsEmpty())
 	{
-		_tcscpy(m_szXInfoText, lpszText);
+		m_xInfoText = text;
 		OnUpdateInfo(nullptr);
 	}
 }
 
 
-void CMainFrame::SetHelpText(LPCTSTR lpszText)
+void CMainFrame::SetHelpText(const TCHAR *text)
 {
-	m_wndStatusBar.SetPaneText(0, lpszText);
+	m_wndStatusBar.SetPaneText(0, text);
 }
 
 
@@ -2377,19 +2373,19 @@ void CMainFrame::OnUpdateTime(CCmdUI *)
 
 void CMainFrame::OnUpdateUser(CCmdUI *)
 {
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_USER), m_szUserText, TRUE);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_USER), m_userText, TRUE);
 }
 
 
 void CMainFrame::OnUpdateInfo(CCmdUI *)
 {
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_INFO), m_szInfoText, TRUE);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_INFO), m_infoText, TRUE);
 }
 
 
 void CMainFrame::OnUpdateXInfo(CCmdUI *)
 {
-	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_XINFO), m_szXInfoText, TRUE);
+	m_wndStatusBar.SetPaneText(m_wndStatusBar.CommandToIndex(ID_INDICATOR_XINFO), m_xInfoText, TRUE);
 }
 
 void CMainFrame::OnPlayerPause()
