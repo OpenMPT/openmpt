@@ -347,10 +347,12 @@ void MidiInOut::SetParameter(PlugParamIndex index, PlugParamValue value, PlaySta
 {
 	if(index >= kMacroParamMin && (index - kMacroParamMin) < m_parameterMacros.size())
 	{
+		m_mutex.lock();
 		// Enough memory should have already been allocated when the macro string was set
 		m_parameterMacroScratchSpace.resize(m_parameterMacros[index - kMacroParamMin].first.size() + 1);
 		m_parameterMacros[index - kMacroParamMin].second = value;
 		MIDIMacroParser parser{GetSoundFile(), playState, chn, false, mpt::as_span(m_parameterMacros[index - kMacroParamMin].first), mpt::as_span(m_parameterMacroScratchSpace), mpt::saturate_round<uint8>(value * 127.0f), static_cast<PLUGINDEX>(GetSlot() + 1)};
+		m_mutex.unlock();
 		mpt::span<uint8> midiMsg;
 		while(parser.NextMessage(midiMsg))
 		{
