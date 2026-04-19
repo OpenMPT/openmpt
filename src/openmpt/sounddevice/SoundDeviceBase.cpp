@@ -429,7 +429,7 @@ SoundDevice::StreamPosition Base::GetStreamPosition() const
 		const uint64 now = CallbackGetReferenceClockNowNanoseconds();
 		const SoundDevice::TimeInfo timeInfo = GetTimeInfo();
 		frames = mpt::saturate_round<int64>(
-			timeInfo.SyncPointStreamFrames + (static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1000.0 * 1000.0))));
+			timeInfo.SyncPointStreamFrames + (static_cast<double>(static_cast<int64>(now - timeInfo.SyncPointSystemTimestamp)) * timeInfo.Speed * m_Settings.Samplerate * (1.0 / (1'000'000'000.0))));
 	} else
 	{
 		frames = m_StreamPositionOutputFrames;
