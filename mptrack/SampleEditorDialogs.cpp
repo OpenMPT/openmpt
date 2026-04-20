@@ -490,14 +490,14 @@ BOOL AddSilenceDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
 
-	CSpinButtonCtrl *spin = (CSpinButtonCtrl *)GetDlgItem(IDC_SPIN_ADDSILENCE);
+	CSpinButtonCtrl *spin = static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN_ADDSILENCE));
 	if(spin)
 	{
 		spin->SetRange32(0, int32_max);
 		spin->SetPos32(m_numSamples);
 	}
 
-	CComboBox *box = (CComboBox *)GetDlgItem(IDC_COMBO1);
+	CComboBox *box = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1));
 	if(box)
 	{
 		box->AddString(_T("samples"));
@@ -790,6 +790,7 @@ bool CResamplingDlg::m_updatePatternNotes = false;
 
 BEGIN_MESSAGE_MAP(CResamplingDlg, DialogBase)
 	ON_EN_SETFOCUS(IDC_EDIT1, &CResamplingDlg::OnFocusEdit)
+	ON_EN_CHANGE(IDC_EDIT1,   &CResamplingDlg::OnEditChanged)
 END_MESSAGE_MAP()
 
 
@@ -891,7 +892,15 @@ void CResamplingDlg::OnOK()
 
 void CResamplingDlg::OnFocusEdit()
 {
-	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3);
+	if(m_lastInputDevice == InputDevice::Mouse)
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3);
+}
+
+
+void CResamplingDlg::OnEditChanged()
+{
+	if(m_lastInputDevice != InputDevice::Unknown)
+		CheckRadioButton(IDC_RADIO1, IDC_RADIO3, IDC_RADIO3);
 }
 
 

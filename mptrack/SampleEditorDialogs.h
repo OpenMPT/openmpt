@@ -246,6 +246,7 @@ protected:
 	void OnOK() override;
 
 	afx_msg void OnFocusEdit();
+	afx_msg void OnEditChanged();
 
 	DECLARE_MESSAGE_MAP()
 };

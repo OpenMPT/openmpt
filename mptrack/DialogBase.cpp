@@ -35,8 +35,16 @@ BOOL DialogBase::OnInitDialog()
 
 BOOL DialogBase::PreTranslateMessage(MSG *pMsg)
 {
-	if(pMsg && HandleGlobalKeyMessage(*pMsg))
-		return TRUE;
+	if(pMsg)
+	{
+		if(pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST)
+			m_lastInputDevice = InputDevice::Keyboard;
+		else if(pMsg->message >= WM_MOUSEFIRST && pMsg->message <= WM_MOUSELAST)
+			m_lastInputDevice = InputDevice::Mouse;
+
+		if(HandleGlobalKeyMessage(*pMsg))
+			return TRUE;
+	}
 
 	return CDialog::PreTranslateMessage(pMsg);
 }

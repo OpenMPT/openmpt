@@ -67,17 +67,6 @@ CModControlDlg::~CModControlDlg()
 }
 
 
-BOOL CModControlDlg::PreTranslateMessage(MSG *pMsg)
-{
-	if(pMsg->message >= WM_KEYFIRST && pMsg->message <= WM_KEYLAST)
-		m_lastInputDevice = InputDevice::Keyboard;
-	else if(pMsg->message >= WM_MOUSEFIRST && pMsg->message <= WM_MOUSELAST)
-		m_lastInputDevice = InputDevice::Mouse;
-
-	return DialogBase::PreTranslateMessage(pMsg);
-}
-
-
 void CModControlDlg::OnSize(UINT nType, int cx, int cy)
 {
 	DialogBase::OnSize(nType, cx, cy);

@@ -38,20 +38,12 @@ public:
 class CModControlDlg : public DialogBase
 {
 protected:
-	enum class InputDevice : uint8
-	{
-		Unknown,
-		Mouse,
-		Keyboard,
-	};
-
 	CModDoc &m_modDoc;
 	CSoundFile &m_sndFile;
 	CModControlView &m_parent;
 	HWND m_hWndView = nullptr;
 	HWND m_lastFocusItem = nullptr;
 	int m_nLockCount = 0;
-	InputDevice m_lastInputDevice = InputDevice::Unknown;
 	bool m_initialized = false;
 
 public:
@@ -87,7 +79,6 @@ public:
 	afx_msg void OnSwitchToView();
 
 	//{{AFX_VIRTUAL(CModControlDlg)
-	BOOL PreTranslateMessage(MSG *pMsg) override;
 	void OnOK() override {}
 	void OnCancel() override {}
 	void OnDPIChanged() override { RecalcLayout(); }

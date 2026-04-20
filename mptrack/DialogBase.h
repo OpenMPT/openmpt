@@ -18,6 +18,13 @@ OPENMPT_NAMESPACE_BEGIN
 class DialogBase : public CDialog
 {
 public:
+	enum class InputDevice : uint8
+	{
+		Unknown,
+		Mouse,
+		Keyboard,
+	};
+
 	using CDialog::CDialog;
 
 	BOOL OnInitDialog() override;
@@ -44,6 +51,8 @@ protected:
 private:
 	CString m_tooltipText;
 	int m_dpi = 0;
+protected:
+	InputDevice m_lastInputDevice = InputDevice::Unknown;
 };
 
 OPENMPT_NAMESPACE_END
