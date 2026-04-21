@@ -2929,7 +2929,7 @@ static std::unique_ptr<CUpdateCheckProgressDialog> g_UpdateCheckProgressDialog =
 bool CMainFrame::ShowUpdateIndicator(const UpdateCheckResult &result, const CString &releaseVersion, const CString &infoURL, bool showHighlight)
 {
 	m_updateCheckResult = std::make_unique<UpdateCheckResult>(result);
-	if(m_wndToolBar.IsVisible() && (TrackerSettings::Instance().mainToolBarVisibleItems & MainToolBarItem::IconsMisc))
+	if(m_wndToolBar.IsVisible() && (TrackerSettings::Instance().mainToolBarVisibleItems.Get() & MainToolBarItem::IconsMisc))
 	{
 		return m_wndToolBar.ShowUpdateInfo(releaseVersion, infoURL, showHighlight);
 	} else
