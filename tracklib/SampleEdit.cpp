@@ -888,11 +888,11 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, uint32 newRat
 				{
 					case 1:
 						firstVal = SC::Convert<double, int8>()(smp.sample8()[readOffset]);
-						lastVal = SC::Convert<double, int8>()(smp.sample8()[readOffset + selLength - numChannels]);
+						lastVal = SC::Convert<double, int8>()(smp.sample8()[readOffset + (selLength - 1) * numChannels]);
 						break;
 					case 2:
 						firstVal = SC::Convert<double, int16>()(smp.sample16()[readOffset]);
-						lastVal = SC::Convert<double, int16>()(smp.sample16()[readOffset + selLength - numChannels]);
+						lastVal = SC::Convert<double, int16>()(smp.sample16()[readOffset + (selLength - 1) * numChannels]);
 						break;
 					default:
 						// When higher bit depth is added, feel free to also replace CDSPResampler16 by CDSPResampler24 above.
