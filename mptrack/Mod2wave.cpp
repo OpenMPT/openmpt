@@ -152,6 +152,7 @@ BOOL CWaveConvert::OnInitDialog()
 	{
 		GetDlgItem(IDC_RADIO3)->SetWindowText(_T("&Entire Song"));
 		GetDlgItem(IDC_RADIO1)->EnableWindow(FALSE);
+		GetDlgItem(IDC_EDIT12)->EnableWindow(FALSE);
 	}
 	CheckRadioButton(IDC_RADIO1, IDC_RADIO3, selectedRadio);
 	UpdateSubsongName();
