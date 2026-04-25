@@ -12,7 +12,6 @@
 #include "mpt/base/saturate_cast.hpp"
 #include "openmpt/base/Int24.hpp"
 #include "openmpt/base/Types.hpp"
-#include "openmpt/soundbase/SampleConvert.hpp"
 
 #include <algorithm>
 #include <limits>
