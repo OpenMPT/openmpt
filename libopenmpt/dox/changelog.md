@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.55-pre
 
+ *  mpg123: Update to v1.33.5 (2026-04-25).
+
 ### libopenmpt 0.4.54 (2026-03-24)
 
  *  [**Sec**] The security fix in libopenmpt 0.4.53 (r25046) was incomplete,
