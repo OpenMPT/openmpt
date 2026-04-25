@@ -14,6 +14,8 @@ is just a high-level summary.
  *  [**Sec**] The security fix in libopenmpt 0.4.53 (r25046) was incomplete,
     causing a regression when playing short looped ("chip") samples (r25088).
 
+ *  mpg123: Update to v1.33.4 (2025-12-20).
+
 ### libopenmpt 0.4.53 (2026-03-22)
 
  *  [**Sec**] Possible out-of-bounds sample data read in a specific combination
