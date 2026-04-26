@@ -977,7 +977,7 @@ void CModToMidi::DoConversion(const mpt::PathString &fileName)
 	const int controls[] = {IDC_COMBO1, IDC_COMBO2, IDC_COMBO3, IDC_RADIO4, IDC_RADIO5, IDC_EDIT1, IDC_CHECK1, IDC_SPIN1, IDC_SPIN2, IDOK};
 	for(int control : controls)
 		GetDlgItem(control)->EnableWindow(FALSE);
-	GetDlgItem(IDCANCEL)->SetFocus();
+	GotoDlgCtrl(GetDlgItem(IDCANCEL));
 
 	CSoundFile &sndFile = m_modDoc.GetSoundFile();
 	SetRange(0, mpt::saturate_round<uint64>(std::accumulate(m_subSongs.begin(), m_subSongs.end(), 0.0, [](double acc, const auto &song) { return acc + song.duration; }) * sndFile.GetSampleRate()));

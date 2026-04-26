@@ -95,7 +95,7 @@ bool LFOPluginEditor::OpenEditor(CWnd *parent)
 
 	m_locked = false;
 	// Avoid weird WM_COMMAND message (following a WM_ACTIVATE message) activating a wrong waveform when closing the plugin editor while the pattern editor is open
-	GetDlgItem(IDC_RADIO1 + m_lfoPlugin.m_waveForm)->SetFocus();
+	GotoDlgCtrl(GetDlgItem(IDC_RADIO1 + m_lfoPlugin.m_waveForm));
 	return CAbstractVstEditor::OpenEditor(parent);
 }
 

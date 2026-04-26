@@ -173,7 +173,7 @@ BOOL CPatternPropertiesDlg::OnInitDialog()
 		m_numRows.AddString(mpt::cfmt::dec(irow));
 	}
 	m_numRows.SetRedraw(TRUE);
-	m_numRows.SetFocus();
+	GotoDlgCtrl(&m_numRows);
 	m_spinRPB.SetRange32(1, MAX_ROWS_PER_BEAT);
 	m_spinRPM.SetRange32(1, MAX_ROWS_PER_MEASURE);
 	m_spinPattern.SetRange32(-1, 1);
@@ -273,7 +273,7 @@ bool CPatternPropertiesDlg::ValidatePatternProperties()
 		Reporting::Error("Invalid time signature!", "Pattern Properties");
 		SetCurrentPattern(m_nPattern);
 		SetDlgItemInt(IDC_EDIT1, m_nPattern);
-		GetDlgItem(IDC_ROWSPERBEAT)->SetFocus();
+		GotoDlgCtrl(GetDlgItem(IDC_ROWSPERBEAT));
 		return false;
 	}
 
@@ -295,7 +295,7 @@ bool CPatternPropertiesDlg::ValidatePatternProperties()
 				{
 					SetCurrentPattern(m_nPattern);
 					SetDlgItemInt(IDC_EDIT1, m_nPattern);
-					m_numRows.SetFocus();
+					GotoDlgCtrl(&m_numRows);
 					return false;
 				}
 				break;

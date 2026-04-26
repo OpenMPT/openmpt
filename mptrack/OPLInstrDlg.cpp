@@ -157,7 +157,7 @@ void OPLInstrDlg::SetEnabled(bool enabled)
 		if(::IsChild(m_hWnd, m_lastFocusItem))
 			::SetFocus(m_lastFocusItem);
 		else
-			GetNextDlgTabItem(nullptr)->SetFocus();
+			NextDlgCtrl();
 	}
 }
 

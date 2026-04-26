@@ -251,7 +251,7 @@ BOOL COptionsColors::OnKillActive()
 	if(highlightBeats > highlightMeasures)
 	{
 		Reporting::Warning("Error: Primary highlight must be greater than or equal secondary highlight.");
-		::SetFocus(::GetDlgItem(m_hWnd, IDC_PRIMARYHILITE));
+		GotoDlgCtrl(GetDlgItem(IDC_PRIMARYHILITE));
 		return 0;
 	}
 

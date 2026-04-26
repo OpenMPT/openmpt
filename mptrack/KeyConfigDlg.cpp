@@ -453,7 +453,7 @@ void COptionsKeyboard::OnFindHotKey()
 	if(!hasKey)
 		UpdateCategory();
 	UpdateShortcutList(hasKey ? -1 : m_curCategory);
-	m_lbnCommandKeys.SetFocus();
+	GotoDlgCtrl(&m_lbnCommandKeys);
 }
 
 
@@ -837,11 +837,11 @@ void COptionsKeyboard::OnListenForKeys()
 void COptionsKeyboard::EnableKeyChoice(bool enable)
 {
 	if(!enable && GetFocus() == &m_eCustHotKey)
-		GetDlgItem(IDC_BUTTON1)->SetFocus();
+		GotoDlgCtrl(GetDlgItem(IDC_BUTTON1));
 	m_eCustHotKey.Bypass(!enable);
 	GetDlgItem(IDC_BUTTON1)->SetWindowText(enable ? _T("Cancel") : _T("&Set"));
 	if(enable)
-		m_eCustHotKey.SetFocus();
+		GotoDlgCtrl(&m_eCustHotKey);
 }
 
 

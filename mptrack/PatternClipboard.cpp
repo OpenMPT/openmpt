@@ -1170,8 +1170,7 @@ void PatternClipboardDialog::OnEditName()
 	m_editNameBox.Create(WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL, rect, &m_clipList, 1);
 	m_editNameBox.SetFont(m_clipList.GetFont());
 	m_editNameBox.SetWindowText(PatternClipboard::instance.m_clipboards[sel].description);
-	m_editNameBox.SetSel(0, -1, TRUE);
-	m_editNameBox.SetFocus();
+	GotoDlgCtrl(&m_editNameBox);
 	SetWindowLongPtr(m_editNameBox.m_hWnd, GWLP_USERDATA, (LONG_PTR)m_clipList.GetItemDataPtr(sel));
 }
 

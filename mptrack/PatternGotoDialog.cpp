@@ -79,14 +79,14 @@ void CPatternGotoDialog::OnOK()
 	if(m_nOrder >= Order.size())
 	{
 		MessageBeep(MB_ICONWARNING);
-		GetDlgItem(IDC_GOTO_ORD)->SetFocus();
+		GotoDlgCtrl(GetDlgItem(IDC_GOTO_ORD));
 		return;
 	}
 	// Does order match pattern? Does pattern exist?
 	if(Order[m_nOrder] != m_nPattern || !Order.IsValidPat(m_nOrder))
 	{
 		MessageBeep(MB_ICONWARNING);
-		GetDlgItem(IDC_GOTO_PAT)->SetFocus();
+		GotoDlgCtrl(GetDlgItem(IDC_GOTO_PAT));
 		return;
 	}
 

@@ -78,7 +78,7 @@ void DialogBase::SetFocusToFirstControl()
 	{
 		if((child->GetStyle() & WS_TABSTOP) && child->IsWindowEnabled())
 		{
-			child->SetFocus();
+			GotoDlgCtrl(child);
 			return;
 		}
 		child = child->GetNextWindow();
