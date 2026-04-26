@@ -1171,7 +1171,7 @@ void CViewSample::OnDraw(CDC *pDC)
 	rect.top = timelineHeight;
 	if((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		const int ymed = mpt::midpoint(rect.top, rect.bottom);
+		const int ymed = (rect.top + rect.bottom) / 2;
 		const int yrange = (rect.Height()) / 2;
 
 		// Erase background
