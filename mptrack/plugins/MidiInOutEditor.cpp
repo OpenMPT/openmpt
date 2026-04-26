@@ -78,6 +78,8 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 	CheckDlgButton(IDC_CHECK2, plugin.m_alwaysSendInitialDump ? BST_UNCHECKED : BST_CHECKED);
 	UpdateMidiDump();
 	m_paramCombo.SetRedraw(FALSE);
+	int numItems = MidiInOut::kMacroParamMax - MidiInOut::kMacroParamMin + 1;
+	m_paramCombo.InitStorage(numItems, static_cast<UINT>(numItems * 14 * sizeof(TCHAR)));
 	for(unsigned int i = MidiInOut::kMacroParamMin; i <= MidiInOut::kMacroParamMax; i++)
 	{
 		m_paramCombo.AddString(MPT_CFORMAT("Parameter {}")(i));
