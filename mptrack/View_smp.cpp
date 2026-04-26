@@ -922,7 +922,7 @@ void CViewSample::DrawSampleData2(HDC hdc, int ymed, int cx, int cy, SmpLength l
 		//posincr = Util::muldiv(len, 0x10000, cx);
 		posincr = uint64(len) * uint64(0x10000) / uint64(cx);
 	}
-	::MoveToEx(hdc, 0, ymed, NULL);
+	::MoveToEx(hdc, 0, ymed, nullptr);
 	posfrac = 0;
 	poshi = 0;
 	for (int x=0; x<xmax; x++)
@@ -1171,8 +1171,8 @@ void CViewSample::OnDraw(CDC *pDC)
 	rect.top = timelineHeight;
 	if((rcClient.bottom > rcClient.top) && (rcClient.right > rcClient.left))
 	{
-		const int ymed = (rect.top + rect.bottom) / 2;
-		const int yrange = (rect.bottom - rect.top) / 2;
+		const int ymed = mpt::midpoint(rect.top, rect.bottom);
+		const int yrange = (rect.Height()) / 2;
 
 		// Erase background
 		if ((m_dwBeginSel < m_dwEndSel) && (m_dwEndSel > smpScrollPos))
@@ -1699,7 +1699,7 @@ void CViewSample::SetInitialDrawPoint(ModSample &smp, const CPoint &point)
 		m_drawChannel = (point.y - m_timelineHeight) * smp.GetNumChannels() / (m_rcClient.Height() - m_timelineHeight);
 	else
 		m_drawChannel = 0;
-	Limit(m_drawChannel, 0, (int)smp.GetNumChannels() - 1);
+	Limit(m_drawChannel, 0, static_cast<int>(smp.GetNumChannels() - 1));
 
 	T *data = static_cast<T *>(smp.samplev()) + m_drawChannel;
 	data[m_dwEndDrag * smp.GetNumChannels()] = GetSampleValueFromPoint<T>(smp, point);
@@ -2931,69 +2931,76 @@ void CViewSample::On16BitConvert()
 void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 {
 	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr || m_nSample > pModDoc->GetNumSamples())
+		return;
+
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(sample.uFlags[CHN_ADLIB] || !sample.HasSampleData())
+		return;
+
 	BeginWaitCursor();
-	if(pModDoc != nullptr && (m_nSample <= pModDoc->GetNumSamples()))
+	bool success = false;
+	if(sample.GetNumChannels() > 1)
 	{
-		CSoundFile &sndFile = pModDoc->GetSoundFile();
-		ModSample &sample = sndFile.GetSample(m_nSample);
-		if(sample.GetNumChannels() > 1 && sample.HasSampleData() && !sample.uFlags[CHN_ADLIB])
+		SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
+		if(convert == ctrlSmp::splitSample)
 		{
-			SAMPLEINDEX rightSmp = SAMPLEINDEX_INVALID;
-			if(convert == ctrlSmp::splitSample)
+			// Split sample into two slots
+			rightSmp = pModDoc->InsertSample();
+			if(rightSmp == SAMPLEINDEX_INVALID)
 			{
-				// Split sample into two slots
-				rightSmp = pModDoc->InsertSample();
-				if(rightSmp == SAMPLEINDEX_INVALID)
-					return;
+				EndWaitCursor();
+				return;
 			}
+		}
 
-			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Mono Conversion");
+		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Mono Conversion");
 
-			bool success = false;
-			if(convert == ctrlSmp::splitSample)
-			{
-				ModSample &right = sndFile.GetSample(rightSmp);
-				success = ctrlSmp::SplitStereo(sample, sample, right, sndFile);
+		if(convert == ctrlSmp::splitSample)
+		{
+			ModSample &right = sndFile.GetSample(rightSmp);
+			success = ctrlSmp::SplitStereo(sample, sample, right, sndFile);
 
-				// Try to create a new instrument as well which maps to the right sample.
-				if(success)
-				{
-					INSTRUMENTINDEX ins = pModDoc->FindSampleParent(m_nSample);
-					if(ins != INSTRUMENTINDEX_INVALID)
-					{
-						INSTRUMENTINDEX rightIns = pModDoc->InsertInstrument(0, ins);
-						if(rightIns != INSTRUMENTINDEX_INVALID)
-						{
-							for(auto &smp : sndFile.Instruments[rightIns]->Keyboard)
-							{
-								if(smp == m_nSample)
-									smp = rightSmp;
-							}
-						}
-						pModDoc->UpdateAllViews(this, InstrumentHint(rightIns).Info().Envelope().Names(), this);
-					}
-
-					// Finally, adjust sample panning
-					if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
-					{
-						sample.uFlags.set(CHN_PANNING);
-						sample.nPan = 0;
-						right.uFlags.set(CHN_PANNING);
-						right.nPan = 256;
-					}
-					pModDoc->UpdateAllViews(this, SampleHint(rightSmp).Info().Data().Names(), this);
-				}
-			} else
-			{
-				success = ctrlSmp::ConvertToMono(sample, sndFile, convert);
-			}
-			
+			// Try to create a new instrument as well which maps to the right sample.
 			if(success)
-				SetModified(SampleHint().Info().Data().Names(), true, true);
-			else
-				pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
+			{
+				INSTRUMENTINDEX ins = pModDoc->FindSampleParent(m_nSample);
+				if(ins != INSTRUMENTINDEX_INVALID)
+				{
+					INSTRUMENTINDEX rightIns = pModDoc->InsertInstrument(0, ins);
+					if(rightIns != INSTRUMENTINDEX_INVALID)
+					{
+						for(auto &smp : sndFile.Instruments[rightIns]->Keyboard)
+						{
+							if(smp == m_nSample)
+								smp = rightSmp;
+						}
+					}
+					pModDoc->UpdateAllViews(this, InstrumentHint(rightIns).Info().Envelope().Names(), this);
+				}
+
+				// Finally, adjust sample panning
+				if(sndFile.GetType() & (MOD_TYPE_IT | MOD_TYPE_MPT | MOD_TYPE_XM))
+				{
+					sample.uFlags.set(CHN_PANNING);
+					sample.nPan = 0;
+					right.uFlags.set(CHN_PANNING);
+					right.nPan = 256;
+				}
+				pModDoc->UpdateAllViews(this, SampleHint(rightSmp).Info().Data().Names(), this);
+			}
+		} else
+		{
+			success = ctrlSmp::ConvertToMono(sample, sndFile, convert);
 		}
 	}
+
+	if(success)
+		SetModified(SampleHint().Info().Data().Names(), true, true);
+	else
+		pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
+
 	EndWaitCursor();
 }
 
