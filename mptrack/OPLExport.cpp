@@ -9,6 +9,7 @@
 
 
 #include "stdafx.h"
+#include "AccessibleControls.h"
 #include "FileDialog.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
@@ -345,6 +346,8 @@ private:
 
 	static ExportFormat s_format;
 
+	AccessibleEdit m_EditSubSong;
+
 	OPLCapture m_oplLogger;
 	CSoundFile &m_sndFile;
 	CModDoc &m_modDoc;
@@ -373,6 +376,8 @@ public:
 		CheckRadioButton(IDC_RADIO4, IDC_RADIO5, m_subSongs.size() <= 1 ? IDC_RADIO4 : IDC_RADIO5);
 
 		static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN1))->SetRange32(1, static_cast<int>(m_subSongs.size()));
+		m_EditSubSong.SubclassDlgItem(IDC_EDIT1, this);
+		m_EditSubSong.SetAccessibleName(_T("Sub Song"));
 		SetDlgItemInt(IDC_EDIT1, static_cast<UINT>(m_selectedSong + 1), FALSE);
 		if(m_subSongs.size() <= 1)
 		{

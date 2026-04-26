@@ -3084,7 +3084,7 @@ mpt::tstring CModDoc::FormatSubsongName(const std::vector<SubSong> &songs, size_
 		sequenceName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(sequenceName),
 		subsongInSequence,
 		song.startOrder,
-		song.endOrder,
+		song.endOrder == ORDERINDEX_INVALID ? song.startOrder : song.endOrder,
 		orderName.empty() ? mpt::tstring{} : MPT_TFORMAT(" ({})")(mpt::ToWin(m_SndFile.GetCharsetInternal(), orderName)));
 }
 

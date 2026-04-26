@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "AccessibleControls.h"
 #include "DialogBase.h"
 #include "ProgressDialog.h"
 #include "Settings.h"
@@ -73,6 +74,7 @@ private:
 	CComboBox m_CbnFileType, m_CbnSampleRate, m_CbnChannels, m_CbnDither, m_CbnSampleFormat, m_CbnSampleSlot;
 	CSpinButtonCtrl m_SpinLoopCount, m_SpinMinOrder, m_SpinMaxOrder, m_SpinSubsongIndex;
 
+	AccessibleEdit m_EditLoopCount, m_EditSubSong, m_EditMinOrder;
 	CEdit m_EditTitle, m_EditAuthor, m_EditURL, m_EditAlbum, m_EditYear;
 	CComboBox m_CbnGenre;
 	CEdit m_EditGenre;
