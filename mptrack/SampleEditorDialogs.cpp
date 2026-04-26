@@ -520,6 +520,9 @@ BOOL AddSilenceDlg::OnInitDialog()
 	}
 	CheckDlgButton(buttonID, BST_CHECKED);
 
+	m_EditAmount.SubclassDlgItem(IDC_EDIT_ADDSILENCE, this);
+	m_EditAmount.AllowNegative(false);
+	m_EditAmount.AllowFractions(m_unit == kMilliseconds);
 	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_editOption == kResize) ? m_length : m_numSamples, FALSE);
 	GetDlgItem(IDC_RADIO1)->EnableWindow(m_allowOPL ? TRUE : FALSE);
 
@@ -529,11 +532,7 @@ BOOL AddSilenceDlg::OnInitDialog()
 
 void AddSilenceDlg::OnOK()
 {
-	m_numSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
-	if(m_unit == kMilliseconds)
-	{
-		m_numSamples = Util::muldivr_unsigned(m_numSamples, m_sampleRate, 1000);
-	}
+	m_numSamples = GetEditLength();
 	switch(m_editOption = GetEditMode())
 	{
 	case kSilenceAtBeginning:
@@ -550,6 +549,20 @@ void AddSilenceDlg::OnOK()
 }
 
 
+SmpLength AddSilenceDlg::GetEditLength() const
+{
+	if(m_unit == kMilliseconds)
+	{
+		double ms = 0.0;
+		m_EditAmount.GetDecimalValue(ms);
+		return mpt::saturate_round<SmpLength>(ms * m_sampleRate / 1000.0);
+	} else
+	{
+		return GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
+	}
+}
+
+
 void AddSilenceDlg::OnEditModeChanged()
 {
 	AddSilenceOptions newEditOption = GetEditMode();
@@ -557,13 +570,19 @@ void AddSilenceDlg::OnEditModeChanged()
 	if(newEditOption != kResize && m_editOption == kResize)
 	{
 		// Switch to "add silence"
-		m_length = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
-		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_numSamples);
+		m_length = GetEditLength();
+		if(m_unit == kMilliseconds)
+			m_EditAmount.SetDecimalValue(m_numSamples * 1000.0 / m_sampleRate);
+		else
+			SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_numSamples);
 	} else if(newEditOption == kResize && m_editOption != kResize)
 	{
 		// Switch to "resize"
-		m_numSamples = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
-		SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_length);
+		m_numSamples = GetEditLength();
+		if(m_unit == kMilliseconds)
+			m_EditAmount.SetDecimalValue(m_length * 1000.0 / m_sampleRate);
+		else
+			SetDlgItemInt(IDC_EDIT_ADDSILENCE, m_length);
 	}
 	m_editOption = newEditOption;
 }
@@ -575,18 +594,20 @@ void AddSilenceDlg::OnUnitChanged()
 	if(m_unit == unit)
 		return;
 
+	m_EditAmount.AllowFractions(unit == kMilliseconds);
 	m_unit = unit;
-	SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE);
-	if(m_unit == kSamples)
+	if(unit == kSamples)
 	{
-		// Convert from milliseconds
-		duration = Util::muldivr_unsigned(duration, m_sampleRate, 1000);
+		// Convert from milliseconds to samples
+		double ms = 0.0;
+		m_EditAmount.GetDecimalValue(ms);
+		SetDlgItemInt(IDC_EDIT_ADDSILENCE, mpt::saturate_round<SmpLength>(ms * m_sampleRate / 1000.0));
 	} else
 	{
-		// Convert from samples
-		duration = Util::muldivr_unsigned(duration, 1000, m_sampleRate);
+		// Convert from samples to milliseconds
+		SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
+		m_EditAmount.SetDecimalValue(duration * 1000.0 / m_sampleRate);
 	}
-	SetDlgItemInt(IDC_EDIT_ADDSILENCE, duration);
 }
 
 

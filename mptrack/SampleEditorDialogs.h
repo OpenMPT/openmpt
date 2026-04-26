@@ -128,6 +128,7 @@ public:
 	AddSilenceOptions m_editOption; // See above
 
 protected:
+	CNumberEdit m_EditAmount;
 	static SmpLength m_addSamples;
 	static SmpLength m_createSamples;
 	uint32 m_sampleRate;
@@ -141,6 +142,7 @@ public:
 	void OnOK() override;
 	
 protected:
+	SmpLength GetEditLength() const;
 	AddSilenceOptions GetEditMode() const;
 	afx_msg void OnEditModeChanged();
 	afx_msg void OnUnitChanged();
