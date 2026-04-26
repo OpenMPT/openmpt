@@ -111,6 +111,10 @@ void CWaveConvert::DoDataExchange(CDataExchange *pDX)
 	DDX_Control(pDX, IDC_SPIN6,		m_SpinSubsongIndex);
 	DDX_Control(pDX, IDC_COMBO9,	m_CbnSampleSlot);
 
+	DDX_Control(pDX, IDC_EDIT3,  m_EditMinOrder);
+	DDX_Control(pDX, IDC_EDIT5,  m_EditLoopCount);
+	DDX_Control(pDX, IDC_EDIT12, m_EditSubSong);
+
 	DDX_Control(pDX, IDC_COMBO3,	m_CbnGenre);
 	DDX_Control(pDX, IDC_EDIT10,	m_EditGenre);
 	DDX_Control(pDX, IDC_EDIT11,	m_EditTitle);
@@ -140,13 +144,17 @@ BOOL CWaveConvert::OnInitDialog()
 		SetDlgItemInt(IDC_EDIT3, m_Settings.minOrder);
 		SetDlgItemInt(IDC_EDIT4, m_Settings.maxOrder);
 	}
+	m_EditMinOrder.SetAccessibleName(_T("From position"));
 	m_SpinMinOrder.SetRange32(0, m_nNumOrders);
 	m_SpinMaxOrder.SetRange32(0, m_nNumOrders);
 
 	SetDlgItemInt(IDC_EDIT5, m_Settings.repeatCount, FALSE);
 	m_SpinLoopCount.SetRange32(1, int16_max);
+	m_EditLoopCount.SetAccessibleName(_T("Repeat"));
+	m_EditLoopCount.SetAccessibleSuffix(_T("times"));
 
 	m_SpinSubsongIndex.SetRange32(1, static_cast<int>(m_subSongs.size()));
+	m_EditSubSong.SetAccessibleName(_T("Sub Song"));
 	SetDlgItemInt(IDC_EDIT12, static_cast<UINT>(m_selectedSong + 1), FALSE);
 	if(m_subSongs.size() <= 1)
 	{

@@ -644,10 +644,11 @@ END_MESSAGE_MAP()
 void CModToMidi::DoDataExchange(CDataExchange *pDX)
 {
 	DialogBase::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_COMBO1,	m_CbnInstrument);
-	DDX_Control(pDX, IDC_COMBO2,	m_CbnChannel);
-	DDX_Control(pDX, IDC_COMBO3,	m_CbnProgram);
-	DDX_Control(pDX, IDC_SPIN1,		m_SpinInstrument);
+	DDX_Control(pDX, IDC_COMBO1, m_CbnInstrument);
+	DDX_Control(pDX, IDC_COMBO2, m_CbnChannel);
+	DDX_Control(pDX, IDC_COMBO3, m_CbnProgram);
+	DDX_Control(pDX, IDC_SPIN1,  m_SpinInstrument);
+	DDX_Control(pDX, IDC_EDIT1,  m_EditSubSong);
 }
 
 
@@ -743,6 +744,7 @@ BOOL CModToMidi::OnInitDialog()
 
 	static_cast<CSpinButtonCtrl *>(GetDlgItem(IDC_SPIN2))->SetRange32(1, static_cast<int>(m_subSongs.size()));
 	SetDlgItemInt(IDC_EDIT1, static_cast<UINT>(m_selectedSong + 1), FALSE);
+	m_EditSubSong.SetAccessibleName(_T("Sub Song"));
 	if(m_subSongs.size() <= 1)
 	{
 		const int controls[] = {IDC_RADIO4, IDC_RADIO5, IDC_EDIT1, IDC_SPIN2};

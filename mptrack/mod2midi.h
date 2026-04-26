@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #ifndef NO_PLUGINS
+#include "AccessibleControls.h"
 #include "DialogBase.h"
 #include "ProgressDialog.h"
 #include "../soundlib/Snd_defs.h"
@@ -37,6 +38,7 @@ class CModToMidi : public CProgressDialog
 {
 protected:
 	CComboBox m_CbnInstrument, m_CbnChannel, m_CbnProgram;
+	AccessibleEdit m_EditSubSong;
 	CSpinButtonCtrl m_SpinInstrument;
 	CModDoc &m_modDoc;
 	MidiExport::InstrMap m_instrMap;
