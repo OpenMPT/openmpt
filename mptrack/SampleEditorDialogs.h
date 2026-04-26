@@ -128,6 +128,7 @@ public:
 	AddSilenceOptions m_editOption; // See above
 
 protected:
+	AccessibleComboBox m_ComboUnit;
 	CNumberEdit m_EditAmount;
 	static SmpLength m_addSamples;
 	static SmpLength m_createSamples;
@@ -138,6 +139,7 @@ protected:
 public:
 	AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL);
 
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
 	

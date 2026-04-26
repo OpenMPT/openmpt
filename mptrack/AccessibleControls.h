@@ -41,7 +41,18 @@ class AccessibleEdit : public CEdit
 public:
 	AccessibleEdit() { EnableActiveAccessibility(); }
 
+	void SetAccessibleName(const TCHAR *name) { m_name = name; }
 	void SetAccessibleSuffix(const TCHAR *suffix) { m_suffix = suffix; }
+
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override
+	{
+		if(varChild.lVal == CHILDID_SELF)
+		{
+			*pszName = m_name.AllocSysString();
+			return S_OK;
+		}
+		return CEdit::get_accName(varChild, pszName);
+	}
 
 	HRESULT get_accValue(VARIANT varChild, BSTR *pszName) override
 	{
@@ -55,8 +66,38 @@ public:
 		return CEdit::get_accValue(varChild, pszName);
 	}
 
+	HRESULT get_accDescription(VARIANT varChild, BSTR *pszName) override
+	{
+		if(varChild.lVal == CHILDID_SELF)
+			return get_accValue(varChild, pszName);
+		return CEdit::get_accDescription(varChild, pszName);
+	}
+
 private:
+	CString m_name;
 	CString m_suffix;
+};
+
+
+class AccessibleComboBox : public CComboBox
+{
+public:
+	AccessibleComboBox() { EnableActiveAccessibility(); }
+
+	void SetAccessibleName(const TCHAR *name) { m_name = name; }
+
+	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override
+	{
+		if(varChild.lVal == CHILDID_SELF)
+		{
+			*pszName = m_name.AllocSysString();
+			return S_OK;
+		}
+		return CComboBox::get_accName(varChild, pszName);
+	}
+
+private:
+	CString m_name;
 };
 
 

@@ -468,6 +468,15 @@ END_MESSAGE_MAP()
 SmpLength AddSilenceDlg::m_addSamples = 32;
 SmpLength AddSilenceDlg::m_createSamples = 64;
 
+void AddSilenceDlg::DoDataExchange(CDataExchange *pDX)
+{
+	DialogBase::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(AddSilenceDlg)
+	DDX_Control(pDX, IDC_COMBO1, m_ComboUnit);
+	//}}AFX_DATA_MAP
+}
+
+
 AddSilenceDlg::AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL)
 	: DialogBase(IDD_ADDSILENCE, parent)
 	, m_numSamples(m_addSamples)
@@ -497,17 +506,14 @@ BOOL AddSilenceDlg::OnInitDialog()
 		spin->SetPos32(m_numSamples);
 	}
 
-	CComboBox *box = static_cast<CComboBox *>(GetDlgItem(IDC_COMBO1));
-	if(box)
+	m_ComboUnit.SetAccessibleName(_T("Length unit"));
+	m_ComboUnit.AddString(_T("samples"));
+	m_ComboUnit.AddString(_T("ms"));
+	m_ComboUnit.SetCurSel(m_unit);
+	if(m_sampleRate == 0)
 	{
-		box->AddString(_T("samples"));
-		box->AddString(_T("ms"));
-		box->SetCurSel(m_unit);
-		if(m_sampleRate == 0)
-		{
-			// Can't do any conversions if samplerate is unknown
-			box->EnableWindow(FALSE);
-		}
+		// Can't do any conversions if samplerate is unknown
+		m_ComboUnit.EnableWindow(FALSE);
 	}
 
 	int buttonID = IDC_RADIO_ADDSILENCE_END;
@@ -523,6 +529,7 @@ BOOL AddSilenceDlg::OnInitDialog()
 	m_EditAmount.SubclassDlgItem(IDC_EDIT_ADDSILENCE, this);
 	m_EditAmount.AllowNegative(false);
 	m_EditAmount.AllowFractions(m_unit == kMilliseconds);
+	m_EditAmount.SetAccessibleSuffix((m_unit == kSamples) ? _T("samples") : _T("ms"));
 	SetDlgItemInt(IDC_EDIT_ADDSILENCE, (m_editOption == kResize) ? m_length : m_numSamples, FALSE);
 	GetDlgItem(IDC_RADIO1)->EnableWindow(m_allowOPL ? TRUE : FALSE);
 
@@ -590,11 +597,12 @@ void AddSilenceDlg::OnEditModeChanged()
 
 void AddSilenceDlg::OnUnitChanged()
 {
-	const auto unit = static_cast<Unit>(static_cast<CComboBox*>(GetDlgItem(IDC_COMBO1))->GetCurSel());
+	const auto unit = static_cast<Unit>(m_ComboUnit.GetCurSel());
 	if(m_unit == unit)
 		return;
 
 	m_EditAmount.AllowFractions(unit == kMilliseconds);
+	m_EditAmount.SetAccessibleSuffix((m_unit == kSamples) ? _T("samples") : _T("ms"));
 	m_unit = unit;
 	if(unit == kSamples)
 	{
