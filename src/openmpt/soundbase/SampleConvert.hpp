@@ -11,7 +11,6 @@
 #include "mpt/base/math.hpp"
 #include "mpt/base/saturate_cast.hpp"
 #include "mpt/base/saturate_round.hpp"
-#include "openmpt/base/Endian.hpp"
 #include "openmpt/base/Int24.hpp"
 #include "openmpt/base/Types.hpp"
 
@@ -95,19 +94,6 @@ struct Convert<Tid, Tid>
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
 	{
 		return val;
-	}
-};
-
-template <typename Tid, mpt::endian endian>
-struct Convert<mpt::packed<Tid, endian>, Tid>
-{
-	using input_t = Tid;
-	using output_t = mpt::packed<Tid, endian>;
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
-	{
-		output_t out;
-		out = val;
-		return out;
 	}
 };
 
