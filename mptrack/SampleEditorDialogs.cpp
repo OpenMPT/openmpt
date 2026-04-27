@@ -682,10 +682,10 @@ void AddSilenceDlg::OnUnitChanged()
 	if(m_unit == unit)
 		return;
 
-	m_EditAmount.AllowFractions(unit == SampleLengthUnit::Milliseconds);
-	m_EditAmount.SetAccessibleSuffix((m_unit == SampleLengthUnit::Samples) ? _T("samples") : _T("ms"));
 	m_unit = unit;
-	if(unit == SampleLengthUnit::Samples)
+	m_EditAmount.AllowFractions(m_unit == SampleLengthUnit::Milliseconds);
+	m_EditAmount.SetAccessibleSuffix((m_unit == SampleLengthUnit::Samples) ? _T("samples") : _T("ms"));
+	if(m_unit == SampleLengthUnit::Samples)
 	{
 		// Convert from milliseconds to samples
 		double ms = 0.0;
