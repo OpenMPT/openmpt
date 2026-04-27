@@ -1,5 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
+#pragma code_page(65001)
+
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -17,7 +19,6 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-#pragma code_page(65001)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2229,6 +2230,10 @@ BEGIN
         TOPMARGIN, 4
         BOTTOMMARGIN, 138
     END
+
+    IDD_OPTIONS_MIXER, DIALOG
+    BEGIN
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -3246,7 +3251,6 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#pragma code_page(65001)
 
 /////////////////////////////////////////////////////////////////////////////
 //
