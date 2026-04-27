@@ -5419,7 +5419,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		for(unsigned int i = 0; i < 256; ++i)
 		{
 			std::byte in = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
-			std::byte out = SC::EncodeALaw{}(SC::DecodeInt16ALaw{}(&in));
+			std::byte out = mpt::byte_cast<std::byte>(SC::EncodeALaw{}(SC::DecodeInt16ALaw{}(&in)));
 			VERIFY_EQUAL_NONCONT(in, out);
 		}
 		VERIFY_EQUAL_NONCONT(SC::EncodeALaw{}(-32768), SC::EncodeALaw{}(-32256));
@@ -5443,7 +5443,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		for(unsigned int i = 0; i < 256; ++i)
 		{
 			std::byte in = mpt::byte_cast<std::byte>(static_cast<uint8>(i));
-			std::byte out = SC::EncodeuLaw{}(SC::DecodeInt16uLaw{}(&in));
+			std::byte out = mpt::byte_cast<std::byte>(SC::EncodeuLaw{}(SC::DecodeInt16uLaw{}(&in)));
 			VERIFY_EQUAL_NONCONT(in, out);
 		}
 #if 0

@@ -79,7 +79,7 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 				{
 					for(uint16 channel = 0; channel < channels; ++channel)
 					{
-						std::byte sampledata = conv(interleaved[channel]);
+						std::byte sampledata = mpt::byte_cast<std::byte>(conv(interleaved[channel]));
 						mpt::IO::WriteRaw(bf, &sampledata, 1);
 						written += 1;
 					}
@@ -95,7 +95,7 @@ static inline std::pair<bool, std::size_t> WriteInterleavedImpl(std::ostream &f,
 				{
 					for(uint16 channel = 0; channel < channels; ++channel)
 					{
-						std::byte sampledata = conv(interleaved[channel]);
+						std::byte sampledata = mpt::byte_cast<std::byte>(conv(interleaved[channel]));
 						mpt::IO::WriteRaw(bf, &sampledata, 1);
 						written += 1;
 					}

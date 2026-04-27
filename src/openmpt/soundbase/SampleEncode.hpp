@@ -9,6 +9,7 @@
 #include "mpt/base/bit.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/memory.hpp"
+#include "openmpt/base/Endian.hpp"
 #include "openmpt/base/Types.hpp"
 
 #include <algorithm>
@@ -28,7 +29,9 @@ namespace SC
 struct EncodeuLaw
 {
 	using input_t = int16;
-	using output_t = std::byte;
+	using output_t = uint8;
+	using encoded_t = std::byte;
+	static constexpr std::size_t encoded_inc = 1;
 	static constexpr uint8 exp_table[17] = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0, 0};
 	static constexpr uint8 mant_table[17] = {0, 10, 9, 8, 7, 6, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
@@ -46,7 +49,7 @@ struct EncodeuLaw
 		out |= exp_table[index];
 		out |= (x >> mant_table[index]) & 0x0fu;
 		out ^= 0xffu;
-		return mpt::byte_cast<std::byte>(out);
+		return out;
 	}
 };
 
@@ -54,7 +57,9 @@ struct EncodeuLaw
 struct EncodeALaw
 {
 	using input_t = int16;
-	using output_t = std::byte;
+	using output_t = uint8;
+	using encoded_t = std::byte;
+	static constexpr std::size_t encoded_inc = 1;
 	static constexpr uint8 exp_table[17] = {0, 7 << 4, 6 << 4, 5 << 4, 4 << 4, 3 << 4, 2 << 4, 1 << 4, 0 << 4, 0, 0, 0, 0, 0, 0, 0, 0};
 	static constexpr uint8 mant_table[17] = {0, 10, 9, 8, 7, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
@@ -67,9 +72,48 @@ struct EncodeALaw
 		out |= exp_table[index];
 		out |= (x >> mant_table[index]) & 0x0fu;
 		out ^= 0x55u;
-		return mpt::byte_cast<std::byte>(out);
+		return out;
 	}
 };
+
+
+template <mpt::endian endian, typename Tsample>
+struct EncodeEndian
+{
+	using input_t = Tsample;
+	using output_t = mpt::packed<Tsample, endian>;
+	using encoded_t = std::byte;
+	static constexpr std::size_t encoded_inc = sizeof(output_t);
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t val)
+	{
+		output_t out;
+		out = val;
+		return out;
+	}
+};
+
+
+template <typename Func2, typename Func1>
+struct EncodeChain
+{
+	using input_t = typename Func1::input_t;
+	using output_t = typename Func2::output_t;
+	using encoded_t = typename Func2::encoded_t;
+	static constexpr std::size_t encoded_inc = Func2::encoded_inc;
+	Func1 func1;
+	Func2 func2;
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t in)
+	{
+		return func2(func1(in));
+	}
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE EncodeChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+		: func1(f1)
+		, func2(f2)
+	{
+		return;
+	}
+};
+
 
 
 }  // namespace SC

@@ -14,6 +14,13 @@
 
 #include "openmpt/soundbase/SampleConvert.hpp"
 #include "openmpt/soundbase/SampleDecode.hpp"
+#include "openmpt/soundbase/SampleEncode.hpp"
+
+#include "mpt/base/bit.hpp"
+#include "mpt/base/memory.hpp"
+
+#include <algorithm>
+#include <array>
 
 #include <cstddef>
 
@@ -46,6 +53,27 @@ std::size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf,
 		inBuf += incSource * SampleConversion::input_inc;
 	}
 
+	return copySize;
+}
+
+
+template <typename SampleConversion>
+std::size_t EncodeSample(typename SampleConversion::encoded_t *MPT_RESTRICT outBuf, std::size_t numSamples, std::size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, std::size_t sourceSize, std::size_t incSource, SampleConversion conv = SampleConversion())
+{
+	const std::size_t sampleSize = incSource * sizeof(typename SampleConversion::input_t);
+	LimitMax(numSamples, sourceSize / sampleSize);
+	const std::size_t copySize = numSamples * sampleSize;
+	static_assert(mpt::is_binary_safe<typename SampleConversion::output_t>::value);
+	static_assert((sizeof(typename SampleConversion::output_t) % sizeof(typename SampleConversion::encoded_t)) == 0);
+	using Tbuf = std::array<typename SampleConversion::encoded_t, sizeof(typename SampleConversion::output_t) / sizeof(typename SampleConversion::encoded_t)>;
+	SampleConversion sampleConv(conv);
+	while(numSamples--)
+	{
+		Tbuf buf = mpt::bit_cast<Tbuf>(sampleConv(*inBuf));
+		std::copy(buf.data(), buf.data() + buf.size(), outBuf);
+		outBuf += incTarget * SampleConversion::encoded_inc;
+		inBuf += incSource;
+	}
 	return copySize;
 }
 
