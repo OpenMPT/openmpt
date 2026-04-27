@@ -759,7 +759,6 @@ BOOL CSampleGridDlg::OnInitDialog()
 	m_EditSegments.AllowFractions(true);
 	m_EditSegments.AllowNegative(false);
 	m_EditSegments.SetDecimalValue(m_segments);
-	m_EditSegments.SetAccessibleName(_T("Grid segments"));
 
 	m_SpinSpacing.SetRange32(0, m_maxSegments);
 	m_SpinSpacing.SetPos32(mpt::saturate_round<int32>(m_spacing));
