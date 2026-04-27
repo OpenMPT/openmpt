@@ -3348,7 +3348,10 @@ void CViewSample::PlayNote(ModCommand::NOTE note, const SmpLength nStartPos, int
 				loopend = loopstart = 0;
 			}
 
-			pModDoc->PlayNote(PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos), &m_noteChannel);
+			PlayNoteParam params = PlayNoteParam(note).Sample(m_nSample).Volume(volume).LoopStart(loopstart).LoopEnd(loopend).Offset(nStartPos);
+			if(loopend > loopstart && SampleEdit::IsSingleChannel(sample, m_channelSelection))
+				params.Panning(SampleEdit::SelectedChannel(m_channelSelection) * 256);
+			pModDoc->PlayNote(params, &m_noteChannel);
 
 			m_dwStatus.set(SMPSTATUS_KEYDOWN);
 

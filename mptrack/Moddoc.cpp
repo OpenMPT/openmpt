@@ -1117,6 +1117,8 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		m_SndFile.NoteChange(chn, note, false, true, true, channel);
 		if(params.m_volume >= 0)
 			chn.nVolume = std::min(params.m_volume, 256);
+		if(params.m_panning >= 0)
+			chn.nPan = std::min(params.m_panning, 256);
 		chn.nnaChannelAge = 0;
 
 		// Handle sample looping.

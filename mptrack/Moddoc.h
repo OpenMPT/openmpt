@@ -85,6 +85,7 @@ struct PlayNoteParam
 	std::bitset<128> *m_notesPlaying = nullptr;
 	SmpLength m_loopStart = 0, m_loopEnd = 0, m_sampleOffset = 0;
 	int32 m_volume = -1;
+	int32 m_panning = -1;
 	SAMPLEINDEX m_sample = 0;
 	INSTRUMENTINDEX m_instr = 0;
 	CHANNELINDEX m_currentChannel = CHANNELINDEX_INVALID;
@@ -97,6 +98,7 @@ struct PlayNoteParam
 	PlayNoteParam& Offset(SmpLength sampleOffset) { m_sampleOffset = sampleOffset; return *this; }
 
 	PlayNoteParam& Volume(int32 volume) { m_volume = volume; return *this; }
+	PlayNoteParam& Panning(int32 panning) { m_panning= panning; return *this; }
 	PlayNoteParam& Sample(SAMPLEINDEX sample) { m_sample = sample; return *this; }
 	PlayNoteParam& Instrument(INSTRUMENTINDEX instr) { m_instr = instr; return *this; }
 	PlayNoteParam& Channel(CHANNELINDEX channel) { m_currentChannel = channel; return *this; }
