@@ -15,6 +15,8 @@
 #include "openmpt/soundbase/SampleConvert.hpp"
 #include "openmpt/soundbase/SampleDecode.hpp"
 
+#include <cstddef>
+
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -30,11 +32,11 @@ OPENMPT_NAMESPACE_BEGIN
 // Template arguments:
 // SampleConversion: Functor of type SampleConversionFunctor to apply sample conversion (see above for existing functors).
 template <typename SampleConversion>
-size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, size_t numSamples, size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, size_t sourceSize, size_t incSource, SampleConversion conv = SampleConversion())
+std::size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, std::size_t numSamples, std::size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, std::size_t sourceSize, std::size_t incSource, SampleConversion conv = SampleConversion())
 {
-	const size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
+	const std::size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
-	const size_t copySize = numSamples * sampleSize;
+	const std::size_t copySize = numSamples * sampleSize;
 
 	SampleConversion sampleConv(conv);
 	while(numSamples--)
