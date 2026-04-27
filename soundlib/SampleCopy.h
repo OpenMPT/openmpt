@@ -41,10 +41,26 @@ OPENMPT_NAMESPACE_BEGIN
 template <typename SampleConversion>
 std::size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, std::size_t numSamples, std::size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, std::size_t sourceSize, std::size_t incSource, SampleConversion conv = SampleConversion())
 {
+	const std::size_t sampleSize = incSource * sizeof(typename SampleConversion::input_t);
+	LimitMax(numSamples, sourceSize / sampleSize);
+	const std::size_t copySize = numSamples * sampleSize;
+	SampleConversion sampleConv(conv);
+	while(numSamples--)
+	{
+		*outBuf = sampleConv(*inBuf);
+		outBuf += incTarget;
+		inBuf += incSource;
+	}
+	return copySize;
+}
+
+
+template <typename SampleConversion>
+std::size_t DecodeSample(typename SampleConversion::output_t *MPT_RESTRICT outBuf, std::size_t numSamples, std::size_t incTarget, const typename SampleConversion::input_t *MPT_RESTRICT inBuf, std::size_t sourceSize, std::size_t incSource, SampleConversion conv = SampleConversion())
+{
 	const std::size_t sampleSize = incSource * SampleConversion::input_inc * sizeof(typename SampleConversion::input_t);
 	LimitMax(numSamples, sourceSize / sampleSize);
 	const std::size_t copySize = numSamples * sampleSize;
-
 	SampleConversion sampleConv(conv);
 	while(numSamples--)
 	{
@@ -52,7 +68,6 @@ std::size_t CopySample(typename SampleConversion::output_t *MPT_RESTRICT outBuf,
 		outBuf += incTarget;
 		inBuf += incSource * SampleConversion::input_inc;
 	}
-
 	return copySize;
 }
 
@@ -81,8 +96,8 @@ std::size_t EncodeSample(typename SampleConversion::encoded_t *MPT_RESTRICT outB
 // SampleConversion template parameter shortcuts for pure copying of native sample data
 namespace SC
 {  // SC = _S_ample_C_onversion
-	using CopyNative8 = ConversionChain<Convert<int8, int8>, DecodeIdentity<int8>>;
-	using CopyNative16 = ConversionChain<Convert<int16, int16>, DecodeIdentity<int16>>;
+	using CopyNative8 = Convert<int8, int8>;
+	using CopyNative16 = Convert<int16, int16>;
 }
 
 

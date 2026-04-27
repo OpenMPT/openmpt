@@ -38,7 +38,7 @@ static bool CopyWavChannel(ModSample &sample, const FileReader &file, size_t cha
 	}
 
 	FileReader::PinnedView inData = file.GetPinnedView(file.BytesLeft());
-	CopySample<SampleConversion>(sample.template sample<typename SampleConversion::output_t>(), sample.nLength, 1, inData.data() + offset, inData.size() - offset, numChannels, conv);
+	DecodeSample<SampleConversion>(sample.template sample<typename SampleConversion::output_t>(), sample.nLength, 1, inData.data() + offset, inData.size() - offset, numChannels, conv);
 	return true;
 }
 
@@ -175,9 +175,9 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 		if(wavFile.GetSampleFormat() == WAVFormatChunk::fmtFloat)
 		{
 			if(wavFile.GetBitsPerSample() <= 32)
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			else
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, somefloat64>, SC::DecodeFloat64<littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeChain<SC::Convert<int16, somefloat64>, SC::DecodeFloat64<littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 		} else
 		{
 			if(wavFile.GetBitsPerSample() <= 8)
@@ -185,11 +185,11 @@ bool CSoundFile::ReadWAV(FileReader &file, ModLoadingFlags loadFlags)
 			else if(wavFile.GetBitsPerSample() <= 16)
 				CopyWavChannel<SC::DecodeInt16<0, littleEndian16>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			else if(wavFile.GetBitsPerSample() <= 24)
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			else if(wavFile.GetBitsPerSample() <= 32)
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 			else if(wavFile.GetBitsPerSample() <= 64)
-				CopyWavChannel<SC::ConversionChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
+				CopyWavChannel<SC::DecodeChain<SC::Convert<int16, int64>, SC::DecodeInt64<0, littleEndian64>>>(sample, sampleChunk, channel, wavFile.GetNumChannels());
 		}
 		sample.PrecomputeLoops(*this, false);
 

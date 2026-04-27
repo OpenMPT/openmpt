@@ -739,6 +739,27 @@ struct Convert<float, double>
 
 
 
+template <typename Func2, typename Func1>
+struct ConvertChain
+{
+	using input_t = typename Func1::input_t;
+	using output_t = typename Func2::output_t;
+	Func1 func1;
+	Func2 func2;
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(input_t in)
+	{
+		return func2(func1(in));
+	}
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ConvertChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+		: func1(f1)
+		, func2(f2)
+	{
+		return;
+	}
+};
+
+
+
 template <typename Tdst, typename Tsrc>
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tdst sample_cast(Tsrc src)
 {

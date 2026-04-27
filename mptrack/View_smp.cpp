@@ -3003,13 +3003,13 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 					uint8 newChn = chn % sample.GetNumChannels();
 					if(oldSample.GetElementarySampleSize() == 1 && sample.GetElementarySampleSize() == 1)
 					{
-						CopySample(oldSample.sample8() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int8, int8>, SC::DecodeIdentity<int8> >());
+						CopySample(oldSample.sample8() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int8, int8>());
 					} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 1)
 					{
-						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8> >());
+						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int8>());
 					} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 2)
 					{
-						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample16() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::ConversionChain<SC::Convert<int16, int16>, SC::DecodeIdentity<int16> >());
+						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample16() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int16>());
 					} else
 					{
 						MPT_ASSERT_NOTREACHED();

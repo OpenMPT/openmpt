@@ -180,10 +180,10 @@ Result Signalsmith::Process()
 			switch(smpSize)
 			{
 			case 1:
-				CopySample<SC::ConversionChain<SC::Convert<ProcessingType, int8>, SC::DecodeIdentity<int8>>>(inputBuffers[chn - startChn].data(), processInLen, 1, m_sample.sample8() + inPos + chn, sizeof(int8) * inRemain * numChans, numChans);
+				CopySample<SC::Convert<ProcessingType, int8>>(inputBuffers[chn - startChn].data(), processInLen, 1, m_sample.sample8() + inPos + chn, sizeof(int8) * inRemain * numChans, numChans);
 				break;
 			case 2:
-				CopySample<SC::ConversionChain<SC::Convert<ProcessingType, int16>, SC::DecodeIdentity<int16>>>(inputBuffers[chn - startChn].data(), processInLen, 1, m_sample.sample16() + inPos + chn, sizeof(int16) * inRemain * numChans, numChans);
+				CopySample<SC::Convert<ProcessingType, int16>>(inputBuffers[chn - startChn].data(), processInLen, 1, m_sample.sample16() + inPos + chn, sizeof(int16) * inRemain * numChans, numChans);
 				break;
 			}
 			// If we're at the end of the sample, fill the remaining buffer with silence.
@@ -200,10 +200,10 @@ Result Signalsmith::Process()
 			switch(smpSize)
 			{
 			case 1:
-				CopySample<SC::ConversionChain<SC::Convert<int8, ProcessingType>, SC::DecodeIdentity<ProcessingType>>>(static_cast<int8 *>(newSampleData) + outPos + chn, processOutLen, numChans, outputBuffers[chn - startChn].data() + readOffset, sizeof(ProcessingType) * processOutLen, 1);
+				CopySample<SC::Convert<int8, ProcessingType>>(static_cast<int8 *>(newSampleData) + outPos + chn, processOutLen, numChans, outputBuffers[chn - startChn].data() + readOffset, sizeof(ProcessingType) * processOutLen, 1);
 				break;
 			case 2:
-				CopySample<SC::ConversionChain<SC::Convert<int16, ProcessingType>, SC::DecodeIdentity<ProcessingType>>>(static_cast<int16 *>(newSampleData) + outPos + chn, processOutLen, numChans, outputBuffers[chn - startChn].data() + readOffset, sizeof(ProcessingType) * processOutLen, 1);
+				CopySample<SC::Convert<int16, ProcessingType>>(static_cast<int16 *>(newSampleData) + outPos + chn, processOutLen, numChans, outputBuffers[chn - startChn].data() + readOffset, sizeof(ProcessingType) * processOutLen, 1);
 				break;
 			}
 		}

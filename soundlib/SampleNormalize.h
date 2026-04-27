@@ -146,7 +146,6 @@ struct Normalize<somefloat64>
 
 // Reads sample data with Func1, then normalizes the sample data, and then converts it with Func2.
 // Func1::output_t and Func2::input_t must be identical.
-// Func1 can also be the identity decode (DecodeIdentity<T>).
 // Func2 can also be the identity conversion (Convert<T,T>).
 template <typename Func2, typename Func1>
 struct NormalizationChain

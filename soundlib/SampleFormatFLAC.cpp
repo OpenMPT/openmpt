@@ -165,19 +165,19 @@ struct FLACDecoder
 			if(bps <= 8)
 			{
 				int8 *sampleData8 = sample.sample8() + offset;
-				CopySample<SC::ConversionChain<SC::ConvertShift< int8, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData8  + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift< int8, int32,  0>>(sampleData8  + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 16)
 			{
 				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  0>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32,  0>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 24)
 			{
 				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32,  8>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32,  8>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			} else if(bps <= 32)
 			{
 				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeIdentity<int32> > >(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				CopySample<SC::ConvertShift<int16, int32, 16>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
 			}
 		}
 

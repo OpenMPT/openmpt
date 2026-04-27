@@ -364,23 +364,11 @@ struct DecodeFloat64
 	}
 };
 
-template <typename Tsample>
-struct DecodeIdentity
-{
-	using input_t = Tsample;
-	using output_t = Tsample;
-	static constexpr std::size_t input_inc = 1;
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE output_t operator()(const input_t *inBuf)
-	{
-		return *inBuf;
-	}
-};
-
 
 // Reads sample data with Func and passes it directly to Func2.
 // Func1::output_t and Func2::input_t must be identical
 template <typename Func2, typename Func1>
-struct ConversionChain
+struct DecodeChain
 {
 	using input_t = typename Func1::input_t;
 	using output_t = typename Func2::output_t;
@@ -391,7 +379,7 @@ struct ConversionChain
 	{
 		return func2(func1(inBuf));
 	}
-	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE ConversionChain(Func2 f2 = Func2(), Func1 f1 = Func1())
+	MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE DecodeChain(Func2 f2 = Func2(), Func1 f1 = Func1())
 		: func1(f1)
 		, func2(f2)
 	{

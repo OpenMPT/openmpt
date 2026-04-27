@@ -256,7 +256,7 @@ struct SymVirtualInst
 				if(chn.position.GetUInt() >= chn.nLength)
 					chn.pCurrentSample = nullptr;
 			}
-			CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 27>, SC::DecodeIdentity<mixsample_t>>>(target.sample16() + writeOffset, writeCount, 1, buffer.data(), sizeof(buffer), 2);
+			CopySample<SC::ConvertFixedPoint<int16, mixsample_t, 27>>(target.sample16() + writeOffset, writeCount, 1, buffer.data(), sizeof(buffer), 2);
 			writeOffset += writeCount;
 		}
 
@@ -507,7 +507,7 @@ struct SymInstrument
 			int16 *newSample = static_cast<int16 *>(ModSample::AllocateSample(mptSmp.nLength, 2 * mptSmp.GetNumChannels()));
 			if(!newSample)
 				return;
-			CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(newSample, mptSmp.nLength * mptSmp.GetNumChannels(), 1, mptSmp.sample8(), mptSmp.GetSampleSizeInBytes(), 1);
+			CopySample<SC::Convert<int16, int8>>(newSample, mptSmp.nLength * mptSmp.GetNumChannels(), 1, mptSmp.sample8(), mptSmp.GetSampleSizeInBytes(), 1);
 			mptSmp.uFlags.set(CHN_16BIT);
 			mptSmp.ReplaceWaveform(newSample, mptSmp.nLength, sndFile);
 		}

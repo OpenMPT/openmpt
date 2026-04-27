@@ -422,19 +422,19 @@ bool CSoundFile::ReadMediaFoundationSample(SAMPLEINDEX sample, FileReader &file,
 	{
 		if(numChannels == 2)
 		{
-			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(Samples[sample], rawData.data(), rawData.size());
+			DecodeStereoInterleavedSample<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(Samples[sample], rawData.data(), rawData.size());
 		} else
 		{
-			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(Samples[sample], rawData.data(), rawData.size());
+			DecodeMonoSample<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24>>>(Samples[sample], rawData.data(), rawData.size());
 		}
 	} else if(bitsPerSample == 32)
 	{
 		if(numChannels == 2)
 		{
-			CopyStereoInterleavedSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(Samples[sample], rawData.data(), rawData.size());
+			DecodeStereoInterleavedSample<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(Samples[sample], rawData.data(), rawData.size());
 		} else
 		{
-			CopyMonoSample<SC::ConversionChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(Samples[sample], rawData.data(), rawData.size());
+			DecodeMonoSample<SC::DecodeChain<SC::Convert<int16, int32>, SC::DecodeInt32<0, littleEndian32>>>(Samples[sample], rawData.data(), rawData.size());
 		}
 	} else
 	{

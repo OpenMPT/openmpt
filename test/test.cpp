@@ -5293,9 +5293,9 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		std::vector<int8> unsigned8(256);
 		std::vector<int8> delta8(256);
 		int8 delta = 0;
-		CopySample<SC::DecodeInt8>(signed8.data(), 256, 1, source8.data(), 256, 1);
-		CopySample<SC::DecodeUint8>(unsigned8.data(), 256, 1, source8.data(), 256, 1);
-		CopySample<SC::DecodeInt8Delta>(delta8.data(), 256, 1, source8.data(), 256, 1);
+		DecodeSample<SC::DecodeInt8>(signed8.data(), 256, 1, source8.data(), 256, 1);
+		DecodeSample<SC::DecodeUint8>(unsigned8.data(), 256, 1, source8.data(), 256, 1);
+		DecodeSample<SC::DecodeInt8Delta>(delta8.data(), 256, 1, source8.data(), 256, 1);
 
 		for(std::size_t i = 0; i < 256; i++)
 		{
@@ -5323,9 +5323,9 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		std::vector<int16> unsigned16(65536);
 		std::vector<int16> delta16(65536);
 		int16 delta = 0;
-		CopySample<SC::DecodeInt16<0, littleEndian16> >(signed16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16<0x8000u, littleEndian16> >(unsigned16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16Delta<littleEndian16> >(delta16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16<0, littleEndian16> >(signed16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16<0x8000u, littleEndian16> >(unsigned16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16Delta<littleEndian16> >(delta16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
 
 		for(std::size_t i = 0; i < 65536; i++)
 		{
@@ -5343,9 +5343,9 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 			source16[i * 2 + 1] = mpt::byte_cast<std::byte>(static_cast<uint8>(i & 0xFF));
 		}
 
-		CopySample<SC::DecodeInt16<0, bigEndian16> >(signed16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16<0x8000u, bigEndian16> >(unsigned16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
-		CopySample<SC::DecodeInt16Delta<bigEndian16> >(delta16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16<0, bigEndian16> >(signed16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16<0x8000u, bigEndian16> >(unsigned16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
+		DecodeSample<SC::DecodeInt16Delta<bigEndian16> >(delta16.data(), 65536, 1, source16.data(), 65536 * 2, 1);
 
 		delta = 0;
 		for(size_t i = 0; i < 65536; i++)
@@ -5375,8 +5375,8 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
 		sample.pData.pSample = sampleBuf.data();
-		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, source24.data(), 3*65536);
-		CopySample<SC::ConversionChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16.data(), 65536, 1, source24.data(), 65536 * 3, 1);
+		DecodeAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, int32>, SC::DecodeInt24<0, littleEndian24> > >(sample, source24.data(), 3*65536);
+		DecodeSample<SC::DecodeChain<SC::ConvertShift<int16, int32, 16>, SC::DecodeInt24<0, littleEndian24> > >(truncated16.data(), 65536, 1, source24.data(), 65536 * 3, 1);
 
 		for(std::size_t i = 0; i < 65536; i++)
 		{
@@ -5404,8 +5404,8 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		sample.nLength = 65536;
 		sample.uFlags.set(CHN_16BIT);
 		sample.pData.pSample = sampleBuf.data();
-		CopyAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(sample, source32.data(), 4*65536);
-		CopySample<SC::ConversionChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(truncated16.data(), 65536, 1, source32.data(), 65536 * 4, 1);
+		DecodeAndNormalizeSample<SC::NormalizationChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(sample, source32.data(), 4*65536);
+		DecodeSample<SC::DecodeChain<SC::Convert<int16, somefloat32>, SC::DecodeFloat32<bigEndian32> > >(truncated16.data(), 65536, 1, source32.data(), 65536 * 4, 1);
 
 		for(std::size_t i = 0; i < 65536; i++)
 		{
@@ -5485,7 +5485,7 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSampleConversion()
 		int8 targetBuf4[4];
 		int8 *signed8 = targetBuf4;
 		std::memset(signed8, 0, 4);
-		CopySample<SC::DecodeInt8>(targetBuf4, 4, 1, &oneSample, sizeof(oneSample), 1);
+		DecodeSample<SC::DecodeInt8>(targetBuf4, 4, 1, &oneSample, sizeof(oneSample), 1);
 		VERIFY_EQUAL_NONCONT(signed8[0], 1);
 		VERIFY_EQUAL_NONCONT(signed8[1], 0);
 		VERIFY_EQUAL_NONCONT(signed8[2], 0);

@@ -805,7 +805,7 @@ bool ConvertTo8Bit(ModSample &smp, CSoundFile &sndFile)
 	if(!smp.HasSampleData() || smp.GetElementarySampleSize() != 2)
 		return false;
 
-	CopySample<SC::ConversionChain<SC::Convert<int8, int16>, SC::DecodeIdentity<int16>>>(static_cast<int8 *>(smp.samplev()), smp.nLength * smp.GetNumChannels(), 1, smp.sample16(), smp.GetSampleSizeInBytes(), 1);
+	CopySample<SC::Convert<int8, int16>>(static_cast<int8 *>(smp.samplev()), smp.nLength * smp.GetNumChannels(), 1, smp.sample16(), smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.reset(CHN_16BIT);
 	for(auto &chn : sndFile.m_PlayState.Chn)
 	{
@@ -828,7 +828,7 @@ bool ConvertTo16Bit(ModSample &smp, CSoundFile &sndFile)
 	if(newSample == nullptr)
 		return false;
 
-	CopySample<SC::ConversionChain<SC::Convert<int16, int8>, SC::DecodeIdentity<int8>>>(newSample, smp.nLength * smp.GetNumChannels(), 1, smp.sample8(), smp.GetSampleSizeInBytes(), 1);
+	CopySample<SC::Convert<int16, int8>>(newSample, smp.nLength * smp.GetNumChannels(), 1, smp.sample8(), smp.GetSampleSizeInBytes(), 1);
 	smp.uFlags.set(CHN_16BIT);
 	smp.ReplaceWaveform(newSample, smp.nLength, sndFile);
 	smp.PrecomputeLoops(sndFile, false);
@@ -1001,10 +1001,10 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, SampleChannel
 					switch(smp.GetElementarySampleSize())
 					{
 						case 1:
-							CopySample<SC::ConversionChain<SC::Convert<double, int8>, SC::DecodeIdentity<int8>>>(convBuffer.data(), smpCount, 1, smp.sample8() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
+							CopySample<SC::Convert<double, int8>>(convBuffer.data(), smpCount, 1, smp.sample8() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
 							break;
 						case 2:
-							CopySample<SC::ConversionChain<SC::Convert<double, int16>, SC::DecodeIdentity<int16>>>(convBuffer.data(), smpCount, 1, smp.sample16() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
+							CopySample<SC::Convert<double, int16>>(convBuffer.data(), smpCount, 1, smp.sample16() + readOffset, smp.GetSampleSizeInBytes(), smp.GetNumChannels());
 							break;
 					}
 					readOffset += smpCount * numChannels;
@@ -1023,10 +1023,10 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, SampleChannel
 				switch(smp.GetElementarySampleSize())
 				{
 					case 1:
-						CopySample<SC::ConversionChain<SC::Convert<int8, double>, SC::DecodeIdentity<double>>>(static_cast<int8 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+						CopySample<SC::Convert<int8, double>>(static_cast<int8 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::Convert<int16, double>, SC::DecodeIdentity<double>>>(static_cast<int16 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
+						CopySample<SC::Convert<int16, double>>(static_cast<int16 *>(newSample) + writeOffset, procCount, smp.GetNumChannels(), outBuffer + procLatency, procCount * sizeof(double), 1);
 						break;
 				}
 				writeOffset += procCount * numChannels;
@@ -1062,10 +1062,10 @@ SmpLength Resample(ModSample &smp, SmpLength start, SmpLength end, SampleChannel
 				switch(smp.GetElementarySampleSize())
 				{
 					case 1:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int8, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t>>>(static_cast<int8 *>(newSample) + writeOffset + c, procCount, numChannels, buffer + c, sizeof(buffer), 2);
+						CopySample<SC::ConvertFixedPoint<int8, mixsample_t, 23>>(static_cast<int8 *>(newSample) + writeOffset + c, procCount, numChannels, buffer + c, sizeof(buffer), 2);
 						break;
 					case 2:
-						CopySample<SC::ConversionChain<SC::ConvertFixedPoint<int16, mixsample_t, 23>, SC::DecodeIdentity<mixsample_t>>>(static_cast<int16 *>(newSample) + writeOffset + c, procCount, numChannels, buffer + c, sizeof(buffer), 2);
+						CopySample<SC::ConvertFixedPoint<int16, mixsample_t, 23>>(static_cast<int16 *>(newSample) + writeOffset + c, procCount, numChannels, buffer + c, sizeof(buffer), 2);
 						break;
 				}
 			}
