@@ -2803,16 +2803,16 @@ void CViewSample::OnEditCopy()
 		// Write sample data
 		file.StartChunk(RIFFChunk::iddata);
 		
-		void *sampleData = data.data() + ff.TellWrite();
+		std::byte *sampleData = data.data() + ff.TellWrite();
 		const uint8 selectedChn = SampleEdit::SelectedChannel(channelSel);
 		const uint8 srcChannels = sample.GetNumChannels();
 		switch(sample.GetElementarySampleSize())
 		{
 		case 1:
-			CopySample<SC::ConversionChain<SC::Convert<uint8, int8>, SC::DecodeIdentity<int8>>>(static_cast<uint8 *>(sampleData), rangeLength * (singleChannel ? 1 : srcChannels), 1, sample.sample8() + rangeStart * srcChannels + selectedChn, rangeLength * sample.GetBytesPerSample(), singleChannel ? srcChannels : 1);
+			EncodeSample<SC::EncodeChain<SC::EncodeEndian<mpt::endian::little, uint8>, SC::Convert<uint8, int8>>>(sampleData, rangeLength * (singleChannel ? 1 : srcChannels), 1, sample.sample8() + rangeStart * srcChannels + selectedChn, rangeLength * sample.GetBytesPerSample(), singleChannel ? srcChannels : 1);
 			break;
 		case 2:
-			CopySample<SC::ConversionChain<SC::Convert<int16le, int16>, SC::DecodeIdentity<int16>>>(static_cast<int16le *>(sampleData), rangeLength * (singleChannel ? 1 : srcChannels), 1, sample.sample16() + rangeStart * srcChannels + selectedChn, rangeLength * sample.GetBytesPerSample(), singleChannel ? srcChannels : 1);
+			EncodeSample<SC::EncodeEndian<mpt::endian::little, int16>>(sampleData, rangeLength * (singleChannel ? 1 : srcChannels), 1, sample.sample16() + rangeStart * srcChannels + selectedChn, rangeLength * sample.GetBytesPerSample(), singleChannel ? srcChannels : 1);
 			break;
 		}
 		ff.SeekRelative(sampleDataSize);
