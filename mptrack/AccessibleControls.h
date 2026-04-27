@@ -23,7 +23,7 @@ public:
 
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override
 	{
-		if(varChild.lVal == CHILDID_SELF)
+		if(varChild.lVal == CHILDID_SELF && !m_text.IsEmpty())
 		{
 			*pszName = m_text.AllocSysString();
 			return S_OK;
@@ -46,7 +46,7 @@ public:
 
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override
 	{
-		if(varChild.lVal == CHILDID_SELF)
+		if(varChild.lVal == CHILDID_SELF && !m_name.IsEmpty())
 		{
 			*pszName = m_name.AllocSysString();
 			return S_OK;
@@ -88,7 +88,7 @@ public:
 
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override
 	{
-		if(varChild.lVal == CHILDID_SELF)
+		if(varChild.lVal == CHILDID_SELF && !m_name.IsEmpty())
 		{
 			*pszName = m_name.AllocSysString();
 			return S_OK;
