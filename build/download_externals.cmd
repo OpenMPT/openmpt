@@ -37,7 +37,7 @@ rem Get current 7zip commandline version which can unpack the 7zip installer but
 rem Get 7zip installer and unpack it with current commandline 7zip
 if not exist "build\tools\7zipr" mkdir "build\tools\7zipr"
 copy /y "build\externals\7zr.exe" "build\tools\7zipr\7zr.exe"
-build\tools\7zipr\7zr.exe x -y -obuild\tools\7zip "build\externals\7z2600-x64.exe" || goto error
+build\tools\7zipr\7zr.exe x -y -obuild\tools\7zip "build\externals\7z2601-x64.exe" || goto error
 
 call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp.exe" "." || goto error
 
