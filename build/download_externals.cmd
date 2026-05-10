@@ -44,7 +44,7 @@ call build\scriptlib\unpack.cmd "build\tools\htmlhelp" "build\externals\htmlhelp
 call build\scriptlib\unpack.cmd "include\winamp"   "build\externals\WA5.55_SDK.exe" "."          || goto error
 call build\scriptlib\unpack.cmd "include\xmplay"   "build\externals\xmp-sdk.zip"    "."          || goto error
 
-call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.14.4-embed-amd64.zip" "." || goto error
+call build\scriptlib\unpack.cmd "build\tools\python3" "build\externals\python-3.14.5-embed-amd64.zip" "." || goto error
 
 
 call :killdir "build\tools\innosetup" || goto error
