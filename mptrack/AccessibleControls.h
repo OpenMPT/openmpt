@@ -56,7 +56,7 @@ public:
 
 	HRESULT get_accValue(VARIANT varChild, BSTR *pszName) override
 	{
-		if(varChild.lVal == CHILDID_SELF)
+		if(varChild.lVal == CHILDID_SELF && !m_suffix.IsEmpty())
 		{
 			CString s;
 			GetWindowText(s);
@@ -68,7 +68,7 @@ public:
 
 	HRESULT get_accDescription(VARIANT varChild, BSTR *pszName) override
 	{
-		if(varChild.lVal == CHILDID_SELF)
+		if(varChild.lVal == CHILDID_SELF && !m_suffix.IsEmpty())
 			return get_accValue(varChild, pszName);
 		return CEdit::get_accDescription(varChild, pszName);
 	}
