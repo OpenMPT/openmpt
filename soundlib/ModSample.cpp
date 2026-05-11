@@ -211,17 +211,10 @@ bool ModSample::CopyWaveform(const ModSample &smpFrom, SmpLength start, SmpLengt
 void ModSample::ReplaceWaveform(void *newWaveform, const SmpLength newLength, CSoundFile &sndFile)
 {
 	auto oldWaveform = samplev();
-	FlagSet<ChannelFlags> setFlags, resetFlags;
-
-	setFlags.set(CHN_16BIT, uFlags[CHN_16BIT]);
-	resetFlags.set(CHN_16BIT, !uFlags[CHN_16BIT]);
-
-	setFlags.set(CHN_STEREO, uFlags[CHN_STEREO]);
-	resetFlags.set(CHN_STEREO, !uFlags[CHN_STEREO]);
 
 	CriticalSection cs;
 
-	ctrlChn::ReplaceSample(sndFile, *this, newWaveform, newLength, setFlags, resetFlags);
+	ctrlChn::ReplaceSample(sndFile, *this, newWaveform, newLength);
 	pData.pSample = newWaveform;
 	nLength = newLength;
 	FreeSample(oldWaveform);

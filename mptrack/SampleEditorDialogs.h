@@ -27,26 +27,18 @@ OPENMPT_NAMESPACE_BEGIN
 class CAmpDlg : public DialogBase
 {
 public:
-	enum class AmpUnit
-	{
-		Percent = 0,
-		Decibels,
-	};
-
 	struct AmpSettings
 	{
 		Fade::Law fadeLaw;
-		AmpUnit unit;
 		double fadeInStart, fadeOutEnd;
 		double factor;
+		AmplificationUnit unit;
 		bool fadeIn, fadeOut;
 	};
 
 	AmpSettings &m_settings;
 
 protected:
-	static constexpr double SILENCE_DB = -96.0;
-
 	const double m_factorMinLinear, m_factorMaxLinear;
 	const double m_factorMinDecibels, m_factorMaxDecibels;
 
@@ -57,14 +49,14 @@ protected:
 	std::array<CStatic, 3> m_unitLabel;
 	std::array<CSpinButtonCtrl, 3> m_spin;
 
-	AmpUnit m_unit = AmpUnit::Percent;
+	AmplificationUnit m_unit = AmplificationUnit::Percent;
 	bool m_locked = true;
 
 public:
 	CAmpDlg(CWnd *parent, AmpSettings &settings, double factorMin = int32_min, double factorMax = int32_max);
 
 protected:
-	void DoDataExchange(CDataExchange* pDX) override;
+	void DoDataExchange(CDataExchange *pDX) override;
 	BOOL OnInitDialog() override;
 	void OnDPIChanged() override;
 	void OnOK() override;
@@ -144,7 +136,7 @@ protected:
 	CNumberEdit m_EditAmount;
 	static SmpLength m_addSamples;
 	static SmpLength m_createSamples;
-	uint32 m_sampleRate;
+	const uint32 m_sampleRate;
 	SampleLengthUnit m_unit = SampleLengthUnit::Samples;
 	bool m_allowOPL;
 
@@ -299,23 +291,40 @@ protected:
 class CMixSampleDlg : public DialogBase
 {
 protected:
+	using SmpLengthSigned = std::make_signed<SmpLength>::type;
+
 	// Dialog controls
-	CEdit m_EditOffset;
-	CNumberEdit m_EditVolOriginal, m_EditVolMix;
-	CSpinButtonCtrl m_SpinOffset, m_SpinVolOriginal, m_SpinVolMix;
+	CNumberEdit m_EditOffset;
+	CSpinButtonCtrl m_SpinOffset;
+	AccessibleComboBox m_ampUnitBox, m_lengthUnitBox;
+	std::array<CNumberEdit, 2> m_edit;
+	std::array<CStatic, 2> m_unitLabel;
+	std::array<CSpinButtonCtrl, 2> m_spin;
+
+	const double m_factorMinLinear, m_factorMaxLinear;
+	const double m_factorMinDecibels, m_factorMaxDecibels;
+	const uint32 m_sampleRate;
 
 public:
-	static SmpLength sampleOffset;
-	static int amplifyOriginal;
-	static int amplifyMix;
+	static SmpLengthSigned sampleOffset;
+	static double amplifyOriginal;
+	static double amplifyMix;
+	static AmplificationUnit m_ampUnit;
+	static SampleLengthUnit m_lengthUnit;
 
 public:
-	CMixSampleDlg(CWnd *parent);
+	CMixSampleDlg(CWnd *parent, uint32 sampleRate);
 
 protected:
 	void DoDataExchange(CDataExchange* pDX) override;
 	BOOL OnInitDialog() override;
 	void OnOK() override;
+
+	afx_msg void OnLengthUnitChanged();
+	afx_msg void OnAmpUnitChanged();
+	void UpdateUnitLabels();
+
+	DECLARE_MESSAGE_MAP()
 };
 
 

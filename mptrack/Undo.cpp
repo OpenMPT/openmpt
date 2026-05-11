@@ -658,13 +658,10 @@ bool CSampleUndo::Undo(undobuf_t &fromBuf, undobuf_t &toBuf, const SAMPLEINDEX s
 				InsertRange(sample.sample8() + selectedChn);
 		} else
 		{
-			pNewSample = static_cast<int8 *>(ModSample::AllocateSample(undo.OldSample.nLength, bytesPerSample));
-			if(pNewSample == nullptr)
+			if(SampleEdit::InsertSilence(sample, changeLen, undo.changeStart, SampleChannelSelection::Both, sndFile) <= undo.OldSample.nLength - changeLen)
 				return false;
-			replace = true;
-			std::memcpy(pNewSample, pCurrentSample, undo.changeStart * bytesPerSample);
-			std::memcpy(pNewSample + undo.changeStart * bytesPerSample, undo.samplePtr, changeLen * bytesPerSample);
-			std::memcpy(pNewSample + undo.changeEnd * bytesPerSample, pCurrentSample + undo.changeStart * bytesPerSample, (undo.OldSample.nLength - undo.changeEnd) * bytesPerSample);
+			pCurrentSample = mpt::void_cast<std::byte *>(sample.samplev());
+			std::memcpy(pCurrentSample + undo.changeStart * bytesPerSample, undo.samplePtr, changeLen * bytesPerSample);
 		}
 		break;
 

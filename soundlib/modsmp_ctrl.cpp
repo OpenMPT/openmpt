@@ -338,10 +338,14 @@ namespace ctrlChn
 void ReplaceSample( CSoundFile &sndFile,
 					const ModSample &sample,
 					const void * const pNewSample,
-					const SmpLength newLength,
-					FlagSet<ChannelFlags> setFlags,
-					FlagSet<ChannelFlags> resetFlags)
+					const SmpLength newLength)
 {
+	FlagSet<ChannelFlags> setFlags, resetFlags;
+	setFlags.set(CHN_16BIT, sample.uFlags[CHN_16BIT]);
+	resetFlags.set(CHN_16BIT, !sample.uFlags[CHN_16BIT]);
+	setFlags.set(CHN_STEREO, sample.uFlags[CHN_STEREO]);
+	resetFlags.set(CHN_STEREO, !sample.uFlags[CHN_STEREO]);
+
 	const bool periodIsFreq = sndFile.PeriodsAreFrequencies();
 	for(auto &chn : sndFile.m_PlayState.Chn)
 	{

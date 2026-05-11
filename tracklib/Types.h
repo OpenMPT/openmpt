@@ -60,6 +60,13 @@ namespace Fade
 }
 
 
+enum class AmplificationUnit : uint8
+{
+	Percent = 0,
+	Decibels,
+};
+
+
 enum class SampleLengthUnit : uint8
 {
 	Samples = 0,
@@ -85,6 +92,8 @@ enum class SampleChannelSelection : uint8
 
 namespace SampleEdit
 {
+	static constexpr double SILENCE_DB = -96.0;
+
 	static constexpr uint8 ChannelSelectionToMask(SampleChannelSelection channelSel) noexcept
 	{
 		return static_cast<uint8>(channelSel);

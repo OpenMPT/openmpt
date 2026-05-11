@@ -46,7 +46,7 @@ std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp);
 
 // Insert silence to given location.
 // Return: Length of the new sample.
-SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, CSoundFile &sndFile);
+SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, SampleChannelSelection channelSel, CSoundFile &sndFile);
 
 // Remove part of a sample [selStart, selEnd[.
 // When applied to only a single channel of a stereo sample, the sample length is not changed.

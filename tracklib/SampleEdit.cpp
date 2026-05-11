@@ -250,30 +250,53 @@ std::vector<std::reference_wrapper<SmpLength>> GetCuesAndLoops(ModSample &smp)
 }
 
 
-SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, CSoundFile &sndFile)
+SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const SmpLength startFrom, SampleChannelSelection channelSel, CSoundFile &sndFile)
 {
 	if(silenceLength == 0 || silenceLength > MAX_SAMPLE_LENGTH || smp.nLength > MAX_SAMPLE_LENGTH - silenceLength || startFrom > smp.nLength)
 		return smp.nLength;
 
-	const bool wasEmpty = !smp.HasSampleData();
-	const SmpLength newLength = smp.nLength + silenceLength;
+	const bool wasEmpty = !smp.HasSampleData() || smp.uFlags[CHN_ADLIB];
 
-	char *pNewSmp = static_cast<char *>(ModSample::AllocateSample(newLength, smp.GetBytesPerSample()));
-	if(pNewSmp == nullptr)
-		return smp.nLength; //Sample allocation failed.
+	ModSample newSmp = smp;
+	newSmp.pData.pSample = nullptr;
+	newSmp.nLength = (smp.uFlags[CHN_ADLIB] ? 0 : smp.nLength) + silenceLength;
+	if(!newSmp.AllocateSample())
+		return smp.nLength;
 
 	if(!wasEmpty)
 	{
 		// Copy over old sample
 		const SmpLength silenceOffset = startFrom * smp.GetBytesPerSample();
-		const SmpLength silenceBytes = silenceLength * smp.GetBytesPerSample();
 		if(startFrom > 0)
 		{
-			memcpy(pNewSmp, smp.samplev(), silenceOffset);
+			memcpy(newSmp.samplev(), smp.samplev(), silenceOffset);
 		}
-		if(startFrom < smp.nLength)
+
+		if(IsSingleChannel(smp, channelSel))
 		{
-			memcpy(pNewSmp + silenceOffset + silenceBytes, smp.sampleb() + silenceOffset, smp.GetSampleSizeInBytes() - silenceOffset);
+			MPT_ASSERT(smp.GetNumChannels() == 2);
+			const auto CopyChannels = [](auto *dstLeft, auto *dstRight, const auto *src, const SmpLength copyCount)
+			{
+				for(const auto *pEnd = src + copyCount; src != pEnd; dstLeft += 2, dstRight += 2, src += 2)
+				{
+					*dstLeft = src[0];
+					*dstRight = src[1];
+				}
+			};
+
+			const uint8 numChannels = smp.GetNumChannels();
+			SmpLength copyOffset = startFrom * numChannels;
+			SmpLength offsetL = copyOffset + 0 + ((channelSel == SampleChannelSelection::Left) ? silenceLength * numChannels : 0);
+			SmpLength offsetR = copyOffset + 1 + ((channelSel == SampleChannelSelection::Right) ? silenceLength * numChannels : 0);
+			SmpLength copyCount = (smp.nLength - startFrom) * numChannels;
+			if(newSmp.GetElementarySampleSize() == 2)
+				CopyChannels(newSmp.sample16() + offsetL, newSmp.sample16() + offsetR, smp.sample16() + copyOffset, copyCount);
+			else
+				CopyChannels(newSmp.sample8() + offsetL, newSmp.sample8() + offsetR, smp.sample8() + copyOffset, copyCount);
+		} else if(startFrom < smp.nLength)
+		{
+			const SmpLength silenceBytes = silenceLength * smp.GetBytesPerSample();
+			memcpy(newSmp.sampleb() + silenceOffset + silenceBytes, smp.sampleb() + silenceOffset, smp.GetSampleSizeInBytes() - silenceOffset);
 		}
 
 		// Update loop points if necessary.
@@ -285,12 +308,13 @@ SmpLength InsertSilence(ModSample &smp, const SmpLength silenceLength, const Smp
 	{
 		// Set loop points automatically
 		smp.nLoopStart = 0;
-		smp.nLoopEnd = newLength;
+		smp.nLoopEnd = newSmp.nLength;
 		smp.uFlags.set(CHN_LOOP);
 	}
 
-	smp.ReplaceWaveform(pNewSmp, newLength, sndFile);
+	smp.ReplaceWaveform(newSmp.samplev(), newSmp.nLength, sndFile);
 	smp.PrecomputeLoops(sndFile, true);
+	newSmp.pData.pSample = nullptr;
 
 	return smp.nLength;
 }
@@ -376,7 +400,7 @@ SmpLength ResizeSample(ModSample &smp, const SmpLength newLength, CSoundFile &sn
 
 	// New sample will be bigger so we'll just use "InsertSilence" as it's already there.
 	if(newLength > smp.nLength)
-		return InsertSilence(smp, newLength - smp.nLength, smp.nLength, sndFile);
+		return InsertSilence(smp, newLength - smp.nLength, smp.nLength, SampleChannelSelection::Both, sndFile);
 
 	// Else: Shrink sample
 
@@ -858,7 +882,7 @@ bool ConvertPingPongLoop(ModSample &smp, CSoundFile &sndFile, bool sustainLoop)
 	const SmpLength oldLoopLength = loopEnd - loopStart;
 	const SmpLength oldLength = smp.nLength;
 
-	if(InsertSilence(smp, oldLoopLength, loopEnd, sndFile) <= oldLength)
+	if(InsertSilence(smp, oldLoopLength, loopEnd, SampleChannelSelection::Both, sndFile) <= oldLength)
 		return false;
 
 	static_assert(MaxSamplingPointSize <= 4);

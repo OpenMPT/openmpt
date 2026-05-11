@@ -2432,7 +2432,8 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 
 		if (sample.HasSampleData() && !sample.uFlags[CHN_ADLIB])
 		{
-			if (m_dwEndSel >= m_dwBeginSel + 4)
+			m_menuChannelSelection = GetChannelSelectionFromPoint(pt, sample);
+			if(m_dwEndSel >= m_dwBeginSel + 4)
 			{
 				::AppendMenu(hMenu, MF_STRING | (CanZoomSelection() ? 0 : MF_GRAYED), ID_SAMPLE_ZOOMONSEL, ih->GetKeyTextFromCommand(kcSampleZoomSelection, _T("&Zoom")));
 				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_SETLOOP, _T("Set As &Loop"));
@@ -2514,7 +2515,7 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), _T("Convert to &Mono"));
 			} else
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, ih->GetKeyTextFromCommand(kcSampleMonoMix, _T("Convert to Stere&o")));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, ih->GetKeyTextFromCommand(kcSampleStereo, _T("Convert to Stere&o")));
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
@@ -2542,12 +2543,20 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_CUT, ih->GetKeyTextFromCommand(kcEditCut, _T("Cu&t")));
 			::AppendMenu(hMenu, MF_STRING, ID_EDIT_COPY, ih->GetKeyTextFromCommand(kcEditCopy, _T("&Copy")));
 		}
+
 		const UINT clipboardFlag = (IsClipboardFormatAvailable(CF_WAVE) ? 0 : MF_GRAYED);
+		CString paste = _T("Paste");
+		if(m_menuChannelSelection == SampleChannelSelection::Left)
+			paste += _T(" into Left channel");
+		else if(m_menuChannelSelection == SampleChannelSelection::Right)
+			paste += _T(" into Right channel");
 		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PASTE, ih->GetKeyTextFromCommand(kcEditPaste, _T("&Paste (Replace)")));
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, ih->GetKeyTextFromCommand(kcEditPushForwardPaste, _T("Paste (&Insert)")));
-		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, ih->GetKeyTextFromCommand(kcEditMixPaste, _T("Mi&x Paste")));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_PUSHFORWARDPASTE, ih->GetKeyTextFromCommand(kcEditPushForwardPaste, paste + _T(" (&Insert)")));
+		::AppendMenu(hMenu, MF_STRING | clipboardFlag, ID_EDIT_MIXPASTE, ih->GetKeyTextFromCommand(kcEditMixPaste, _T("Mi&x " + paste)));
+
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanUndo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_UNDO, ih->GetKeyTextFromCommand(kcEditUndo, _T("&Undo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetUndoName(m_nSample))));
 		::AppendMenu(hMenu, MF_STRING | (pModDoc->GetSampleUndo().CanRedo(m_nSample) ? 0 : MF_GRAYED), ID_EDIT_REDO, ih->GetKeyTextFromCommand(kcEditRedo, _T("&Redo ") + mpt::ToCString(pModDoc->GetSoundFile().GetCharsetInternal(), pModDoc->GetSampleUndo().GetRedoName(m_nSample))));
+
 		ClientToScreen(&pt);
 		::TrackPopupMenu(hMenu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, pt.x, pt.y, 0, m_hWnd, NULL);
 		::DestroyMenu(hMenu);
@@ -2852,29 +2861,30 @@ void CViewSample::OnEditInsertPaste()
 }
 
 
-template<typename Tdst, typename Tsrc>
-static void MixSampleLoop(SmpLength numSamples, const Tsrc *src, uint8 srcInc, int srcFact, Tdst *dst, uint8 dstInc)
+template<typename Tsrc>
+static void MixSampleLoop(SmpLength numSamples, const Tsrc *src, uint8 srcInc, double amplify, int32 *dst, uint8 dstInc)
 {
-	SC::Convert<Tdst, Tsrc> conv;
+	SC::Convert<int16, Tsrc> conv;  // Mixing 16-bit data into 32-bit accumulation buffer
 	while(numSamples--)
 	{
-		*dst = mpt::saturate_cast<Tdst>(*dst + Util::muldivr(conv(*src), srcFact, 100));
+		*dst += mpt::saturate_round<int32>(conv(*src) * amplify);
 		src += srcInc;
 		dst += dstInc;
 	}
 }
 
 
-static void MixSampleOnto(const ModSample &sample, SmpLength offset, int amplify, uint8 chn, uint8 newNumChannels, int16 *pNewSample)
+static void MixSampleOnto(const ModSample &sample, SmpLength srcStart, SmpLength srcLen, double amplify, uint8 srcChn, uint8 dstChn, uint8 dstStride, int32 *dst)
 {
 	uint8 numChannels = sample.GetNumChannels();
+	srcLen = std::min(srcLen, sample.nLength - srcStart);
 	switch(sample.GetElementarySampleSize())
 	{
 	case 1:
-		MixSampleLoop(sample.nLength, sample.sample8() + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
+		MixSampleLoop(srcLen, sample.sample8() + srcStart * numChannels + (srcChn % numChannels), numChannels, amplify / 100.0, dst + dstChn, dstStride);
 		break;
 	case 2:
-		MixSampleLoop(sample.nLength, sample.sample16() + (chn % numChannels), numChannels, amplify, pNewSample + offset * newNumChannels + chn, newNumChannels);
+		MixSampleLoop(srcLen, sample.sample16() + srcStart * numChannels + (srcChn % numChannels), numChannels, amplify / 100.0, dst + dstChn, dstStride);
 		break;
 	default:
 		MPT_ASSERT_NOTREACHED();
@@ -2901,7 +2911,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		// Show mix paste dialog
 		if(pasteMode == PasteMode::MixPaste)
 		{
-			CMixSampleDlg dlg(this);
+			CMixSampleDlg dlg(this, sample.GetSampleRate(sndFile.GetType()));
 			if(dlg.DoModal() != IDOK)
 			{
 				EndWaitCursor();
@@ -2937,11 +2947,15 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			sample.filename = oldSample.filename;
 		}
 
+		const bool singleChannel = pasteMode != PasteMode::Replace && SampleEdit::IsSingleChannel(oldSample, m_menuChannelSelection);
+		const uint8 targetChn = SampleEdit::SelectedChannel(m_menuChannelSelection);
 		if(pasteMode == PasteMode::MixPaste && ok)
 		{
 			// Mix new sample (stored in the actual sample slot) and old sample (stored in oldSample)
-			SmpLength newLength = std::max(oldSample.nLength, CMixSampleDlg::sampleOffset + sample.nLength);
-			const uint8 newNumChannels = std::max(oldSample.GetNumChannels(), sample.GetNumChannels());
+			SmpLength newLength = std::max(oldSample.nLength, mpt::saturate_cast<SmpLength>(CMixSampleDlg::sampleOffset + sample.nLength));
+			// When pasting into a single channel, the result keeps the old channel count;
+			// otherwise pick the wider of the two samples.
+			const uint8 newNumChannels = singleChannel ? oldSample.GetNumChannels() : std::max(oldSample.GetNumChannels(), sample.GetNumChannels());
 
 			// Result is at least 9 bits (when mixing two 8-bit samples), so always enforce 16-bit resolution
 			int16 *pNewSample = static_cast<int16 *>(ModSample::AllocateSample(newLength, 2u * newNumChannels));
@@ -2952,13 +2966,51 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				ok = false;
 			} else
 			{
-				selBegin = CMixSampleDlg::sampleOffset;
+				selBegin = mpt::saturate_cast<SmpLength>(CMixSampleDlg::sampleOffset);
 				selEnd = selBegin + sample.nLength;
-				for(uint8 chn = 0; chn < newNumChannels; chn++)
+
+				static constexpr SmpLength chunkSize = 4096;
+				std::vector<int32> mixBuffer;
+				const int64 mixOffset = CMixSampleDlg::sampleOffset;
+				const uint8 srcChannels = sample.GetNumChannels();
+
+				for(SmpLength pos = 0; pos < newLength; pos += chunkSize)
 				{
-					MixSampleOnto(oldSample, 0, CMixSampleDlg::amplifyOriginal, chn, newNumChannels, pNewSample);
-					MixSampleOnto(sample, CMixSampleDlg::sampleOffset, CMixSampleDlg::amplifyMix, chn, newNumChannels, pNewSample);
+					const SmpLength chunkLen = std::min(chunkSize, newLength - pos);
+					mixBuffer.assign(chunkLen * newNumChannels, 0);
+
+					// Mix old sample
+					if(pos < oldSample.nLength)
+					{
+						SmpLength oldChunk = std::min(chunkLen, oldSample.nLength - pos);
+						for(uint8 chn = 0; chn < newNumChannels; chn++)
+							MixSampleOnto(oldSample, pos, oldChunk, CMixSampleDlg::amplifyOriginal, chn, chn, newNumChannels, mixBuffer.data());
+					}
+
+					// Mix pasted sample
+					if(pos + chunkLen > mixOffset && pos < mixOffset + sample.nLength)
+					{
+						SmpLength srcStart = static_cast<SmpLength>(std::max(static_cast<int64>(pos), mixOffset) - mixOffset);
+						SmpLength dstStart = static_cast<SmpLength>(std::max(mixOffset, static_cast<int64>(pos)) - pos);
+						SmpLength srcChunk = std::min(chunkLen - dstStart, sample.nLength - srcStart);
+						int32 *chunkDst = mixBuffer.data() + dstStart * newNumChannels;
+
+						if(singleChannel)
+						{
+							for(uint8 srcChn = 0; srcChn < srcChannels; srcChn++)
+								MixSampleOnto(sample, srcStart, srcChunk, CMixSampleDlg::amplifyMix / static_cast<int>(srcChannels), srcChn, targetChn, newNumChannels, chunkDst);
+						} else
+						{
+							for(uint8 chn = 0; chn < newNumChannels; chn++)
+								MixSampleOnto(sample, srcStart, srcChunk, CMixSampleDlg::amplifyMix, chn, chn, newNumChannels, chunkDst);
+						}
+					}
+
+					int16 *out = pNewSample + pos * newNumChannels;
+					for(SmpLength i = 0; i < chunkLen * newNumChannels; i++)
+						out[i] = mpt::saturate_cast<int16>(mixBuffer[i]);
 				}
+
 				sndFile.DestroySample(m_nSample);
 				sample = oldSample;
 				sample.uFlags.set(CHN_16BIT);
@@ -2976,13 +3028,13 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				if(selLength >= sample.nLength)
 					ok = true;
 				else
-					ok = SampleEdit::InsertSilence(oldSample, sample.nLength - selLength, m_dwBeginSel, sndFile) > oldLength;
+					ok = SampleEdit::InsertSilence(oldSample, sample.nLength - selLength, m_dwBeginSel, singleChannel ? m_menuChannelSelection : SampleChannelSelection::Both, sndFile) > oldLength;
 			} else
 			{
 				m_dwBeginSel = m_dwBeginDrag;
-				ok = SampleEdit::InsertSilence(oldSample, sample.nLength, m_dwBeginSel, sndFile) > oldLength;
+				ok = SampleEdit::InsertSilence(oldSample, sample.nLength, m_dwBeginSel, singleChannel ? m_menuChannelSelection : SampleChannelSelection::Both, sndFile) > oldLength;
 			}
-			if(ok && sample.GetNumChannels() > oldSample.GetNumChannels())
+			if(ok && !singleChannel && sample.GetNumChannels() > oldSample.GetNumChannels())
 			{
 				// Keep channel configuration with higher channel count
 				ok = ctrlSmp::ConvertToStereo(oldSample, sndFile);
@@ -2998,21 +3050,57 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 				selEnd = selBegin + sample.nLength;
 				uint8 numChannels = oldSample.GetNumChannels();
 				SmpLength offset = m_dwBeginSel * numChannels;
-				for(uint8 chn = 0; chn < numChannels; chn++)
+				if(singleChannel)
 				{
-					uint8 newChn = chn % sample.GetNumChannels();
-					if(oldSample.GetElementarySampleSize() == 1 && sample.GetElementarySampleSize() == 1)
+					// Paste into a single channel, mixing stereo source to mono
+					uint8 srcChannels = sample.GetNumChannels();
+					if(oldSample.GetElementarySampleSize() == 2)
 					{
-						CopySample(oldSample.sample8() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int8, int8>());
-					} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 1)
-					{
-						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int8>());
-					} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 2)
-					{
-						CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample16() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int16>());
+						SC::Convert<int16, int16> conv16;
+						SC::Convert<int16, int8> conv8;
+						int16 *dst = oldSample.sample16() + offset + targetChn;
+						for(SmpLength i = 0; i < sample.nLength; i++, dst += numChannels)
+						{
+							int32 mix = 0;
+							for(uint8 srcChn = 0; srcChn < srcChannels; srcChn++)
+							{
+								if(sample.GetElementarySampleSize() == 2)
+									mix += conv16(sample.sample16()[i * srcChannels + srcChn]);
+								else
+									mix += conv8(sample.sample8()[i * srcChannels + srcChn]);
+							}
+							*dst = mpt::saturate_cast<int16>(mix / static_cast<int>(srcChannels));
+						}
 					} else
 					{
-						MPT_ASSERT_NOTREACHED();
+						SC::Convert<int8, int8> conv8;
+						int8 *dst = oldSample.sample8() + offset + targetChn;
+						for(SmpLength i = 0; i < sample.nLength; i++, dst += numChannels)
+						{
+							int32 mix = 0;
+							for(uint8 srcChn = 0; srcChn < srcChannels; srcChn++)
+								mix += conv8(sample.sample8()[i * srcChannels + srcChn]);
+							*dst = mpt::saturate_cast<int8>(mix / static_cast<int>(srcChannels));
+						}
+					}
+				} else
+				{
+					for(uint8 chn = 0; chn < numChannels; chn++)
+					{
+						uint8 newChn = chn % sample.GetNumChannels();
+						if(oldSample.GetElementarySampleSize() == 1 && sample.GetElementarySampleSize() == 1)
+						{
+							CopySample(oldSample.sample8() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int8, int8>());
+						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 1)
+						{
+							CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample8() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int8>());
+						} else if(oldSample.GetElementarySampleSize() == 2 && sample.GetElementarySampleSize() == 2)
+						{
+							CopySample(oldSample.sample16() + offset + chn, sample.nLength, numChannels, sample.sample16() + newChn, sample.GetSampleSizeInBytes(), sample.GetNumChannels(), SC::Convert<int16, int16>());
+						} else
+						{
+							MPT_ASSERT_NOTREACHED();
+						}
 					}
 				}
 			} else
@@ -3025,7 +3113,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 
 		if(ok)
 		{
-			SetCurSel(selBegin, selEnd);
+			SetCurSel(selBegin, selEnd, singleChannel ? m_menuChannelSelection : SampleChannelSelection::Both);
 			sample.PrecomputeLoops(sndFile, true);
 			cs.Leave();
 			SetModified(SampleHint().Info().Data().Names(), true, false);
@@ -3152,7 +3240,7 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
 	ModSample &sample = sndFile.GetSample(m_nSample);
-	if(sample.uFlags[CHN_ADLIB] || !sample.HasSampleData())
+	if(sample.uFlags[CHN_ADLIB] || !sample.HasSampleData() || sample.GetNumChannels() != 2)
 		return;
 
 	BeginWaitCursor();
@@ -3210,10 +3298,6 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 		{
 			success = ctrlSmp::ConvertToMono(sample, sndFile, convert);
 		}
-	} else
-	{
-		pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Stereo Conversion");
-		success = ctrlSmp::ConvertToStereo(sample, sndFile);
 	}
 
 	if(success)
@@ -3221,6 +3305,26 @@ void CViewSample::OnMonoConvert(ctrlSmp::StereoToMonoMode convert)
 	else
 		pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 
+	EndWaitCursor();
+}
+
+
+void CViewSample::OnStereoConvert()
+{
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr || m_nSample > pModDoc->GetNumSamples())
+		return;
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+	ModSample &sample = sndFile.GetSample(m_nSample);
+	if(sample.uFlags[CHN_ADLIB] || !sample.HasSampleData() || sample.GetNumChannels() != 1)
+		return;
+
+	BeginWaitCursor();
+	pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Stereo Conversion");
+	if(ctrlSmp::ConvertToStereo(sample, sndFile))
+		SetModified(SampleHint().Info().Data().Names(), true, true);
+	else
+		pModDoc->GetSampleUndo().RemoveLastUndoStep(m_nSample);
 	EndWaitCursor();
 }
 
@@ -3702,7 +3806,7 @@ void CViewSample::OnAddSilence()
 			SmpLength nStart = (dlg.m_editOption == AddSilenceDlg::kSilenceAtEnd) ? sample.nLength : 0;
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_insert, "Add Silence", nStart, nStart + dlg.m_numSamples);
 			sample.SetAdlib(false);
-			SampleEdit::InsertSilence(sample, dlg.m_numSamples, nStart, sndFile);
+			SampleEdit::InsertSilence(sample, dlg.m_numSamples, nStart, SampleChannelSelection::Both, sndFile);
 		}
 	}
 
@@ -3865,8 +3969,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPasteITStyle:
-		case kcEditMixPaste:	DoPaste(PasteMode::MixPaste); return wParam;
-		case kcEditPushForwardPaste: DoPaste(PasteMode::Insert); return wParam;
+		case kcEditMixPaste:	m_menuChannelSelection = m_channelSelection; DoPaste(PasteMode::MixPaste); return wParam;
+		case kcEditPushForwardPaste: m_menuChannelSelection = m_channelSelection; DoPaste(PasteMode::Insert); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcSampleConvertPingPongLoop: OnConvertPingPongLoop(); return wParam;
@@ -3881,6 +3985,7 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcSampleMonoLeft:	OnMonoConvertLeft(); return wParam;
 		case kcSampleMonoRight:	OnMonoConvertRight(); return wParam;
 		case kcSampleMonoSplit:	OnMonoConvertSplit(); return wParam;
+		case kcSampleStereo: OnStereoConvert(); return wParam;
 		case kcSampleSendSelectionToNew: OnSendSelectionToNewSlot(); return wParam;
 
 		case kcSampleSliceCuePoints:	OnSampleSliceCuePoints(); return wParam;

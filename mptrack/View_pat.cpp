@@ -3481,7 +3481,7 @@ static void AmplifyFade(int &vol, double amp, ROWINDEX row, ROWINDEX numRows, do
 
 void CViewPattern::OnPatternAmplify()
 {
-	static CAmpDlg::AmpSettings settings{ Fade::kLinear, CAmpDlg::AmpUnit::Percent, 0.0, 0.0, 100.0, false, false };
+	static CAmpDlg::AmpSettings settings{ Fade::kLinear, 0.0, 0.0, 100.0, AmplificationUnit::Percent, false, false };
 
 	CAmpDlg dlg(this, settings, 0);
 	if(dlg.DoModal() != IDOK)

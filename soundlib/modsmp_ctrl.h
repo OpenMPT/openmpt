@@ -59,9 +59,7 @@ namespace ctrlChn
 void ReplaceSample( CSoundFile &sndFile,
 					const ModSample &sample,
 					const void * const pNewSample,
-					const SmpLength newLength,
-					FlagSet<ChannelFlags> setFlags,
-					FlagSet<ChannelFlags> resetFlags);
+					const SmpLength newLength);
 
 } // namespace ctrlChn
 

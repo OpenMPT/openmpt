@@ -966,6 +966,7 @@ static constexpr struct
 	{2129, kcSampleRemoveDCOffsetAll, _T("Remove DC Offset from All Samples")},
 	{2130, kcSampleResampleAll, _T("Resample All Samples")},
 	{2131, kcSample8BitAll, _T("Convert All Samples to 8-Bit")},
+	{2132, kcSampleStereo, _T("Convert to Stereo")},
 };
 // clang-format on
 

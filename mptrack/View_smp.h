@@ -82,6 +82,7 @@ protected:
 	SmpLength m_dwMenuParam = 0;
 	SmpLength m_dwBeginSel = 0, m_dwEndSel = 0, m_dwBeginDrag = 0, m_dwEndDrag = 0;
 	SampleChannelSelection m_channelSelection = SampleChannelSelection::Both;
+	SampleChannelSelection m_menuChannelSelection = SampleChannelSelection::Both;
 
 	// Drag & Drop
 	HitTestItem m_dragItem = HitTestItem::Nothing;
@@ -235,6 +236,7 @@ protected:
 	afx_msg void OnMonoConvertLeft() { OnMonoConvert(ctrlSmp::onlyLeft); }
 	afx_msg void OnMonoConvertRight() { OnMonoConvert(ctrlSmp::onlyRight); }
 	afx_msg void OnMonoConvertSplit() { OnMonoConvert(ctrlSmp::splitSample); }
+	afx_msg void OnStereoConvert();
 	afx_msg void OnSampleTrim() { TrimSample(false); }
 	afx_msg void OnPrevInstrument();
 	afx_msg void OnNextInstrument();

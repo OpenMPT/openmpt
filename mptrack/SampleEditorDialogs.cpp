@@ -24,10 +24,62 @@
 
 OPENMPT_NAMESPACE_BEGIN
 
+static void HandleSampleLengthUnitChange(CNumberEdit &editBox, SampleLengthUnit newUnit, uint32 sampleRate)
+{
+	editBox.AllowFractions(newUnit == SampleLengthUnit::Milliseconds);
+	editBox.SetAccessibleSuffix((newUnit == SampleLengthUnit::Samples) ? _T("samples") : _T("ms"));
+	if(newUnit == SampleLengthUnit::Samples)
+	{
+		// Convert from milliseconds to samples
+		double ms = 0.0;
+		editBox.GetDecimalValue(ms);
+		editBox.SetDecimalValue(mpt::saturate_round<SmpLength>(ms * sampleRate / 1000.0));
+	} else
+	{
+		// Convert from samples to milliseconds
+		double duration = 0.0;
+		editBox.GetDecimalValue(duration);
+		editBox.SetDecimalValue(duration * 1000.0 / sampleRate);
+	}
+}
+
+
 static void PopulateSampleLengthUnitComboBox(CComboBox &comboBox, SampleLengthUnit unit)
 {
 	comboBox.SetItemData(comboBox.AddString(_T("samples")), static_cast<DWORD_PTR>(SampleLengthUnit::Samples));
 	comboBox.SetItemData(comboBox.AddString(_T("ms")), static_cast<DWORD_PTR>(SampleLengthUnit::Milliseconds));
+	comboBox.SetCurSel(static_cast<int>(unit));
+}
+
+
+static void HandleAmplificationUnitChange(CNumberEdit &editBox, CSpinButtonCtrl &spinCtrl, int32 spinMin, int32 spinMax, AmplificationUnit newUnit)
+{
+	double value;
+	editBox.GetDecimalValue(value);
+	if(newUnit == AmplificationUnit::Decibels)
+	{
+		if(value > 0)
+			value = CModDoc::LinearToDecibels(value, 100.0);
+		else
+			value = SampleEdit::SILENCE_DB;
+	} else
+	{
+		if(value > SampleEdit::SILENCE_DB)
+			value = CModDoc::DecibelsToLinear(value, 100.0);
+		else
+			value = 0;
+	}
+	editBox.AllowNegative(spinMax < 0 || newUnit == AmplificationUnit::Decibels);
+	editBox.SetDecimalValue(value);
+	spinCtrl.SetRange32(spinMin, spinMax);
+	spinCtrl.SetPos32(mpt::saturate_round<int32>(value));
+}
+
+
+static void PopulateAmplificationUnitComboBox(CComboBox &comboBox, AmplificationUnit unit)
+{
+	comboBox.SetItemData(comboBox.AddString(_T("Percent (%)")), static_cast<DWORD_PTR>(AmplificationUnit::Percent));
+	comboBox.SetItemData(comboBox.AddString(_T("Decibels (dB)")), static_cast<DWORD_PTR>(AmplificationUnit::Decibels));
 	comboBox.SetCurSel(static_cast<int>(unit));
 }
 
@@ -47,6 +99,9 @@ void CAmpDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CAmpDlg)
 	DDX_Control(pDX, IDC_COMBO1, m_fadeBox);
 	DDX_Control(pDX, IDC_COMBO2, m_unitBox);
+	DDX_Control(pDX, IDC_EDIT1, m_edit[0]);
+	DDX_Control(pDX, IDC_EDIT2, m_edit[1]);
+	DDX_Control(pDX, IDC_EDIT3, m_edit[2]);
 	DDX_Control(pDX, IDC_UNIT1, m_unitLabel[0]);
 	DDX_Control(pDX, IDC_UNIT2, m_unitLabel[1]);
 	DDX_Control(pDX, IDC_UNIT3, m_unitLabel[2]);
@@ -61,8 +116,8 @@ CAmpDlg::CAmpDlg(CWnd *parent, AmpSettings &settings, double factorMin, double f
 	, m_settings{settings}
 	, m_factorMinLinear{factorMin}
 	, m_factorMaxLinear{factorMax}
-	, m_factorMinDecibels{(factorMin > 0) ? CModDoc::LinearToDecibels(factorMin, 100.0) : SILENCE_DB}
-	, m_factorMaxDecibels{(factorMax > 0) ? CModDoc::LinearToDecibels(factorMax, 100.0) : SILENCE_DB}
+	, m_factorMinDecibels{(factorMin > 0) ? CModDoc::LinearToDecibels(factorMin, 100.0) : SampleEdit::SILENCE_DB}
+	, m_factorMaxDecibels{(factorMax > 0) ? CModDoc::LinearToDecibels(factorMax, 100.0) : SampleEdit::SILENCE_DB}
 {}
 
 BOOL CAmpDlg::OnInitDialog()
@@ -70,23 +125,20 @@ BOOL CAmpDlg::OnInitDialog()
 	DialogBase::OnInitDialog();
 
 	m_unit = m_settings.unit;
-	m_unitBox.SetItemData(m_unitBox.AddString(_T("Percent (%)")), static_cast<DWORD_PTR>(AmpUnit::Percent));
-	m_unitBox.SetItemData(m_unitBox.AddString(_T("Decibels (dB)")), static_cast<DWORD_PTR>(AmpUnit::Decibels));
-	m_unitBox.SetCurSel(static_cast<int>(m_unit));
+	PopulateAmplificationUnitComboBox(m_unitBox, m_unit);
 
-	const bool allowNegative = m_factorMinLinear < 0 || m_unit == AmpUnit::Decibels;
-	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
-	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
+	const bool allowNegative = m_factorMinLinear < 0 || m_unit == AmplificationUnit::Decibels;
+	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmplificationUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmplificationUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
 	std::array<double, 3> values = {m_settings.factor, m_settings.fadeInStart, m_settings.fadeOutEnd};
 
 	for(size_t i = 0; i < 3; i++)
 	{
-		m_edit[i].SubclassDlgItem(static_cast<UINT>(IDC_EDIT1 + i), this);
 		m_edit[i].AllowFractions(true);
 		m_edit[i].AllowNegative(allowNegative);
 
-		if(m_unit == AmpUnit::Decibels)
-			values[i] = (values[i] > 0) ? CModDoc::LinearToDecibels(values[i], 100.0) : SILENCE_DB;
+		if(m_unit == AmplificationUnit::Decibels)
+			values[i] = (values[i] > 0) ? CModDoc::LinearToDecibels(values[i], 100.0) : SampleEdit::SILENCE_DB;
 		m_edit[i].SetDecimalValue(values[i]);
 		m_spin[i].SetRange32(factorMin, factorMax);
 		m_spin[i].SetPos32(mpt::saturate_round<int32>(values[i]));
@@ -183,7 +235,7 @@ void CAmpDlg::OnOK()
 	for(size_t i = 0; i < 3; i++)
 	{
 		m_edit[i].GetDecimalValue(values[i]);
-		if(m_unit == AmpUnit::Decibels)
+		if(m_unit == AmplificationUnit::Decibels)
 			values[i] = CModDoc::DecibelsToLinear(values[i], 100.0);
 		Limit(values[i], m_factorMinLinear, m_factorMaxLinear);
 	}
@@ -218,38 +270,18 @@ void CAmpDlg::OnUnitChanged()
 	if(m_locked)
 		return;
 
-	const AmpUnit newUnit = static_cast<AmpUnit>(m_unitBox.GetItemData(m_unitBox.GetCurSel()));
+	const AmplificationUnit newUnit = static_cast<AmplificationUnit>(m_unitBox.GetItemData(m_unitBox.GetCurSel()));
 	if(newUnit == m_unit)
 		return;
 
 	m_locked = true;
 	m_unit = newUnit;
 
-	const bool allowNegative = m_factorMinLinear < 0 || m_unit == AmpUnit::Decibels;
-	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
-	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmpUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
-
+	const int32 factorMin = mpt::saturate_round<int32>((m_unit == AmplificationUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_unit == AmplificationUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
 	for(size_t i = 0; i < 3; i++)
 	{
-		double value;
-		m_edit[i].GetDecimalValue(value);
-		if(m_unit == AmpUnit::Decibels)
-		{
-			if(value > 0)
-				value = CModDoc::LinearToDecibels(value, 100.0);
-			else
-				value = SILENCE_DB;
-		} else
-		{
-			if(value > SILENCE_DB)
-				value = CModDoc::DecibelsToLinear(value, 100.0);
-			else
-				value = 0;
-		}
-		m_edit[i].AllowNegative(allowNegative);
-		m_edit[i].SetDecimalValue(value);
-		m_spin[i].SetRange32(factorMin, factorMax);
-		m_spin[i].SetPos32(mpt::saturate_round<int32>(value));
+		HandleAmplificationUnitChange(m_edit[i], m_spin[i], factorMin, factorMax, m_unit);
 	}
 
 	m_locked = false;
@@ -259,7 +291,7 @@ void CAmpDlg::OnUnitChanged()
 
 void CAmpDlg::UpdateUnitLabels()
 {
-	const TCHAR *unitLabel = (m_unit == AmpUnit::Decibels) ? _T("dB") : _T("%");
+	const TCHAR *unitLabel = (m_unit == AmplificationUnit::Decibels) ? _T("dB") : _T("%");
 	for(auto &label : m_unitLabel)
 	{
 		label.SetWindowText(unitLabel);
@@ -561,10 +593,10 @@ void AddSilenceDlg::DoDataExchange(CDataExchange *pDX)
 
 
 AddSilenceDlg::AddSilenceDlg(CWnd *parent, SmpLength origLength, uint32 sampleRate, bool allowOPL)
-	: DialogBase(IDD_ADDSILENCE, parent)
-	, m_numSamples(m_addSamples)
-	, m_sampleRate(sampleRate)
-	, m_allowOPL(allowOPL)
+	: DialogBase{IDD_ADDSILENCE, parent}
+	, m_numSamples{m_addSamples}
+	, m_sampleRate{sampleRate}
+	, m_allowOPL{allowOPL}
 {
 	if(origLength > 0)
 	{
@@ -590,12 +622,13 @@ BOOL AddSilenceDlg::OnInitDialog()
 	}
 
 	m_ComboUnit.SetAccessibleName(_T("Length unit"));
-	PopulateSampleLengthUnitComboBox(m_ComboUnit, m_unit);
 	if(m_sampleRate == 0)
 	{
-		// Can't do any conversions if samplerate is unknown
+		// Can't do any conversions if sample rate is unknown
 		m_ComboUnit.EnableWindow(FALSE);
+		m_unit = SampleLengthUnit::Samples;
 	}
+	PopulateSampleLengthUnitComboBox(m_ComboUnit, m_unit);
 
 	int buttonID = IDC_RADIO_ADDSILENCE_END;
 	switch(m_editOption)
@@ -683,20 +716,7 @@ void AddSilenceDlg::OnUnitChanged()
 		return;
 
 	m_unit = unit;
-	m_EditAmount.AllowFractions(m_unit == SampleLengthUnit::Milliseconds);
-	m_EditAmount.SetAccessibleSuffix((m_unit == SampleLengthUnit::Samples) ? _T("samples") : _T("ms"));
-	if(m_unit == SampleLengthUnit::Samples)
-	{
-		// Convert from milliseconds to samples
-		double ms = 0.0;
-		m_EditAmount.GetDecimalValue(ms);
-		SetDlgItemInt(IDC_EDIT_ADDSILENCE, mpt::saturate_round<SmpLength>(ms * m_sampleRate / 1000.0));
-	} else
-	{
-		// Convert from samples to milliseconds
-		SmpLength duration = GetDlgItemInt(IDC_EDIT_ADDSILENCE, nullptr, FALSE);
-		m_EditAmount.SetDecimalValue(duration * 1000.0 / m_sampleRate);
-	}
+	HandleSampleLengthUnitChange(m_EditAmount, m_unit, m_sampleRate);
 }
 
 
@@ -1123,25 +1143,44 @@ void CResamplingDlg::OnEditChanged()
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Sample mix dialog
 
-SmpLength CMixSampleDlg::sampleOffset = 0;
-int CMixSampleDlg::amplifyOriginal = 50;
-int CMixSampleDlg::amplifyMix = 50;
+CMixSampleDlg::SmpLengthSigned CMixSampleDlg::sampleOffset = 0;
+double CMixSampleDlg::amplifyOriginal = 50.0;
+double CMixSampleDlg::amplifyMix = 50.0;
+AmplificationUnit CMixSampleDlg::m_ampUnit = AmplificationUnit::Percent;
+SampleLengthUnit CMixSampleDlg::m_lengthUnit = SampleLengthUnit::Samples;
+
+
+BEGIN_MESSAGE_MAP(CMixSampleDlg, DialogBase)
+	ON_CBN_SELCHANGE(IDC_COMBO1, &CMixSampleDlg::OnAmpUnitChanged)
+	ON_CBN_SELCHANGE(IDC_COMBO2, &CMixSampleDlg::OnLengthUnitChanged)
+END_MESSAGE_MAP()
 
 
 void CMixSampleDlg::DoDataExchange(CDataExchange* pDX)
 {
 	DialogBase::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMixSampleDlg)
-	DDX_Control(pDX, IDC_EDIT_OFFSET,			m_EditOffset);
-	DDX_Control(pDX, IDC_SPIN_OFFSET,			m_SpinOffset);
-	DDX_Control(pDX, IDC_SPIN_SAMPVOL1,			m_SpinVolOriginal);
-	DDX_Control(pDX, IDC_SPIN_SAMPVOL2,			m_SpinVolMix);
+	DDX_Control(pDX, IDC_UNIT1,         m_unitLabel[0]);
+	DDX_Control(pDX, IDC_UNIT2,         m_unitLabel[1]);
+	DDX_Control(pDX, IDC_EDIT_SAMPVOL1, m_edit[0]);
+	DDX_Control(pDX, IDC_EDIT_SAMPVOL2, m_edit[1]);
+	DDX_Control(pDX, IDC_SPIN_SAMPVOL1, m_spin[0]);
+	DDX_Control(pDX, IDC_SPIN_SAMPVOL2, m_spin[1]);
+	DDX_Control(pDX, IDC_EDIT_OFFSET,   m_EditOffset);
+	DDX_Control(pDX, IDC_SPIN_OFFSET,   m_SpinOffset);
+	DDX_Control(pDX, IDC_COMBO1,        m_ampUnitBox);
+	DDX_Control(pDX, IDC_COMBO2,        m_lengthUnitBox);
 	//}}AFX_DATA_MAP
 }
 
 
-CMixSampleDlg::CMixSampleDlg(CWnd *parent)
+CMixSampleDlg::CMixSampleDlg(CWnd *parent, uint32 sampleRate)
 	: DialogBase(IDD_MIXSAMPLES, parent)
+	, m_factorMinLinear{-100'000}
+	, m_factorMaxLinear{100'000}
+	, m_factorMinDecibels{(m_factorMinLinear > 0) ? CModDoc::LinearToDecibels(m_factorMinLinear, 100.0) : SampleEdit::SILENCE_DB}
+	, m_factorMaxDecibels{(m_factorMaxLinear > 0) ? CModDoc::LinearToDecibels(m_factorMaxLinear, 100.0) : SampleEdit::SILENCE_DB}
+	, m_sampleRate{sampleRate}
 { }
 
 
@@ -1149,21 +1188,46 @@ BOOL CMixSampleDlg::OnInitDialog()
 {
 	DialogBase::OnInitDialog();
 
+	m_lengthUnitBox.SetAccessibleName(_T("Length unit"));
+	if(m_sampleRate == 0)
+	{
+		// Can't do any conversions if sample rate is unknown
+		m_lengthUnitBox.EnableWindow(FALSE);
+		m_lengthUnit = SampleLengthUnit::Samples;
+	}
+	PopulateSampleLengthUnitComboBox(m_lengthUnitBox, m_lengthUnit);
+	PopulateAmplificationUnitComboBox(m_ampUnitBox, m_ampUnit);
+
 	// Offset
-	m_SpinOffset.SetRange32(0, MAX_SAMPLE_LENGTH);
-	SetDlgItemInt(IDC_EDIT_OFFSET, sampleOffset);
+	static_assert(MAX_SAMPLE_LENGTH <= std::numeric_limits<SmpLengthSigned>::max());
+	m_SpinOffset.SetRange32(-static_cast<SmpLengthSigned>(MAX_SAMPLE_LENGTH), MAX_SAMPLE_LENGTH);
+	m_EditOffset.SetAccessibleSuffix((m_lengthUnit == SampleLengthUnit::Samples) ? _T("samples") : _T("ms"));
+	m_EditOffset.AllowNegative(true);
+	m_EditOffset.AllowFractions(m_lengthUnit == SampleLengthUnit::Milliseconds);
+	double duration = sampleOffset;
+	if(m_lengthUnit == SampleLengthUnit::Milliseconds)
+		duration *= 1000.0 / m_sampleRate;
+	m_EditOffset.SetDecimalValue(duration);
 
 	// Volumes
-	m_SpinVolOriginal.SetRange(-10000, 10000);
-	m_SpinVolMix.SetRange(-10000, 10000);
+	const bool allowNegative = m_factorMinLinear < 0 || m_ampUnit == AmplificationUnit::Decibels;
+	const int32 factorMin = mpt::saturate_round<int32>((m_ampUnit == AmplificationUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_ampUnit == AmplificationUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
+	std::array<double, 2> values = {amplifyOriginal, amplifyMix};
 
-	m_EditVolOriginal.SubclassDlgItem(IDC_EDIT_SAMPVOL1, this);
-	m_EditVolOriginal.AllowNegative(true);
-	m_EditVolMix.SubclassDlgItem(IDC_EDIT_SAMPVOL2, this);
-	m_EditVolMix.AllowNegative(true);
+	for(size_t i = 0; i < 2; i++)
+	{
+		m_edit[i].AllowFractions(true);
+		m_edit[i].AllowNegative(allowNegative);
 
-	SetDlgItemInt(IDC_EDIT_SAMPVOL1, amplifyOriginal);
-	SetDlgItemInt(IDC_EDIT_SAMPVOL2, amplifyMix);
+		if(m_ampUnit == AmplificationUnit::Decibels)
+			values[i] = (values[i] > 0) ? CModDoc::LinearToDecibels(values[i], 100.0) : SampleEdit::SILENCE_DB;
+		m_edit[i].SetDecimalValue(values[i]);
+		m_spin[i].SetRange32(factorMin, factorMax);
+		m_spin[i].SetPos32(mpt::saturate_round<int32>(values[i]));
+	}
+
+	UpdateUnitLabels();
 
 	return TRUE;
 }
@@ -1172,9 +1236,64 @@ BOOL CMixSampleDlg::OnInitDialog()
 void CMixSampleDlg::OnOK()
 {
 	DialogBase::OnOK();
-	sampleOffset = Clamp<SmpLength, SmpLength>(GetDlgItemInt(IDC_EDIT_OFFSET), 0, MAX_SAMPLE_LENGTH);
-	amplifyOriginal = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL1), -10000, 10000);
-	amplifyMix = Clamp<int, int>(GetDlgItemInt(IDC_EDIT_SAMPVOL2), -10000, 10000);
+
+	double offset = 0.0;
+	m_EditOffset.GetDecimalValue(offset);
+	if(m_lengthUnit == SampleLengthUnit::Milliseconds)
+		offset *= m_sampleRate / 1000.0;
+	sampleOffset = Clamp(mpt::saturate_round<SmpLengthSigned>(offset), -static_cast<SmpLengthSigned>(MAX_SAMPLE_LENGTH), static_cast<SmpLengthSigned>(MAX_SAMPLE_LENGTH));
+
+	std::array<double, 2> values;
+	for(size_t i = 0; i < 2; i++)
+	{
+		m_edit[i].GetDecimalValue(values[i]);
+		if(m_ampUnit == AmplificationUnit::Decibels)
+			values[i] = CModDoc::DecibelsToLinear(values[i], 100.0);
+		Limit(values[i], m_factorMinLinear, m_factorMaxLinear);
+	}
+
+	amplifyOriginal = values[0];
+	amplifyMix = values[1];
+}
+
+
+void CMixSampleDlg::OnLengthUnitChanged()
+{
+	const auto unit = static_cast<SampleLengthUnit>(m_lengthUnitBox.GetItemData(m_lengthUnitBox.GetCurSel()));
+	if(m_lengthUnit == unit)
+		return;
+
+	m_lengthUnit = unit;
+	HandleSampleLengthUnitChange(m_EditOffset, m_lengthUnit, m_sampleRate);
+}
+
+
+void CMixSampleDlg::OnAmpUnitChanged()
+{
+	const AmplificationUnit newUnit = static_cast<AmplificationUnit>(m_ampUnitBox.GetItemData(m_ampUnitBox.GetCurSel()));
+	if(newUnit == m_ampUnit)
+		return;
+
+	m_ampUnit = newUnit;
+
+	const int32 factorMin = mpt::saturate_round<int32>((m_ampUnit == AmplificationUnit::Decibels) ? m_factorMinDecibels : m_factorMinLinear);
+	const int32 factorMax = mpt::saturate_round<int32>((m_ampUnit == AmplificationUnit::Decibels) ? m_factorMaxDecibels : m_factorMaxLinear);
+	for(size_t i = 0; i < 2; i++)
+	{
+		HandleAmplificationUnitChange(m_edit[i], m_spin[i], factorMin, factorMax, m_ampUnit);
+	}
+
+	UpdateUnitLabels();
+}
+
+
+void CMixSampleDlg::UpdateUnitLabels()
+{
+	const TCHAR *unitLabel = (m_ampUnit == AmplificationUnit::Decibels) ? _T("dB") : _T("%");
+	for(auto &label : m_unitLabel)
+	{
+		label.SetWindowText(unitLabel);
+	}
 }
 
 OPENMPT_NAMESPACE_END
