@@ -440,7 +440,7 @@
 				systemversion "10.0.26100.0"
 			end
 		filter { "action:vs2026" }
-			systemversion "10.0.26100.0"
+			systemversion "10.0.28000.0"
 		filter {}
 	end
 

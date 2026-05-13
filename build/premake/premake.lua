@@ -238,8 +238,8 @@ MPT_WIN = {
 	["11_22H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x0c), -- NTDDI_WIN10_NI   22H2
 	--["11_23H2"]                                                                   23H2
 	["11_24H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10), -- NTDDI_WIN11_GE   24H2
-	--["11_25H2"]                                                                   25H2
-	--["11_26H1"]                                                                   26H1
+	["11_25H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x11), -- NTDDI_WIN11_DT   25H2
+	["11_26H1"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x12), -- NTDDI_WIN11_BR   26H1
 
 }
 
@@ -681,7 +681,7 @@ if MPT_OS_WINDOWS_WINRT then
 			premake.w('<AppContainerApplication>true</AppContainerApplication>')
 			premake.w('<ApplicationType>Windows Store</ApplicationType>')
 			premake.w('<ApplicationTypeRevision>10.0</ApplicationTypeRevision>')
-			premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.26100.0</WindowsTargetPlatformVersion>')
+			premake.w('<WindowsTargetPlatformVersion Condition=" \'$(WindowsTargetPlatformVersion)\' == \'\' ">10.0.28000.0</WindowsTargetPlatformVersion>')
 			if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
 				premake.w('<WindowsTargetPlatformMinVersion>10.0.22631.0</WindowsTargetPlatformMinVersion>')
 			elseif MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
