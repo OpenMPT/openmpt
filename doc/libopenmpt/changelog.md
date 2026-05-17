@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.7-pre
+### libopenmpt 0.8.7 (2026-05-17)
 
  *  ULT: Sustain loops were stopped after a portamento.
 
