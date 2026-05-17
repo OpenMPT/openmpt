@@ -7,14 +7,14 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.7-pre
 
+ *  ULT: Sustain loops were stopped after a portamento.
+
  *  mpg123: Update to v1.33.5 (2026-04-25).
 
 ### libopenmpt 0.8.6 (2026-03-24)
 
  *  [**Sec**] The security fix in libopenmpt 0.8.5 (r25042) was incomplete,
     causing a regression when playing short looped ("chip") samples (r25084).
-
- *  ULT: Sustain loops were stopped after a portamento.
 
  *  mpg123: Update to v1.33.4 (2025-12-20).
 
