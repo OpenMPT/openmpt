@@ -43,6 +43,50 @@ using std::log2;
 
 #if MPT_OS_DJGPP
 
+inline long lround(const long double val) {
+	return ::lroundl(val);
+}
+
+inline long lround(const double val) {
+	return ::lround(val);
+}
+
+inline long lround(const float val) {
+	return ::lroundf(val);
+}
+
+#else // !MPT_OS_DJGPP
+
+// C++11 std::lround
+using std::lround;
+
+#endif // MPT_OS_DJGPP
+
+
+#if MPT_OS_DJGPP
+
+inline long long llround(const long double val) {
+	return ::llroundl(val);
+}
+
+inline long long llround(const double val) {
+	return ::llround(val);
+}
+
+inline long long llround(const float val) {
+	return ::llroundf(val);
+}
+
+#else // !MPT_OS_DJGPP
+
+// C++11 std::llround
+using std::llround;
+
+#endif // MPT_OS_DJGPP
+
+
+#if MPT_OS_DJGPP
+
 inline long double round(const long double val) {
 	return ::roundl(val);
 }
