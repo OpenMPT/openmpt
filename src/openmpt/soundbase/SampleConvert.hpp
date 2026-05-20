@@ -42,7 +42,7 @@ namespace SC
 // amd64 SSE2   fast    call         inline       +
 // amd64 SSE4.2 fast    inline+fixup inline       +
 // amd64 AVX2   fast    inline+fixup inline       +
-// 
+//
 // i386  x87    precise call         fixup+call   -
 // i386  SSE2   precise call         fixup+call   -
 // amd64 SSE2   precise call         call+fixup   -
@@ -56,7 +56,7 @@ namespace SC
 // in which case the canonical semantically correct std::round should be preferred.
 
 #if MPT_COMPILER_MSVC
-#if (defined(_M_FP_FAST) && (_M_FP_FAST == 1))
+#if defined(_M_FP_FAST) && (_M_FP_FAST == 1)
 // /fp:fast
 #if 0
 #elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_FPU) && !defined(MPT_ARCH_X86_SSE2))
@@ -85,7 +85,7 @@ namespace SC
 #define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
 #endif
 #endif
-#endif // MPT_COMPILER_MSVC
+#endif  // MPT_COMPILER_MSVC
 
 #ifndef MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND
 #define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
