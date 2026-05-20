@@ -49,11 +49,23 @@ namespace SC
 // amd64 SSE4.2 precise inline+fixup inline       +
 // amd64 AVX2   precise inline+fixup inline       +
 //
-// See <https://godbolt.org/z/dYYGenjKT> for a microbenchmark.
+// std::round: <https://godbolt.org/z/dYYGenjKT>
+// 
+// arch  SSE    /fp:    std::lround fastlround   better
 //
-// TODO: Real-world benchmark of amd64 SSE4.2 and amd64 AVX2.
-// The inlined additional code might fold away, or nearly away,
-// in which case the canonical semantically correct std::round should be preferred.
+// i386  x87    fast    2*call      fixup+2*call -
+// i386  SSE2   fast    inline      inline+fixup -
+// amd64 SSE2   fast    call        inline       +
+// amd64 SSE4.2 fast    call        inline       +
+// amd64 AVX2   fast    call        inline       +
+//
+// i386  x87    precise call        fixup+2*call -
+// i386  SSE2   precise call        fixup+call   -
+// amd64 SSE2   precise call        fixup+call   -
+// amd64 SSE4.2 precise call        inline       +
+// amd64 AVX2   precise call        inline       +
+//
+// std::lround: <https://godbolt.org/z/rcbcbK7b7>
 
 #if MPT_COMPILER_MSVC
 #if defined(_M_FP_FAST) && (_M_FP_FAST == 1)
@@ -62,7 +74,7 @@ namespace SC
 #elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_FPU) && !defined(MPT_ARCH_X86_SSE2))
 #define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
 #elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_SSE2))
-#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
 #elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE2) && !defined(MPT_ARCH_X86_SSE4_2))
 #define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
 #elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE4_2) && !defined(MPT_ARCH_X86_AVX2))
@@ -98,12 +110,36 @@ MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tfloat fastround(Tfloat x)
 	static_assert(std::is_floating_point<Tfloat>::value);
 	return std::floor(x + static_cast<Tfloat>(0.5));
 }
+template <typename Tfloat>
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE long fastlround(Tfloat x)
+{
+	static_assert(std::is_floating_point<Tfloat>::value);
+	return static_cast<long>(std::floor(x + static_cast<Tfloat>(0.5)));
+}
+template <typename Tfloat>
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE long long fastllround(Tfloat x)
+{
+	static_assert(std::is_floating_point<Tfloat>::value);
+	return static_cast<long long>(std::floor(x + static_cast<Tfloat>(0.5)));
+}
 #else
 template <typename Tfloat>
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tfloat fastround(Tfloat x)
 {
 	static_assert(std::is_floating_point<Tfloat>::value);
 	return mpt::round(x);
+}
+template <typename Tfloat>
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE long fastlround(Tfloat x)
+{
+	static_assert(std::is_floating_point<Tfloat>::value);
+	return mpt::lround(x);
+}
+template <typename Tfloat>
+MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE long long fastllround(Tfloat x)
+{
+	static_assert(std::is_floating_point<Tfloat>::value);
+	return mpt::llround(x);
 }
 #endif
 
@@ -221,7 +257,7 @@ struct Convert<uint8, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 128.0f;
-		return static_cast<uint8>(mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val))) + 0x80);
+		return static_cast<uint8>(mpt::saturate_cast<int8>(SC::fastlround(val)) + 0x80);
 	}
 };
 
@@ -234,7 +270,7 @@ struct Convert<uint8, double>
 	{
 		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 128.0;
-		return static_cast<uint8>(mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val))) + 0x80);
+		return static_cast<uint8>(mpt::saturate_cast<int8>(SC::fastlround(val)) + 0x80);
 	}
 };
 
@@ -302,7 +338,7 @@ struct Convert<int8, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 128.0f;
-		return mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val)));
+		return mpt::saturate_cast<int8>(SC::fastlround(val));
 	}
 };
 
@@ -315,7 +351,7 @@ struct Convert<int8, double>
 	{
 		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 128.0;
-		return mpt::saturate_cast<int8>(static_cast<int>(SC::fastround(val)));
+		return mpt::saturate_cast<int8>(SC::fastlround(val));
 	}
 };
 
@@ -383,7 +419,7 @@ struct Convert<int16, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 32768.0f;
-		return mpt::saturate_cast<int16>(static_cast<int>(SC::fastround(val)));
+		return mpt::saturate_cast<int16>(SC::fastlround(val));
 	}
 };
 
@@ -396,7 +432,7 @@ struct Convert<int16, double>
 	{
 		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 32768.0;
-		return mpt::saturate_cast<int16>(static_cast<int>(SC::fastround(val)));
+		return mpt::saturate_cast<int16>(SC::fastlround(val));
 	}
 };
 
@@ -464,7 +500,7 @@ struct Convert<int24, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
-		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val))), 8));
+		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(SC::fastllround(val)), 8));
 	}
 };
 
@@ -477,7 +513,7 @@ struct Convert<int24, double>
 	{
 		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 2147483648.0;
-		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val))), 8));
+		return static_cast<int24>(mpt::rshift_signed(mpt::saturate_cast<int32>(SC::fastllround(val)), 8));
 	}
 };
 
@@ -545,7 +581,7 @@ struct Convert<int32, somefloat32>
 	{
 		val = mpt::safe_clamp(val, -1.0f, 1.0f);
 		val *= 2147483648.0f;
-		return mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val)));
+		return mpt::saturate_cast<int32>(SC::fastllround(val));
 	}
 };
 
@@ -558,7 +594,7 @@ struct Convert<int32, double>
 	{
 		val = mpt::safe_clamp(val, -1.0, 1.0);
 		val *= 2147483648.0;
-		return mpt::saturate_cast<int32>(static_cast<int64>(SC::fastround(val)));
+		return mpt::saturate_cast<int32>(SC::fastllround(val));
 	}
 };
 
