@@ -7,6 +7,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "mpt/base/arithmetic_shift.hpp"
+#include "mpt/base/detect.hpp"
 #include "mpt/base/macros.hpp"
 #include "mpt/base/math.hpp"
 #include "mpt/base/saturate_cast.hpp"
@@ -31,7 +32,66 @@ namespace SC
 
 
 
+// fastround:
+// Improves code generation on certain MSVC targets.
+//
+// arch  SSE    /fp:    std::round   fastround    better
+//
+// i386  x87    fast    call         fixup+call   -
+// i386  SSE2   fast    call         inline+fixup +
+// amd64 SSE2   fast    call         inline       +
+// amd64 SSE4.2 fast    inline+fixup inline       +
+// amd64 AVX2   fast    inline+fixup inline       +
+// 
+// i386  x87    precise call         fixup+call   -
+// i386  SSE2   precise call         fixup+call   -
+// amd64 SSE2   precise call         call+fixup   -
+// amd64 SSE4.2 precise inline+fixup inline       +
+// amd64 AVX2   precise inline+fixup inline       +
+//
+// See <https://godbolt.org/z/dYYGenjKT> for a microbenchmark.
+//
+// TODO: Real-world benchmark of amd64 SSE4.2 and amd64 AVX2.
+// The inlined additional code might fold away, or nearly away,
+// in which case the canonical semantically correct std::round should be preferred.
+
 #if MPT_COMPILER_MSVC
+#if (defined(_M_FP_FAST) && (_M_FP_FAST == 1))
+// /fp:fast
+#if 0
+#elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_FPU) && !defined(MPT_ARCH_X86_SSE2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
+#elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_SSE2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE2) && !defined(MPT_ARCH_X86_SSE4_2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE4_2) && !defined(MPT_ARCH_X86_AVX2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_AVX2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#endif
+#else
+// /fp:precise / ...
+#if 0
+#elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_FPU) && !defined(MPT_ARCH_X86_SSE2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
+#elif MPT_ARCH_X86 && (defined(MPT_ARCH_X86_SSE2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE2) && !defined(MPT_ARCH_X86_SSE4_2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_SSE4_2) && !defined(MPT_ARCH_X86_AVX2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#elif MPT_ARCH_AMD64 && (defined(MPT_ARCH_X86_AVX2))
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 1
+#endif
+#endif
+#endif // MPT_COMPILER_MSVC
+
+#ifndef MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND
+#define MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND 0
+#endif
+
+#if MPT_SOUNDBASE_SAMPLECONVERT_HPP_FASTROUND
 template <typename Tfloat>
 MPT_ATTR_ALWAYSINLINE MPT_INLINE_FORCE Tfloat fastround(Tfloat x)
 {
