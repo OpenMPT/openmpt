@@ -50,7 +50,7 @@ namespace SC
 // amd64 AVX2   precise inline+fixup inline       +
 //
 // std::round: <https://godbolt.org/z/dYYGenjKT>
-// 
+//
 // arch  SSE    /fp:    std::lround fastlround   better
 //
 // i386  x87    fast    2*call      fixup+2*call -
