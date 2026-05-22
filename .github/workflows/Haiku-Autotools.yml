@@ -23,7 +23,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v1.0.0
+      uses: cross-platform-actions/action@v1.1.0
       with:
         architecture: x86_64
         memory: 4G
@@ -31,52 +31,26 @@ jobs:
         version: ${{matrix.version}}
         shell: bash
         sync_files: false
-        shutdown_vm: false
-        run: true
     - name: Sync files to VM
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: haiku
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: runner-to-vm
-        shutdown_vm: false
-        run: true
+      shell: cpa.sh {0} --sync-files runner-to-vm
+      run: true
+    - name: Update system
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        pkgman refresh
+        pkgman full-sync -y
+    - name: Reboot VM
+      shell: cpa.sh {0} --sync-files none --reboot
+      run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: haiku
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          pkgman refresh
-          pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        pkgman refresh
+        pkgman install -y subversion git perl gawk make pkgconfig mpg123_devel libogg_devel libvorbis_devel flac_devel libsndfile_devel portaudio_devel libsdl2_devel autoconf autoconf_archive libtool libtool_libltdl doxygen help2man
+    - name: Reboot VM
+      shell: cpa.sh {0} --sync-files none --reboot
+      run: true
     - name: Build
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: haiku
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
-    - name: Shutdown VM
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: haiku
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: true
-        run: true
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        export MAKEFLAGS="-j4"; ./build/autotools/autoconfiscate.sh
