@@ -950,6 +950,29 @@ public:
 	*/
 	LIBOPENMPT_CXX_API_MEMBER float get_current_channel_vu_rear_right( std::int32_t channel ) const;
 
+	//! Get the per-channel audio output for the most recently rendered block, mixed to mono.
+	/*!
+	  \param channel The channel index (0-based).
+	  \param count   Number of frames to retrieve. Must not exceed the count passed to the most recent read() call.
+	  \param buf     Output buffer of at least \p count floats. Values are in the range [-1.0, 1.0].
+	  \return The number of frames written to \p buf, or 0 if capture is not enabled or the channel is out of range.
+	  \remarks Enable capture first via ctl_set_boolean("render.channel_capture", true).
+	           Works for both PCM and OPL/FM channels. Must be called after read() and before the next read() call.
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::size_t get_current_channel_audio_mono( std::int32_t channel, std::size_t count, float * buf ) const;
+
+	//! Get the per-channel audio output for the most recently rendered block, as separate left/right channels.
+	/*!
+	  \param channel   The channel index (0-based).
+	  \param count     Number of frames to retrieve. Must not exceed the count passed to the most recent read() call.
+	  \param buf_left  Output buffer of at least \p count floats for the left channel.
+	  \param buf_right Output buffer of at least \p count floats for the right channel.
+	  \return The number of frames written, or 0 if capture is not enabled or the channel is out of range.
+	  \remarks Enable capture first via ctl_set_boolean("render.channel_capture", true).
+	           Works for both PCM and OPL/FM channels. Must be called after read() and before the next read() call.
+	*/
+	LIBOPENMPT_CXX_API_MEMBER std::size_t get_current_channel_audio_stereo( std::int32_t channel, std::size_t count, float * buf_left, float * buf_right ) const;
+
 	//! Get the number of sub-songs
 	/*!
 	  \return The number of sub-songs in the module. This includes any "hidden" songs (songs that share the same sequence, but start at different order indices) and "normal" sub-songs or "sequences" (if the format supports them).

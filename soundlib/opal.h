@@ -179,6 +179,12 @@ class Opal {
         void                Port(uint16_t reg_num, uint8_t val);
         void                Sample(int16_t *left, int16_t *right);
 
+    public:
+        // Per-voice output snapshot — valid after each Sample() call.
+        // Returns a pointer to NumChannels int16 values: the isolated left-channel
+        // contribution of each OPL voice before summation in Output().
+        const int16_t *     GetVoiceOutput() const noexcept { return m_voiceOut; }
+
     protected:
         void                Init(int sample_rate);
         void                Output(int16_t &left, int16_t &right);
@@ -186,6 +192,7 @@ class Opal {
         int32_t             SampleRate;
         int32_t             SampleAccum;
         int16_t             LastOutput[2], CurrOutput[2];
+        int16_t             m_voiceOut[NumChannels]{};
         Channel             Chan[NumChannels];
         Operator            Op[NumOperators];
 //      uint16_t            ExpTable[256];
@@ -596,6 +603,7 @@ void Opal::Output(int16_t &left, int16_t &right) {
 
         int16_t chanleft, chanright;
         Chan[i].Output(chanleft, chanright);
+        m_voiceOut[i] = chanleft;
 
         leftmix += chanleft;
         rightmix += chanright;

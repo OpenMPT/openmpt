@@ -309,13 +309,46 @@ void CSoundFile::CreateStereoMix(int count)
 	if(m_MixerSettings.gnChannels > 2)
 		StereoFill(MixRearBuffer, count, m_surroundROfsVol, m_surroundLOfsVol);
 
+	if(m_channelCaptureEnabled && !m_channelCaptureBuf.empty())
+	{
+		std::fill(m_channelCaptureBuf.begin(), m_channelCaptureBuf.end(), mixsample_t{});
+		m_channelCaptureGlobalVolScale = m_PlayConfig.getGlobalVolumeAppliesToMaster()
+		    ? static_cast<float>(m_PlayState.m_nGlobalVolume) / static_cast<float>(MAX_GLOBAL_VOLUME)
+		    : 1.0f;
+	}
+
 	// Channels that are actually mixed and not skipped (because they are paused or muted)
 	CHANNELINDEX numChannelsMixed = 0;
 
 	for(uint32 nChn = 0; nChn < m_nMixChannels; nChn++)
 	{
-		if(MixChannel(count, m_PlayState.Chn[m_PlayState.ChnMix[nChn]], m_PlayState.ChnMix[nChn], numChannelsMixed < m_MixerSettings.m_nMaxMixChannels))
+		const CHANNELINDEX absIdx = m_PlayState.ChnMix[nChn];
+
+		int captureTarget = -1;
+		mixsample_t snapBuf[MIXBUFFERSIZE * 2];
+		if(m_channelCaptureEnabled && !m_channelCaptureBuf.empty())
+		{
+			if(absIdx < m_channelCaptureNumChannels)
+				captureTarget = static_cast<int>(absIdx);
+			else
+			{
+				const CHANNELINDEX master = m_PlayState.Chn[absIdx].nMasterChn;
+				if(master > 0 && master <= m_channelCaptureNumChannels)
+					captureTarget = static_cast<int>(master - 1);
+			}
+			if(captureTarget >= 0)
+				std::memcpy(snapBuf, MixSoundBuffer, count * 2 * sizeof(mixsample_t));
+		}
+
+		if(MixChannel(count, m_PlayState.Chn[absIdx], absIdx, numChannelsMixed < m_MixerSettings.m_nMaxMixChannels))
 			numChannelsMixed++;
+
+		if(m_channelCaptureEnabled && captureTarget >= 0)
+		{
+			mixsample_t *dest = m_channelCaptureBuf.data() + static_cast<std::size_t>(captureTarget) * MIXBUFFERSIZE * 2;
+			for(int s = 0; s < count * 2; ++s)
+				dest[s] += MixSoundBuffer[s] - snapBuf[s];
+		}
 	}
 	m_nMixStat = std::max(m_nMixStat, numChannelsMixed);
 }
