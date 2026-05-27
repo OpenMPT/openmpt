@@ -603,7 +603,7 @@ void Opal::Output(int16_t &left, int16_t &right) {
 
         int16_t chanleft, chanright;
         Chan[i].Output(chanleft, chanright);
-        m_voiceOut[i] = chanleft;
+        m_voiceOut[i] = chanleft != 0 ? chanleft : chanright;
 
         leftmix += chanleft;
         rightmix += chanright;
