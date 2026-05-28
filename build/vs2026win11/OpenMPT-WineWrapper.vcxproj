@@ -564,6 +564,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -593,6 +596,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -621,6 +627,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -649,6 +658,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -685,6 +697,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -720,6 +735,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -755,6 +773,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -790,6 +811,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -826,6 +850,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -861,6 +888,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -896,6 +926,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -931,6 +964,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -960,6 +996,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -989,6 +1028,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1017,6 +1059,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1045,6 +1090,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1081,6 +1129,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1116,6 +1167,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1151,6 +1205,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1186,6 +1243,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1222,6 +1282,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1257,6 +1320,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1292,6 +1358,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>
@@ -1327,6 +1396,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PostBuildEvent>
       <Command>..\..\build\wine\build_wine_support.cmd $(IntDir) $(OutDir)</Command>
     </PostBuildEvent>

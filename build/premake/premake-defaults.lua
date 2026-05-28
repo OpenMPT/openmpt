@@ -170,6 +170,15 @@
 			spectremitigations "On"
 		end
 	end
+	if MPT_BUILD_MSBUILD then
+		if MPT_MSVC_AT_LEAST(2026) or MPT_COMPILER_CLANGCL then
+			if MPT_WIN_AT_LEAST(MPT_WIN["11"]) then
+				segmentheap "On"
+			else
+				segmentheap "Off"
+			end
+		end
+	end
 	filter {}
 	filter { "action:vs*", "architecture:x86" }
 		resdefines { "VER_ARCHNAME=\"x86\"" }

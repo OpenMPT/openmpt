@@ -429,6 +429,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -462,6 +465,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -495,6 +501,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -535,6 +544,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -574,6 +586,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -613,6 +628,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -654,6 +672,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -694,6 +715,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -734,6 +758,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -768,6 +795,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -801,6 +831,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -834,6 +867,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -874,6 +910,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -913,6 +952,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -952,6 +994,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -993,6 +1038,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1033,6 +1081,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>
@@ -1073,6 +1124,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
     </PreBuildEvent>

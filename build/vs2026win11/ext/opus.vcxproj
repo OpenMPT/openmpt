@@ -892,6 +892,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
     <ClCompile>
@@ -918,6 +921,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
     <ClCompile>
@@ -944,6 +950,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64EC'">
     <ClCompile>
@@ -970,6 +979,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
     <ClCompile>
@@ -1003,6 +1015,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
     <ClCompile>
@@ -1035,6 +1050,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
     <ClCompile>
@@ -1067,6 +1085,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64EC'">
     <ClCompile>
@@ -1099,6 +1120,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
     <ClCompile>
@@ -1132,6 +1156,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
     <ClCompile>
@@ -1164,6 +1191,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
     <ClCompile>
@@ -1196,6 +1226,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64EC'">
     <ClCompile>
@@ -1228,6 +1261,9 @@
     </Link>
     <ProjectReference>
     </ProjectReference>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\opus\celt\_kiss_fft_guts.h" />

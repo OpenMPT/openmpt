@@ -434,6 +434,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -473,6 +474,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -512,6 +514,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -558,6 +561,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -603,6 +607,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -648,6 +653,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -695,6 +701,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -741,6 +748,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -787,6 +795,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -827,6 +836,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -866,6 +876,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -905,6 +916,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -951,6 +963,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -996,6 +1009,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1041,6 +1055,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1088,6 +1103,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1134,6 +1150,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1180,6 +1197,7 @@
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
       <AdditionalManifestFiles>../vs/win10.manifest;../vs/win11-locale-legacy.manifest;../../mptrack/res/OpenMPT.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

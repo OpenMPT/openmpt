@@ -567,6 +567,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -600,6 +601,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -632,6 +634,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -664,6 +667,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -704,6 +708,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -743,6 +748,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -782,6 +788,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -821,6 +828,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -861,6 +869,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -900,6 +909,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -939,6 +949,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -978,6 +989,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1011,6 +1023,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1044,6 +1057,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1076,6 +1090,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1108,6 +1123,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1148,6 +1164,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1187,6 +1204,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1226,6 +1244,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1265,6 +1284,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1305,6 +1325,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1344,6 +1365,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1383,6 +1405,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>
@@ -1422,6 +1445,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PreBuildEvent>
       <Command>..\..\build\svn_version\update_svn_version_vs_premake.cmd $(IntDir)</Command>

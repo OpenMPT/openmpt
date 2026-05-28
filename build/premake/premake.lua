@@ -154,6 +154,38 @@ end)
 
 
 
+premake.api.register {
+	name = "segmentheap",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"On",
+		"Off",
+	}
+}
+
+function premake.vstudio.vc2010.segmentHeap(cfg)
+	if (cfg.segmentheap == 'On') then
+		if _ACTION >= "vs2026" then
+			premake.vstudio.vc2010.element("EnableSegmentHeap", nil, "true")
+		end
+	end
+	if (cfg.segmentheap == 'Off') then
+		if _ACTION >= "vs2026" then
+			premake.vstudio.vc2010.element("EnableSegmentHeap", nil, "false")
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "manifest", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.additionalManifestFiles, premake.vstudio.vc2010.segmentHeap)
+	return calls
+end)
+
+
+
 function MPT_WIN_MAKE_VERSION(major, minor, sp, build)
 	return ((major << 24) + (minor << 16) + (sp << 8) + (build << 0))
 end

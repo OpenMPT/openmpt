@@ -571,6 +571,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -605,6 +606,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -638,6 +640,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64EC'">
@@ -671,6 +674,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -712,6 +716,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -752,6 +757,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -792,6 +798,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64EC'">
@@ -832,6 +839,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|Win32'">
@@ -873,6 +881,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|x64'">
@@ -913,6 +922,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64'">
@@ -953,6 +963,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Checked|ARM64EC'">
@@ -993,6 +1004,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|Win32'">
@@ -1027,6 +1039,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|x64'">
@@ -1061,6 +1074,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64'">
@@ -1094,6 +1108,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugShared|ARM64EC'">
@@ -1127,6 +1142,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|Win32'">
@@ -1168,6 +1184,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|x64'">
@@ -1208,6 +1225,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64'">
@@ -1248,6 +1266,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseShared|ARM64EC'">
@@ -1288,6 +1307,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|Win32'">
@@ -1329,6 +1349,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|x64'">
@@ -1369,6 +1390,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64'">
@@ -1409,6 +1431,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='CheckedShared|ARM64EC'">
@@ -1449,6 +1472,7 @@
     </ProjectReference>
     <Manifest>
       <AdditionalManifestFiles>../vs/win10.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
