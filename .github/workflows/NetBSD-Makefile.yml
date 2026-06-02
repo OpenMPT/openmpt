@@ -30,66 +30,32 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v1.0.0
+      uses: cross-platform-actions/action@v1.1.0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: netbsd
         version: ${{matrix.version}}
         shell: bash
-        sync_files: runner-to-vm
-        shutdown_vm: false
-        run: true
+        sync_files: false
+    - name: Sync files to VM
+      shell: cpa.sh {0} --sync-files runner-to-vm
+      run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: netbsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          sudo pkgin -y update
-          sudo pkgin -y full-upgrade
-          sudo pkgin -y install subversion-base git p5-XML-XPath mawk
-          sudo pkgin -y install gmake pkgconf
-          sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
-          sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
-          sudo pkgin -y install doxygen help2man
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkgin -y update
+        sudo pkgin -y full-upgrade
+        sudo pkgin -y install subversion-base git p5-XML-XPath mawk
+        sudo pkgin -y install gmake pkgconf
+        sudo pkgin -y install mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio SDL2
+        sudo pkgin -y install autoconf autoconf-archive automake libtool libltdl
+        sudo pkgin -y install doxygen help2man
     - name: Build
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: netbsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
     - name: Test
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: netbsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
-    - name: Shutdown VM
-      uses: cross-platform-actions/action@v1.0.0
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: netbsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: true
-        run: true
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check

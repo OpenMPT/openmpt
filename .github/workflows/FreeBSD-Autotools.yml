@@ -27,49 +27,23 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@bf4c487506d60be13c9e4d72c1f430e2361efebf
+      uses: cross-platform-actions/action@v1.1.0
       with:
         architecture: x86_64
         memory: 4G
         operating_system: freebsd
         version: ${{matrix.version}}
         shell: bash
-        sync_files: runner-to-vm
-        shutdown_vm: false
-        run: true
+        sync_files: false
+    - name: Sync files to VM
+      shell: cpa.sh {0} --sync-files runner-to-vm
+      run: true
     - name: Install dependencies
-      uses: cross-platform-actions/action@bf4c487506d60be13c9e4d72c1f430e2361efebf
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: freebsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          sudo pkg upgrade -y
-          sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg upgrade -y
+        sudo pkg install -y subversion p5-XML-XPath git mawk gmake pkgconf autoconf autoconf-archive automake libtool help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio sdl2
     - name: Build
-      uses: cross-platform-actions/action@bf4c487506d60be13c9e4d72c1f430e2361efebf
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: freebsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: false
-        run: |
-          export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
-    - name: Shutdown VM
-      uses: cross-platform-actions/action@bf4c487506d60be13c9e4d72c1f430e2361efebf
-      with:
-        architecture: x86_64
-        memory: 4G
-        operating_system: freebsd
-        version: ${{matrix.version}}
-        shell: bash
-        sync_files: false
-        shutdown_vm: true
-        run: true
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ./build/autotools/autoconfiscate.sh
