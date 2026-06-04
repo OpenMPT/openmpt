@@ -1805,25 +1805,29 @@ BOOL CViewGlobals::OnToolTipText(UINT, NMHDR *pNMHDR, LRESULT *pResult)
 		case IDC_EDIT3:
 		case IDC_EDIT5:
 		case IDC_EDIT7:
-			text = CModDoc::LinearToDecibelsString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT1) / 2].nVolume, 64.0);
+			if(size_t chn = m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT1) / 2; chn < chnSettings.size())
+			text = CModDoc::LinearToDecibelsString(chnSettings[chn].nVolume, 64.0);
 			break;
 		case IDC_SLIDER1:
 		case IDC_SLIDER3:
 		case IDC_SLIDER5:
 		case IDC_SLIDER7:
-			text = CModDoc::LinearToDecibelsString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER1) / 2].nVolume, 64.0);
+			if(size_t chn = m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER1) / 2; chn < chnSettings.size())
+				text = CModDoc::LinearToDecibelsString(chnSettings[chn].nVolume, 64.0);
 			break;
 		case IDC_EDIT2:
 		case IDC_EDIT4:
 		case IDC_EDIT6:
 		case IDC_EDIT8:
-			text = CModDoc::PanningToString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT2) / 2].nPan, 128);
+			if(size_t chn = m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_EDIT2) / 2; chn < chnSettings.size())
+				text = CModDoc::PanningToString(chnSettings[chn].nPan, 128);
 			break;
 		case IDC_SLIDER2:
 		case IDC_SLIDER4:
 		case IDC_SLIDER6:
 		case IDC_SLIDER8:
-			text = CModDoc::PanningToString(chnSettings[m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER2) / 2].nPan, 128);
+			if(size_t chn = m_nActiveTab * CHANNELS_IN_TAB + (id - IDC_SLIDER2) / 2; chn < chnSettings.size())
+				text = CModDoc::PanningToString(chnSettings[chn].nPan, 128);
 			break;
 		case IDC_EDIT16:
 			{
