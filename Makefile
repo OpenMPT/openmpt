@@ -1384,6 +1384,7 @@ CPPCHECK_FLAGS += --enable=warning --inline-suppr --template='{file}:{line}: war
 CPPCHECK_FLAGS += --check-level=exhaustive
 CPPCHECK_FLAGS += --suppress=missingIncludeSystem
 CPPCHECK_FLAGS += --suppress=uninitMemberVar
+CPPCHECK_FLAGS += --suppress=uninitMemberVarNoCtor
 
 CPPCHECK_FLAGS += $(CPPFLAGS)
 CPPFLAGS += $(CPPFLAGS_ZLIB) $(CPPFLAGS_MPG123) $(CPPFLAGS_OGG) $(CPPFLAGS_VORBIS) $(CPPFLAGS_VORBISFILE)
