@@ -350,7 +350,6 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 	m_ToolBar.ChangeBitmap(IDC_LIST_INSTRUMENTS, sndFile.GetNumInstruments() ? IMAGE_INSTRUMENTS : IMAGE_INSTRMUTE);
 
 	CString s;
-	LV_ITEM lvi, lvi2;
 
 	m_ItemList.SetRedraw(FALSE);
 	// Add sample headers
@@ -434,26 +433,22 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						s = sndFile.GetSamplePath(iSmp + 1).ToCString();
 						break;
 					}
-					lvi.mask = LVIF_TEXT;
-					lvi.iItem = iSmp;
-					lvi.iSubItem = nCol;
-					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iSmp < nCount))
 					{
 						bool update = true;
 						if (iSmp < nCount)
 						{
-							TCHAR stmp[512];
-							lvi2 = lvi;
-							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
-							stmp[0] = 0;
-							m_ItemList.GetItem(&lvi2);
+							CString stmp = m_ItemList.GetItemText(iSmp, nCol);
 							if (s == stmp) update = false;
 						}
-						if (update) m_ItemList.SetItem(&lvi);
+						if (update) m_ItemList.SetItemText(iSmp, nCol, s);
 					} else
 					{
+						LV_ITEM lvi;
+						lvi.mask = LVIF_TEXT;
+						lvi.iItem = iSmp;
+						lvi.iSubItem = nCol;
+						lvi.pszText = const_cast<TCHAR *>(s.GetString());
 						m_ItemList.InsertItem(&lvi);
 					}
 					nCol++;
@@ -520,26 +515,22 @@ void CViewComments::UpdateView(UpdateHint hint, CObject *)
 						}
 						break;
 					}
-					lvi.mask = LVIF_TEXT;
-					lvi.iItem = iIns;
-					lvi.iSubItem = nCol;
-					lvi.pszText = const_cast<TCHAR *>(s.GetString());
 					if ((iCol) || (iIns < nCount))
 					{
 						bool update = true;
 						if (iIns < nCount)
 						{
-							TCHAR stmp[512];
-							lvi2 = lvi;
-							lvi2.pszText = stmp;
-							lvi2.cchTextMax = mpt::saturate_cast<int>(std::size(stmp));
-							stmp[0] = 0;
-							m_ItemList.GetItem(&lvi2);
+							CString stmp = m_ItemList.GetItemText(iIns, nCol);
 							if (s == stmp) update = false;
 						}
-						if (update) m_ItemList.SetItem(&lvi);
+						if (update) m_ItemList.SetItemText(iIns, nCol, s);
 					} else
 					{
+						LV_ITEM lvi;
+						lvi.mask = LVIF_TEXT;
+						lvi.iItem = iIns;
+						lvi.iSubItem = nCol;
+						lvi.pszText = const_cast<TCHAR *>(s.GetString());
 						m_ItemList.InsertItem(&lvi);
 					}
 					nCol++;
