@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.8-pre
 
+ *  mpg123: Update to v1.33.6 (2026-06-06).
+
 ### libopenmpt 0.8.7 (2026-05-17)
 
  *  ULT: Sustain loops were stopped after a portamento.
