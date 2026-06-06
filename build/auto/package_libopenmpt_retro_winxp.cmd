@@ -75,7 +75,7 @@ copy /y ..\..\include\vorbis\COPYING                                    .\Licens
 copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
 rem copy /y ..\..\include\zlib\contrib\minizip\LICENSE.Info-Zip             .\Licenses\License.minizip.txt || goto error
 copy /y ..\..\LICENSE .\LICENSE.txt || goto error
-copy /y ..\..\doc\libopenmpt\changelog.md .\ || goto error
+copy /y ..\..\doc\libopenmpt\changelog.md .\Changelog.txt || goto error
 copy /y ..\..\libopenmpt\xmp-openmpt\xmp-openmpt.txt .\XMPlay\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt.txt .\Winamp5\ || goto error
 copy /y ..\..\libopenmpt\in_openmpt\in_openmpt_wa2.txt .\Winamp2\ || goto error
@@ -169,7 +169,7 @@ rem copy /y ..\..\include\unrar\license.txt                                 .\Li
 copy /y ..\..\include\vorbis\COPYING                                    .\Licenses\License.Vorbis.txt || goto error
 copy /y ..\..\include\zlib\README                                       .\Licenses\License.zlib.txt || goto error
 rem copy /y ..\..\include\zlib\contrib\minizip\LICENSE.Info-Zip             .\Licenses\License.minizip.txt || goto error
-copy /y ..\..\doc\libopenmpt\changelog.md .\changelog.md || goto error
+copy /y ..\..\doc\libopenmpt\changelog.md .\Changelog.txt || goto error
 copy /y ..\..\libopenmpt\libopenmpt.h inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt.hpp inc\libopenmpt\ || goto error
 copy /y ..\..\libopenmpt\libopenmpt_config.h inc\libopenmpt\ || goto error
