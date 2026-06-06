@@ -122,7 +122,7 @@ copy /y ..\..\bin\release\vs2026-win11-static\x86\openmpt-mpg123.dll .\Winamp5\ 
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.windows\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.windows.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- changelog.md ^
+ Cangelog.txt ^
  openmpt123\x86-legacy\openmpt123.exe ^
  openmpt123\x86-legacy\openmpt-mpg123.dll ^
  openmpt123\amd64-legacy\openmpt123.exe ^
@@ -295,7 +295,7 @@ copy /y ..\..\bin\release\vs2026-win11-shared\arm64ec\openmpt-zlib.dll bin\arm64
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.%MPT_VS_VER%\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.%MPT_VS_VER%.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- changelog.md ^
+ Cangelog.txt ^
  inc\libopenmpt\libopenmpt.h ^
  inc\libopenmpt\libopenmpt.hpp ^
  inc\libopenmpt\libopenmpt_config.h ^
