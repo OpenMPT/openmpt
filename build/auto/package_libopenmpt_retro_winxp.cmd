@@ -94,7 +94,7 @@ copy /y ..\..\bin\release\vs2017-winxp-static\x86\openmpt-mpg123.dll .\Winamp2\ 
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\bin.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.bin.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- Cangelog.txt ^
+ Changelog.txt ^
  openmpt123\x86\openmpt123.exe ^
  openmpt123\x86\openmpt-mpg123.dll ^
  openmpt123\amd64\openmpt123.exe ^
@@ -198,7 +198,7 @@ copy /y ..\..\bin\release\vs2017-winxpx64-shared\amd64\openmpt-zlib.dll bin\amd6
 ..\..\build\tools\7zip\7z.exe a -t%MPT_PKG_FORMAT% -mx=9 %MPT_PKG_FORMAT_OPTIONS% ..\libopenmpt\dev.windows.retro.winxp\%LIBOPENMPT_VERSION_STRING%\libopenmpt-%MPT_REVISION%.dev.windows.retro.winxp.%MPT_PKG_FORMAT% ^
  LICENSE.txt ^
  Licenses ^
- Cangelog.txt ^
+ Changelog.txt ^
  inc\libopenmpt\libopenmpt.h ^
  inc\libopenmpt\libopenmpt.hpp ^
  inc\libopenmpt\libopenmpt_config.h ^
