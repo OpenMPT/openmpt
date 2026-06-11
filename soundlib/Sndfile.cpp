@@ -2192,4 +2192,20 @@ void TempoSwing::Deserialize(std::istream &iStrm, TempoSwing &swing, const size_
 }
 
 
+void CSoundFile::SetChannelCaptureEnabled(bool enable, CHANNELINDEX numChannels)
+{
+	m_channelCaptureEnabled = enable;
+	m_channelCaptureNumChannels = enable ? numChannels : 0;
+	if(enable)
+		m_channelCaptureBuf.assign(static_cast<std::size_t>(numChannels) * MIXBUFFERSIZE * 2, mixsample_t{});
+	else
+	{
+		m_channelCaptureBuf.clear();
+		m_channelCaptureBuf.shrink_to_fit();
+	}
+	if(m_opl)
+		m_opl->SetupVoiceCapture(enable);
+}
+
+
 OPENMPT_NAMESPACE_END
