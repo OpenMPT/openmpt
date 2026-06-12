@@ -7,6 +7,7 @@ The following changes have been made:
     <https://sourceforge.net/p/lame/bugs/500/>.
  *  <https://sourceforge.net/p/lame/svn/6445/> has been applied to fix
     <https://sourceforge.net/p/lame/bugs/501/>.
+ *  `configMS.h` has been modified to use `<stdint.h>`.
  *  `include/lame.h` has been modified to not touch WinAPI macro `CDECL`
  *  export ordinals in `include/lame.def` have been removed
  *  negative-shift warning in VbrTag.c has been fixed.
