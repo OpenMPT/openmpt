@@ -54,7 +54,7 @@
   defines { "HAVE_CONFIG_H", "HAVE_MPGLIB", "USE_LAYER_2" }
 	filter {}
 	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
-		buildoptions { "/wd4267", "/wd4334" }
+		buildoptions { "/wd4305", "/wd4267", "/wd4334" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
 	end
 	filter {}
