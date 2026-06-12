@@ -59,7 +59,7 @@
   defines { "HAVE_CONFIG_H", "HAVE_MPGLIB", "USE_LAYER_2" }
   filter {}
   filter { "action:vs*" }
-    buildoptions { "/wd4267", "/wd4334" }
+    buildoptions { "/wd4305", "/wd4267", "/wd4334" }
 	filter {}
 	filter { "action:vs*" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
