@@ -201,7 +201,7 @@ public:
 	CString GetCurrentProgramName() final { return m_programName; }
 	void SetCurrentProgramName(const CString &name) final { m_programName = name; }
 	CString GetProgramName(int32) final { return m_programName; }
-	virtual CString GetPluginVendor() { return _T("OpenMPT Project"); }
+	CString GetPluginVendor() { return _T("OpenMPT Project"); }
 
 	bool HasEditor() const final { return true; }
 protected:
