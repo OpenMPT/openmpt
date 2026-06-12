@@ -52,6 +52,7 @@
 #define HAVE_STRCHR
 #define HAVE_MEMCPY
 
+#if 0  /* OpenMPT */
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 #pragma warning( disable : 4305 )
 	typedef __int8  int8_t;
@@ -78,6 +79,9 @@
 #define int32_t signed int
 #define int64_t signed long long
 #endif
+#else  /* OpenMPT */
+#include <stdint.h>  /* OpenMPT */
+#endif  /* OpenMPT */
 
 typedef long double ieee854_float80_t;
 typedef double      ieee754_float64_t;
