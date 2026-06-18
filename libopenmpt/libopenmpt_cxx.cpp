@@ -362,6 +362,13 @@ float module::get_current_channel_vu_rear_right( std::int32_t channel ) const {
 	return impl->get_current_channel_vu_rear_right( channel );
 }
 
+std::size_t module::get_current_channel_audio_mono( std::int32_t channel, std::size_t count, float * buf ) const {
+	return impl->get_current_channel_audio_mono( channel, count, buf );
+}
+std::size_t module::get_current_channel_audio_stereo( std::int32_t channel, std::size_t count, float * buf_left, float * buf_right ) const {
+	return impl->get_current_channel_audio_stereo( channel, count, buf_left, buf_right );
+}
+
 std::int32_t module::get_num_subsongs() const {
 	return impl->get_num_subsongs();
 }
