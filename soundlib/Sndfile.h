@@ -440,7 +440,7 @@ private:
 
 public:
 	// Per-channel audio capture — enabled via "render.channel_capture" CTL.
-	// Allocated on enable, freed on disable. Interleaved stereo: [ch * MIXBUFFERSIZE * 2].
+	// Allocated on enable, freed on disable - Interleaved stereo: [ch * MIXBUFFERSIZE * 2].
 	bool                     m_channelCaptureEnabled{false};
 	CHANNELINDEX             m_channelCaptureNumChannels{0};
 	float                    m_channelCaptureGlobalVolScale{1.0f};
