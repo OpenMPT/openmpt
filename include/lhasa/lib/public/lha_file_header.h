@@ -124,6 +124,13 @@ extern "C" {
 #define LHA_FILE_64BIT_SIZES           0x20
 
 /**
+ * Bit field value set in extra_flags to indicate that the file had
+ * an empty filename, and the value in the filename field is a fake
+ * value.
+ */
+#define LHA_FILE_FAKE_NAME             0x40
+
+/**
  * Macro that evaluates to true if the specified flag is set in the
  * given @ref LHAFileHeader.
  */

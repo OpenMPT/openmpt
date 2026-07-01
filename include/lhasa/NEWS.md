@@ -1,3 +1,17 @@
+## v0.6.0 (2026-06-17):
+
+ * This release fixes a read overflow in the -pm2- decoder, where a
+   specially-crafted -pm2- sequence could cause reads from beyond the
+   end of the `copy_decode[]` array. However, it is not believed to be
+   an exploitable bug so this is not a security issue. Thanks to
+   Yukimura / @damseleng for reporting the bug.
+ * Archived files with empty filenames are now skipped over during
+   extract so that subsequent files can be extracted properly. This
+   allows some files in the Aminet archive to be extracted that were
+   previously only partially extracted (thanks @polluks).
+ * A minor typo was fixed in the `lha_reader.h` header (thanks
+   @polluks).
+
 ## v0.5.0 (2025-08-01):
 
  * The output from the list subcommands has been tweaked to be more

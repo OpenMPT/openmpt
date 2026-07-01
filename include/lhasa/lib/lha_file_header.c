@@ -1004,8 +1004,17 @@ LHAFileHeader *lha_file_header_read(LHAInputStream *stream)
 	// field string (-lhd-) as directories.
 
 	if (strcmp(header->compress_method, LHA_COMPRESS_TYPE_DIR) != 0) {
+
+		// Some archives in the wild have files that do not have any
+		// filename (see bug #67). For these archives, we generate a
+		// fake filename, but set a special flag indicating that it
+		// is fake.
 		if (header->filename == NULL) {
-			goto fail;
+			header->extra_flags |= LHA_FILE_FAKE_NAME;
+			header->filename = strdup("__unknown");
+			if (header->filename == NULL) {
+				goto fail;
+			}
 		}
 	} else if (!strcmp(header->compress_method, LHA_COMPRESS_TYPE_DIR)
 	        && LHA_FILE_HAVE_EXTRA(header, LHA_FILE_UNIX_PERMS)
