@@ -235,6 +235,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: update Homebrew
       run: brew update
+    - name: fixup Homebrew xcodes
+      run: brew pin xcodes
     - name: fixup GitHub Homebrew ruby breakage
       if: ${{ matrix.host == 'macos-14' }}
       run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
