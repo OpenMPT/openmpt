@@ -546,6 +546,10 @@ static int extract_archive_dry_run(LHAFilter *filter, LHAOptions *options)
 			break;
 		}
 
+		if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_FAKE_NAME)) {
+			continue;
+		}
+
 		filename = file_full_path(header, options);
 
 		// Every line begins the same - "EXTRACT filename..."
@@ -596,6 +600,16 @@ int extract_archive(LHAFilter *filter, LHAOptions *options)
 			break;
 		}
 
+		if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_FAKE_NAME)) {
+			if (options->quiet < 1) {
+				fprintf(stderr, "LHa: Skipping extract of "
+				        "%" PRIu64 " byte file with empty "
+				        "filename.\n",
+				        header->length);
+			}
+			continue;
+		}
+
 		if (!extract_archived_file(filter->reader, header, options)) {
 			result = 0;
 		}
@@ -644,6 +658,10 @@ int print_archive(LHAFilter *filter, LHAOptions *options)
 
 		if (header == NULL) {
 			break;
+		}
+
+		if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_FAKE_NAME)) {
+			continue;
 		}
 
 		is_normal_file = strcmp(header->compress_method,

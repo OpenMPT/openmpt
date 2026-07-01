@@ -244,7 +244,7 @@ static const ListColumn size_column = {
 
 static const char *compression_percent(size_t compressed, size_t uncompressed)
 {
-	static char buf[10];
+	static char buf[16];
 	int permille;
 
 	// We pessimistically round the compression ratio up to the next 0.1%,
@@ -413,6 +413,10 @@ static const ListColumn full_timestamp_column = {
 
 static void name_column_print(LHAFileHeader *header)
 {
+	if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_FAKE_NAME)) {
+		printf("[zero-length-filename]");
+		return;
+	}
 	if (header->path != NULL) {
 		safe_printf("%s", header->path);
 	}
@@ -439,6 +443,10 @@ static const ListColumn short_name_column = {
 
 static void whole_line_name_column_print(LHAFileHeader *header)
 {
+	if (LHA_FILE_HAVE_EXTRA(header, LHA_FILE_FAKE_NAME)) {
+		printf("[zero-length-filename]\n");
+		return;
+	}
 	if (header->path != NULL) {
 		safe_printf("%s", header->path);
 	}

@@ -185,6 +185,14 @@ static int read_code_tree(LHAPM2Decoder *decoder)
 		return 0;
 	}
 
+	// Code values > 28 can potentially lead to an overflow of the
+	// copy_decode table (GHSA-j2m3-h278-rrg9). We prevent this by
+	// checking there are no more than 29 codes (the 28/29
+	// difference here is not an error; 0-28 is 29 codes).
+	if (num_codes > 29) {
+		return 0;
+	}
+
 	// Store flag variable indicating whether we want to read
 	// the offset tree as well.
 

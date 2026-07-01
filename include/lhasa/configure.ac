@@ -1,4 +1,4 @@
-AC_INIT([Lhasa],[0.5.0],[fraggle@gmail.com],[lhasa])
+AC_INIT([Lhasa],[0.6.0],[fraggle@gmail.com],[lhasa])
 AC_CONFIG_AUX_DIR(autotools)
 
 # The version information below should be updated with each new release.
