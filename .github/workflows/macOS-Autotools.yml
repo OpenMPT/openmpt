@@ -45,6 +45,9 @@ jobs:
     - name: fixup GitHub Homebrew ruby breakage
       if: ${{ matrix.host == 'macos-15' }}
       run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
+    - name: fixup GitHub Homebrew ruby breakage
+      if: ${{ matrix.host == 'macos-26' }}
+      run: brew unlink ruby@3.4 && brew link --overwrite ruby@3.4 && brew unlink ruby@3.4 && brew upgrade ruby@3.4
     - name: upgrade packages
       run: brew upgrade
     - name: install dependencies
