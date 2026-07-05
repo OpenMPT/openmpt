@@ -8,7 +8,8 @@
  *
  * This file includes half-band upsampling class.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -31,12 +32,12 @@ class CDSPHBUpsampler : public CDSPProcessor
 {
 public:
 	/**
-	 * Function that provides filter data for various steepness indices and
+	 * @brief Provides filter data for various steepness indices and
 	 * attenuations.
 	 *
 	 * @param ReqAtten Required half-band filter attentuation.
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
-	 * upsampling/downsampling ratio, e.g. at 4x 0 is used, at 8x 1 is used,
+	 * upsampling/downsampling ratio, e.g., at 4x 0 is used, at 8x 1 is used,
 	 * etc.
 	 * @param[out] flt Resulting pointer to filter taps.
 	 * @param[out] fltt Resulting filter's half-length, in samples (taps).
@@ -315,12 +316,12 @@ public:
 	}
 
 	/**
-	 * Function that provides filter data for various steepness indices and
+	 * @brief Provides filter data for various steepness indices and
 	 * attenuations. For 1/3 resamplings.
 	 *
 	 * @param ReqAtten Required half-band filter attentuation.
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
-	 * upsampling/downsampling ratio, e.g. at 4x 0 is used, at 8x 1 is used,
+	 * upsampling/downsampling ratio, e.g., at 4x 0 is used, at 8x 1 is used,
 	 * etc.
 	 * @param[out] flt Resulting pointer to filter taps.
 	 * @param[out] fltt Resulting filter's half-length, in samples (taps).
@@ -551,19 +552,19 @@ public:
 	}
 
 	/**
-	 * Constructor initalizes the half-band upsampler.
+	 * @brief Initalizes the half-band upsampler.
 	 *
 	 * @param ReqAtten Required half-band filter attentuation.
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
-	 * upsampling ratio, e.g. at 4x upsampling 0 is used, at 8x upsampling 1
+	 * upsampling ratio, e.g., at 4x upsampling 0 is used, at 8x upsampling 1
 	 * is used, etc.
-	 * @param IsThird "True" if 1/3 of frequency response resampling is
+	 * @param IsThird `true` if 1/3 of frequency response resampling is
 	 * performed.
-	 * @param PrevLatency Latency, in samples (any value >=0), which was left
-	 * in the output signal by a previous process. Whole-number latency will
-	 * be consumed by *this object while remaining fractional latency can be
-	 * obtained via the getLatencyFrac() function.
-	 * @param aDoConsumeLatency "True" if the output latency should be
+	 * @param PrevLatency Latency, in samples (any non-negative value), which
+	 * was left in the output signal by a previous process. Whole-number
+	 * latency will be consumed by *this* object while remaining fractional
+	 * latency can be obtained via the getLatencyFrac() function.
+	 * @param aDoConsumeLatency `true` if the output latency should be
 	 * consumed. Does not apply to the fractional part of the latency (if such
 	 * part is available).
 	 */
@@ -598,7 +599,7 @@ public:
 		// Copy obtained filter to address-aligned buffer.
 
 		fltp = alignptr( FltBuf, 16 );
-		memcpy( fltp, fltp0, fltt * sizeof( fltp[ 0 ]));
+		memcpy( fltp, fltp0, (size_t) fltt * sizeof( fltp[ 0 ]));
 
 		convfn = FltConvFn[ fltt - 1 ];
 		fll = fltt - 1;
@@ -666,7 +667,8 @@ public:
 		WritePos = 0;
 		ReadPos = flb; // Set "read" position to account for filter's latency.
 
-		memset( &Buf[ ReadPos ], 0, ( BufLen - flb ) * sizeof( Buf[ 0 ]));
+		memset( &Buf[ ReadPos ], 0,
+			(size_t) ( BufLen - flb ) * sizeof( Buf[ 0 ]));
 	}
 
 	virtual int process( double* ip, int l, double*& op0 )
@@ -682,12 +684,13 @@ public:
 			const int b = min( l, min( BufLen - WritePos, flb - BufLeft ));
 
 			double* const wp1 = Buf + WritePos;
-			memcpy( wp1, ip, b * sizeof( wp1[ 0 ]));
+			memcpy( wp1, ip, (size_t) b * sizeof( wp1[ 0 ]));
 			const int ec = flo - WritePos;
 
 			if( ec > 0 )
 			{
-				memcpy( wp1 + BufLen, ip, min( b, ec ) * sizeof( wp1[ 0 ]));
+				memcpy( wp1 + BufLen, ip,
+					(size_t) min( b, ec ) * sizeof( wp1[ 0 ]));
 			}
 
 			ip += b;
@@ -733,7 +736,7 @@ private:
 		///< expressed as Nth power of 2. This value can be reduced if it is
 		///< known that only short input buffers will be passed to the
 		///< interpolator. The minimum value of this parameter is 5, and
-		///< 1 << BufLenBits should be at least 3 times larger than the
+		///< `1 << BufLenBits` should be at least 3 times larger than the
 		///< FilterLen.
 	static const int BufLen = 1 << BufLenBits; ///< The length of the ring
 		///< buffer. The actual length is longer, to permit "beyond bounds"
@@ -744,8 +747,8 @@ private:
 		///< protection for the largest filter.
 	double FltBuf[ 14 + 2 ]; ///< Holder for half-band filter taps, used with
 		///< 16-byte address-aligning, for SIMD use.
-	const double* BufRP; ///< Offseted Buf pointer at ReadPos=0.
-	double* fltp; ///< Half-band filter taps, points to FltBuf.
+	const double* BufRP; ///< Offseted Buf pointer at `ReadPos` equal 0.
+	double* fltp; ///< Half-band filter taps, points to `FltBuf`.
 	int fll; ///< Input latency (left-hand filter length).
 	int fl2; ///< Right-side filter length.
 	int flo; ///< Overrrun length.
@@ -754,11 +757,11 @@ private:
 	int Latency; ///< Initial latency that should be removed from the output.
 	int LatencyLeft; ///< Latency left to remove.
 	int BufLeft; ///< The number of samples left in the buffer to process.
-		///< When this value is below "fl2", the interpolation cycle ends.
+		///< When this value is below `fl2`, the interpolation cycle ends.
 	int WritePos; ///< The current buffer write position. Incremented together
-		///< with the BufLeft variable.
+		///< with the `BufLeft` variable.
 	int ReadPos; ///< The current buffer read position.
-	bool DoConsumeLatency; ///< "True" if the output latency should be
+	bool DoConsumeLatency; ///< `true` if the output latency should be
 		///< consumed. Does not apply to the fractional part of the latency
 		///< (if such part is available).
 

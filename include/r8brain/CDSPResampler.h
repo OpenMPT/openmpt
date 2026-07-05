@@ -9,7 +9,8 @@
  * This file includes the master sample rate converter (resampler) class that
  * combines all elements of this library into a single front-end class.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -47,29 +48,30 @@ class CDSPResampler : public CDSPProcessor
 {
 public:
 	/**
-	 * Constructor initalizes the resampler object.
+	 * @brief Initalizes the resampler object.
 	 *
 	 * Note that increasing the transition band and decreasing attenuation
 	 * reduces the filter length, this in turn reduces the "input before
 	 * output" delay. However, the filter length has only a minor influence on
 	 * the overall resampling speed.
 	 *
-	 * It should be noted that the ReqAtten specifies the minimal difference
+	 * It should be noted that the `ReqAtten` specifies the minimal difference
 	 * between the loudest input signal component and the produced aliasing
-	 * artifacts during resampling. For example, if ReqAtten=100 was specified
-	 * when performing 2x upsampling, the analysis of the resulting signal may
-	 * display high-frequency components which are quieter than the loudest
-	 * part of the input signal by only 100 decibel meaning the high-frequency
-	 * part did not become "magically" completely silent after resampling. You
-	 * have to specify a higher ReqAtten value if you need a totally clean
-	 * high-frequency content. On the other hand, it may not be reasonable to
-	 * have a high-frequency content cleaner than the input signal itself: if
-	 * the input signal is 16-bit, setting ReqAtten to 180 will make its
-	 * high-frequency content 24-bit, but the original part of the signal will
-	 * remain 16-bit.
+	 * artifacts during resampling. For example, if `ReqAtten=100` was
+	 * specified when performing 2x upsampling, the analysis of the resulting
+	 * signal may display high-frequency components which are quieter than
+	 * the loudest part of the input signal by only 100 decibel meaning
+	 * the high-frequency part did not become "magically" completely silent
+	 * after resampling. You have to specify a higher `ReqAtten` value if you
+	 * need a totally clean high-frequency content. On the other hand, it may
+	 * not be reasonable to have a high-frequency content cleaner than
+	 * the input signal itself: if the input signal is 16-bit, setting
+	 * `ReqAtten` to 180 will make its high-frequency content 24-bit, but
+	 * the original part of the signal will remain 16-bit.
 	 *
 	 * @param SrcSampleRate Source signal's sample rate. Both sample rates can
-	 * be specified as a ratio, e.g. SrcSampleRate = 1.0, DstSampleRate = 2.0.
+	 * be specified as a ratio: e.g., `SrcSampleRate = 1.0`,
+	 * `DstSampleRate = 2.0`.
 	 * @param DstSampleRate Destination signal's sample rate. The "power of 2"
 	 * ratios between the source and destination sample rates force resampler
 	 * to use several fast "power of 2" resampling steps, without using
@@ -79,9 +81,9 @@ public:
 	 * this value as it allocates intermediate buffers. Input buffers longer
 	 * than this value should never be supplied to the resampler. Note that
 	 * upsampling produces more samples than was provided on input, so at
-	 * higher upsampling ratios it is advisable to use smaller MaxInLen
-	 * values to reduce memory footprint. When downsampling, a larger MaxInLen
-	 * is suggested in order to increase downsampling performance.
+	 * higher upsampling ratios it is advisable to use smaller `aMaxInLen`
+	 * values to reduce memory footprint. When downsampling, a larger
+	 * `aMaxInLen` is suggested in order to increase downsampling performance.
 	 * @param ReqTransBand Required transition band, in percent of the
 	 * spectral space of the input signal (or the output signal if
 	 * downsampling is performed) between filter's -3 dB point and the Nyquist
@@ -97,11 +99,11 @@ public:
 	 * @param ReqAtten Required stop-band attenuation in decibel, in the
 	 * range CDSPFIRFilter::getLPMinAtten() to CDSPFIRFilter::getLPMaxAtten(),
 	 * inclusive. The actual attenuation may be 0.40-4.46 dB higher. The
-	 * general formula for selecting the ReqAtten is 6.02 * Bits + 40, where
-	 * "Bits" is the bit resolution (e.g. 16, 24), "40" is an added resolution
-	 * for dynamic signals; this value can be decreased to 20 to 10 if the
-	 * signal being resampled is non-dynamic (e.g., an impulse response or
-	 * filter, with a non-steep frequency response).
+	 * general formula for selecting the `ReqAtten` is `6.02 * Bits + 40`,
+	 * where `Bits` is the bit resolution (e.g., 16, 24), 40 is an added
+	 * resolution for dynamic signals; this value can be decreased to 20 to
+	 * 10, if the signal being resampled is non-dynamic (e.g., an impulse
+	 * response or filter, with a non-steep frequency response).
 	 * @param ReqPhase Required filter's phase response. Note that this
 	 * setting does not affect interpolator's phase response which is always
 	 * linear-phase. Also note that if the "power of 2" resampling was engaged
@@ -417,10 +419,10 @@ public:
 	}
 
 	/**
-	 * Function returns the number of input samples required to advance to
+	 * @brief Returns the number of input samples required to advance to
 	 * the specified output sample position (so that the next process() call
 	 * passes this output position), starting at the cleared or
-	 * after-construction state of *this object.
+	 * after-construction state of *this* object.
 	 *
 	 * This function works by iteratively passing 1 sample at a time until the
 	 * overall output length passes the specified value. This is a relatively
@@ -462,9 +464,9 @@ public:
 	}
 
 	/**
-	 * Function returns the number of input samples required to produce at
+	 * @brief Returns the number of input samples required to produce at
 	 * least the specified number of output samples, starting at the cleared
-	 * or after-construction state of *this object.
+	 * or after-construction state of *this* object.
 	 *
 	 * @param ReqOutSamples The number of output samples required. If a
 	 * non-positive value was specified, the function returns 0.
@@ -492,9 +494,9 @@ public:
 	}
 
 	/**
-	 * @return This function ignores the supplied parameter and returns the
-	 * maximal output buffer length that depends on the MaxInLen supplied to
-	 * the constructor.
+	 * @brief This implementation ignores the supplied parameter and returns
+	 * the maximal output buffer length that depends on the `MaxInLen`
+	 * supplied to the constructor.
 	 */
 
 	virtual int getMaxOutLen( const int/* MaxInLen */) const
@@ -503,11 +505,13 @@ public:
 	}
 
 	/**
-	 * Function clears (resets) the state of *this object and returns it to
-	 * the state after construction. All input data accumulated in the
-	 * internal buffer so far will be discarded.
+	 * @brief Clears (resets) the state of *this* object and returns it to
+	 * the state after construction.
 	 *
-	 * This function makes it possible to use *this object for converting
+	 * All input data accumulated in the internal buffer so far will be
+	 * discarded.
+	 *
+	 * This function makes it possible to use *this* object for converting
 	 * separate streams from the same source sample rate to the same
 	 * destination sample rate without reconstructing the object. It is more
 	 * efficient to clear the state of the resampler object than to destroy it
@@ -525,7 +529,7 @@ public:
 	}
 
 	/**
-	 * Function performs sample rate conversion.
+	 * @brief Performs sample rate conversion.
 	 *
 	 * If the source and destination sample rates are equal, the resampler
 	 * will do nothing and will simply return the input buffer unchanged.
@@ -535,19 +539,19 @@ public:
 	 * intermediate output buffer itself.
 	 *
 	 * @param ip0 Input buffer. This buffer is never used as output buffer by
-	 * this function. This pointer may be returned in "op0" if no resampling
+	 * this function. This pointer may be returned in `op0` if no resampling
 	 * is happening (source sample rate equals destination sample rate).
 	 * @param l The number of samples available in the input buffer. Should
-	 * not exceed the MaxInLen supplied in the constructor.
+	 * not exceed the `MaxInLen` supplied in the constructor.
 	 * @param[out] op0 This variable receives the pointer to the resampled
-	 * data. On function's return, this pointer points to *this object's
+	 * data. On function's return, this pointer points to *this* object's
 	 * internal buffer. In real-time applications it is suggested to pass this
 	 * pointer to the next output audio block and consume any data left from
 	 * the previous output audio block first before calling the process()
-	 * function again. The buffer pointed to by the "op0" on return is owned
+	 * function again. The buffer pointed to by the `op0` on return is owned
 	 * by the resampler, so it should not be freed by the caller.
-	 * @return The number of samples available in the "op0" output buffer. If
-	 * the data from the output buffer "op0" is going to be written to a
+	 * @return The number of samples available in the `op0` output buffer. If
+	 * the data from the output buffer `op0` is going to be written to a
 	 * bigger output buffer, it is suggested to check the returned number of
 	 * samples so that no overflow of the bigger output buffer happens.
 	 */
@@ -571,9 +575,11 @@ public:
 	}
 
 	/**
-	 * Function performs resampling of an input sample buffer of the specified
-	 * length in the "one-shot" mode. This function can be useful when impulse
-	 * response or time-series resampling is required.
+	 * @brief Performs resampling of an input sample buffer of the specified
+	 * length in the "one-shot" mode.
+	 *
+	 * This function can be useful when impulse response or time-series
+	 * resampling is required.
 	 *
 	 * @param ip Input buffer pointer.
 	 * @param iplen Length of the input buffer in samples.
@@ -646,7 +652,7 @@ public:
 
 private:
 	CFixedBuffer< CDSPProcessor* > Steps; ///< Array of processing steps.
-	int StepCapacity; ///< The capacity of the Steps array.
+	int StepCapacity; ///< The capacity of the `Steps` array.
 	int StepCount; ///< The number of created processing steps.
 	int MaxInLen; ///< Maximal input length.
 	CFixedBuffer< double > TmpBufAll; ///< Buffer containing both temporary
@@ -661,11 +667,11 @@ private:
 		///< output.
 
 	/**
-	 * Function adds processor, updates MaxOutLen variable and adjusts length
+	 * @brief Adds processor, updates `MaxOutLen` variable and adjusts length
 	 * of temporary internal buffers.
 	 *
 	 * @param Proc Processor to add. This pointer is inherited and will be
-	 * destroyed on *this object's destruction.
+	 * destroyed on *this* object's destruction.
 	 */
 
 	void addProcessor( CDSPProcessor* const Proc )
@@ -694,7 +700,7 @@ private:
 	}
 
 	/**
-	 * Function creates temporary buffers.
+	 * @brief Creates temporary buffers.
 	 */
 
 	void createTmpBuffers()
@@ -724,8 +730,8 @@ class CDSPResampler16 : public CDSPResampler
 {
 public:
 	/**
-	 * Constructor initializes the 16-bit resampler. See the
-	 * r8b::CDSPResampler class for details.
+	 * @brief Initializes the 16-bit resampler. See the r8b::CDSPResampler
+	 * class for details.
 	 *
 	 * @param SrcSampleRate Source signal's sample rate.
 	 * @param DstSampleRate Destination signal's sample rate.
@@ -755,7 +761,7 @@ class CDSPResampler16IR : public CDSPResampler
 {
 public:
 	/**
-	 * Constructor initializes the 16-bit impulse response resampler. See the
+	 * @brief Initializes the 16-bit impulse response resampler. See the
 	 * r8b::CDSPResampler class for details.
 	 *
 	 * @param SrcSampleRate Source signal's sample rate.
@@ -785,7 +791,7 @@ class CDSPResampler24 : public CDSPResampler
 {
 public:
 	/**
-	 * Constructor initializes the 24-bit resampler (including 32-bit floating
+	 * @brief Initializes the 24-bit resampler (including 32-bit floating
 	 * point). See the r8b::CDSPResampler class for details.
 	 *
 	 * @param SrcSampleRate Source signal's sample rate.

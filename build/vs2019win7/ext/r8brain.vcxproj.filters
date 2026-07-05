@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="fft">
+      <UniqueIdentifier>{6572880B-D17B-887C-5AF7-9E7CC6FF937C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\r8brain\CDSPBlockConvolver.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPFIRFilter.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPFracInterpolator.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPHBDownsampler.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPHBUpsampler.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPProcessor.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPRealFFT.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPResampler.h" />
+    <ClInclude Include="..\..\..\include\r8brain\CDSPSincFilterGen.h" />
+    <ClInclude Include="..\..\..\include\r8brain\fft\fft4g.h">
+      <Filter>fft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\r8brain\r8bbase.h" />
+    <ClInclude Include="..\..\..\include\r8brain\r8bconf.h" />
+    <ClInclude Include="..\..\..\include\r8brain\r8butil.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\include\r8brain\CDSPHBDownsampler.inc" />
+    <None Include="..\..\..\include\r8brain\CDSPHBUpsampler.inc" />
+  </ItemGroup>
+</Project>

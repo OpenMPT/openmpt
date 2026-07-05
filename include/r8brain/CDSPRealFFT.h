@@ -11,7 +11,8 @@
  * minimizes time necessary to initialize the FFT object of the required
  * length.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -21,11 +22,11 @@
 #include "r8bbase.h"
 
 #if R8B_PFFFT_DOUBLE
-	#include "pffft_double/pffft_double.h"
+	#include "fft/pffft_double.h"
 #elif R8B_PFFFT
-	#include "pffft.h"
+	#include "fft/pffft.h"
 #elif !R8B_IPP
-	#include "fft4g.h"
+	#include "fft/fft4g.h"
 #endif // !R8B_IPP
 
 namespace r8b {
@@ -51,14 +52,15 @@ namespace r8b {
 
 class CDSPRealFFT : public R8B_BASECLASS
 {
-	R8BNOCTOR( CDSPRealFFT );
+	R8BNOCTOR( CDSPRealFFT )
 
+	friend class CPtrKeeper< CDSPRealFFT >;
 	friend class CDSPRealFFTKeeper;
 
 public:
 	/**
-	 * @return A multiplication constant that should be used after inverse
-	 * transform to obtain a correct value scale.
+	 * @brief Return a multiplication constant that should be used after
+	 * inverse transform to obtain a correct value scale.
 	 */
 
 	double getInvMulConst() const
@@ -67,8 +69,8 @@ public:
 	}
 
 	/**
-	 * @return The length (the number of real values in a transform) of *this
-	 * FFT object, expressed as Nth power of 2.
+	 * @brief Returns the length (the number of real values in a transform) of
+	 * *this* FFT object, expressed as Nth power of 2.
 	 */
 
 	int getLenBits() const
@@ -77,8 +79,8 @@ public:
 	}
 
 	/**
-	 * @return The length (the number of real values in a transform) of *this
-	 * FFT object.
+	 * @brief Returns the length (the number of real values in a transform) of
+	 * *this* FFT object.
 	 */
 
 	int getLen() const
@@ -87,10 +89,10 @@ public:
 	}
 
 	/**
-	 * Function performs in-place forward FFT.
+	 * @brief Performs in-place forward FFT.
 	 *
 	 * @param[in,out] p Pointer to data block to transform, length should be
-	 * equal to *this object's getLen().
+	 * equal to *this* object's getLen().
 	 */
 
 	void forward( double* const p ) const
@@ -121,16 +123,16 @@ public:
 
 	#else // R8B_PFFFT_DOUBLE
 
-		ooura_fft :: rdft( Len, 1, p, wi.getPtr(), wd.getPtr() );
+		ooura_fft :: rdft( Len, 1, p, wi, wd );
 
 	#endif // R8B_IPP
 	}
 
 	/**
-	 * Function performs in-place inverse FFT.
+	 * @brief Performs in-place inverse FFT.
 	 *
 	 * @param[in,out] p Pointer to data block to transform, length should be
-	 * equal to *this object's getLen().
+	 * equal to *this* object's getLen().
 	 */
 
 	void inverse( double* const p ) const
@@ -150,7 +152,7 @@ public:
 
 	#else // R8B_PFFFT_DOUBLE
 
-		ooura_fft :: rdft( Len, -1, p, wi.getPtr(), wd.getPtr() );
+		ooura_fft :: rdft( Len, -1, p, wi, wd );
 
 	#endif // R8B_IPP
 
@@ -168,10 +170,12 @@ public:
 	}
 
 	/**
-	 * Function multiplies two complex-valued data blocks and places result in
-	 * a new data block. Length of all data blocks should be equal to *this
-	 * object's block length. Input blocks should have been produced with the
-	 * forward() function of *this object.
+	 * @brief Multiplies two complex-valued data blocks and places result in
+	 * a new data block.
+	 *
+	 * Length of all data blocks should be equal to *this* object's block
+	 * length. Input blocks should have been produced with the forward()
+	 * function of *this* object.
 	 *
 	 * @param aip1 Input data block 1.
 	 * @param aip2 Input data block 2.
@@ -218,9 +222,11 @@ public:
 	}
 
 	/**
-	 * Function multiplies two complex-valued data blocks in-place. Length of
-	 * both data blocks should be equal to *this object's block length. Blocks
-	 * should have been produced with the forward() function of *this object.
+	 * @brief Nultiplies two complex-valued data blocks in-place.
+	 *
+	 * Length of both data blocks should be equal to *this* object's block
+	 * length. Blocks should have been produced with the forward() function of
+	 * *this* object.
 	 *
 	 * @param aip Input data block 1.
 	 * @param[in,out] aop Output/input data block 2.
@@ -268,11 +274,12 @@ public:
 	}
 
 	/**
-	 * Function multiplies two complex-valued data blocks in-place,
-	 * considering that the "ip" block contains "zero-phase" response. Length
-	 * of both data blocks should be equal to *this object's block length.
-	 * Blocks should have been produced with the forward() function of *this
-	 * object.
+	 * @brief Multiplies two complex-valued data blocks in-place, considering
+	 * that the `aip` block contains "zero-phase" response.
+	 *
+	 * Length of both data blocks should be equal to *this* object's block
+	 * length. Blocks should have been produced with the forward() function of
+	 * *this* object.
 	 *
 	 * @param aip Input data block 1, "zero-phase" response. This block should
 	 * be first transformed via the convertToZP() function.
@@ -378,8 +385,8 @@ public:
 	}
 
 	/**
-	 * Function converts the specified forward-transformed block into
-	 * "zero-phase" form suitable for use with the multiplyBlocksZP()
+	 * @brief Converts the specified forward-transformed block into
+	 * "zero-phase" form, suitable for use with the multiplyBlocksZP()
 	 * function.
 	 *
 	 * @param[in,out] ap Block to transform.
@@ -427,41 +434,6 @@ private:
 		CFixedBuffer< int > wi; ///< Working buffer (ints).
 		CFixedBuffer< double > wd; ///< Working buffer (doubles).
 	#endif // R8B_IPP
-
-	/**
-	 * A simple class that keeps the pointer to the object and deletes it
-	 * automatically.
-	 */
-
-	class CObjKeeper
-	{
-		R8BNOCTOR( CObjKeeper );
-
-	public:
-		CObjKeeper()
-			: Object( NULL )
-		{
-		}
-
-		~CObjKeeper()
-		{
-			delete Object;
-		}
-
-		CObjKeeper& operator = ( CDSPRealFFT* const aObject )
-		{
-			Object = aObject;
-			return( *this );
-		}
-
-		operator CDSPRealFFT* () const
-		{
-			return( Object );
-		}
-
-	private:
-		CDSPRealFFT* Object; ///< FFT object being kept.
-	};
 
 	CDSPRealFFT()
 	{
@@ -545,16 +517,16 @@ private:
 
 class CDSPRealFFTKeeper : public R8B_BASECLASS
 {
-	R8BNOCTOR( CDSPRealFFTKeeper );
+	R8BNOCTOR( CDSPRealFFTKeeper )
 
 public:
 	CDSPRealFFTKeeper()
-		: Object( NULL )
+		: Object( R8B_NULL )
 	{
 	}
 
 	/**
-	 * Function acquires FFT object with the specified block length.
+	 * @brief Acquires FFT object with the specified block length.
 	 *
 	 * @param LenBits The length of FFT block (Nth power of 2), in the range
 	 * [1; 30] inclusive, specifies the number of real values in a FFT block.
@@ -567,25 +539,25 @@ public:
 
 	~CDSPRealFFTKeeper()
 	{
-		if( Object != NULL )
+		if( Object != R8B_NULL )
 		{
 			release( Object );
 		}
 	}
 
 	/**
-	 * @return Pointer to the acquired FFT object.
+	 * @brief Returns pointer to the acquired FFT object.
 	 */
 
 	const CDSPRealFFT* operator -> () const
 	{
-		R8BASSERT( Object != NULL );
+		R8BASSERT( Object != R8B_NULL );
 
 		return( Object );
 	}
 
 	/**
-	 * Function acquires FFT object with the specified block length. This
+	 * @brief Acquires FFT object with the specified block length. This
 	 * function can be called any number of times.
 	 *
 	 * @param LenBits The length of FFT block (Nth power of 2), in the range
@@ -594,7 +566,7 @@ public:
 
 	void init( const int LenBits )
 	{
-		if( Object != NULL )
+		if( Object != R8B_NULL )
 		{
 			if( Object -> LenBits == LenBits )
 			{
@@ -608,27 +580,23 @@ public:
 	}
 
 	/**
-	 * Function releases a previously acquired FFT object.
+	 * @brief Releases a previously acquired FFT object.
 	 */
 
 	void reset()
 	{
-		if( Object != NULL )
+		if( Object != R8B_NULL )
 		{
 			release( Object );
-			Object = NULL;
+			Object = R8B_NULL;
 		}
 	}
 
 private:
 	CDSPRealFFT* Object; ///< FFT object.
 
-	static CSyncObject StateSync; ///< FFTObjects synchronizer.
-	static CDSPRealFFT :: CObjKeeper FFTObjects[]; ///< Pool of FFT objects of
-		///< various lengths.
-
 	/**
-	 * Function acquires FFT object from the global pool.
+	 * @brief Acquires FFT object from the global pool.
 	 *
 	 * @param LenBits FFT block length (expressed as Nth power of 2).
 	 */
@@ -637,36 +605,58 @@ private:
 	{
 		R8BASSERT( LenBits > 0 && LenBits <= 30 );
 
-		R8BSYNC( StateSync );
+		R8BSYNC( getStateSync() );
 
-		if( FFTObjects[ LenBits ] == NULL )
+		if( getFFTObjects()[ LenBits ] == R8B_NULL )
 		{
 			return( new CDSPRealFFT( LenBits ));
 		}
 
-		CDSPRealFFT* ffto = FFTObjects[ LenBits ];
-		FFTObjects[ LenBits ] = ffto -> Next;
+		CDSPRealFFT* ffto = getFFTObjects()[ LenBits ].unkeep();
+		getFFTObjects()[ LenBits ] = ffto -> Next;
 
 		return( ffto );
 	}
 
 	/**
-	 * Function releases a previously acquired FFT object.
+	 * @brief Releases a previously acquired FFT object.
 	 *
 	 * @param ffto FFT object to release.
 	 */
 
 	void release( CDSPRealFFT* const ffto )
 	{
-		R8BSYNC( StateSync );
+		R8BSYNC( getStateSync() );
 
-		ffto -> Next = FFTObjects[ ffto -> LenBits ];
-		FFTObjects[ ffto -> LenBits ] = ffto;
+		ffto -> Next = getFFTObjects()[ ffto -> LenBits ].unkeep();
+		getFFTObjects()[ ffto -> LenBits ] = ffto;
+	}
+
+	/**
+	 * @brief Returns pointer to a pool of free FFT objects.
+	 */
+
+	static CPtrKeeper< CDSPRealFFT >* getFFTObjects()
+	{
+		R8B_EXITDTOR static CPtrKeeper< CDSPRealFFT > FFTObjects[ 31 ];
+
+		return( FFTObjects );
+	}
+
+	/**
+	 * @brief Returns reference to FFT object pool sync object.
+	 */
+
+	static CSyncObject& getStateSync()
+	{
+		R8B_EXITDTOR static CSyncObject StateSync;
+
+		return( StateSync );
 	}
 };
 
 /**
- * Function calculates the minimum-phase transform of the filter kernel, using
+ * @brief Calculates the minimum-phase transform of the filter kernel, using
  * a discrete Hilbert transform in cepstrum domain.
  *
  * For more details, see part III.B of
@@ -680,17 +670,17 @@ private:
  * attenuation is high, this multiplier should be increased or otherwise the
  * required attenuation will not be reached due to "smoothing" effect of this
  * transform.
- * @param DoFinalMul "True" if the final multiplication after transform should
- * be performed. Such multiplication returns the gain of the signal to its
- * original value. This parameter can be set to "false" if normalization of
- * the resulting filter kernel is planned to be used.
- * @param[out] DCGroupDelay If not NULL, this variable receives group delay
- * at DC offset, in samples (can be a non-integer value).
+ * @param DoFinalMul `true` if the final multiplication after transform
+ * should be performed. Such multiplication returns the gain of the signal to
+ * its original value. This parameter can be set to `false` if normalization
+ * of the resulting filter kernel is planned to be used.
+ * @param[out] DCGroupDelay If not `nullptr`, this variable receives group
+ * delay at DC offset, in samples (can be a non-integer value).
  */
 
 inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 	const int LenMult = 2, const bool DoFinalMul = true,
-	double* const DCGroupDelay = NULL )
+	double* const DCGroupDelay = R8B_NULL )
 {
 	R8BASSERT( KernelLen > 0 );
 	R8BASSERT( LenMult >= 2 );
@@ -703,8 +693,9 @@ inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 	CFixedBuffer< double > ip( Len );
 	CFixedBuffer< double > ip2( Len2 + 1 );
 
-	memcpy( &ip[ 0 ], Kernel, KernelLen * sizeof( ip[ 0 ]));
-	memset( &ip[ KernelLen ], 0, ( Len - KernelLen ) * sizeof( ip[ 0 ]));
+	memcpy( &ip[ 0 ], Kernel, (size_t) KernelLen * sizeof( ip[ 0 ]));
+	memset( &ip[ KernelLen ], 0,
+		(size_t) ( Len - KernelLen ) * sizeof( ip[ 0 ]));
 
 	CDSPRealFFTKeeper ffto( LenBits );
 	ffto -> forward( ip );
@@ -783,10 +774,11 @@ inline void calcMinPhaseTransform( double* const Kernel, const int KernelLen,
 	}
 	else
 	{
-		memcpy( &Kernel[ 0 ], &ip[ 0 ], KernelLen * sizeof( Kernel[ 0 ]));
+		memcpy( &Kernel[ 0 ], &ip[ 0 ],
+			(size_t) KernelLen * sizeof( Kernel[ 0 ]));
 	}
 
-	if( DCGroupDelay != NULL )
+	if( DCGroupDelay != R8B_NULL )
 	{
 		*DCGroupDelay = calcFIRFilterGroupDelay( Kernel, KernelLen, 0.0 );
 	}

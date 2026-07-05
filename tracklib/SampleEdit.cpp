@@ -19,15 +19,7 @@
 #include "openmpt/soundbase/Copy.hpp"
 #include "openmpt/soundbase/SampleConvertFixedPoint.hpp"
 
-#if MPT_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable:6011)
-#pragma warning(disable:6031)
-#endif // MPT_COMPILER_MSVC
 #include "../include/r8brain/CDSPResampler.h"
-#if MPT_COMPILER_MSVC
-#pragma warning(pop)
-#endif // MPT_COMPILER_MSVC
 
 #if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
 #if MPT_COMPILER_MSVC

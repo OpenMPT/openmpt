@@ -1322,9 +1322,6 @@
     <ProjectReference Include="ext\pthread-win32.vcxproj">
       <Project>{2F5B53AA-AB47-4B76-9913-87210353D8E4}</Project>
     </ProjectReference>
-    <ProjectReference Include="ext\r8brain.vcxproj">
-      <Project>{BC116B29-9958-4389-B294-7529BB7C7D37}</Project>
-    </ProjectReference>
     <ProjectReference Include="ext\rtaudio.vcxproj">
       <Project>{4886456B-1342-4EC8-AD3F-D92AEB8C1097}</Project>
     </ProjectReference>

@@ -2562,9 +2562,6 @@
     <ProjectReference Include="ext\portaudio.vcxproj">
       <Project>{189B867F-FF4B-45A1-B741-A97492EE69AF}</Project>
     </ProjectReference>
-    <ProjectReference Include="ext\r8brain.vcxproj">
-      <Project>{BC116B29-9958-4389-B294-7529BB7C7D37}</Project>
-    </ProjectReference>
     <ProjectReference Include="ext\rtaudio.vcxproj">
       <Project>{4886456B-1342-4EC8-AD3F-D92AEB8C1097}</Project>
     </ProjectReference>

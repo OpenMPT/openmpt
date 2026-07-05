@@ -945,13 +945,10 @@
     <ClInclude Include="..\..\..\include\r8brain\CDSPRealFFT.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPResampler.h" />
     <ClInclude Include="..\..\..\include\r8brain\CDSPSincFilterGen.h" />
-    <ClInclude Include="..\..\..\include\r8brain\fft4g.h" />
+    <ClInclude Include="..\..\..\include\r8brain\fft\fft4g.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bbase.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8bconf.h" />
     <ClInclude Include="..\..\..\include\r8brain\r8butil.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\include\r8brain\r8bbase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\r8brain\CDSPHBDownsampler.inc" />

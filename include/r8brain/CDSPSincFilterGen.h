@@ -9,7 +9,8 @@
  * This file includes the CDSPSincFilterGen class implementation that
  * generates FIR filters.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -33,8 +34,8 @@ class CDSPSincFilterGen
 public:
 	double Len2; ///< Required half filter kernel's length in samples (can be
 		///< a fractional value). Final physical kernel length will be
-		///< provided in the KernelLen variable. Len2 should be >= 2.
-	double Len2i; ///< = 1.0 / Len2, initialized and used by some window
+		///< provided in the `KernelLen` variable. `Len2` should be >= 2.
+	double Len2i; ///< Equals `1.0 / Len2`, initialized and used by some window
 		///< functions for optimization (should not be initialized by the
 		///< caller).
 	int KernelLen; ///< Resulting length of the filter kernel, this variable
@@ -43,31 +44,19 @@ public:
 		///< as filter's latency in samples (taps), this variable is set after
 		///< the call to one of the "init" functions.
 
-	union
-	{
-		struct
-		{
-			double Freq1; ///< Required corner circular frequency 1 [0; pi].
-				///< Used only in the generateBand() function.
-			double Freq2; ///< Required corner circular frequency 2 [0; pi].
-				///< Used only in the generateBand() function. The range
-				///< [Freq1; Freq2] defines a pass band for the generateBand()
-				///< function.
-		};
-
-		struct
-		{
-			double FracDelay; ///< Fractional delay in the range [0; 1], used
-				///< only in the generateFrac() function. Note that the
-				///< FracDelay parameter is actually inversed. At 0.0 value it
-				///< produces 1 sample delay (with the latency equal to fl2),
-				///< at 1.0 value it produces 0 sample delay (with the latency
-				///< equal to fl2 - 1).
-		};
-	};
+	double Freq1; ///< Required corner circular frequency 1 [0; pi]. Used only
+		///< in the generateBand() function.
+	double Freq2; ///< Required corner circular frequency 2 [0; pi]. Used only
+		///< in the generateBand() function. The range [Freq1; Freq2] defines
+		///< a pass band for the generateBand() function.
+	double FracDelay; ///< Fractional delay in the range [0; 1], used only in
+		///< the generateFrac() function. Note that the `FracDelay` parameter
+		///< is actually inversed. At 0.0 value it produces 1 sample delay
+		///< (with the latency equal to fl2), at 1.0 value it produces 0
+		///< sample delay (with the latency equal to fl2 - 1).
 
 	/**
-	 * Window function type.
+	 * @brief Window function type.
 	 */
 
 	enum EWindowFunctionType
@@ -80,24 +69,24 @@ public:
 			///< parameter. The "Power" parameter is optional.
 	};
 
-	typedef double( CDSPSincFilterGen :: *CWindowFunc )(); ///< Window
+	typedef double( CDSPSincFilterGen ::* CWindowFunc )(); ///< Window
 		///< calculation function pointer type.
 
 	/**
-	 * Function initializes *this structure for generation of a window
+	 * @brief Initializes *this* structure for generation of a window
 	 * function, odd-sized.
 	 *
 	 * @param WinType Window function type.
-	 * @param Params Window function's parameters. If NULL, the table values
-	 * may be used.
-	 * @param UsePower "True" if the power factor should be used to raise the
-	 * window function. If "true", the power factor should be specified as the
-	 * last value in the Params array. If Params is NULL, the table or default
-	 * value of -1.0 (off) will be used.
+	 * @param Params Window function's parameters. If `nullptr`, the table
+	 * values may be used.
+	 * @param UsePower `true` if the power factor should be used to raise the
+	 * window function. If `true`, the power factor should be specified as the
+	 * last value in the `Params` array. If `Params` is `nullptr`, the table
+	 * or default value of -1.0 (off) will be used.
 	 */
 
 	void initWindow( const EWindowFunctionType WinType = wftCosine,
-		const double* const Params = NULL, const bool UsePower = false )
+		const double* const Params = R8B_NULL, const bool UsePower = false )
 	{
 		R8BASSERT( Len2 >= 2.0 );
 
@@ -108,21 +97,22 @@ public:
 	}
 
 	/**
-	 * Function initializes *this structure for generation of band-limited
-	 * sinc filter kernel. The generateBand() function should be used to
-	 * calculate the filter.
+	 * @brief Initializes *this* structure for generation of band-limited
+	 * sinc filter kernel.
+	 *
+	 * The generateBand() function should be used to calculate the filter.
 	 *
 	 * @param WinType Window function type.
-	 * @param Params Window function's parameters. If NULL, the table values
-	 * may be used.
-	 * @param UsePower "True" if the power factor should be used to raise the
-	 * window function. If "true", the power factor should be specified as the
-	 * last value in the Params array. If Params is NULL, the table or default
-	 * value of -1.0 (off) will be used.
+	 * @param Params Window function's parameters. If `nullptr`, the table
+	 * values may be used.
+	 * @param UsePower `true` if the power factor should be used to raise the
+	 * window function. If `true`, the power factor should be specified as the
+	 * last value in the `Params` array. If `Params` is `nullptr`, the table
+	 * or default value of -1.0 (off) will be used.
 	 */
 
 	void initBand( const EWindowFunctionType WinType = wftCosine,
-		const double* const Params = NULL, const bool UsePower = false )
+		const double* const Params = R8B_NULL, const bool UsePower = false )
 	{
 		R8BASSERT( Len2 >= 2.0 );
 
@@ -133,21 +123,23 @@ public:
 	}
 
 	/**
-	 * Function initializes *this structure for Hilbert transformation filter
-	 * calculation. Freq1 and Freq2 variables are not used.
-	 * The generateHilbert() function should be used to calculate the filter.
+	 * @brief Initializes *this* structure for Hilbert transformation filter
+	 * calculation.
+	 *
+	 * `Freq1` and `Freq2` variables are not used. The generateHilbert()
+	 * function should be used to calculate the filter.
 	 *
 	 * @param WinType Window function type.
-	 * @param Params Window function's parameters. If NULL, the table values
-	 * may be used.
-	 * @param UsePower "True" if the power factor should be used to raise the
-	 * window function. If "true", the power factor should be specified as the
-	 * last value in the Params array. If Params is NULL, the table or default
-	 * value of -1.0 (off) will be used.
+	 * @param Params Window function's parameters. If `nullptr`, the table
+	 * values may be used.
+	 * @param UsePower `true` if the power factor should be used to raise the
+	 * window function. If `true`, the power factor should be specified as the
+	 * last value in the `Params` array. If `Params` is `nullptr`, the table
+	 * or default value of -1.0 (off) will be used.
 	 */
 
 	void initHilbert( const EWindowFunctionType WinType = wftCosine,
-		const double* const Params = NULL, const bool UsePower = false )
+		const double* const Params = R8B_NULL, const bool UsePower = false )
 	{
 		R8BASSERT( Len2 >= 2.0 );
 
@@ -158,22 +150,23 @@ public:
 	}
 
 	/**
-	 * Function initializes *this structure for generation of full-bandwidth
-	 * fractional delay sinc filter kernel. Freq1 and Freq2 variables are not
-	 * used. The generateFrac() function should be used to calculate the
-	 * filter.
+	 * @brief Initializes *this* structure for generation of full-bandwidth
+	 * fractional delay sinc filter kernel.
+	 * 
+	 * `Freq1` and `Freq2` variables are not used. The generateFrac() function
+	 * should be used to calculate the filter.
 	 *
 	 * @param WinType Window function type.
-	 * @param Params Window function's parameters. If NULL, the table values
-	 * may be used.
-	 * @param UsePower "True" if the power factor should be used to raise the
-	 * window function. If "true", the power factor should be specified as the
-	 * last value in the Params array. If Params is NULL, the table or default
-	 * value of -1.0 (off) will be used.
+	 * @param Params Window function's parameters. If `nullptr`, the table
+	 * values may be used.
+	 * @param UsePower `true` if the power factor should be used to raise the
+	 * window function. If `true`, the power factor should be specified as the
+	 * last value in the `Params` array. If `Params` is `nullptr`, the table
+	 * or default value of -1.0 (off) will be used.
 	 */
 
 	void initFrac( const EWindowFunctionType WinType = wftCosine,
-		const double* const Params = NULL, const bool UsePower = false )
+		const double* const Params = R8B_NULL, const bool UsePower = false )
 	{
 		R8BASSERT( Len2 >= 2.0 );
 
@@ -184,7 +177,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Hann" window function coefficient.
+	 * @brief Returns the next "Hann" window function coefficient.
 	 */
 
 	double calcWindowHann()
@@ -193,7 +186,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Hamming" window function coefficient.
+	 * @brief Returns the next "Hamming" window function coefficient.
 	 */
 
 	double calcWindowHamming()
@@ -202,7 +195,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Blackman" window function coefficient.
+	 * @brief Returns the next "Blackman" window function coefficient.
 	 */
 
 	double calcWindowBlackman()
@@ -211,7 +204,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Nuttall" window function coefficient.
+	 * @brief Returns the next "Nuttall" window function coefficient.
 	 */
 
 	double calcWindowNuttall()
@@ -221,7 +214,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Blackman-Nuttall" window function coefficient.
+	 * @brief Returns the next "Blackman-Nuttall" window function coefficient.
 	 */
 
 	double calcWindowBlackmanNuttall()
@@ -231,7 +224,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Kaiser" window function coefficient.
+	 * @brief Returns the next "Kaiser" window function coefficient.
 	 */
 
 	double calcWindowKaiser()
@@ -248,7 +241,7 @@ public:
 	}
 
 	/**
-	 * @return The next "Gaussian" window function coefficient.
+	 * @brief Returns the next "Gaussian" window function coefficient.
 	 */
 
 	double calcWindowGaussian()
@@ -262,7 +255,7 @@ public:
 	}
 
 	/**
-	 * Function calculates window function only.
+	 * @brief Calculates the window function only.
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
@@ -309,7 +302,7 @@ public:
 	}
 
 	/**
-	 * Function calculates band-limited windowed sinc function-based filter
+	 * @brief Calculates band-limited windowed sinc function-based filter
 	 * kernel.
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
@@ -327,7 +320,7 @@ public:
 		const double pw = Power;
 		int t = 1;
 
-		if( Freq1 < 0x1p-42 )
+		if( Freq1 < 2.3e-13 )
 		{
 			if( pw < 0.0 )
 			{
@@ -402,7 +395,7 @@ public:
 	}
 
 	/**
-	 * Function calculates windowed Hilbert transformer filter kernel.
+	 * @brief Calculates windowed Hilbert transformer filter kernel.
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
@@ -449,7 +442,7 @@ public:
 	}
 
 	/**
-	 * Function calculates windowed fractional delay filter kernel.
+	 * @brief Calculates windowed fractional delay filter kernel.
 	 *
 	 * @param[out] op Output buffer, length = KernelLen.
 	 * @param wfunc Window calculation function to use.
@@ -481,9 +474,9 @@ public:
 			f = -f;
 		}
 
-		int IsZeroX = ( fabs( fd - 1.0 ) < 0x1p-42 );
+		int IsZeroX = ( fabs( fd - 1.0 ) < 2.3e-13 );
 		int mt = 0 - IsZeroX;
-		IsZeroX = ( IsZeroX || fabs( fd ) < 0x1p-42 );
+		IsZeroX = ( IsZeroX || fabs( fd ) < 2.3e-13 );
 
 		if( pw < 0.0 )
 		{
@@ -565,37 +558,29 @@ private:
 	CSineGen w2; ///< Cosine wave 2 for window function.
 	CSineGen w3; ///< Cosine wave 3 for window function.
 
-	union
-	{
-		struct
-		{
-			double KaiserBeta; ///< Kaiser window function's "Beta"
-				///< coefficient.
-			double KaiserMul; ///< Kaiser window function's divisor, inverse.
-			double KaiserLen2Frac; ///< Equals FracDelay / Len2.
-		};
-
-		struct
-		{
-			double GaussianSigmaI; ///< Gaussian window function's "Sigma"
-				///< coefficient, inverse.
-			double GaussianSigmaFrac; ///< Equals FracDelay / GaussianSigma.
-		};
-	};
+	double KaiserBeta; ///< Kaiser window function's "Beta" coefficient.
+	double KaiserMul; ///< Kaiser window function's divisor, inverse.
+	double KaiserLen2Frac; ///< Equals `FracDelay / Len2`.
+	double GaussianSigmaI; ///< Gaussian window function's "Sigma"
+		///< coefficient, inverse.
+	double GaussianSigmaFrac; ///< Equals `FracDelay / GaussianSigma`.
 
 	int wn; ///< Window function integer position. 0 - center of the window
 		///< function. This variable may not be used by some window functions.
 
 	/**
-	 * Function initializes Kaiser window function calculation. The FracDelay
-	 * variable should be initialized when using this window function.
+	 * @brief Initializes Kaiser window function calculation.
+	 * 
+	 * The `FracDelay` variable should be initialized when using this window
+	 * function.
 	 *
-	 * @param Params Function parameters. If NULL, the default values will be
-	 * used. If not NULL, the first parameter should specify the "Beta" value.
-	 * @param UsePower "True" if the power factor should be used to raise the
+	 * @param Params Function parameters. If `nullptr`, the default values
+	 * will be used; otherwise, the first parameter should specify the "Beta"
+	 * value.
+	 * @param UsePower `true` if the power factor should be used to raise the
 	 * window function.
-	 * @param IsCentered "True" if centered window should be used. This
-	 * parameter usually equals to "false" for fractional delay filters only.
+	 * @param IsCentered `true` if centered window should be used. This
+	 * parameter usually equals to `false` for fractional delay filters only.
 	 */
 
 	void setWindowKaiser( const double* Params, const bool UsePower,
@@ -603,7 +588,7 @@ private:
 	{
 		wn = ( IsCentered ? 0 : -fl2 );
 
-		if( Params == NULL )
+		if( Params == R8B_NULL )
 		{
 			KaiserBeta = 9.5945013206755156;
 			Power = ( UsePower ? 1.9718457932433306 : -1.0 );
@@ -620,16 +605,18 @@ private:
 	}
 
 	/**
-	 * Function initializes Gaussian window function calculation. The FracDelay
-	 * variable should be initialized when using this window function.
+	 * @brief Initializes Gaussian window function calculation.
 	 *
-	 * @param Params Function parameters. If NULL, the table values will be
-	 * used. If not NULL, the first parameter should specify the "Sigma"
+	 * The `FracDelay` variable should be initialized when using this window
+	 * function.
+	 *
+	 * @param Params Function parameters. If `nullptr`, the table values will
+	 * be used; otherwise, the first parameter should specify the "Sigma"
 	 * value.
-	 * @param UsePower "True" if the power factor should be used to raise the
+	 * @param UsePower `true` if the power factor should be used to raise the
 	 * window function.
-	 * @param IsCentered "True" if centered window should be used. This
-	 * parameter usually equals to "false" for fractional delay filters only.
+	 * @param IsCentered `true` if centered window should be used. This
+	 * parameter usually equals to `false` for fractional delay filters only.
 	 */
 
 	void setWindowGaussian( const double* Params, const bool UsePower,
@@ -637,7 +624,7 @@ private:
 	{
 		wn = ( IsCentered ? 0 : -fl2 );
 
-		if( Params == NULL )
+		if( Params == R8B_NULL )
 		{
 			GaussianSigmaI = 1.0;
 			Power = -1.0;
@@ -654,18 +641,18 @@ private:
 	}
 
 	/**
-	 * Function initializes calculation of window function of the specified
+	 * @brief Initializes calculation of window function of the specified
 	 * type.
 	 *
 	 * @param WinType Window function type.
-	 * @param Params Window function's parameters. If NULL, the table values
-	 * may be used.
-	 * @param UsePower "True" if the power factor should be used to raise the
-	 * window function. If "true", the power factor should be specified as the
-	 * last value in the Params array. If Params is NULL, the table or default
-	 * value of -1.0 (off) will be used.
-	 * @param IsCentered "True" if centered window should be used. This
-	 * parameter usually equals to "false" for fractional delay filters only.
+	 * @param Params Window function's parameters. If `nullptr`, the table
+	 * values may be used.
+	 * @param UsePower `true` if the power factor should be used to raise the
+	 * window function. If `true`, the power factor should be specified as the
+	 * last value in the `Params` array. If `Params` is `nullptr`, the table
+	 * or default value of -1.0 (off) will be used.
+	 * @param IsCentered `true` if centered window should be used. This
+	 * parameter usually equals to `false` for fractional delay filters only.
 	 * @param UseFracDelay Fractional delay to use.
 	 */
 
@@ -695,7 +682,7 @@ private:
 				w3.init( step3, R8B_PId2 - step3 * fl2 + step3 * FracDelay );
 			}
 
-			Power = ( UsePower && Params != NULL ? Params[ 0 ] : -1.0 );
+			Power = ( UsePower && Params != R8B_NULL ? Params[ 0 ] : -1.0 );
 		}
 		else
 		if( WinType == wftKaiser )

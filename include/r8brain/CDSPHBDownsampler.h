@@ -8,7 +8,8 @@
  *
  * This file includes half-band downsampling convolver class.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -30,17 +31,17 @@ class CDSPHBDownsampler : public CDSPProcessor
 {
 public:
 	/**
-	 * Constructor initalizes the half-band downsampler.
+	 * @brief Initalizes the half-band downsampler.
 	 *
 	 * @param ReqAtten Required half-band filter attentuation.
 	 * @param SteepIndex Steepness index - 0=steepest. Corresponds to general
-	 * downsampling ratio, e.g. at 4x downsampling 0 is used, at 8x
+	 * downsampling ratio, e.g., at 4x downsampling 0 is used, at 8x
 	 * downsampling 1 is used, etc.
-	 * @param IsThird "True" if 1/3 resampling is performed.
-	 * @param PrevLatency Latency, in samples (any value >=0), which was left
-	 * in the output signal by a previous process. Whole-number latency will
-	 * be consumed by *this object while remaining fractional latency can be
-	 * obtained via the getLatencyFrac() function.
+	 * @param IsThird `true` if 1/3 resampling is performed.
+	 * @param PrevLatency Latency, in samples (any non-negative value), which
+	 * was left in the output signal by a previous process. Whole-number
+	 * latency will be consumed by *this* object while remaining fractional
+	 * latency can be obtained via the getLatencyFrac() function.
 	 */
 
 	CDSPHBDownsampler( const double ReqAtten, const int SteepIndex,
@@ -74,7 +75,7 @@ public:
 		// Copy obtained filter to address-aligned buffer.
 
 		fltp = alignptr( FltBuf, 16 );
-		memcpy( fltp, fltp0, fltt * sizeof( fltp[ 0 ]));
+		memcpy( fltp, fltp0, (size_t) fltt * sizeof( fltp[ 0 ]));
 
 		convfn = FltConvFn[ fltt - 1 ];
 		fll = fltt;
@@ -126,8 +127,11 @@ public:
 		WritePos2 = 0;
 		ReadPos = flb; // Set "read" position to account for filter's latency.
 
-		memset( &Buf1[ ReadPos ], 0, ( BufLen - flb ) * sizeof( Buf1[ 0 ]));
-		memset( &Buf2[ ReadPos ], 0, ( BufLen - flb ) * sizeof( Buf2[ 0 ]));
+		memset( &Buf1[ ReadPos ], 0,
+			(size_t) ( BufLen - flb ) * sizeof( Buf1[ 0 ]));
+
+		memset( &Buf2[ ReadPos ], 0,
+			(size_t) ( BufLen - flb ) * sizeof( Buf2[ 0 ]));
 	}
 
 	virtual int process( double* ip, int l, double*& op0 )
@@ -188,9 +192,12 @@ public:
 			if( ec > 0 )
 			{
 				wp1 = Buf1 + WritePos1;
-				memcpy( wp1 + BufLen, wp1, min( b1, ec ) * sizeof( wp1[ 0 ]));
+				memcpy( wp1 + BufLen, wp1,
+					(size_t) min( b1, ec ) * sizeof( wp1[ 0 ]));
+
 				wp2 = Buf2 + WritePos1;
-				memcpy( wp2 + BufLen, wp2, min( b2, ec ) * sizeof( wp2[ 0 ]));
+				memcpy( wp2 + BufLen, wp2,
+					(size_t) min( b2, ec ) * sizeof( wp2[ 0 ]));
 			}
 
 			WritePos1 = ( WritePos1 + b1 ) & BufLenMask;
@@ -236,7 +243,7 @@ private:
 		///< expressed as Nth power of 2. This value can be reduced if it is
 		///< known that only short input buffers will be passed to the
 		///< interpolator. The minimum value of this parameter is 5, and
-		///< 1 << BufLenBits should be at least 3 times larger than the
+		///< `1 << BufLenBits` should be at least 3 times larger than the
 		///< FilterLen.
 	static const int BufLen = 1 << BufLenBits; ///< The length of the ring
 		///< buffer. The actual length is longer, to permit "beyond bounds"
@@ -249,9 +256,9 @@ private:
 		///< protection for the largest filter.
 	double FltBuf[ 14 + 2 ]; ///< Holder for half-band filter taps, used with
 		///< 16-byte address-aligning, for SIMD use.
-	const double* BufRP1; ///< Offseted Buf1 pointer at ReadPos=0.
-	const double* BufRP2; ///< Offseted Buf2 pointer at ReadPos=0.
-	double* fltp; ///< Half-band filter taps, points to FltBuf.
+	const double* BufRP1; ///< Offseted Buf1 pointer at `ReadPos` equal 0.
+	const double* BufRP2; ///< Offseted Buf2 pointer at `ReadPos` equal 0.
+	double* fltp; ///< Half-band filter taps, points to `FltBuf`.
 	double LatencyFrac; ///< Fractional latency left on the output.
 	int Latency; ///< Initial latency that should be removed from the output.
 	int fll; ///< Input latency (left-hand filter length).
@@ -260,10 +267,10 @@ private:
 	int flb; ///< Initial buffer read position.
 	int LatencyLeft; ///< Latency left to remove.
 	int BufLeft; ///< The number of samples left in the buffer to process.
-		///< When this value is below "fl2", the interpolation cycle ends.
+		///< When this value is below `fl2`, the interpolation cycle ends.
 	int WritePos1; ///< The current buffer 1 write position.
 	int WritePos2; ///< The current buffer 2 write position. Incremented
-		///< together with the BufLeft variable.
+		///< together with the `BufLeft` variable.
 	int ReadPos; ///< The current buffer read position.
 
 	typedef void( *CConvolveFn )( double* op, double* const opend,

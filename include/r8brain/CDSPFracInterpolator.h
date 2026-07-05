@@ -8,7 +8,8 @@
  *
  * This file includes fractional delay interpolator class.
  *
- * r8brain-free-src Copyright (c) 2013-2022 Aleksey Vaneev
+ * r8brain-free-src Copyright (c) 2013-2025 Aleksey Vaneev
+ *
  * See the "LICENSE" file for license.
  */
 
@@ -36,13 +37,13 @@ namespace r8b {
 
 class CDSPFracDelayFilterBank : public R8B_BASECLASS
 {
-	R8BNOCTOR( CDSPFracDelayFilterBank );
+	R8BNOCTOR( CDSPFracDelayFilterBank )
 
 	friend class CDSPFracDelayFilterBankCache;
 
 public:
 	/**
-	 * Constructor.
+	 * @brief Initializes the filter bank object.
 	 *
 	 * @param aFilterFracs The number of fractional delay positions to sample,
 	 * -1 - use default.
@@ -51,10 +52,10 @@ public:
 	 * be set for 3rd order, 3 for 2nd order, 2 for linear interpolation, 1
 	 * for whole-numbered stepping.
 	 * @param aInterpPoints The number of points the interpolation is based
-	 * on. This value should not be confused with the ElementSize. Set to 2
+	 * on. This value should not be confused with the `ElementSize`. Set to 2
 	 * for linear or no interpolation.
 	 * @param aReqAtten Required filter attentuation.
-	 * @param aIsThird "True" if one-third filter is required.
+	 * @param aIsThird `true` if one-third filter is required.
 	 */
 
 	CDSPFracDelayFilterBank( const int aFilterFracs, const int aElementSize,
@@ -64,7 +65,7 @@ public:
 		, InterpPoints( aInterpPoints )
 		, ReqAtten( aReqAtten )
 		, IsThird( aIsThird )
-		, Next( NULL )
+		, Next( R8B_NULL )
 		, RefCount( 1 )
 	{
 		R8BASSERT( ElementSize >= 1 && ElementSize <= 4 );
@@ -193,12 +194,11 @@ public:
 	}
 
 	/**
-	 * Function "rounds" the specified attenuation to the nearest effective
-	 * value.
+	 * @brief Rounds the specified attenuation to the nearest effective value.
 	 *
 	 * @param[in,out] att Required filter attentuation. Will be rounded to the
 	 * nearest value.
-	 * @param aIsThird "True" if one-third filter is required.
+	 * @param aIsThird `true` if one-third filter is required.
 	 */
 
 	static void roundReqAtten( double& att, const bool aIsThird )
@@ -208,8 +208,8 @@ public:
 	}
 
 	/**
-	 * @return The length of the filter, in samples (taps). Always an even
-	 * number, not less than 6.
+	 * @brief Returns the length of the filter, in samples (taps). Always
+	 * an even number, not less than 6.
 	 */
 
 	int getFilterLen() const
@@ -218,7 +218,7 @@ public:
 	}
 
 	/**
-	 * @return The number of fractional positions sampled by the bank.
+	 * @brief Returns the number of fractional positions sampled by the bank.
 	 */
 
 	int getFilterFracs() const
@@ -227,8 +227,9 @@ public:
 	}
 
 	/**
-	 * @param i Filter index, in the range 0 to FilterFracs, inclusive.
-	 * @return Reference to the filter.
+	 * @brief Returns reference to the filter.
+	 *
+	 * @param i Filter index, in the range 0 to `FilterFracs`, inclusive.
 	 */
 
 	const double& operator []( const int i ) const
@@ -239,6 +240,8 @@ public:
 	}
 
 	/**
+	 * @brief Reduces reference count to *this* object.
+	 *
 	 * This function should be called when the filter bank obtained via the
 	 * filter bank cache is no longer needed.
 	 */
@@ -253,23 +256,23 @@ private:
 	int ElementSize; ///< Filter element size.
 	int InterpPoints; ///< Interpolation points to use.
 	double ReqAtten; ///< Filter's attentuation.
-	bool IsThird; ///< "True" if one-third filter is in use.
+	bool IsThird; ///< `true` if one-third filter is in use.
 	int FilterSize; ///< This constant specifies the "size" of a single filter
 		///< in "double" elements.
 	CFixedBuffer< double > Table; ///< The table of fractional delay filters
 		///< for all discrete fractional x = 0..1 sample positions, and
 		///< interpolation coefficients.
 	CDSPFracDelayFilterBank* Next; ///< Next filter bank in cache's list.
-	int RefCount; ///< The number of references made to *this filter bank.
+	int RefCount; ///< The number of references made to *this* filter bank.
 		///< Not considered for "static" filter bank objects.
 
 	/**
-	 * Function returns windowing function parameters for the specified
+	 * @brief Returns windowing function parameters for the specified
 	 * attenuation and filter type.
 	 *
 	 * @param[in,out] att Required filter attentuation. Will be rounded to the
 	 * nearest value.
-	 * @param aIsThird "True" if one-third filter is required.
+	 * @param aIsThird `true` if one-third filter is required.
 	 * @param[out] fltlen Resulting filter length.
 	 */
 
@@ -338,7 +341,7 @@ private:
 	}
 
 	/**
-	 * Function shuffles 2 order-2 filter points for SIMD operation.
+	 * @brief Shuffles 2 order-2 filter points for SIMD operation.
 	 *
 	 * @param p Filter table start pointer.
 	 * @param pe Filter table end pointer.
@@ -357,7 +360,7 @@ private:
 	}
 
 	/**
-	 * Function shuffles 2 order-3 filter points for SIMD operation.
+	 * @brief Shuffles 2 order-3 filter points for SIMD operation.
 	 *
 	 * @param p Filter table start pointer.
 	 * @param pe Filter table end pointer.
@@ -381,7 +384,7 @@ private:
 	}
 
 	/**
-	 * Function shuffles 2 order-4 filter points for SIMD operation.
+	 * @brief Shuffles 2 order-4 filter points for SIMD operation.
 	 *
 	 * @param p Filter table start pointer.
 	 * @param pe Filter table end pointer.
@@ -417,25 +420,13 @@ private:
 
 class CDSPFracDelayFilterBankCache : public R8B_BASECLASS
 {
-	R8BNOCTOR( CDSPFracDelayFilterBankCache );
+	R8BNOCTOR( CDSPFracDelayFilterBankCache )
 
 	friend class CDSPFracDelayFilterBank;
 
 public:
 	/**
-	 * @return The number of filters present in the cache now. This value can
-	 * be monitored for debugging "forgotten" filters.
-	 */
-
-	static int getObjCount()
-	{
-		R8BSYNC( StateSync );
-
-		return( ObjCount );
-	}
-
-	/**
-	 * Function calculates or returns reference to a previously calculated
+	 * @brief Calculates or returns reference to a previously calculated
 	 * (cached) fractional delay filter bank.
 	 *
 	 * @param aFilterFracs The number of fractional delay positions to sample,
@@ -444,8 +435,8 @@ public:
 	 * @param aInterpPoints The number of points the interpolation is based
 	 * on.
 	 * @param ReqAtten Required filter attentuation.
-	 * @param IsThird "True" if one-third filter is required.
-	 * @param IsStatic "True" if a permanent static filter should be returned
+	 * @param IsThird `true` if one-third filter is required.
+	 * @param IsStatic `true` if a permanent static filter should be returned
 	 * that is never removed from the cache until application terminates.
 	 * @return Reference to a filter bank.
 	 */
@@ -454,16 +445,23 @@ public:
 		const int aElementSize, const int aInterpPoints,
 		double ReqAtten, const bool IsThird, const bool IsStatic )
 	{
+		R8B_EXITDTOR static CPtrKeeper< CDSPFracDelayFilterBank > Objects;
+			// The chain of cached objects.
+		R8B_EXITDTOR static CPtrKeeper< CDSPFracDelayFilterBank > StaticObjects;
+			// The chain of static objects.
+		R8B_EXITDTOR static int ObjCount = 0; // The number of objects
+			// currently present in the Objects cache.
+
 		CDSPFracDelayFilterBank :: roundReqAtten( ReqAtten, IsThird );
 
-		R8BSYNC( StateSync );
+		R8BSYNC( getStateSync() );
 
 		if( IsStatic )
 		{
-			CDSPFracDelayFilterBank* PrevObj = NULL;
+			CDSPFracDelayFilterBank* PrevObj = R8B_NULL;
 			CDSPFracDelayFilterBank* CurObj = StaticObjects;
 
-			while( CurObj != NULL )
+			while( CurObj != R8B_NULL )
 			{
 				if( CurObj -> InitFilterFracs == aFilterFracs &&
 					CurObj -> IsThird == IsThird &&
@@ -471,7 +469,7 @@ public:
 					CurObj -> InterpPoints == aInterpPoints &&
 					CurObj -> ReqAtten == ReqAtten )
 				{
-					if( PrevObj != NULL )
+					if( PrevObj != R8B_NULL )
 					{
 						// Move the object to the top of the list.
 
@@ -500,10 +498,10 @@ public:
 			return( *CurObj );
 		}
 
-		CDSPFracDelayFilterBank* PrevObj = NULL;
+		CDSPFracDelayFilterBank* PrevObj = R8B_NULL;
 		CDSPFracDelayFilterBank* CurObj = Objects;
 
-		while( CurObj != NULL )
+		while( CurObj != R8B_NULL )
 		{
 			if( CurObj -> InitFilterFracs == aFilterFracs &&
 				CurObj -> IsThird == IsThird &&
@@ -514,13 +512,14 @@ public:
 				break;
 			}
 
-			if( CurObj -> Next == NULL && ObjCount >= R8B_FRACBANK_CACHE_MAX )
+			if( CurObj -> Next == R8B_NULL &&
+				ObjCount >= R8B_FRACBANK_CACHE_MAX )
 			{
 				if( CurObj -> RefCount == 0 )
 				{
 					// Delete the last bank which is not used.
 
-					PrevObj -> Next = NULL;
+					PrevObj -> Next = R8B_NULL;
 					delete CurObj;
 					ObjCount--;
 				}
@@ -529,12 +528,12 @@ public:
 					// Move the last bank to the top of the list since it
 					// seems to be in use for a long time.
 
-					PrevObj -> Next = NULL;
+					PrevObj -> Next = R8B_NULL;
 					CurObj -> Next = Objects.unkeep();
 					Objects = CurObj;
 				}
 
-				CurObj = NULL;
+				CurObj = R8B_NULL;
 				break;
 			}
 
@@ -542,11 +541,11 @@ public:
 			CurObj = CurObj -> Next;
 		}
 
-		if( CurObj != NULL )
+		if( CurObj != R8B_NULL )
 		{
 			CurObj -> RefCount++;
 
-			if( PrevObj == NULL )
+			if( PrevObj == R8B_NULL )
 			{
 				return( *CurObj );
 			}
@@ -573,14 +572,17 @@ public:
 		return( *CurObj );
 	}
 
-private:
-	static CSyncObject StateSync; ///< Cache state synchronizer.
-	static CPtrKeeper< CDSPFracDelayFilterBank* > Objects; ///< The chain of
-		///< cached objects.
-	static CPtrKeeper< CDSPFracDelayFilterBank* > StaticObjects; ///< The
-		///< chain of static objects.
-	static int ObjCount; ///< The number of objects currently preset in the
-		///< Objects cache.
+protected:
+	/**
+	 * @brief Returns reference to global filter bank cache sync object.
+	 */
+
+	static CSyncObject& getStateSync()
+	{
+		R8B_EXITDTOR static CSyncObject StateSync;
+
+		return( StateSync );
+	}
 };
 
 // ---------------------------------------------------------------------------
@@ -589,54 +591,54 @@ private:
 
 inline void CDSPFracDelayFilterBank :: unref()
 {
-	R8BSYNC( CDSPFracDelayFilterBankCache :: StateSync );
+	R8BSYNC( CDSPFracDelayFilterBankCache :: getStateSync() );
 
 	RefCount--;
 }
 
 /**
- * Function interatively searches for a greatest common denominator (GCD) of 2
+ * @brief Interatively searches for a greatest common denominator (GCD) of 2
  * numbers.
  *
  * @param l Number 1.
  * @param s Number 2.
  * @param[out] GCD Resulting GCD.
- * @return "True" if the greatest common denominator of 2 numbers was
- * found.
+ * @return `true` if the greatest common denominator of 2 numbers was found.
  */
 
 inline bool findGCD( double l, double s, double& GCD )
 {
 	int it = 0;
 
-	while( it < 50 )
+	while( ++it < 150 )
 	{
-		if( s <= 0.0 )
+		const double r = l - s;
+
+		if( r == 0.0 )
 		{
-			GCD = l;
-			return( true );
+			GCD = s;
+			return( s > 0.0 );
 		}
 
-		const double r = l - s;
 		l = s;
-		s = ( r < 0.0 ? -r : r );
-		it++;
+		s = fabs( r );
 	}
 
 	return( false );
 }
 
 /**
- * Function evaluates source and destination sample rate ratio and returns
- * the required input and output stepping. Function returns "false" if
- * whole stepping cannot be used to perform interpolation using these sample
- * rates.
+ * @brief Evaluates source and destination sample rate ratio and returns
+ * the required input and output stepping.
+ *
+ * Function returns `false` if whole stepping cannot be used to perform
+ * interpolation using these sample rates.
  *
  * @param SSampleRate Source sample rate.
  * @param DSampleRate Destination sample rate.
  * @param[out] ResInStep Resulting input step.
  * @param[out] ResOutStep Resulting output step.
- * @return "True" if stepping was acquired.
+ * @return `true` if stepping was acquired.
  */
 
 inline bool getWholeStepping( const double SSampleRate,
@@ -644,7 +646,7 @@ inline bool getWholeStepping( const double SSampleRate,
 {
 	double GCD;
 
-	if( !findGCD( SSampleRate, DSampleRate, GCD ) || GCD < 1.0 )
+	if( !findGCD( SSampleRate, DSampleRate, GCD ))
 	{
 		return( false );
 	}
@@ -689,17 +691,17 @@ class CDSPFracInterpolator : public CDSPProcessor
 {
 public:
 	/**
-	 * Constructor initalizes the interpolator. It is important to call the
+	 * @brief Initalizes the interpolator. It is important to call the
 	 * getMaxOutLen() function afterwards to obtain the optimal output buffer
 	 * length.
 	 *
 	 * @param aSrcSampleRate Source sample rate.
 	 * @param aDstSampleRate Destination sample rate.
 	 * @param ReqAtten Required filter attentuation.
-	 * @param IsThird "True" if one-third filter is required.
-	 * @param PrevLatency Latency, in samples (any value >=0), which was left
-	 * in the output signal by a previous process. This latency will be
-	 * consumed completely.
+	 * @param IsThird `true` if one-third filter is required.
+	 * @param PrevLatency Latency, in samples (any non-negative value), which
+	 * was left in the output signal by a previous process. This latency will
+	 * be consumed completely.
 	 */
 
 	CDSPFracInterpolator( const double aSrcSampleRate,
@@ -837,7 +839,8 @@ public:
 		ReadPos = flb; // Set "read" position to account for filter's
 			// latency at zero fractional delay.
 
-		memset( &Buf[ ReadPos ], 0, ( BufLen - flb ) * sizeof( Buf[ 0 ]));
+		memset( &Buf[ ReadPos ], 0,
+			(size_t) ( BufLen - flb ) * sizeof( Buf[ 0 ]));
 
 		if( IsWhole )
 		{
@@ -882,12 +885,13 @@ public:
 			const int b = min( l, min( BufLen - WritePos, flb - BufLeft ));
 
 			double* const wp1 = Buf + WritePos;
-			memcpy( wp1, ip, b * sizeof( wp1[ 0 ]));
+			memcpy( wp1, ip, (size_t) b * sizeof( wp1[ 0 ]));
 			const int ec = flo - WritePos;
 
 			if( ec > 0 )
 			{
-				memcpy( wp1 + BufLen, ip, min( b, ec ) * sizeof( wp1[ 0 ]));
+				memcpy( wp1 + BufLen, ip,
+					(size_t) min( b, ec ) * sizeof( wp1[ 0 ]));
 			}
 
 			ip += b;
@@ -922,7 +926,7 @@ private:
 		///< expressed as Nth power of 2. This value can be reduced if it is
 		///< known that only short input buffers will be passed to the
 		///< interpolator. The minimum value of this parameter is 5, and
-		///< 1 << BufLenBits should be at least 3 times larger than the
+		///< `1 << BufLenBits` should be at least 3 times larger than the
 		///< FilterLen. However, this condition can be easily met if the input
 		///< signal is suitably downsampled first before the interpolation is
 		///< performed.
@@ -953,7 +957,7 @@ private:
 	int LatencyLeft; ///< Input latency left to remove.
 	int BufLeft; ///< The number of samples left in the buffer to process.
 	int WritePos; ///< The current buffer write position. Incremented together
-		///< with the BufLeft variable.
+		///< with the `BufLeft` variable.
 	int ReadPos; ///< The current buffer read position.
 	int InPosFracW; ///< Interpolation position (fractional part) for
 		///< whole-number stepping. Corresponds to the index into the filter
@@ -970,18 +974,18 @@ private:
 
 	CDSPFracDelayFilterBank* FilterBank; ///< Filter bank in use, may be
 		///< whole-number stepping filter bank or static bank.
-	bool IsWhole; ///< "True" if whole-number stepping is in use.
+	bool IsWhole; ///< `true` if whole-number stepping is in use.
 
-	typedef double*( CDSPFracInterpolator :: *CConvolveFn )( double* op ); ///<
+	typedef double*( CDSPFracInterpolator ::* CConvolveFn )( double* op ); ///<
 		///< Convolution function type.
 	CConvolveFn convfn; ///< Convolution function in use.
 
 	/**
-	 * Convolution function for 0th order resampling.
+	 * @brief Convolution function for 0th order resampling.
 	 *
 	 * @param[out] op Output buffer.
-	 * @return Advanced "op" value.
 	 * @tparam fltlen Filter length, in taps.
+	 * @return Advanced "op" value.
 	 */
 
 	template< int fltlen >
@@ -1056,7 +1060,7 @@ private:
 	}
 
 	/**
-	 * Convolution function for 2nd order resampling.
+	 * @brief Convolution function for 2nd order resampling.
 	 *
 	 * @param[out] op Output buffer.
 	 * @return Advanced "op" value.

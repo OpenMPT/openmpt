@@ -17,6 +17,32 @@
 #ifndef R8B_FFT4G_INCLUDED
 #define R8B_FFT4G_INCLUDED
 
+#if __cplusplus >= 201103L
+	#include <cmath>
+#else // __cplusplus >= 201103L
+	#include <math.h>
+#endif // __cplusplus >= 201103L
+
+namespace r8b {
+
+#if __cplusplus >= 201103L
+
+	using std :: sin;
+	using std :: cos;
+	using std :: atan;
+
+#endif // __cplusplus >= 201103L
+
+/**
+ * @brief A wrapper class around Takuya OOURA's FFT functions.
+ *
+ * A wrapper class around fft4g.c file's FFT functions by Takuya OOURA.
+ * Provides static private functions for use by the CDSPRealFFT class.
+ */
+
+class ooura_fft
+{
+public:
 /*
 Fast Fourier/Cosine/Sine Transform
     dimension   :one
@@ -33,12 +59,12 @@ functions
     dfct: Cosine Transform of RDFT (Real Symmetric DFT)
     dfst: Sine Transform of RDFT (Real Anti-symmetric DFT)
 function prototypes
-    void cdft(int, int, FPType *, int *, FPType *);
-    void rdft(int, int, FPType *, int *, FPType *);
-    void ddct(int, int, FPType *, int *, FPType *);
-    void ddst(int, int, FPType *, int *, FPType *);
-    void dfct(int, FPType *, FPType *, int *, FPType *);
-    void dfst(int, FPType *, FPType *, int *, FPType *);
+    void cdft(int, int, double *, int *, double *);
+    void rdft(int, int, double *, int *, double *);
+    void ddct(int, int, double *, int *, double *);
+    void ddst(int, int, double *, int *, double *);
+    void dfct(int, double *, double *, int *, double *);
+    void dfst(int, double *, double *, int *, double *);
 
 
 -------- Complex DFT (Discrete Fourier Transform) --------
@@ -58,25 +84,25 @@ function prototypes
     [parameters]
         2*n            :data length (int)
                         n >= 1, n = power of 2
-        a[0...2*n-1]   :input/output data (FPType *)
+        a[0...2*n-1]   :input/output data (double *)
                         input data
-                            a[2*j] = Re(x[j]),
+                            a[2*j] = Re(x[j]), 
                             a[2*j+1] = Im(x[j]), 0<=j<n
                         output data
-                            a[2*k] = Re(X[k]),
+                            a[2*k] = Re(X[k]), 
                             a[2*k+1] = Im(X[k]), 0<=k<n
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n/2-1]   :cos/sin table (FPType *)
+        w[0...n/2-1]   :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             cdft(2*n, -1, a, ip, w);
-        is
+        is 
             cdft(2*n, 1, a, ip, w);
             for (j = 0; j <= 2 * n - 1; j++) {
                 a[j] *= 1.0 / n;
@@ -90,8 +116,8 @@ function prototypes
             R[k] = sum_j=0^n-1 a[j]*cos(2*pi*j*k/n), 0<=k<=n/2
             I[k] = sum_j=0^n-1 a[j]*sin(2*pi*j*k/n), 0<k<n/2
         <case2> IRDFT (excluding scale)
-            a[k] = (R[0] + R[n/2]*cos(pi*k))/2 +
-                   sum_j=1^n/2-1 R[j]*cos(2*pi*j*k/n) +
+            a[k] = (R[0] + R[n/2]*cos(pi*k))/2 + 
+                   sum_j=1^n/2-1 R[j]*cos(2*pi*j*k/n) + 
                    sum_j=1^n/2-1 I[j]*sin(2*pi*j*k/n), 0<=k<n
     [usage]
         <case1>
@@ -103,7 +129,7 @@ function prototypes
     [parameters]
         n              :data length (int)
                         n >= 2, n = power of 2
-        a[0...n-1]     :input/output data (FPType *)
+        a[0...n-1]     :input/output data (double *)
                         <case1>
                             output data
                                 a[2*k] = R[k], 0<=k<n/2
@@ -116,16 +142,16 @@ function prototypes
                                 a[1] = R[n/2]
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n/2)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n/2+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n/2-1]   :cos/sin table (FPType *)
+        w[0...n/2-1]   :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             rdft(n, 1, a, ip, w);
-        is
+        is 
             rdft(n, -1, a, ip, w);
             for (j = 0; j <= n - 1; j++) {
                 a[j] *= 2.0 / n;
@@ -149,21 +175,21 @@ function prototypes
     [parameters]
         n              :data length (int)
                         n >= 2, n = power of 2
-        a[0...n-1]     :input/output data (FPType *)
+        a[0...n-1]     :input/output data (double *)
                         output data
                             a[k] = C[k], 0<=k<n
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n/2)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n/2+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n*5/4-1] :cos/sin table (FPType *)
+        w[0...n*5/4-1] :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             ddct(n, -1, a, ip, w);
-        is
+        is 
             a[0] *= 0.5;
             ddct(n, 1, a, ip, w);
             for (j = 0; j <= n - 1; j++) {
@@ -188,7 +214,7 @@ function prototypes
     [parameters]
         n              :data length (int)
                         n >= 2, n = power of 2
-        a[0...n-1]     :input/output data (FPType *)
+        a[0...n-1]     :input/output data (double *)
                         <case1>
                             input data
                                 a[j] = A[j], 0<j<n
@@ -201,16 +227,16 @@ function prototypes
                                 a[0] = S[n]
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n/2)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n/2+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n*5/4-1] :cos/sin table (FPType *)
+        w[0...n*5/4-1] :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             ddst(n, -1, a, ip, w);
-        is
+        is 
             a[0] *= 0.5;
             ddst(n, 1, a, ip, w);
             for (j = 0; j <= n - 1; j++) {
@@ -228,24 +254,24 @@ function prototypes
     [parameters]
         n              :data length - 1 (int)
                         n >= 2, n = power of 2
-        a[0...n]       :input/output data (FPType *)
+        a[0...n]       :input/output data (double *)
                         output data
                             a[k] = C[k], 0<=k<=n
-        t[0...n/2]     :work area (FPType *)
+        t[0...n/2]     :work area (double *)
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n/4)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n/4+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n*5/8-1] :cos/sin table (FPType *)
+        w[0...n*5/8-1] :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             a[0] *= 0.5;
             a[n] *= 0.5;
             dfct(n, a, t, ip, w);
-        is
+        is 
             a[0] *= 0.5;
             a[n] *= 0.5;
             dfct(n, a, t, ip, w);
@@ -264,23 +290,23 @@ function prototypes
     [parameters]
         n              :data length + 1 (int)
                         n >= 2, n = power of 2
-        a[0...n-1]     :input/output data (FPType *)
+        a[0...n-1]     :input/output data (double *)
                         output data
                             a[k] = S[k], 0<k<n
                         (a[0] is used for work area)
-        t[0...n/2-1]   :work area (FPType *)
+        t[0...n/2-1]   :work area (double *)
         ip[0...*]      :work area for bit reversal (int *)
                         length of ip >= 2+sqrt(n/4)
-                        strictly,
-                        length of ip >=
+                        strictly, 
+                        length of ip >= 
                             2+(1<<(int)(log(n/4+0.5)/log(2))/2).
                         ip[0],ip[1] are pointers of the cos/sin table.
-        w[0...n*5/8-1] :cos/sin table (FPType *)
+        w[0...n*5/8-1] :cos/sin table (double *)
                         w[],ip[] are initialized if ip[0] == 0.
     [remark]
-        Inverse of
+        Inverse of 
             dfst(n, a, t, ip, w);
-        is
+        is 
             dfst(n, a, t, ip, w);
             for (j = 1; j <= n - 1; j++) {
                 a[j] *= 2.0 / n;
@@ -293,23 +319,8 @@ Appendix :
     w[] and ip[] are compatible with all routines.
 */
 
-namespace r8b {
 
-/**
- * @brief A wrapper class around Takuya OOURA's FFT functions.
- *
- * A wrapper class around fft4g.c file's FFT functions by Takuya OOURA.
- * Provides static private functions for use by the CDSPRealFFT class.
- */
-
-class ooura_fft
-{
-friend class CDSPRealFFT;
-
-private:
-typedef double FPType;
-
-static void cdft(int n, int isgn, FPType *a, int *ip, FPType *w)
+static void cdft(int n, int isgn, double *a, int *ip, double *w)
 {
     if (n > (ip[0] << 2)) {
         makewt(n >> 2, ip, w);
@@ -327,11 +338,12 @@ static void cdft(int n, int isgn, FPType *a, int *ip, FPType *w)
     }
 }
 
-static void rdft(int n, int isgn, FPType *a, int *ip, FPType *w)
+
+static void rdft(int n, int isgn, double *a, int *ip, double *w)
 {
     int nw, nc;
     double xi;
-
+    
     nw = ip[0];
     if (n > (nw << 2)) {
         nw = n >> 2;
@@ -366,11 +378,12 @@ static void rdft(int n, int isgn, FPType *a, int *ip, FPType *w)
     }
 }
 
-static void ddct(int n, int isgn, FPType *a, int *ip, FPType *w)
+
+static void ddct(int n, int isgn, double *a, int *ip, double *w)
 {
     int j, nw, nc;
     double xr;
-
+    
     nw = ip[0];
     if (n > (nw << 2)) {
         nw = n >> 2;
@@ -416,11 +429,12 @@ static void ddct(int n, int isgn, FPType *a, int *ip, FPType *w)
     }
 }
 
-static void ddst(int n, int isgn, FPType *a, int *ip, FPType *w)
+
+static void ddst(int n, int isgn, double *a, int *ip, double *w)
 {
     int j, nw, nc;
     double xr;
-
+    
     nw = ip[0];
     if (n > (nw << 2)) {
         nw = n >> 2;
@@ -466,11 +480,12 @@ static void ddst(int n, int isgn, FPType *a, int *ip, FPType *w)
     }
 }
 
-static void dfct(int n, FPType *a, FPType *t, int *ip, FPType *w)
+
+static void dfct(int n, double *a, double *t, int *ip, double *w)
 {
     int j, k, l, m, mh, nw, nc;
     double xr, xi, yr, yi;
-
+    
     nw = ip[0];
     if (n > (nw << 3)) {
         nw = n >> 3;
@@ -555,11 +570,12 @@ static void dfct(int n, FPType *a, FPType *t, int *ip, FPType *w)
     }
 }
 
-static void dfst(int n, FPType *a, FPType *t, int *ip, FPType *w)
+
+static void dfst(int n, double *a, double *t, int *ip, double *w)
 {
     int j, k, l, m, mh, nw, nc;
     double xr, xi, yr, yi;
-
+    
     nw = ip[0];
     if (n > (nw << 3)) {
         nw = n >> 3;
@@ -635,13 +651,16 @@ static void dfst(int n, FPType *a, FPType *t, int *ip, FPType *w)
     a[0] = 0;
 }
 
+
 /* -------- initializing routines -------- */
 
-static void makewt(int nw, int *ip, FPType *w)
+
+
+static void makewt(int nw, int *ip, double *w)
 {
     int j, nwh;
     double delta, x, y;
-
+    
     ip[0] = nw;
     ip[1] = 1;
     if (nw > 2) {
@@ -665,11 +684,12 @@ static void makewt(int nw, int *ip, FPType *w)
     }
 }
 
-static void makect(int nc, int *ip, FPType *c)
+
+static void makect(int nc, int *ip, double *c)
 {
     int j, nch;
     double delta;
-
+    
     ip[1] = nc;
     if (nc > 1) {
         nch = nc >> 1;
@@ -683,13 +703,15 @@ static void makect(int nc, int *ip, FPType *c)
     }
 }
 
+
 /* -------- child routines -------- */
 
-static void bitrv2(int n, int *ip, FPType *a)
+
+static void bitrv2(int n, int *ip, double *a)
 {
     int j, j1, k, k1, l, m, m2;
     double xr, xi, yr, yi;
-
+    
     ip[0] = 0;
     l = n;
     m = 1;
@@ -784,11 +806,12 @@ static void bitrv2(int n, int *ip, FPType *a)
     }
 }
 
-static void bitrv2conj(int n, int *ip, FPType *a)
+
+static void bitrv2conj(int n, int *ip, double *a)
 {
     int j, j1, k, k1, l, m, m2;
     double xr, xi, yr, yi;
-
+    
     ip[0] = 0;
     l = n;
     m = 1;
@@ -892,11 +915,12 @@ static void bitrv2conj(int n, int *ip, FPType *a)
     }
 }
 
-static void cftfsub(int n, FPType *a, const FPType *w)
+
+static void cftfsub(int n, double *a, double *w)
 {
     int j, j1, j2, j3, l;
     double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
-
+    
     l = 2;
     if (n > 8) {
         cft1st(n, a, w);
@@ -941,11 +965,12 @@ static void cftfsub(int n, FPType *a, const FPType *w)
     }
 }
 
-static void cftbsub(int n, FPType *a, const FPType *w)
+
+static void cftbsub(int n, double *a, double *w)
 {
     int j, j1, j2, j3, l;
     double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
-
+    
     l = 2;
     if (n > 8) {
         cft1st(n, a, w);
@@ -990,12 +1015,13 @@ static void cftbsub(int n, FPType *a, const FPType *w)
     }
 }
 
-static void cft1st(int n, FPType *a, const FPType *w)
+
+static void cft1st(int n, double *a, double *w)
 {
     int j, k1, k2;
     double wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
     double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
-
+    
     x0r = a[0] + a[2];
     x0i = a[1] + a[3];
     x1r = a[0] - a[2];
@@ -1094,12 +1120,13 @@ static void cft1st(int n, FPType *a, const FPType *w)
     }
 }
 
-static void cftmdl(int n, int l, FPType *a, const FPType *w)
+
+static void cftmdl(int n, int l, double *a, double *w)
 {
     int j, j1, j2, j3, k, k1, k2, m, m2;
     double wk1r, wk1i, wk2r, wk2i, wk3r, wk3i;
     double x0r, x0i, x1r, x1i, x2r, x2i, x3r, x3i;
-
+    
     m = l << 2;
     for (j = 0; j < l; j += 2) {
         j1 = j + l;
@@ -1220,11 +1247,12 @@ static void cftmdl(int n, int l, FPType *a, const FPType *w)
     }
 }
 
-static void rftfsub(int n, FPType *a, int nc, const FPType *c)
+
+static void rftfsub(int n, double *a, int nc, double *c)
 {
     int j, k, kk, ks, m;
     double wkr, wki, xr, xi, yr, yi;
-
+    
     m = n >> 1;
     ks = 2 * nc / m;
     kk = 0;
@@ -1244,11 +1272,12 @@ static void rftfsub(int n, FPType *a, int nc, const FPType *c)
     }
 }
 
-static void rftbsub(int n, FPType *a, int nc, const FPType *c)
+
+static void rftbsub(int n, double *a, int nc, double *c)
 {
     int j, k, kk, ks, m;
     double wkr, wki, xr, xi, yr, yi;
-
+    
     a[1] = -a[1];
     m = n >> 1;
     ks = 2 * nc / m;
@@ -1270,11 +1299,12 @@ static void rftbsub(int n, FPType *a, int nc, const FPType *c)
     a[m + 1] = -a[m + 1];
 }
 
-static void dctsub(int n, FPType *a, int nc, const FPType *c)
+
+static void dctsub(int n, double *a, int nc, double *c)
 {
     int j, k, kk, ks, m;
     double wkr, wki, xr;
-
+    
     m = n >> 1;
     ks = nc / n;
     kk = 0;
@@ -1290,11 +1320,12 @@ static void dctsub(int n, FPType *a, int nc, const FPType *c)
     a[m] *= c[0];
 }
 
-static void dstsub(int n, FPType *a, int nc, const FPType *c)
+
+static void dstsub(int n, double *a, int nc, double *c)
 {
     int j, k, kk, ks, m;
     double wkr, wki, xr;
-
+    
     m = n >> 1;
     ks = nc / n;
     kk = 0;
@@ -1309,6 +1340,7 @@ static void dstsub(int n, FPType *a, int nc, const FPType *c)
     }
     a[m] *= c[0];
 }
+
 };
 
 } // namespace r8b

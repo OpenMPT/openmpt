@@ -8,9 +8,6 @@
   includedirs { "../../include/r8brain" }
 	filter {}
   files {
-   "../../include/r8brain/r8bbase.cpp",
-  }
-  files {
    "../../include/r8brain/CDSPBlockConvolver.h",
    "../../include/r8brain/CDSPFIRFilter.h",
    "../../include/r8brain/CDSPFracInterpolator.h",
@@ -22,7 +19,7 @@
    "../../include/r8brain/CDSPRealFFT.h",
    "../../include/r8brain/CDSPResampler.h",
    "../../include/r8brain/CDSPSincFilterGen.h",
-   "../../include/r8brain/fft4g.h",
+   "../../include/r8brain/fft/fft4g.h",
    "../../include/r8brain/r8bbase.h",
    "../../include/r8brain/r8bconf.h",
    "../../include/r8brain/r8butil.h",
@@ -32,10 +29,6 @@ function mpt_use_r8brain ()
 	filter {}
 	dependencyincludedirs {
 		"../../include",
-	}
-	filter {}
-	links {
-		"r8brain",
 	}
 	filter {}
 end
