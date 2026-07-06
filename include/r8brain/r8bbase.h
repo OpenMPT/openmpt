@@ -108,6 +108,8 @@
 	defined( _M_ARM64 ) || defined( _M_ARM64EC )
 
 	#if defined( _MSC_VER )
+	#endif  // OpenMPT
+	#if defined( _MSC_VER ) && !defined(__clang__)  // OpenMPT
 		#include <arm64_neon.h>
 	#else // defined( _MSC_VER )
 		#include <arm_neon.h>

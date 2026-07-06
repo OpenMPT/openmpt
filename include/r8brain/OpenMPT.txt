@@ -1,6 +1,9 @@
 r8brain-free resampling library from https://github.com/avaneev/r8brain-free-src
 version 7.1.
-The example program, DLL and "other" folder, PFFFT sources and logo file have been removed.
-No further local changes have been made.
-For building, premake is used to generate Visual Studio project files.
-See ../build/premake/ for details.
+ *  The example program, DLL and "other" folder, PFFFT sources and logo file
+    have been removed.
+ *  ARM64 Clang-cl build has been fixed in r8bbase.h.
+ *  All modifications have been marked with // OpenMPT.
+ *  No further local changes have been made.
+ *  For building, premake is used to generate Visual Studio project files. See
+    ../build/premake/ for details.
