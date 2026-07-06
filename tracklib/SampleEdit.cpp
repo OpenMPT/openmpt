@@ -24,7 +24,7 @@
 #pragma warning(disable:6011)
 #pragma warning(disable:6031)
 #endif // MPT_COMPILER_MSVC
-#include "../include/r8brain/CDSPResampler.h"
+#include <r8brain/CDSPResampler.h>
 #if MPT_COMPILER_MSVC
 #pragma warning(pop)
 #endif // MPT_COMPILER_MSVC
