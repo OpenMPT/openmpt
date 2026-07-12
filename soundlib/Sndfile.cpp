@@ -933,6 +933,7 @@ void CSoundFile::ResetPlayPos()
 	m_PlayState.m_lTotalSampleCount = 0;
 	m_PlayState.m_ppqPosFract = 0.0;
 	m_PlayState.m_ppqPosBeat = 0;
+	m_PlayState.m_lastMovedChannel = CHANNELINDEX_INVALID;
 	m_PlayState.m_globalScriptState.Initialize(*this);
 }
 
@@ -1216,6 +1217,7 @@ PlayBehaviourSet CSoundFile::GetSupportedPlaybackBehaviour(MODTYPE type)
 		playBehaviour.set(kITNoteCutWithPorta);
 		playBehaviour.set(kITVolColNoSlidePropagation);
 		playBehaviour.set(kITStoppedFilterEnvAtStart);
+		playBehaviour.set(kITCompatGxxCarryPortaWithIns);
 		break;
 
 	case MOD_TYPE_XM:

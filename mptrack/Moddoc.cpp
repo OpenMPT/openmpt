@@ -1085,7 +1085,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 		{
 			// Set instrument (or sample if there are no instruments)
 			chn.ResetEnvelopes();
-			m_SndFile.InstrumentChange(chn, params.m_instr);
+			m_SndFile.InstrumentChange(m_SndFile.m_PlayState, channel, params.m_instr);
 		} else if(params.m_sample > 0 && params.m_sample <= GetNumSamples())
 		{
 			// Or set sample explicitly
