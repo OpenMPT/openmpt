@@ -16,7 +16,6 @@ jobs:
           - { version: '7.7' }
           - { version: '7.6' }
           - { version: '7.5' }
-          - { version: '7.4' }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools

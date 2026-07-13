@@ -26,9 +26,6 @@ jobs:
           - { version: '7.5', deps: sys   }
           - { version: '7.5', deps: local }
           - { version: '7.5', deps: small }
-          - { version: '7.4', deps: sys   }
-          - { version: '7.4', deps: local }
-          - { version: '7.4', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
