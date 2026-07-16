@@ -125,6 +125,7 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT_LEFT,	&CViewSample::OnMonoConvertLeft)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT_RIGHT,	&CViewSample::OnMonoConvertRight)
 	ON_COMMAND(ID_SAMPLE_MONOCONVERT_SPLIT,	&CViewSample::OnMonoConvertSplit)
+	ON_COMMAND(ID_SAMPLE_STEREOCONVERT,		&CViewSample::OnStereoConvert)
 	ON_COMMAND(ID_SAMPLE_TRIM,				&CViewSample::OnSampleTrim)
 	ON_COMMAND(ID_PREVINSTRUMENT,			&CViewSample::OnPrevInstrument)
 	ON_COMMAND(ID_NEXTINSTRUMENT,			&CViewSample::OnNextInstrument)
@@ -2515,7 +2516,7 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 				::AppendMenu(hMenu, MF_POPUP, reinterpret_cast<UINT_PTR>(hMonoMenu), _T("Convert to &Mono"));
 			} else
 			{
-				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_MONOCONVERT, ih->GetKeyTextFromCommand(kcSampleStereo, _T("Convert to Stere&o")));
+				::AppendMenu(hMenu, MF_STRING, ID_SAMPLE_STEREOCONVERT, ih->GetKeyTextFromCommand(kcSampleStereo, _T("Convert to Stere&o")));
 			}
 
 			// "Trim" menu item is responding differently if there's no selection,
