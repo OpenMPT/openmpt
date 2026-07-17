@@ -25,6 +25,7 @@ exit 1
 
 set MPT_VS_SLN=sln
 if "%MPT_VS_VER%" == "vs2026" set MPT_VS_SLN=slnx
+if "%MPT_VS_VER%" == "vs2026preview" set MPT_VS_SLN=slnx
 
 if "%MPT_VS_TARGET%" == "winxpansi" set MPT_VS_WITHTARGET=%MPT_VS_VER%winxpansi
 if "%MPT_VS_TARGET%" == "winxp"   set MPT_VS_WITHTARGET=%MPT_VS_VER%winxp

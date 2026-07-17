@@ -46,6 +46,11 @@ newoption {
 	description = "ClangCL projects",
 }
 
+newoption {
+	trigger = "preview-compiler",
+	description = "USe MSVC Preview Compiler",
+}
+
 
 
 require('vstudio')
@@ -124,6 +129,33 @@ end
 premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
 	local calls = base(prj)
 	table.insertafter(calls, premake.vstudio.vc2010.wholeProgramOptimization, premake.vstudio.vc2010.spectreMitigations)
+	return calls
+end)
+
+
+
+premake.api.register {
+	name = "previewcompiler",
+	scope = "config",
+	kind = "string",
+	allowed = {
+		"Default",
+		"On",
+		"Off",
+	}
+}
+
+function premake.vstudio.vc2010.previewCompiler(cfg)
+	if (cfg.previewcompiler == 'On') then
+		if _ACTION >= "vs2026" then
+			premake.vstudio.vc2010.element("MSVCPreviewEnabled", nil, "true")
+		end
+	end
+end
+
+premake.override(premake.vstudio.vc2010.elements, "configurationProperties", function(base, prj)
+	local calls = base(prj)
+	table.insertafter(calls, premake.vstudio.vc2010.windowsSDKDesktopARM64ECSupport, premake.vstudio.vc2010.previewCompiler)
 	return calls
 end)
 
@@ -467,8 +499,15 @@ function MPT_WIN_PLATFORMS(v)
 	end
 end
 
-mpt_projectpathname = _ACTION .. _OPTIONS["windows-version"]
-mpt_bindirsuffix = _OPTIONS["windows-version"]
+mpt_projectpathname = _ACTION
+mpt_actionsuffix = ""
+mpt_bindirsuffix = ""
+if _OPTIONS["preview-compiler"] then
+	mpt_projectpathname = mpt_projectpathname .. "preview"
+	mpt_actionsuffix = mpt_actionsuffix .. "preview"
+end
+mpt_projectpathname = mpt_projectpathname .. _OPTIONS["windows-version"]
+mpt_bindirsuffix = mpt_bindirsuffix .. _OPTIONS["windows-version"]
 
 if _OPTIONS["windows-version"] == "win11" then
 	MPT_WIN_VERSION = MPT_WIN["11_24H2"]
