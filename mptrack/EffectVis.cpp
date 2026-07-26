@@ -429,12 +429,12 @@ void CEffectVis::DrawNodes()
 	//erase
 	if ((ROWINDEX)m_nRowToErase < m_startRow || m_nParamToErase < 0)
 	{
-		m_dcNodes.FillSolidRect(&m_rcDraw, 0);
+		m_dcNodes.FillSolidRect(&m_rcDraw, RGB(0, 0, 0));
 	} else
 	{
 		int x = RowToScreenX(m_nRowToErase);
 		CRect r(x - nodeSizeHalf, m_rcDraw.top, x + nodeSizeHalf + 1, m_rcDraw.bottom);
-		m_dcNodes.FillSolidRect(&r, 0);
+		m_dcNodes.FillSolidRect(&r, RGB(0, 0, 0));
 	}
 
 	for (ROWINDEX row = m_startRow; row <= m_endRow; row++)
@@ -708,6 +708,9 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		m_nLastDrawnRow = row;
 		m_nLastDrawnY = point.y;
 	}
+
+	DrawNodes();
+
 	//update status bar
 	CString status;
 	CString effectName;
@@ -926,6 +929,7 @@ void CEffectVis::MakeChange(ROWINDEX row, int y)
 
 	m_ModDoc.SetModified();
 	m_ModDoc.UpdateAllViews(nullptr, RowHint(row), this);
+	InvalidateRow(row);  // Only invalidate, actual redrawing is triggered in OnMouseMove as we may modify multiple rows with one mouse event
 }
 
 void CEffectVis::SetPcNote(ROWINDEX row)
