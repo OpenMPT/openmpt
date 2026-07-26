@@ -64,6 +64,8 @@ include_dependency "ext-stb_vorbis.lua"
 	excludes {
 		"../../src/mpt/crypto/**.cpp",
 		"../../src/mpt/crypto/**.hpp",
+		"../../src/mpt/environment/**.cpp",
+		"../../src/mpt/environment/**.hpp",
 		"../../src/mpt/filemode/**.cpp",
 		"../../src/mpt/filemode/**.hpp",
 		"../../src/mpt/fs/**.cpp",
