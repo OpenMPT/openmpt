@@ -58,9 +58,6 @@
     <Filter Include="src\mpt\endian\tests">
       <UniqueIdentifier>{6DFC313A-598B-BB03-02AA-CFFEEE17CCA9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\mpt\environment">
-      <UniqueIdentifier>{B1B8A85D-1D1A-866B-A687-CC1D12E8BC2A}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\mpt\exception_text">
       <UniqueIdentifier>{6F821773-5B7C-40C5-44E9-D6D53082A631}</UniqueIdentifier>
     </Filter>
@@ -659,9 +656,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\endian\tests\tests_endian_integer.hpp">
       <Filter>src\mpt\endian\tests</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\mpt\environment\environment.hpp">
-      <Filter>src\mpt\environment</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mpt\exception_text\exception_text.hpp">
       <Filter>src\mpt\exception_text</Filter>
