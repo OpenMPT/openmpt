@@ -676,7 +676,8 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		m_nParamToErase = GetParam(m_nDragItem);
 
 		MakeChange(m_nDragItem, point.y);
-	} else if ((m_dwStatus & FXVSTATUS_LDRAGGING))
+		DrawNodes();
+	} else if(m_dwStatus & FXVSTATUS_LDRAGGING)
 	{
 		// Interpolate if we detect that rows have been skipped but the left mouse button was not released.
 		// This ensures we produce a smooth curve even when we are not notified of mouse movements at a high frequency (e.g. if CPU usage is high)
@@ -707,15 +708,13 @@ void CEffectVis::OnMouseMove(UINT nFlags, CPoint point)
 		// Remember last modified point in case we need to interpolate
 		m_nLastDrawnRow = row;
 		m_nLastDrawnY = point.y;
+		DrawNodes();
 	}
-
-	DrawNodes();
 
 	//update status bar
 	CString status;
 	CString effectName;
 	uint16 paramValue;
-
 
 	if (IsPcNote(row))
 	{
