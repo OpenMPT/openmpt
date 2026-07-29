@@ -50,6 +50,8 @@
 #include "mpt/string/utility.hpp"
 #include "openmpt/sounddevice/SoundDeviceManager.hpp"
 
+#include <thread>
+
 #if MPT_MSVC_AT_LEAST(2022, 2) && MPT_MSVC_BEFORE(2022, 3)
 // Work-around <https://developercommunity.visualstudio.com/t/warning-C4311-in-MFC-header-afxrecovery/10041328>,
 // see <https://developercommunity.visualstudio.com/t/Compiler-warnings-after-upgrading-to-17/10036311#T-N10061908>.
@@ -1540,6 +1542,21 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	deviceEnumerators.push_back(std::static_pointer_cast<SoundDevice::IDevicesEnumerator>(std::make_shared<SoundDevice::DevicesEnumerator<SoundDevice::SoundDeviceStub>>()));
 	m_pSoundDevicesManager = std::make_unique<SoundDevice::Manager>(m_GlobalLogger, sysInfo, appInfo, std::move(deviceEnumerators));
 	m_pTrackerSettings->MigrateOldSoundDeviceSettings(*m_pSoundDevicesManager);
+
+	// Windows 11 lazily initializes its MIDI service on first use, which can
+	// take several seconds as it scans for Bluetooth and Network MIDI devices.
+	// Once the service is running, the delay / hang when trying to use any
+	// MIDI APIs effectively disappears.
+	// To work around that, force some MIDI API usage on a separate thread to
+	// force-initialize MidiSrv. Adding an instance of the MIDI I/O plugin,
+	// reviewing MIDI settings or turning on MIDI recording should no longer
+	// hang on first use then.
+	// Note that this can still block the OpenMPT UI if the main thread
+	// enumerates MME audio devices at the same time, e.g. because the user
+	// opened the settings dialog, as there appears to be shared internal lock
+	// between these two APIs.
+	// See https://github.com/microsoft/MIDI/issues/1076
+	std::thread{midiInGetNumDevs}.detach();
 
 	// Set default note names
 	CSoundFile::SetDefaultNoteNames();
