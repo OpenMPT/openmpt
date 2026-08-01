@@ -49,6 +49,7 @@
 #include "common/FileReader.h"
 #include "common/Logging.h"
 #include "soundlib/Sndfile.h"
+#include "soundlib/OPL.h"
 #include "soundlib/mod_specifications.h"
 #include "soundlib/AudioReadTarget.h"
 
@@ -1407,6 +1408,75 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 	}
 	return m_sndFile->m_PlayState.Chn[channel].dwFlags[OpenMPT::CHN_SURROUND] ? m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f) : 0.0f;
 }
+std::size_t module_impl::get_current_channel_audio_mono( std::int32_t channel, std::size_t count, float * buf ) const {
+	if ( !buf || count == 0 || channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0;
+	}
+	if ( !m_sndFile->m_channelCaptureEnabled || m_sndFile->m_channelCaptureBuf.empty() ) {
+		return 0;
+	}
+	const OpenMPT::CHANNELINDEX ch = static_cast<OpenMPT::CHANNELINDEX>( channel );
+	if ( ch >= m_sndFile->m_channelCaptureNumChannels ) {
+		return 0;
+	}
+	const std::size_t n = std::min( count, static_cast<std::size_t>( MIXBUFFERSIZE ) );
+	const float scale = m_sndFile->m_channelCaptureGlobalVolScale / OpenMPT::MIXING_SCALEF;
+	const OpenMPT::mixsample_t * src = m_sndFile->m_channelCaptureBuf.data() + static_cast<std::size_t>( ch ) * MIXBUFFERSIZE * 2;
+	for ( std::size_t s = 0; s < n; ++s ) {
+		buf[s] = static_cast<float>( src[s * 2] ) * scale;
+	}
+	// Add OPL voice contributions for this tracker channel
+	if ( m_sndFile->m_opl && m_sndFile->m_opl->IsVoiceCaptureEnabled() ) {
+		const OpenMPT::OPL * opl = m_sndFile->m_opl.get();
+		const int nf = std::min( opl->GetCapturedFrameCount(), static_cast<int>( n ) );
+		constexpr float invMixScale = 1.0f / OpenMPT::MIXING_SCALEF;
+		const float oplScale = m_sndFile->m_channelCaptureGlobalVolScale * invMixScale;
+		for ( int v = 0; v < OpenMPT::OPL::NUM_OPL_VOICES; ++v ) {
+			if ( opl->GetVoiceTrackerChannel( v ) != ch ) continue;
+			const float * vf = opl->GetVoiceFrames( v );
+			if ( !vf ) continue;
+			for ( int s = 0; s < nf; ++s )
+				buf[s] += vf[s] * oplScale;
+		}
+	}
+	return n;
+}
+std::size_t module_impl::get_current_channel_audio_stereo( std::int32_t channel, std::size_t count, float * buf_left, float * buf_right ) const {
+	if ( !buf_left || !buf_right || count == 0 || channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return 0;
+	}
+	if ( !m_sndFile->m_channelCaptureEnabled || m_sndFile->m_channelCaptureBuf.empty() ) {
+		return 0;
+	}
+	const OpenMPT::CHANNELINDEX ch = static_cast<OpenMPT::CHANNELINDEX>( channel );
+	if ( ch >= m_sndFile->m_channelCaptureNumChannels ) {
+		return 0;
+	}
+	const std::size_t n = std::min( count, static_cast<std::size_t>( MIXBUFFERSIZE ) );
+	const float scale = m_sndFile->m_channelCaptureGlobalVolScale / OpenMPT::MIXING_SCALEF;
+	const OpenMPT::mixsample_t * src = m_sndFile->m_channelCaptureBuf.data() + static_cast<std::size_t>( ch ) * MIXBUFFERSIZE * 2;
+	for ( std::size_t s = 0; s < n; ++s ) {
+		buf_left[s]  = static_cast<float>( src[s * 2]     ) * scale;
+		buf_right[s] = static_cast<float>( src[s * 2 + 1] ) * scale;
+	}
+	// Add OPL voice contributions for this tracker channel
+	if ( m_sndFile->m_opl && m_sndFile->m_opl->IsVoiceCaptureEnabled() ) {
+		const OpenMPT::OPL * opl = m_sndFile->m_opl.get();
+		const int nf = std::min( opl->GetCapturedFrameCount(), static_cast<int>( n ) );
+		constexpr float invMixScale = 1.0f / OpenMPT::MIXING_SCALEF;
+		const float oplScale = m_sndFile->m_channelCaptureGlobalVolScale * invMixScale;
+		for ( int v = 0; v < OpenMPT::OPL::NUM_OPL_VOICES; ++v ) {
+			if ( opl->GetVoiceTrackerChannel( v ) != ch ) continue;
+			const float * vf = opl->GetVoiceFrames( v );
+			if ( !vf ) continue;
+			for ( int s = 0; s < nf; ++s ) {
+				buf_left[s]  += vf[s] * oplScale;
+				buf_right[s] += vf[s] * oplScale;
+			}
+		}
+	}
+	return n;
+}
 
 std::int32_t module_impl::get_num_subsongs() const {
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
@@ -1734,6 +1804,7 @@ std::pair<const module_impl::ctl_info *, const module_impl::ctl_info *> module_i
 		{ "render.resampler.emulate_amiga", ctl_type::boolean },
 		{ "render.resampler.emulate_amiga_type", ctl_type::text },
 		{ "render.opl.volume_factor", ctl_type::floatingpoint },
+		{ "render.channel_capture", ctl_type::boolean },
 		{ "dither", ctl_type::integer }
 	};
 	return std::make_pair(std::begin(ctl_infos), std::end(ctl_infos));
@@ -1831,6 +1902,8 @@ bool module_impl::ctl_get_boolean( std::string_view ctl, bool throw_if_unknown )
 		return m_ctl_seek_sync_samples;
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
 		return ( m_sndFile->m_Resampler.m_Settings.emulateAmiga != OpenMPT::Resampling::AmigaFilter::Off );
+	} else if ( ctl == "render.channel_capture" ) {
+		return m_ctl_render_channel_capture;
 	} else {
 		MPT_ASSERT_NOTREACHED();
 		return false;
@@ -2062,6 +2135,9 @@ void module_impl::ctl_set_boolean( std::string_view ctl, bool value, bool throw_
 		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
 			m_sndFile->SetResamplerSettings( newsettings );
 		}
+	} else if ( ctl == "render.channel_capture" ) {
+		m_ctl_render_channel_capture = value;
+		m_sndFile->SetChannelCaptureEnabled( value, m_sndFile->GetNumChannels() );
 	} else {
 		MPT_ASSERT_NOTREACHED();
 	}
