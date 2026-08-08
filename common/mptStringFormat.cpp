@@ -304,6 +304,8 @@ static inline void ApplyFormat(Tostream & o, const FormatSpec & format, const T 
 	if(precision != -1) { o << std::setprecision(precision); }
 }
 
+#if MPT_FORMAT_CXX17_INT
+
 template<typename Tstring>
 static inline Tstring PostProcessCase(Tstring str, const FormatSpec & format)
 {
@@ -320,6 +322,8 @@ static inline Tstring PostProcessCase(Tstring str, const FormatSpec & format)
 	}
 	return str;
 }
+
+#endif // MPT_FORMAT_CXX17_INT
 
 template<typename Tstring>
 static inline Tstring PostProcessDigits(Tstring str, const FormatSpec & format)
