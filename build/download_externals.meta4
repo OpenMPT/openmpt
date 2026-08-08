@@ -40,7 +40,7 @@
   <url>https://web.archive.org/web/20160423015142id_/http://download.microsoft.com/download/0/a/9/0a939ef6-e31c-430f-a3df-dfae7960d564/htmlhelp.exe</url>
   <url>https://web.archive.org/web/20160301111642id_/http://download.microsoft.com/download/0/A/9/0A939EF6-E31C-430F-A3DF-DFAE7960D564/htmlhelp.exe</url>
  </file>
- <file name="build/externals/python-3.14.6-embed-amd64.zip">
+ <file name="build/externals/python-3.14.7-embed-amd64.zip">
   <size>12673227</size>
   <hash type="sha-512">c62810365c120d192767c02b471ea38d100d29ae8332fa00318d1ee66fa7f75b14f01962d3a1b47e935994d2b1e4a76f3bc44bc2bc67cbf0618a2214dfb73a02</hash>
   <url>https://www.python.org/ftp/python/3.14.7/python-3.14.7-embed-amd64.zip</url>
