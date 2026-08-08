@@ -13,10 +13,10 @@
   <size>1657896</size>
   <hash type="sha-512">85389eaef377aa9fef3155d2e3375c1fff77fc10e39d9312cab229f202f3aff78f6e807460cf6b04bc2a32f72f7853afbf475cf0dce6232a40c0a6f8ddcbe4da</hash>
   <url>https://7-zip.org/a/7z2602-x64.exe</url>
-  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2601-x64.exe</url>
-  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2601-x64.exe</url>
-  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2601-x64.exe</url>
-  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2601-x64.exe</url>
+  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2602-x64.exe</url>
+  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2602-x64.exe</url>
+  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2602-x64.exe</url>
+  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.02/7z2602-x64.exe</url>
  </file>
  <file name="build/externals/WA5.55_SDK.exe">
   <size>336166</size>
