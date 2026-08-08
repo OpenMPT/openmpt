@@ -217,7 +217,7 @@ sane_random_device::result_type sane_random_device::operator()()
 	{
 		try
 		{
-			if constexpr(std::random_device::min() != 0 || !mpt::is_mask(std::random_device::max()))
+			MPT_MAYBE_CONSTANT_IF((std::random_device::min() != 0) || !mpt::is_mask(std::random_device::max()))
 			{ // insane std::random_device
 				//  This implementation is not exactly uniformly distributed but good enough
 				// for OpenMPT.
