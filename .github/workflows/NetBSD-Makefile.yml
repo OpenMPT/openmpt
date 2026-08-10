@@ -13,6 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { version: '11.0', deps: sys   }
+          - { version: '11.0', deps: local }
+          - { version: '11.0', deps: small }
           - { version: '10.1', deps: sys   }
           - { version: '10.1', deps: local }
           - { version: '10.1', deps: small }
@@ -30,7 +33,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Startup VM
-      uses: cross-platform-actions/action@v1.3.0
+      uses: cross-platform-actions/action@f529a9b3b38622ad7cd6ff898432f387a2d0db6b
       with:
         architecture: x86_64
         memory: 4G
