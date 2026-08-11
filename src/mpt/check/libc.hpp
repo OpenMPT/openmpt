@@ -12,7 +12,7 @@
 #if MPT_PLATFORM_MULTITHREADED
 #if MPT_LIBC_MINGW
 // MinGW only has `#define _MT` in header files instead of `#define _MT 1`.
-#if !defined(_MT)
+#if !defined(_UCRT) && !defined(_MT)
 MPT_WARNING("C stdlib is not multi-threaded.")
 #endif
 #elif MPT_LIBC_MS
