@@ -16,6 +16,7 @@ jobs:
       matrix:
         include:
           - { sys: UCRT64,  rep: ucrt64,  env: ucrt-x86_64 }
+          - { sys: CLANG64, rep: clang64, env: clang-x86_64 }
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-autotools-${{matrix.sys}}-${{matrix.rep}}-${{matrix.env}}-r2
       cancel-in-progress: true
