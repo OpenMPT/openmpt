@@ -75,7 +75,7 @@ jobs:
         # Remove CodeQL and other toolcaches
         sudo rm -rf /opt/hostedtoolcache
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: fix git
       # https://github.com/actions/runner/issues/2033
       run: chown -R $(id -u):$(id -g) $(pwd)
