@@ -249,7 +249,7 @@ jobs:
       cancel-in-progress: true
     runs-on: ${{matrix.host}}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: update Homebrew
       run: brew update
     - name: fixup Homebrew xcodes

@@ -18,7 +18,7 @@ jobs:
       group: ${{github.ref}}-${{github.workflow}}-autotools-${{matrix.sys}}-${{matrix.rep}}-${{matrix.env}}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{matrix.sys}}
