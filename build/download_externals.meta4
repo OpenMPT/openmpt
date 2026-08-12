@@ -53,10 +53,10 @@
   <url>https://sf-west-interserver-1.dl.sourceforge.net/project/innounp/innounp/innounp 0.50/innounp050.rar</url>
   <url>https://sf-west-interserver-2.dl.sourceforge.net/project/innounp/innounp/innounp 0.50/innounp050.rar</url>
  </file>
- <file name="build/externals/innosetup-7.0.2-x64.exe">
-  <size>17020192</size>
-  <hash type="sha-512">e69ef122d666a2f9e5047ce09691bf0afed3ee9480526933799f4b27dc4d8a7835017e451d87bf1d6166d4d5da9839ab2ded85eb7845e79f49bedbb8b09a5947</hash>
-  <url>https://github.com/jrsoftware/issrc/releases/download/is-7_0_2/innosetup-7.0.2-x64.exe</url>
+ <file name="build/externals/innosetup-7.1.0-x64.exe">
+  <size>14304168</size>
+  <hash type="sha-512">ebbf1d657fae95f29f45508aa04ec3a9fbf730e7f002244b538a0d1f6d26c0f36f57de9ebac2819f113ba0ea50b231b4464cb3ada6a0d86cc00abcbdfa8ef4b6</hash>
+  <url>https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe</url>
  </file>
  <file name="build/externals/isetup-5.5.8-unicode.exe">
   <size>2342456</size>
