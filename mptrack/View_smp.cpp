@@ -2711,8 +2711,8 @@ void CViewSample::OnEditDelete()
 		return;
 
 	LimitMax(m_dwEndSel, sample.nLength);
-	if(!SampleEdit::IsSingleChannel(sample, m_channelSelection)
-		&& ((m_dwBeginSel >= m_dwEndSel) || (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength)))
+	if(m_dwBeginSel >= m_dwEndSel ||
+		(!SampleEdit::IsSingleChannel(sample, m_channelSelection) && (m_dwEndSel - m_dwBeginSel + 4 >= sample.nLength)))
 	{
 		if(Reporting::Confirm("Remove this sample?", "Remove Sample", true) != cnfYes)
 			return;
