@@ -2,6 +2,8 @@ cryptp++ library version 8.9.0 (2023-10-01).
 The following changes have been made:
  *  Commit <https://github.com/weidai11/cryptopp/commit/121014baf0e8> has been
     applied to fix <https://github.com/weidai11/cryptopp/issues/1240>.
+ *  Pull request <https://github.com/weidai11/cryptopp/pull/1339> has been
+    applied to fix <https://github.com/weidai11/cryptopp/issues/1250>.
  *  `#define CRYPTOPP_ARM_ACLE_HEADER 1` in `config_asm.h` has been disabled if
     ´_MSC_VER` is defined.
  *  `config_asm.h`, `config_cpu.h`, `config_int.h`, `donna.h`,
