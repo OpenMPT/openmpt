@@ -123,6 +123,8 @@ static std::vector<SAMPLEINDEX> AllocateXMSamples(CSoundFile &sndFile, SAMPLEIND
 // Read .XM patterns
 static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSoundFile &sndFile)
 {
+	const bool isNitroTracker = !memcmp(fileHeader.trackerName, "NitroTracker", 13);
+
 	// Reading patterns
 	sndFile.Patterns.ResizeArray(fileHeader.patterns);
 	for(PATTERNINDEX pat = 0; pat < fileHeader.patterns; pat++)
@@ -210,6 +212,10 @@ static void ReadXMPatterns(FileReader &file, const XMFileHeader &fileHeader, CSo
 
 			if(m.instr == 0xFF)
 			{
+				m.instr = 0;
+			} else if(isNitroTracker && m.instr && !m.IsNote())
+			{
+				// NitroTracker ignores instrument numbers unless there's a note next to them
 				m.instr = 0;
 			}
 
