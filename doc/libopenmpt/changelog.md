@@ -7,6 +7,15 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.8-pre
 
+ *  IT: Due to an Impulse Tracker bug in Compatible Gxx mode, Envelope Carry may
+    not resume the envelope from the correct position when there is both an
+    instrument number and tone portamento next to a note.
+ *  XM: NitroTracker ignores instrument numbers where there is no note next to
+    them, so they are no longer imported. Fixes various NitroTracker-made XMs
+    such as notominous-a19.xm.
+ *  STK: Loosen heuristics a bit to allow STK.CRB-GreatMuzaxs6 to load.
+ *  GT2: Loading file versions 6 and later was broken since libopenmpt 0.8.0.
+
  *  mpg123: Update to v1.33.7 (2026-08-03).
  *  miniz: Update to v3.1.2 (2026-07-01).
  *  pugixml: Update to v1.16 (2026-06-16).

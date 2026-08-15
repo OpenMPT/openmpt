@@ -33,6 +33,31 @@ Got questions, comments or bug reports? Visit https://openmpt.org/ where you can
 find our issue tracker and forums.
 
 
+v1.32.11.00 (15 August 2026, revision 25566)
+--------------------------------------------
+General Tab
+- [Fix] <js> Fixed possible crash when hovering unavailable channel controls (with fewer than four channels active on the tab).
+
+Pattern tab
+- [Fix] <js> Parameter Editor: The display of rows that were not visible in the pattern editor was not updated properly while modifying (http://bugs.openmpt.org/view.php?id=1982).
+
+IT
+- [Fix] <js> Due to an Impulse Tracker bug in Compatible Gxx mode, Envelope Carry may not resume the envelope from the correct position when there is both an instrument number and tone portamento next to a note.
+
+XM
+- [Imp] <js> NitroTracker ignores instrument numbers where there is no note next to them, so they are no longer imported. Fixes various NitroTracker-made XMs such as notominous-a19.xm.
+
+Other formats
+- [Mod] <js> STK: Loosen heuristics a bit to allow STK.CRB-GreatMuzaxs6 to load.
+- [Fix] <js> GT2: Loading file versions 6 and later was broken since OpenMPT 1.32.01.00.
+
+Misc
+- [Imp] <js> Enforce Windows 11's MIDI service to start up when OpenMPT launches, to avoid UI hangs when the user tries to use some MIDI functionality for the first time.
+
+Third-Party Libraries
+- [Imp] Update lhasa (v0.6.0) and mpg123 (v1.33.7)
+
+
 v1.32.10.00 (17 May 2026, revision 25321)
 -----------------------------------------
 Pattern tab
