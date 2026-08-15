@@ -7,6 +7,10 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.43-pre
 
+ *  XM: NitroTracker ignores instrument numbers where there is no note next to
+    them, so they are no longer imported. Fixes various NitroTracker-made XMs
+    such as notominous-a19.xm.
+
  *  mpg123: Update to v1.33.7 (2026-08-03).
  *  pugixml: Update to v1.16 (2026-06-16).
 
