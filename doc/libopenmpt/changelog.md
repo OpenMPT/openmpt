@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.8-pre
+### libopenmpt 0.8.8 (2026-08-15)
 
  *  IT: Due to an Impulse Tracker bug in Compatible Gxx mode, Envelope Carry may
     not resume the envelope from the correct position when there is both an
