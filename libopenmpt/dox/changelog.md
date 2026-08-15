@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.4.55-pre
+### libopenmpt 0.4.55 (2026-08-15)
 
  *  XM: NitroTracker ignores instrument numbers where there is no note next to
     them, so they are no longer imported. Fixes various NitroTracker-made XMs
