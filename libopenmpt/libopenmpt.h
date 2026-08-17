@@ -659,6 +659,40 @@ LIBOPENMPT_API int openmpt_probe_file_header_from_stream( uint64_t flags, openmp
  */
 typedef struct openmpt_module openmpt_module;
 
+/*! \brief Playback state of a channel
+ *
+ * State information for an active channel in the module mixer.
+ */
+typedef struct openmpt_module_current_channel_state {
+	int32_t volume;
+	int32_t final_volume;
+	int32_t pan;
+	int32_t instrument;
+	int32_t key;
+	int32_t period;
+	int32_t position;
+	int64_t increment;
+	int32_t pitchbend;
+	int32_t note;
+	int32_t sample;
+	int32_t muted;
+} openmpt_module_current_channel_state;
+
+/*! \brief Properties and metadata of a sample slot
+ *
+ * State information, a pointer to raw audio data, and properties for a loaded sample.
+ */
+typedef struct openmpt_module_sample_state {
+	const void * data;
+	int32_t length;
+	int32_t loop_start;
+	int32_t loop_end;
+	int32_t flags;
+	int32_t c5speed;
+	int32_t channels;
+	int32_t bits_per_sample;
+} openmpt_module_sample_state;
+
 typedef struct openmpt_module_initial_ctl {
 	const char * ctl;
 	const char * value;
@@ -1274,6 +1308,43 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_mo
  * \remarks The returned value is solely based on the note velocity and does not take the actual waveform of the playing sample into account.
  */
 LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel );
+
+/*! \brief Get the current state of a channel
+ *
+ * Retrieves the detailed real-time playback state of a specific mixer channel.
+ * \param mod The module handle to work on.
+ * \param channel The channel index to query (0-based). Must be in the range [0, openmpt_module_get_num_channels(mod) - 1].
+ * \param state Pointer to an openmpt_module_current_channel_state structure that receives the channel's current playback state.
+ * \return 1 on success, 0 on failure (e.g., if mod or state is NULL, or channel is out of bounds).
+ * \sa openmpt_module_get_num_channels
+ */
+LIBOPENMPT_API int openmpt_module_get_current_channel_state( openmpt_module * mod, int32_t channel, openmpt_module_current_channel_state * state );
+
+/*! \brief Get the current state of a sample
+ *
+ * Retrieves metadata, sample properties, and raw data pointer for a specific sample slot.
+ * \param mod The module handle to work on.
+ * \param sample The sample index to query (1-based, from 1 to openmpt_module_get_num_samples(mod)).
+ * \param state Pointer to an openmpt_module_sample_state structure that receives the sample properties.
+ * \return 1 on success, 0 on failure.
+ * \remarks This function returns 0 (failure) if the sample index is out of bounds, if the sample has no associated sample data, or if it represents an Adlib/OPL sample.
+ * \sa openmpt_module_get_num_samples
+ */
+LIBOPENMPT_API int openmpt_module_get_sample_state( openmpt_module * mod, int32_t sample, openmpt_module_sample_state * state );
+
+/*! \brief Mute or unmute a specific channel
+ *
+ * Modifies or queries the mute state of a playback channel.
+ * \param mod The module handle to work on.
+ * \param channel The channel index to modify (0-based). Must be in the range [0, openmpt_module_get_num_channels(mod) - 1].
+ * \param status The action to perform:
+ *        -  0: Unmute the channel.
+ *        -  1: Mute the channel.
+ *        - -1: Query the current mute status without changing it.
+ * \return The mute state of the channel *before* the operation (1 if previously muted, 0 if previously unmuted), or -1 on error (e.g., if the channel index is out of bounds).
+ * \sa openmpt_module_get_num_channels
+ */
+LIBOPENMPT_API int32_t openmpt_module_channel_mute( openmpt_module * mod, int32_t channel, int32_t status );
 
 /*! \brief Get the number of sub-songs
  *
