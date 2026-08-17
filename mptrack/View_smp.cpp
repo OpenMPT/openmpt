@@ -582,7 +582,7 @@ void CViewSample::SetCurSel(SmpLength begin, SmpLength end, SampleChannelSelecti
 		return;
 
 	mpt::ustring s;
-	if(m_dwEndSel > m_dwBeginSel)
+	if(HasSelection())
 	{
 		const SmpLength selLength = m_dwEndSel - m_dwBeginSel;
 
@@ -782,7 +782,7 @@ std::pair<CViewSample::HitTestItem, SmpLength> CViewSample::PointToItem(CPoint p
 		return {HitTestItem::Nothing, MAX_SAMPLE_LENGTH};
 	} else
 	{
-		if(m_dwEndSel > m_dwBeginSel && !m_dwStatus[SMPSTATUS_DRAWING])
+		if(HasSelection() && !m_dwStatus[SMPSTATUS_DRAWING])
 		{
 			// Only one channel selected? Limit vertical range of selection marker
 			int yMin = m_timelineHeight, yMax = m_rcClient.bottom, yCenter = m_timelineHeight + WaveformHeight() / 2;
@@ -1908,7 +1908,7 @@ void CViewSample::OnMouseMove(UINT flags, CPoint point)
 		UpdateIndicator(MPT_CFORMAT("Cursor: {}")(fmt(3, _T(","), x)));
 
 		CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
-		if(pMainFrm && m_dwEndSel <= m_dwBeginSel)
+		if(pMainFrm && !HasSelection())
 		{
 			// Show cursor position as offset effect if no selection is made.
 			if(m_nSample > 0 && sample.HasSampleData() && x < sample.nLength)
@@ -2522,7 +2522,7 @@ void CViewSample::OnRButtonUp(UINT, CPoint pt)
 			// "Trim" menu item is responding differently if there's no selection,
 			// but a loop present: "trim around loop point"! (jojo in topic 2258)
 			CString trimMenuText = _T("Tr&im");
-			bool isGrayed = ((m_dwEndSel <= m_dwBeginSel) || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
+			bool isGrayed = (!HasSelection() || (m_dwEndSel - m_dwBeginSel < MIN_TRIM_LENGTH)
 								|| (m_dwEndSel - m_dwBeginSel == sample.nLength));
 
 			if ((m_dwBeginSel == m_dwEndSel) && (sample.nLoopStart < sample.nLoopEnd))
@@ -2770,7 +2770,7 @@ void CViewSample::OnEditCopy()
 
 	// First things first: Calculate sample size, taking partial selections into account.
 	LimitMax(m_dwEndSel, sample.nLength);
-	if(m_dwEndSel > m_dwBeginSel)
+	if(HasSelection())
 	{
 		rangeStart = m_dwBeginSel;
 		rangeEnd = m_dwEndSel;
@@ -2856,8 +2856,7 @@ void CViewSample::OnEditMixPaste()
 
 void CViewSample::OnEditInsertPaste()
 {
-	if(m_dwBeginSel <= m_dwEndSel)
-		m_dwBeginSel = m_dwEndSel = m_dwBeginDrag = m_dwEndDrag = m_dwMenuParam;
+	m_dwBeginSel = m_dwEndSel = m_dwBeginDrag = m_dwEndDrag = m_dwMenuParam;
 	DoPaste(PasteMode::Insert);
 }
 
@@ -3023,7 +3022,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 			// Insert / replace selection
 			SmpLength oldLength = oldSample.nLength;
 			SmpLength selLength = m_dwEndSel - m_dwBeginSel;
-			if(m_dwEndSel > m_dwBeginSel)
+			if(HasSelection())
 			{
 				// Replace selection with pasted data
 				if(selLength >= sample.nLength)
@@ -3339,7 +3338,7 @@ void CViewSample::OnSendSelectionToNewSlot()
 	const ModSample &sourceSmp = sndFile.GetSample(m_nSample);
 	LimitMax(m_dwBeginSel, sourceSmp.nLength);
 	LimitMax(m_dwEndSel, sourceSmp.nLength);
-	if(!sourceSmp.HasSampleData() || sourceSmp.uFlags[CHN_ADLIB] || m_dwEndSel <= m_dwBeginSel)
+	if(!sourceSmp.HasSampleData() || sourceSmp.uFlags[CHN_ADLIB] || !HasSelection())
 		return;
 
 	const SAMPLEINDEX newSample = modDoc->InsertSample();
@@ -3970,8 +3969,8 @@ LRESULT CViewSample::OnCustomKeyMsg(WPARAM wParam, LPARAM lParam)
 		case kcEditCopy:		OnEditCopy(); return wParam;
 		case kcEditPaste:		OnEditPaste(); return wParam;
 		case kcEditMixPasteITStyle:
-		case kcEditMixPaste:	m_menuChannelSelection = m_channelSelection; DoPaste(PasteMode::MixPaste); return wParam;
-		case kcEditPushForwardPaste: m_menuChannelSelection = m_channelSelection; DoPaste(PasteMode::Insert); return wParam;
+		case kcEditMixPaste:	m_menuChannelSelection = SelectedChannel(); DoPaste(PasteMode::MixPaste); return wParam;
+		case kcEditPushForwardPaste: m_menuChannelSelection = SelectedChannel(); DoPaste(PasteMode::Insert); return wParam;
 		case kcEditUndo:		OnEditUndo(); return wParam;
 		case kcEditRedo:		OnEditRedo(); return wParam;
 		case kcSampleConvertPingPongLoop: OnConvertPingPongLoop(); return wParam;
