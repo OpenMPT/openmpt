@@ -134,7 +134,7 @@ protected:
 	void SetCurSel(SmpLength begin, SmpLength end) { SetCurSel(begin, end, m_channelSelection); }
 	void SetCurSel(SmpLength begin, SmpLength end, SampleChannelSelection channelSel);
 	bool HasSelection() const noexcept { return m_dwEndSel > m_dwBeginSel; };
-	SampleChannelSelection SelectedChannel() const noexcept { HasSelection() ? m_channelSelection : SampleChannelSelection::Both; }
+	SampleChannelSelection SelectedChannel() const noexcept { return HasSelection() ? m_channelSelection : SampleChannelSelection::Both; }
 	void ScrollToPosition(int x);
 	void DrawPositionMarks();
 	template <typename Tsample>
