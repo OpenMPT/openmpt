@@ -107,6 +107,18 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 	// "fact" chunk should contain sample length of compressed samples.
 	sampleLength = chunks.GetChunk(RIFFChunk::idfact).ReadUint32LE();
 
+	if((formatInfo.format == WAVFormatChunk::fmtIMA_ADPCM) && (GetBlockAlign() > 0))
+	{
+		FileReader::pos_type dataLength = sampleData.GetLength();
+		std::size_t blocks = mpt::align_up<FileReader::pos_type>(dataLength, GetBlockAlign()) / GetBlockAlign();
+		std::size_t framesPerBlock = ((GetBlockAlign() - (4 * formatInfo.numChannels)) * 2 / formatInfo.numChannels) + 1;
+		FileReader::pos_type expectedLengthFrames = blocks * framesPerBlock;
+		if(sampleLength == 0)
+		{
+			sampleLength = expectedLengthFrames;
+		}
+	}
+
 	if((formatInfo.format != WAVFormatChunk::fmtIMA_ADPCM || sampleLength == 0) && GetSampleSize() != 0)
 	{
 		if((GetBlockAlign() == 0) || (GetBlockAlign() / GetNumChannels() >= 2 * GetSampleSize()))
