@@ -7,6 +7,9 @@ is just a high-level summary.
 
 ### libopenmpt 0.4.56-pre
 
+ *  [**Sec**] Possible heap out-of-bounds read when loading custom tunings from
+    MPTM files (r25613, r25619).
+
 ### libopenmpt 0.4.55 (2026-08-15)
 
  *  XM: NitroTracker ignores instrument numbers where there is no note next to
