@@ -678,14 +678,17 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 	{
 		// Convert old geometric to new groupgeometric because old geometric tunings
 		// can have ratio(0) != 1.0, which would get lost when saving nowadays.
-		if(mpt::saturate_cast<NOTEINDEXTYPE>(m_RatioTable.size()) >= m_GroupSize - m_StepMin)
+		NOTEINDEXTYPE baseNote = 0;
+		baseNote = mpt::clamp(baseNote, GetValidityRange().first, GetValidityRange().second);
+		if(IsValidNote(baseNote) && IsValidNote(baseNote + GetGroupSize() - 1))
 		{
 			std::vector<RATIOTYPE> ratios;
-			for(NOTEINDEXTYPE n = 0; n < m_GroupSize; ++n)
+			for(NOTEINDEXTYPE note = baseNote; note < m_GroupSize + baseNote; ++note)
 			{
-				ratios.push_back(m_RatioTable[n - m_StepMin]);
+				ratios.push_back(GetRatio(note));
 			}
-			CreateGroupGeometric(ratios, m_GroupRatio, GetValidityRange(), 0);
+			// ignore return value, keep as geometric if conversion fails
+			CreateGroupGeometric(ratios, m_GroupRatio, GetValidityRange(), baseNote);
 		}
 	}
 
