@@ -680,7 +680,7 @@ SerializationResult CTuningRTI::InitDeserializeOLD(std::istream& inStrm)
 		// can have ratio(0) != 1.0, which would get lost when saving nowadays.
 		NOTEINDEXTYPE baseNote = 0;
 		baseNote = mpt::clamp(baseNote, GetValidityRange().first, GetValidityRange().second);
-		if(IsValidNote(baseNote) && IsValidNote(baseNote + GetGroupSize() - 1))
+		if(IsValidNote(baseNote) && IsValidNote(mpt::saturate_cast<NOTEINDEXTYPE>(baseNote + static_cast<NOTEINDEXTYPE>(GetGroupSize()) - 1)))
 		{
 			std::vector<RATIOTYPE> ratios;
 			for(NOTEINDEXTYPE note = baseNote; note < m_GroupSize + baseNote; ++note)
