@@ -7,6 +7,13 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.30-pre
 
+ *  [**Sec**] Possible heap out-of-bounds write when loading SymMOD files
+    containing WAV IMA ADPCM samples (r25629). See also
+    <https://github.com/OpenMPT/openmpt/security/advisories/GHSA-fxf7-wc37-p2cx>
+    . Found by [Tristan Madani](https://github.com/TristanInSec).
+ *  [**Sec**] Possible heap out-of-bounds read when loading custom tunings from
+    MPTM files (r25611, r25617).
+
 ### libopenmpt 0.6.29 (2026-08-15)
 
  *  XM: NitroTracker ignores instrument numbers where there is no note next to
