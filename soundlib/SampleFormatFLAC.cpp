@@ -154,7 +154,6 @@ struct FLACDecoder
 		// Source bit depth
 		const unsigned int bps = frame->header.bits_per_sample;
 
-		MPT_ASSERT((bps <= 8 && sample.GetElementarySampleSize() == 1) || (bps > 8 && sample.GetElementarySampleSize() == 2));
 		MPT_ASSERT(modChannels <= FLAC__stream_decoder_get_channels(decoder));
 		MPT_ASSERT(bps == FLAC__stream_decoder_get_bits_per_sample(decoder));
 		MPT_UNREFERENCED_PARAMETER(decoder); // decoder is unused if ASSERTs are compiled out
@@ -162,22 +161,82 @@ struct FLACDecoder
 		// Do the sample conversion
 		for(uint8 chn = 0; chn < modChannels; chn++)
 		{
-			if(bps <= 8)
+			if(sample.GetElementarySampleSize() == 1)
 			{
 				int8 *sampleData8 = sample.sample8() + offset;
-				CopySample<SC::ConvertShift< int8, int32,  0>>(sampleData8  + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
-			} else if(bps <= 16)
+				switch(bps)
+				{
+					case  1: CopySample<SC::ConvertShiftUp<int8, int32, 7>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  2: CopySample<SC::ConvertShiftUp<int8, int32, 6>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  3: CopySample<SC::ConvertShiftUp<int8, int32, 5>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  4: CopySample<SC::ConvertShiftUp<int8, int32, 4>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  5: CopySample<SC::ConvertShiftUp<int8, int32, 3>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  6: CopySample<SC::ConvertShiftUp<int8, int32, 2>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  7: CopySample<SC::ConvertShiftUp<int8, int32, 1>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  8: CopySample<SC::ConvertShift<int8, int32, 0>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  9: CopySample<SC::ConvertShift<int8, int32,  1>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 10: CopySample<SC::ConvertShift<int8, int32,  2>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 11: CopySample<SC::ConvertShift<int8, int32,  3>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 12: CopySample<SC::ConvertShift<int8, int32,  4>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 13: CopySample<SC::ConvertShift<int8, int32,  5>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 14: CopySample<SC::ConvertShift<int8, int32,  6>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 15: CopySample<SC::ConvertShift<int8, int32,  7>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 16: CopySample<SC::ConvertShift<int8, int32,  8>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 17: CopySample<SC::ConvertShift<int8, int32,  9>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 18: CopySample<SC::ConvertShift<int8, int32, 10>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 19: CopySample<SC::ConvertShift<int8, int32, 11>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 20: CopySample<SC::ConvertShift<int8, int32, 12>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 21: CopySample<SC::ConvertShift<int8, int32, 13>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 22: CopySample<SC::ConvertShift<int8, int32, 14>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 23: CopySample<SC::ConvertShift<int8, int32, 15>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 24: CopySample<SC::ConvertShift<int8, int32, 16>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 25: CopySample<SC::ConvertShift<int8, int32, 17>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 26: CopySample<SC::ConvertShift<int8, int32, 18>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 27: CopySample<SC::ConvertShift<int8, int32, 19>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 28: CopySample<SC::ConvertShift<int8, int32, 20>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 29: CopySample<SC::ConvertShift<int8, int32, 21>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 30: CopySample<SC::ConvertShift<int8, int32, 22>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 31: CopySample<SC::ConvertShift<int8, int32, 23>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 32: CopySample<SC::ConvertShift<int8, int32, 24>>(sampleData8 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+				}
+			} else if(sample.GetElementarySampleSize() == 2)
 			{
 				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConvertShift<int16, int32,  0>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
-			} else if(bps <= 24)
-			{
-				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConvertShift<int16, int32,  8>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
-			} else if(bps <= 32)
-			{
-				int16 *sampleData16 = sample.sample16() + offset;
-				CopySample<SC::ConvertShift<int16, int32, 16>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1);
+				switch(bps)
+				{
+					case  1: CopySample<SC::ConvertShiftUp<int16, int32, 15>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  2: CopySample<SC::ConvertShiftUp<int16, int32, 14>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  3: CopySample<SC::ConvertShiftUp<int16, int32, 13>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  4: CopySample<SC::ConvertShiftUp<int16, int32, 12>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  5: CopySample<SC::ConvertShiftUp<int16, int32, 11>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  6: CopySample<SC::ConvertShiftUp<int16, int32, 10>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  7: CopySample<SC::ConvertShiftUp<int16, int32,  9>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  8: CopySample<SC::ConvertShiftUp<int16, int32,  8>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case  9: CopySample<SC::ConvertShiftUp<int16, int32,  7>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 10: CopySample<SC::ConvertShiftUp<int16, int32,  6>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 11: CopySample<SC::ConvertShiftUp<int16, int32,  5>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 12: CopySample<SC::ConvertShiftUp<int16, int32,  4>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 13: CopySample<SC::ConvertShiftUp<int16, int32,  3>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 14: CopySample<SC::ConvertShiftUp<int16, int32,  2>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 15: CopySample<SC::ConvertShiftUp<int16, int32,  1>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 16: CopySample<SC::ConvertShift<int16, int32, 0>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 17: CopySample<SC::ConvertShift<int16, int32,  1>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 18: CopySample<SC::ConvertShift<int16, int32,  2>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 19: CopySample<SC::ConvertShift<int16, int32,  3>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 20: CopySample<SC::ConvertShift<int16, int32,  4>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 21: CopySample<SC::ConvertShift<int16, int32,  5>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 22: CopySample<SC::ConvertShift<int16, int32,  6>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 23: CopySample<SC::ConvertShift<int16, int32,  7>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 24: CopySample<SC::ConvertShift<int16, int32,  8>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 25: CopySample<SC::ConvertShift<int16, int32,  9>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 26: CopySample<SC::ConvertShift<int16, int32, 10>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 27: CopySample<SC::ConvertShift<int16, int32, 11>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 28: CopySample<SC::ConvertShift<int16, int32, 12>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 29: CopySample<SC::ConvertShift<int16, int32, 13>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 30: CopySample<SC::ConvertShift<int16, int32, 14>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 31: CopySample<SC::ConvertShift<int16, int32, 15>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+					case 32: CopySample<SC::ConvertShift<int16, int32, 16>>(sampleData16 + chn, copySamples, modChannels, buffer[chn], srcSize, 1); break;
+				}
 			}
 		}
 
