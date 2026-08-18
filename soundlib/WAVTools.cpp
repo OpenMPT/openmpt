@@ -116,6 +116,13 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 		if(sampleLength == 0)
 		{
 			sampleLength = expectedLengthFrames;
+		} else if((sampleLength > 0) && (formatInfo.numChannels == 2))
+		{
+			// libsndfile divides the sample length by 2 for stereo samples (it gets confused about frames vs samples)
+			if((sampleLength * 2) <= expectedLengthFrames)
+			{
+				sampleLength *= 2;
+			}
 		}
 	}
 
