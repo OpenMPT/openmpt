@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.4.57-pre
+
 ### libopenmpt 0.4.56 (2026-08-19)
 
  *  [**Sec**] Possible heap out-of-bounds read when loading custom tunings from
