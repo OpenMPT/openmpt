@@ -8,7 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.6.30-pre
 
  *  [**Sec**] Possible heap out-of-bounds write when loading SymMOD files
-    containing WAV IMA ADPCM samples (r25629). See also
+    containing WAV IMA ADPCM samples (r25629, r25647). See also
     <https://github.com/OpenMPT/openmpt/security/advisories/GHSA-fxf7-wc37-p2cx>
     . Found by [Tristan Madani](https://github.com/TristanInSec).
  *  [**Sec**] Possible heap out-of-bounds read when loading custom tunings from
