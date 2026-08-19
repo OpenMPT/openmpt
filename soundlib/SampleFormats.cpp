@@ -418,7 +418,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 			int32 index = header.index;
 			//int32 stepsize = 7;  // wrong
 			// ^ reference code
-			index = std::clamp(index, 0, 88);
+			index = std::clamp(index, static_cast<int32>(0), static_cast<int32>(88));
 			int32 stepsize = stepsizeTable[index];
 
 			// skip writing output after given sample length
@@ -465,7 +465,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 						difference = -difference;
 					}
 					newSample += difference;
-					newSample = std::clamp(newSample, -32768, 32767);
+					newSample = std::clamp(newSample, static_cast<int32>(-32768), static_cast<int32>(32767));
 					// ^ reference code
 
 					// skip writing output after given sample length
@@ -477,7 +477,7 @@ static bool IMAADPCMUnpack16(int16 *target, SmpLength sampleLen, FileReader file
 
 					// v reference code
 					index += indexTable[originalSample];
-					index = std::clamp(index, 0, 88);
+					index = std::clamp(index, static_cast<int32>(0), static_cast<int32>(88));
 					stepsize = stepsizeTable[index];
 					// ^ reference code
 
