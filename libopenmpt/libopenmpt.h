@@ -1275,6 +1275,31 @@ LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_left( openmpt_mo
  */
 LIBOPENMPT_API float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, int32_t channel );
 
+/*! \brief Get the per-channel audio output for the most recently rendered block, mixed to mono.
+ *
+ * \param mod     The module handle to work on.
+ * \param channel The channel index (0-based).
+ * \param count   Number of frames to retrieve. Must not exceed the count passed to the most recent openmpt_module_read_*() call.
+ * \param buf     Output buffer of at least \p count floats. Values are in the range [-1.0, 1.0].
+ * \return The number of frames written to \p buf, or 0 if capture is not enabled or the channel is out of range.
+ * \remarks Enable capture first via openmpt_module_ctl_set_boolean(mod, "render.channel_capture", 1).
+ *          Works for both PCM and OPL/FM channels. Must be called after openmpt_module_read_*() and before the next read call.
+ */
+LIBOPENMPT_API size_t openmpt_module_get_current_channel_audio_mono( openmpt_module * mod, int32_t channel, size_t count, float * buf );
+
+/*! \brief Get the per-channel audio output for the most recently rendered block, as separate left/right channels.
+ *
+ * \param mod       The module handle to work on.
+ * \param channel   The channel index (0-based).
+ * \param count     Number of frames to retrieve. Must not exceed the count passed to the most recent openmpt_module_read_*() call.
+ * \param buf_left  Output buffer of at least \p count floats for the left channel.
+ * \param buf_right Output buffer of at least \p count floats for the right channel.
+ * \return The number of frames written, or 0 if capture is not enabled or the channel is out of range.
+ * \remarks Enable capture first via openmpt_module_ctl_set_boolean(mod, "render.channel_capture", 1).
+ *          Works for both PCM and OPL/FM channels. Must be called after openmpt_module_read_*() and before the next read call.
+ */
+LIBOPENMPT_API size_t openmpt_module_get_current_channel_audio_stereo( openmpt_module * mod, int32_t channel, size_t count, float * buf_left, float * buf_right );
+
 /*! \brief Get the number of sub-songs
  *
  * \param mod The module handle to work on.
