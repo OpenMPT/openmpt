@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.7.21-pre
+### libopenmpt 0.7.21 (2026-08-19)
 
  *  [**Sec**] Possible heap out-of-bounds write when loading SymMOD files
     containing WAV IMA ADPCM samples (r25626, r25646). See also
