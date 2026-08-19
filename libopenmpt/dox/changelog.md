@@ -5,6 +5,8 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
+### libopenmpt 0.6.31-pre
+
 ### libopenmpt 0.6.30 (2026-08-19)
 
  *  [**Sec**] Possible heap out-of-bounds write when loading SymMOD files
