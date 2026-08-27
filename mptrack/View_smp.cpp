@@ -2714,6 +2714,7 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 		// Save old data for mixpaste
 		ModSample oldSample = sample;
 		std::string oldSampleName = sndFile.m_szNames[m_nSample];
+		mpt::PathString oldSamplePath = sndFile.GetSamplePath(m_nSample);
 
 		if(pasteMode != PasteMode::Replace)
 		{
@@ -2844,6 +2845,9 @@ void CViewSample::DoPaste(PasteMode pasteMode)
 						pModDoc->UpdateAllViews(this, InstrumentHint(parentIns).Names(), this);
 					}
 				}
+			} else
+			{
+				sndFile.SetSamplePath(m_nSample, std::move(oldSamplePath));
 			}
 		} else
 		{
