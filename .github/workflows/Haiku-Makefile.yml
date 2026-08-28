@@ -11,9 +11,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: 'r1beta5', deps: sys   }
-          - { version: 'r1beta5', deps: local }
-          - { version: 'r1beta5', deps: small }
+          - { version: 'r1beta6', deps: sys   }
+          - { version: 'r1beta6', deps: local }
+          - { version: 'r1beta6', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
