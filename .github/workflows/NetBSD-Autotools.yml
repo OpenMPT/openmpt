@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: '11.0' }
-          - { version: '10.1' }
-          - { version: '9.4'  }
+          - { version: '11.0', variant: 'microvm' }
+          - { version: '10.1', variant: 'default' }
+          - { version: '9.4' , variant: 'default' }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
@@ -33,6 +33,7 @@ jobs:
         memory: 4G
         operating_system: netbsd
         version: ${{matrix.version}}
+        variant: ${{matrix.variant}}
         shell: bash
         sync_files: false
     - name: Sync files to VM

@@ -13,15 +13,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: '11.0', deps: sys   }
-          - { version: '11.0', deps: local }
-          - { version: '11.0', deps: small }
-          - { version: '10.1', deps: sys   }
-          - { version: '10.1', deps: local }
-          - { version: '10.1', deps: small }
-          - { version: '9.4' , deps: sys   }
-          - { version: '9.4' , deps: local }
-          - { version: '9.4' , deps: small }
+          - { version: '11.0', variant: 'microvm', deps: sys   }
+          - { version: '11.0', variant: 'microvm', deps: local }
+          - { version: '11.0', variant: 'microvm', deps: small }
+          - { version: '10.1', variant: 'default', deps: sys   }
+          - { version: '10.1', variant: 'default', deps: local }
+          - { version: '10.1', variant: 'default', deps: small }
+          - { version: '9.4' , variant: 'default', deps: sys   }
+          - { version: '9.4' , variant: 'default', deps: local }
+          - { version: '9.4' , variant: 'default', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
@@ -39,6 +39,7 @@ jobs:
         memory: 4G
         operating_system: netbsd
         version: ${{matrix.version}}
+        variant: ${{matrix.variant}}
         shell: bash
         sync_files: false
     - name: Sync files to VM
