@@ -13,6 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { version: '26.04', deps: sys   }
+          - { version: '26.04', deps: local }
+          - { version: '26.04', deps: small }
           - { version: '24.04', deps: sys   }
           - { version: '24.04', deps: local }
           - { version: '24.04', deps: small }
