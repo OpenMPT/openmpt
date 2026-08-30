@@ -1734,6 +1734,7 @@ std::pair<const module_impl::ctl_info *, const module_impl::ctl_info *> module_i
 		{ "render.resampler.emulate_amiga", ctl_type::boolean },
 		{ "render.resampler.emulate_amiga_type", ctl_type::text },
 		{ "render.opl.volume_factor", ctl_type::floatingpoint },
+		{ "render.xm.ft2_volume_ramping", ctl_type::boolean },
 		{ "dither", ctl_type::integer }
 	};
 	return std::make_pair(std::begin(ctl_infos), std::end(ctl_infos));
@@ -1831,6 +1832,8 @@ bool module_impl::ctl_get_boolean( std::string_view ctl, bool throw_if_unknown )
 		return m_ctl_seek_sync_samples;
 	} else if ( ctl == "render.resampler.emulate_amiga" ) {
 		return ( m_sndFile->m_Resampler.m_Settings.emulateAmiga != OpenMPT::Resampling::AmigaFilter::Off );
+	} else if ( ctl == "render.xm.ft2_volume_ramping" ) {
+		return m_sndFile->m_playBehaviour[OpenMPT::kFT2VolumeRamping];
 	} else {
 		MPT_ASSERT_NOTREACHED();
 		return false;
@@ -2062,6 +2065,8 @@ void module_impl::ctl_set_boolean( std::string_view ctl, bool value, bool throw_
 		if ( newsettings != m_sndFile->m_Resampler.m_Settings ) {
 			m_sndFile->SetResamplerSettings( newsettings );
 		}
+	} else if ( ctl == "render.xm.ft2_volume_ramping" ) {
+		m_sndFile->m_playBehaviour.set( OpenMPT::kFT2VolumeRamping, value );
 	} else {
 		MPT_ASSERT_NOTREACHED();
 	}
