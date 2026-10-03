@@ -42,7 +42,8 @@ static constexpr struct { mpt::osinfo::windows::Epoch epoch; mpt::osinfo::window
 	// clang-format off
 	// WinNT 10.0
 	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 28001, UL_("Windows 11 (future)")    },
-	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 28000, UL_("Windows 11 26H1")        },
+	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 28000, UL_("Windows 11 26H1")        }, // arm64-only
+	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 26300, UL_("Windows 11 26H2")        }, // regular
 	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 26200, UL_("Windows 11 25H2")        },
 	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 26100, UL_("Windows 11 24H2")        },
 	{ mpt::osinfo::windows::Epoch::WinNT , mpt::osinfo::windows::Version::Win10     , 22631, UL_("Windows 11 23H2")        },
