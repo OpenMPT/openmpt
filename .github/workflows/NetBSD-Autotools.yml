@@ -13,7 +13,7 @@ jobs:
         include:
           - { version: '11.0' }
           - { version: '10.1' }
-          - { version: '9.4'  }
+          - { version: '9.5'  }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
