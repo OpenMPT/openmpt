@@ -278,9 +278,9 @@ jobs:
       run: brew update
     - name: fixup Homebrew xcodes
       run: brew pin xcodes
-    - name: fixup GitHub Homebrew ruby breakage
-      if: ${{ matrix.host == 'macos-14' }}
-      run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
+    - name: fixup GitHub Homebrew openssl breakage
+      if: ${{ matrix.host == 'macos-15' }}
+      run: brew unlink openssl@3 && brew link --overwrite openssl@3 && brew unlink openssl@3 && brew upgrade openssl@3
     - name: fixup GitHub Homebrew ruby breakage
       if: ${{ matrix.host == 'macos-15' }}
       run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
