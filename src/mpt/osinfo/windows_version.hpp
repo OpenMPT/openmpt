@@ -259,6 +259,8 @@ public:
 
 #elif MPT_WINNT_AT_LEAST(MPT_WIN_11_26H1)
 		return Version(Epoch::WinNT, Win10, ServicePack{0, 0}, InternetExplror{0, 0}, 28000);
+//#elif MPT_WINNT_AT_LEAST(MPT_WIN_11_26H2)
+//		return Version(Epoch::WinNT, Win10, ServicePack{0, 0}, InternetExplror{0, 0}, 26300);
 #elif MPT_WINNT_AT_LEAST(MPT_WIN_11_25H2)
 		return Version(Epoch::WinNT, Win10, ServicePack{0, 0}, InternetExplror{0, 0}, 26200);
 #elif MPT_WINNT_AT_LEAST(MPT_WIN_11_24H2)
