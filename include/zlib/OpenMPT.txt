@@ -1,9 +1,11 @@
 zlib 1.3.2. (zlib-1.3.2.tar.gz)
 Files not required by OpenMPT have been removed.
 OpenMPT specific changes:
- *  Commit
+ *  Commits
     <https://github.com/madler/zlib/commit/813dac5dcb5902ed241e9b0d38abd2d847a335a9>
-    has been applied to fix <https://github.com/madler/zlib/issues/1168>.
+    , and
+    <https://github.com/madler/zlib/commit/a82e0db392178a3e05fb27bf551a6ce757a47898>
+    have been applied to fix <https://github.com/madler/zlib/issues/1168>.
  *  `zconf.h` has been modified to avoid preprocessor warnings. See
     <https://github.com/madler/zlib/issues/1169>.
  *  `contrib/minizip/iowin32.c` has been modified to only use Windows 8 WinRT
