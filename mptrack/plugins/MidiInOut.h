@@ -84,6 +84,8 @@ protected:
 				m_message = new unsigned char[size];
 			else
 				m_message = m_msgSmall.data();
+			// cppcheck false-positive
+			// cppcheck-suppress bufferAccessOutOfBounds
 			std::memcpy(m_message, data, size);
 		}
 
