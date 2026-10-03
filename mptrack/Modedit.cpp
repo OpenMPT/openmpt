@@ -225,6 +225,8 @@ CHANNELINDEX CModDoc::ReArrangeChannels(const std::vector<CHANNELINDEX> &newOrde
 					for(CHANNELINDEX chn = 0; chn < newNumChannels; chn++, mNew++)
 					{
 						if(newOrder[chn] < oldNumChannels)  // Case: getting old channel to the new channel order.
+							// cppcheck false-positive
+							// cppcheck-suppress objectIndex
 							*mNew = mOld[newOrder[chn]];
 					}
 				}
