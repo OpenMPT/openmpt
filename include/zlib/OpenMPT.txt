@@ -4,6 +4,7 @@ OpenMPT specific changes:
  *  Commit
     <https://github.com/madler/zlib/commit/813dac5dcb5902ed241e9b0d38abd2d847a335a9>
     has been applied to fix <https://github.com/madler/zlib/issues/1168>.
+ *  `gzguts.h` has been modified to unconditionally include `<errno.h>` early.
  *  `zconf.h` has been modified to avoid preprocessor warnings. See
     <https://github.com/madler/zlib/issues/1169>.
  *  `contrib/minizip/iowin32.c` has been modified to only use Windows 8 WinRT
