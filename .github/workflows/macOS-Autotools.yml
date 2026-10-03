@@ -12,6 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { host: xcode-27, compiler: '27.2' }
+          - { host: xcode-27, compiler: '27.1' }
+          - { host: xcode-27, compiler: '27'   }
           - { host: macos-26, compiler: '26.6' }
           - { host: macos-26, compiler: '26.5' }
           - { host: macos-26, compiler: '26.4' }
@@ -47,6 +50,9 @@ jobs:
       run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
     - name: fixup GitHub Homebrew ruby breakage
       if: ${{ matrix.host == 'macos-26' }}
+      run: brew unlink ruby@3.4 && brew link --overwrite ruby@3.4 && brew unlink ruby@3.4 && brew upgrade ruby@3.4
+    - name: fixup GitHub Homebrew ruby breakage
+      if: ${{ matrix.host == 'xcode-27' }}
       run: brew unlink ruby@3.4 && brew link --overwrite ruby@3.4 && brew unlink ruby@3.4 && brew upgrade ruby@3.4
     - name: upgrade packages
       run: brew upgrade
