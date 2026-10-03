@@ -304,6 +304,7 @@ MPT_WIN = {
 	["11_24H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x10), -- NTDDI_WIN11_GE   24H2
 	["11_25H2"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x11), -- NTDDI_WIN11_DT   25H2
 	["11_26H1"] = MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x12), -- NTDDI_WIN11_BR   26H1
+	--["11_26H2"]                                                                   26H2
 
 }
 
