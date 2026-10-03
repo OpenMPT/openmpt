@@ -11,6 +11,45 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - { host: xcode-27, compiler: '27.2', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: arm64 , target: '12.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.2', arch: x86_64, target: '12.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: arm64 , target: '12.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27.1', arch: x86_64, target: '12.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: '26.5' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: '15.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: '14.8' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: '13.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: arm64 , target: '12.7' , deps: small, check: true , ancient: false }
+          - { host: xcode-27, compiler: '27'  , arch: x86_64, target: '12.7' , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.6', arch: ''    , target: ''     , deps: sys  , check: true , ancient: false }
           - { host: macos-26, compiler: '26.6', arch: arm64 , target: ''     , deps: small, check: true , ancient: false }
           - { host: macos-26, compiler: '26.6', arch: x86_64, target: ''     , deps: small, check: true , ancient: false }
@@ -232,6 +271,9 @@ jobs:
       run: brew unlink ruby@3.3 && brew link --overwrite ruby@3.3 && brew unlink ruby@3.3 && brew upgrade ruby@3.3
     - name: fixup GitHub Homebrew ruby breakage
       if: ${{ matrix.host == 'macos-26' }}
+      run: brew unlink ruby@3.4 && brew link --overwrite ruby@3.4 && brew unlink ruby@3.4 && brew upgrade ruby@3.4
+    - name: fixup GitHub Homebrew ruby breakage
+      if: ${{ matrix.host == 'xcode-27' }}
       run: brew unlink ruby@3.4 && brew link --overwrite ruby@3.4 && brew unlink ruby@3.4 && brew upgrade ruby@3.4
     - name: upgrade packages
       run: brew upgrade
