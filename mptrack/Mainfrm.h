@@ -217,6 +217,7 @@ protected:
 #endif // MPT_ENABLE_UPDATE
 	DWORD m_helpCookie = 0;
 	bool m_bOptionsLocked = false;
+	bool m_unloading = false;
 
 	// Notification Buffer
 	mpt::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex

@@ -405,6 +405,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 
 BOOL CMainFrame::DestroyWindow()
 {
+	m_unloading = true;
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable:6387) // '_Param_(2)' could be '0':  this does not adhere to the specification for the function 'HtmlHelpW'
@@ -3557,7 +3558,7 @@ BOOL CMainFrame::OnQueryEndSession()
 void CMainFrame::UpdateDocumentCount()
 {
 	const bool isLoaded = m_quickStartDlg != nullptr;
-	const bool shouldLoad = !theApp.GetOpenDocumentCount();
+	const bool shouldLoad = !m_unloading && !theApp.GetOpenDocumentCount();
 	if(shouldLoad && !isLoaded)
 	{
 		m_quickStartDlg = std::make_unique<QuickStartDlg>(m_TemplateModulePaths, m_ExampleModulePaths, CWnd::FromHandle(m_hWndMDIClient));

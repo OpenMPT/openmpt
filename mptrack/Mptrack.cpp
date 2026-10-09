@@ -1602,6 +1602,8 @@ BOOL CTrackApp::InitInstanceImpl(CMPTCommandLineInfo &cmdInfo)
 	{
 		EndWaitCursor();
 		StopSplashScreen();
+		m_pMainWnd->DestroyWindow();
+		m_pMainWnd = nullptr;
 		return FALSE;
 	}
 
