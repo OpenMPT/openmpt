@@ -1408,6 +1408,71 @@ float module_impl::get_current_channel_vu_rear_right( std::int32_t channel ) con
 	return m_sndFile->m_PlayState.Chn[channel].dwFlags[OpenMPT::CHN_SURROUND] ? m_sndFile->m_PlayState.Chn[channel].nRightVU * (1.0f/128.0f) : 0.0f;
 }
 
+bool module_impl::get_current_channel_state( std::int32_t channel, current_channel_state & state ) const {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return false;
+	}
+	const OpenMPT::ModChannel & chn = m_sndFile->m_PlayState.Chn[channel];
+	state.volume = std::clamp( chn.nVolume / 4, 0, 64 );
+	state.final_volume = std::clamp( static_cast<std::int32_t>( std::round( get_current_channel_vu_mono( channel ) * 64.0f ) ), 0, 64 );
+	state.pan = std::clamp( chn.nPan, 0, 256 );
+	state.instrument = chn.nNewIns > 0 ? static_cast<std::int32_t>( chn.nNewIns ) - 1 : -1;
+	state.key = OpenMPT::ModCommand::IsNote( chn.nNote ) ? static_cast<std::int32_t>( chn.nNote ) - 1 : -1;
+	state.period = chn.nPeriod;
+	state.position = static_cast<std::int32_t>( chn.position.GetUInt() );
+	state.increment = chn.increment.GetRaw();
+	state.pitchbend = chn.GetMIDIPitchBend();
+	state.note = chn.nNote;
+	state.sample = 0;
+	if ( chn.pModSample != nullptr ) {
+		for ( OpenMPT::SAMPLEINDEX i = 1; i <= m_sndFile->GetNumSamples(); ++i ) {
+			if ( chn.pModSample == &m_sndFile->GetSample( i ) ) {
+				state.sample = i;
+				if ( state.instrument < 0 ) {
+					state.instrument = static_cast<std::int32_t>( i ) - 1;
+				}
+				break;
+			}
+		}
+	}
+	state.muted = chn.dwFlags[OpenMPT::CHN_MUTE] ? 1 : 0;
+	return true;
+}
+
+bool module_impl::get_sample_state( std::int32_t sample, sample_state & state ) const {
+	if ( sample <= 0 || sample > m_sndFile->GetNumSamples() ) {
+		return false;
+	}
+	const OpenMPT::ModSample & smp = m_sndFile->GetSample( static_cast<OpenMPT::SAMPLEINDEX>( sample ) );
+	if ( !smp.HasSampleData() || smp.uFlags[OpenMPT::CHN_ADLIB] ) {
+		return false;
+	}
+	state.data = smp.samplev();
+	state.length = static_cast<std::int32_t>( smp.nLength );
+	state.loop_start = static_cast<std::int32_t>( smp.nLoopStart );
+	state.loop_end = static_cast<std::int32_t>( smp.nLoopEnd );
+	state.flags = static_cast<std::int32_t>( static_cast<std::uint16_t>( smp.uFlags ) );
+	state.c5speed = static_cast<std::int32_t>( smp.nC5Speed );
+	state.channels = static_cast<std::int32_t>( smp.GetNumChannels() );
+	state.bits_per_sample = static_cast<std::int32_t>( smp.GetElementarySampleSize() * 8 );
+	return true;
+}
+
+std::int32_t module_impl::set_channel_mute( std::int32_t channel, std::int32_t status ) {
+	if ( channel < 0 || channel >= m_sndFile->GetNumChannels() ) {
+		return -1;
+	}
+	OpenMPT::ModChannel & chn = m_sndFile->m_PlayState.Chn[channel];
+	const bool muted = chn.dwFlags[OpenMPT::CHN_MUTE] || m_sndFile->ChnSettings[channel].dwFlags[OpenMPT::CHN_MUTE];
+	if ( status < 0 ) {
+		return muted ? 1 : 0;
+	}
+	const bool setMuted = status != 0;
+	chn.dwFlags.set( OpenMPT::CHN_MUTE, setMuted );
+	m_sndFile->ChnSettings[channel].dwFlags.set( OpenMPT::CHN_MUTE, setMuted );
+	return muted ? 1 : 0;
+}
+
 std::int32_t module_impl::get_num_subsongs() const {
 	std::unique_ptr<subsongs_type> subsongs_temp = has_subsongs_inited() ? std::unique_ptr<subsongs_type>() : std::make_unique<subsongs_type>( get_subsongs() );
 	const subsongs_type & subsongs = has_subsongs_inited() ? m_subsongs : *subsongs_temp;
