@@ -87,6 +87,16 @@ public:
 	void Initialize(uint32 sampleRate);
 	void Mix(int32 *buffer, size_t count, uint32 volumeFactorQ16);
 
+	// Per-voice audio capture — opt-in, enabled via "render.channel_capture" CTL.
+	// Must be called before Mix(); data is valid until the next Mix() call.
+	void         SetupVoiceCapture(bool enable) noexcept;
+	bool         IsVoiceCaptureEnabled()              const noexcept { return m_captureEnabled; }
+	int          GetCapturedFrameCount()              const noexcept { return m_captureFrameCount; }
+	const float* GetVoiceFrames(int voice)            const noexcept { return m_captureEnabled ? m_voiceFrames[voice] : nullptr; }
+	CHANNELINDEX GetVoiceTrackerChannel(int voice)    const noexcept { return m_OPLtoChan[voice]; }
+	static constexpr int MAX_CAPTURE_FRAMES = 512;
+	static constexpr int NUM_OPL_VOICES    = 18;
+
 	void NoteOff(CHANNELINDEX c);
 	void NoteCut(CHANNELINDEX c, bool unassign = true);
 	void Frequency(CHANNELINDEX c, uint32 milliHertz, bool keyOff, bool beatingOscillators);
@@ -130,6 +140,10 @@ protected:
 	std::array<OPLPatch, OPL_CHANNELS> m_Patches;
 
 	bool m_isActive = false;
+
+	bool  m_captureEnabled{false};
+	int   m_captureFrameCount{0};
+	float m_voiceFrames[OPL_CHANNELS][MAX_CAPTURE_FRAMES]{};
 };
 
 OPENMPT_NAMESPACE_END

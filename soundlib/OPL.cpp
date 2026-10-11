@@ -60,6 +60,8 @@ void OPL::Mix(int32 *target, size_t count, uint32 volumeFactorQ16)
 
 	// This factor causes a sample voice to be more or less as loud as an OPL voice
 	const int32 factor = Util::muldiv_unsigned(volumeFactorQ16, 6169, (1 << 16));
+	if(m_captureEnabled)
+		m_captureFrameCount = 0;
 	while(count--)
 	{
 		int16 l, r;
@@ -67,7 +69,21 @@ void OPL::Mix(int32 *target, size_t count, uint32 volumeFactorQ16)
 		target[0] += l * factor;
 		target[1] += r * factor;
 		target += 2;
+		if(m_captureEnabled && m_captureFrameCount < MAX_CAPTURE_FRAMES)
+		{
+			const int16_t *voiceOut = m_opl->GetVoiceOutput();
+			for(int v = 0; v < OPL_CHANNELS; ++v)
+				m_voiceFrames[v][m_captureFrameCount] = static_cast<float>(voiceOut[v]) * static_cast<float>(factor);
+			++m_captureFrameCount;
+		}
 	}
+}
+
+
+void OPL::SetupVoiceCapture(bool enable) noexcept
+{
+	m_captureEnabled = enable;
+	m_captureFrameCount = 0;
 }
 
 
