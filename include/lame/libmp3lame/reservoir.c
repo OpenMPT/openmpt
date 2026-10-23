@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: reservoir.c,v 1.45 2011/05/07 16:05:17 rbrito Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

@@ -24,7 +24,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: psymodel.c,v 1.216 2017/09/06 19:38:23 aleidinger Exp $ */
+/* $Id$ */
 
 
 /*

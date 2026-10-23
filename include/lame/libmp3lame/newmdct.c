@@ -24,7 +24,7 @@
  *         Special Thanks to Patrick De Smet for your advices.
  */
 
-/* $Id: newmdct.c,v 1.39 2011/05/07 16:05:17 rbrito Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

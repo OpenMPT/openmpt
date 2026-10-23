@@ -21,7 +21,21 @@
 #ifndef _MPGLIB_H_
 #define _MPGLIB_H_
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include "lame.h"
+
+#ifdef HAVE_MPG123
+#include <mpg123.h>
+#ifndef MPG123_API_VERSION
+#error "Seems like you got the wrong mpg123 header. No MPG123_API_VERSION defined."
+#endif
+#if (MPG123_API_VERSION < 45)
+#error "Need mpg123 API >= 45."
+#endif
+#endif
 
 #ifndef plotting_data_defined
 #define plotting_data_defined
@@ -32,6 +46,7 @@ typedef struct plotting_data plotting_data;
 
 extern void lame_report_fnc(lame_report_function f, const char *format, ...);
 
+#ifdef HAVE_MPGLIB
 struct buf {
     unsigned char *pnt;
     long    size;
@@ -47,38 +62,13 @@ struct framebuf {
     struct frame *prev;
 };
 
-typedef struct mpstr_tag {
-    struct buf *head, *tail; /* buffer linked list pointers, tail points to oldest buffer */
-    int     vbr_header;      /* 1 if valid Xing vbr header detected */
-    int     num_frames;      /* set if vbr header present */
-    int     enc_delay;       /* set if vbr header present */
-    int     enc_padding;     /* set if vbr header present */
-    /* header_parsed, side_parsed and data_parsed must be all set 1
-       before the full frame has been parsed */
-    int     header_parsed;   /* 1 = header of current frame has been parsed */
-    int     side_parsed;     /* 1 = header of sideinfo of current frame has been parsed */
-    int     data_parsed;
-    int     free_format;     /* 1 = free format frame */
-    int     old_free_format; /* 1 = last frame was free format */
-    int     bsize;
-    int     framesize;
-    int     ssize;           /* number of bytes used for side information, including 2 bytes for CRC-16 if present */
-    int     dsize;
-    int     fsizeold;        /* size of previous frame, -1 for first */
-    int     fsizeold_nopadding;
-    struct frame fr;         /* holds the parameters decoded from the header */
-    struct III_sideinfo sideinfo;
-    unsigned char bsspace[2][MAXFRAMESIZE + 1024]; /* bit stream space used ???? */ /* MAXFRAMESIZE */
-    real    hybrid_block[2][2][SBLIMIT * SSLIMIT];
-    int     hybrid_blc[2];
-    unsigned long header;
-    int     bsnum;
-    real    synth_buffs[2][2][0x110];
-    int     synth_bo;
-    int     sync_bitstream;  /* 1 = bitstream is yet to be synchronized */
+#endif
 
-    int     bitindex;
-    unsigned char *wordpointer;
+typedef struct mpstr_tag {
+#ifdef HAVE_MPG123
+    mpg123_handle *mh;
+    struct mpg123_moreinfo mi;
+#endif
     plotting_data *pinfo;
 
     lame_report_function report_msg;
@@ -86,11 +76,11 @@ typedef struct mpstr_tag {
     lame_report_function report_err;
 } MPSTR, *PMPSTR;
 
-
+#ifdef HAVE_MPGLIB
 #define MP3_ERR -1
 #define MP3_OK  0
 #define MP3_NEED_MORE 1
-
+#endif
 
 
 #endif /* _MPGLIB_H_ */

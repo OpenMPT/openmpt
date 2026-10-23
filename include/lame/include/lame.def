@@ -277,6 +277,7 @@ hip_decode1_headersB
 hip_set_debugf	
 hip_set_errorf	
 hip_set_msgf	
+hip_decode_init_gapless	
 
 id3tag_genre_list	
 id3tag_init   		
@@ -298,11 +299,16 @@ lame_get_id3v1_tag
 lame_get_id3v2_tag	
 lame_set_write_id3tag_automatic	
 lame_get_write_id3tag_automatic	
-id3tag_set_pad	
+id3tag_set_pad		
 id3tag_set_comment_ucs2	
-id3tag_set_textinfo_ucs2 
+id3tag_set_textinfo_ucs2	
 id3tag_set_fieldvalue_ucs2	
 id3tag_set_comment_utf16	
-id3tag_set_textinfo_utf16 
+id3tag_set_textinfo_utf16	
 id3tag_set_fieldvalue_utf16	
+id3tag_set_comment_utf8		
+id3tag_set_textinfo_utf8	
 
+; two external functions for ID3v2.4 tag support
+id3tag_add_v2_4_UTF8 
+id3tag_v2_4_UTF8_only 

@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: util.c,v 1.159 2017/09/06 15:07:30 robert Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -247,30 +247,30 @@ bitrate is more balanced according to the -V value.*/
 
 
 FLOAT
-ATHformula(SessionConfig_t const *cfg, FLOAT f)
+ATHformula(SessionConfig_t const *cfg, FLOAT freq)
 {
     FLOAT   ath;
     switch (cfg->ATHtype) {
     case 0:
-        ath = ATHformula_GB(f, 9, 0.1f, 24.0f);
+        ath = ATHformula_GB(freq, 9, 0.1f, 24.0f);
         break;
     case 1:
-        ath = ATHformula_GB(f, -1, 0.1f, 24.0f); /*over sensitive, should probably be removed */
+        ath = ATHformula_GB(freq, -1, 0.1f, 24.0f); /*over sensitive, should probably be removed */
         break;
     case 2:
-        ath = ATHformula_GB(f, 0, 0.1f, 24.0f);
+        ath = ATHformula_GB(freq, 0, 0.1f, 24.0f);
         break;
     case 3:
-        ath = ATHformula_GB(f, 1, 0.1f, 24.0f) + 6; /*modification of GB formula by Roel */
+        ath = ATHformula_GB(freq, 1, 0.1f, 24.0f) + 6; /*modification of GB formula by Roel */
         break;
     case 4:
-        ath = ATHformula_GB(f, cfg->ATHcurve, 0.1f, 24.0f);
+        ath = ATHformula_GB(freq, cfg->ATHcurve, 0.1f, 24.0f);
         break;
     case 5:
-        ath = ATHformula_GB(f, cfg->ATHcurve, 3.41f, 16.1f);
+        ath = ATHformula_GB(freq, cfg->ATHcurve, 3.41f, 16.1f);
         break;
     default:
-        ath = ATHformula_GB(f, 0, 0.1f, 24.0f);
+        ath = ATHformula_GB(freq, 0, 0.1f, 24.0f);
         break;
     }
     return ath;
@@ -543,7 +543,7 @@ fill_buffer_resample(lame_internal_flags * gfc,
     EncStateVar_t *esv = &gfc->sv_enc;
     double  resample_ratio = (double)cfg->samplerate_in / (double)cfg->samplerate_out;
     int     BLACKSIZE;
-    FLOAT   offset, xvalue;
+    FLOAT   offset;
     int     i, j = 0, k;
     int     filter_l;
     FLOAT   fcn, intratio;
@@ -590,6 +590,7 @@ fill_buffer_resample(lame_internal_flags * gfc,
     /* time of k'th element in outbuf   =  j/ofreq */
     for (k = 0; k < desired_len; k++) {
         double  time0 = k * resample_ratio; /* time of k'th output sample */
+        FLOAT   xvalue;
         int     joff;
 
         j = floor(time0 - esv->itime[ch]);
@@ -845,7 +846,7 @@ disable_FPE(void)
 
 
 
-#if defined(__FreeBSD__) && !defined(__alpha__)
+#if defined(__FreeBSD__) && defined(FP_X_INV) && defined(FP_X_DZ)
     {
         /* seet floating point mask to the Linux default */
         fp_except_t mask;

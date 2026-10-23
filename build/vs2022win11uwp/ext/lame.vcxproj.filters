@@ -18,6 +18,75 @@
     <ClInclude Include="..\..\..\include\lame\include\lame.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\VbrTag.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\VbrTagCrc.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\bitstream.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\encoder.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\fft.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\gain_analysis.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\id3tag.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\l3side.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\lame-analysis.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\lame_global_flags.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\lameerror.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\machine.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\newmdct.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\psymodel.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\quantize.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\quantize_pvt.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\reservoir.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\set_get.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\tables.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\util.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\vbrquantize.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\version.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\mpglib\mpglib.h">
+      <Filter>mpglib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\include\lame\libmp3lame\VbrTag.c">
@@ -82,30 +151,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\lame\libmp3lame\version.c">
       <Filter>libmp3lame</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\common.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\dct64_i386.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\decode_i386.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\interface.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\layer1.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\layer2.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\layer3.c">
-      <Filter>mpglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\include\lame\mpglib\tabinit.c">
-      <Filter>mpglib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

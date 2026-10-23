@@ -23,7 +23,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: encoder.c,v 1.114 2017/08/26 10:54:57 robert Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

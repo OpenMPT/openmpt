@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: set_get.c,v 1.104 2017/09/06 15:07:30 robert Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -2131,7 +2131,7 @@ lame_get_totalframes(const lame_global_flags * gfp)
         lame_internal_flags const *const gfc = gfp->internal_flags;
         if (is_lame_internal_flags_valid(gfc)) {
             SessionConfig_t const *const cfg = &gfc->cfg;
-            unsigned long const pcm_samples_per_frame = 576 * cfg->mode_gr;
+            unsigned long const pcm_samples_per_frame = 576ul * cfg->mode_gr;
             unsigned long pcm_samples_to_encode = gfp->num_samples;
             unsigned long end_padding = 0;
             int frames = 0;

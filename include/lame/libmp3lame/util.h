@@ -560,7 +560,7 @@ extern  "C" {
     extern int FindNearestBitrate(int, int, int);
     extern int map2MP3Frequency(int freq);
     extern int SmpFrqIndex(int, int *const);
-    extern int nearestBitrateFullIndex(uint16_t brate);
+    extern int nearestBitrateFullIndex(uint16_t bitrate);
     extern FLOAT ATHformula(SessionConfig_t const *cfg, FLOAT freq);
     extern FLOAT freq2bark(FLOAT freq);
     void    disable_FPE(void);
@@ -609,6 +609,7 @@ extern  "C" {
     int     is_lame_internal_flags_valid(const lame_internal_flags * gfp);
     
     extern void hip_set_pinfo(hip_t hip, plotting_data* pinfo);
+    extern void hip_finish_pinfo(hip_t hip);
 
 #ifdef __cplusplus
 }

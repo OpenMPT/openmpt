@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: lame.h,v 1.192 2017/08/31 14:14:46 robert Exp $ */
+/* $Id$ */
 
 #ifndef LAME_LAME_H
 #define LAME_LAME_H
@@ -1054,6 +1054,9 @@ typedef struct {
 
 /* required call to initialize decoder */
 hip_t CDECL hip_decode_init(void);
+/* With that you don't have to care about MP3 encoder/decoder delay
+   anymore. Only available with libmpg123 (returns NULL otherwise). */
+hip_t CDECL hip_decode_init_gapless(void);
 
 /* cleanup call to exit decoder  */
 int CDECL hip_decode_exit(hip_t gfp);
@@ -1206,6 +1209,12 @@ void CDECL id3tag_init     (lame_t gfp);
 /* force addition of version 2 tag */
 void CDECL id3tag_add_v2   (lame_t gfp);
 
+/* force addition of version 2.4 tag with UTF-8 encoding */
+void CDECL id3tag_add_v2_4_UTF8 (lame_t gfp);
+
+/* add only a version 2.4 tag with UTF-8 encoding */
+void CDECL id3tag_v2_4_UTF8_only (lame_t gfp);
+
 /* add only a version 1 tag */
 void CDECL id3tag_v1_only  (lame_t gfp);
 
@@ -1297,6 +1306,12 @@ int CDECL id3tag_set_textinfo_utf16(lame_t gfp, char const *id, unsigned short c
 
 /* experimental */
 int CDECL id3tag_set_comment_utf16(lame_t gfp, char const *lang, unsigned short const *desc, unsigned short const *text);
+
+/* experimental */
+int CDECL id3tag_set_textinfo_utf8(lame_t gfp, char const *id, unsigned short const *text);
+
+/* experimental */
+int CDECL id3tag_set_comment_utf8(lame_t gfp, char const *lang, char const *desc, char const *text);
 
 
 /***********************************************************************
