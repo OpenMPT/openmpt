@@ -7,8 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PluginBridgeLegacy", "Plugi
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		CheckedShared|ARM = CheckedShared|ARM
 		CheckedShared|ARM64 = CheckedShared|ARM64
+		CheckedShared|ARM = CheckedShared|ARM
 		CheckedShared|Win32 = CheckedShared|Win32
 		CheckedShared|x64 = CheckedShared|x64
 		Checked|ARM = Checked|ARM
@@ -33,10 +33,10 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM.ActiveCfg = CheckedShared|ARM
-		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM.Build.0 = CheckedShared|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM64.ActiveCfg = CheckedShared|ARM64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM64.Build.0 = CheckedShared|ARM64
+		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM.ActiveCfg = CheckedShared|ARM
+		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|ARM.Build.0 = CheckedShared|ARM
 		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|Win32.ActiveCfg = CheckedShared|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|Win32.Build.0 = CheckedShared|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.CheckedShared|x64.ActiveCfg = CheckedShared|x64
@@ -81,10 +81,10 @@ Global
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|Win32.Build.0 = Release|Win32
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|x64.ActiveCfg = Release|x64
 		{1A147336-891E-49AC-9EAD-A750599A224C}.Release|x64.Build.0 = Release|x64
-		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM.ActiveCfg = CheckedShared|ARM
-		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM.Build.0 = CheckedShared|ARM
 		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM64.ActiveCfg = CheckedShared|ARM64
 		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM64.Build.0 = CheckedShared|ARM64
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM.ActiveCfg = CheckedShared|ARM
+		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|ARM.Build.0 = CheckedShared|ARM
 		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|Win32.ActiveCfg = CheckedShared|Win32
 		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|Win32.Build.0 = CheckedShared|Win32
 		{BDEC2D44-C957-4940-A32B-02824AF6E21D}.CheckedShared|x64.ActiveCfg = CheckedShared|x64
