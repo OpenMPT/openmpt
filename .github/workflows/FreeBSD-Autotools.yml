@@ -15,7 +15,6 @@ jobs:
         include:
           - { version: '15.1' }
           - { version: '14.5' }
-          - { version: '13.5' }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
