@@ -420,6 +420,19 @@ private:
 	ID3Type id3type;
 	mpt::IO::Offset id3v2Size;
 	FileTags Tags;
+private:
+	static std::vector<unsigned short> ToUTF16BOMvector(const std::u16string &str)
+	{
+		std::vector<unsigned short> result;
+		result.reserve(1 + str.length() + 1);
+		result.push_back(0xFEFFu);
+		for(const auto c : str)
+		{
+			result.push_back(static_cast<unsigned short>(c));
+		}
+		result.push_back(0);
+		return result;
+	}
 public:
 	MP3LameStreamWriter(std::ostream &stream, bool compatible, const Encoder::Settings &settings_, const FileTags &tags)
 		: StreamWriterBase(stream)
@@ -551,7 +564,7 @@ public:
 
 		if(settings.Tags)
 		{
-			if(id3type == ID3v2Lame || id3type == ID3v1)
+			if(id3type == ID3v1)
 			{
 				// Lame API expects Latin1, which is sad, but we cannot change that.
 				if(!tags.title.empty()) id3tag_set_title(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.title).c_str());
@@ -561,6 +574,15 @@ public:
 				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.comments).c_str());
 				if(!tags.trackno.empty()) id3tag_set_track(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.trackno).c_str());
 				if(!tags.genre.empty()) id3tag_set_genre(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.genre).c_str());
+			} else if(id3type == ID3v2Lame)
+			{
+				if(!tags.title.empty()) id3tag_set_textinfo_utf16(gfp, "TIT2", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.title)).data());
+				if(!tags.artist.empty()) id3tag_set_textinfo_utf16(gfp, "TPE1", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.artist)).data());
+				if(!tags.album.empty()) id3tag_set_textinfo_utf16(gfp, "TALB", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.album)).data());
+				if(!tags.year.empty()) id3tag_set_textinfo_utf16(gfp, "TYER", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.year)).data());
+				if(!tags.comments.empty()) id3tag_set_textinfo_utf16(gfp, "COMM", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.comments)).data());
+				if(!tags.trackno.empty()) id3tag_set_textinfo_utf16(gfp, "TRCK", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.trackno)).data());
+				if(!tags.genre.empty()) id3tag_set_textinfo_utf16(gfp, "TCON", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.genre)).data());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
