@@ -28,7 +28,7 @@ is just a high-level summary.
 
 ### libopenmpt 0.6.28 (2026-03-24)
 
- *  [**Sec**] The security fix in libopenmpt 0.6.28 (r25044) was incomplete,
+ *  [**Sec**] The security fix in libopenmpt 0.6.27 (r25044) was incomplete,
     causing a regression when playing short looped ("chip") samples (r25086).
 
  *  mpg123: Update to v1.33.4 (2025-12-20).
