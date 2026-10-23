@@ -103,6 +103,7 @@ struct StreamEncoderSettingsConf
 	Setting<bool> MP3ID3v2WriteReplayGainTXXX;
 	Setting<int32> MP3LameQuality;
 	Setting<bool> MP3LameID3v2UseLame;
+	Setting<uint8> MP3LameID3v2Version;
 	Setting<bool> MP3LameCalculateReplayGain;
 	Setting<bool> MP3LameCalculatePeakSample;
 	Setting<int32> OpusComplexity;

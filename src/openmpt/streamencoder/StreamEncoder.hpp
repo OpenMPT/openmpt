@@ -220,6 +220,7 @@ struct StreamSettings
 	bool MP3ID3v2WriteReplayGainTXXX = true;
 	int32 MP3LameQuality = 3;  // 0
 	bool MP3LameID3v2UseLame = false;
+	uint8 MP3LameID3v2Version = 4;
 	bool MP3LameCalculateReplayGain = true;
 	bool MP3LameCalculatePeakSample = true;
 	int32 OpusComplexity = -1;  // 10

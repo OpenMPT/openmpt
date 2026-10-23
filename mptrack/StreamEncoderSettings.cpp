@@ -76,6 +76,7 @@ StreamEncoderSettingsConf::StreamEncoderSettingsConf(SettingsContainer &conf, co
 	, MP3ID3v2WriteReplayGainTXXX(conf, section, U_("MP3ID3v2WriteReplayGainTXXX"), Encoder::StreamSettings().MP3ID3v2WriteReplayGainTXXX)
 	, MP3LameQuality(conf, section, U_("MP3LameQuality"), Encoder::StreamSettings().MP3LameQuality)
 	, MP3LameID3v2UseLame(conf, section, U_("MP3LameID3v2UseLame"), Encoder::StreamSettings().MP3LameID3v2UseLame)
+	, MP3LameID3v2Version(conf, section, U_("MP3LameID3v2Version"), Encoder::StreamSettings().MP3LameID3v2Version)
 	, MP3LameCalculateReplayGain(conf, section, U_("MP3LameCalculateReplayGain"), Encoder::StreamSettings().MP3LameCalculateReplayGain)
 	, MP3LameCalculatePeakSample(conf, section, U_("MP3LameCalculatePeakSample"), Encoder::StreamSettings().MP3LameCalculatePeakSample)
 	, OpusComplexity(conf, section, U_("OpusComplexity"), Encoder::StreamSettings().OpusComplexity)
@@ -95,6 +96,7 @@ StreamEncoderSettingsConf::operator Encoder::StreamSettings() const
 	result.MP3ID3v2WriteReplayGainTXXX = MP3ID3v2WriteReplayGainTXXX;
 	result.MP3LameQuality = MP3LameQuality;
 	result.MP3LameID3v2UseLame = MP3LameID3v2UseLame;
+	result.MP3LameID3v2Version = MP3LameID3v2Version;
 	result.MP3LameCalculateReplayGain = MP3LameCalculateReplayGain;
 	result.MP3LameCalculatePeakSample = MP3LameCalculatePeakSample;
 	result.OpusComplexity = OpusComplexity;

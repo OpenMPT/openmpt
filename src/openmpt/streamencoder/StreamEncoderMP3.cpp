@@ -414,7 +414,8 @@ private:
 	{
 		ID3None,
 		ID3v1,
-		ID3v2Lame,
+		ID3v2Lamev23,
+		ID3v2Lamev24,
 		ID3v2OpenMPT,
 	};
 	ID3Type id3type;
@@ -442,7 +443,7 @@ public:
 		Mode = Encoder::ModeInvalid;
 		gfp_inited = false;
 		gfp = lame_t();
-		id3type = ID3v2Lame;
+		id3type = ID3v2Lamev23;
 		id3v2Size = 0;
 
 		if(!gfp)
@@ -457,9 +458,12 @@ public:
 			if(compatible)
 			{
 				id3type = ID3v1;
-			} else if(settings.Details.MP3LameID3v2UseLame)
+			} else if(settings.Details.MP3LameID3v2UseLame && (settings.Details.MP3LameID3v2Version <= 3))
 			{
-				id3type = ID3v2Lame;
+				id3type = ID3v2Lamev23;
+			} else if(settings.Details.MP3LameID3v2UseLame && (settings.Details.MP3LameID3v2Version >= 4))
+			{
+				id3type = ID3v2Lamev24;
 			} else
 			{
 				id3type = ID3v2OpenMPT;
@@ -549,10 +553,16 @@ public:
 				id3tag_init(gfp);
 				id3tag_v1_only(gfp);
 				break;
-			case ID3v2Lame:
+			case ID3v2Lamev23:
 				id3tag_init(gfp);
 				id3tag_add_v2(gfp);
 				id3tag_v2_only(gfp);
+				id3tag_set_pad(gfp, settings.Details.MP3ID3v2MinPadding);
+				break;
+			case ID3v2Lamev24:
+				id3tag_init(gfp);
+				id3tag_add_v2_4_UTF8(gfp);
+				id3tag_v2_4_UTF8_only(gfp);
 				id3tag_set_pad(gfp, settings.Details.MP3ID3v2MinPadding);
 				break;
 			case ID3v2OpenMPT:
@@ -574,7 +584,7 @@ public:
 				if(!tags.comments.empty()) id3tag_set_comment(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.comments).c_str());
 				if(!tags.trackno.empty()) id3tag_set_track(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.trackno).c_str());
 				if(!tags.genre.empty()) id3tag_set_genre(gfp, mpt::transcode<std::string>(mpt::common_encoding::iso8859_1, tags.genre).c_str());
-			} else if(id3type == ID3v2Lame)
+			} else if(id3type == ID3v2Lamev23)
 			{
 				if(!tags.title.empty()) id3tag_set_textinfo_utf16(gfp, "TIT2", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.title)).data());
 				if(!tags.artist.empty()) id3tag_set_textinfo_utf16(gfp, "TPE1", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.artist)).data());
@@ -583,6 +593,15 @@ public:
 				if(!tags.comments.empty()) id3tag_set_textinfo_utf16(gfp, "COMM", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.comments)).data());
 				if(!tags.trackno.empty()) id3tag_set_textinfo_utf16(gfp, "TRCK", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.trackno)).data());
 				if(!tags.genre.empty()) id3tag_set_textinfo_utf16(gfp, "TCON", ToUTF16BOMvector(mpt::transcode<std::u16string>(tags.genre)).data());
+			} else if(id3type == ID3v2Lamev24)
+			{
+				if(!tags.title.empty()) id3tag_set_textinfo_utf8(gfp, "TIT2", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.title).c_str());
+				if(!tags.artist.empty()) id3tag_set_textinfo_utf8(gfp, "TPE1", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.artist).c_str());
+				if(!tags.album.empty()) id3tag_set_textinfo_utf8(gfp, "TALB", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.album).c_str());
+				if(!tags.year.empty()) id3tag_set_textinfo_utf8(gfp, "TYER", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.year).c_str());
+				if(!tags.comments.empty()) id3tag_set_textinfo_utf8(gfp, "COMM", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.comments).c_str());
+				if(!tags.trackno.empty()) id3tag_set_textinfo_utf8(gfp, "TRCK", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.trackno).c_str());
+				if(!tags.genre.empty()) id3tag_set_textinfo_utf8(gfp, "TCON", mpt::transcode<std::string>(mpt::common_encoding::utf8, tags.genre).c_str());
 			} else if(id3type == ID3v2OpenMPT)
 			{
 				Tags = tags;
@@ -662,7 +681,10 @@ public:
 			tagger.WriteID3v2Tags(f, Tags, replayGain);
 			mpt::IO::SeekAbsolute(f, endPos);
 		}
-		if(id3type == ID3v2Lame)
+		if(id3type == ID3v2Lamev23)
+		{
+			id3v2Size = lame_get_id3v2_tag(gfp, nullptr, 0);
+		} else if(id3type == ID3v2Lamev24)
 		{
 			id3v2Size = lame_get_id3v2_tag(gfp, nullptr, 0);
 		} else if(id3type == ID3v2OpenMPT)
