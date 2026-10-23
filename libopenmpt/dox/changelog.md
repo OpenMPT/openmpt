@@ -434,7 +434,7 @@ is just a high-level summary.
  *  [**Sec**] Possible read beyond sample start after swapping to a sample with
     loop points set but not loop enabled. (r15499)
  *  [**Sec**] Fixed various possible crashes with malformed MMCMP files.
-    (r15504, 15528)
+    (r15504, r15528)
  *  [**Sec**] MED: Possible read past end of sequence name (stack-allocated, so
     relatively unlikely to result in a crash). (r15477)
 
