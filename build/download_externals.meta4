@@ -2,21 +2,21 @@
 <metalink xmlns="urn:ietf:params:xml:ns:metalink">
  <file name="build/externals/7zr.exe">
   <size>602624</size>
-  <hash type="sha-512">cc2e3b46c50ac576f913dfa9f39079a9b5e7e39cd164bd968556da0b3779c23e6506f93f11fc2eb3681f9371e3d6256ae95de40da6c4ee4c96d8a58063a3d25a</hash>
+  <hash type="sha-512">d6de9c64d41ae3a99e92e3085be010fa25ddb39d77875084afd3ee77907754e0f37da9a8abfa9ede6f7f717be3eac945421a849ea3865cb8ac613518e182120d</hash>
   <url>https://7-zip.org/a/7zr.exe</url>
-  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7zr.exe</url>
-  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7zr.exe</url>
-  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7zr.exe</url>
-  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7zr.exe</url>
+  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7zr.exe</url>
+  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7zr.exe</url>
+  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7zr.exe</url>
+  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7zr.exe</url>
  </file>
- <file name="build/externals/7z2604-x64.exe">
-  <size>1664082</size>
-  <hash type="sha-512">ffcc354499e4121735cd4e1bb08725b01cfea758eef2d8681e4782abb53d27cd3f33bbb06de08d4f77f52e2516a9aeefe6c3d3605b8258a65a2405ea49f29b03</hash>
-  <url>https://7-zip.org/a/7z2604-x64.exe</url>
-  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7z2604-x64.exe</url>
-  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7z2604-x64.exe</url>
-  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7z2604-x64.exe</url>
-  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.04/7z2604-x64.exe</url>
+ <file name="build/externals/7z2605-x64.exe">
+  <size>1663506</size>
+  <hash type="sha-512">1fc7519fde5d29a45cb0082ee310802e40d74507c25b90ed82c2f954fce962b4afeb1821ac497542fca453a5b5ef5c11e4e75d70026924c5a78ce0f76c9c20d5</hash>
+  <url>https://7-zip.org/a/7z2605-x64.exe</url>
+  <url>https://deac-fra.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7z2605-x64.exe</url>
+  <url>https://sf-eu-introserv-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7z2605-x64.exe</url>
+  <url>https://sf-west-interserver-1.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7z2605-x64.exe</url>
+  <url>https://sf-west-interserver-2.dl.sourceforge.net/project/sevenzip/7-Zip/26.05/7z2605-x64.exe</url>
  </file>
  <file name="build/externals/WA5.55_SDK.exe">
   <size>336166</size>
