@@ -272,7 +272,9 @@ inline void observable_checkpoint() {
 }
 #elif MPT_COMPILER_GCC || MPT_COMPILER_CLANG
 inline void observable_checkpoint() {
+	// clang-format off
 	__asm__ __volatile__("" ::: "memory");
+	// clang-format on
 }
 #else
 inline void observable_checkpoint() {
@@ -285,13 +287,17 @@ inline void observable_checkpoint() {
 
 
 inline void compiler_barrier(std::memory_order order) {
-	#if MPT_COMPILER_CLANG
-		__asm__ __volatile__("" ::: "memory");
-	#endif
+#if MPT_COMPILER_CLANG
+	// clang-format off
+	__asm__ __volatile__("" ::: "memory");
+	// clang-format on
+#endif
 	std::atomic_signal_fence(order);
-	#if MPT_COMPILER_CLANG
-		__asm__ __volatile__("" ::: "memory");
-	#endif
+#if MPT_COMPILER_CLANG
+	// clang-format off
+	__asm__ __volatile__("" ::: "memory");
+	// clang-format on
+#endif
 }
 
 
@@ -303,13 +309,17 @@ inline void cpu_barrier(std::memory_order order) {
 
 
 inline void full_barrier() {
-	#if MPT_COMPILER_CLANG
-		__asm__ __volatile__("" ::: "memory");
-		std::atomic_thread_fence(std::memory_order_seq_cst);
-		__asm__ __volatile__("" ::: "memory");
-	#else
-		std::atomic_thread_fence(std::memory_order_seq_cst);
-	#endif
+#if MPT_COMPILER_CLANG
+	// clang-format off
+	__asm__ __volatile__("" ::: "memory");
+	// clang-format on
+	std::atomic_thread_fence(std::memory_order_seq_cst);
+	// clang-format off
+	__asm__ __volatile__("" ::: "memory");
+	// clang-format on
+#else
+	std::atomic_thread_fence(std::memory_order_seq_cst);
+#endif
 }
 
 
