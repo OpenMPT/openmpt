@@ -34,6 +34,10 @@
 	vstudio.vs2010_architectures =
 	{
 		win32   = "x86",
+		x86       = "x86",
+		x86_64    = "x64",
+		ARM       = "ARM",
+		AARCH64   = "ARM64",
 	}
 
 	local function architecture(system, arch)

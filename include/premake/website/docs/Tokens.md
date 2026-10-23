@@ -103,6 +103,7 @@ The available tokens, and their replacements:
 |------------|---------------------------------------------|-----------------------|
 | {CHDIR}    | chdir {args}                                | cd {args}             |
 | {COPYFILE} | copy /B /Y {args}                           | cp -f {args}          |
+| {COPYFILEIFNEWER} | xcopy /D /Y {args}*                   | cp -u {args}          |
 | {COPYDIR}  | xcopy /Q /E /Y /I {args}                    | cp -rf {args}         |
 | {DELETE}   | del {args}                                  | rm -rf {args}         |
 | {ECHO}     | echo {args}                                 | echo {args}           |
@@ -114,7 +115,11 @@ The available tokens, and their replacements:
 | {TOUCH}    | type nul >> {arg} && copy /b {arg}+,, {arg} | touch {args}          |
 
 :::caution
-The following tokens are deprecated:
+The following tokens are deprecated in 5.0.0-beta1:
+:::
+
+:::danger
+The following tokens are removed in 5.0.0:
 :::
 
 | Token      | DOS                                         | Posix           | Remarks                             |

@@ -389,3 +389,16 @@
 		return (field.accessor(f, "translate") ~= nil)
 	end
 
+	
+	function field.resolvealias(key, value)
+		value = value:lower()
+		local f = field.get(key)
+		if f and f.aliases then
+			local alias = f.aliases[value]
+			if alias then
+				return tostring(alias):lower()
+			end
+		end
+		return value
+	end
+

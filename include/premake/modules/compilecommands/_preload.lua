@@ -1,0 +1,129 @@
+--
+-- _preload.lua
+-- Define the compilecommands actions
+-- Author: Nick Clark
+-- Copyright (c) 2026 Jess Perkins and the Premake project
+--
+
+local p = premake
+
+newoption {
+	category = "Compilation Database",
+
+	trigger = "cc-config",
+	description = "Specify the configuration to generate compile_commands.json for",
+}
+
+newoption {
+	category = "Compilation Database",
+
+	trigger = "cc-platform",
+	description = "Specify the platform to generate compile_commands.json for",
+}
+
+newoption {
+	category = "Compilation Database",
+
+	trigger = "cc-output",
+	description = "Specify the output file path for compile_commands.json",
+}
+
+newoption {
+	category = "Compilation Database",
+
+	trigger = "implicit-includes",
+	description = "Include implicit include directories in compile_commands.json",
+	
+	allowed = {
+		{ "On" , "Include implicit include directories (default)" },
+		{ "Off", "Exclude implicit include directories" },
+	},
+
+	default = "On",
+}
+
+newaction {
+	trigger = "compilecommands",
+	shortname = "compilecommands",
+	description = "Generate compile_commands.json files",
+
+	-- Action Capabilities
+	valid_kinds = { "ConsoleApp", "WindowedApp", "StaticLib", "SharedLib" },
+	valid_languages = { "C", "C++" },
+	valid_tools = {
+		cc = { "clang", "cosmocc", "emcc", "gcc" },
+	},
+
+	toolset = "clang",
+
+	onInitialize = function()
+		require("compilecommands")
+	end,
+
+	configurable = true,
+
+	execute = function()
+		local all_commands = {}
+
+		for wks in p.global.eachWorkspace() do
+			-- Platform is set in the following order of precedence
+			-- 1. Command line option
+			-- 2. Workspace default platform
+			-- 3. Empty string
+			local platform = _OPTIONS["cc-platform"] or wks.defaultplatform or ""
+
+			-- Configuration is set in the following order of precedence
+			-- 1. Command line option
+			-- 2. Workspace default configuration
+			-- 3. First build configuration of the workspace
+			-- 4. Empty string
+			local defaultCfg = wks.defaultconfiguration and p.config.getdefault(wks)
+			local buildcfg = _OPTIONS["cc-config"] or (defaultCfg and defaultCfg.buildcfg) or wks.configurations[1] or ""
+
+			local compile_commands = p.modules.compilecommands.generate(wks, platform, buildcfg)
+			all_commands = table.join(all_commands, compile_commands)
+		end
+
+		local results, err = json.encode(all_commands)
+		if not results then
+			p.error("Failed to encode compile commands to JSON: %s", err)
+			return
+		end
+
+		local output_path = _OPTIONS["cc-output"] or "compile_commands.json"
+
+		local dir = path.getdirectory(output_path)
+		local ok, err = os.mkdir(dir)
+		if not ok then
+			error(err, 0)
+		end
+
+		local f, err = os.writefile_ifnotequal(results, output_path)
+		if err then
+			p.error("Failed to write compile_commands.json: %s", err)
+		elseif f ~= 0 then
+			printf("Generated %s...", path.getrelative(os.getcwd(), output_path))
+		end
+
+		-- clangd relies on the "directory" entries in compile_commands.json to exist in order to properly
+		-- resolve relative paths. This is to ensure that the compilecommands action generates them.
+		local paths_to_generate = {}
+		for _, cmd in ipairs(all_commands) do
+			local dir = cmd.directory
+			if dir and not os.isdir(dir) then
+				paths_to_generate[dir] = true
+			end
+		end
+
+		for dir, _ in pairs(paths_to_generate) do
+			local ok, err = os.mkdir(dir)
+			if not ok then
+				error(err, 0)
+			end
+		end
+	end
+}
+
+return function(cfg)
+	return (_ACTION == "compilecommands")
+end

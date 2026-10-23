@@ -186,3 +186,29 @@ function suite.BuildStlModulesOn()
 	<BuildStlModules>true</BuildStlModules>
 	]]
 end
+
+function suite.DynamicDebuggingOn()
+	dynamicdebugging 'On'
+	prepare()
+	test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<UseDynamicDebugging>true</UseDynamicDebugging>
+	]]
+end
+
+function suite.DynamicDebuggingOff()
+	dynamicdebugging 'Off'
+	prepare()
+	test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+	<UseDynamicDebugging>false</UseDynamicDebugging>
+	]]
+end

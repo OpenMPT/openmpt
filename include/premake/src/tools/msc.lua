@@ -50,6 +50,21 @@
 		return flag
 	end
 
+	msc.generateassembly = {
+		generateassembly = {
+			On = "/FA",
+			Verbose = "/FAs",
+		},
+	}
+
+	function msc.getassemblyflags(cfg, assemblyOutput)
+		local flags = config.mapFlags(cfg, msc.generateassembly)
+		if assemblyOutput and #flags > 0 then
+			table.insert(flags, "/Fa" .. assemblyOutput)
+		end
+		return flags
+	end
+
 	msc.shared = {
 		clr = {
 			On = "/clr",
@@ -68,6 +83,7 @@
 		floatingpoint = {
 			Fast = "/fp:fast",
 			Strict = "/fp:strict",
+			Precise = "/fp:precise",
 		},
 		floatingpointexceptions = {
 			On  = "/fp:except",
@@ -82,6 +98,9 @@
 			FastCall = "/Gr",
 			StdCall = "/Gz",
 			VectorCall = "/Gv",
+		},
+		dynamicdebugging = {
+			On = "/dynamicdeopt",
 		},
 		intrinsics = {
 			On = "/Oi",
@@ -107,6 +126,7 @@
 		vectorextensions = {
 			AVX = "/arch:AVX",
 			AVX2 = "/arch:AVX2",
+			AVX512 = "/arch:AVX512",
 			SSE = "/arch:SSE",
 			SSE2 = "/arch:SSE2",
 			SSE3 = "/arch:SSE2",
@@ -134,8 +154,6 @@
 			On = "/Zl",
 		},
 		staticruntime = {
-			-- this option must always be emit (does it??)
-			_ = function(cfg) return getRuntimeFlag(cfg, false) end,
 			-- runtime defaults to dynamic in VS
 			Default = function(cfg) return getRuntimeFlag(cfg, false) end,
 			On = function(cfg) return getRuntimeFlag(cfg, true) end,
@@ -214,8 +232,9 @@
 			["C++14"] = "/std:c++14",
 			["C++17"] = "/std:c++17",
 			["C++20"] = "/std:c++20",
-			["C++23"] = "/std:c++latest",
-			["C++latest"] = "/std:c++latest"
+			["C++23"] = "/std:c++23preview",
+			["C++26"] = "/std:c++latest",
+			["C++latest"] = "/std:c++latest",
 		},
 		exceptionhandling = {
 			Default = "/EHsc",
@@ -302,7 +321,16 @@
 		return result
 	end
 
+	function msc.getpch(cfg)
+		-- TODO: Add support for MSC precompiled headers in gmake
+		return nil
+	end
+
 	function msc.getrunpathdirs()
+		return {}
+	end
+
+	function msc.getsections()
 		return {}
 	end
 
@@ -310,32 +338,45 @@
 -- Decorate include file search paths for the MSVC command line.
 --
 
-	function msc.getincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
+	function msc.getstructuredincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
 		local result = {}
 		for _, dir in ipairs(dirs) do
 			dir = p.tools.getrelative(cfg.project, dir)
-			table.insert(result, '/I' ..  p.quoted(dir))
+			table.insert(result, { flag = '/I', value = p.quoted(dir) })
 		end
 
 		for _, dir in ipairs(extdirs or {}) do
 			dir = p.tools.getrelative(cfg.project, dir)
 			if isVersionGreaterOrEqualTo(cfg.toolset, "msc-v142") then
-				table.insert(result, '/external:I' ..  p.quoted(dir))
+				table.insert(result, { flag = '/external:I', value = p.quoted(dir) })
 			else
-				table.insert(result, '/I' ..  p.quoted(dir))
+				table.insert(result, { flag = '/I', value = p.quoted(dir) })
 			end
 		end
 
 		for _, dir in ipairs(includedirsafter or {}) do
 			dir = p.tools.getrelative(cfg.project, dir)
 			if isVersionGreaterOrEqualTo(cfg.toolset, "msc-v142") then
-				table.insert(result, '/external:I' ..  p.quoted(dir))
+				table.insert(result, { flag = '/external:I', value = p.quoted(dir) })
 			else
-				table.insert(result, '/I' ..  p.quoted(dir))
+				table.insert(result, { flag = '/I', value = p.quoted(dir) })
 			end
 		end
 
 		return result
+	end
+
+
+	function msc.getincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
+		local result = msc.getstructuredincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
+		return table.flatten(table.translate(result, function(kv)
+			return kv.flag .. kv.value
+		end))
+	end
+
+
+	function msc.getstructuredimplicitincludedirs(toolname, language)
+		return {}
 	end
 
 
@@ -366,7 +407,10 @@
 		},
 		symbols = {
 			On = "/DEBUG"
-		}
+		},
+		dynamicdebugging = {
+			On = "/dynamicdeopt",
+		},
 	}
 
 	msc.librarianFlags = {
@@ -374,6 +418,10 @@
 			All = "/WX",
 		}
 	}
+
+	function msc.wholearchive(cfg)
+		return table.translate(config.getwholearchive(cfg), function(libraryname) return "/WHOLEARCHIVE:" .. libraryname end)
+	end
 
 	function msc.getldflags(cfg)
 		local map = iif(cfg.kind ~= p.STATICLIB, msc.linkerFlags, msc.librarianFlags)
@@ -405,6 +453,8 @@
 				table.insert(flags, "/PROFILE")
 			end
 		end
+
+		flags = table.join(flags, msc.wholearchive(cfg))
 
 		return flags
 	end
@@ -451,11 +501,11 @@
 
 		-- If we need sibling projects to be listed explicitly, grab them first
 		if not systemonly then
-			links = config.getlinks(cfg, "siblings", "fullpath")
+			links = config.getlinks(cfg, "siblings", "fullpath", nil, true)
 		end
 
 		-- Then the system libraries, which come undecorated
-		local system = config.getlinks(cfg, "system", "fullpath")
+		local system = config.getlinks(cfg, "system", "fullpath", nil, true)
 		for i = 1, #system do
 			-- Add extension if required
 			local link = system[i]
@@ -507,6 +557,28 @@
 
 	function msc.gettooloutputext(tool)
 		return iif(tool == "rc", ".res", ".obj")
+	end
+
+	function msc.getassemblyoutput(cfg, objectOutput)
+		if #msc.getassemblyflags(cfg) > 0 then
+			return path.replaceextension(objectOutput, ".asm")
+		end
+	end
+
+	function msc.gettoolflags(cfg, tool, input, output, depfile)
+		if tool == "rc" then
+			return string.format('/nologo /fo%s %s', output, input)
+		end
+		local lang = iif(tool == "cc", "/Tc", "/Tp")
+		return string.format('/nologo /Fo%s /c %s%s', output, lang, input)
+	end
+
+	function msc.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
+		if cfg.kind == p.STATICLIB then
+			return string.format('%s /nologo /OUT:%s %s', linker, output, objects)
+		end
+		local shared = iif(cfg.kind == p.SHAREDLIB, " /LD", "")
+		return string.format('%s%s /nologo /Fe%s %s %s %s /link %s', linker, shared, output, objects, resources, libs, ldflags)
 	end
 
 

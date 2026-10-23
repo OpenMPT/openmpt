@@ -4,11 +4,11 @@ Specifies the default build platform for a workspace.
 defaultplatform ("platform_name")
 ```
 
-If `platform_name` has not been defined using [`platforms`](platforms.md) the default platform will not change from the generic one i.e. the first one passed to [`platforms`](platforms.md).
+If a default platform is not specified through this API, the first platform in alphabetical order from `platforms` will be used as the default.
 
 ### Parameters ###
 
-`platform_name` - Is the name of the platform you want to use as default.
+`platform_name` - The name of the platform to use as default.
 
 ### Applies To ###
 
@@ -43,6 +43,12 @@ workspace "MyWorkspace"
     architecture "x64"
 
 ```
+
+### Remarks ###
+
+When generating Visual Studio solutions (`.sln` or `.slnx`), Premake writes the selected platform and build configuration first. Neither Microsoft solution format provides fields that explicitly identify the default platform or configuration, so this is a best-effort hint based on entry ordering. Microsoft tools or other consumers may apply their own defaults instead; for example, MSBuild prefers `Mixed Platforms`, then `Any CPU`, when either is available.
+
 ### See Also ###
 
+* [defaultconfiguration](defaultconfiguration.md)
 * [platforms](platforms.md)

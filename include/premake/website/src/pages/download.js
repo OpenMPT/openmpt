@@ -6,7 +6,7 @@ import { Column, Container, Row } from '../components/Grid';
 import Sponsors from '../components/Sponsors';
 
 
-const LATEST_VERSION = '5.0.0-beta8';
+const LATEST_VERSION = '5.0.0';
 
 
 const DownloadLink = ({ arch }) => {
@@ -21,11 +21,6 @@ const DownloadLink = ({ arch }) => {
 		filename = 'linux.tar.gz';
 		label = 'Linux';
 		icon = 'fa-linux';
-		break;
-	case 'src':
-		filename = 'src.zip';
-		label = 'Source Code';
-		icon = 'fa-code';
 		break;
 	case 'windows':
 		filename = 'windows.zip';
@@ -74,14 +69,6 @@ const Download = () =>
 					</Column>
 					<Column>
 						<h3>Build It Yourself</h3>
-						<p>
-							The source code package includes project files for all supported toolsets.
-							See <Link to="https://github.com/premake/premake-core/blob/master/BUILD.txt">BUILD.txt</Link> for
-							build instructions.
-						</p>
-						<ul className="download-links">
-							<DownloadLink arch="src" />
-						</ul>
 						<p>
 							The latest sources (without prebuilt project files) are available
 							on <Link to="https://github.com/premake/premake-core">GitHub</Link>.

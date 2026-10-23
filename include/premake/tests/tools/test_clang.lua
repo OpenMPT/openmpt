@@ -39,6 +39,12 @@
 		test.isequal("windres", clang.gettoolname(cfg, "rc"))
 	end
 
+	function suite.tools_onWindows()
+		system "Windows"
+		prepare()
+		test.isequal("llvm-ar", clang.gettoolname(cfg, "ar"))
+	end
+
 	function suite.tools_onLinkTimeOptimizationViaAPI()
 		linktimeoptimization "On"
 		prepare()
@@ -57,6 +63,24 @@
 		test.isequal("windres", clang.gettoolname(cfg, "rc"))
 	end
 
+	function suite.tools_onMacOSWithLinkTimeOptimization()
+		system "MacOSX"
+		linktimeoptimization "On"
+		prepare()
+		test.isequal("ar", clang.gettoolname(cfg, "ar"))
+	end
+
+	function suite.tools_forVersion_onMacOSWithLinkTimeOptimization()
+		system "MacOSX"
+		toolset "clang-16"
+		linktimeoptimization "On"
+		prepare()
+		test.isequal("clang-16", clang.gettoolname(cfg, "cc"))
+		test.isequal("clang++-16", clang.gettoolname(cfg, "cxx"))
+		test.isequal("ar", clang.gettoolname(cfg, "ar"))
+		test.isequal("windres-16", clang.gettoolname(cfg, "rc"))
+	end
+
 	function suite.tools_forVersion()
 		toolset "clang-16"
 		prepare()
@@ -64,6 +88,13 @@
 		test.isequal("clang++-16", clang.gettoolname(cfg, "cxx"))
 		test.isequal("ar-16", clang.gettoolname(cfg, "ar"))
 		test.isequal("windres-16", clang.gettoolname(cfg, "rc"))
+	end
+
+	function suite.tools_forVersion_onWindows()
+		system "Windows"
+		toolset "clang-16"
+		prepare()
+		test.isequal("llvm-ar-16", clang.gettoolname(cfg, "ar"))
 	end
 
 	function suite.tools_forVersion_onLinkTimeOptimizationViaAPI()
@@ -160,6 +191,36 @@ end
 		openmp "Off"
 		prepare()
 		test.excludes("-fopenmp", clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onAVX512()
+		vectorextensions "AVX512"
+		prepare()
+		test.contains({ "-mavx512f" }, clang.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onOpenmpOn()
+		openmp "On"
+		prepare()
+		test.contains("-fopenmp", clang.getcxxflags(cfg))
+	end
+
+	function suite.cxxflags_onOpenmpOff()
+		openmp "Off"
+		prepare()
+		test.excludes("-fopenmp", clang.getcxxflags(cfg))
+	end
+
+	function suite.ldflags_onOpenmpOn()
+		openmp "On"
+		prepare()
+		test.contains("-fopenmp", clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onOpenmpOff()
+		openmp "Off"
+		prepare()
+		test.excludes("-fopenmp", clang.getldflags(cfg))
 	end
 
 --
@@ -283,6 +344,44 @@ end
 	end
 
 --
+-- Check handling of floating point modifiers.
+--
+
+	function suite.cflags_onFloatingPointFast()
+		floatingpoint "Fast"
+		prepare()
+		test.contains({ "-ffast-math" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onFloatingPointStrict()
+		floatingpoint "Strict"
+		prepare()
+		test.contains({ "-ffp-model=strict" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onFloatingPointPrecise()
+		floatingpoint "Precise"
+		prepare()
+		test.contains({ "-ffp-model=precise" }, clang.getcflags(cfg))
+	end
+
+--
+-- Check handling of external warnings.
+--
+
+	function suite.cflags_onNoExternalWarnings()
+		externalwarnings "Off"
+		prepare()
+		test.excludes({ "-Wsystem-headers" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onHighExternalWarnings()
+		externalwarnings "High"
+		prepare()
+		test.contains({ "-Wsystem-headers" }, clang.getcflags(cfg))
+	end
+
+--
 -- Test profiling flag
 --
 
@@ -390,4 +489,154 @@ end
 		architecture "arm64"
 		prepare()
 		test.contains({ "-arch arm64" }, clang.getldflags(cfg))
+	end
+
+--
+-- Make sure unicode support is handled properly.
+--
+
+	function suite.cflags_onUnicode_Windows()
+		system "Windows"
+		characterset "Unicode"
+		prepare()
+		test.contains({ "-D_UNICODE", "-DUNICODE", "-municode" }, clang.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onUnicode_Windows()
+		system "Windows"
+		characterset "Unicode"
+		prepare()
+		test.contains({ "-D_UNICODE", "-DUNICODE", "-municode" }, clang.getcxxflags(cfg))
+	end
+
+	function suite.ldflags_onWindowsSharedLib()
+		system "Windows"
+		kind "SharedLib"
+		prepare()
+		test.contains({ "-shared", '-Xlinker /IMPLIB:"bin/Debug/MyProject.lib"' }, clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onWindowsSharedLibWithoutImportLib()
+		system "Windows"
+		kind "SharedLib"
+		useimportlib "Off"
+		prepare()
+		test.contains({ "-shared", "-Xlinker /NOIMPLIB" }, clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onBSDSharedLib()
+		system "bsd"
+		kind "SharedLib"
+		prepare()
+		test.contains({ "-shared", "-Wl,-soname=libMyProject.so" }, clang.getldflags(cfg))
+	end
+
+
+--
+-- Check handling of Run-Time Library flags.
+--
+
+	function suite.cflags_onWindowsStaticRuntime()
+		system "Windows"
+		staticruntime "On"
+		symbols "On"
+		prepare()
+		test.contains({ "-fms-runtime-lib=static_dbg" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onWindowsDynamicRuntime()
+		system "Windows"
+		staticruntime "Off"
+		runtime "Debug"
+		prepare()
+		test.contains({ "-fms-runtime-lib=dll_dbg" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onWindowsStaticRuntimeRelease()
+		system "Windows"
+		staticruntime "On"
+		runtime "Release"
+		prepare()
+		test.contains({ "-fms-runtime-lib=static" }, clang.getcflags(cfg))
+	end
+
+	function suite.cflags_onWindowsDynamicRuntimeRelease()
+		system "Windows"
+		staticruntime "Off"
+		runtime "Release"
+		prepare()
+		test.contains({ "-fms-runtime-lib=dll" }, clang.getcflags(cfg))
+	end
+
+	function suite.ldflags_onWindowsStaticRuntime()
+		system "Windows"
+		staticruntime "On"
+		symbols "On"
+		prepare()
+		test.contains({ "-Xlinker /NODEFAULTLIB:libcmt -fms-runtime-lib=static_dbg" }, clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onWindowsDynamicRuntime()
+		system "Windows"
+		staticruntime "Off"
+		runtime "Debug"
+		prepare()
+		test.contains({ "-Xlinker /NODEFAULTLIB:libcmt -fms-runtime-lib=dll_dbg" }, clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onWindowsDynamicRuntimeRelease()
+		system "Windows"
+		staticruntime "Off"
+		runtime "Release"
+		prepare()
+		test.contains({ "-Xlinker /NODEFAULTLIB:libcmt -fms-runtime-lib=dll" }, clang.getldflags(cfg))
+	end
+
+	function suite.cflags_onNonWindowsRuntime()
+		system "Linux"
+		staticruntime "On"
+		prepare()
+		test.excludes({ "-fms-runtime-lib=static_dbg" }, clang.getcflags(cfg))
+	end
+
+	function suite.ldflags_onNonWindowsRuntime()
+		system "Linux"
+		staticruntime "On"
+		prepare()
+		test.excludes({ "-fms-runtime-lib=static_dbg" }, clang.getldflags(cfg))
+	end
+
+	function suite.ldflags_onUnicode_Windows()
+		system "Windows"
+		characterset "Unicode"
+		prepare()
+		test.contains({ "-municode" }, clang.getldflags(cfg))
+	end
+
+	function suite.cflags_onUnicode_NonWindows()
+		system "Linux"
+		characterset "Unicode"
+		prepare()
+		test.excludes({ "-D_UNICODE", "-DUNICODE", "-municode" }, clang.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onUnicode_NonWindows()
+		system "Linux"
+		characterset "Unicode"
+		prepare()
+		test.excludes({ "-D_UNICODE", "-DUNICODE", "-municode" }, clang.getcxxflags(cfg))
+	end
+
+	function suite.ldflags_onUnicode_NonWindows()
+		system "Linux"
+		characterset "Unicode"
+		prepare()
+		test.excludes({ "-municode" }, clang.getldflags(cfg))
+	end
+
+	function suite.inlinesVisibilityHidden_onlyInCxxFlags()
+		inlinesvisibility "Hidden"
+		prepare()
+		test.excludes({ "-fvisibility-inlines-hidden" }, clang.getcflags(cfg))
+		test.contains({ "-fvisibility-inlines-hidden" }, clang.getcxxflags(cfg))
 	end

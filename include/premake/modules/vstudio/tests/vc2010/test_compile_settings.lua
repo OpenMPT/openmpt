@@ -42,6 +42,16 @@
 		]]
 	end
 
+	function suite.assemblerOutput_onConfig()
+		toolset "msc"
+		generateassembly "On"
+		local cfg = test.getconfig(prj, "Debug")
+		vc2010.assemblerOutput(cfg)
+		test.capture [[
+<AssemblerOutput>AssemblyCode</AssemblerOutput>
+		]]
+	end
+
 
 ---
 -- Test precompiled header handling; the header should be treated as
@@ -68,7 +78,7 @@
 
 	function suite.noPrecompiledHeaders_onNoPCH()
 		pchheader "afxwin.h"
-		flags "NoPCH"
+		enablepch "Off"
 		prepare()
 		test.capture [[
 <ClCompile>
@@ -402,7 +412,7 @@
 --
 
 	function suite.minimalRebuild_onNoMinimalRebuild()
-		flags "NoMinimalRebuild"
+		minimalrebuild "Off"
 		prepare()
 		test.capture [[
 <ClCompile>
@@ -713,19 +723,7 @@
 		]]
 	end
 
-	function suite.runtimeTypeInfo_onNoBufferSecurityCheck_ViaFlag()
-		flags "NoBufferSecurityCheck"
-		prepare()
-		test.capture [[
-<ClCompile>
-	<PrecompiledHeader>NotUsing</PrecompiledHeader>
-	<WarningLevel>Level3</WarningLevel>
-	<Optimization>Disabled</Optimization>
-	<BufferSecurityCheck>false</BufferSecurityCheck>
-		]]
-	end
-
-	function suite.runtimeTypeInfo_onNoBufferSecurityCheck_ViaAPI()
+	function suite.runtimeTypeInfo_onNoBufferSecurityCheck()
 		buffersecuritycheck "Off"
 		prepare()
 		test.capture [[
@@ -737,7 +735,7 @@
 		]]
 	end
 
-	function suite.runtimeTypeInfo_onBufferSecurityCheck_ViaAPI()
+	function suite.runtimeTypeInfo_onBufferSecurityCheck()
 		buffersecuritycheck "On"
 		prepare()
 		test.capture [[
@@ -879,22 +877,6 @@
 
 
 --
--- Check handling of the NoRuntimeChecks flag.
---
-
-	function suite.onNoRuntimeChecks()
-		flags { "NoRuntimeChecks" }
-		prepare()
-		test.capture [[
-<ClCompile>
-	<PrecompiledHeader>NotUsing</PrecompiledHeader>
-	<WarningLevel>Level3</WarningLevel>
-	<BasicRuntimeChecks>Default</BasicRuntimeChecks>
-		]]
-	end
-
-
---
 -- Check handling of the runtimechecks API with "Off" value.
 --
 
@@ -946,20 +928,7 @@
 -- Check handling of the EnableMultiProcessorCompile flag.
 --
 
-	function suite.onMultiProcessorCompile_Flag()
-		flags { "MultiProcessorCompile" }
-		prepare()
-		test.capture [[
-<ClCompile>
-	<PrecompiledHeader>NotUsing</PrecompiledHeader>
-	<WarningLevel>Level3</WarningLevel>
-	<Optimization>Disabled</Optimization>
-	<MinimalRebuild>false</MinimalRebuild>
-	<MultiProcessorCompilation>true</MultiProcessorCompilation>
-		]]
-	end
-
-	function suite.onMultiProcessorCompile_API()
+	function suite.onMultiProcessorCompile()
 		multiprocessorcompile "On"
 		prepare()
 		test.capture [[
@@ -1025,11 +994,11 @@
 
 
 --
--- Check handling of the OmitDefaultLibrary flag.
+-- Check handling of the nodefaultlib API.
 --
 
 	function suite.onOmitDefaultLibrary()
-		flags { "OmitDefaultLibrary" }
+		nodefaultlib "On"
 		prepare()
 		test.capture [[
 <ClCompile>
@@ -1500,6 +1469,38 @@
 	<WarningLevel>Level3</WarningLevel>
 	<Optimization>Disabled</Optimization>
 	<LanguageStandard>stdcpp23</LanguageStandard>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+</ClCompile>
+		]]
+	end
+
+	function suite.onLanguage_Cpp26_VS2022()
+		p.action.set("vs2022")
+
+		cppdialect 'C++26'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<LanguageStandard>stdcpplatest</LanguageStandard>
+	<ExternalWarningLevel>Level3</ExternalWarningLevel>
+</ClCompile>
+		]]
+	end
+
+	function suite.onLanguage_Cpp26_VS2026()
+		p.action.set("vs2026")
+
+		cppdialect 'C++26'
+		prepare()
+		test.capture [[
+<ClCompile>
+	<PrecompiledHeader>NotUsing</PrecompiledHeader>
+	<WarningLevel>Level3</WarningLevel>
+	<Optimization>Disabled</Optimization>
+	<LanguageStandard>stdcpplatest</LanguageStandard>
 	<ExternalWarningLevel>Level3</ExternalWarningLevel>
 </ClCompile>
 		]]

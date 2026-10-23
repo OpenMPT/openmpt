@@ -111,10 +111,7 @@
 
 				-- check for field value aliases
 				if prefix then
-					local fld = p.field.get(prefix)
-					if fld and fld.aliases then
-						word[1] = fld.aliases[word[1]] or word[1]
-					end
+					word[1] = p.field.resolvealias(prefix, word[1])
 				end
 
 				-- Check if the prefix is an action

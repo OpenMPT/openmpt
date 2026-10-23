@@ -1,1 +1,1 @@
-Premake version 5.0.0-beta8 (2026-01-24) (.tar.gz release)
+Premake version 5.0.0 (2026-10-05) (.tar.gz release)

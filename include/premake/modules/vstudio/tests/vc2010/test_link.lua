@@ -7,7 +7,6 @@
 	local p = premake
 	local suite = test.declare("vs2010_link")
 	local vc2010 = p.vstudio.vc2010
-	local project = p.project
 
 
 --
@@ -125,20 +124,6 @@
 --
 -- Test the handling of the NoImplicitLink flag.
 --
-
-	function suite.linkDependencies_onNoImplicitLink_ViaFlag()
-		flags "NoImplicitLink"
-		prepare()
-		test.capture [[
-<Link>
-	<SubSystem>Windows</SubSystem>
-	<ImportLibrary>bin\Debug\MyProject.lib</ImportLibrary>
-</Link>
-<ProjectReference>
-	<LinkLibraryDependencies>false</LinkLibraryDependencies>
-</ProjectReference>
-		]]
-	end
 
 	function suite.linkDependencies_onNoImplicitLink_ViaAPI()
 		implicitlink "Off"
@@ -541,24 +526,6 @@
 -- If the NoImplicitLink flag is set, all dependencies should be listed explicitly.
 --
 
-	function suite.includeSiblings_onNoImplicitLink_ViaFlag()
-		flags { "NoImplicitLink" }
-		links { "MyProject2" }
-		test.createproject(wks)
-		kind "SharedLib"
-		prepare()
-		test.capture [[
-<Link>
-	<SubSystem>Windows</SubSystem>
-	<AdditionalDependencies>bin\Debug\MyProject2.lib;%(AdditionalDependencies)</AdditionalDependencies>
-	<ImportLibrary>bin\Debug\MyProject.lib</ImportLibrary>
-</Link>
-<ProjectReference>
-	<LinkLibraryDependencies>false</LinkLibraryDependencies>
-</ProjectReference>
-		]]
-	end
-
 	function suite.includeSiblings_onNoImplicitLink_ViaAPI()
 		implicitlink "Off"
 		links { "MyProject2" }
@@ -767,19 +734,7 @@
 -- Test generating .map files.
 --
 
-	function suite.generateMapFile_onMapsFlag()
-		flags { "Maps" }
-		prepare()
-		test.capture [[
-<Link>
-	<SubSystem>Windows</SubSystem>
-	<ImportLibrary>bin\Debug\MyProject.lib</ImportLibrary>
-	<GenerateMapFile>true</GenerateMapFile>
-</Link>
-		]]
-	end
-
-	function suite.generateMapFile_onMapFileAPI()
+	function suite.generateMapFile()
 		mapfile "On"
 		prepare()
 		test.capture [[
@@ -877,6 +832,26 @@
 <Link>
 	<SubSystem>Windows</SubSystem>
 	<AdditionalDependencies>kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+	<ImportLibrary>bin\Debug\MyProject.lib</ImportLibrary>
+</Link>
+		]]
+	end
+
+
+--
+-- Whole archive should be listed in additional dependencies.
+--
+
+	function suite.wholearchive()
+		links { "MyProject2" }
+		wholearchive { "kernel32", "MyProject2" }
+		project "MyProject2"
+		kind "StaticLib"
+		prepare()
+		test.capture [[
+<Link>
+	<SubSystem>Windows</SubSystem>
+	<AdditionalDependencies>/WHOLEARCHIVE:kernel32;/WHOLEARCHIVE:bin\Debug\MyProject2.lib;%(AdditionalDependencies)</AdditionalDependencies>
 	<ImportLibrary>bin\Debug\MyProject.lib</ImportLibrary>
 </Link>
 		]]

@@ -20,6 +20,7 @@
 
 	function suite.setup()
 		p.action.set("ninja")
+		system "Linux"
 		wks, prj = test.createWorkspace()
 	end
 
@@ -63,7 +64,7 @@ rule cc_msc
 		cpp.ccrule(cfg)
 		test.capture [[
 rule cc_gcc
-  command = gcc $cflags -c $in -o $out
+  command = gcc $cflags -c $in -o $out -MD -MF $out.d
   deps = gcc
   depfile = $out.d
   description = Compiling C source $in
@@ -83,7 +84,7 @@ rule cc_gcc
 		cpp.ccrule(cfg)
 		test.capture [[
 rule cc_clang
-  command = clang $cflags -c $in -o $out
+  command = clang $cflags -c $in -o $out -MD -MF $out.d
   deps = gcc
   depfile = $out.d
   description = Compiling C source $in
@@ -114,6 +115,25 @@ rule cxx_msc
 		]]
 	end
 
+	function suite.buildFile_generateAssembly_onMSVC()
+		toolset "msc"
+		language "C++"
+		files { "main.cpp" }
+		buildoptions { "/projectFlag" }
+		generateassembly "Verbose"
+		filter "files:main.cpp"
+		generateassembly "On"
+		local cfg = prepare()
+		local node = p.project.getsourcetree(cfg.project).children["main.cpp"]
+		local filecfg = p.fileconfig.getconfig(node, cfg)
+		local objFile = cpp.objectFile(cfg, node, filecfg)
+		cpp.buildFile(cfg, node, filecfg, objFile, nil, nil)
+		test.capture [[
+build obj/Debug/main.obj | obj/Debug/main.asm: cxx_msc main.cpp
+  cxxflags = $cxxflags_MyProject_Debug /FA /Faobj/Debug/main.asm
+		]]
+	end
+
 
 --
 -- Check the C++ compile rule for GCC.
@@ -126,7 +146,7 @@ rule cxx_msc
 		cpp.cxxrule(cfg)
 		test.capture [[
 rule cxx_gcc
-  command = g++ $cxxflags -c $in -o $out
+  command = g++ $cxxflags -c $in -o $out -MD -MF $out.d
   deps = gcc
   depfile = $out.d
   description = Compiling C++ source $in
@@ -146,7 +166,7 @@ rule cxx_gcc
 		cpp.cxxrule(cfg)
 		test.capture [[
 rule cxx_clang
-  command = clang++ $cxxflags -c $in -o $out
+  command = clang++ $cxxflags -c $in -o $out -MD -MF $out.d
   deps = gcc
   depfile = $out.d
   description = Compiling C++ source $in
@@ -208,6 +228,10 @@ rule rc_gcc
 		local cfg = prepare()
 		cpp.linkrule(cfg)
 		test.capture [[
+rule ar_msc
+  command = lib $in /nologo -OUT:$out
+  description = Archiving static library $out
+
 rule link_msc
   command = cl $in $links /link $ldflags /nologo /out:$out
   description = Linking target $out
@@ -227,6 +251,10 @@ rule link_msc
 		local cfg = prepare()
 		cpp.linkrule(cfg)
 		test.capture [[
+rule ar_gcc
+  command = ar -rcs $out $in
+  description = Archiving static library $out
+
 rule link_gcc
   command = g++ -o $out $in $links $ldflags
   description = Linking target $out
@@ -246,6 +274,10 @@ rule link_gcc
 		local cfg = prepare()
 		cpp.linkrule(cfg)
 		test.capture [[
+rule ar_gcc
+  command = ar -rcs $out $in
+  description = Archiving static library $out
+
 rule link_gcc
   command = gcc -o $out $in $links $ldflags
   description = Linking target $out
@@ -266,49 +298,16 @@ rule link_gcc
 		local cfg = prepare()
 		cpp.linkrule(cfg)
 		test.capture [[
+rule ar_gcc
+  command = ar -rcs $out $in
+  description = Archiving static library $out
+
 rule link_gcc
   command = g++ -o $out $in $links $ldflags
   description = Linking target $out
 
 		]]
 	end
-
-
---
--- Check the archive rule for a static library with MSVC.
---
-
-	function suite.linkrule_onMSVCStaticLib()
-		toolset "msc"
-		kind "StaticLib"
-		local cfg = prepare()
-		cpp.linkrule(cfg)
-		test.capture [[
-rule ar_msc
-  command = lib $in /nologo -OUT:$out
-  description = Archiving static library $out
-
-		]]
-	end
-
-
---
--- Check the archive rule for a static library with GCC.
---
-
-	function suite.linkrule_onGCCStaticLib()
-		toolset "gcc"
-		kind "StaticLib"
-		local cfg = prepare()
-		cpp.linkrule(cfg)
-		test.capture [[
-rule ar_gcc
-  command = ar -rcs $out $in
-  description = Archiving static library $out
-
-		]]
-	end
-
 
 ---
 -- Precompiled header rules

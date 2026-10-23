@@ -99,10 +99,10 @@
 	function context.addFilter(ctx, key, value)
 		if type(value) == "table" then
 			for i = 1, #value do
-				value[i] = tostring(value[i]):lower()
+				value[i] = p.field.resolvealias(key, tostring(value[i]))
 			end
 		elseif value ~= nil then
-			value = tostring(value):lower()
+			value = p.field.resolvealias(key, value)
 		end
 		ctx.terms[key:lower()] = value
 	end

@@ -454,7 +454,12 @@
 				local packageAPIInfo = vstudio.nuget2010.packageAPIInfo(prj, package)
 
 				local action = p.action.current()
-				local targetFramework = cfg.dotnetframework or action.vstudio.targetFramework
+				local targetFramework = nil
+				if #cfg.dotnetframework > 0 then
+					targetFramework = cfg.dotnetframework[#cfg.dotnetframework]
+				else
+					targetFramework = action.vstudio.targetFramework
+				end
 
 				local targetVersion = dotnetbase.makeVersionComparable(targetFramework)
 
@@ -754,7 +759,14 @@
 
 	function dotnetbase.targetFrameworkVersion(cfg)
 		local action = p.action.current()
-		local framework = cfg.dotnetframework or action.vstudio.targetFramework
+
+		local framework = nil
+		if #cfg.dotnetframework > 0 then
+			framework = cfg.dotnetframework[#cfg.dotnetframework]
+		else
+			framework = action.vstudio.targetFramework
+		end
+
 		if framework and not dotnetbase.isNewFormatProject(cfg) then
 			_p(2,'<TargetFrameworkVersion>v%s</TargetFrameworkVersion>', framework)
 		end
@@ -793,13 +805,11 @@
 	end
 
 	function dotnetbase.isNewFormatProject(cfg)
-		local framework = cfg.dotnetframework
-		if not framework then
-			return false
-		end
-
-		if framework:find('^net') ~= nil then
-			return true
+		local frameworks = cfg.dotnetframework
+		for _, currFramework in ipairs(frameworks) do
+			if currFramework:find('^net') ~= nil then
+				return true
+			end
 		end
 
 		return false
@@ -807,14 +817,48 @@
 
 	function dotnetbase.netcore.targetFramework(cfg)
 		local action = p.action.current()
-		local framework = cfg.dotnetframework or action.vstudio.targetFramework
-		if framework and dotnetbase.isNewFormatProject(cfg) then
-			_p(2,'<TargetFramework>%s</TargetFramework>', framework)
+
+		local frameworks = nil
+		if #cfg.dotnetframework > 0 then
+			frameworks = cfg.dotnetframework
+		else
+			targetFramework = action.vstudio.targetFramework
+			if targetFramework ~= nil then
+				frameworks = { [1] = targetFramework }
+			end
+
+		end
+
+		if frameworks ~= nil then
+			if dotnetbase.isNewFormatProject(cfg) then
+				if #frameworks > 1 then
+					_p(2, '<TargetFrameworks>%s</TargetFrameworks>', table.concat(frameworks, ";"))
+				else
+					_p(2, '<TargetFramework>%s</TargetFramework>', frameworks[1])
+				end
+			end
 		end
 	end
 
 	function dotnetbase.netcore.enableDefaultCompileItems(cfg)
 		_p(2,'<EnableDefaultCompileItems>%s</EnableDefaultCompileItems>', iif(cfg.enableDefaultCompileItems, "true", "false"))
+	end
+
+	function dotnetbase.netcore.enableImplicitUsings(cfg)
+		local types = {
+			Off = "false",
+			On = "true"
+		}
+
+		if _ACTION >= "vs2022" and dotnetbase.isNewFormatProject(cfg) and types[cfg.enableimplicitusings] then
+			_p(2,'<ImplicitUsings>%s</ImplicitUsings>', types[cfg.enableimplicitusings])
+		end
+	end
+
+	function dotnetbase.netcore.appManifest(cfg)
+		if cfg.appmanifest and string.len(cfg.appmanifest) > 0 then
+			_p(2,'<ApplicationManifest>%s</ApplicationManifest>', path.getrelative(cfg.project.location, cfg.appmanifest))
+		end
 	end
 
 	function dotnetbase.netcore.useWpf(cfg)

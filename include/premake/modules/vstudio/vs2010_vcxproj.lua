@@ -114,16 +114,30 @@
 
 	function m.targetFramework(prj)
 		local action = p.action.current()
-		local tools = string.format(' ToolsVersion="%s"', action.vstudio.toolsVersion)
 
-		local framework = prj.dotnetframework or action.vstudio.targetFramework or "4.0"
-		if framework and dotnetbase.isNewFormatProject(prj) then
-			p.w('<TargetFramework>%s</TargetFramework>', framework)
+		local frameworks = nil
+		if #prj.dotnetframework > 0 then
+			frameworks = prj.dotnetframework
 		else
-			p.w('<TargetFrameworkVersion>v%s</TargetFrameworkVersion>', framework)
+			targetFramework = action.vstudio.targetFramework or "4.0"
+			frameworks = { [1] = targetFramework }
+
+		end
+
+		if frameworks ~= nil then
+			if dotnetbase.isNewFormatProject(prj) then
+				if #frameworks > 1 then
+					p.w('<TargetFrameworks>%s</TargetFrameworks>', table.concat(frameworks, ";"))
+				else
+					p.w('<TargetFramework>%s</TargetFramework>', frameworks[1])
+				end
+			else
+				if #frameworks >= 1 then
+					p.w('<TargetFrameworkVersion>v%s</TargetFrameworkVersion>', frameworks[#frameworks])
+				end
+			end
 		end
 	end
-
 
 
 --
@@ -597,6 +611,8 @@
 			m.useStandardPreprocessor,
 			m.enableModules,
 			m.buildStlModules,
+			m.useDynamicDebugging,
+			m.assemblerOutput,
 		}
 
 		if cfg.kind == p.STATICLIB then
@@ -795,6 +811,7 @@
 				m.generateDebugInformation,
 				m.optimizeReferences,
 				m.linkTimeCodeGeneration,
+				m.useDynamicDebugging,
 			}
 		else
 			return {
@@ -804,6 +821,7 @@
 				m.optimizeReferences,
 				m.linkTimeCodeGeneration,
 				m.additionalDependencies,
+				m.useDynamicDebugging,
 				m.additionalLibraryDirectories,
 				m.importLibrary,
 				m.entryPointSymbol,
@@ -882,6 +900,7 @@
 				m.treatLinkerWarningAsErrors,
 				m.targetMachine,
 				m.additionalLinkOptions,
+				m.useDynamicDebugging,
 			}
 		else
 			return {}
@@ -1104,6 +1123,7 @@
 		return {
 			m.excludedFromBuild,
 			m.objectFileName,
+			m.assemblerListingLocation,
 			m.clCompilePreprocessorDefinitions,
 			m.clCompileUndefinePreprocessorDefinitions,
 			m.languageStandard,
@@ -1117,6 +1137,7 @@
 			m.disableSpecificWarnings,
 			m.treatSpecificWarningsAsErrors,
 			m.basicRuntimeChecks,
+			m.assemblerOutput,
 			m.exceptionHandling,
 			m.compileAsManaged,
 			m.compileAs,
@@ -1957,6 +1978,10 @@
 	function m.additionalDependencies(cfg, explicit)
 		local links
 
+		local toolgetrelative = p.tools.getrelative
+		p.tools.getrelative = function(...)
+			return path.translate(toolgetrelative(...))
+		end
 		-- check to see if this project uses an external toolset. If so, let the
 		-- toolset define the format of the links
 		local toolset = config.toolset(cfg)
@@ -1965,8 +1990,10 @@
 		else
 			links = vstudio.getLinks(cfg, explicit)
 		end
+		links = table.join(links, p.tools.msc.wholearchive(cfg))
+		p.tools.getrelative = toolgetrelative
 
-		links = path.translate(table.concat(links, ";"))
+		links = table.concat(links, ";")
 
 		local additional = ";%(AdditionalDependencies)"
 		if cfg.inheritdependencies ~= nil then
@@ -1978,6 +2005,17 @@
 		-- If there are no links and dependencies should be inherited, the tag doesn't have to be generated.
 		if #links > 0 or additional == "" then
 			m.element("AdditionalDependencies", nil, "%s%s", links, additional)
+		end
+	end
+
+
+	function m.useDynamicDebugging(cfg, explicit)
+		if cfg.dynamicdebugging and _ACTION >= "vs2022" then
+			if cfg.dynamicdebugging == p.ON then
+				m.element("UseDynamicDebugging", nil, "true")
+			elseif cfg.dynamicdebugging == p.OFF then
+				m.element("UseDynamicDebugging", nil, "false")
+			end
 		end
 	end
 
@@ -2042,7 +2080,7 @@
 				m.element("LanguageStandard", condition, iif(_ACTION <= "vs2017", 'stdcpplatest', 'stdcpp20'))
 			elseif (cfg.cppdialect == "C++23") then
 				m.element("LanguageStandard", condition, iif(_ACTION <= "vs2019", 'stdcpplatest', 'stdcpp23'))
-			elseif (cfg.cppdialect == "C++latest") then
+			elseif (cfg.cppdialect == "C++26" or cfg.cppdialect == "C++latest") then
 				m.element("LanguageStandard", condition, 'stdcpplatest')
 			end
 		end
@@ -2161,6 +2199,40 @@
 		end
 	end
 
+	local function supportsAssemblerOutput(cfg)
+		cfg = cfg.config or cfg
+		if not cfg.toolset or cfg.system == p.LINUX or cfg.system == p.ANDROID then
+			return false
+		end
+		local toolset = p.tools.canonical(cfg.toolset)
+		return toolset == p.tools.msc or toolset == p.tools.clang
+	end
+
+	local assemblerOutputs = {
+		On = "AssemblyCode",
+		Verbose = "AssemblyAndSourceCode",
+	}
+
+	function m.assemblerOutput(cfg, condition)
+		if not supportsAssemblerOutput(cfg) then
+			return
+		end
+
+		local value = assemblerOutputs[cfg.generateassembly]
+		if not value and cfg.config and cfg.generateassembly and assemblerOutputs[cfg.config.generateassembly] then
+			value = "NoListing"
+		end
+		if value then
+			m.element("AssemblerOutput", condition, value)
+		end
+	end
+
+	function m.assemblerListingLocation(fcfg, condition)
+		local value = fcfg.generateassembly or fcfg.config.generateassembly
+		if supportsAssemblerOutput(fcfg) and assemblerOutputs[value] then
+			m.element("AssemblerListingLocation", condition, "$(IntDir)\\%s.asm", fcfg.objname)
+		end
+	end
 
 	function m.additionalLinkOptions(cfg)
 
@@ -2433,6 +2505,8 @@
 			v = "AdvancedVectorExtensions"
 		elseif x == "AVX2" and _ACTION > "vs2012" then
 			v = "AdvancedVectorExtensions2"
+		elseif x == "AVX512" and _ACTION >= "vs2017" then
+			v = "AdvancedVectorExtensions512"
 		elseif cfg.architecture ~= "x86_64" then
 			if x == "SSE2" or x == "SSE3" or x == "SSSE3" or x == "SSE4.1" or x == "SSE4.2" then
 				v = "StreamingSIMDExtensions2"
@@ -2844,12 +2918,21 @@
 
 	function m.intDir(cfg)
 		local objdir = vstudio.path(cfg, cfg.objdir)
+		local localobjdir = objdir
+		local remoteobjdir  = objdir
 
 		if not path.isabsolute(objdir) then
-			objdir = "$(ProjectDir)" .. objdir
+			localobjdir = "$(ProjectDir)" .. objdir
+			remoteobjdir = "$(RemoteProjectRelDir)" .. objdir
 		end
 
-		m.element("IntDir", nil, "%s\\", objdir)
+		m.element("IntDir", nil, "%s\\", localobjdir)
+
+		-- Keep the RemoteIntRelDir in sync with IntDir
+		if cfg.system == p.LINUX then
+			remoteobjdir = path.translate(remoteobjdir, "/")
+			m.element("RemoteIntRelDir", nil, "%s/", remoteobjdir)
+		end
 	end
 
 
@@ -3074,7 +3157,11 @@
 
 	function m.optimizeReferences(cfg)
 		if config.isOptimizedBuild(cfg) then
-			m.element("EnableCOMDATFolding", nil, "true")
+			if cfg.dynamicdebugging == p.ON then
+				m.element("EnableCOMDATFolding", nil, "false")
+			else
+				m.element("EnableCOMDATFolding", nil, "true")
+			end
 			m.element("OptimizeReferences", nil, "true")
 		end
 	end
@@ -3098,12 +3185,21 @@
 
 	function m.outDir(cfg)
 		local outdir = vstudio.path(cfg, cfg.buildtarget.directory)
+		local localoutdir = outdir
+		local remoteoutdir = outdir
 
 		if not path.isabsolute(outdir) then
-			outdir = "$(ProjectDir)" .. outdir
+			localoutdir = "$(ProjectDir)" .. outdir
+			remoteoutdir = "$(RemoteProjectRelDir)" .. outdir
 		end
 
-		m.element("OutDir", nil, "%s\\", outdir)
+		m.element("OutDir", nil, "%s\\", localoutdir)
+
+		-- Keep the RemoteOutRelDir in sync with OutDir or we won't be able to find the executable in the remote machine
+		if cfg.system == p.LINUX then
+			remoteoutdir = path.translate(remoteoutdir, "/")
+			m.element("RemoteOutRelDir", nil, "%s/", remoteoutdir)
+		end
 
 	end
 
@@ -4347,11 +4443,11 @@
 
 		-- If we need sibling projects to be listed explicitly, grab them first
 		if explicit then
-			links = config.getlinks(cfg, "siblings", "fullpath")
+			links = config.getlinks(cfg, "siblings", "fullpath", nil, true)
 		end
 
 		-- Then the system libraries, which come undecorated
-		local system = config.getlinks(cfg, "system", "name")
+		local system = config.getlinks(cfg, "system", "name", nil, true)
 		for i = 1, #system do
 			local link = system[i]
 			table.insert(links, link)

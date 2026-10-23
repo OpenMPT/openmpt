@@ -136,6 +136,7 @@
 		name = "dotnetframework",
 		scope = "config",
 		kind = "string",
+		list = true,
 	}
 	p.api.alias("dotnetframework", "framework") -- for backward compatibility
 
@@ -156,6 +157,22 @@
 		scope = "config",
 		kind = "boolean",
 		default = false
+	}
+	p.api.register {
+		name = "appmanifest",
+		scope = "config",
+		kind = "string"
+	}
+
+	p.api.register {
+		name = "enableimplicitusings",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"Default",
+			"On",
+			"Off"
+		}
 	}
 
 	p.api.register {
@@ -620,15 +637,6 @@
 		"5.0",
 	})
 
-	p.api.deprecateField("toolchainversion", "Use `toolchain 'gcc-<version>'` or `toolchain 'clang-<version>'` instead.",
-	function(value)
-		if value == "4.6" or value == "4.8" or value == "4.9" then
-			toolset("gcc-" .. value)
-		elseif value == "3.4" or value == "3.5" or value == "3.6" or value == "3.8" or value == "5.0" then
-			toolset("clang-" .. value)
-		end
-	end)
-
 	p.api.register {
 		name = "floatabi",
 		scope = "config",
@@ -701,7 +709,6 @@
 	p.api.addAllowed("vectorextensions", { "NEON", "MXU" })
 	p.api.addAllowed("exceptionhandling", {"UnwindTables"})
 	p.api.addAllowed("kind", p.PACKAGING)
-	p.api.addAllowed("flags", { "NoImplicitLink", "NoCopyLocal", "NoRuntimeChecks" })
 
 	p.api.register {
 		name = "implicitlink",
@@ -714,14 +721,6 @@
 		}
 	}
 
-	p.api.deprecateValue("flags", "NoImplicitLink", "Use `implicitlink` instead.",
-	function(value)
-		implicitlink("Off")
-	end,
-	function(value)
-		implicitlink("Default")
-	end)
-
 	p.api.register {
 		name = "allowcopylocal",
 		scope = "config",
@@ -732,13 +731,6 @@
 			"Off"
 		}
 	}
-
-	p.api.deprecateValue("flags", "NoCopyLocal", "Use `allowcopylocal {}` instead.", function(value)
-		allowcopylocal("Off")
-	end,
-	function(value)
-		allowcopylocal("Default")
-	end)
 
 	p.api.register {
 		name = "runtimechecks",
@@ -752,14 +744,6 @@
 			"FastChecks",
 		}
 	}
-
-	p.api.deprecateValue("flags", "NoRuntimeChecks", "Use `runtimechecks` instead.",
-	function(value)
-		runtimechecks("Off")
-	end,
-	function(value)
-		runtimechecks("Default")
-	end)
 
 --
 -- Decide when the full module should be loaded.

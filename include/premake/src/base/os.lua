@@ -143,10 +143,22 @@
 		end
 	end
 
+---
+-- Attempt to locate and return the path to a header file.
+--
+-- Searches the same well-known system locations as os.findlib(), but replaces any /lib or /bin
+-- components with /include, and also searches in additional headerdirs provided by the caller.
+--
+-- @param headerpath
+--    A partial header file path.
+-- @param headerdirs
+--    Optional; a string or table of additional paths.
+--    If an input is an absolute path, it will be searched directly.
+--    If an input is a relative path, it will be treated as is, relative to the current working directory.
+-- @return
+--    The full path to the directory containing the headerpath if found; `nil` otherwise.
+---
 	function os.findheader(headerpath, headerdirs)
-		-- headerpath: a partial header file path
-		-- headerdirs: additional header search paths
-
 		local paths = get_library_search_path()
 
 		-- replace all /lib and /bin by /include
@@ -162,6 +174,60 @@
 		paths = table.join(userpaths, paths)
 
 		local result = os.pathsearch (headerpath, table.unpack(paths))
+		return result
+	end
+
+---
+-- Attempt to locate and return the path to a header file under additional subdirectories.
+--
+-- Searches the same well-known system locations as os.findheader(), but appends additional
+-- subdirectory paths provided by the caller to the system search paths before searching.
+--
+-- @param headerpath
+--    A partial header file path.
+-- @param additionalpaths
+--    Required; a string or table of additional paths.
+--    If an input is an absolute path, it will be searched directly.
+--    If an input is a relative path, it will be appended to each system search path separately.
+--    If an input is an empty string, the system search paths will be searched (path.join returns the original path).
+-- @return
+--    The full path to the directory containing the headerpath if found; `nil` otherwise.
+---
+	function os.findsubdirheader(headerpath, additionalpaths)
+		if additionalpaths == nil then
+			error("os.findsubdirheader: additionalpaths is required", 2)
+		end
+
+		local paths = get_library_search_path()
+
+		-- replace all /lib and /bin by /include
+		paths = table.translate(paths, function (p) return p:gsub('[/\\]lib[0-9]*', '/include'):gsub('[/\\]bin', '/include') end)
+
+		local userpaths = {}
+
+		if type(additionalpaths) == "string" then
+			userpaths = { additionalpaths }
+		elseif type(additionalpaths) == "table" then
+			userpaths = additionalpaths
+		end
+
+		if #userpaths > 0 then
+			local basepaths = paths
+			local newpaths = {}
+			for _, userpath in ipairs(userpaths) do
+				if path.isabsolute(userpath) then
+					-- absolute path: search directly, same as os.findheader
+					table.insert(newpaths, userpath)
+				else
+					for _, p in ipairs(basepaths) do
+						table.insert(newpaths, path.join(p, userpath))
+					end
+				end
+			end
+			paths = newpaths
+		end
+
+		local result = os.pathsearch(headerpath, table.unpack(paths))
 		return result
 	end
 
@@ -514,6 +580,9 @@
 	function os.remove(f)
 		-- in case of string, just match files
 		if type(f) == "string" then
+			if os.islink(f) then
+				return builtin_remove(f)
+			end
 			local p = os.matchfiles(f)
 			for _, v in pairs(p) do
 				local ok, err, code = builtin_remove(v)
@@ -591,11 +660,11 @@
 			chdir = function(v)
 				return "cd " .. path.normalize(v)
 			end,
-			copy = function(v)
-				return "cp -rf " .. path.normalize(v)
-			end,
 			copyfile = function(v)
 				return "cp -f " .. path.normalize(v)
+			end,
+			copyfileifnewer = function(v)
+				return "cp -u " .. path.normalize(v)
 			end,
 			copydir = function(v)
 				return "cp -rf " .. path.normalize(v)
@@ -657,23 +726,49 @@
 			chdir = function(v)
 				return "chdir " .. path.translate(path.normalize(v))
 			end,
-			copy = function(v)
-				v = path.translate(path.normalize(v))
-
-				-- Detect if there's multiple parts to the input, if there is grab the first part else grab the whole thing
-				local src = string.match(v, '^".-"') or string.match(v, '^.- ') or v
-
-				-- Strip the trailing space from the second condition so that we don't have a space between src and '\\NUL'
-				src = string.match(src, '^.*%S')
-
-				return "IF EXIST " .. src .. "\\ (xcopy /Q /E /Y /I " .. v .. " > nul) ELSE (xcopy /Q /Y /I " .. v .. " > nul)"
-			end,
 			copyfile = function(v)
 				v = path.translate(path.normalize(v))
 				-- XCOPY doesn't have a switch to assume destination is a file when it doesn't exist.
 				-- A trailing * will suppress the prompt but requires the file extensions be the same length.
 				-- Just use COPY instead, it actually works.
 				return "copy /B /Y " .. v
+			end,
+			copyfileifnewer = function(v)
+				-- A trailing * on the destination suppresses xcopy's
+				-- locale-dependent "File or Directory?" prompt (the old
+				-- "echo F |" hack only works on English Windows).
+				--
+				-- A trailing / on the destination marks it as a
+				-- directory; the source filename is appended so xcopy
+				-- sees a file-to-file copy.
+
+				-- Check for trailing / before normalize strips it.
+				local orig_dst = v:match('%S+%s*$') or ''
+				local orig_dst_bare = orig_dst:gsub('"', '')
+				local dst_is_dir = orig_dst_bare:sub(-1) == '/'
+
+				v = path.translate(path.normalize(v), "\\")
+
+				if dst_is_dir then
+					local src = string.match(v, '^".-"') or string.match(v, '^%S+')
+					local src_name = path.getname(src:gsub('"', ''))
+					-- Append source filename inside or outside closing quote.
+					-- Strip any trailing separator that survived translate.
+					if v:sub(-1) == '"' then
+						local base = v:sub(1, -2):gsub('[/\\]$', '')
+						v = base .. '\\' .. src_name .. '"'
+					else
+						v = v:gsub('[/\\]$', '') .. '\\' .. src_name
+					end
+				end
+
+				-- Put * inside the closing quote when the path is quoted.
+				if v:sub(-1) == '"' then
+					v = v:sub(1, -2) .. '*"'
+				else
+					v = v .. "*"
+				end
+				return "xcopy /D /Y " .. v
 			end,
 			copydir = function(v)
 				v = path.translate(path.normalize(v))

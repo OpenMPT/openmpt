@@ -2,7 +2,7 @@
 -- ninja_cpp.lua
 -- Define the ninja cpp functionality
 -- Author: Nick Clark
--- Copyright (c) 2025 Jess Perkins and the Premake project
+-- Copyright (c) 2025-2026 Jess Perkins and the Premake project
 --
 
 local p = premake
@@ -38,36 +38,39 @@ function m.rules(prj)
 	
 	for cfg in project.eachconfig(prj) do
 		local toolset = ninja.gettoolset(cfg)
-		local toolsetKey = tostring(toolset)
+		local toolsetName = ninja.toolsetname(cfg)
 		
-		if not rulesDone[toolsetKey] then
+		if not rulesDone[toolsetName] then
 			m.ccrule(cfg, toolset)
 			m.cxxrule(cfg, toolset)
 			m.resourcerule(cfg, toolset)
 			m.linkrule(cfg, toolset)
 			m.pchrule(cfg, toolset)
-			m.copyrule(cfg, toolset)
-			m.prebuildcommandrule(cfg, toolset)
-			m.prelinkcommandrule(cfg, toolset)
-			m.postbuildcommandrule(cfg, toolset)
-			m.customcommand(cfg, toolset)
-			m.customrule(cfg, toolset, prj)
 			
-			rulesDone[toolsetKey] = true
+			rulesDone[toolsetName] = true
 		end
 	end
+
+	local firstCfg = project.getfirstconfig(prj)
+	m.copyrule(firstCfg)
+	m.prebuildcommandrule(firstCfg)
+	m.prelinkcommandrule(firstCfg)
+	m.postbuildcommandrule(firstCfg)
+	m.customcommand(firstCfg)
+	m.customrule(firstCfg, nil, prj)
 end
 
 function m.ccrule(cfg, toolset)
 	toolset = toolset or ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local ccname = toolset.gettoolname(cfg, "cc")
-	_p("rule cc_%s", cfg.toolset)
+	_p("rule cc_%s", toolsetName)
 
 	if toolset == p.tools.msc then
 		_p("  command = %s $cflags /nologo /showIncludes -c /Tc$in /Fo$out", ccname)
 		_p("  deps = msvc")
 	else
-		_p("  command = %s $cflags -c $in -o $out", ccname)
+		_p("  command = %s $cflags -c $in -o $out -MD -MF $out.d", ccname)
 		_p("  deps = gcc")
 		_p("  depfile = $out.d")
 	end
@@ -79,14 +82,15 @@ end
 
 function m.cxxrule(cfg, toolset)
 	toolset = toolset or ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local cxxname = toolset.gettoolname(cfg, "cxx")
-	_p("rule cxx_%s", cfg.toolset)
+	_p("rule cxx_%s", toolsetName)
 	
 	if toolset == p.tools.msc then
 		_p("  command = %s $cxxflags /nologo /showIncludes -c /Tp$in /Fo$out", cxxname)
 		_p("  deps = msvc")
 	else
-		_p("  command = %s $cxxflags -c $in -o $out", cxxname)
+		_p("  command = %s $cxxflags -c $in -o $out -MD -MF $out.d", cxxname)
 		_p("  deps = gcc")
 		_p("  depfile = $out.d")
 	end
@@ -98,9 +102,10 @@ end
 
 function m.resourcerule(cfg, toolset)
 	toolset = toolset or ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local rcname = toolset.gettoolname(cfg, "rc")
 
-	_p("rule rc_%s", cfg.toolset)
+	_p("rule rc_%s", toolsetName)
 	
 	if toolset == p.tools.msc then
 		_p("  command = %s /nologo /fo$out $in $resflags", rcname)
@@ -114,48 +119,46 @@ end
 
 function m.linkrule(cfg, toolset)
 	toolset = toolset or ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 
 	if toolset == p.tools.msc then
-		if cfg.kind == p.STATICLIB then
-			local arname = toolset.gettoolname(cfg, "ar")
-			_p("rule ar_%s", cfg.toolset)
-			_p("  command = %s $in /nologo -OUT:$out", arname)
-			_p("  description = Archiving static library $out")
-			_p("")
-		else
-			local ldname = toolset.gettoolname(cfg, iif(cfg.language == "C", "cc", "cxx"))
-			_p("rule link_%s", cfg.toolset)
-			_p("  command = %s $in $links /link $ldflags /nologo /out:$out", ldname)
-			_p("  description = Linking target $out")
-			_p("")
-		end
-	else
-		if cfg.kind == p.STATICLIB then
-			local arname = toolset.gettoolname(cfg, "ar")
-			_p("rule ar_%s", cfg.toolset)
-			_p("  command = %s -rcs $out $in", arname)
-			_p("  description = Archiving static library $out")
-			_p("")
-		else
-			local ldname = toolset.gettoolname(cfg, iif(cfg.language == "C", "cc", "cxx"))
-			local commands = string.format("command = %s -o $out $in $links $ldflags", ldname);
-			
-			commands = commands:gsub("(.-)%s*$", "%1")
-			commands = commands:gsub("%s+", " ")
+		local arname = toolset.gettoolname(cfg, "ar")
+		_p("rule ar_%s", toolsetName)
+		_p("  command = %s $in /nologo -OUT:$out", arname)
+		_p("  description = Archiving static library $out")
+		_p("")
 
-			_p("rule link_%s", cfg.toolset)
-			_p("  %s", commands)
-			_p("  description = Linking target $out")
-			_p("")
-		end
+		local ldname = toolset.gettoolname(cfg, iif(cfg.language == "C", "cc", "cxx"))
+		_p("rule link_%s", toolsetName)
+		_p("  command = %s $in $links /link $ldflags /nologo /out:$out", ldname)
+		_p("  description = Linking target $out")
+		_p("")
+	else
+		local arname = toolset.gettoolname(cfg, "ar")
+		_p("rule ar_%s", toolsetName)
+		_p("  command = %s -rcs $out $in", arname)
+		_p("  description = Archiving static library $out")
+		_p("")
+
+		local ldname = toolset.gettoolname(cfg, iif(cfg.language == "C", "cc", "cxx"))
+		local commands = string.format("command = %s -o $out $in $links $ldflags", ldname);
+		
+		commands = commands:gsub("(.-)%s*$", "%1")
+		commands = commands:gsub("%s+", " ")
+
+		_p("rule link_%s", toolsetName)
+		_p("  %s", commands)
+		_p("  description = Linking target $out")
+		_p("")
 	end
 end
 
 function m.pchrule(cfg, toolset)
 	toolset = toolset or ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local pchname = toolset.gettoolname(cfg, cfg.language == "C" and "cc" or "cxx")
 
-	_p("rule pch_%s", cfg.toolset)
+	_p("rule pch_%s", toolsetName)
 	if toolset == p.tools.msc then
 		-- MSVC: /Yc creates the PCH, /Fp specifies output, /Fo specifies obj output
 		_p("  command = %s /nologo /Yc$pchheader /Fp$out /Fo$objdir/ $cflags /c $in", pchname)
@@ -222,6 +225,10 @@ function m.customrule(cfg, toolset, prj)
 	end
 end
 
+local function kindHasOutputFile(kind)
+	return kind == p.STATICLIB or kind == p.SHAREDLIB or kind == p.CONSOLEAPP or kind == p.WINDOWSAPP
+end
+
 local function gatherDepTargets(cfg)
 	local depTargets = {}
 	for _, depname in ipairs(cfg.dependson) do
@@ -229,8 +236,23 @@ local function gatherDepTargets(cfg)
 		if depprj then
 			local depcfg = project.getconfig(depprj, cfg.buildcfg, cfg.platform)
 			if depcfg then
-				local depTarget = path.getrelative(cfg.workspace.location, depcfg.buildtarget.directory) .. "/" .. depcfg.buildtarget.name
-				table.insert(depTargets, depTarget)
+				-- Dependency hierarchy is as follows:
+				-- 1) If the dependent config has post-build commands, depend on the post-build target
+				-- 2) If the dependent config produces an output file (exe/dll/lib), depend on that
+				-- 3) If the dependent config has pre-link commands, depend on the pre-link target
+				-- 4) If the dependent config has pre-build commands, depend on the pre-build target
+				
+				local depTargetEventRoot = path.getrelative(cfg.workspace.location, depcfg.objdir) .. "/" .. depcfg.project.name
+				if depcfg.postbuildcommands and #depcfg.postbuildcommands > 0 then
+					table.insert(depTargets, depTargetEventRoot .. ".postbuild")
+				elseif kindHasOutputFile(depcfg.kind) then
+					local depTarget = path.getrelative(cfg.workspace.location, depcfg.buildtarget.directory) .. "/" .. depcfg.buildtarget.name
+					table.insert(depTargets, depTarget)
+				elseif depcfg.prelinkcommands and #depcfg.prelinkcommands > 0 then
+					table.insert(depTargets, depTargetEventRoot .. ".prelinkevents")
+				elseif depcfg.prebuildcommands and #depcfg.prebuildcommands > 0 then
+					table.insert(depTargets, depTargetEventRoot .. ".prebuild")
+				end
 			end
 		end
 	end
@@ -288,15 +310,7 @@ function m.configurationVariables(cfg)
 	
 	local links = toolset.getlinks(cfg)
 	if #links > 0 then
-		local wksLinks = {}
-		for _, link in ipairs(links) do
-			if not path.isabsolute(link) and link:match('[/\\]') then
-				local absPath = path.join(cfg.project.location, link)
-				link = path.getrelative(cfg.workspace.location, absPath)
-			end
-			table.insert(wksLinks, link)
-		end
-		_p("links_%s = %s", ninja.key(cfg), table.concat(wksLinks, " "))
+		_p("links_%s = %s", ninja.key(cfg), table.concat(links, " "))
 	end
 	
 	_p("objdir_%s = %s", ninja.key(cfg), project.getrelative(cfg.project, cfg.objdir))
@@ -314,7 +328,7 @@ function m.getCFlags(cfg, toolset)
 	flags = table.join(flags, toolFlags)
 	
 	local escaper = p.escaper(p.quote)
-	local defines = toolset.getdefines(cfg.defines)
+	local defines = toolset.getdefines(cfg.defines, cfg)
 	flags = table.join(flags, defines)
 	
 	local undefines = toolset.getundefines(cfg.undefines)
@@ -333,20 +347,32 @@ function m.getCFlags(cfg, toolset)
 	return flags
 end
 
+local function getCompileAsFlag(filecfg, toolset)
+	if filecfg and filecfg.compileas and toolset and toolset.shared and toolset.shared.compileas then
+		if p.languages.isc(filecfg.compileas) then
+			return toolset.shared.compileas["C"]
+		elseif p.languages.iscpp(filecfg.compileas) then
+			return toolset.shared.compileas["C++"]
+		end
+	end
+	return nil
+end
+
 function m.getFileCFlags(cfg, filecfg, toolset)
 	local flags = {}
+	toolset = toolset or ninja.gettoolset(cfg)
+	local compileasFlag = getCompileAsFlag(filecfg, toolset)
 
-	if filecfg.cdialect and filecfg.cdialect ~= cfg.cdialect then
-		local toolFlags = toolset.getcflags(filecfg)
-		flags = table.join(flags, toolFlags)
-	else
-		local toolFlags = toolset.getcflags(cfg)
-		flags = table.join(flags, toolFlags)
+	local proxy = p.fileconfig.proxy(cfg, filecfg)
+	local toolFlags = toolset.getcflags(proxy)
+	if compileasFlag then
+		toolFlags = table.filter(toolFlags, function(flag) return flag ~= compileasFlag end)
 	end
+	flags = table.join(flags, toolFlags)
 	
 	local allDefines = table.join(cfg.defines or {}, filecfg.defines or {})
 	local escaper = p.escaper(p.quote)
-	local defines = toolset.getdefines(allDefines)
+	local defines = toolset.getdefines(allDefines, proxy)
 	flags = table.join(flags, defines)
 
 	local allUndefines = table.join(cfg.undefines or {}, filecfg.undefines or {})
@@ -360,7 +386,8 @@ function m.getFileCFlags(cfg, filecfg, toolset)
 	local includedirs = toolset.getincludedirs(cfg, allIncludedirs, allExternalIncludedirs, allFrameworkdirs, allIncludedirsafter)
 	flags = table.join(flags, includedirs)
 	
-	local forceincludes = toolset.getforceincludes(filecfg)
+	local allForceincludes = table.join(cfg.forceincludes or {}, filecfg.forceincludes or {})
+	local forceincludes = toolset.getforceincludes({ project = cfg.project, forceincludes = allForceincludes })
 	flags = table.join(flags, forceincludes)
 
 	local allBuildopts = table.join(cfg.buildoptions or {}, filecfg.buildoptions or {})
@@ -379,7 +406,7 @@ function m.getCxxFlags(cfg, toolset)
 	flags = table.join(flags, toolFlags)
 
 	local escaper = p.escaper(p.quote)
-	local defines = toolset.getdefines(cfg.defines)
+	local defines = toolset.getdefines(cfg.defines, cfg)
 	flags = table.join(flags, defines)
 
 	local undefines = toolset.getundefines(cfg.undefines)
@@ -401,18 +428,19 @@ end
 
 function m.getFileCxxFlags(cfg, filecfg, toolset)
 	local flags = {}
+	toolset = toolset or ninja.gettoolset(cfg)
+	local compileasFlag = getCompileAsFlag(filecfg, toolset)
 
-	if filecfg.cppdialect and filecfg.cppdialect ~= cfg.cppdialect then
-		local toolFlags = toolset.getcxxflags(filecfg)
-		flags = table.join(flags, toolFlags)
-	else
-		local toolFlags = toolset.getcxxflags(cfg)
-		flags = table.join(flags, toolFlags)
+	local proxy = p.fileconfig.proxy(cfg, filecfg)
+	local toolFlags = toolset.getcxxflags(proxy)
+	if compileasFlag then
+		toolFlags = table.filter(toolFlags, function(flag) return flag ~= compileasFlag end)
 	end
+	flags = table.join(flags, toolFlags)
 	
 	local allDefines = table.join(cfg.defines or {}, filecfg.defines or {})
 	local escaper = p.escaper(p.quote)
-	local defines = toolset.getdefines(allDefines)
+	local defines = toolset.getdefines(allDefines, proxy)
 	flags = table.join(flags, defines)
 
 	local allUndefines = table.join(cfg.undefines or {}, filecfg.undefines or {})
@@ -426,7 +454,8 @@ function m.getFileCxxFlags(cfg, filecfg, toolset)
 	local includedirs = toolset.getincludedirs(cfg, allIncludedirs, allExternalIncludedirs, allFrameworkdirs, allIncludedirsafter)
 	flags = table.join(flags, includedirs)
 	
-	local forceincludes = toolset.getforceincludes(filecfg)
+	local allForceincludes = table.join(cfg.forceincludes or {}, filecfg.forceincludes or {})
+	local forceincludes = toolset.getforceincludes({ project = cfg.project, forceincludes = allForceincludes })
 	flags = table.join(flags, forceincludes)
 
 	local allBuildopts = table.join(cfg.buildoptions or {}, filecfg.buildoptions or {})
@@ -437,73 +466,26 @@ function m.getFileCxxFlags(cfg, filecfg, toolset)
 	return flags
 end
 
-function m.hasPerFileConfiguration(cfg, filecfg)
-	if filecfg.defines and #filecfg.defines > 0 then
-		local parentDefines = cfg.defines or {}
-		if #filecfg.defines ~= #parentDefines then
+function m.hasPerFileConfiguration(cfg, filecfg, rule)
+	if not filecfg then
+		return false
+	end
+	
+	local toolset = ninja.gettoolset(cfg)
+	if not rule or rule == "cc" then
+		local cflagsBase = table.concat(m.getCFlags(cfg, toolset), " ")
+		local cflagsFile = table.concat(m.getFileCFlags(cfg, filecfg, toolset), " ")
+		if cflagsBase ~= cflagsFile then
 			return true
 		end
-		for i, define in ipairs(filecfg.defines) do
-			if define ~= parentDefines[i] then
-				return true
-			end
-		end
 	end
-	
-	if filecfg.undefines and #filecfg.undefines > 0 then
-		local parentUndefines = cfg.undefines or {}
-		if #filecfg.undefines ~= #parentUndefines then
+
+	if not rule or rule == "cxx" then
+		local cxxflagsBase = table.concat(m.getCxxFlags(cfg, toolset), " ")
+		local cxxflagsFile = table.concat(m.getFileCxxFlags(cfg, filecfg, toolset), " ")
+		if cxxflagsBase ~= cxxflagsFile then
 			return true
 		end
-		for i, undefine in ipairs(filecfg.undefines) do
-			if undefine ~= parentUndefines[i] then
-				return true
-			end
-		end
-	end
-	
-	if filecfg.buildoptions and #filecfg.buildoptions > 0 then
-		local parentBuildopts = cfg.buildoptions or {}
-		if #filecfg.buildoptions ~= #parentBuildopts then
-			return true
-		end
-		for i, opt in ipairs(filecfg.buildoptions) do
-			if opt ~= parentBuildopts[i] then
-				return true
-			end
-		end
-	end
-	
-	if filecfg.includedirs and #filecfg.includedirs > 0 then
-		local parentIncludedirs = cfg.includedirs or {}
-		if #filecfg.includedirs ~= #parentIncludedirs then
-			return true
-		end
-		for i, dir in ipairs(filecfg.includedirs) do
-			if dir ~= parentIncludedirs[i] then
-				return true
-			end
-		end
-	end
-	
-	if filecfg.externalincludedirs and #filecfg.externalincludedirs > 0 then
-		local parentExternalIncludedirs = cfg.externalincludedirs or {}
-		if #filecfg.externalincludedirs ~= #parentExternalIncludedirs then
-			return true
-		end
-		for i, dir in ipairs(filecfg.externalincludedirs) do
-			if dir ~= parentExternalIncludedirs[i] then
-				return true
-			end
-		end
-	end
-	
-	if filecfg.cdialect and filecfg.cdialect ~= cfg.cdialect then
-		return true
-	end
-	
-	if filecfg.cppdialect and filecfg.cppdialect ~= cfg.cppdialect then
-		return true
 	end
 	
 	return false
@@ -521,7 +503,10 @@ function m.getLdFlags(cfg, toolset)
 	
 	local libdirs = toolset.getLibraryDirectories(cfg)
 	flags = table.join(flags, libdirs)
-	
+
+	local sections = toolset.getsections(cfg)
+	flags = table.join(flags, sections)
+
 	if toolset.getrunpathdirs then
 		local runpathdirs = table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))
 		local rpaths = toolset.getrunpathdirs(cfg, runpathdirs)
@@ -557,6 +542,7 @@ function m.buildPch(cfg)
 	end
 	
 	local toolset = ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local pchPath = m.getPchPath(cfg)
 	local depfile = pchPath .. ".d"
 	
@@ -565,8 +551,8 @@ function m.buildPch(cfg)
 	end
 	
 	local implicitDeps = ""
-	if cfg._dependsOnTarget then
-		implicitDeps = " | " .. cfg._dependsOnTarget
+	if cfg._dependsOnTargets then
+		implicitDeps = " | " .. table.concat(cfg._dependsOnTargets, " ")
 	end
 	
 	if toolset == p.tools.msc then
@@ -581,7 +567,7 @@ function m.buildPch(cfg)
 		
 		local wksRelPchPath = path.getrelative(cfg.workspace.location, path.join(cfg.project.location, pchPath))
 		
-		_p("build %s | %s: pch_%s %s%s", wksRelPchPath, objFile, cfg.toolset, relPath, implicitDeps)
+		_p("build %s | %s: pch_%s %s%s", wksRelPchPath, objFile, toolsetName, relPath, implicitDeps)
 		_p("  pchheader = %s", cfg.pchheader)
 		_p("  objdir = %s", objdir)
 		if cfg.language == "C" then
@@ -596,8 +582,8 @@ function m.buildPch(cfg)
 		local relPath
 		
 		if pch then
-			local headerPath = path.getabsolute(path.join(cfg.project.location, pch))
-			relPath = path.getrelative(cfg.workspace.location, headerPath)
+			-- pch is workspace-relative because ninja.getrelative is active when this runs
+			relPath = pch
 		else
 			relPath = cfg.pchheader
 		end
@@ -605,7 +591,7 @@ function m.buildPch(cfg)
 		local wksRelPchPath = path.getrelative(cfg.workspace.location, path.join(cfg.project.location, pchPath))
 		local wksRelPchDepPath = path.getrelative(cfg.workspace.location, path.join(cfg.project.location, depfile))
 		
-		_p("build %s | %s: pch_%s %s%s", wksRelPchPath, wksRelPchDepPath, cfg.toolset, relPath, implicitDeps)
+		_p("build %s | %s: pch_%s %s%s", wksRelPchPath, wksRelPchDepPath, toolsetName, relPath, implicitDeps)
 		
 		if cfg.language == "C" then
 			_p("  cflags = $cflags_%s", ninja.key(cfg))
@@ -766,7 +752,15 @@ function m.buildFile(cfg, node, filecfg, objFile, pchFile, prebuildTarget)
 	local flags = ""
 	local extraFlags = {}
 	local toolset = ninja.gettoolset(cfg)
-	local hasPerFileConfig = m.hasPerFileConfiguration(cfg, filecfg)
+	local toolsetName = ninja.toolsetname(cfg)
+	local assemblyFile
+	if toolset.getassemblyflags then
+		local assemblyCfg = filecfg.generateassembly and filecfg or cfg
+		if toolset.getassemblyoutput then
+			assemblyFile = toolset.getassemblyoutput(assemblyCfg, objFile)
+		end
+		table.insertflat(extraFlags, toolset.getassemblyflags(assemblyCfg, assemblyFile and p.quoted(assemblyFile)))
+	end
 	
 	if filecfg and filecfg.compileas and filecfg.compileas ~= "Default" then
 		if p.languages.isc(filecfg.compileas) then
@@ -826,44 +820,48 @@ function m.buildFile(cfg, node, filecfg, objFile, pchFile, prebuildTarget)
 				implicitDeps = implicitDeps .. " " .. output
 			end
 		end
-		
-		if not prebuildTarget and (not cfg._customRuleOutputs or #cfg._customRuleOutputs == 0) then
-			-- Use pre-computed dependency targets if available, otherwise compute them inline
-			local depTargets = cfg._dependsOnTargets
-			if not depTargets and cfg.dependson and #cfg.dependson > 0 then
-				depTargets = gatherDepTargets(cfg)
+
+		-- Check if there are any dependson targets and add them as implicit dependencies
+		if cfg._dependsOnTargets then
+			if implicitDeps == "" then
+				implicitDeps = " |"
 			end
-			
-			if depTargets then
-				if implicitDeps == "" then
-					implicitDeps = " |"
-				end
-				for _, depTarget in ipairs(depTargets) do
-					implicitDeps = implicitDeps .. " " .. depTarget
-				end
-			end
+			implicitDeps = implicitDeps .. " " .. table.concat(cfg._dependsOnTargets, " ")
 		end
 		
-		_p("build %s: %s_%s %s%s", objFile, rule, cfg.toolset, relPath, implicitDeps)
+		local implicitOutput = ""
+		if assemblyFile then
+			implicitOutput = " | " .. assemblyFile
+		end
+		_p("build %s%s: %s_%s %s%s", objFile, implicitOutput, rule, toolsetName, relPath, implicitDeps)
 		
 		if usePch then
 			if toolset == p.tools.msc then
 				table.insert(extraFlags, "/Yu" .. cfg.pchheader)
 				local pchPath = m.getPchPath(cfg)
 				if pchPath then
-					table.insert(extraFlags, "/Fp" .. pchPath)
+					local wksRelPchPath = path.getrelative(cfg.workspace.location, path.join(cfg.project.location, pchPath))
+					table.insert(extraFlags, "/Fp" .. wksRelPchPath)
 				end
 			else
 				local pch = toolset.getpch(cfg)
 				if pch then
-					local objdir = path.getrelative(cfg.project.location, cfg.objdir)
+					local objdir = path.getrelative(cfg.workspace.location, cfg.objdir)
 					local pchPlaceholder = objdir .. "/" .. path.getname(pch)
+					-- Add the directory containing the PCH header to the search path so
+					-- #include "pch.h" in source files can be resolved when building from
+					-- the workspace root (where the project subdirectory is not in the path).
+					local pchDir = path.getdirectory(pch)
+					if pchDir and pchDir ~= "" and pchDir ~= "." then
+						table.insert(extraFlags, "-I " .. pchDir)
+					end
 					table.insert(extraFlags, "-include " .. pchPlaceholder)
 				end
 			end
 		end
 		
 		-- If the file has per-file configuration, generate flags directly rather than using variables
+		local hasPerFileConfig = m.hasPerFileConfiguration(cfg, filecfg, rule)
 		if hasPerFileConfig then
 			local fileFlags = {}
 			if rule == "cc" then
@@ -980,16 +978,16 @@ function m.checkCustomRuleFile(cfg, node, filecfg, outputTracking)
 		end
 	end
 	
-	if cfg._dependsOnTarget and not cfg._hasPrebuild then
+	if cfg._dependsOnTargets and not cfg._hasPrebuild then
 		if deps == "" then
 			deps = " |"
 		end
-		deps = deps .. " " .. cfg._dependsOnTarget
+		deps = deps .. " " .. table.concat(cfg._dependsOnTargets, " ")
 	end
 	
 	local commands = {}
 	if buildcommands then
-		local translatedCommands = os.translateCommandsAndPaths(buildcommands, cfg.project.basedir, cfg.project.location)
+		local translatedCommands = os.translateCommandsAndPaths(buildcommands, cfg.workspace.basedir, cfg.workspace.location)
 		for _, cmd in ipairs(translatedCommands) do
 			table.insert(commands, cmd)
 		end
@@ -1027,7 +1025,7 @@ local function buildCommandString(cmds, message, touchFile)
 	elseif shell == "cmd" then
 		local joined = table.concat(allcmds, " && ")
 		-- Escape double quotes
-		joined = joined:gsub('"', '\\"')
+		joined = joined:gsub('"', '^"')
 		return "cmd /C \"" .. joined .. "\""
 	else
 		return table.concat(allcmds, " && ")
@@ -1093,7 +1091,7 @@ function m.buildCustomFile(cfg, node, filecfg, outputTracking)
 		end
 	end
 	
-	local commands = os.translateCommandsAndPaths(filecfg.buildcommands, cfg.project.basedir, cfg.project.location)
+	local commands = os.translateCommandsAndPaths(filecfg.buildcommands, cfg.workspace.basedir, cfg.workspace.location)
 	local cmdStr = buildCommandString(commands, nil, nil)
 	
 	_p("build %s: custom %s%s", table.concat(outputs, " "), relPath, deps)
@@ -1122,6 +1120,7 @@ function m.linkTarget(cfg)
 	end
 	
 	local toolset = ninja.gettoolset(cfg)
+	local toolsetName = ninja.toolsetname(cfg)
 	local targetPath = path.getrelative(cfg.workspace.location, cfg.buildtarget.directory) .. "/" .. cfg.buildtarget.name
 	
 	local prelinkTarget = m.buildPreLinkEvents(cfg, cfg._objectFiles)
@@ -1131,13 +1130,7 @@ function m.linkTarget(cfg)
 	local deps = config.getlinks(cfg, "siblings", "fullpath")
 	local implicitDeps = ""
 	if #deps > 0 then
-		local wksRelDeps = {}
-		for _, dep in ipairs(deps) do
-			local absPath = path.join(cfg.project.location, dep)
-			local relDep = path.getrelative(cfg.workspace.location, absPath)
-			table.insert(wksRelDeps, relDep)
-		end
-		implicitDeps = " | " .. table.concat(wksRelDeps, " ")
+		implicitDeps = " | " .. table.concat(deps, " ")
 	end
 	
 	-- Use pre-computed dependency targets if available, otherwise compute them inline
@@ -1181,10 +1174,21 @@ function m.linkTarget(cfg)
 	-- for the .lib file
 	-- If this is on windows and building a shared library, emit a exp file as an implicit output
 	if cfg.system == p.WINDOWS and cfg.kind == p.SHAREDLIB then
-		local expFileName = cfg.buildtarget.name:gsub("%..-$", "") .. ".exp"
-		if expFileName then
-			local expFilePath = path.getrelative(cfg.workspace.location, cfg.buildtarget.directory) .. "/" .. expFileName
-			table.insert(implicitoutputs, expFilePath)
+		-- exp files are only required with link.exe
+		-- If using MSVC or clang with link as the linker, emit the exp file
+		local shouldEmitExp = false
+		if toolset == p.tools.msc then
+			shouldEmitExp = true
+		elseif toolset == p.tools.clang and toolset.linker == "link" then
+			shouldEmitExp = true
+		end
+
+		if shouldEmitExp then
+			local expFileName = cfg.buildtarget.name:gsub("%..-$", "") .. ".exp"
+			if expFileName then
+				local expFilePath = path.getrelative(cfg.workspace.location, cfg.buildtarget.directory) .. "/" .. expFileName
+				table.insert(implicitoutputs, expFilePath)
+			end
 		end
 
 		if cfg.useimportlib ~= p.OFF then
@@ -1197,9 +1201,9 @@ function m.linkTarget(cfg)
 	end
 	
 	if #implicitoutputs > 0 then
-		_p("build %s | %s: %s_%s %s%s", targetPath, table.concat(implicitoutputs, " "), rule, cfg.toolset, table.concat(cfg._objectFiles, " "), implicitDeps)
+		_p("build %s | %s: %s_%s %s%s", targetPath, table.concat(implicitoutputs, " "), rule, toolsetName, table.concat(cfg._objectFiles, " "), implicitDeps)
 	else
-		_p("build %s: %s_%s %s%s", targetPath, rule, cfg.toolset, table.concat(cfg._objectFiles, " "), implicitDeps)
+		_p("build %s: %s_%s %s%s", targetPath, rule, toolsetName, table.concat(cfg._objectFiles, " "), implicitDeps)
 	end
 	
 	if cfg.kind ~= p.STATICLIB then
@@ -1209,6 +1213,10 @@ function m.linkTarget(cfg)
 		if #links > 0 then
 			_p("  links = $links_%s", ninja.key(cfg))
 		end
+	end
+
+	if cfg.kind == p.SHAREDLIB then
+		_p("  restat = 1")
 	end
 	
 	if hasPostBuild then
@@ -1227,8 +1235,8 @@ function m.buildPreBuildEvents(cfg)
 	local prebuildTarget = path.getrelative(cfg.workspace.location, cfg.objdir) .. "/" .. cfg.project.name .. ".prebuild"
 
 	local implicitDeps = ""
-	if cfg._dependsOnTarget then
-		implicitDeps = " | " .. cfg._dependsOnTarget
+	if cfg._dependsOnTargets then
+		implicitDeps = " | " .. table.concat(cfg._dependsOnTargets, " ")
 	end
 	
 	if hasMessage and not hasCommands then
@@ -1237,7 +1245,7 @@ function m.buildPreBuildEvents(cfg)
 		_p("build %s: prebuild%s", prebuildTarget, implicitDeps)
 		_p("  prebuildcommands = %s", cmdstr)
 	else
-		local commands = os.translateCommandsAndPaths(cfg.prebuildcommands, cfg.project.basedir, cfg.project.location)
+		local commands = os.translateCommandsAndPaths(cfg.prebuildcommands, cfg.workspace.basedir, cfg.workspace.location)
 		local cmdstr = buildCommandString(commands, cfg.prebuildmessage, prebuildTarget)
 		_p("build %s: prebuild%s", prebuildTarget, implicitDeps)
 		_p("  prebuildcommands = %s", cmdstr)
@@ -1267,7 +1275,7 @@ function m.buildPreLinkEvents(cfg, objectFiles)
 		_p("build %s: prelink%s", prelinkTarget, objDeps)
 		_p("  prelinkcommands = %s", cmdstr)
 	else
-		local commands = os.translateCommandsAndPaths(cfg.prelinkcommands, cfg.project.basedir, cfg.project.location)
+		local commands = os.translateCommandsAndPaths(cfg.prelinkcommands, cfg.workspace.basedir, cfg.workspace.location)
 		local cmdstr = buildCommandString(commands, cfg.prelinkmessage, prelinkTarget)
 
 		_p("build %s: prelink%s", prelinkTarget, objDeps)
@@ -1292,7 +1300,7 @@ function m.buildPostBuildEvents(cfg, targetPath)
 		_p("build %s: postbuild | %s", postbuildPhony, targetPath)
 		_p("  postbuildcommands = %s", cmdstr) 
 	else
-		local commands = os.translateCommandsAndPaths(cfg.postbuildcommands, cfg.project.basedir, cfg.project.location)
+		local commands = os.translateCommandsAndPaths(cfg.postbuildcommands, cfg.workspace.basedir, cfg.workspace.location)
 		local cmdstr = buildCommandString(commands, cfg.postbuildmessage, postbuildPhony)
 		_p("build %s: postbuild | %s", postbuildPhony, targetPath)
 		_p("  postbuildcommands = %s", cmdstr)
@@ -1329,7 +1337,7 @@ function m.projectPhonies(prj)
 		
 		local hasPostBuild = #firstCfg.postbuildcommands > 0 or firstCfg.postbuildmessage
 		if hasPostBuild then
-			local postbuildTarget = path.getrelative(firstCfg.workspace.location, firstCfg.buildtarget.directory) .. "/" .. firstCfg.project.name .. ".postbuild"
+			local postbuildTarget = path.getrelative(firstCfg.workspace.location, firstCfg.objdir) .. "/" .. firstCfg.project.name .. ".postbuild"
 			_p("build %s: phony %s", prj.name, postbuildTarget)
 		else
 			_p("build %s: phony %s", prj.name, targetPath)

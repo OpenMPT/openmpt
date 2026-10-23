@@ -52,11 +52,25 @@
 --
 -- Returns list of C compiler flags for a configuration.
 --
+	gcc.generateassembly = {
+		generateassembly = {
+			On = "-save-temps=obj",
+			Verbose = { "-save-temps=obj", "-fverbose-asm" },
+		},
+	}
+
+	function gcc.getassemblyflags(cfg)
+		return config.mapFlags(cfg, gcc.generateassembly)
+	end
+
 	gcc.shared = {
 		architecture = {
 			x86 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch i386", "-m32") end,
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
 			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
+		},
+		characterset = {
+			Unicode = function (cfg) return iif(cfg.system == p.WINDOWS, { "-D_UNICODE", "-DUNICODE", "-municode" }, {}) end,
 		},
 		fatalwarnings = {
 			All = "-Werror",
@@ -70,8 +84,8 @@
 			Strict = "-ffloat-store",
 		},
 		linktimeoptimization = {
-			On = "-flto",
-			Fast = "-flto",
+			On = "-flto=auto",
+			Fast = "-flto=auto",
 		},
 		strictaliasing = {
 			Off = "-fno-strict-aliasing",
@@ -96,6 +110,7 @@
 		vectorextensions = {
 			AVX = "-mavx",
 			AVX2 = "-mavx2",
+			AVX512 = "-mavx512f",
 			SSE = "-msse",
 			SSE2 = "-msse2",
 			SSE3 = "-msse3",
@@ -169,9 +184,6 @@
 			Hidden = "-fvisibility=hidden",
 			Internal = "-fvisibility=internal",
 			Protected = "-fvisibility=protected",
-		},
-		inlinesvisibility = {
-			Hidden = "-fvisibility-inlines-hidden"
 		},
 		profile = {
 			On = "-pg",
@@ -259,6 +271,8 @@
 			["C++20"] = "-std=c++20",
 			["C++2b"] = "-std=c++2b",
 			["C++23"] = "-std=c++23",
+			["C++2c"] = "-std=c++2c",
+			["C++26"] = "-std=c++26",
 			["gnu++98"] = "-std=gnu++98",
 			["gnu++0x"] = "-std=gnu++0x",
 			["gnu++11"] = "-std=gnu++11",
@@ -270,6 +284,8 @@
 			["gnu++20"] = "-std=gnu++20",
 			["gnu++2b"] = "-std=gnu++2b",
 			["gnu++23"] = "-std=gnu++23",
+			["gnu++2c"] = "-std=gnu++2c",
+			["gnu++26"] = "-std=gnu++26",
 			["C++latest"] = "-std=c++23",
 		},
 		buffersecuritycheck = {
@@ -278,6 +294,9 @@
 		},
 		rtti = {
 			Off = "-fno-rtti"
+		},
+		inlinesvisibility = {
+			Hidden = "-fvisibility-inlines-hidden"
 		}
 	}
 
@@ -355,32 +374,86 @@
 --    An array of symbols with the appropriate flag decorations.
 --
 
-	function gcc.getincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
+	function gcc.getstructuredincludedirs(cfg, dirs, extdirs, frameworkdirs, includedirsafter)
 		local result = {}
 		for _, dir in ipairs(dirs) do
 			dir = p.tools.getrelative(cfg.project, dir)
-			table.insert(result, '-I' .. p.quoted(dir))
+			table.insert(result, { flag = '-I', value = dir })
 		end
 
 		if table.contains(os.getSystemTags(cfg.system), "darwin") then
 			for _, dir in ipairs(frameworkdirs or {}) do
 				dir = p.tools.getrelative(cfg.project, dir)
-				table.insert(result, '-F' .. p.quoted(dir))
+				table.insert(result, { flag = '-F', value = dir })
 			end
 		end
 
 		for _, dir in ipairs(extdirs or {}) do
 			dir = p.tools.getrelative(cfg.project, dir)
-			table.insert(result, '-isystem ' .. p.quoted(dir))
+			table.insert(result, { flag = '-isystem', value = dir })
 		end
 
 		for _, dir in ipairs(includedirsafter or {}) do
 			dir = p.tools.getrelative(cfg.project, dir)
-			table.insert(result, '-idirafter ' .. p.quoted(dir))
+			table.insert(result, { flag = '-idirafter', value = dir })
 		end
 
 		return result
 	end
+
+
+	function gcc.getincludedirs(cfg, dirs, extdirs, frameworkdirs, incdirsafter)
+		local result = gcc.getstructuredincludedirs(cfg, dirs, extdirs, frameworkdirs, incdirsafter)
+		return table.translate(result, function(kv)
+			return kv.flag .. p.quoted(kv.value)
+		end)
+	end
+
+
+	function gcc.getstructuredimplicitincludedirs(cfg, toolname, language)
+		local cmd = nil
+
+		if language == "C" then
+			cmd = toolname .. " -v -E -x c " .. iif(os.istarget("windows"), "nul", "/dev/null")
+		elseif language == "C++" then
+			cmd = toolname .. " -v -E -x c++ " .. iif(os.istarget("windows"), "nul", "/dev/null")
+		else
+			p.warn("Unsupported language '%s' for implicit include directories", language)
+			return {}
+		end
+
+		local stdout, stderr = os.outputof(cmd, "both")
+		if not stdout or not stderr then
+			p.warn("Failed to execute command '%s' to get implicit include directories", cmd)
+			return {}
+		end
+
+		-- Lines between "#include <...> search starts here:" and "End of search list." are the implicit include directories
+		local result = {}
+		local inSearchList = false
+		for line in stdout:gmatch("[^\r\n]+") do
+			if line:find("#include <...> search starts here:") then
+				inSearchList = true
+			elseif line:find("End of search list.") then
+				inSearchList = false
+			elseif inSearchList then
+				local trimmed = line:match("^%s*(.-)%s*$") -- trim whitespace
+				
+				-- If on windows, replace backslashes with forward slashes to normalize the paths
+				if os.istarget("windows") then
+					trimmed = trimmed:gsub("\\", "/")
+				end
+
+				table.insert(result, {
+					flag = '-isystem',
+					value = trimmed
+				})
+			end
+		end
+
+		return result
+	end
+
 
 	-- relative pch file path if any
 	function gcc.getpch(cfg)
@@ -438,7 +511,8 @@
 		mode = iif (mode == nil, "linker", mode)
 
 		if not (table.contains(os.getSystemTags(cfg.system), "darwin")
-				or (cfg.system == p.LINUX)) then
+				or (cfg.system == p.LINUX)
+				or table.contains(os.getSystemTags(cfg.system), "bsd")) then
 			return result
 		end
 
@@ -455,7 +529,7 @@
 			else
 				if table.contains(os.getSystemTags(cfg.system), "darwin") then
 					rpath = "@loader_path/" .. rpath
-				elseif (cfg.system == p.LINUX) then
+				else
 					rpath = iif(rpath == ".", "", "/" .. rpath)
 					rpath = "$$ORIGIN" .. rpath
 				end
@@ -468,9 +542,26 @@
 			end
 		end
 
+		if mode == "linker" and #result > 0 and table.contains(os.getSystemTags(cfg.system), "bsd") then
+			table.insert(result, "-Wl,-z,origin") -- DragonFly and OpenBSD up to 7.9 only expand $ORIGIN if DF_ORIGIN is set.
+		end
+
 		return result
 	end
 
+--
+-- get the link-time file embedding flags
+--
+	function gcc.getsections(cfg)
+		local result = {}
+		if table.contains(os.getSystemTags(cfg.system), "darwin") then
+			if cfg.infoplist then
+				local relative = p.tools.getrelative(cfg.project, cfg.infoplist)
+				table.insert(result, "-Wl,-sectcreate,__TEXT,__info_plist," .. p.quoted(relative))
+			end
+		end
+		return result
+	end
 --
 -- get the right output flag.
 --
@@ -506,6 +597,9 @@
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
 			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
+		characterset = {
+			Unicode = function (cfg) return iif(cfg.system == p.WINDOWS, { "-municode" }, {}) end,
+		},
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
 		},
@@ -515,7 +609,7 @@
 				local r = { gcc.getsharedlibarg(cfg) }
 				if cfg.system == p.WINDOWS and cfg.useimportlib ~= p.OFF then
 					table.insert(r, '-Wl,--out-implib="' .. cfg.linktarget.relpath .. '"')
-				elseif cfg.system == p.LINUX then
+				elseif cfg.system == p.LINUX or table.contains(os.getSystemTags(cfg.system), "bsd") then
 					table.insert(r, '-Wl,-soname=' .. p.quoted(cfg.linktarget.name))
 				elseif table.contains(os.getSystemTags(cfg.system), "darwin") then
 					table.insert(r, '-Wl,-install_name,' .. p.quoted('@rpath/' .. cfg.linktarget.name))
@@ -541,6 +635,9 @@
 		profile = {
 			On = "-pg",
 		},
+		openmp = {
+			On = "-fopenmp"
+		},
 		sanitize = {
 			Address = "-fsanitize=address",
 			Thread = "-fsanitize=thread",
@@ -555,8 +652,22 @@
 		}
 	}
 
+	function gcc.wholearchive(cfg)
+		if cfg.system == p.MACOSX then
+			return table.translate(config.getwholearchive(cfg), function(libraryname) return "-force_load " .. libraryname end)
+		else
+			if #cfg.wholearchive == 0 then
+				return {}
+			end
+			return table.join({ "-Wl,--whole-archive" }, config.getwholearchive(cfg), { "-Wl,--no-whole-archive" })
+		end
+	end
+
 	function gcc.getldflags(cfg)
 		local flags = config.mapFlags(cfg, gcc.ldflags)
+
+		flags = table.join(flags, gcc.wholearchive(cfg))
+
 		return flags
 	end
 
@@ -635,7 +746,7 @@
 
 		if not systemonly then
 			if cfg.userelativelinks == p.ON then
-				local libFiles = config.getlinks(cfg, "siblings", "basename")
+				local libFiles = config.getlinks(cfg, "siblings", "basename", nil, true)
 				for _, link in ipairs(libFiles) do
 					if string.startswith(link, "lib") then
 						link = link:sub(4)
@@ -646,12 +757,12 @@
 				-- Don't use the -l form for sibling libraries, since they may have
 				-- custom prefixes or extensions that will confuse the linker. Instead
 				-- just list out the full relative path to the library.
-				result = config.getlinks(cfg, "siblings", "fullpath")
+				result = config.getlinks(cfg, "siblings", "fullpath", nil, true)
 			end
 		end
 
 		-- The "-l" flag is fine for system libraries
-		local links = config.getlinks(cfg, "system", "fullpath")
+		local links = config.getlinks(cfg, "system", "fullpath", nil, true)
 		local static_syslibs = {"-Wl,-Bstatic"}
 		local shared_syslibs = {}
 
@@ -732,7 +843,8 @@
 	gcc.tools = {
 		cc = "gcc",
 		cxx = "g++",
-		ar = "ar",
+		-- Apple's ar does not support the GCC LTO object format and is not part of the GNU toolchain.
+		ar = function(cfg) return iif(cfg.system == p.MACOSX, "gcc-ar", "ar") end,
 		rc = "windres"
 	}
 
@@ -743,9 +855,31 @@
 		else
 			version = ""
 		end
-		return (cfg.gccprefix or "") .. gcc.tools[tool] .. version
+
+		local value = gcc.tools[tool]
+		if type(value) == "function" then
+			value = value(cfg)
+		end
+		return (cfg.gccprefix or "") .. value .. version
 	end
 
 	function gcc.gettooloutputext(tool)
 		return iif(tool == "rc", ".res", ".o")
+	end
+
+	function gcc.gettoolflags(cfg, tool, input, output, depfile)
+		if tool == "rc" then
+			return string.format('%s -O coff -o %s', input, output)
+		end
+		return string.format('-o %s -MF %s -c %s', output, depfile, input)
+	end
+
+	function gcc.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
+		if cfg.kind == p.STATICLIB then
+			if cfg.architecture == p.UNIVERSAL then
+				return string.format('libtool -o %s %s', output, objects)
+			end
+			return string.format('%s -rcs %s %s', linker, output, objects)
+		end
+		return string.format('%s -o %s %s %s %s %s', linker, output, objects, resources, ldflags, libs)
 	end

@@ -4,10 +4,12 @@ DIR=$( cd "$( dirname "$0" )" && pwd )
 cd "$DIR"
 
 COSMO_FLAG=""
+NINJA_FLAG=""
 for arg in "$@"; do
   if [ "$arg" = "-cosmo" ]; then
     COSMO_FLAG="cosmo"
-    break
+  elif [ "$arg" = "-ninja" ]; then
+    NINJA_FLAG="-ninja"
   fi
 done
 
@@ -17,8 +19,13 @@ PREMAKE_OPTS_ARG=""
 SYSTEM=$(uname -s)
 
 # If the user has not explicitly selected an architecture, select one automatically
-if [ -z "$PLATFORM" ] && [ "$SYSTEM" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
-  PLATFORM="ARM64"
+if [ -z "$PLATFORM" ] && [ "$SYSTEM" = "Darwin" ]; then
+  OSX_ARCH=$(uname -m)
+  if [ "$OSX_ARCH" = "arm64" ]; then
+    PLATFORM="ARM64"
+  elif [ "$OSX_ARCH" = "x86_64" ]; then
+    PLATFORM="x64"
+  fi
 fi
 
 if [ -n "$PLATFORM" ]; then
@@ -38,11 +45,11 @@ fi
 case "${SYSTEM}" in
    Linux)
      NPROC=$(nproc --all)
-     make -f Bootstrap.mak ${COSMO_FLAG:-linux} $PLATFORM_ARG $CONFIG_ARG "$PREMAKE_OPTS_ARG" -j$NPROC
+     make -f Bootstrap.mak ${COSMO_FLAG:-linux$NINJA_FLAG} $PLATFORM_ARG $CONFIG_ARG "$PREMAKE_OPTS_ARG" -j$NPROC
      ;;
    Darwin)
      NPROC=$(sysctl -n hw.ncpu)
-     make -f Bootstrap.mak ${COSMO_FLAG:-osx} $PLATFORM_ARG $CONFIG_ARG "$PREMAKE_OPTS_ARG" -j$NPROC
+     make -f Bootstrap.mak ${COSMO_FLAG:-osx$NINJA_FLAG} $PLATFORM_ARG $CONFIG_ARG "$PREMAKE_OPTS_ARG" -j$NPROC
      ;;
    FreeBSD|OpenBSD|NetBSD|DragonFly)
      NPROC=$(sysctl -n hw.ncpu)

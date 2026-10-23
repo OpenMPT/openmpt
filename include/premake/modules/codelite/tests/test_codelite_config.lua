@@ -53,7 +53,7 @@
 		symbols "On"
 		language "C++"
 		cppdialect "C++11"
-		flags { "NoBufferSecurityCheck" }
+		buffersecuritycheck "Off"
 		forceincludes { "forced_include1.h", "forced_include2.h" }
 		buildoptions { "-opt1", "-opt2" }
 		prepare()
@@ -100,7 +100,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-isystem sysdir;-isystem sysdir2" C_Options="-isystem sysdir;-isystem sysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+      <Compiler Options="-isystemsysdir;-isystemsysdir2" C_Options="-isystemsysdir;-isystemsysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -110,7 +110,7 @@
 		prepare()
 		codelite.project.compiler(cfg)
 		test.capture [[
-      <Compiler Options="-idirafter sysdir;-idirafter sysdir2" C_Options="-idirafter sysdir;-idirafter sysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+      <Compiler Options="-idiraftersysdir;-idiraftersysdir2" C_Options="-idiraftersysdir;-idiraftersysdir2" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
       </Compiler>
 		]]
 	end
@@ -140,6 +140,23 @@
       </Compiler>
 		]]
 	end
+
+	--
+	-- Check compiler options with MSC toolset, verifying that character set
+	-- and exception handling defines are included alongside user defines and undefines.
+	--
+	function suite.OnProjectCfg_Undefines_MSVC()
+		toolset "msc"
+		defines { "TEST" }
+		undefines { "UNDEF" }
+		prepare()
+		codelite.project.compiler(cfg)
+		test.capture [[
+      <Compiler Options="/EHsc;/D_UNICODE;/DUNICODE;/DTEST;/UUNDEF" C_Options="/D_UNICODE;/DUNICODE;/DTEST;/UUNDEF" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="1">
+      </Compiler>
+		]]
+	end
+
 
 	function suite.OnProjectCfg_Pch()
 		  pchheader "pch.h"
@@ -213,6 +230,23 @@
       </ResourceCompiler>
 		]]
 	end
+
+	--
+	-- Check resource compiler options with MSC toolset, verifying that
+	-- character set defines are not included in resource compiler flags.
+	--
+	function suite.OnProjectCfg_ResDefines_MSVC()
+		toolset "msc"
+		files { "x.rc" }
+		resdefines { "RC_DEF" }
+		prepare()
+		codelite.project.resourceCompiler(cfg)
+		test.capture [[
+      <ResourceCompiler Options="/DRC_DEF;" Required="yes">
+      </ResourceCompiler>
+		]]
+	end
+
 
 	function suite.OnProjectCfg_ResRegularInclude()
 		files { "x.rc" }

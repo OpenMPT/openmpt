@@ -202,7 +202,7 @@
 		local toolset = m.getcompiler(cfg)
 		local externalincludedirs = toolset.getincludedirs(cfg, {}, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter)
 		local forceincludes = toolset.getforceincludes(cfg)
-		local defines = iif(#cfg.undefines > 0, table.join(toolset.getdefines(cfg.defines), toolset.getundefines(cfg.undefines)), {})
+		local defines = iif(#cfg.undefines > 0, table.join(toolset.getdefines(cfg.defines, cfg), toolset.getundefines(cfg.undefines)), {})
 		local cxxflags = table.concat(table.join(externalincludedirs, toolset.getcxxflags(cfg), forceincludes, cfg.buildoptions, defines), ";")
 		local cflags   = table.concat(table.join(externalincludedirs, toolset.getcflags(cfg), forceincludes, cfg.buildoptions, defines), ";")
 		local asmflags = ""
@@ -235,7 +235,7 @@
 		end
 
 		local toolset = m.getcompiler(cfg)
-		local flags   = table.join(toolset.getldflags(cfg), toolset.getincludedirs(cfg, {}, nil, cfg.frameworkdirs), toolset.getrunpathdirs(cfg, table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))), cfg.linkoptions, toolset.getlinks(cfg))
+		local flags   = table.join(toolset.getldflags(cfg), toolset.getincludedirs(cfg, {}, nil, cfg.frameworkdirs), toolset.getrunpathdirs(cfg, table.join(cfg.runpathdirs, config.getsiblingtargetdirs(cfg))), toolset.getsections(cfg), cfg.linkoptions, toolset.getlinks(cfg))
 
 		_x(3, '<Linker Options="%s" Required="yes">', table.concat(flags, ";"))
 

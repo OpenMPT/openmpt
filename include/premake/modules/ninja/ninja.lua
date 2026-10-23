@@ -77,6 +77,21 @@ function ninja.gettoolset(cfg)
     return toolset
 end
 
+function ninja.toolsetname(cfg)
+    local default = (p.action.current() and p.action.current().toolset) or "gcc"
+    local identifier = cfg.toolset or default
+    if type(identifier) == "string" then
+        local norm = p.tools.normalize(identifier)
+        local parts = norm:explode("-", true, 1)
+        return parts[1]:gsub("[^%w_]", "_"):lower()
+    end
+    local toolset = ninja.gettoolset(cfg)
+    if toolset and toolset._NAME then
+        return toolset._NAME:gsub("[^%w_]", "_"):lower()
+    end
+    return "gcc"
+end
+
 function ninja.list(value)
     if #value > 0 then
         return " " .. table.concat(value, " ")

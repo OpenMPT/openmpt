@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="https://premake.github.io/" target="blank"><img src="https://premake.github.io/img/premake-logo.png" height="200" width="200" alt="Premake" /></a>
+  <a href="https://premake.github.io/" target="_blank"><img src="https://premake.github.io/img/premake-logo.png" height="200" width="200" alt="Premake" /></a>
 </p>
 
 <p align="center">
     <img src="https://img.shields.io/github/release/premake/premake-core/all.svg" alt="Latest release" />
     <img src="https://img.shields.io/github/release-date-pre/premake/premake-core.svg" alt="Release date" />
-    <img src="https://img.shields.io/github/commits-since/premake/premake-core/v5.0.0-beta6.svg" alt="Commits" />
+    <img src="https://img.shields.io/github/commits-since/premake/premake-core/v5.0.0.svg" alt="Commits" />
     <a href="https://opensource.org/licenses/BSD-3-Clause" target="_blank">
         <img src="https://img.shields.io/github/license/premake/premake-core" alt="BSD 3-Clause" />
     </a>
@@ -16,7 +16,7 @@
     <a href="https://github.com/premake/premake-core/graphs/contributors" target="_blank">
         <img src="https://img.shields.io/github/contributors/premake/premake-core?label=code+contributors" alt="Contributors" />
     </a>
-    <a href="https://opencollective.com/premake" _target="blank">
+    <a href="https://opencollective.com/premake" target="_blank">
         <img src="https://opencollective.com/premake/all/badge.svg?label=financial+contributors" alt="Contributors" />
     </a>
     <a href="https://twitter.com/premakeapp" target="_blank">

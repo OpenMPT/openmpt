@@ -1,7 +1,7 @@
 --
 -- fileconfig.lua
 -- The set of configuration information for a specific file.
--- Copyright (c) 2011-2014 Jess Perkins and the Premake project
+-- Copyright (c) 2011-2026 Jess Perkins and the Premake project
 --
 
 	local p = premake
@@ -304,5 +304,63 @@
 		-- fallback for batch rule inputs
 		return fcfg.relpath
 	end
+
+
+--
+-- Returns a proxy configuration context that resolves settings for a file
+-- within a configuration. Scalar properties set on the file override project-level
+-- properties, while list and keyed properties are merged. If filecfg is nil,
+-- returns cfg directly.
+--
+-- @param cfg
+--    The project configuration.
+-- @param filecfg
+--    The file configuration or sub-configuration.
+-- @return
+--    A proxy object or the configuration itself.
+--
+
+	function fileconfig.proxy(cfg, filecfg)
+		if not filecfg then
+			return cfg
+		end
+		return setmetatable({}, {
+			__index = function(t, k)
+				local f = p.field._list[k]
+				local isList = f and (f._kind:startswith("list:") or f._kind:startswith("keyed:") or f._kind:startswith("table") or f.list or f.keyed)
+				if isList then
+					local v1 = cfg[k]
+					local v2 = filecfg[k]
+					if type(v1) == "table" and type(v2) == "table" then
+						return table.join(v1, v2)
+					elseif type(v1) == "table" then
+						if v2 ~= nil and v2 ~= "" then
+							return table.join(v1, { v2 })
+						else
+							return v1
+						end
+					elseif type(v2) == "table" then
+						if #v2 == 0 and v1 ~= nil then
+							return v1
+						elseif v1 ~= nil and v1 ~= "" then
+							return table.join({ v1 }, v2)
+						else
+							return v2
+						end
+					elseif v2 ~= nil then
+						return v2
+					else
+						return v1
+					end
+				end
+				local v = filecfg[k]
+				if v ~= nil then
+					return v
+				end
+				return cfg[k]
+			end
+		})
+	end
+
 
 

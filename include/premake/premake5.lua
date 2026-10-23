@@ -191,7 +191,7 @@
 --
 -- TODO: Switch to these new APIs once they've had a chance to land everywhere
 --
---    defaultConfiguration "Release"
+--    defaultconfiguration "Release"
 --    symbols "On"
 --
 
@@ -224,6 +224,7 @@
 
 		multiprocessorcompile "On"
 		warnings "Extra"
+		symbols "On"
 
 		filter { "options:not zlib-src=none" }
 			defines { "PREMAKE_COMPRESSION" }
@@ -259,7 +260,7 @@
 		filter { "system:windows", "options:arch=ARM" }
 			platforms { "ARM" }
 
-		filter { "system:windows", "options:arch=AARCH64" }
+		filter { "system:windows", "options:arch=AARCH64 or arch=ARM64" }
 			platforms { "ARM64" }
 
 		filter { "system:windows", "options:arch=x86 or arch=Win32" }
@@ -268,12 +269,11 @@
 		filter { "system:windows", "options:arch=x86_64 or arch=x64" }
 			platforms { "x64" }
 
-		filter { "system:windows", "options:arch=" }
+		filter { "system:windows", "options:not arch=*" }
 			platforms { "x86", "x64" }
 
 		filter "configurations:Debug"
 			defines     "_DEBUG"
-			symbols	    "On"
 
 		filter "configurations:Release"
 			defines             "NDEBUG"
@@ -286,6 +286,14 @@
 
 		filter { "system:windows", "configurations:Release" }
 			incrementallink "Off"
+
+		filter { "system:windows", "action:vs*" }
+			characterset "Unicode"
+
+		filter { "system:windows", "action:not vs*", "toolset:not msc" } -- TODO: mingw doesn't support `characterset "Unicode"`
+			defines { "UNICODE", "_UNICODE" }
+			buildoptions { "-municode" }
+			linkoptions { "-municode" }
 
 		-- MinGW AR does not handle LTO out of the box and need a plugin to be setup
 		filter { "system:windows", "configurations:Release", "toolset:not gcc" }
@@ -351,7 +359,7 @@
 			targetdir   "bin/release"
 
 		filter "system:windows"
-			links       { "ole32", "ws2_32", "advapi32", "version" }
+			links       { "ole32", "ws2_32", "advapi32", "version", "user32" }
 
 		filter { "system:windows", "toolset:msc*" }
 			files       { "src/**.rc" }
@@ -359,7 +367,7 @@
 		filter { "system:windows", "toolset:not msc" }
 			links		{ "crypt32", "bcrypt" }
 
-		filter { "system:windows", "toolset:clang", "action:not vs*" }
+		filter { "system:windows", "toolset:clang or msc", "action:not vs*" }
 			links		{ "crypt32", "bcrypt" }
 
 		filter "system:linux or bsd or hurd"

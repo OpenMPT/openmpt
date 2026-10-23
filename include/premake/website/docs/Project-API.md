@@ -35,7 +35,6 @@
 | [compilebuildoutputs](compilebuildoutputs.md)             |  |
 | [configfile](configfile.md)                               |  |
 | [configmap](configmap.md)                                 |  |
-| [configuration](configuration.md)                         |  |
 | [configurations](configurations.md)                       |  |
 | [copylocal](copylocal.md)                                 |  |
 | [cppdialect](cppdialect.md)                               |  |
@@ -53,6 +52,7 @@
 | [debugremotehost](debugremotehost.md)                     | Target for remote debugging |
 | [debugsearchpaths](debugsearchpaths.md)                   | Search paths for source code while debugging |
 | [debugstartupcommands](debugstartupcommands.md)           | Debugger commands to execute on debugger startup |
+| [defaultconfiguration](defaultconfiguration.md)           |  |
 | [defaultplatform](defaultplatform.md)                     |  |
 | [defines](defines.md)                                     |  |
 | [dependson](dependson.md)                                 |  |
@@ -96,6 +96,7 @@
 | [includedirs](includedirs.md)                             |  |
 | [includedirsafter](includedirsafter.md)                   |  |
 | [includeexternal](globals/includeexternal.md)             |  |
+| [infoplist](infoplist.md)                                   | Sets the Apple ap bundle infos.                  |
 | [inlining](inlining.md)                                   | Tells the compiler when it should inline functions |
 | [intrinsics](intrinsics.md)                               |  |
 | [kind](kind.md)                                           |  |
@@ -160,6 +161,7 @@
 | [vectorextensions](vectorextensions.md)                   | Enable hardware vector extensions |
 | [vpaths](vpaths.md)                                       |  |
 | [warnings](warnings.md)                                   |  |
+| [wholearchive](wholearchive.md)                           |  |
 | [workspace](workspace.md)                                 |  |
 
 ### Builtin Extension APIs ###

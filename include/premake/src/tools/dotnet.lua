@@ -56,6 +56,8 @@
 		-- Determine the build action for the file, falling back to the file
 		-- extension if no explicit action is available.
 
+		local customprefix = "custom:"
+
 		if fcfg.buildaction == "Compile" or ext == ".cs" or ext == ".fs" then
 			info.action = "Compile"
 		elseif fcfg.buildaction == "Embed" or ext == ".resx" then
@@ -64,6 +66,8 @@
 			info.action = "Content"
 		elseif fcfg.buildaction == "Resource" then
 			info.action = "Resource"
+		elseif fcfg.buildaction ~= nil and fcfg.buildaction:startswith(customprefix) then
+			info.action = string.sub(fcfg.buildaction, #customprefix + 1)
 		elseif ext == ".xaml" then
 			if fcfg.buildaction == "Application" or path.getbasename(fname) == "App" then
 				if fcfg.project.kind == p.SHAREDLIB then
@@ -75,6 +79,9 @@
 				info.action = "Page"
 			end
 		else
+			if fcfg.buildaction ~= nil then
+				premake.warn("Unknown buildaction: " .. fcfg.buildaction .. " falling back to None")
+			end
 			info.action = "None"
 		end
 

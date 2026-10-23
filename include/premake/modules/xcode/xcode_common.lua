@@ -44,6 +44,7 @@
 			[".swift"] = "Sources",
 			[".metal"] = "Resources",
 			[".xcprivacy"] = "Resources",
+			[".icon"] = "Resources",
 		}
 		if node.isResource then
 			return "Resources"
@@ -149,6 +150,7 @@
 			[".metal"]     = "sourcecode.metal",
 			[".dylib"]     = "compiled.mach-o.dylib",
 			[".xcprivacy"] = "PrivacyInfo.xcprivacy",
+			[".icon"]	   = "folder.iconcomposer.icon",
 		}
 		return types[path.getextension(node.path)] or "text"
 	end
@@ -365,13 +367,13 @@
 
 	function xcode.newid(...)
 		local name = ''
-		local arg = {...}
-		for i, v in pairs(arg) do
-			name = name..v..'****'
+		local arg = { n = select("#", ...), ... }
+		for i=1, arg.n do
+			name = name .. tostring(arg[i]) .. '****'
 		end
 
-
-		return ("%08X%08X%08X"):format(name:hash(16777619), name:hash(2166136261), name:hash(46577619))
+		local sha1 = name:sha1():upper()
+		return sha1:sub(1, 24)
 	end
 
 
@@ -1357,6 +1359,10 @@
 			end
 		end
 
+		if cfg.infoplist then
+			settings["INFOPLIST_FILE"] = p.tools.getrelative(cfg.project, cfg.infoplist)
+		end
+
 		--ms not by default ...add it manually if you need it
 		--settings['COMBINE_HIDPI_IMAGES'] = 'YES'
 
@@ -1543,12 +1549,12 @@
 		settings['SYSTEM_HEADER_SEARCH_PATHS'] = systemincludedirs
 
 		for i,v in ipairs(cfg.libdirs) do
-			cfg.libdirs[i] = p.project.getrelative(cfg.project, cfg.libdirs[i])
+			cfg.libdirs[i] = p.quoted(p.project.getrelative(cfg.project, cfg.libdirs[i]))
 		end
 		for i,v in ipairs(cfg.syslibdirs) do
-			cfg.syslibdirs[i] = p.project.getrelative(cfg.project, cfg.syslibdirs[i])
+			cfg.syslibdirs[i] = p.quoted(p.project.getrelative(cfg.project, cfg.syslibdirs[i]))
 		end
-		settings['LIBRARY_SEARCH_PATHS'] = table.join (cfg.libdirs, cfg.syslibdirs)
+		settings['LIBRARY_SEARCH_PATHS'] = table.join(cfg.libdirs, cfg.syslibdirs)
 
 		for i,v in ipairs(cfg.frameworkdirs) do
 			cfg.frameworkdirs[i] = p.project.getrelative(cfg.project, cfg.frameworkdirs[i])
@@ -1609,7 +1615,7 @@
 			end
 		end
 
-		settings['OTHER_LDFLAGS'] = table.join(flags, cfg.linkoptions)
+		settings['OTHER_LDFLAGS'] = table.join(flags, cfg.linkoptions, toolset.wholearchive(cfg))
 
 		if cfg.staticruntime == "On" then
 			settings['STANDARD_C_PLUS_PLUS_LIBRARY_TYPE'] = 'static'
@@ -1724,8 +1730,8 @@
 
 
 	function xcode.XCBuildConfigurationList(tr)
-		local wks = tr.project.workspace
-		local defaultCfgName = xcode.stringifySetting(tr.configs[1].buildcfg)
+		local defaultCfg = p.config.getdefault(tr.project)
+		local defaultCfgName = xcode.stringifySetting(defaultCfg.buildcfg)
 		local settings = {}
 
 		for _, target in ipairs(tr.products.children) do

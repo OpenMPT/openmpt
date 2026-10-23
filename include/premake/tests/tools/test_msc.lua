@@ -358,6 +358,9 @@
 		externalincludedirs { "/usr/local/include" }
 		prepare()
 		test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+		test.isequal({
+			{ flag = '/I', value = '/usr/local/include' },
+		}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
 	function suite.cflags_onVs2008ExternalIncludeDirs()
@@ -365,6 +368,9 @@
 		externalincludedirs { "/usr/local/include" }
 		prepare()
 		test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+		test.isequal({
+			{ flag = '/I', value = '/usr/local/include' },
+		}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
 	function suite.cflags_onVs2022ExternalIncludeDirs()
@@ -373,6 +379,9 @@
 		prepare()
 		test.contains("/external:W3", msc.getsharedflags(cfg))
 		test.contains("/external:I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
+		test.isequal({
+			{ flag = '/external:I', value = '/usr/local/include' },
+		}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs))
 	end
 
 --
@@ -383,6 +392,9 @@ function suite.cflags_onIncludeDirsAfter()
 	includedirsafter { "/usr/local/include" }
 	prepare()
 	test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+	test.isequal({
+		{ flag = '/I', value = '/usr/local/include' },
+	}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
 end
 
 function suite.cflags_onVs2008IncludeDirsAfter()
@@ -390,6 +402,9 @@ function suite.cflags_onVs2008IncludeDirsAfter()
 	includedirsafter { "/usr/local/include" }
 	prepare()
 	test.contains("/I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+	test.isequal({
+		{ flag = '/I', value = '/usr/local/include' },
+	}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
 end
 
 function suite.cflags_onVs2022IncludeDirsAfter()
@@ -398,6 +413,9 @@ function suite.cflags_onVs2022IncludeDirsAfter()
 	prepare()
 	test.contains("/external:W3", msc.getsharedflags(cfg))
 	test.contains("/external:I/usr/local/include", msc.getincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
+	test.isequal({
+		{ flag = '/external:I', value = '/usr/local/include' },
+	}, msc.getstructuredincludedirs(cfg, cfg.includedirs, cfg.externalincludedirs, cfg.frameworkdirs, cfg.includedirsafter))
 end
 
 
@@ -469,6 +487,12 @@ end
 	function suite.cppdialectCpp23()
 		cppdialect "C++23"
 		prepare()
+		test.contains('/std:c++23preview', msc.getcxxflags(cfg))
+	end
+
+	function suite.cppdialectCpp26()
+		cppdialect "C++26"
+		prepare()
 		test.contains('/std:c++latest', msc.getcxxflags(cfg))
 	end
 
@@ -510,6 +534,12 @@ end
 		test.contains("/fp:strict", msc.getcflags(cfg))
 	end
 
+	function suite.cflags_onFloatingPointPrecise()
+		floatingpoint "Precise"
+		prepare()
+		test.contains("/fp:precise", msc.getcflags(cfg))
+	end
+
 	function suite.cflags_onSSE()
 		vectorextensions "SSE"
 		prepare()
@@ -539,6 +569,12 @@ end
 		vectorextensions "AVX2"
 		prepare()
 		test.contains("/arch:AVX2", msc.getcflags(cfg))
+	end
+
+	function suite.cflags_onAVX512()
+		vectorextensions "AVX512"
+		prepare()
+		test.contains("/arch:AVX512", msc.getcflags(cfg))
 	end
 
 
@@ -588,18 +624,12 @@ end
 --
 
 	function suite.cflags_onNoMinimalRebuild()
-		flags "NoMinimalRebuild"
+		minimalrebuild "Off"
 		prepare()
 		test.contains("/Gm-", msc.getcflags(cfg))
 	end
 
-	function suite.cflags_onMultiProcessorCompile_Flag()
-		flags "MultiProcessorCompile"
-		prepare()
-		test.contains("/MP", msc.getcflags(cfg))
-	end
-
-	function suite.cflags_onMultiProcessorCompile_API()
+	function suite.cflags_onMultiProcessorCompile()
 		multiprocessorcompile "On"
 		prepare()
 		test.contains("/MP", msc.getcflags(cfg))
@@ -683,19 +713,19 @@ end
 --
 
 	function suite.ldflags_onOmitDefaultLibrary()
-		flags "OmitDefaultLibrary"
+		nodefaultlib "On"
 		prepare()
 		test.contains("/NODEFAULTLIB", msc.getldflags(cfg))
 	end
 
 	function suite.ldflags_onNoIncrementalLink()
-		flags "NoIncrementalLink"
+		incrementallink "Off"
 		prepare()
 		test.contains("/INCREMENTAL:NO", msc.getldflags(cfg))
 	end
 
 	function suite.ldflags_onNoManifest()
-		flags "NoManifest"
+		manifest "Off"
 		prepare()
 		test.contains("/MANIFEST:NO", msc.getldflags(cfg))
 	end
@@ -725,6 +755,17 @@ end
 		profile "On"
 		prepare()
 		test.missing("/PROFILE", msc.getldflags(cfg))
+	end
+
+	function suite.ldflags_wholearchive()
+		system "windows"
+		links { "MyProject2" }
+		wholearchive { "kernel32", "MyProject2" }
+		project "MyProject2"
+		system "windows"
+		kind "StaticLib"
+		prepare()
+		test.isequal({"/NOLOGO", "/DLL", "/WHOLEARCHIVE:kernel32", "/WHOLEARCHIVE:bin/Debug/MyProject2.lib"}, msc.getldflags(cfg))
 	end
 
 --
@@ -818,13 +859,13 @@ end
 	function suite.mixedToolFlags_onCFlags()
 		fatalwarnings "All"
 		prepare()
-		test.isequal({ "/WX", "/MD" }, msc.getcflags(cfg))
+		test.isequal({ "/WX" }, msc.getcflags(cfg))
 	end
 
 	function suite.mixedToolFlags_onCxxFlags()
 		fatalwarnings "All"
 		prepare()
-		test.isequal({ "/WX", "/MD", "/EHsc" }, msc.getcxxflags(cfg))
+		test.isequal({ "/WX", "/EHsc" }, msc.getcxxflags(cfg))
 	end
 
 
@@ -878,4 +919,40 @@ end
 		symbols "On"
 		prepare()
 		test.isequal({ "/MD", "/Z7" }, msc.getcflags(cfg))
+	end
+
+	function suite.cflags_onDynamicDebuggingOn()
+		dynamicdebugging "On"
+		prepare()
+		test.contains("/dynamicdeopt", msc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onDynamicDebuggingOn()
+		dynamicdebugging "On"
+		prepare()
+		test.contains("/dynamicdeopt", msc.getcxxflags(cfg))
+	end
+
+	function suite.cflags_onDynamicDebuggingOff()
+		dynamicdebugging "Off"
+		prepare()
+		test.excludes("/dynamicdeopt", msc.getcflags(cfg))
+	end
+
+	function suite.cxxflags_onDynamicDebuggingOff()
+		dynamicdebugging "Off"
+		prepare()
+		test.excludes("/dynamicdeopt", msc.getcxxflags(cfg))
+	end
+
+	function suite.linkerflags_onDynamicDebuggingOn()
+		dynamicdebugging "On"
+		prepare()
+		test.contains("/dynamicdeopt", msc.getldflags(cfg))
+	end
+
+	function suite.linkerflags_onDynamicDebuggingOff()
+		dynamicdebugging "Off"
+		prepare()
+		test.excludes("/dynamicdeopt", msc.getldflags(cfg))
 	end

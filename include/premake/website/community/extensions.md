@@ -11,3 +11,7 @@ These IDE extensions are available from other developers; follow the links for m
 ## Visual Studio
 
 - [VSPremake](https://marketplace.visualstudio.com/items?itemName=ColtonMcGraw.VSPremake) : Run Premake5 inside Visual Studio
+
+## Language Support
+
+- [premake-language-support](https://luarocks.org/modules/lolrobbe2/premake-language-support), lls-addon for sumneko lua.

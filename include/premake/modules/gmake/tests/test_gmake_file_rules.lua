@@ -112,14 +112,34 @@ $(OBJDIR)/test.o: src/test.c
 
 $(OBJDIR)/hello.obj: src/hello.cpp
 	@echo "$(notdir $<)"
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) /nologo /Fo"$@" /c /Tp"$<"
 $(OBJDIR)/test.obj: src/test.c
 	@echo "$(notdir $<)"
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) /nologo /Fo"$@" /c /Tc"$<"
 
 ]]
 	end
 
+	function suite.assemblyOutput_onConfigAndFile()
+		toolset "msc"
+		files { "src/hello.cpp", "src/test.cpp" }
+		generateassembly "On"
+		filter "files:src/hello.cpp"
+		generateassembly "Verbose"
+		prepare()
+		test.capture [[
+# File Rules
+# #############################################
+
+$(OBJDIR)/hello.obj: src/hello.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) /FAs /Fa"$(@:%.obj=%.asm)" $(FORCE_INCLUDE) /nologo /Fo"$@" /c /Tp"$<"
+$(OBJDIR)/test.obj: src/test.cpp
+	@echo "$(notdir $<)"
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) /FA /Fa"$(@:%.obj=%.asm)" $(FORCE_INCLUDE) /nologo /Fo"$@" /c /Tp"$<"
+
+]]
+	end
 
 --
 -- Two files with the same base name should have different object files.
@@ -472,4 +492,3 @@ endif
 endif
 ]]
 	end
-

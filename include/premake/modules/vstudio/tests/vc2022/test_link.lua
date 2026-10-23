@@ -38,3 +38,54 @@ local project = p.project
 	<AdditionalOptions>/wx:4123,4124 %(AdditionalOptions)</AdditionalOptions>
 		]]
 	end
+
+
+	function suite.dynamicDebugging_On()
+		kind "StaticLib"
+		dynamicdebugging "On"
+		prepare()
+		test.capture [[
+<Link>
+	<SubSystem>Windows</SubSystem>
+	<UseDynamicDebugging>true</UseDynamicDebugging>
+</Link>
+<Lib>
+	<UseDynamicDebugging>true</UseDynamicDebugging>
+</Lib>
+	]]
+	end
+
+
+	function suite.dynamicDebugging_On_WithOpts()
+		kind "StaticLib"
+		dynamicdebugging "On"
+		optimize "On"
+		prepare()
+		test.capture [[
+<Link>
+	<SubSystem>Windows</SubSystem>
+	<EnableCOMDATFolding>false</EnableCOMDATFolding>
+	<OptimizeReferences>true</OptimizeReferences>
+	<UseDynamicDebugging>true</UseDynamicDebugging>
+</Link>
+<Lib>
+	<UseDynamicDebugging>true</UseDynamicDebugging>
+</Lib>
+	]]
+	end
+
+
+	function suite.dynamicDebugging_Off()
+		kind "StaticLib"
+		dynamicdebugging "Off"
+		prepare()
+		test.capture [[
+<Link>
+	<SubSystem>Windows</SubSystem>
+	<UseDynamicDebugging>false</UseDynamicDebugging>
+</Link>
+<Lib>
+	<UseDynamicDebugging>false</UseDynamicDebugging>
+</Lib>
+	]]
+	end

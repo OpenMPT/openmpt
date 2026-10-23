@@ -51,10 +51,17 @@ SLN_EXT = sln
 SLN_EXT = slnx
 !endif
 
+# ninja config targets use the declared casing (Release/Debug).
+NINJA_CONFIG_TMP = $(CONFIG:release=Release)
+NINJA_CONFIG = $(NINJA_CONFIG_TMP:debug=Debug)
+
 !else
 else
 
 # make
+
+# ninja config targets use the declared casing (Release/Debug).
+NINJA_CONFIG := $(subst debug,Debug,$(subst release,Release,$(CONFIG)))
 
 endif
 !endif : # !endif has to be last to work in make
@@ -64,7 +71,9 @@ HOST_PLATFORM= none
 .PHONY: default none clean nix-clean windows-clean \
 	mingw-clean mingw macosx macosx-clean osx-clean osx \
 	linux-clean linux bsd-clean bsd solaris-clean solaris \
-	haiku-clean haiku windows-base windows windows-msbuild
+	haiku-clean haiku windows-base windows windows-msbuild \
+	windows-gmake-clean windows-gmake \
+	linux-ninja osx-ninja macosx-ninja windows-ninja windows-ninja-clean
 
 default: $(HOST_PLATFORM)
 
@@ -72,7 +81,7 @@ none:
 	@echo "Please do"
 	@echo "   nmake -f Bootstrap.mak windows"
 	@echo "or"
-	@echo "   CC=mingw32-gcc mingw32-make -f Bootstrap.mak mingw CONFIG=x64"
+	@echo "   CC=mingw32-gcc mingw32-make -f Bootstrap.mak mingw PLATFORM=x64"
 	@echo "or"
 	@echo "   make -f Bootstrap.mak HOST_PLATFORM"
 	@echo "where HOST_PLATFORM is one of these:"
@@ -86,7 +95,7 @@ clean:
 	@echo "Please run the same command used for building by adding a '-clean' suffix to the target name."
 	@echo "   nmake -f Bootstrap.mak windows-clean"
 	@echo "or"
-	@echo "   CC=mingw32-gcc mingw32-make -f Bootstrap.mak mingw-clean CONFIG=x64"
+	@echo "   CC=mingw32-gcc mingw32-make -f Bootstrap.mak mingw-clean PLATFORM=x64"
 	@echo "or"
 	@echo "   make -f Bootstrap.mak HOST_PLATFORM-clean"
 	@echo "where HOST_PLATFORM is one of these:"
@@ -106,7 +115,7 @@ mingw-clean: nix-clean
 
 mingw: mingw-clean
 	mkdir -p build/bootstrap
-	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_STATICLIB -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lole32 -lversion
+	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_STATICLIB -DUNICODE -D_UNICODE -municode -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lole32 -lversion
 	./build/bootstrap/premake_bootstrap embed
 	./build/bootstrap/premake_bootstrap --arch=$(PLATFORM) --os=windows --to=build/bootstrap --cc=gcc $(PREMAKE_OPTS) gmake
 	$(MAKE) -C build/bootstrap -j`getconf _NPROCESSORS_ONLN` config=$(CONFIG)_$(PLATFORM:x86=win32)
@@ -132,6 +141,22 @@ linux: linux-clean
 	./build/bootstrap/premake_bootstrap embed
 	./build/bootstrap/premake_bootstrap --to=build/bootstrap $(PREMAKE_OPTS) gmake
 	$(MAKE) -C build/bootstrap -j`getconf _NPROCESSORS_ONLN` config=$(CONFIG)
+
+linux-ninja: linux-clean
+	mkdir -p build/bootstrap
+	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_STATICLIB -DLUA_USE_POSIX -DLUA_USE_DLOPEN -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" $(SRC) -lm -ldl -lrt -luuid
+	./build/bootstrap/premake_bootstrap embed
+	./build/bootstrap/premake_bootstrap --to=build/bootstrap $(PREMAKE_OPTS) ninja
+	ninja -C build/bootstrap $(NINJA_CONFIG)
+
+macosx-ninja: osx-ninja
+
+osx-ninja: osx-clean
+	mkdir -p build/bootstrap
+	$(CC) -o build/bootstrap/premake_bootstrap -DPREMAKE_NO_BUILTIN_SCRIPTS -DLUA_STATICLIB -DLUA_USE_MACOSX -I"$(LUA_DIR)" -I"$(LUASHIM_DIR)" -framework CoreServices -framework Foundation -framework Security -lreadline $(SRC)
+	./build/bootstrap/premake_bootstrap embed
+	./build/bootstrap/premake_bootstrap --arch=$(PLATFORM) --to=build/bootstrap $(PREMAKE_OPTS) ninja
+	ninja -C build/bootstrap $(NINJA_CONFIG)
 
 bsd-clean: nix-clean
 
@@ -162,7 +187,7 @@ haiku: haiku-clean
 
 windows-base: windows-clean
 	if not exist build\bootstrap (mkdir build\bootstrap)
-	cl /Fo.\build\bootstrap\ /Fe.\build\bootstrap\premake_bootstrap.exe /DPREMAKE_NO_BUILTIN_SCRIPTS /DLUA_STATICLIB /I"$(LUA_DIR)" /I"$(LUASHIM_DIR)" user32.lib ole32.lib advapi32.lib $(SRC)
+	cl /Fo.\build\bootstrap\ /Fe.\build\bootstrap\premake_bootstrap.exe /DPREMAKE_NO_BUILTIN_SCRIPTS /DLUA_STATICLIB /DUNICODE /D_UNICODE /I"$(LUA_DIR)" /I"$(LUASHIM_DIR)" user32.lib ole32.lib advapi32.lib $(SRC)
 	.\build\bootstrap\premake_bootstrap.exe embed
 	.\build\bootstrap\premake_bootstrap --arch=$(PLATFORM) --to=build/bootstrap $(PREMAKE_OPTS) $(MSDEV)
 
@@ -172,6 +197,26 @@ windows: windows-base
 
 windows-msbuild: windows-base
 	msbuild /p:Configuration=$(CONFIG) /p:Platform=$(PLATFORM:x86=win32) .\build\bootstrap\Premake5.$(SLN_EXT)
+
+windows-gmake-clean: windows-clean
+
+# NOTE: this Windows target assumes cmd is the shell. Use 'make -f Bootstrap.mak windows-gmake SHELL=cmd.exe'
+windows-gmake: windows-gmake-clean
+	if not exist build\bootstrap (mkdir build\bootstrap)
+	cl /Fo.\build\bootstrap\ /Fe.\build\bootstrap\premake_bootstrap.exe /DPREMAKE_NO_BUILTIN_SCRIPTS /DLUA_STATICLIB /DUNICODE /D_UNICODE /I"$(LUA_DIR)" /I"$(LUASHIM_DIR)" user32.lib ole32.lib advapi32.lib $(SRC)
+	.\build\bootstrap\premake_bootstrap.exe embed
+	.\build\bootstrap\premake_bootstrap --arch=$(PLATFORM) --os=windows --to=build/bootstrap --cc=msc $(PREMAKE_OPTS) gmake
+	$(MAKE) -C build/bootstrap -j$(NUMBER_OF_PROCESSORS) config=$(CONFIG)_$(PLATFORM:x86=win32)
+
+windows-ninja-clean: windows-clean
+
+# NOTE: this Windows target assumes cmd is the shell. Use 'nmake -f Bootstrap.mak windows-ninja'
+windows-ninja: windows-ninja-clean
+	if not exist build\bootstrap (mkdir build\bootstrap)
+	cl /Fo.\build\bootstrap\ /Fe.\build\bootstrap\premake_bootstrap.exe /DPREMAKE_NO_BUILTIN_SCRIPTS /DLUA_STATICLIB /DUNICODE /D_UNICODE /I"$(LUA_DIR)" /I"$(LUASHIM_DIR)" user32.lib ole32.lib advapi32.lib $(SRC)
+	.\build\bootstrap\premake_bootstrap.exe embed
+	.\build\bootstrap\premake_bootstrap --arch=$(PLATFORM) --os=windows --to=build/bootstrap --cc=msc $(PREMAKE_OPTS) ninja
+	ninja -C build/bootstrap $(NINJA_CONFIG)_$(PLATFORM:x86=Win32)
 
 cosmo-clean: nix-clean
 
