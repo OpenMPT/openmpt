@@ -1,4 +1,4 @@
-lame library version 3.101.
+lame library version 4.0.
 The following changes have been made:
  *  Obviously, unnecessary folders and files have been removed.
  *  export ordinals in `include/lame.def` have been removed

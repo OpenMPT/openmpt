@@ -602,6 +602,15 @@ fill_buffer_resample(lame_internal_flags * gfc,
         /* blackman filter.  by default, window centered at j+.5(filter_l%2) */
         /* but we want a window centered at time0.   */
         offset = (time0 - esv->itime[ch] - (j + .5 * (filter_l % 2)));
+        /* offset is bounded to [-0.5, +0.5) by construction, so joff below
+           always lands within blackfilt[0 .. 2*bpc] and never over-indexes
+           the table: for a non-integer resample ratio filter_l is odd, making
+           offset the fractional part of (time0 - itime) minus 0.5; for a
+           (near-)integer ratio the intratio branch above is only taken when
+           the ratio is an *exact* integer (samplerate_in an exact multiple of
+           samplerate_out), where offset is identically 0.  Sample rates are
+           always integers, so no runtime bounds guard is needed here - the
+           assert is a development-time sanity check, compiled out under NDEBUG. */
         assert(fabs(offset) <= .501);
 
         /* find the closest precomputed window for this offset: */

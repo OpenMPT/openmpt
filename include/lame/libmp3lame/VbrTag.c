@@ -782,6 +782,12 @@ PutLameVBR(lame_global_flags const *gfp, size_t nMusicLength, uint8_t * pbtStrea
     CreateI4(&pbtStreamBuffer[nBytesWritten], nQuality);
     nBytesWritten += 4;
 
+    /*! \par LAME tag: encoder-version sub-field, fixed 9-byte width.
+     *  \c szVersion (\c get_lame_tag_encoder_short_version()) must fit in
+     *  9 bytes - see the \c \\par blocks in that function's doc comment in
+     *  \c version.c for the exact byte budget, the reason the width can't
+     *  be changed, and the compile-time check that enforces it. `strncpy`
+     *  silently truncates (and skips the NUL terminator) if it doesn't fit. */
     strncpy((char *) &pbtStreamBuffer[nBytesWritten], szVersion, 9);
     nBytesWritten += 9;
 
