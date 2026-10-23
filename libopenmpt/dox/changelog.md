@@ -366,9 +366,9 @@ is just a high-level summary.
  *  [**Sec**] Possible read beyond sample start after swapping to a sample with
     loop points set but not loop enabled. (r15500)
  *  [**Sec**] Fixed various possible crashes with malformed MMCMP files.
-    (r15505, 15529)
- *  [**Sec**] MED: Possible read past end of file buffer by up to 3 bytes
-    (r15507, 15509)
+    (r15505, r15529)
+ *  [**Sec**] MED: Possible read past end of file buffer by up to 3 bytes.
+    (r15507, r15509)
 
  *  Fixed excessive memory usage with files claiming to have an extremely high
     rows per beat count while also using tempo swing. Maximum rows per beat are
