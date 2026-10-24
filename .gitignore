@@ -286,6 +286,7 @@
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj.filters
+/include/lame/ABOUT-NLS
 /include/lame/ACM
 /include/lame/API
 /include/lame/ChangeLog
@@ -313,6 +314,7 @@
 /include/lame/config.rpath
 /include/lame/config.sub
 /include/lame/configure
+/include/lame/configure.ac
 /include/lame/configure.in
 /include/lame/debian
 /include/lame/depcomp
@@ -324,6 +326,7 @@
 /include/lame/lame.spec
 /include/lame/lame.spec.in
 /include/lame/ltmain.sh
+/include/lame/m4
 /include/lame/mac
 /include/lame/macosx
 /include/lame/misc
