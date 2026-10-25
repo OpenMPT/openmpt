@@ -150,6 +150,7 @@ protected:
 	bool m_ctl_load_skip_plugins;
 	bool m_ctl_load_skip_subsongs_init;
 	bool m_ctl_seek_sync_samples;
+	bool m_ctl_render_channel_capture = false;
 	std::vector<std::string> m_loaderMessages;
 public:
 	void PushToCSoundFileLog( const std::string & text ) const;
@@ -239,6 +240,8 @@ public:
 	float get_current_channel_vu_right( std::int32_t channel ) const;
 	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
 	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
+	std::size_t get_current_channel_audio_mono( std::int32_t channel, std::size_t count, float * buf ) const;
+	std::size_t get_current_channel_audio_stereo( std::int32_t channel, std::size_t count, float * buf_left, float * buf_right ) const;
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
