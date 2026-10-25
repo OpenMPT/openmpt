@@ -15,6 +15,7 @@ jobs:
         include:
           - { version: '11.0', variant: 'microvm' }
           - { version: '10.2', variant: 'default' }
+          - { version: '9.5' , variant: 'default' }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
