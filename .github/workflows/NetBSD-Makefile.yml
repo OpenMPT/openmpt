@@ -16,9 +16,9 @@ jobs:
           - { version: '11.0', variant: 'microvm', deps: sys   }
           - { version: '11.0', variant: 'microvm', deps: local }
           - { version: '11.0', variant: 'microvm', deps: small }
-          - { version: '10.1', variant: 'default', deps: sys   }
-          - { version: '10.1', variant: 'default', deps: local }
-          - { version: '10.1', variant: 'default', deps: small }
+          - { version: '10.2', variant: 'default', deps: sys   }
+          - { version: '10.2', variant: 'default', deps: local }
+          - { version: '10.2', variant: 'default', deps: small }
 
     concurrency:
       group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.deps}}
