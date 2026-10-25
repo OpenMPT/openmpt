@@ -1021,7 +1021,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 	case MIDIEvents::evPitchBend:
 		for(size_t n = NOTE_MIN; n <= NOTE_MAX; n++)
 		{
-			if(!m_midiPlayingNotes[channel][n])
+			if(!m_midiPlayingNotes[channel][n - NOTE_MIN])
 				continue;
 			CHANNELINDEX chn = m_noteChannel[n - NOTE_MIN];
 			if(chn != CHANNELINDEX_INVALID)
@@ -1633,7 +1633,6 @@ LRESULT CModDoc::ActivateView(UINT nIdView, DWORD dwParam)
 // Activate document's window.
 void CModDoc::ActivateWindow()
 {
-
 	CChildFrame *pChildFrm = GetChildFrame();
 	if(pChildFrm) pChildFrm->MDIActivate();
 }
@@ -3183,7 +3182,6 @@ void CModDoc::PrepareUndoForAllPatterns(bool storeChannelInfo, const char *descr
 		}
 	}
 }
-
 
 
 CString CModDoc::LinearToDecibelsString(double value, double valueAtZeroDB)
