@@ -239,6 +239,33 @@ public:
 	float get_current_channel_vu_right( std::int32_t channel ) const;
 	float get_current_channel_vu_rear_left( std::int32_t channel ) const;
 	float get_current_channel_vu_rear_right( std::int32_t channel ) const;
+	struct current_channel_state {
+		std::int32_t volume = 0;
+		std::int32_t final_volume = 0;
+		std::int32_t pan = 128;
+		std::int32_t instrument = -1;
+		std::int32_t key = -1;
+		std::int32_t period = 0;
+		std::int32_t position = 0;
+		std::int64_t increment = 0;
+		std::int32_t pitchbend = 0;
+		std::int32_t note = 0;
+		std::int32_t sample = 0;
+		std::int32_t muted = 0;
+	};
+	struct sample_state {
+		const void * data = nullptr;
+		std::int32_t length = 0;
+		std::int32_t loop_start = 0;
+		std::int32_t loop_end = 0;
+		std::int32_t flags = 0;
+		std::int32_t c5speed = 0;
+		std::int32_t channels = 0;
+		std::int32_t bits_per_sample = 0;
+	};
+	bool get_current_channel_state( std::int32_t channel, current_channel_state & state ) const;
+	bool get_sample_state( std::int32_t sample, sample_state & state ) const;
+	std::int32_t set_channel_mute( std::int32_t channel, std::int32_t status );
 	std::int32_t get_num_subsongs() const;
 	std::int32_t get_num_channels() const;
 	std::int32_t get_num_orders() const;
