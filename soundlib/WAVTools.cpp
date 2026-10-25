@@ -123,6 +123,7 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 			{
 				sampleLength *= 2;
 			}
+			LimitMax(sampleLength, expectedLengthFrames);
 		}
 	}
 
