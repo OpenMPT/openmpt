@@ -9,6 +9,8 @@
 #define V2_ONLY_FLAG    (1U << 3)
 #define SPACE_V1_FLAG   (1U << 4)
 #define PAD_V2_FLAG     (1U << 5)
+// flag for enabling writing ID3v2.4 with UTF-8 characters
+#define V2_4_UTF8_FLAG  (1U << 6)
 
 enum {
     MIMETYPE_NONE = 0,
@@ -28,7 +30,7 @@ typedef struct FrameDataNode {
             unsigned char *b; /* ptr to raw bytes                 */
         } ptr;
         size_t  dim;
-        int     enc;         /* 0:Latin-1, 1:UCS-2, 2:RAW        */
+        int     enc;         /* 0:Latin-1, 1:UCS-2, 2:RAW, 3:UTF-8 */
     } dsc  , txt;
 } FrameDataNode;
 
@@ -58,7 +60,8 @@ extern int id3tag_write_v1(lame_global_flags * gfp);
 /*
  * NOTE: A version 2 tag will NOT be added unless one of the text fields won't
  * fit in a version 1 tag (e.g. the title string is longer than 30 characters),
- * or the "id3tag_add_v2" or "id3tag_v2_only" functions are used.
+ * or the "id3tag_add_v2", "id3tag_add_v2_4_UTF8", "id3tag_v2_only", or
+ * "id3tag_v2_4_UTF8_only" functions are used.
  */
 
 #endif

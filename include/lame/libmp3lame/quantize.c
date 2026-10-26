@@ -22,7 +22,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/* $Id: quantize.c,v 1.219 2017/08/02 19:48:05 robert Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -1497,7 +1497,7 @@ VBR_old_iteration_loop(lame_internal_flags * gfc, const FLOAT pe[2][2],
 
     FLOAT   xrpow[576];
     int     bands[2][2];
-    int     frameBits[15];
+    int     frameBits[16];
     int     used_bits;
     int     bits;
     int     min_bits[2][2], max_bits[2][2];
@@ -1651,7 +1651,7 @@ VBR_new_iteration_loop(lame_internal_flags * gfc, const FLOAT pe[2][2],
     FLOAT   l3_xmin[2][2][SFBMAX];
 
     FLOAT   xrpow[2][2][576];
-    int     frameBits[15];
+    int     frameBits[16];
     int     used_bits;
     int     max_bits[2][2];
     int     ch, gr, analog_silence, pad;

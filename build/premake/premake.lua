@@ -363,9 +363,9 @@ if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
  dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
- dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-nlohmann-json.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-opus.lua"
@@ -398,9 +398,9 @@ if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
  dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
- dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-nlohmann-json.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-opus.lua"
@@ -433,9 +433,9 @@ if _OPTIONS["windows-version"] == "winxp" then
  dofile "../../build/premake/ext-cryptopp.lua"
 end
  dofile "../../build/premake/ext-flac.lua"
+ dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-lame.lua"
  dofile "../../build/premake/ext-lhasa.lua"
- dofile "../../build/premake/ext-mpg123.lua"
  dofile "../../build/premake/ext-nlohmann-json.lua"
  dofile "../../build/premake/ext-ogg.lua"
  dofile "../../build/premake/ext-opus.lua"
