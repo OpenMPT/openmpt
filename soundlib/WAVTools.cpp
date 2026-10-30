@@ -68,7 +68,8 @@ WAVReader::WAVReader(FileReader &inputFile) : file(inputFile)
 
 	// Read format chunk
 	FileReader formatChunk = chunks.GetChunk(RIFFChunk::idfmt_);
-	if(!formatChunk.ReadStruct(formatInfo))
+	if(!formatChunk.ReadStruct(formatInfo)
+		|| formatInfo.numChannels == 0)
 	{
 		return;
 	}
