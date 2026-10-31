@@ -7,6 +7,16 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.10-pre
 
+ *  [**Sec**] SymMOD: Potential divison by 0 when trying to decode an embedded
+    IMA ADPCM WAV sample claiming to contain 0 audio channels (r25831).
+
+ *  [**Bug**] SymMOD: It was possible that a fact chunk of an embedded WAV file
+    claimed an impossibly big sample length for an IMA ADPCM sample, causing
+    unnecessarily large memory allocations.
+
+ *  Volume column portamento effect memory was not updated properly during
+    seeking, causing notes to continue playing at the wrong pitch.
+
 ### libopenmpt 0.8.9 (2026-08-19)
 
  *  [**Sec**] Possible heap out-of-bounds write when loading SymMOD files
