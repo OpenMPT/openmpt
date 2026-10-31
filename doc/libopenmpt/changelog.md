@@ -5,7 +5,7 @@ Changelog {#changelog}
 For fully detailed change log, please see the source repository directly. This
 is just a high-level summary.
 
-### libopenmpt 0.8.10-pre
+### libopenmpt 0.8.10 (2026-10-31)
 
  *  [**Sec**] SymMOD: Potential divison by 0 when trying to decode an embedded
     IMA ADPCM WAV sample claiming to contain 0 audio channels (r25831).
