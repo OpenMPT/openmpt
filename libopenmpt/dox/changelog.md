@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.5.45-pre
 
+ *  zlib: Update to v1.4 (2026-11-05).
+
 ### libopenmpt 0.5.44 (2026-08-19)
 
  *  [**Sec**] Possible heap out-of-bounds read when loading custom tunings from
