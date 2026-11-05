@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.7.23-pre
 
+ *  zlib: Update to v1.4 (2026-11-05).
+
 ### libopenmpt 0.7.22 (2026-10-31)
 
  *  [**Sec**] SymMOD: Potential divison by 0 when trying to decode an embedded
