@@ -286,6 +286,7 @@
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj
 /include/flac/src/share/win_utf8_io/win_utf8_io_static.vcxproj.filters
+/include/lame/.clang-format
 /include/lame/ABOUT-NLS
 /include/lame/ACM
 /include/lame/API
@@ -329,8 +330,11 @@
 /include/lame/m4
 /include/lame/mac
 /include/lame/macosx
+/include/lame/maintainer
 /include/lame/misc
 /include/lame/missing
+/include/lame/test
+/include/lame/test-driver
 /include/lame/testcase.mp3
 /include/lame/testcase.wav
 /include/lame/vc_solution
