@@ -19,6 +19,12 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/**
+ * \file
+ * \internal
+ * \brief The SSE2 forms of init_xrpow_core() and of the FFT (fht_SSE2()).
+ */
+
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -29,10 +35,11 @@
 #include "encoder.h"
 #include "util.h"
 #include "lame_intrin.h"
+#include "fft_pvt.h"
 
 
 
-#ifdef HAVE_XMMINTRIN_H
+#ifdef HAVE_SSE2_INTRINSICS
 
 #include <xmmintrin.h>
 
@@ -42,29 +49,39 @@ typedef union {
     __m128  _m128;
 } vecfloat_union;
 
-#define TRI_SIZE (5-1)  /* 1024 =  4**5 */
-static const FLOAT costab[TRI_SIZE * 2] = {
-    9.238795325112867e-01, 3.826834323650898e-01,
-    9.951847266721969e-01, 9.801714032956060e-02,
-    9.996988186962042e-01, 2.454122852291229e-02,
-    9.999811752826011e-01, 6.135884649154475e-03
-};
 
 
-/* make sure functions with SSE instructions maintain their own properly aligned stack */
-#if defined (__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2)))
-#define REALIGN __attribute__((force_align_arg_pointer))
-#define TARGET(x) __attribute__((target(x)))
-#else
-#define REALIGN
-#define TARGET(x)
-#endif
+/* Coefficients below 2^-80 are set to zero before the roots: from 2^-84 down,
+   x * sqrt(x) is a denormal, and a square root evaluated from a reciprocal
+   estimate, as a compiler may do under -ffast-math, makes a NaN of a denormal;
+   the margin keeps the estimate's error away from that edge. They quantize to
+   zero at every step size. */
+#define XRPOW_SMALLEST_ROOTED 8.271806125530277e-25f
 
-#define SSE_FUNCTION REALIGN TARGET("sse2")
-
+/**
+ * \internal
+ * \brief The xrpow values of four coefficients: |xr|^(3/4), and 0 for a
+ *        coefficient below #XRPOW_SMALLEST_ROOTED.
+ * \param x          the four coefficients.
+ * \param fabs_mask  the mask that clears the sign bit.
+ * \param smallest   #XRPOW_SMALLEST_ROOTED in every lane.
+ * \param sum        adds |xr| of each lane.
+ * \param max        keeps the largest xrpow value of each lane.
+ * \return the four xrpow values.
+ */
+static inline SSE_FUNCTION __m128
+xrpow_block(__m128 x, __m128 fabs_mask, __m128 smallest, __m128 * sum, __m128 * max)
+{
+    x = _mm_and_ps(x, fabs_mask);
+    *sum = _mm_add_ps(*sum, x);
+    x = _mm_and_ps(x, _mm_cmpge_ps(x, smallest));
+    x = _mm_sqrt_ps(_mm_mul_ps(x, _mm_sqrt_ps(x)));
+    *max = _mm_max_ps(*max, x);
+    return x;
+}
 
 SSE_FUNCTION void
-init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int max_nz, FLOAT * sum)
+init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[SAMPLES_PER_GRANULE], int max_nz, FLOAT * sum)
 {
     int     i;
     float   tmp_max = 0;
@@ -75,36 +92,33 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int max_nz, FLOA
 
     const vecfloat_union fabs_mask = {{ 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF }};
     const __m128 vec_fabs_mask = _mm_loadu_ps(&fabs_mask._float[0]);
+    const __m128 vec_smallest = _mm_set_ps1(XRPOW_SMALLEST_ROOTED);
     vecfloat_union vec_xrpow_max;
     vecfloat_union vec_sum;
     vecfloat_union vec_tmp;
 
-    _mm_prefetch((char const *) cod_info->xr, _MM_HINT_T0);
+    _mm_prefetch((char const *) cod_info->granule.xr, _MM_HINT_T0);
     _mm_prefetch((char const *) xrpow, _MM_HINT_T0);
 
     vec_xrpow_max._m128 = _mm_set_ps1(0);
     vec_sum._m128 = _mm_set_ps1(0);
 
     for (i = 0; i < upper4; i += 4) {
-        vec_tmp._m128 = _mm_loadu_ps(&(cod_info->xr[i])); /* load */
-        vec_tmp._m128 = _mm_and_ps(vec_tmp._m128, vec_fabs_mask); /* fabs */
-        vec_sum._m128 = _mm_add_ps(vec_sum._m128, vec_tmp._m128);
-        vec_tmp._m128 = _mm_sqrt_ps(_mm_mul_ps(vec_tmp._m128, _mm_sqrt_ps(vec_tmp._m128)));
-        vec_xrpow_max._m128 = _mm_max_ps(vec_xrpow_max._m128, vec_tmp._m128); /* retrieve max */
+        vec_tmp._m128 = _mm_loadu_ps(&(cod_info->granule.xr[i])); /* load */
+        vec_tmp._m128 = xrpow_block(vec_tmp._m128, vec_fabs_mask, vec_smallest,
+                                    &vec_sum._m128, &vec_xrpow_max._m128);
         _mm_storeu_ps(&(xrpow[i]), vec_tmp._m128); /* store into xrpow[] */
     }
     vec_tmp._m128 = _mm_set_ps1(0);
     switch (rest) {
-        case 3: vec_tmp._float[2] = cod_info->xr[upper4+2];
-        case 2: vec_tmp._float[1] = cod_info->xr[upper4+1];
-        case 1: vec_tmp._float[0] = cod_info->xr[upper4+0];
-            vec_tmp._m128 = _mm_and_ps(vec_tmp._m128, vec_fabs_mask); /* fabs */
-            vec_sum._m128 = _mm_add_ps(vec_sum._m128, vec_tmp._m128);
-            vec_tmp._m128 = _mm_sqrt_ps(_mm_mul_ps(vec_tmp._m128, _mm_sqrt_ps(vec_tmp._m128)));
-            vec_xrpow_max._m128 = _mm_max_ps(vec_xrpow_max._m128, vec_tmp._m128); /* retrieve max */
+        case 3: vec_tmp._float[2] = cod_info->granule.xr[upper4+2]; /* fall through */
+        case 2: vec_tmp._float[1] = cod_info->granule.xr[upper4+1]; /* fall through */
+        case 1: vec_tmp._float[0] = cod_info->granule.xr[upper4+0];
+            vec_tmp._m128 = xrpow_block(vec_tmp._m128, vec_fabs_mask, vec_smallest,
+                                        &vec_sum._m128, &vec_xrpow_max._m128);
             switch (rest) {
-                case 3: xrpow[upper4+2] = vec_tmp._float[2];
-                case 2: xrpow[upper4+1] = vec_tmp._float[1];
+                case 3: xrpow[upper4+2] = vec_tmp._float[2]; /* fall through */
+                case 2: xrpow[upper4+1] = vec_tmp._float[1]; /* fall through */
                 case 1: xrpow[upper4+0] = vec_tmp._float[0];
                 default:
                     break;
@@ -120,7 +134,7 @@ init_xrpow_core_sse(gr_info * const cod_info, FLOAT xrpow[576], int max_nz, FLOA
                 ? vec_xrpow_max._float[2] : vec_xrpow_max._float[3];
         tmp_max = ma > mb ? ma : mb;
     }
-    cod_info->xrpow_max = tmp_max;
+    cod_info->quant.xrpow_max = tmp_max;
     *sum = tmp_sum;
 }
 
@@ -145,7 +159,7 @@ fht_SSE2(FLOAT * fz, int n)
     FLOAT  *fi, *gi;
     FLOAT const *fn;
 
-    n <<= 1;            /* to get BLKSIZE, because of 3DNow! ASM routine */
+    n <<= 1;            /* callers pass half the transform length */
     fn = fz + n;
     k4 = 4;
     do {
@@ -156,29 +170,7 @@ fht_SSE2(FLOAT * fz, int n)
         k2 = k4 << 1;
         k3 = k2 + k1;
         k4 = k2 << 1;
-        fi = fz;
-        gi = fi + kx;
-        do {
-            FLOAT   f0, f1, f2, f3;
-            f1 = fi[0] - fi[k1];
-            f0 = fi[0] + fi[k1];
-            f3 = fi[k2] - fi[k3];
-            f2 = fi[k2] + fi[k3];
-            fi[k2] = f0 - f2;
-            fi[0] = f0 + f2;
-            fi[k3] = f1 - f3;
-            fi[k1] = f1 + f3;
-            f1 = gi[0] - gi[k1];
-            f0 = gi[0] + gi[k1];
-            f3 = SQRT2 * gi[k3];
-            f2 = SQRT2 * gi[k2];
-            gi[k2] = f0 - f2;
-            gi[0] = f0 + f2;
-            gi[k3] = f1 - f3;
-            gi[k1] = f1 + f3;
-            gi += k4;
-            fi += k4;
-        } while (fi < fn);
+        fht_pass_head(fz, fn, k1, k2, k3, k4, kx);
         c1 = tri[0];
         s1 = tri[1];
         for (i = 1; i < kx; i++) {
@@ -241,5 +233,5 @@ fht_SSE2(FLOAT * fz, int n)
     } while (k4 < n);
 }
 
-#endif	/* HAVE_XMMINTRIN_H */
+#endif	/* HAVE_SSE2_INTRINSICS */
 

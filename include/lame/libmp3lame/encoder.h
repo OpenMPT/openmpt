@@ -92,12 +92,26 @@
 /* number of subbands */
 #define SBLIMIT       32
 
+/* samples per granule and channel, in time and as spectral lines */
+#define SAMPLES_PER_GRANULE 576
+
+/* subband samples per granule, SAMPLES_PER_GRANULE / SBLIMIT */
+#define SUBBAND_SAMPLES 18
+
+/* how many input samples before its position the subband analysis window
+   reads: window_subband() covers 286 older and 224 newer ones */
+#define SUBBAND_LOOKBACK 286
+
 /* parition bands bands */
 #define CBANDS        64
 
 /* number of critical bands/scale factor bands where masking is computed*/
 #define SBPSY_l       21
 #define SBPSY_s       12
+
+/* the same at an output rate of 8 kHz or less */
+#define SBPSY_l_8KHZ  17
+#define SBPSY_s_8KHZ   9
 
 /* total number of scalefactor bands encoded */
 #define SBMAX_l       22
@@ -130,12 +144,6 @@
  *  -mf: MPG_MD_MS_LR
  *  -mi: all
  */
-#if 0
-#define MPG_MD_LR_LR  0
-#define MPG_MD_LR_I   1
-#define MPG_MD_MS_LR  2
-#define MPG_MD_MS_I   3
-#endif
 enum MPEGChannelMode
 {   MPG_MD_LR_LR = 0
 ,   MPG_MD_LR_I  = 1

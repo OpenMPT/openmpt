@@ -30,16 +30,13 @@
 #include "encoder.h"
 #include "util.h"
 #include "lame_global_flags.h"
+#include "tables.h"
 
-#define SET_OPTION(opt, val, def) if (enforce) \
-    (void) lame_set_##opt(gfp, val); \
-    else if (!(fabs(lame_get_##opt(gfp) - def) > 0)) \
-    (void) lame_set_##opt(gfp, val);
-
-#define SET__OPTION(opt, val, def) if (enforce) \
-    lame_set_##opt(gfp, val); \
-    else if (!(fabs(lame_get_##opt(gfp) - def) > 0)) \
-    lame_set_##opt(gfp, val);
+/* Sets an option if the caller enforces the preset or left the option at its default. */
+#define SET_OPTION(opt, val, def) do { \
+        if (enforce || !(fabs(lame_get_##opt(gfp) - def) > 0)) \
+            (void) lame_set_##opt(gfp, val); \
+    } while (0)
 
 #undef Min
 #undef Max
@@ -167,8 +164,8 @@ apply_vbr_preset(lame_global_flags * gfp, int a, int enforce)
     LERP(ath_fixpoint);
 
     (void) lame_set_VBR_q(gfp, set->vbr_q);
-    SET_OPTION(quant_comp, set->quant_comp, -1);
-    SET_OPTION(quant_comp_short, set->quant_comp_s, -1);
+    SET_OPTION(quant_comp, set->quant_comp, -1.0);
+    SET_OPTION(quant_comp_short, set->quant_comp_s, -1.0);
     if (set->expY) {
         (void) lame_set_experimentalY(gfp, set->expY);
     }
@@ -198,7 +195,7 @@ apply_vbr_preset(lame_global_flags * gfp, int a, int enforce)
             (void) lame_set_exp_nspsytune(gfp, sf21mod);
         }
     }
-    SET__OPTION(msfix, set->msfix, -1);
+    SET_OPTION(msfix, set->msfix, -1);
 
     if (enforce == 0) {
         gfp->VBR_q = a;
@@ -206,8 +203,8 @@ apply_vbr_preset(lame_global_flags * gfp, int a, int enforce)
     }
     gfp->internal_flags->cfg.minval = set->minval;
     {   /* take care of gain adjustments */
-        double const x = fabs(gfp->scale);
-        double const y = (x > 0.f) ? (10.f * log10(x)) : 0.f;
+        double const abs_scale = fabs(gfp->scale);
+        double const y = (abs_scale > 0.f) ? (10.f * log10(abs_scale)) : 0.f;
         gfp->internal_flags->cfg.ATHfixpoint = set->ath_fixpoint - y;
     }
 }
@@ -216,7 +213,6 @@ static int
 apply_abr_preset(lame_global_flags * gfp, int preset, int enforce)
 {
     typedef struct {
-        int     abr_kbps;
         int     quant_comp;
         int     quant_comp_s;
         int     safejoint;
@@ -237,28 +233,30 @@ apply_abr_preset(lame_global_flags * gfp, int preset, int enforce)
     /* 
      *  Switch mappings for ABR mode
      */
-    const abr_presets_t abr_switch_map[] = {        
-    /* kbps  quant q_s safejoint nsmsfix st_lrm  st_s  scale   msk ath_lwr ath_curve  interch , sfscale */
-      {  8,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -30.0,     11,    0.0012,        1}, /*   8, impossible to use in stereo */
-      { 16,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -25.0,     11,    0.0010,        1}, /*  16 */
-      { 24,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -20.0,     11,    0.0010,        1}, /*  24 */
-      { 32,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -15.0,     11,    0.0010,        1}, /*  32 */
-      { 40,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -10.0,     11,    0.0009,        1}, /*  40 */
-      { 48,     9,  9,        0,      0,  6.60,  145,  0.95,    0,  -10.0,     11,    0.0009,        1}, /*  48 */
-      { 56,     9,  9,        0,      0,  6.60,  145,  0.95,    0,   -6.0,     11,    0.0008,        1}, /*  56 */
-      { 64,     9,  9,        0,      0,  6.60,  145,  0.95,    0,   -2.0,     11,    0.0008,        1}, /*  64 */
-      { 80,     9,  9,        0,      0,  6.60,  145,  0.95,    0,     .0,      8,    0.0007,        1}, /*  80 */
-      { 96,     9,  9,        0,   2.50,  6.60,  145,  0.95,    0,    1.0,      5.5,  0.0006,        1}, /*  96 */
-      {112,     9,  9,        0,   2.25,  6.60,  145,  0.95,    0,    2.0,      4.5,  0.0005,        1}, /* 112 */
-      {128,     9,  9,        0,   1.95,  6.40,  140,  0.95,    0,    3.0,      4,    0.0002,        1}, /* 128 */
-      {160,     9,  9,        1,   1.79,  6.00,  135,  0.95,   -2,    5.0,      3.5,  0,             1}, /* 160 */
-      {192,     9,  9,        1,   1.49,  5.60,  125,  0.97,   -4,    7.0,      3,    0,             0}, /* 192 */
-      {224,     9,  9,        1,   1.25,  5.20,  125,  0.98,   -6,    9.0,      2,    0,             0}, /* 224 */
-      {256,     9,  9,        1,   0.97,  5.20,  125,  1.00,   -8,   10.0,      1,    0,             0}, /* 256 */
-      {320,     9,  9,        1,   0.90,  5.20,  125,  1.00,  -10,   12.0,      0,    0,             0}  /* 320 */
+    static const abr_presets_t abr_switch_map[] = {        
+    /* one row for each entry of full_bitrate_table; the comment names its kbps
+       quant q_s safejoint nsmsfix st_lrm  st_s  scale   msk ath_lwr ath_curve  interch , sfscale */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -30.0,     11,    0.0012,        1}, /*   8, impossible to use in stereo */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -25.0,     11,    0.0010,        1}, /*  16 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -20.0,     11,    0.0010,        1}, /*  24 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -15.0,     11,    0.0010,        1}, /*  32 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -10.0,     11,    0.0009,        1}, /*  40 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,  -10.0,     11,    0.0009,        1}, /*  48 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,   -6.0,     11,    0.0008,        1}, /*  56 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,   -2.0,     11,    0.0008,        1}, /*  64 */
+      {    9,  9,        0,      0,  6.60,  145,  0.95,    0,     .0,      8,    0.0007,        1}, /*  80 */
+      {    9,  9,        0,   2.50,  6.60,  145,  0.95,    0,    1.0,      5.5,  0.0006,        1}, /*  96 */
+      {    9,  9,        0,   2.25,  6.60,  145,  0.95,    0,    2.0,      4.5,  0.0005,        1}, /* 112 */
+      {    9,  9,        0,   1.95,  6.40,  140,  0.95,    0,    3.0,      4,    0.0002,        1}, /* 128 */
+      {    9,  9,        1,   1.79,  6.00,  135,  0.95,   -2,    5.0,      3.5,  0,             1}, /* 160 */
+      {    9,  9,        1,   1.49,  5.60,  125,  0.97,   -4,    7.0,      3,    0,             0}, /* 192 */
+      {    9,  9,        1,   1.25,  5.20,  125,  0.98,   -6,    9.0,      2,    0,             0}, /* 224 */
+      {    9,  9,        1,   0.97,  5.20,  125,  1.00,   -8,   10.0,      1,    0,             0}, /* 256 */
+      {    9,  9,        1,   0.90,  5.20,  125,  1.00,  -10,   12.0,      0,    0,             0}  /* 320 */
     };
 
     /* *INDENT-ON* */
+    compiletime_assert(dimension_of(abr_switch_map) == dimension_of(full_bitrate_table));
 
     /* Variables for the ABR stuff */
     int     r;
@@ -281,10 +279,10 @@ apply_abr_preset(lame_global_flags * gfp, int preset, int enforce)
         (void) lame_set_sfscale(gfp, 1);
 
 
-    SET_OPTION(quant_comp, abr_switch_map[r].quant_comp, -1);
-    SET_OPTION(quant_comp_short, abr_switch_map[r].quant_comp_s, -1);
+    SET_OPTION(quant_comp, abr_switch_map[r].quant_comp, -1.0);
+    SET_OPTION(quant_comp_short, abr_switch_map[r].quant_comp_s, -1.0);
 
-    SET__OPTION(msfix, abr_switch_map[r].nsmsfix, -1);
+    SET_OPTION(msfix, abr_switch_map[r].nsmsfix, -1);
 
     SET_OPTION(short_threshold_lrm, abr_switch_map[r].st_lrm, -1);
     SET_OPTION(short_threshold_s, abr_switch_map[r].st_s, -1);
@@ -307,14 +305,63 @@ apply_abr_preset(lame_global_flags * gfp, int preset, int enforce)
 
     SET_OPTION(interChRatio, abr_switch_map[r].interch, -1);
 
-    (void) abr_switch_map[r].abr_kbps;
-
-    gfp->internal_flags->cfg.minval = 5. * (abr_switch_map[r].abr_kbps / 320.);
+    gfp->internal_flags->cfg.minval = 5. * (full_bitrate_table[r] / 320.);
 
     return preset;
 }
 
 
+
+/**
+ * \internal
+ * \brief Whether a value is one of the VBR quality constants, \c V9 to \c V0:
+ *        410 to 500 in steps of 10.
+ * \param preset  the value.
+ * \return 1 if it is one, else 0.
+ */
+static int
+is_vbr_preset(int preset)
+{
+    return V9 <= preset && preset <= V0 && (V0 - preset) % 10 == 0;
+}
+
+/**
+ * \internal
+ * \brief Whether a value is an average bitrate preset, \c ABR_8 to \c ABR_320.
+ * \param preset  the value.
+ * \return 1 if it is one, else 0.
+ */
+static int
+is_abr_preset(int preset)
+{
+    return ABR_8 <= preset && preset <= ABR_320;
+}
+
+/**
+ * \internal
+ * \brief Whether apply_preset() knows a value: a named preset, a VBR quality
+ *        constant or an average bitrate.
+ *
+ * \param preset  the value.
+ * \return 1 if it is a preset, else 0.
+ */
+int
+preset_is_known(int preset)
+{
+    switch (preset) {
+    case R3MIX:
+    case MEDIUM:
+    case MEDIUM_FAST:
+    case STANDARD:
+    case STANDARD_FAST:
+    case EXTREME:
+    case EXTREME_FAST:
+    case INSANE:
+        return 1;
+    default:
+        return is_vbr_preset(preset) || is_abr_preset(preset);
+    }
+}
 
 int
 apply_preset(lame_global_flags * gfp, int preset, int enforce)
@@ -359,46 +406,16 @@ apply_preset(lame_global_flags * gfp, int preset, int enforce)
     }
 
     gfp->preset = preset;
-    {
-        switch (preset) {
-        case V9:
-            apply_vbr_preset(gfp, 9, enforce);
-            return preset;
-        case V8:
-            apply_vbr_preset(gfp, 8, enforce);
-            return preset;
-        case V7:
-            apply_vbr_preset(gfp, 7, enforce);
-            return preset;
-        case V6:
-            apply_vbr_preset(gfp, 6, enforce);
-            return preset;
-        case V5:
-            apply_vbr_preset(gfp, 5, enforce);
-            return preset;
-        case V4:
-            apply_vbr_preset(gfp, 4, enforce);
-            return preset;
-        case V3:
-            apply_vbr_preset(gfp, 3, enforce);
-            return preset;
-        case V2:
-            apply_vbr_preset(gfp, 2, enforce);
-            return preset;
-        case V1:
-            apply_vbr_preset(gfp, 1, enforce);
-            return preset;
-        case V0:
-            apply_vbr_preset(gfp, 0, enforce);
-            return preset;
-        default:
-            break;
-        }
+    if (is_vbr_preset(preset)) {
+        apply_vbr_preset(gfp, (V0 - preset) / 10, enforce);
+        return preset;
     }
-    if (8 <= preset && preset <= 320) {
+    if (is_abr_preset(preset)) {
         return apply_abr_preset(gfp, preset, enforce);
     }
 
     gfp->preset = 0;    /*no corresponding preset found */
     return preset;
 }
+
+#undef SET_OPTION

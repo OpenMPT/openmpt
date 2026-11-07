@@ -1,7 +1,7 @@
 #include <winver.h>
 #include "version.h"
 
-#ifdef _DLL
+#ifdef LAME_RC_DLL
 IDI_ICON1		ICON		DISCARDABLE	"logoe.ico"
 #else
 IDI_ICON1		ICON		DISCARDABLE	"logoe.ico"
@@ -17,7 +17,7 @@ VS_VERSION_INFO VERSIONINFO
 	FILEFLAGS 0x0L
 #endif
 	FILEOS VOS__WINDOWS32
-#ifdef _DLL
+#ifdef LAME_RC_DLL
 	FILETYPE VFT_DLL
 #else
 	FILETYPE VFT_APP
@@ -32,10 +32,10 @@ VS_VERSION_INFO VERSIONINFO
 				VALUE "FileDescription", "MP3 Encoder.\0"
 				VALUE "FileVersion", LAME_VERSION_STRING "\0"
 				VALUE "LegalCopyright", "Copyright (C) 1999-2011 The L.A.M.E. Team\0"
-#ifdef _DLL
-				VALUE "OriginalFilename", STR(_DLL) "\0"
+#ifdef LAME_RC_DLL
+				VALUE "OriginalFilename", LAME_STR(LAME_RC_DLL) "\0"
 #else
-				VALUE "OriginalFilename", STR(_APP) "\0"
+				VALUE "OriginalFilename", LAME_STR(LAME_RC_APP) "\0"
 #endif
 				VALUE "ProductName", "L.A.M.E.\0"
 				VALUE "ProductVersion", LAME_VERSION_STRING "\0"

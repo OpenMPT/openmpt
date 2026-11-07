@@ -38,7 +38,6 @@
 
 
 
-#ifndef USE_GOGO_SUBBAND
 static const FLOAT enwindow[] = {
     -4.77e-07 * 0.740951125354959 / 2.384e-06, 1.03951e-04 * 0.740951125354959 / 2.384e-06,
     9.53674e-04 * 0.740951125354959 / 2.384e-06, 2.841473e-03 * 0.740951125354959 / 2.384e-06,
@@ -224,7 +223,6 @@ static const FLOAT enwindow[] = {
     4.9591e-05 / 2.384e-06,
     4.756451e-03 / 2.384e-06, 2.1458e-05 / 2.384e-06, -6.9618e-05 / 2.384e-06, /*    2.384e-06/2.384e-06 */
 };
-#endif
 
 
 #define NS 12
@@ -398,10 +396,14 @@ static const FLOAT win[4][NL] = {
      }
 };
 
-#define tantab_l (win[SHORT_TYPE]+3)
-#define cx (win[SHORT_TYPE]+12)
-#define ca (win[SHORT_TYPE]+20)
-#define cs (win[SHORT_TYPE]+28)
+/** \internal \brief Where the tables after the three short-window values of
+    win[SHORT_TYPE] start. */
+enum {
+    TANTAB_L_OFFSET = 3, /**< the tangents of the long window, 9 values */
+    CX_OFFSET = 12,      /**< the cosines of mdct_long(), 8 values */
+    CA_OFFSET = 20,      /**< the alias reduction butterfly, 8 values */
+    CS_OFFSET = 28       /**< the alias reduction butterfly, 8 values */
+};
 
 /************************************************************************
 *
@@ -869,6 +871,7 @@ mdct_short(FLOAT * inout)
 inline static void
 mdct_long(FLOAT * out, FLOAT const *in)
 {
+    FLOAT const *const cx = win[SHORT_TYPE] + CX_OFFSET;
     FLOAT   ct, st;
     {
         FLOAT   tc1, tc2, tc3, tc4, ts5, ts6, ts7, ts8;
@@ -948,26 +951,29 @@ mdct_sub48(lame_internal_flags * gfc, const sample_t * w0, const sample_t * w1)
     EncStateVar_t *const esv = &gfc->sv_enc;
     int     gr, k, ch;
     const sample_t *wk;
+    FLOAT const *const tantab_l = win[SHORT_TYPE] + TANTAB_L_OFFSET;
+    FLOAT const *const ca = win[SHORT_TYPE] + CA_OFFSET;
+    FLOAT const *const cs = win[SHORT_TYPE] + CS_OFFSET;
 
-    wk = w0 + 286;
+    wk = w0 + SUBBAND_LOOKBACK;
     /* thinking cache performance, ch->gr loop is better than gr->ch loop */
     for (ch = 0; ch < cfg->channels_out; ch++) {
         for (gr = 0; gr < cfg->mode_gr; gr++) {
             int     band;
             gr_info *const gi = &(gfc->l3_side.tt[gr][ch]);
-            FLOAT  *mdct_enc = gi->xr;
+            FLOAT  *mdct_enc = gi->granule.xr;
             FLOAT  *samp = esv->sb_sample[ch][1 - gr][0];
 
-            for (k = 0; k < 18 / 2; k++) {
+            for (k = 0; k < SUBBAND_SAMPLES / 2; k++) {
                 window_subband(wk, samp);
-                window_subband(wk + 32, samp + 32);
-                samp += 64;
-                wk += 64;
+                window_subband(wk + SBLIMIT, samp + SBLIMIT);
+                samp += 2 * SBLIMIT;
+                wk += 2 * SBLIMIT;
                 /*
                  * Compensate for inversion in the analysis filter
                  */
-                for (band = 1; band < 32; band += 2) {
-                    samp[band - 32] *= -1;
+                for (band = 1; band < SBLIMIT; band += 2) {
+                    samp[band - SBLIMIT] *= -1;
                 }
             }
 
@@ -975,40 +981,40 @@ mdct_sub48(lame_internal_flags * gfc, const sample_t * w0, const sample_t * w1)
              * Perform imdct of 18 previous subband samples
              * + 18 current subband samples
              */
-            for (band = 0; band < 32; band++, mdct_enc += 18) {
-                int     type = gi->block_type;
+            for (band = 0; band < SBLIMIT; band++, mdct_enc += SUBBAND_SAMPLES) {
+                int     type = gi->granule.block_type;
                 FLOAT const *const band0 = esv->sb_sample[ch][gr][0] + order[band];
                 FLOAT  *const band1 = esv->sb_sample[ch][1 - gr][0] + order[band];
-                if (gi->mixed_block_flag && band < 2)
-                    type = 0;
+                if (gi->granule.mixed_block_flag && band < 2)
+                    type = NORM_TYPE;
                 if (esv->amp_filter[band] < 1e-12) {
-                    memset(mdct_enc, 0, 18 * sizeof(FLOAT));
+                    memset(mdct_enc, 0, SUBBAND_SAMPLES * sizeof(FLOAT));
                 }
                 else {
                     if (esv->amp_filter[band] < 1.0) {
-                        for (k = 0; k < 18; k++)
-                            band1[k * 32] *= esv->amp_filter[band];
+                        for (k = 0; k < SUBBAND_SAMPLES; k++)
+                            band1[k * SBLIMIT] *= esv->amp_filter[band];
                     }
                     if (type == SHORT_TYPE) {
                         for (k = -NS / 4; k < 0; k++) {
                             FLOAT const w = win[SHORT_TYPE][k + 3];
-                            mdct_enc[k * 3 + 9] = band0[(9 + k) * 32] * w - band0[(8 - k) * 32];
-                            mdct_enc[k * 3 + 18] = band0[(14 - k) * 32] * w + band0[(15 + k) * 32];
-                            mdct_enc[k * 3 + 10] = band0[(15 + k) * 32] * w - band0[(14 - k) * 32];
-                            mdct_enc[k * 3 + 19] = band1[(2 - k) * 32] * w + band1[(3 + k) * 32];
-                            mdct_enc[k * 3 + 11] = band1[(3 + k) * 32] * w - band1[(2 - k) * 32];
-                            mdct_enc[k * 3 + 20] = band1[(8 - k) * 32] * w + band1[(9 + k) * 32];
+                            mdct_enc[k * 3 + 9] = band0[(9 + k) * SBLIMIT] * w - band0[(8 - k) * SBLIMIT];
+                            mdct_enc[k * 3 + 18] = band0[(14 - k) * SBLIMIT] * w + band0[(15 + k) * SBLIMIT];
+                            mdct_enc[k * 3 + 10] = band0[(15 + k) * SBLIMIT] * w - band0[(14 - k) * SBLIMIT];
+                            mdct_enc[k * 3 + 19] = band1[(2 - k) * SBLIMIT] * w + band1[(3 + k) * SBLIMIT];
+                            mdct_enc[k * 3 + 11] = band1[(3 + k) * SBLIMIT] * w - band1[(2 - k) * SBLIMIT];
+                            mdct_enc[k * 3 + 20] = band1[(8 - k) * SBLIMIT] * w + band1[(9 + k) * SBLIMIT];
                         }
                         mdct_short(mdct_enc);
                     }
                     else {
-                        FLOAT   work[18];
+                        FLOAT   work[SUBBAND_SAMPLES];
                         for (k = -NL / 4; k < 0; k++) {
                             FLOAT   a, b;
-                            a = win[type][k + 27] * band1[(k + 9) * 32]
-                                + win[type][k + 36] * band1[(8 - k) * 32];
-                            b = win[type][k + 9] * band0[(k + 9) * 32]
-                                - win[type][k + 18] * band0[(8 - k) * 32];
+                            a = win[type][k + 27] * band1[(k + 9) * SBLIMIT]
+                                + win[type][k + 36] * band1[(8 - k) * SBLIMIT];
+                            b = win[type][k + 9] * band0[(k + 9) * SBLIMIT]
+                                - win[type][k + 18] * band0[(8 - k) * SBLIMIT];
                             work[k + 9] = a - b * tantab_l[k + 9];
                             work[k + 18] = a * tantab_l[k + 9] + b;
                         }
@@ -1031,9 +1037,9 @@ mdct_sub48(lame_internal_flags * gfc, const sample_t * w0, const sample_t * w1)
                 }
             }
         }
-        wk = w1 + 286;
+        wk = w1 + SUBBAND_LOOKBACK;
         if (cfg->mode_gr == 1) {
-            memcpy(esv->sb_sample[ch][0], esv->sb_sample[ch][1], 576 * sizeof(FLOAT));
+            memcpy(esv->sb_sample[ch][0], esv->sb_sample[ch][1], sizeof(esv->sb_sample[ch][0]));
         }
     }
 }

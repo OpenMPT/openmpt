@@ -53,6 +53,28 @@
  *   gfp->internal_flags->ATH
  *   (gfc->ATH)
  */
+/**
+ * \brief Scale the absolute threshold of hearing to the loudness of the
+ *        granule.
+ *
+ * A listener turns a quiet passage up. So a threshold for one playback level
+ * is wrong for quiet material: noise below the threshold at a normal level
+ * becomes audible when the volume is turned up. This function lowers the
+ * threshold when the granule gets quieter, by up to about 32 dB.
+ *
+ * It uses psycho_loudness_approx(), a power sum weighted by equal loudness,
+ * shifted by a configurable sensitivity. With it, the caller can move the
+ * range where the adjustment works.
+ *
+ * The response is asymmetric on purpose. A rise takes effect after the delay
+ * of one frame, so that a loud passage is not encoded with a threshold that is
+ * still low from the quiet passage before. A fall happens slowly, so that a
+ * short dip does not move the threshold down and up again.
+ *
+ * Turning the adjustment off is a supported setting (lame_set_athaa_type()).
+ * It is the only way to encode with a threshold that assumes no playback
+ * level.
+ */
 static void
 adjust_ATH(lame_internal_flags const *const gfc)
 {
@@ -172,8 +194,8 @@ updateStats(lame_internal_flags * const gfc)
     }
     for (gr = 0; gr < cfg->mode_gr; ++gr) {
         for (ch = 0; ch < cfg->channels_out; ++ch) {
-            int     bt = gfc->l3_side.tt[gr][ch].block_type;
-            if (gfc->l3_side.tt[gr][ch].mixed_block_flag)
+            int     bt = gfc->l3_side.tt[gr][ch].granule.block_type;
+            if (gfc->l3_side.tt[gr][ch].granule.mixed_block_flag)
                 bt = 4;
             eov->bitrate_blocktype_hist[eov->bitrate_index][bt]++;
             eov->bitrate_blocktype_hist[eov->bitrate_index][5]++;
@@ -194,15 +216,15 @@ lame_encode_frame_init(lame_internal_flags * gfc, const sample_t *const inbuf[2]
     int     ch, gr;
 
     if (gfc->lame_encode_frame_init == 0) {
-        sample_t primebuff0[286 + 1152 + 576];
-        sample_t primebuff1[286 + 1152 + 576];
-        int const framesize = 576 * cfg->mode_gr;
+        sample_t primebuff0[SUBBAND_LOOKBACK + 1152 + SAMPLES_PER_GRANULE];
+        sample_t primebuff1[SUBBAND_LOOKBACK + 1152 + SAMPLES_PER_GRANULE];
+        int const framesize = SAMPLES_PER_GRANULE * cfg->mode_gr;
         /* prime the MDCT/polyphase filterbank with a short block */
         int     i, j;
         gfc->lame_encode_frame_init = 1;
         memset(primebuff0, 0, sizeof(primebuff0));
         memset(primebuff1, 0, sizeof(primebuff1));
-        for (i = 0, j = 0; i < 286 + 576 * (1 + cfg->mode_gr); ++i) {
+        for (i = 0, j = 0; i < SUBBAND_LOOKBACK + SAMPLES_PER_GRANULE * (1 + cfg->mode_gr); ++i) {
             if (i < framesize) {
                 primebuff0[i] = 0;
                 if (cfg->channels_out == 2)
@@ -218,14 +240,14 @@ lame_encode_frame_init(lame_internal_flags * gfc, const sample_t *const inbuf[2]
         /* polyphase filtering / mdct */
         for (gr = 0; gr < cfg->mode_gr; gr++) {
             for (ch = 0; ch < cfg->channels_out; ch++) {
-                gfc->l3_side.tt[gr][ch].block_type = SHORT_TYPE;
+                gfc->l3_side.tt[gr][ch].granule.block_type = SHORT_TYPE;
             }
         }
         mdct_sub48(gfc, primebuff0, primebuff1);
 
         /* check FFT will not use a negative starting offset */
-#if 576 < FFTOFFSET
-# error FFTOFFSET greater than 576: FFT uses a negative offset
+#if SAMPLES_PER_GRANULE < FFTOFFSET
+# error FFTOFFSET greater than SAMPLES_PER_GRANULE: FFT uses a negative offset
 #endif
         /* check if we have enough data for FFT */
         assert(gfc->sv_enc.mf_size >= (BLKSIZE + framesize - FFTOFFSET));
@@ -239,6 +261,234 @@ lame_encode_frame_init(lame_internal_flags * gfc, const sample_t *const inbuf[2]
 
 
 
+
+
+/**
+ * \internal
+ * \brief Runs the psychoacoustic model over the granules of a frame.
+ *
+ * It also sets each granule's block type, and in joint stereo the share of
+ * the side channel in the energy.
+ *
+ * \param gfc            the encoder.
+ * \param inbuf          the input of the frame, per channel.
+ * \param masking_LR     receives the masking of left and right.
+ * \param masking_MS     receives the masking of mid and side.
+ * \param pe             receives the perceptual entropy of left and right.
+ * \param pe_MS          receives the perceptual entropy of mid and side.
+ * \param ms_ener_ratio  receives the side channel's share of the energy,
+ *                       in joint stereo only.
+ */
+static void
+run_psymodel(lame_internal_flags * gfc, const sample_t *const inbuf[2],
+             III_psy_ratio masking_LR[2][2], III_psy_ratio masking_MS[2][2],
+             FLOAT pe[2][2], FLOAT pe_MS[2][2], FLOAT ms_ener_ratio[2])
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    FLOAT   tot_ener[2][4];
+    const sample_t *bufp[2] = {0, 0}; /* address of beginning of left & right granule */
+    int     blocktype[2];
+    int     ch, gr;
+
+    /* psy model has a 1 granule (576) delay that we must compensate for
+     * (mt 6/99).
+     */
+    for (gr = 0; gr < cfg->mode_gr; gr++) {
+
+        for (ch = 0; ch < cfg->channels_out; ch++) {
+            bufp[ch] = &inbuf[ch][SAMPLES_PER_GRANULE + gr * SAMPLES_PER_GRANULE - FFTOFFSET];
+        }
+        L3psycho_anal_vbr(gfc, bufp, gr,
+                          masking_LR, masking_MS,
+                          pe[gr], pe_MS[gr], tot_ener[gr], blocktype);
+
+        if (cfg->mode == JOINT_STEREO) {
+            ms_ener_ratio[gr] = tot_ener[gr][2] + tot_ener[gr][3];
+            if (ms_ener_ratio[gr] > 0)
+                ms_ener_ratio[gr] = tot_ener[gr][3] / ms_ener_ratio[gr];
+        }
+
+        /* block type flags */
+        for (ch = 0; ch < cfg->channels_out; ch++) {
+            gr_info *const cod_info = &gfc->l3_side.tt[gr][ch];
+            cod_info->granule.block_type = blocktype[ch];
+            cod_info->granule.mixed_block_flag = 0;
+        }
+    }
+}
+
+
+/**
+ * \internal
+ * \brief Chooses between mid/side and left/right coding of a frame.
+ *
+ * \param gfc    the encoder, with the block types of the frame.
+ * \param pe     the perceptual entropy of left and right.
+ * \param pe_MS  the perceptual entropy of mid and side.
+ * \return MPG_MD_MS_LR or MPG_MD_LR_LR.
+ */
+static int
+choose_mode_ext(lame_internal_flags const *gfc, FLOAT pe[2][2], FLOAT pe_MS[2][2])
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int     mode_ext = MPG_MD_LR_LR;
+    int     ch, gr;
+
+    if (cfg->force_ms) {
+        mode_ext = MPG_MD_MS_LR;
+    }
+    else if (cfg->mode == JOINT_STEREO) {
+        /* ms_ratio = is scaled, for historical reasons, to look like
+           a ratio of side_channel / total.
+           0 = signal is 100% mono
+           .5 = L & R uncorrelated
+         */
+
+        /* [0] and [1] are the results for the two granules in MPEG-1,
+         * in MPEG-2 it's only a faked averaging of the same value
+         * _prev is the value of the last granule of the previous frame
+         * _next is the value of the first granule of the next frame
+         */
+
+        FLOAT   sum_pe_MS = 0;
+        FLOAT   sum_pe_LR = 0;
+        for (gr = 0; gr < cfg->mode_gr; gr++) {
+            for (ch = 0; ch < cfg->channels_out; ch++) {
+                sum_pe_MS += pe_MS[gr][ch];
+                sum_pe_LR += pe[gr][ch];
+            }
+        }
+
+        /* based on PE: M/S coding would not use much more bits than L/R */
+        if (sum_pe_MS <= 1.00 * sum_pe_LR) {
+
+            gr_info const *const gi0 = &gfc->l3_side.tt[0][0];
+            gr_info const *const gi1 = &gfc->l3_side.tt[cfg->mode_gr - 1][0];
+
+            if (gi0[0].granule.block_type == gi0[1].granule.block_type
+                && gi1[0].granule.block_type == gi1[1].granule.block_type) {
+
+                mode_ext = MPG_MD_MS_LR;
+            }
+        }
+    }
+    return mode_ext;
+}
+
+
+/**
+ * \internal
+ * \brief Gives the frame analyzer what the model found in the frame.
+ *
+ * \param gfc            the encoder, with the analyzer's record.
+ * \param ms_ener_ratio  the side channel's share of the energy.
+ * \param pe_use         the perceptual entropy of the chosen channel mode.
+ */
+static void
+copy_analysis_input(lame_internal_flags * gfc, FLOAT const ms_ener_ratio[2], FLOAT pe_use[2][2])
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int     ch, gr;
+
+    for (gr = 0; gr < cfg->mode_gr; gr++) {
+        for (ch = 0; ch < cfg->channels_out; ch++) {
+            gfc->pinfo->ms_ratio[gr] = 0;
+            gfc->pinfo->ms_ener_ratio[gr] = ms_ener_ratio[gr];
+            gfc->pinfo->blocktype[gr][ch] = gfc->l3_side.tt[gr][ch].granule.block_type;
+            gfc->pinfo->pe[gr][ch] = pe_use[gr][ch];
+            /* pinfo->xr is double but tt[].granule.xr is FLOAT: convert
+               element-wise, a raw copy would reinterpret the bits */
+            {
+                int     i;
+                for (i = 0; i < SAMPLES_PER_GRANULE; ++i)
+                    gfc->pinfo->xr[gr][ch][i] = gfc->l3_side.tt[gr][ch].granule.xr[i];
+            }
+            /* in psymodel, LR and MS data was stored in pinfo.  
+               switch to MS data: */
+            if (gfc->ov_enc.mode_ext == MPG_MD_MS_LR) {
+                gfc->pinfo->ers[gr][ch] = gfc->pinfo->ers[gr][ch + 2];
+                memcpy(gfc->pinfo->energy[gr][ch], gfc->pinfo->energy[gr][ch + 2],
+                       sizeof(gfc->pinfo->energy[gr][ch]));
+            }
+        }
+    }
+}
+
+
+/**
+ * \internal
+ * \brief Smooths the perceptual entropy over the frames, for CBR and ABR.
+ *
+ * A low-pass filter runs over the sum of each frame's entropy, and the
+ * entropy of this frame is scaled by the result.
+ *
+ * \param gfc     the encoder, with the history of the sums.
+ * \param pe_use  the perceptual entropy of the frame; it is scaled in place.
+ */
+static void
+smooth_pe(lame_internal_flags * gfc, FLOAT pe_use[2][2])
+{
+    static FLOAT const fircoef[9] = {
+        -0.0207887 * 5, -0.0378413 * 5, -0.0432472 * 5, -0.031183 * 5,
+        7.79609e-18 * 5, 0.0467745 * 5, 0.10091 * 5, 0.151365 * 5,
+        0.187098 * 5
+    };
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int     ch, gr, i;
+    FLOAT   f;
+
+    for (i = 0; i < 18; i++)
+        gfc->sv_enc.pefirbuf[i] = gfc->sv_enc.pefirbuf[i + 1];
+
+    f = 0.0;
+    for (gr = 0; gr < cfg->mode_gr; gr++)
+        for (ch = 0; ch < cfg->channels_out; ch++)
+            f += pe_use[gr][ch];
+    gfc->sv_enc.pefirbuf[18] = f;
+
+    f = gfc->sv_enc.pefirbuf[9];
+    for (i = 0; i < 9; i++)
+        f += (gfc->sv_enc.pefirbuf[i] + gfc->sv_enc.pefirbuf[18 - i]) * fircoef[i];
+
+    if (f > 0) {
+        f = (670 * 5 * cfg->mode_gr * cfg->channels_out) / f;
+        for (gr = 0; gr < cfg->mode_gr; gr++) {
+            for (ch = 0; ch < cfg->channels_out; ch++) {
+                pe_use[gr][ch] *= f;
+            }
+        }
+    }
+}
+
+
+/**
+ * \internal
+ * \brief Gives the frame analyzer the frame's input samples and noise.
+ *
+ * \param gfc      the encoder, with the analyzer's record.
+ * \param inbuf    the input of the frame, per channel.
+ * \param masking  the masking of the chosen channel mode.
+ */
+static void
+copy_analysis_output(lame_internal_flags * gfc, const sample_t *const inbuf[2],
+                     const III_psy_ratio (*masking)[2])
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int const framesize = SAMPLES_PER_GRANULE * cfg->mode_gr;
+    int     ch;
+
+    for (ch = 0; ch < cfg->channels_out; ch++) {
+        int     j;
+        for (j = 0; j < FFTOFFSET; j++)
+            gfc->pinfo->pcmdata[ch][j] = gfc->pinfo->pcmdata[ch][j + framesize];
+        for (j = FFTOFFSET; j < 1600; j++) {
+            gfc->pinfo->pcmdata[ch][j] = inbuf[ch][j - FFTOFFSET];
+        }
+    }
+    gfc->sv_qnt.masking_lower = 1.0;
+
+    set_frame_pinfo(gfc, masking);
+}
 
 
 /************************************************************************
@@ -299,8 +549,6 @@ FFT's                    <---------1024---------->
 
 */
 
-typedef FLOAT chgrdata[2][2];
-
 
 int
 lame_encode_mp3_frame(       /* Output */
@@ -317,17 +565,17 @@ lame_encode_mp3_frame(       /* Output */
     const III_psy_ratio (*masking)[2]; /*pointer to selected maskings */
     const sample_t *inbuf[2];
 
-    FLOAT   tot_ener[2][4];
     FLOAT   ms_ener_ratio[2] = { .5, .5 };
     FLOAT   pe[2][2] = { {0., 0.}, {0., 0.} }, pe_MS[2][2] = { {
     0., 0.}, {
     0., 0.}};
     FLOAT (*pe_use)[2];
 
-    int     ch, gr;
-
     inbuf[0] = inbuf_l;
     inbuf[1] = inbuf_r;
+
+    if (gfc->sv_enc.internal_error)
+        return LAME_INTERNALERROR;
 
     if (gfc->lame_encode_frame_init == 0) {
         /*first run? */
@@ -357,40 +605,7 @@ lame_encode_mp3_frame(       /* Output */
     *   Stage 1: psychoacoustic model       *
     ****************************************/
 
-    {
-        /* psychoacoustic model
-         * psy model has a 1 granule (576) delay that we must compensate for
-         * (mt 6/99).
-         */
-        int     ret;
-        const sample_t *bufp[2] = {0, 0}; /* address of beginning of left & right granule */
-        int     blocktype[2];
-
-        for (gr = 0; gr < cfg->mode_gr; gr++) {
-
-            for (ch = 0; ch < cfg->channels_out; ch++) {
-                bufp[ch] = &inbuf[ch][576 + gr * 576 - FFTOFFSET];
-            }
-            ret = L3psycho_anal_vbr(gfc, bufp, gr,
-                                    masking_LR, masking_MS,
-                                    pe[gr], pe_MS[gr], tot_ener[gr], blocktype);
-            if (ret != 0)
-                return -4;
-
-            if (cfg->mode == JOINT_STEREO) {
-                ms_ener_ratio[gr] = tot_ener[gr][2] + tot_ener[gr][3];
-                if (ms_ener_ratio[gr] > 0)
-                    ms_ener_ratio[gr] = tot_ener[gr][3] / ms_ener_ratio[gr];
-            }
-
-            /* block type flags */
-            for (ch = 0; ch < cfg->channels_out; ch++) {
-                gr_info *const cod_info = &gfc->l3_side.tt[gr][ch];
-                cod_info->block_type = blocktype[ch];
-                cod_info->mixed_block_flag = 0;
-            }
-        }
-    }
+    run_psymodel(gfc, inbuf, masking_LR, masking_MS, pe, pe_MS, ms_ener_ratio);
 
 
     /* auto-adjust of ATH, useful for low volume */
@@ -410,45 +625,7 @@ lame_encode_mp3_frame(       /* Output */
     ****************************************/
 
     /* Here will be selected MS or LR coding of the 2 stereo channels */
-    gfc->ov_enc.mode_ext = MPG_MD_LR_LR;
-
-    if (cfg->force_ms) {
-        gfc->ov_enc.mode_ext = MPG_MD_MS_LR;
-    }
-    else if (cfg->mode == JOINT_STEREO) {
-        /* ms_ratio = is scaled, for historical reasons, to look like
-           a ratio of side_channel / total.
-           0 = signal is 100% mono
-           .5 = L & R uncorrelated
-         */
-
-        /* [0] and [1] are the results for the two granules in MPEG-1,
-         * in MPEG-2 it's only a faked averaging of the same value
-         * _prev is the value of the last granule of the previous frame
-         * _next is the value of the first granule of the next frame
-         */
-
-        FLOAT   sum_pe_MS = 0;
-        FLOAT   sum_pe_LR = 0;
-        for (gr = 0; gr < cfg->mode_gr; gr++) {
-            for (ch = 0; ch < cfg->channels_out; ch++) {
-                sum_pe_MS += pe_MS[gr][ch];
-                sum_pe_LR += pe[gr][ch];
-            }
-        }
-
-        /* based on PE: M/S coding would not use much more bits than L/R */
-        if (sum_pe_MS <= 1.00 * sum_pe_LR) {
-
-            gr_info const *const gi0 = &gfc->l3_side.tt[0][0];
-            gr_info const *const gi1 = &gfc->l3_side.tt[cfg->mode_gr - 1][0];
-
-            if (gi0[0].block_type == gi0[1].block_type && gi1[0].block_type == gi1[1].block_type) {
-
-                gfc->ov_enc.mode_ext = MPG_MD_MS_LR;
-            }
-        }
-    }
+    gfc->ov_enc.mode_ext = choose_mode_ext(gfc, pe, pe_MS);
 
     /* bit and noise allocation */
     if (gfc->ov_enc.mode_ext == MPG_MD_MS_LR) {
@@ -462,60 +639,16 @@ lame_encode_mp3_frame(       /* Output */
 
 
     /* copy data for MP3 frame analyzer */
-    if (cfg->analysis && gfc->pinfo != NULL) {
-        for (gr = 0; gr < cfg->mode_gr; gr++) {
-            for (ch = 0; ch < cfg->channels_out; ch++) {
-                gfc->pinfo->ms_ratio[gr] = 0;
-                gfc->pinfo->ms_ener_ratio[gr] = ms_ener_ratio[gr];
-                gfc->pinfo->blocktype[gr][ch] = gfc->l3_side.tt[gr][ch].block_type;
-                gfc->pinfo->pe[gr][ch] = pe_use[gr][ch];
-                memcpy(gfc->pinfo->xr[gr][ch], &gfc->l3_side.tt[gr][ch].xr[0], sizeof(FLOAT) * 576);
-                /* in psymodel, LR and MS data was stored in pinfo.  
-                   switch to MS data: */
-                if (gfc->ov_enc.mode_ext == MPG_MD_MS_LR) {
-                    gfc->pinfo->ers[gr][ch] = gfc->pinfo->ers[gr][ch + 2];
-                    memcpy(gfc->pinfo->energy[gr][ch], gfc->pinfo->energy[gr][ch + 2],
-                           sizeof(gfc->pinfo->energy[gr][ch]));
-                }
-            }
-        }
-    }
+    if (cfg->analysis && gfc->pinfo != NULL)
+        copy_analysis_input(gfc, ms_ener_ratio, pe_use);
 
 
     /****************************************
     *   Stage 4: quantization loop          *
     ****************************************/
 
-    if (cfg->vbr == vbr_off || cfg->vbr == vbr_abr) {
-        static FLOAT const fircoef[9] = {
-            -0.0207887 * 5, -0.0378413 * 5, -0.0432472 * 5, -0.031183 * 5,
-            7.79609e-18 * 5, 0.0467745 * 5, 0.10091 * 5, 0.151365 * 5,
-            0.187098 * 5
-        };
-
-        int     i;
-        FLOAT   f;
-
-        for (i = 0; i < 18; i++)
-            gfc->sv_enc.pefirbuf[i] = gfc->sv_enc.pefirbuf[i + 1];
-
-        f = 0.0;
-        for (gr = 0; gr < cfg->mode_gr; gr++)
-            for (ch = 0; ch < cfg->channels_out; ch++)
-                f += pe_use[gr][ch];
-        gfc->sv_enc.pefirbuf[18] = f;
-
-        f = gfc->sv_enc.pefirbuf[9];
-        for (i = 0; i < 9; i++)
-            f += (gfc->sv_enc.pefirbuf[i] + gfc->sv_enc.pefirbuf[18 - i]) * fircoef[i];
-
-        f = (670 * 5 * cfg->mode_gr * cfg->channels_out) / f;
-        for (gr = 0; gr < cfg->mode_gr; gr++) {
-            for (ch = 0; ch < cfg->channels_out; ch++) {
-                pe_use[gr][ch] *= f;
-            }
-        }
-    }
+    if (cfg->vbr == vbr_off || cfg->vbr == vbr_abr)
+        smooth_pe(gfc, pe_use);
     switch (cfg->vbr)
     {
     default:
@@ -533,6 +666,8 @@ lame_encode_mp3_frame(       /* Output */
         VBR_new_iteration_loop(gfc, (const FLOAT (*)[2])pe_use, ms_ener_ratio, masking);
         break;
     }
+    if (gfc->sv_enc.internal_error)
+        return LAME_INTERNALERROR;
 
 
     /****************************************
@@ -541,7 +676,8 @@ lame_encode_mp3_frame(       /* Output */
 
 
     /*  write the frame to the bitstream  */
-    (void) format_bitstream(gfc);
+    if (format_bitstream(gfc) != 0)
+        return LAME_INTERNALERROR;
 
     /* copy mp3 bit buffer into array */
     mp3count = copy_buffer(gfc, mp3buf, mp3buf_size, 1);
@@ -551,20 +687,8 @@ lame_encode_mp3_frame(       /* Output */
         AddVbrFrame(gfc);
     }
 
-    if (cfg->analysis && gfc->pinfo != NULL) {
-        int     framesize = 576 * cfg->mode_gr;
-        for (ch = 0; ch < cfg->channels_out; ch++) {
-            int     j;
-            for (j = 0; j < FFTOFFSET; j++)
-                gfc->pinfo->pcmdata[ch][j] = gfc->pinfo->pcmdata[ch][j + framesize];
-            for (j = FFTOFFSET; j < 1600; j++) {
-                gfc->pinfo->pcmdata[ch][j] = inbuf[ch][j - FFTOFFSET];
-            }
-        }
-        gfc->sv_qnt.masking_lower = 1.0;
-
-        set_frame_pinfo(gfc, masking);
-    }
+    if (cfg->analysis && gfc->pinfo != NULL)
+        copy_analysis_output(gfc, inbuf, masking);
 
     ++gfc->ov_enc.frame_number;
 

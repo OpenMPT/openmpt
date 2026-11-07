@@ -24,7 +24,7 @@
 
 int     ResvFrameBegin(lame_internal_flags * gfc, int *mean_bits);
 void    ResvMaxBits(lame_internal_flags * gfc, int mean_bits, int *targ_bits, int *extra_bits,
-                    int cbr);
+                    int gr0_spent);
 void    ResvAdjust(lame_internal_flags * gfc, gr_info const *gi);
 void    ResvFrameEnd(lame_internal_flags * gfc, int mean_bits);
 

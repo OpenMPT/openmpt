@@ -22,6 +22,9 @@ include_dependency "ext-mpg123.lua"
 		"../../include/lame/include/lame.h",
 	}
 	files {
+		"../../include/lame/configMS.h",
+	}
+	files {
 		"../../include/lame/mpglib/mpglib.h",
 	}
 	files {
@@ -31,6 +34,7 @@ include_dependency "ext-mpg123.lua"
 		"../../include/lame/libmp3lame/encoder.h",
 		"../../include/lame/libmp3lame/fft.c",
 		"../../include/lame/libmp3lame/fft.h",
+		"../../include/lame/libmp3lame/fft_pvt.h",
 		"../../include/lame/libmp3lame/gain_analysis.c",
 		"../../include/lame/libmp3lame/gain_analysis.h",
 		"../../include/lame/libmp3lame/id3tag.c",
@@ -39,11 +43,11 @@ include_dependency "ext-mpg123.lua"
 		"../../include/lame/libmp3lame/lame.c",
 		"../../include/lame/libmp3lame/lame_global_flags.h",
 		"../../include/lame/libmp3lame/lame-analysis.h",
-		"../../include/lame/libmp3lame/lameerror.h",
 		"../../include/lame/libmp3lame/machine.h",
 		"../../include/lame/libmp3lame/mpglib_interface.c",
 		"../../include/lame/libmp3lame/newmdct.c",
 		"../../include/lame/libmp3lame/newmdct.h",
+		"../../include/lame/libmp3lame/obsolte_api.h",
 		"../../include/lame/libmp3lame/presets.c",
 		"../../include/lame/libmp3lame/psymodel.c",
 		"../../include/lame/libmp3lame/psymodel.h",
@@ -69,6 +73,14 @@ include_dependency "ext-mpg123.lua"
 		"../../include/lame/libmp3lame/version.h",
 	}
 	files {
+		"../../include/lame/libmp3lame/vector/avx2_choose_table.c",
+		"../../include/lame/libmp3lame/vector/avx2_quantize_lines.c",
+		"../../include/lame/libmp3lame/vector/avx512_quantize_lines.c",
+		"../../include/lame/libmp3lame/vector/neon_choose_table.c",
+		"../../include/lame/libmp3lame/vector/xmm_calc_sfb_noise.c",
+		"../../include/lame/libmp3lame/vector/xmm_choose_table.c",
+		"../../include/lame/libmp3lame/vector/xmm_quant_kernel.h",
+		"../../include/lame/libmp3lame/vector/xmm_quantize_lines.c",
 		"../../include/lame/libmp3lame/vector/xmm_quantize_sub.c",
 	}
 	defines {

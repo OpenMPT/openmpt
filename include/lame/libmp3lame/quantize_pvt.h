@@ -29,6 +29,55 @@
 
 #define PRECALC_SIZE (IXMAX_VAL+2)
 
+/**
+ * \internal
+ * \brief Scalefactor marker: granule 1 shares granule 0's value (scfsi), so the
+ * band's scalefactor is not written. scfsi_calc() sets it.
+ */
+#define SCALEFAC_SCFSI (-1)
+
+/**
+ * \internal
+ * \brief Scalefactor marker: every line of the band quantizes to 0, so any
+ * value fits. Only best_scalefac_store() and the scfsi_calc() it calls see it;
+ * best_scalefac_store() sets these bands to 0 before it returns.
+ */
+#define SCALEFAC_ANY (-2)
+
+/**
+ * \internal
+ * \brief One past the largest region0_count, a 4-bit field of the side
+ * information.
+ */
+#define REGION0_COUNT_LIMIT 16
+
+/**
+ * \internal
+ * \brief One past the largest region1_count, a 3-bit field of the side
+ * information.
+ */
+#define REGION1_COUNT_LIMIT 8
+
+/**
+ * \internal
+ * \brief The region0_count of a window-switched granule, which the standard
+ * fixes.
+ */
+#define SWITCHED_REGION0_COUNT 7
+
+/**
+ * \internal
+ * \brief The global gain whose quantizer step is 1.0. The tables that
+ * POW20() and IPOW20() read are centred on it.
+ */
+#define GLOBAL_GAIN_UNITY 210
+
+/**
+ * \internal
+ * \brief The largest global gain, an 8-bit field of the side information.
+ */
+#define GLOBAL_GAIN_MAX 255
+
 
 extern const int nr_of_sfb_block[6][3][4];
 extern const int pretab[SBMAX_l];
@@ -38,25 +87,71 @@ extern const int slen2_tab[16];
 extern const scalefac_struct sfBandIndex[9];
 
 extern FLOAT pow43[PRECALC_SIZE];
-#ifdef TAKEHIRO_IEEE754_HACK
+#if TAKEHIRO_IEEE754_HACK
 extern FLOAT adj43asm[PRECALC_SIZE];
 #else
 extern FLOAT adj43[PRECALC_SIZE];
 #endif
 
-#define Q_MAX (256+1)
-#define Q_MAX2 116      /* minimum possible number of
-                           -cod_info->global_gain
-                           + ((scalefac[] + (cod_info->preflag ? pretab[sfb] : 0))
-                           << (cod_info->scalefac_scale + 1))
-                           + cod_info->subblock_gain[cod_info->window[sfb]] * 8;
+/**
+ * \internal
+ * \brief Returns the quantizer step of scalefactor band \a sfb.
+ *
+ * The step is the global gain, less the band's scalefactor with its
+ * preemphasis, scaled by 2 or 4 as scalefac_scale selects, and less 8 times
+ * the subblock gain of the band's window.
+ *
+ * \param gi   the granule.
+ * \param sfb  the scalefactor band.
+ * \return the step, as POW20() takes it.
+ */
+static inline int
+sfb_quant_step(gr_info const *gi, int sfb)
+{
+    return gi->quant.global_gain
+        - (gi->quant.scalefac[sfb] + (gi->quant.preflag ? pretab[sfb] : 0))
+        * (1 << (gi->quant.scalefac_scale + 1))
+        - gi->quant.subblock_gain[gi->granule.window[sfb]] * 8;
+}
 
+#define Q_MAX (256+1)
+#define Q_MAX2 116      /* the largest global_gain - sfb_quant_step():
                            for long block, 0+((15+3)<<2) = 18*4 = 72
                            for short block, 0+(15<<2)+7*8 = 15*4+56 = 116
                          */
 
 extern FLOAT pow20[Q_MAX + Q_MAX2 + 1];
 extern FLOAT ipow20[Q_MAX];
+
+/**
+ * \internal
+ * \brief Returns the quantizer step size of step \a x, 2^((x - 210) / 4),
+ * from the table.
+ *
+ * \param x  the step, -Q_MAX2 to Q_MAX - 1.
+ * \return the step size.
+ */
+static inline FLOAT
+POW20(int x)
+{
+    assert(0 <= x + Q_MAX2 && x < Q_MAX);
+    return pow20[x + Q_MAX2];
+}
+
+/**
+ * \internal
+ * \brief Returns the factor the quantizer applies at global gain \a x,
+ * 2^(-(x - 210) * 3 / 16), from the table.
+ *
+ * \param x  the global gain, 0 to Q_MAX - 1.
+ * \return the factor.
+ */
+static inline FLOAT
+IPOW20(int x)
+{
+    assert(0 <= x && x < Q_MAX);
+    return ipow20[x];
+}
 
 typedef struct calc_noise_result_t {
     FLOAT   over_noise;      /* sum of quantization noise > masking */
@@ -69,20 +164,22 @@ typedef struct calc_noise_result_t {
 
 
 /**
-* allows re-use of previously
-* computed noise values
+* \internal
+* \brief Noise values computed before, kept so that they can be reused.
 */
 typedef struct calc_noise_data_t {
     int     global_gain;
     int     sfb_count1;
-    int     step[39];
-    FLOAT   noise[39];
-    FLOAT   noise_log[39];
+    int     step[SFBMAX];
+    FLOAT   noise[SFBMAX];
+    FLOAT   noise_log[SFBMAX];
 } calc_noise_data;
 
 
+int     bits_in_range(FLOAT bits, int lo, int hi);
+
 int     on_pe(lame_internal_flags * gfc, const FLOAT pe[2][2],
-              int targ_bits[2], int mean_bits, int gr, int cbr);
+              int targ_bits[2], int mean_bits, int gr, int gr0_spent);
 
 void    reduce_side(int targ_bits[2], FLOAT ms_ener_ratio, int mean_bits, int max_bits);
 

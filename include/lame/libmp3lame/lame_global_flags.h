@@ -1,6 +1,9 @@
 #ifndef LAME_GLOBAL_FLAGS_H
 #define LAME_GLOBAL_FLAGS_H
 
+#include "lame.h"
+#include "machine.h"
+
 #ifndef lame_internal_flags_defined
 #define lame_internal_flags_defined
 struct lame_internal_flags;
@@ -26,6 +29,8 @@ typedef enum short_block_e {
 ***********************************************************************/
 struct lame_global_struct {
     unsigned int class_id;
+    int     lame_allocated_gfp; /* is this struct owned by calling
+                                   program or lame?                     */
 
     /* input description */
     unsigned long num_samples; /* number of samples. default=2^32-1           */
@@ -160,9 +165,6 @@ struct lame_global_struct {
     /* provided because they may be of use to calling application           */
   /************************************************************************/
 
-    int     lame_allocated_gfp; /* is this struct owned by calling
-                                   program or lame?                     */
-
 
 
   /**************************************************************************/
@@ -171,12 +173,20 @@ struct lame_global_struct {
     lame_internal_flags *internal_flags;
 
 
+    /* The deprecated selection, kept for the families that still gate
+       something.  MMX and 3DNow! have no state here: nothing in this library
+       consults them, so storing a flag would only be able to mislead a caller
+       into thinking it had turned something off. */
     struct {
-        int     mmx;
-        int     amd3dnow;
-        int     sse;
-
+        unsigned int sse:1;
+        unsigned int avx2:1;
     } asm_optimizations;
+
+    /* Which vector routines this instance was asked to run: a vector_impl_t
+       value, or VECTOR_IMPL_AUTO for "whatever the machine offers", which is
+       the default and reproduces the behaviour that predates the request.
+       Validated where it is set, so lame_init_params() can take it as given. */
+    int     vector_routines_request;
 };
 
 int     is_lame_global_flags_valid(const lame_global_flags * gfp);

@@ -21,12 +21,15 @@
  *  coding by Glen Sawyer (mp3gain@hotmail.com) 735 W 255 N, Orem, UT 84057-4505 USA
  *    -- blame him if you think this runs too slowly, or the coding is otherwise flawed
  *
- *  For an explanation of the concepts and the basic algorithms involved, go to:
- *    http://www.replaygain.org/
+ *  For an explanation of the concepts and the basic algorithms involved, see
+ *  David Robinson's ReplayGain proposal (2001), kept as the ReplayGain
+ *  specification on the Hydrogenaudio wiki.
  */
 
 #ifndef GAIN_ANALYSIS_H
 #define GAIN_ANALYSIS_H
+
+#include "machine.h"
 
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
@@ -67,26 +70,24 @@ extern  "C" {
     };
 
     struct replaygain_data {
-        Float_t linprebuf[MAX_ORDER * 2];
         Float_t *linpre;     /* left input samples, with pre-buffer */
-        Float_t lstepbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
         Float_t *lstep;      /* left "first step" (i.e. post first filter) samples */
-        Float_t loutbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
         Float_t *lout;       /* left "out" (i.e. post second filter) samples */
-        Float_t rinprebuf[MAX_ORDER * 2];
         Float_t *rinpre;     /* right input samples ... */
-        Float_t rstepbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
         Float_t *rstep;
-        Float_t routbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
         Float_t *rout;
         long    sampleWindow; /* number of samples required to reach number of milliseconds required for RMS window */
         long    totsamp;
         double  lsum;
         double  rsum;
+        Float_t linprebuf[MAX_ORDER * 2];
+        Float_t lstepbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
+        Float_t loutbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
+        Float_t rinprebuf[MAX_ORDER * 2];
+        Float_t rstepbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
+        Float_t routbuf[MAX_SAMPLES_PER_WINDOW + MAX_ORDER];
         int     freqindex;
-        int     first;
         uint32_t A[STEPS_per_dB * MAX_dB];
-        uint32_t B[STEPS_per_dB * MAX_dB];
 
     };
 #ifndef replaygain_data_defined

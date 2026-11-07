@@ -605,20 +605,22 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\lame\configMS.h" />
     <ClInclude Include="..\..\..\include\lame\include\lame.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\VbrTag.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\VbrTagCrc.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\bitstream.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\encoder.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\fft.h" />
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\fft_pvt.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\gain_analysis.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\id3tag.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\l3side.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\lame-analysis.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\lame_global_flags.h" />
-    <ClInclude Include="..\..\..\include\lame\libmp3lame\lameerror.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\machine.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\newmdct.h" />
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\obsolte_api.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\psymodel.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\quantize.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\quantize_pvt.h" />
@@ -627,6 +629,7 @@
     <ClInclude Include="..\..\..\include\lame\libmp3lame\tables.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\util.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\vbrquantize.h" />
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\vector\xmm_quant_kernel.h" />
     <ClInclude Include="..\..\..\include\lame\libmp3lame\version.h" />
     <ClInclude Include="..\..\..\include\lame\mpglib\mpglib.h" />
   </ItemGroup>
@@ -650,6 +653,13 @@
     <ClCompile Include="..\..\..\include\lame\libmp3lame\takehiro.c" />
     <ClCompile Include="..\..\..\include\lame\libmp3lame\util.c" />
     <ClCompile Include="..\..\..\include\lame\libmp3lame\vbrquantize.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx2_choose_table.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx2_quantize_lines.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx512_quantize_lines.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\neon_choose_table.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_calc_sfb_noise.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_choose_table.c" />
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_quantize_lines.c" />
     <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_quantize_sub.c" />
     <ClCompile Include="..\..\..\include\lame\libmp3lame\version.c" />
   </ItemGroup>

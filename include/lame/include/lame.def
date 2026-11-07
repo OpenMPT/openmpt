@@ -2,7 +2,7 @@
 ;LIBRARY  libmp3lame.DLL
 ; run through:
 ; ```
-;     sed -i 's/@.*//g' include/lame.def
+;     sed -i 's/
 ; ```
 LIBRARY
 EXPORTS
@@ -312,3 +312,44 @@ id3tag_set_textinfo_utf8
 ; two external functions for ID3v2.4 tag support
 id3tag_add_v2_4_UTF8 
 id3tag_v2_4_UTF8_only 
+
+; UTF-8 field-value setter (companion to id3tag_set_fieldvalue_utf16)
+id3tag_set_fieldvalue_utf8 
+
+; Latin-1 tag setters, the counterparts of the ucs2 pair above
+id3tag_set_textinfo_latin1 
+id3tag_set_comment_latin1 
+
+; Decoder analysis hooks. The frontends call these across the library
+; boundary - get_audio.c and the mp3x analyzer - so a dynamically linked
+; build does not link without them.
+hip_set_pinfo 
+hip_finish_pinfo 
+
+; Deprecated and obsolete entry points. Their declarations are compiled out of
+; lame.h, so nothing new can call them, but the definitions are still built and
+; the shared library still exports them. The two lists describe the same code
+; and these leave both of them together, when the code itself goes.
+lame_set_ogg 
+lame_get_ogg 
+lame_set_mode_automs 
+lame_get_mode_automs 
+lame_set_ReplayGain_input 
+lame_get_ReplayGain_input 
+lame_set_ReplayGain_decode 
+lame_get_ReplayGain_decode 
+lame_set_findPeakSample 
+lame_get_findPeakSample 
+lame_encode_finish 
+
+; Reads back which instruction-set families an instance allows, the question
+; lame_set_asm_optimizations cannot answer about its own argument.
+lame_get_asm_optimizations 
+
+; Which vector routines the encoder runs, the interface that replaces the
+; asm_optimizations pair. The set of names is data rather than an enum, so
+; adding an instruction set adds no entry point here.
+lame_get_num_vector_routines 
+lame_get_vector_routines_name 
+lame_set_vector_routines 
+lame_get_vector_routines 

@@ -26,18 +26,16 @@
 /*
  * To make a string from a token, use the # operator:
  */
-#ifndef STR
-# define __STR(x)  #x
-# define STR(x)    __STR(x)
-#endif
+#define LAME_STR_(x)  #x
+#define LAME_STR(x)   LAME_STR_(x)
 
 # define LAME_URL              "https://lame.sourceforge.io"
 
 
 # define LAME_MAJOR_VERSION      4 /* Major version number */
-# define LAME_MINOR_VERSION      0 /* Minor version number */
-# define LAME_TYPE_VERSION       2 /* 0:alpha 1:beta 2:release */
-# define LAME_PATCH_VERSION      0 /* Patch level */
+# define LAME_MINOR_VERSION      1 /* Minor version number */
+# define LAME_TYPE_VERSION       1 /* 0:alpha 1:beta 2:release */
+# define LAME_PATCH_VERSION      1 /* Patch level */
 # define LAME_ALPHA_VERSION     (LAME_TYPE_VERSION==0)
 # define LAME_BETA_VERSION      (LAME_TYPE_VERSION==1)
 # define LAME_RELEASE_VERSION   (LAME_TYPE_VERSION==2)
@@ -48,20 +46,25 @@
 # define PSY_BETA_VERSION        0 /* Set number if this is a beta version, otherwise zero */
 
 #if LAME_ALPHA_VERSION
-#define LAME_PATCH_LEVEL_STRING " alpha " STR(LAME_PATCH_VERSION)
+#define LAME_PATCH_LEVEL_STRING " alpha " LAME_STR(LAME_PATCH_VERSION)
 #endif
 #if LAME_BETA_VERSION
-#define LAME_PATCH_LEVEL_STRING " beta " STR(LAME_PATCH_VERSION)
+#define LAME_PATCH_LEVEL_STRING " beta " LAME_STR(LAME_PATCH_VERSION)
 #endif
 #if LAME_RELEASE_VERSION
 #if LAME_PATCH_VERSION
-#define LAME_PATCH_LEVEL_STRING " release " STR(LAME_PATCH_VERSION)
+#define LAME_PATCH_LEVEL_STRING " release " LAME_STR(LAME_PATCH_VERSION)
 #else
 #define LAME_PATCH_LEVEL_STRING ""
 #endif
 #endif
 
-# define LAME_VERSION_STRING STR(LAME_MAJOR_VERSION) "." STR(LAME_MINOR_VERSION) LAME_PATCH_LEVEL_STRING
+# define LAME_VERSION_STRING LAME_STR(LAME_MAJOR_VERSION) "." LAME_STR(LAME_MINOR_VERSION) \
+                            LAME_PATCH_LEVEL_STRING
+
+#ifndef RC_INVOKED
+const char *get_lame_tag_encoder_short_version(void);
+#endif
 
 #endif /* LAME_VERSION_H */
 

@@ -27,115 +27,78 @@
 /* $Id$ */
 
 
-/*
-PSYCHO ACOUSTICS
-
-
-This routine computes the psycho acoustics, delayed by one granule.  
-
-Input: buffer of PCM data (1024 samples).  
-
-This window should be centered over the 576 sample granule window.
-The routine will compute the psycho acoustics for
-this granule, but return the psycho acoustics computed
-for the *previous* granule.  This is because the block
-type of the previous granule can only be determined
-after we have computed the psycho acoustics for the following
-granule.  
-
-Output:  maskings and energies for each scalefactor band.
-block type, PE, and some correlation measures.  
-The PE is used by CBR modes to determine if extra bits
-from the bit reservoir should be used.  The correlation
-measures are used to determine mid/side or regular stereo.
-*/
-/*
-Notation:
-
-barks:  a non-linear frequency scale.  Mapping from frequency to
-        barks is given by freq2bark()
-
-scalefactor bands: The spectrum (frequencies) are broken into 
-                   SBMAX "scalefactor bands".  Thes bands
-                   are determined by the MPEG ISO spec.  In
-                   the noise shaping/quantization code, we allocate
-                   bits among the partition bands to achieve the
-                   best possible quality
-
-partition bands:   The spectrum is also broken into about
-                   64 "partition bands".  Each partition 
-                   band is about .34 barks wide.  There are about 2-5
-                   partition bands for each scalefactor band.
-
-LAME computes all psycho acoustic information for each partition
-band.  Then at the end of the computations, this information
-is mapped to scalefactor bands.  The energy in each scalefactor
-band is taken as the sum of the energy in all partition bands
-which overlap the scalefactor band.  The maskings can be computed
-in the same way (and thus represent the average masking in that band)
-or by taking the minmum value multiplied by the number of
-partition bands used (which represents a minimum masking in that band).
-*/
-/*
-The general outline is as follows:
-
-1. compute the energy in each partition band
-2. compute the tonality in each partition band
-3. compute the strength of each partion band "masker"
-4. compute the masking (via the spreading function applied to each masker)
-5. Modifications for mid/side masking.  
-
-Each partition band is considiered a "masker".  The strength
-of the i'th masker in band j is given by:
-
-    s3(bark(i)-bark(j))*strength(i)
-
-The strength of the masker is a function of the energy and tonality.
-The more tonal, the less masking.  LAME uses a simple linear formula
-(controlled by NMT and TMN) which says the strength is given by the
-energy divided by a linear function of the tonality.
-*/
-/*
-s3() is the "spreading function".  It is given by a formula
-determined via listening tests.  
-
-The total masking in the j'th partition band is the sum over
-all maskings i.  It is thus given by the convolution of
-the strength with s3(), the "spreading function."
-
-masking(j) = sum_over_i  s3(i-j)*strength(i)  = s3 o strength
-
-where "o" = convolution operator.  s3 is given by a formula determined
-via listening tests.  It is normalized so that s3 o 1 = 1.
-
-Note: instead of a simple convolution, LAME also has the
-option of using "additive masking"
-
-The most critical part is step 2, computing the tonality of each
-partition band.  LAME has two tonality estimators.  The first
-is based on the ISO spec, and measures how predictiable the
-signal is over time.  The more predictable, the more tonal.
-The second measure is based on looking at the spectrum of
-a single granule.  The more peaky the spectrum, the more
-tonal.  By most indications, the latter approach is better.
-
-Finally, in step 5, the maskings for the mid and side
-channel are possibly increased.  Under certain circumstances,
-noise in the mid & side channels is assumed to also
-be masked by strong maskers in the L or R channels.
-
-
-Other data computed by the psy-model:
-
-ms_ratio        side-channel / mid-channel masking ratio (for previous granule)
-ms_ratio_next   side-channel / mid-channel masking ratio for this granule
-
-percep_entropy[2]     L and R values (prev granule) of PE - A measure of how 
-                      much pre-echo is in the previous granule
-percep_entropy_MS[2]  mid and side channel values (prev granule) of percep_entropy
-energy[4]             L,R,M,S energy in each channel, prev granule
-blocktype_d[2]        block type to use for previous granule
-*/
+/**
+ * \file
+ * \internal
+ * \brief Psychoacoustic model: per-band masking thresholds, block type and
+ *        perceptual entropy.
+ *
+ * For each granule, the model computes how much quantization noise each
+ * scalefactor band can contain before a listener hears it. The rest of the
+ * encoder uses these thresholds. The quantization loops shape the noise to
+ * them. The perceptual entropy controls the bit reservoir. The stereo mode
+ * decision reads the thresholds of each channel.
+ *
+ * \par One entry point, every mode
+ *
+ * Despite its name, L3psycho_anal_vbr() is used for CBR, ABR and VBR.
+ *
+ * \par Results lag the input by one granule
+ *
+ * The block type of a granule is known only after the next granule is
+ * analyzed, because an attack makes the granule before it a start block. So
+ * the analysis runs on the current granule and returns the results of the
+ * previous granule. Callers handle this delay.
+ *
+ * \par Two frequency partitionings
+ *
+ * The analysis uses a grid of at most CBANDS partition bands, each about
+ * DELBARK bark wide on the Zwicker scale (freq2bark()). init_numline() decides
+ * how many are used, from the sample rate. At the end,
+ * convert_partition2scalefac() maps the results onto the scalefactor bands of
+ * the bitstream, SBMAX_l long and SBMAX_s short. It splits a partition that
+ * crosses a scalefactor band boundary between its two neighbors.
+ *
+ * \par The analysis filter bank is not the coding filter bank
+ *
+ * The thresholds come from a separate FFT, not from the MDCT that the encoder
+ * quantizes: 1024 points with a Blackman window for long blocks, and 256
+ * points with a Hann window for each of the three short sub-blocks
+ * (init_fft()). This transform is not critically sampled. So it keeps the full
+ * energy of the signal and gives a magnitude spectrum to measure tonality on.
+ * The thresholds are scaled into the domain of the coder where they are used.
+ *
+ * \par What the model computes, in order
+ *
+ * -# Attack detection. vbrpsy_attack_detection() high-passes the input at
+ *    fs/4, splits the granule into nine sub-blocks, and compares each with the
+ *    one two positions earlier. A large enough ratio counts as an attack, and
+ *    an attack selects short blocks.
+ * -# Energy per partition band, from the FFT (calc_energy()).
+ * -# Tonality, as the ratio of peak to average energy over three neighboring
+ *    partitions (calc_mask_index()). Tonal content masks less than noise, so
+ *    the index selects how far below the signal the threshold of the band is.
+ * -# Spreading. Every band masks its neighbors through s3_func().
+ *    vbrpsy_mask_add() combines the contributions, and this is not a plain
+ *    power sum.
+ * -# Pre-echo control. It keeps thresholds low where higher thresholds would
+ *    let noise come before a transient. In the long path it compares with the
+ *    two granules before (vbrpsy_compute_masking_l()). In the short path it
+ *    compares with the sub-block before, depending on where the attack is in
+ *    the granule. That code is in L3psycho_anal_vbr() itself, after the
+ *    mapping to scalefactor bands, because only there is the attack position
+ *    known.
+ * -# Mid/side thresholds, in joint stereo only
+ *    (vbrpsy_compute_MS_thresholds()).
+ * -# Perceptual entropy, an estimate of how many bits the granule will need
+ *    (pecalc_l(), pecalc_s()).
+ *
+ * \par The absolute threshold is separate
+ *
+ * Masking thresholds follow the signal. The absolute threshold of hearing is a
+ * lower limit for them. Other code computes it: ATHformula(), with the
+ * loudness adjustment in adjust_ATH().
+ */
 
 
 
@@ -212,6 +175,23 @@ future:  Data indicates that the shape of the equal loudness curve varies
          simply bend the existing ATH curve to achieve the desired shape.
          However, the potential gain may not be enough to justify an effort.
 */
+/**
+ * \brief Approximate the loudness of a granule as an equal-loudness-weighted
+ *        power sum.
+ *
+ * The weights in \a eql_w come from the absolute threshold of hearing, which
+ * approximates an equal-loudness contour. The scale is set so that a signal
+ * near clipping returns about 1.0, and full-scale binary white noise (samples
+ * at +32767 and -32768) returns almost 3.
+ *
+ * The result controls adjust_ATH(). This is the only place where the encoder
+ * adapts to the level of the material.
+ *
+ * \todo The shape of an equal-loudness contour changes with the level, and the
+ *       ATH has the shape at the threshold, not at a typical playback level. A
+ *       curve with the shape at playback level would be more accurate. Nobody
+ *       has measured whether this is worth the work.
+ */
 static  FLOAT
 psycho_loudness_approx(FLOAT const *energy, FLOAT const *eql_w)
 {
@@ -275,6 +255,13 @@ static const FLOAT tab[] = {
 static const int tab_mask_add_delta[] = { 2, 2, 2, 1, 1, 1, 0, 0, -1 };
 #define STATIC_ASSERT_EQUAL_DIMENSION(A,B) enum{static_assert_##A=1/((dimension_of(A) == dimension_of(B))?1:0)}
 
+/**
+ * \brief Distance in partition bands within which vbrpsy_mask_add() combines
+ *        two maskers non-linearly.
+ *
+ * The tonality index selects it: tonal partitions get a narrower window than
+ * noise-like ones. About three partitions make one bark.
+ */
 inline static int
 mask_add_delta(int i)
 {
@@ -284,6 +271,13 @@ mask_add_delta(int i)
 }
 
 
+/**
+ * \brief Check that the precomputed limits of vbrpsy_mask_add() still equal
+ *        the expressions they come from.
+ *
+ * Compiles to nothing under NDEBUG. The limits let the hot path compare
+ * energies directly, without a logarithm.
+ */
 static void
 init_mask_add_max_values(void)
 {
@@ -301,6 +295,18 @@ init_mask_add_max_values(void)
 
 
 /* addition of simultaneous masking   Naoki Shibata 2000/7 */
+/**
+ * \brief Combine two masking contributions.
+ *
+ * Not a power sum. Within \a delta partitions and a moderate level ratio, the
+ * two are added and the sum is increased. Further apart, or when one masker
+ * is much stronger, the result is the plain sum or only the larger one.
+ *
+ * This matters because a plain sum over many neighboring bands overestimates
+ * how much a spread-out signal masks.
+ *
+ * Naoki Shibata, 2000.
+ */
 inline static FLOAT
 vbrpsy_mask_add(FLOAT m1, FLOAT m2, int b, int delta)
 {
@@ -357,6 +363,14 @@ vbrpsy_mask_add(FLOAT m1, FLOAT m2, int b, int delta)
     band sfb to the next one sfb+1; enn and thmm have to be split
     between them
 */
+/**
+ * \brief Map partition-band energies and thresholds onto scalefactor bands.
+ *
+ * The two grids do not match. The analysis uses partition bands of about
+ * constant bark width. The bitstream quantizes in the scalefactor bands of
+ * the standard. A partition that crosses a scalefactor band boundary is split
+ * between the two, weighted by how much of it is on each side.
+ */
 static void
 convert_partition2scalefac(PsyConst_CB2SB_t const *const gd, FLOAT const *eb, FLOAT const *thr,
                            FLOAT enn_out[], FLOAT thm_out[])
@@ -402,6 +416,10 @@ convert_partition2scalefac(PsyConst_CB2SB_t const *const gd, FLOAT const *eb, FL
     }
 }
 
+/**
+ * \brief convert_partition2scalefac() for one short sub-block, storing into
+ *        the per-channel short-block state.
+ */
 static void
 convert_partition2scalefac_s(lame_internal_flags * gfc, FLOAT const *eb, FLOAT const *thr, int chn,
                              int sblock)
@@ -418,6 +436,10 @@ convert_partition2scalefac_s(lame_internal_flags * gfc, FLOAT const *eb, FLOAT c
 }
 
 /* longblock threshold calculation (part 2) */
+/**
+ * \brief convert_partition2scalefac() for a long block, storing into the
+ *        per-channel long-block state.
+ */
 static void
 convert_partition2scalefac_l(lame_internal_flags * gfc, FLOAT const *eb, FLOAT const *thr, int chn)
 {
@@ -428,6 +450,14 @@ convert_partition2scalefac_l(lame_internal_flags * gfc, FLOAT const *eb, FLOAT c
     convert_partition2scalefac(gdl, eb, thr, enn, thm);
 }
 
+/**
+ * \brief Derive short-block thresholds from a long-block analysis.
+ *
+ * Used where the short-block analysis did not run, but short-block thresholds
+ * are still needed. The threshold is divided by a constant factor, and all
+ * three sub-blocks get the same value. So it is a placeholder, not an
+ * analysis: it cannot tell the sub-blocks apart.
+ */
 static void
 convert_partition2scalefac_l_to_s(lame_internal_flags * gfc, FLOAT const *eb, FLOAT const *thr,
                                   int chn)
@@ -450,21 +480,37 @@ convert_partition2scalefac_l_to_s(lame_internal_flags * gfc, FLOAT const *eb, FL
 
 
 
+/**
+ * \brief Geometric interpolation, \a x raised to \a r times \a y raised to
+ *        1 - \a r.
+ *
+ * An \a r of 1 or more returns \a x, and one of 0 or less returns \a y.
+ */
 static inline FLOAT
 NS_INTERP(FLOAT x, FLOAT y, FLOAT r)
 {
     /* was pow((x),(r))*pow((y),1-(r)) */
     if (r >= 1.0f)
-        return x;       /* 99.7% of the time */
+        return x;
     if (r <= 0.0f)
         return y;
     if (y > 0.0f)
-        return powf(x / y, r) * y; /* rest of the time */
+        return powf(x / y, r) * y;
     return 0.0f;        /* never happens */
 }
 
 
 
+/**
+ * \brief Perceptual entropy of a short-block granule.
+ *
+ * Sums, over the bands where the energy is above the threshold, a weight per
+ * band times the logarithm of the ratio of energy to threshold. The result
+ * estimates how many bits the granule will need. It controls the bit
+ * reservoir and the VBR bitrate.
+ *
+ * \note The band weights are tuned for 44.1 kHz only.
+ */
 static  FLOAT
 pecalc_s(III_psy_ratio const *mr, FLOAT masking_lower)
 {
@@ -510,6 +556,12 @@ pecalc_s(III_psy_ratio const *mr, FLOAT masking_lower)
     return pe_s;
 }
 
+/**
+ * \brief Perceptual entropy of a long-block granule.
+ *
+ * \see pecalc_s(), also for the sample rate that the band weights are tuned
+ *      for.
+ */
 static  FLOAT
 pecalc_l(III_psy_ratio const *mr, FLOAT masking_lower)
 {
@@ -563,6 +615,12 @@ pecalc_l(III_psy_ratio const *mr, FLOAT masking_lower)
 }
 
 
+/**
+ * \brief Total, peak and mean FFT line energy for each partition band.
+ *
+ * calc_mask_index() compares the peak and the mean to decide how tonal the
+ * band is. The total is the strength of the masker.
+ */
 static void
 calc_energy(PsyConst_CB2SB_t const *l, FLOAT const *fftenergy, FLOAT * eb, FLOAT * max, FLOAT * avg)
 {
@@ -590,14 +648,28 @@ calc_energy(PsyConst_CB2SB_t const *l, FLOAT const *fftenergy, FLOAT * eb, FLOAT
 }
 
 
+/**
+ * \internal
+ * \brief Tonality index per partition band.
+ *
+ * Measured as the ratio of the peak line to the mean, over the band and its
+ * two neighbors. A spectrum in few lines is tonal, an even spectrum is
+ * noise-like. The index selects an entry in the table that decides how far
+ * below the signal the threshold of the band is, because a tone masks noise
+ * much less than noise masks a tone.
+ *
+ * \param gd        the partition layout of the block type, long or short.
+ * \param max       the peak line energy of each partition.
+ * \param avg       the mean line energy of each partition.
+ * \param mask_idx  receives the index of each partition.
+ */
 static void
-calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
-                  FLOAT const *avg, unsigned char *mask_idx)
+calc_mask_index(PsyConst_CB2SB_t const *gd, FLOAT const *max,
+                FLOAT const *avg, unsigned char *mask_idx)
 {
-    PsyConst_CB2SB_t const *const gdl = &gfc->cd_psy->l;
     FLOAT   m, a;
     int     b, k;
-    int const last_tab_entry = sizeof(tab) / sizeof(tab[0]) - 1;
+    int const last_tab_entry = dimension_of(tab) - 1;
     b = 0;
     a = avg[b] + avg[b + 1];
     assert(a >= 0);
@@ -605,9 +677,9 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
         m = max[b];
         if (m < max[b + 1])
             m = max[b + 1];
-        assert((gdl->numlines[b] + gdl->numlines[b + 1] - 1) > 0);
+        assert((gd->numlines[b] + gd->numlines[b + 1] - 1) > 0);
         a = 20.0f * (m * 2.0f - a)
-            / (a * (gdl->numlines[b] + gdl->numlines[b + 1] - 1));
+            / (a * (gd->numlines[b] + gd->numlines[b + 1] - 1));
         k = (int) a;
         if (k > last_tab_entry)
             k = last_tab_entry;
@@ -617,7 +689,7 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
         mask_idx[b] = 0;
     }
 
-    for (b = 1; b < gdl->npart - 1; b++) {
+    for (b = 1; b < gd->npart - 1; b++) {
         a = avg[b - 1] + avg[b] + avg[b + 1];
         assert(a >= 0);
         if (a > 0.0f) {
@@ -626,9 +698,9 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
                 m = max[b];
             if (m < max[b + 1])
                 m = max[b + 1];
-            assert((gdl->numlines[b - 1] + gdl->numlines[b] + gdl->numlines[b + 1] - 1) > 0);
+            assert((gd->numlines[b - 1] + gd->numlines[b] + gd->numlines[b + 1] - 1) > 0);
             a = 20.0f * (m * 3.0f - a)
-                / (a * (gdl->numlines[b - 1] + gdl->numlines[b] + gdl->numlines[b + 1] - 1));
+                / (a * (gd->numlines[b - 1] + gd->numlines[b] + gd->numlines[b + 1] - 1));
             k = (int) a;
             if (k > last_tab_entry)
                 k = last_tab_entry;
@@ -639,7 +711,7 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
         }
     }
     assert(b > 0);
-    assert(b == gdl->npart - 1);
+    assert(b == gd->npart - 1);
 
     a = avg[b - 1] + avg[b];
     assert(a >= 0);
@@ -647,9 +719,9 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
         m = max[b - 1];
         if (m < max[b])
             m = max[b];
-        assert((gdl->numlines[b - 1] + gdl->numlines[b] - 1) > 0);
+        assert((gd->numlines[b - 1] + gd->numlines[b] - 1) > 0);
         a = 20.0f * (m * 2.0f - a)
-            / (a * (gdl->numlines[b - 1] + gdl->numlines[b] - 1));
+            / (a * (gd->numlines[b - 1] + gd->numlines[b] - 1));
         k = (int) a;
         if (k > last_tab_entry)
             k = last_tab_entry;
@@ -658,10 +730,59 @@ calc_mask_index_l(lame_internal_flags const *gfc, FLOAT const *max,
     else {
         mask_idx[b] = 0;
     }
-    assert(b == (gdl->npart - 1));
+    assert(b == (gd->npart - 1));
 }
 
 
+/**
+ * \internal
+ * \brief Turns the FFT of the left and the right channel into the FFT of the
+ *        mid and the side channel, in place.
+ * \param l  the left channel; receives the mid channel.
+ * \param r  the right channel; receives the side channel.
+ * \param n  the number of FFT values.
+ */
+static inline void
+ms_from_lr(FLOAT * l, FLOAT * r, int n)
+{
+    FLOAT const sqrt2_half = SQRT2 * 0.5f;
+    int     j;
+
+    for (j = n - 1; j >= 0; --j) {
+        FLOAT const lj = l[j];
+        FLOAT const rj = r[j];
+        l[j] = (lj + rj) * sqrt2_half;
+        r[j] = (lj - rj) * sqrt2_half;
+    }
+}
+
+
+/**
+ * \internal
+ * \brief The energy of each line of a real FFT.
+ * \param w  the FFT in the layout of fht(): the real parts up to n / 2, the
+ *           imaginary parts above.
+ * \param e  receives n / 2 + 1 energies.
+ * \param n  the FFT size.
+ */
+static inline void
+power_spectrum(FLOAT const *w, FLOAT * e, int n)
+{
+    int     j;
+
+    e[0] = w[0];
+    e[0] *= e[0];
+    for (j = n / 2 - 1; j >= 0; --j) {
+        FLOAT const re = w[n / 2 - j];
+        FLOAT const im = w[n / 2 + j];
+        e[n / 2 - j] = (re * re + im * im) * 0.5f;
+    }
+}
+
+
+/**
+ * \brief Windowed long-block FFT and its per-line energy.
+ */
 static void
 vbrpsy_compute_fft_l(lame_internal_flags * gfc, const sample_t * const buffer[2], int chn,
                      int gr_out, FLOAT fftenergy[HBLKSIZE], FLOAT(*wsamp_l)[BLKSIZE])
@@ -675,27 +796,10 @@ vbrpsy_compute_fft_l(lame_internal_flags * gfc, const sample_t * const buffer[2]
         fft_long(gfc, *wsamp_l, chn, buffer);
     }
     else if (chn == 2) {
-        FLOAT const sqrt2_half = SQRT2 * 0.5f;
         /* FFT data for mid and side channel is derived from L & R */
-        for (j = BLKSIZE - 1; j >= 0; --j) {
-            FLOAT const l = wsamp_l[0][j];
-            FLOAT const r = wsamp_l[1][j];
-            wsamp_l[0][j] = (l + r) * sqrt2_half;
-            wsamp_l[1][j] = (l - r) * sqrt2_half;
-        }
+        ms_from_lr(wsamp_l[0], wsamp_l[1], BLKSIZE);
     }
-
-    /*********************************************************************
-    *  compute energies
-    *********************************************************************/
-    fftenergy[0] = wsamp_l[0][0];
-    fftenergy[0] *= fftenergy[0];
-
-    for (j = BLKSIZE / 2 - 1; j >= 0; --j) {
-        FLOAT const re = (*wsamp_l)[BLKSIZE / 2 - j];
-        FLOAT const im = (*wsamp_l)[BLKSIZE / 2 + j];
-        fftenergy[BLKSIZE / 2 - j] = (re * re + im * im) * 0.5f;
-    }
+    power_spectrum(*wsamp_l, fftenergy, BLKSIZE);
     /* total energy */
     {
         FLOAT   totalenergy = 0.0f;
@@ -714,42 +818,31 @@ vbrpsy_compute_fft_l(lame_internal_flags * gfc, const sample_t * const buffer[2]
 }
 
 
+/**
+ * \brief Windowed FFT and per-line energy for one short sub-block.
+ */
 static void
 vbrpsy_compute_fft_s(lame_internal_flags const *gfc, const sample_t * const buffer[2], int chn,
                      int sblock, FLOAT(*fftenergy_s)[HBLKSIZE_s], FLOAT(*wsamp_s)[3][BLKSIZE_s])
 {
-    int     j;
-
     if (sblock == 0 && chn < 2) {
         fft_short(gfc, *wsamp_s, chn, buffer);
     }
     if (chn == 2) {
-        FLOAT const sqrt2_half = SQRT2 * 0.5f;
         /* FFT data for mid and side channel is derived from L & R */
-        for (j = BLKSIZE_s - 1; j >= 0; --j) {
-            FLOAT const l = wsamp_s[0][sblock][j];
-            FLOAT const r = wsamp_s[1][sblock][j];
-            wsamp_s[0][sblock][j] = (l + r) * sqrt2_half;
-            wsamp_s[1][sblock][j] = (l - r) * sqrt2_half;
-        }
+        ms_from_lr(wsamp_s[0][sblock], wsamp_s[1][sblock], BLKSIZE_s);
     }
-
-    /*********************************************************************
-    *  compute energies
-    *********************************************************************/
-    fftenergy_s[sblock][0] = (*wsamp_s)[sblock][0];
-    fftenergy_s[sblock][0] *= fftenergy_s[sblock][0];
-    for (j = BLKSIZE_s / 2 - 1; j >= 0; --j) {
-        FLOAT const re = (*wsamp_s)[sblock][BLKSIZE_s / 2 - j];
-        FLOAT const im = (*wsamp_s)[sblock][BLKSIZE_s / 2 + j];
-        fftenergy_s[sblock][BLKSIZE_s / 2 - j] = (re * re + im * im) * 0.5f;
-    }
+    power_spectrum((*wsamp_s)[sblock], fftenergy_s[sblock], BLKSIZE_s);
 }
 
 
     /*********************************************************************
     * compute loudness approximation (used for ATH auto-level adjustment) 
     *********************************************************************/
+/**
+ * \brief Store the loudness of the granule for adjust_ATH(), when the
+ *        absolute threshold adapts.
+ */
 static void
 vbrpsy_compute_loudness_approximation_l(lame_internal_flags * gfc, int gr_out, int chn,
                                         const FLOAT fftenergy[HBLKSIZE])
@@ -766,13 +859,73 @@ vbrpsy_compute_loudness_approximation_l(lame_internal_flags * gfc, int gr_out, i
     *  Apply HPF of fs/4 to the input signal.
     *  This is used for attack detection / handling.
     **********************************************************************/
+/**
+ * \internal
+ * \brief Returns the maskings and energies of the previous granule to the
+ *        caller.
+ *
+ * There is a one granule delay: the caller gets what the last call computed.
+ *
+ * \param psv               the model's state.
+ * \param gr_out            the granule the caller encodes.
+ * \param n_chn_out         the channels of the output.
+ * \param n_chn_psy         the channels the model analyses, 4 in joint stereo.
+ * \param masking_ratio     receives the left and right maskings.
+ * \param masking_MS_ratio  receives the mid and side maskings, in joint stereo.
+ * \param energy            receives the energy of each analysed channel.
+ */
+static void
+vbrpsy_return_previous(PsyStateVar_t const *psv, int gr_out, int n_chn_out, int n_chn_psy,
+                       III_psy_ratio masking_ratio[2][2], III_psy_ratio masking_MS_ratio[2][2],
+                       FLOAT energy[4])
+{
+    int     chn;
+
+    for (chn = 0; chn < n_chn_out; chn++) {
+        masking_ratio[gr_out][chn].en = psv->en[chn];
+        masking_ratio[gr_out][chn].thm = psv->thm[chn];
+        if (n_chn_psy > 2) {
+            /* MS maskings  */
+            masking_MS_ratio[gr_out][chn].en = psv->en[chn + 2];
+            masking_MS_ratio[gr_out][chn].thm = psv->thm[chn + 2];
+        }
+    }
+    for (chn = 0; chn < n_chn_psy; chn++) {
+        energy[chn] = psv->tot_ener[chn];
+    }
+}
+
+
+/**
+ * \brief Detect transients and choose long or short blocks.
+ *
+ * Quantization noise spreads over the whole synthesis window. So in a long
+ * block, noise can come before a transient that would mask it. This is a
+ * pre-echo. A short block has a shorter window, which is the only remedy the
+ * bitstream format offers.
+ *
+ * The granule is high-pass filtered at a quarter of the sample rate, because a
+ * transient shows most clearly where the signal is least tonal. Then it is
+ * split into nine sub-blocks, and the peak amplitude of each is compared with
+ * the sub-block two positions earlier. A ratio above the configured threshold
+ * is an attack.
+ *
+ * Two refinements follow. A periodic signal would trigger the detector in
+ * every period, so an attack is ignored where neighboring sub-blocks have
+ * similar energy at a low level. And a sub-block whose energy comes in a
+ * single spike gets an extra attenuation factor, which is applied later to
+ * its threshold.
+ *
+ * This function also returns the maskings of the previous granule to the
+ * caller. This is where the one-granule delay of the model happens.
+ */
 static void
 vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer[2], int gr_out,
                         III_psy_ratio masking_ratio[2][2], III_psy_ratio masking_MS_ratio[2][2],
                         FLOAT energy[4], FLOAT sub_short_factor[4][3], int ns_attacks[4][4],
                         int uselongblock[2])
 {
-    FLOAT   ns_hpfsmpl[2][576];
+    FLOAT   ns_hpfsmpl[2][SAMPLES_PER_GRANULE];
     SessionConfig_t const *const cfg = &gfc->cfg;
     PsyStateVar_t *const psv = &gfc->sv_psy;
     plotting_data *plt = cfg->analysis ? gfc->pinfo : 0;
@@ -781,6 +934,8 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
     int const n_chn_psy = (cfg->mode == JOINT_STEREO) ? 4 : n_chn_out;
     int     chn, i, j;
 
+    vbrpsy_return_previous(psv, gr_out, n_chn_out, n_chn_psy, masking_ratio, masking_MS_ratio,
+                           energy);
     memset(&ns_hpfsmpl[0][0], 0, sizeof(ns_hpfsmpl));
     /* Don't copy the input buffer into a temporary buffer */
     /* unroll the loop 2 times */
@@ -791,9 +946,9 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
             -5.52212e-17 * 2, -0.313819 * 2
         };
         /* apply high pass filter of fs/4 */
-        const sample_t *const firbuf = &buffer[chn][576 - 350 - NSFIRLEN + 192];
+        const sample_t *const firbuf = &buffer[chn][SAMPLES_PER_GRANULE - 350 - NSFIRLEN + 192];
         assert(dimension_of(fircoef) == ((NSFIRLEN - 1) / 2));
-        for (i = 0; i < 576; i++) {
+        for (i = 0; i < SAMPLES_PER_GRANULE; i++) {
             FLOAT   sum1, sum2;
             sum1 = firbuf[i + 10];
             sum2 = 0.0;
@@ -802,14 +957,6 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
                 sum2 += fircoef[j + 1] * (firbuf[i + j + 1] + firbuf[i + NSFIRLEN - j - 1]);
             }
             ns_hpfsmpl[chn][i] = sum1 + sum2;
-        }
-        masking_ratio[gr_out][chn].en = psv->en[chn];
-        masking_ratio[gr_out][chn].thm = psv->thm[chn];
-        if (n_chn_psy > 2) {
-            /* MS maskings  */
-            /*percep_MS_entropy         [chn-2]     = gfc -> pe  [chn];  */
-            masking_MS_ratio[gr_out][chn].en = psv->en[chn + 2];
-            masking_MS_ratio[gr_out][chn].thm = psv->thm[chn + 2];
         }
     }
     for (chn = 0; chn < n_chn_psy; chn++) {
@@ -820,7 +967,7 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
         int     ns_uselongblock = 1;
 
         if (chn == 2) {
-            for (i = 0, j = 576; j > 0; ++i, --j) {
+            for (i = 0, j = SAMPLES_PER_GRANULE; j > 0; ++i, --j) {
                 FLOAT const l = ns_hpfsmpl[0][i];
                 FLOAT const r = ns_hpfsmpl[1][i];
                 ns_hpfsmpl[0][i] = l + r;
@@ -839,7 +986,7 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
         }
 
         for (i = 0; i < 9; i++) {
-            FLOAT const *const pfe = pf + 576 / 9;
+            FLOAT const *const pfe = pf + SAMPLES_PER_GRANULE / 9;
             FLOAT   p = 1.;
             for (; pf < pfe; pf++)
                 if (p < fabs(*pf))
@@ -941,15 +1088,14 @@ vbrpsy_attack_detection(lame_internal_flags * gfc, const sample_t * const buffer
                 uselongblock[0] = uselongblock[1] = 0;
             }
         }
-
-        /* there is a one granule delay.  Copy maskings computed last call
-         * into masking_ratio to return to calling program.
-         */
-        energy[chn] = psv->tot_ener[chn];
     }
 }
 
 
+/**
+ * \brief Move the short-block spreading state on by one granule, when the
+ *        short-block masking of the granule was not computed.
+ */
 static void
 vbrpsy_skip_masking_s(lame_internal_flags * gfc, int chn, int sblock)
 {
@@ -965,79 +1111,62 @@ vbrpsy_skip_masking_s(lame_internal_flags * gfc, int chn, int sblock)
 }
 
 
-static void
-vbrpsy_calc_mask_index_s(lame_internal_flags const *gfc, FLOAT const *max,
-                         FLOAT const *avg, unsigned char *mask_idx)
+/**
+ * \internal
+ * \brief Applies the two limits to the masking threshold of a partition.
+ *
+ * The threshold may not be above a limit from the peak line of the band. If
+ * it were, the quantizer would take the difference from other bands, and a
+ * strongly tonal band would be heavily distorted. And it may not be above the
+ * energy of the band itself. The masking_lower factor applies around these
+ * limits: a factor above 1 before the energy limit, a factor below 1 after it.
+ *
+ * \param thr            the threshold.
+ * \param max            the peak line energy of the partition.
+ * \param minval         the minimum masking value of the partition.
+ * \param avg_mask       the tonality factor of the spread energy.
+ * \param masking_lower  the masking_lower factor of the partition.
+ * \param eb             the energy of the partition.
+ * \return the bounded threshold.
+ */
+static inline FLOAT
+bound_threshold(FLOAT thr, FLOAT max, FLOAT minval, FLOAT avg_mask, FLOAT masking_lower,
+                FLOAT eb)
 {
-    PsyConst_CB2SB_t const *const gds = &gfc->cd_psy->s;
-    FLOAT   m, a;
-    int     b, k;
-    int const last_tab_entry = dimension_of(tab) - 1;
-    b = 0;
-    a = avg[b] + avg[b + 1];
-    assert(a >= 0);
-    if (a > 0.0f) {
-        m = max[b];
-        if (m < max[b + 1])
-            m = max[b + 1];
-        assert((gds->numlines[b] + gds->numlines[b + 1] - 1) > 0);
-        a = 20.0f * (m * 2.0f - a)
-            / (a * (gds->numlines[b] + gds->numlines[b + 1] - 1));
-        k = (int) a;
-        if (k > last_tab_entry)
-            k = last_tab_entry;
-        mask_idx[b] = k;
-    }
-    else {
-        mask_idx[b] = 0;
-    }
+    FLOAT   x = max;
 
-    for (b = 1; b < gds->npart - 1; b++) {
-        a = avg[b - 1] + avg[b] + avg[b + 1];
-        assert(b + 1 < gds->npart);
-        assert(a >= 0);
-        if (a > 0.0) {
-            m = max[b - 1];
-            if (m < max[b])
-                m = max[b];
-            if (m < max[b + 1])
-                m = max[b + 1];
-            assert((gds->numlines[b - 1] + gds->numlines[b] + gds->numlines[b + 1] - 1) > 0);
-            a = 20.0f * (m * 3.0f - a)
-                / (a * (gds->numlines[b - 1] + gds->numlines[b] + gds->numlines[b + 1] - 1));
-            k = (int) a;
-            if (k > last_tab_entry)
-                k = last_tab_entry;
-            mask_idx[b] = k;
-        }
-        else {
-            mask_idx[b] = 0;
-        }
+    x *= minval;
+    x *= avg_mask;
+    if (thr > x) {
+        thr = x;
     }
-    assert(b > 0);
-    assert(b == gds->npart - 1);
-
-    a = avg[b - 1] + avg[b];
-    assert(a >= 0);
-    if (a > 0.0f) {
-        m = max[b - 1];
-        if (m < max[b])
-            m = max[b];
-        assert((gds->numlines[b - 1] + gds->numlines[b] - 1) > 0);
-        a = 20.0f * (m * 2.0f - a)
-            / (a * (gds->numlines[b - 1] + gds->numlines[b] - 1));
-        k = (int) a;
-        if (k > last_tab_entry)
-            k = last_tab_entry;
-        mask_idx[b] = k;
+    if (masking_lower > 1) {
+        thr *= masking_lower;
     }
-    else {
-        mask_idx[b] = 0;
+    if (thr > eb) {
+        thr = eb;
     }
-    assert(b == (gds->npart - 1));
+    if (masking_lower < 1) {
+        thr *= masking_lower;
+    }
+    return thr;
 }
 
 
+/**
+ * \brief Masking thresholds for one short sub-block.
+ *
+ * Spreads the energy of each partition over its neighbors through the
+ * precomputed spreading matrix, combines the contributions with
+ * vbrpsy_mask_add(), and scales the result by the tonality of the bands that
+ * contributed.
+ *
+ * Then bound_threshold() applies the two limits to the threshold.
+ *
+ * Pre-echo control does not happen here. For short blocks it happens after
+ * the mapping to scalefactor bands, in L3psycho_anal_vbr(), where the
+ * position of the attack in the granule is known.
+ */
 static void
 vbrpsy_compute_masking_s(lame_internal_flags * gfc, const FLOAT(*fftenergy_s)[HBLKSIZE_s],
                          FLOAT * eb, FLOAT * thr, int chn, int sblock)
@@ -1045,31 +1174,14 @@ vbrpsy_compute_masking_s(lame_internal_flags * gfc, const FLOAT(*fftenergy_s)[HB
     PsyStateVar_t *const psv = &gfc->sv_psy;
     PsyConst_CB2SB_t const *const gds = &gfc->cd_psy->s;
     FLOAT   max[CBANDS], avg[CBANDS];
-    int     i, j, b;
+    int     j, b;
     unsigned char mask_idx_s[CBANDS];
 
     memset(max, 0, sizeof(max));
     memset(avg, 0, sizeof(avg));
 
-    for (b = j = 0; b < gds->npart; ++b) {
-        FLOAT   ebb = 0, m = 0;
-        int const n = gds->numlines[b];
-        for (i = 0; i < n; ++i, ++j) {
-            FLOAT const el = fftenergy_s[sblock][j];
-            ebb += el;
-            if (m < el)
-                m = el;
-        }
-        eb[b] = ebb;
-        assert(ebb >= 0);
-        max[b] = m;
-        assert(n > 0);
-        avg[b] = ebb * gds->rnumlines[b];
-        assert(avg[b] >= 0);
-    }
-    assert(b == gds->npart);
-    assert(j == 129);
-    vbrpsy_calc_mask_index_s(gfc, max, avg, mask_idx_s);
+    calc_energy(gds, fftenergy_s[sblock], eb, max, avg);
+    calc_mask_index(gds, max, avg, mask_idx_s);
     for (j = b = 0; b < gds->npart; b++) {
         int     kk = gds->s3ind[b][0];
         int const last = gds->s3ind[b][1];
@@ -1092,45 +1204,10 @@ vbrpsy_compute_masking_s(lame_internal_flags * gfc, const FLOAT(*fftenergy_s)[HB
         dd = (1 + 2 * dd) / (2 * dd_n);
         avg_mask = tab[dd] * 0.5f;
         ecb *= avg_mask;
-#if 0                   /* we can do PRE ECHO control now here, or do it later */
-        if (psv->blocktype_old[chn & 0x01] == SHORT_TYPE) {
-            /* limit calculated threshold by even older granule */
-            FLOAT const t1 = rpelev_s * psv->nb_s1[chn][b];
-            FLOAT const t2 = rpelev2_s * psv->nb_s2[chn][b];
-            FLOAT const tm = (t2 > 0) ? Min(ecb, t2) : ecb;
-            thr[b] = (t1 > 0) ? NS_INTERP(Min(tm, t1), ecb, 0.6) : ecb;
-        }
-        else {
-            /* limit calculated threshold by older granule */
-            FLOAT const t1 = rpelev_s * psv->nb_s1[chn][b];
-            thr[b] = (t1 > 0) ? NS_INTERP(Min(ecb, t1), ecb, 0.6) : ecb;
-        }
-#else /* we do it later */
         thr[b] = ecb;
-#endif
         psv->nb_s2[chn][b] = psv->nb_s1[chn][b];
         psv->nb_s1[chn][b] = ecb;
-        {
-            /*  if THR exceeds EB, the quantization routines will take the difference
-             *  from other bands. in case of strong tonal samples (tonaltest.wav)
-             *  this leads to heavy distortions. that's why we limit THR here.
-             */
-            x = max[b];
-            x *= gds->minval[b];
-            x *= avg_mask;
-            if (thr[b] > x) {
-                thr[b] = x;
-            }
-        }
-        if (masking_lower > 1) {
-            thr[b] *= masking_lower;
-        }
-        if (thr[b] > eb[b]) {
-            thr[b] = eb[b];
-        }
-        if (masking_lower < 1) {
-            thr[b] *= masking_lower;
-        }
+        thr[b] = bound_threshold(thr[b], max[b], gds->minval[b], avg_mask, masking_lower, eb[b]);
 
         assert(thr[b] >= 0);
     }
@@ -1141,6 +1218,20 @@ vbrpsy_compute_masking_s(lame_internal_flags * gfc, const FLOAT(*fftenergy_s)[HB
 }
 
 
+/**
+ * \brief Masking thresholds for a long block, including pre-echo control.
+ *
+ * Spreading and non-linear addition are as in vbrpsy_compute_masking_s(), and
+ * bound_threshold() applies the two limits. This path adds pre-echo control
+ * over time. The threshold may not rise much above the thresholds of the two
+ * granules before. So in a quiet passage before a sudden loud passage, the
+ * noise floor cannot rise before the loud passage arrives to mask it.
+ *
+ * If the previous granule used short blocks, only the limit from that granule
+ * is used. If no long-block analysis exists for that granule, the limit is
+ * estimated from the energy of the current band. This estimate is a guess
+ * that saves computing time.
+ */
 static void
 vbrpsy_compute_masking_l(lame_internal_flags * gfc, const FLOAT fftenergy[HBLKSIZE],
                          FLOAT eb_l[CBANDS], FLOAT thr[CBANDS], int chn)
@@ -1155,7 +1246,7 @@ vbrpsy_compute_masking_l(lame_internal_flags * gfc, const FLOAT fftenergy[HBLKSI
     *    Calculate the energy and the tonality of each partition.
  *********************************************************************/
     calc_energy(gdl, fftenergy, eb_l, max, avg);
-    calc_mask_index_l(gfc, max, avg, mask_idx_l);
+    calc_mask_index(gdl, max, avg, mask_idx_l);
 
  /*********************************************************************
     *      convolve the partitioned energy and unpredictability
@@ -1180,14 +1271,7 @@ vbrpsy_compute_masking_l(lame_internal_flags * gfc, const FLOAT fftenergy[HBLKSI
             dd_n += 1;
             x = gdl->s3[k] * eb_l[kk] * tab[mask_idx_l[kk]];
             t = vbrpsy_mask_add(ecb, x, kk - b, delta);
-#if 0
-            ecb += eb_l[kk];
-            if (ecb > t) {
-                ecb = t;
-            }
-#else
             ecb = t;
-#endif
             ++k, ++kk;
         }
         dd = (1 + 2 * dd) / (2 * dd_n);
@@ -1242,27 +1326,7 @@ vbrpsy_compute_masking_l(lame_internal_flags * gfc, const FLOAT fftenergy[HBLKSI
         }
         psv->nb_l2[chn][b] = psv->nb_l1[chn][b];
         psv->nb_l1[chn][b] = ecb;
-        {
-            /*  if THR exceeds EB, the quantization routines will take the difference
-             *  from other bands. in case of strong tonal samples (tonaltest.wav)
-             *  this leads to heavy distortions. that's why we limit THR here.
-             */
-            x = max[b];
-            x *= gdl->minval[b];
-            x *= avg_mask;
-            if (thr[b] > x) {
-                thr[b] = x;
-            }
-        }
-        if (masking_lower > 1) {
-            thr[b] *= masking_lower;
-        }
-        if (thr[b] > eb_l[b]) {
-            thr[b] = eb_l[b];
-        }
-        if (masking_lower < 1) {
-            thr[b] *= masking_lower;
-        }
+        thr[b] = bound_threshold(thr[b], max[b], gdl->minval[b], avg_mask, masking_lower, eb_l[b]);
         assert(thr[b] >= 0);
     }
     for (; b < CBANDS; ++b) {
@@ -1272,6 +1336,13 @@ vbrpsy_compute_masking_l(lame_internal_flags * gfc, const FLOAT fftenergy[HBLKSI
 }
 
 
+/**
+ * \brief Apply the configured short-block setting to the decision of each
+ *        channel.
+ *
+ * Short blocks can be forced on, turned off, or coupled, so that both
+ * channels always use the same block type.
+ */
 static void
 vbrpsy_compute_block_type(SessionConfig_t const *cfg, int *uselongblock)
 {
@@ -1296,6 +1367,16 @@ vbrpsy_compute_block_type(SessionConfig_t const *cfg, int *uselongblock)
 }
 
 
+/**
+ * \brief Decide the block type of the previous granule and return it to the
+ *        caller.
+ *
+ * A block type cannot be chosen from its own granule alone. The window shape
+ * needs a transition, so the granule before a short one becomes a start
+ * block, and the granule after it a stop block. This is known only after the
+ * next granule is analyzed. That is why the results of the model lag its
+ * input by one granule.
+ */
 static void
 vbrpsy_apply_block_type(PsyStateVar_t * psv, int nch, int const *uselongblock, int *blocktype_d)
 {
@@ -1333,6 +1414,23 @@ vbrpsy_apply_block_type(PsyStateVar_t * psv, int nch, int const *uselongblock, i
  * compute M/S thresholds from Johnston & Ferreira 1992 ICASSP paper
  ***************************************************************/
 
+/**
+ * \brief Adjust mid and side thresholds for joint-stereo coding.
+ *
+ * Coding mid and side instead of left and right changes where the
+ * quantization noise is in the stereo image. Noise at another place than the
+ * signal that should mask it can become audible. This effect is the binaural
+ * masking level difference. The correction applies only where the left and
+ * right thresholds are within about 2 dB of each other. In that case the two
+ * channels are similar enough for the effect to matter.
+ *
+ * If the caller set an msfix value, the mid and side thresholds are also kept
+ * low relative to the smaller of the two mono thresholds. Both are first
+ * raised to at least the absolute threshold of hearing.
+ *
+ * After Johnston and Ferreira, ICASSP 1992; the msfix refinement is Naoki
+ * Shibata, 2000.
+ */
 static void
 vbrpsy_compute_MS_thresholds(const FLOAT eb[4][CBANDS], FLOAT thr[4][CBANDS],
                              const FLOAT cb_mld[CBANDS], const FLOAT ath_cb[CBANDS], FLOAT athlower,
@@ -1404,7 +1502,103 @@ vbrpsy_compute_MS_thresholds(const FLOAT eb[4][CBANDS], FLOAT thr[4][CBANDS],
  * not use this feature. (Robert 071216)
 */
 
-int
+/**
+ * \internal
+ * \brief Short block pre-echo control.
+ *
+ * Where an attack is near, it lowers each new short block threshold towards
+ * the one before it, and it applies the pulse factor of the attack detection.
+ *
+ * \param psv               the model's state; the short block thresholds change.
+ * \param last_thm          the thresholds of the previous granule.
+ * \param ns_attacks        the attacks per channel and short block.
+ * \param sub_short_factor  the pulse factor per channel and short block.
+ * \param n_chn_psy         the channels the model analyses.
+ */
+static void
+vbrpsy_short_preecho(PsyStateVar_t * psv, III_psy_xmin const last_thm[4],
+                     int ns_attacks[4][4], FLOAT sub_short_factor[4][3], int n_chn_psy)
+{
+    FLOAT const pcfact = 0.6f;
+    FLOAT   thmm;
+    int     chn, sb, sblock;
+
+    for (chn = 0; chn < n_chn_psy; chn++) {
+        for (sb = 0; sb < SBMAX_s; sb++) {
+            FLOAT   new_thmm[3], prev_thm, t1, t2;
+            for (sblock = 0; sblock < 3; sblock++) {
+                thmm = psv->thm[chn].s[sb][sblock];
+                thmm *= NS_PREECHO_ATT0;
+
+                t1 = t2 = thmm;
+
+                if (sblock > 0) {
+                    prev_thm = new_thmm[sblock - 1];
+                }
+                else {
+                    prev_thm = last_thm[chn].s[sb][2];
+                }
+                if (ns_attacks[chn][sblock] >= 2 || ns_attacks[chn][sblock + 1] == 1) {
+                    t1 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT1 * pcfact);
+                }
+                thmm = Min(t1, thmm);
+                if (ns_attacks[chn][sblock] == 1) {
+                    t2 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT2 * pcfact);
+                }
+                else if ((sblock == 0 && psv->last_attacks[chn] == 3)
+                         || (sblock > 0 && ns_attacks[chn][sblock - 1] == 3)) { /* 2nd preceeding block */
+                    switch (sblock) {
+                    case 0:
+                        prev_thm = last_thm[chn].s[sb][1];
+                        break;
+                    case 1:
+                        prev_thm = last_thm[chn].s[sb][2];
+                        break;
+                    case 2:
+                        prev_thm = new_thmm[0];
+                        break;
+                    }
+                    t2 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT2 * pcfact);
+                }
+
+                thmm = Min(t2, thmm);
+
+                /* pulse like signal detection for fatboy.wav and so on */
+                thmm *= sub_short_factor[chn][sblock];
+
+                new_thmm[sblock] = thmm;
+            }
+            for (sblock = 0; sblock < 3; sblock++) {
+                psv->thm[chn].s[sb][sblock] = new_thmm[sblock];
+            }
+        }
+    }
+}
+
+
+/**
+ * \internal
+ * \brief Run the psychoacoustic model over one granule.
+ *
+ * The single entry point, used by every encoding mode. The file description
+ * says what the model computes and in which order.
+ *
+ * The results describe the **previous** granule, not the one in \a buffer,
+ * because a block type is known only after the next granule.
+ *
+ * \param gfc               encoder state. The model reads its configuration
+ *                          and the history of each channel, and updates the
+ *                          history.
+ * \param buffer            input samples per channel, centered on the granule.
+ * \param gr_out            index of the granule the results are returned for.
+ * \param[out] masking_ratio      per-band energies and thresholds, L/R.
+ * \param[out] masking_MS_ratio   the same for mid/side, in joint stereo.
+ * \param[out] percep_entropy     perceptual entropy, L/R.
+ * \param[out] percep_MS_entropy  perceptual entropy, mid/side.
+ * \param[out] energy             per-channel granule energy.
+ * \param[out] blocktype_d        the settled block type per channel.
+ */
+void
 L3psycho_anal_vbr(lame_internal_flags * gfc,
                   const sample_t * const buffer[2], int gr_out,
                   III_psy_ratio masking_ratio[2][2],
@@ -1430,8 +1624,6 @@ L3psycho_anal_vbr(lame_internal_flags * gfc,
     FLOAT   eb[4][CBANDS], thr[4][CBANDS];
 
     FLOAT   sub_short_factor[4][3];
-    FLOAT   thmm;
-    FLOAT const pcfact = 0.6f;
     FLOAT const ath_factor =
         (cfg->msfix > 0.f) ? (cfg->ATH_offset_factor * gfc->ATH->adjust_factor) : 1.f;
 
@@ -1440,10 +1632,10 @@ L3psycho_anal_vbr(lame_internal_flags * gfc,
 
     /* block type  */
     int     ns_attacks[4][4] = { {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0} };
-    int     uselongblock[2];
+    int     uselongblock[2] = { 1, 1 };
 
     /* usual variables like loop indices, etc..    */
-    int     chn, sb, sblock;
+    int     chn, sblock;
 
     /* chn=2 and 3 = Mid and Side channels */
     int const n_chn_psy = (cfg->mode == JOINT_STEREO) ? 4 : cfg->channels_out;
@@ -1509,58 +1701,7 @@ L3psycho_anal_vbr(lame_internal_flags * gfc,
             }
         }
 
-        /****   short block pre-echo control   ****/
-        for (chn = 0; chn < n_chn_psy; chn++) {
-            for (sb = 0; sb < SBMAX_s; sb++) {
-                FLOAT   new_thmm[3], prev_thm, t1, t2;
-                for (sblock = 0; sblock < 3; sblock++) {
-                    thmm = psv->thm[chn].s[sb][sblock];
-                    thmm *= NS_PREECHO_ATT0;
-
-                    t1 = t2 = thmm;
-
-                    if (sblock > 0) {
-                        prev_thm = new_thmm[sblock - 1];
-                    }
-                    else {
-                        prev_thm = last_thm[chn].s[sb][2];
-                    }
-                    if (ns_attacks[chn][sblock] >= 2 || ns_attacks[chn][sblock + 1] == 1) {
-                        t1 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT1 * pcfact);
-                    }
-                    thmm = Min(t1, thmm);
-                    if (ns_attacks[chn][sblock] == 1) {
-                        t2 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT2 * pcfact);
-                    }
-                    else if ((sblock == 0 && psv->last_attacks[chn] == 3)
-                             || (sblock > 0 && ns_attacks[chn][sblock - 1] == 3)) { /* 2nd preceeding block */
-                        switch (sblock) {
-                        case 0:
-                            prev_thm = last_thm[chn].s[sb][1];
-                            break;
-                        case 1:
-                            prev_thm = last_thm[chn].s[sb][2];
-                            break;
-                        case 2:
-                            prev_thm = new_thmm[0];
-                            break;
-                        }
-                        t2 = NS_INTERP(prev_thm, thmm, NS_PREECHO_ATT2 * pcfact);
-                    }
-
-                    thmm = Min(t1, thmm);
-                    thmm = Min(t2, thmm);
-
-                    /* pulse like signal detection for fatboy.wav and so on */
-                    thmm *= sub_short_factor[chn][sblock];
-
-                    new_thmm[sblock] = thmm;
-                }
-                for (sblock = 0; sblock < 3; sblock++) {
-                    psv->thm[chn].s[sb][sblock] = new_thmm[sblock];
-                }
-            }
-        }
+        vbrpsy_short_preecho(psv, last_thm, ns_attacks, sub_short_factor, n_chn_psy);
     }
     for (chn = 0; chn < n_chn_psy; chn++) {
         psv->last_attacks[chn] = ns_attacks[chn][2];
@@ -1603,7 +1744,6 @@ L3psycho_anal_vbr(lame_internal_flags * gfc,
             plt->pe[gr_out][chn] = ppe[chn];
         }
     }
-    return 0;
 }
 
 
@@ -1611,6 +1751,20 @@ L3psycho_anal_vbr(lame_internal_flags * gfc,
 
 /* 
  *   The spreading function.  Values returned in units of energy
+ */
+/**
+ * \brief The spreading function: how much a masker raises the threshold at a
+ *        given bark distance.
+ *
+ * It is asymmetric, like hearing: masking reaches further up in frequency
+ * than down. The distance is scaled differently on the two sides before one
+ * common curve is computed, and a shallow notch is subtracted just above the
+ * masker.
+ *
+ * The curve depends only on the distance in frequency. It has no term for the
+ * level of the masker, so the same spreading is used at every signal level.
+ * The result is normalized, so that spreading a flat spectrum does not change
+ * it.
  */
 static  FLOAT
 s3_func(FLOAT bark)
@@ -1647,56 +1801,13 @@ s3_func(FLOAT bark)
     return tempx;
 }
 
-#if 0
-static  FLOAT
-norm_s3_func(void)
-{
-    double  lim_a = 0, lim_b = 0;
-    double  x = 0, l, h;
-    for (x = 0; s3_func(x) > 1e-20; x -= 1);
-    l = x;
-    h = 0;
-    while (fabs(h - l) > 1e-12) {
-        x = (h + l) / 2;
-        if (s3_func(x) > 0) {
-            h = x;
-        }
-        else {
-            l = x;
-        }
-    }
-    lim_a = l;
-    for (x = 0; s3_func(x) > 1e-20; x += 1);
-    l = 0;
-    h = x;
-    while (fabs(h - l) > 1e-12) {
-        x = (h + l) / 2;
-        if (s3_func(x) > 0) {
-            l = x;
-        }
-        else {
-            h = x;
-        }
-    }
-    lim_b = h;
-    {
-        double  sum = 0;
-        int const m = 1000;
-        int     i;
-        for (i = 0; i <= m; ++i) {
-            double  x = lim_a + i * (lim_b - lim_a) / m;
-            double  y = s3_func(x);
-            sum += y;
-        }
-        {
-            double  norm = (m + 1) / (sum * (lim_b - lim_a));
-            /*printf( "norm = %lf\n",norm); */
-            return norm;
-        }
-    }
-}
-#endif
-
+/**
+ * \brief Weight that vbrpsy_compute_MS_thresholds() uses to move masking
+ *        between the mid and side channels.
+ *
+ * It rises with frequency to a constant level. The source code says only that
+ * it is a curve fitted to a published plot, without naming the source.
+ */
 static  FLOAT
 stereo_demask(double f)
 {
@@ -1708,6 +1819,13 @@ stereo_demask(double f)
     return pow(10.0, 1.25 * (1 - cos(PI * arg)) - 2.5);
 }
 
+/**
+ * \brief Lay out the partition bands for one sample rate and transform size.
+ *
+ * Assigns each FFT line to a partition, so that a partition has about a fixed
+ * bark width. For each scalefactor band it records in which partition the band
+ * ends, and how to split a partition that crosses the band boundary.
+ */
 static void
 init_numline(PsyConst_CB2SB_t * gd, FLOAT sfreq, int fft_size,
              int mdct_size, int sbmax, int const *scalepos)
@@ -1801,6 +1919,9 @@ init_numline(PsyConst_CB2SB_t * gd, FLOAT sfreq, int fft_size,
     }
 }
 
+/**
+ * \brief Center bark value and bark width of each partition band.
+ */
 static void
 compute_bark_values(PsyConst_CB2SB_t const *gd, FLOAT sfreq, int fft_size,
                     FLOAT * bval, FLOAT * bval_width)
@@ -1823,6 +1944,14 @@ compute_bark_values(PsyConst_CB2SB_t const *gd, FLOAT sfreq, int fft_size,
     }
 }
 
+/**
+ * \brief Precompute the spreading matrix from s3_func().
+ *
+ * The band layout is fixed for the whole encode. So the values that matter
+ * are computed once, not for each pair of bands in every granule, and stored
+ * with the index range they cover. Each row is normalized, so that spreading
+ * does not change the total energy.
+ */
 static int
 init_s3_values(FLOAT ** p, int (*s3ind)[2], int npart,
                FLOAT const *bval, FLOAT const *bval_width, FLOAT const *norm)
@@ -1874,35 +2003,71 @@ init_s3_values(FLOAT ** p, int (*s3ind)[2], int npart,
     return 0;
 }
 
-int
-psymodel_init(lame_global_flags const *gfp)
+/**
+ * \internal
+ * \brief The lowest absolute threshold over the FFT lines of one partition,
+ *        as an energy over the whole partition.
+ * \param cfg       the session; selects the threshold formula.
+ * \param sfreq     the output sample rate, in Hz.
+ * \param blksize   the FFT size of the block type.
+ * \param first     the first line of the partition.
+ * \param numlines  the number of lines of the partition.
+ * \return the threshold, in FFT energy units.
+ */
+static double
+partition_ath(SessionConfig_t const *cfg, FLOAT sfreq, int blksize, int first, int numlines)
 {
-    lame_internal_flags *const gfc = gfp->internal_flags;
-    SessionConfig_t *const cfg = &gfc->cfg;
-    PsyStateVar_t *const psv = &gfc->sv_psy;
-    PsyConst_t *gd;
-    int     i, j, b, sb, k;
-    FLOAT   bvl_a = 13, bvl_b = 24;
-    FLOAT   snr_l_a = 0, snr_l_b = 0;
-    FLOAT   snr_s_a = -8.25, snr_s_b = -4.5;
+    double  x = FLOAT_MAX;
+    int     k;
 
-    FLOAT   bval[CBANDS];
-    FLOAT   bval_width[CBANDS];
-    FLOAT   norm[CBANDS];
-    FLOAT const sfreq = cfg->samplerate_out;
-
-    FLOAT   xav = 10, xbv = 12;
-    FLOAT const minval_low = (0.f - cfg->minval);
-
-    if (gfc->cd_psy != 0) {
-        return 0;
+    for (k = 0; k < numlines; k++) {
+        FLOAT const freq = sfreq * (first + k) / (1000.0 * blksize);
+        FLOAT   level;
+        level = ATHformula(cfg, freq * 1000) - 20; /* scale to FFT units; returned value is in dB */
+        level = pow(10., 0.1 * level); /* convert from dB -> energy */
+        level *= numlines;
+        if (x > level)
+            x = level;
     }
-    memset(norm, 0, sizeof(norm));
+    return x;
+}
 
-    gd = lame_calloc(PsyConst_t, 1);
-    gfc->cd_psy = gd;
 
-    gd->force_short_block_calc = gfp->experimentalZ;
+/**
+ * \internal
+ * \brief The signal-to-noise ratio that the spreading function is normalized
+ *        to at one Bark value: snr_a up to bvl_a, then a straight line to
+ *        snr_b at bvl_b.
+ * \param bval   the Bark value of the partition.
+ * \param snr_a  the ratio up to bvl_a, in dB.
+ * \param snr_b  the ratio at bvl_b, in dB.
+ * \param bvl_a  the Bark value where the line starts.
+ * \param bvl_b  the Bark value where the line ends.
+ * \return the ratio, in dB.
+ */
+static double
+snr_between(FLOAT bval, FLOAT snr_a, FLOAT snr_b, FLOAT bvl_a, FLOAT bvl_b)
+{
+    double  snr = snr_a;
+
+    if (bval >= bvl_a) {
+        snr = snr_b * (bval - bvl_a) / (bvl_b - bvl_a)
+            + snr_a * (bvl_b - bval) / (bvl_b - bvl_a);
+    }
+    return snr;
+}
+
+
+/**
+ * \internal
+ * \brief Sets the history the model keeps from granule to granule to its start.
+ *
+ * \param psv  the model's state.
+ */
+static void
+init_psy_history(PsyStateVar_t * psv)
+{
+    int     i, j, sb;
 
     psv->blocktype_old[0] = psv->blocktype_old[1] = NORM_TYPE; /* the vbr header is long blocks */
 
@@ -1921,8 +2086,8 @@ psymodel_init(lame_global_flags const *gfp)
                 psv->en[i].s[sb][j] = 1e20;
                 psv->thm[i].s[sb][j] = 1e20;
             }
-            psv->last_attacks[i] = 0;
         }
+        psv->last_attacks[i] = 0;
         for (j = 0; j < 9; j++)
             psv->last_en_subshort[i][j] = 10.;
     }
@@ -1930,6 +2095,97 @@ psymodel_init(lame_global_flags const *gfp)
 
     /* init. for loudness approx. -jd 2001 mar 27 */
     psv->loudness_sq_save[0] = psv->loudness_sq_save[1] = 0.0;
+}
+
+
+/**
+ * \internal
+ * \brief Sets the attack thresholds: the caller's, or the defaults.
+ *
+ * \param gd   the model's constants.
+ * \param gfp  the settings; a negative threshold there means the default.
+ */
+static void
+init_attack_thresholds(PsyConst_t * gd, lame_global_flags const *gfp)
+{
+    float   x = gfp->attackthre;
+    float   y = gfp->attackthre_s;
+    if (x < 0) {
+        x = NSATTACKTHRE;
+    }
+    if (y < 0) {
+        y = NSATTACKTHRE_S;
+    }
+    gd->attack_threshold[0] = gd->attack_threshold[1] = gd->attack_threshold[2] = x;
+    gd->attack_threshold[3] = y;
+}
+
+
+#ifndef NDEBUG
+/**
+ * \internal
+ * \brief Returns how many spectral lines the partitions cover.
+ *
+ * \param part  the partition layout of one block size.
+ * \return the sum of the lines of every partition.
+ */
+static int
+partition_line_count(PsyConst_CB2SB_t const *part)
+{
+    int     b, n = 0;
+    for (b = 0; b < part->npart; ++b) {
+        n += part->numlines[b];
+    }
+    return n;
+}
+#endif
+
+
+/**
+ * \internal
+ * \brief Build the per-session constant tables the model needs.
+ *
+ * Called once per encoder instance. It lays out the partition bands for both
+ * transform sizes. It precomputes the spreading matrices, the minimum masking
+ * value of each band, the stereo demasking weights and the attack thresholds.
+ * It initializes the history of each channel, which the model keeps from
+ * granule to granule.
+ *
+ * \return 0 on success, non-zero if a table could not be allocated.
+ */
+int
+psymodel_init(lame_global_flags const *gfp)
+{
+    lame_internal_flags *const gfc = gfp->internal_flags;
+    SessionConfig_t *const cfg = &gfc->cfg;
+    PsyStateVar_t *const psv = &gfc->sv_psy;
+    PsyConst_t *gd;
+    int     i, j, b;
+    FLOAT   bvl_a = 13, bvl_b = 24;
+    FLOAT   snr_l_a = 0, snr_l_b = 0;
+    FLOAT   snr_s_a = -8.25, snr_s_b = -4.5;
+
+    FLOAT   bval[CBANDS];
+    FLOAT   bval_width[CBANDS];
+    FLOAT   norm[CBANDS];
+    FLOAT const sfreq = cfg->samplerate_out;
+
+    FLOAT   xav = 10, xbv = 12;
+    FLOAT const minval_low = (0.f - cfg->minval);
+
+    if (gfc->cd_psy != 0) {
+        return 0;
+    }
+    memset(norm, 0, sizeof(norm));
+
+    gd = lame_calloc(PsyConst_t, 1);
+    if (gd == 0)
+        return -1;
+    gfc->cd_psy = gd;
+
+    gd->force_short_block_calc = gfp->experimentalZ;
+
+    init_psy_history(psv);
 
 
 
@@ -1937,17 +2193,13 @@ psymodel_init(lame_global_flags const *gfp)
      * now compute the psychoacoustic model specific constants
      ************************************************************************/
     /* compute numlines, bo, bm, bval, bval_width, mld */
-    init_numline(&gd->l, sfreq, BLKSIZE, 576, SBMAX_l, gfc->scalefac_band.l);
+    init_numline(&gd->l, sfreq, BLKSIZE, SAMPLES_PER_GRANULE, SBMAX_l, gfc->scalefac_band.l);
     assert(gd->l.npart < CBANDS);
     compute_bark_values(&gd->l, sfreq, BLKSIZE, bval, bval_width);
 
     /* compute the spreading function */
     for (i = 0; i < gd->l.npart; i++) {
-        double  snr = snr_l_a;
-        if (bval[i] >= bvl_a) {
-            snr = snr_l_b * (bval[i] - bvl_a) / (bvl_b - bvl_a)
-                + snr_l_a * (bvl_b - bval[i]) / (bvl_b - bvl_a);
-        }
+        double const snr = snr_between(bval[i], snr_l_a, snr_l_b, bvl_a, bvl_b);
         norm[i] = pow(10.0, snr / 10.0);
     }
     i = init_s3_values(&gd->l.s3, gd->l.s3ind, gd->l.npart, bval, bval_width, norm);
@@ -1960,18 +2212,8 @@ psymodel_init(lame_global_flags const *gfp)
         double  x;
 
         /* ATH */
-        x = FLOAT_MAX;
-        for (k = 0; k < gd->l.numlines[i]; k++, j++) {
-            FLOAT const freq = sfreq * j / (1000.0 * BLKSIZE);
-            FLOAT   level;
-            /* freq = Min(.1,freq); *//* ATH below 100 Hz constant, not further climbing */
-            level = ATHformula(cfg, freq * 1000) - 20; /* scale to FFT units; returned value is in dB */
-            level = pow(10., 0.1 * level); /* convert from dB -> energy */
-            level *= gd->l.numlines[i];
-            if (x > level)
-                x = level;
-        }
-        gfc->ATH->cb_l[i] = x;
+        gfc->ATH->cb_l[i] = partition_ath(cfg, sfreq, BLKSIZE, j, gd->l.numlines[i]);
+        j += gd->l.numlines[i];
 
         /* MINVAL.
            For low freq, the strength of the masking is limited by minval
@@ -2005,26 +2247,12 @@ psymodel_init(lame_global_flags const *gfp)
     j = 0;
     for (i = 0; i < gd->s.npart; i++) {
         double  x;
-        double  snr = snr_s_a;
-        if (bval[i] >= bvl_a) {
-            snr = snr_s_b * (bval[i] - bvl_a) / (bvl_b - bvl_a)
-                + snr_s_a * (bvl_b - bval[i]) / (bvl_b - bvl_a);
-        }
+        double const snr = snr_between(bval[i], snr_s_a, snr_s_b, bvl_a, bvl_b);
         norm[i] = pow(10.0, snr / 10.0);
 
         /* ATH */
-        x = FLOAT_MAX;
-        for (k = 0; k < gd->s.numlines[i]; k++, j++) {
-            FLOAT const freq = sfreq * j / (1000.0 * BLKSIZE_s);
-            FLOAT   level;
-            /* freq = Min(.1,freq); *//* ATH below 100 Hz constant, not further climbing */
-            level = ATHformula(cfg, freq * 1000) - 20; /* scale to FFT units; returned value is in dB */
-            level = pow(10., 0.1 * level); /* convert from dB -> energy */
-            level *= gd->s.numlines[i];
-            if (x > level)
-                x = level;
-        }
-        gfc->ATH->cb_s[i] = x;
+        gfc->ATH->cb_s[i] = partition_ath(cfg, sfreq, BLKSIZE_s, j, gd->s.numlines[i]);
+        j += gd->s.numlines[i];
 
         /* MINVAL.
            For low freq, the strength of the masking is limited by minval
@@ -2080,7 +2308,7 @@ psymodel_init(lame_global_flags const *gfp)
     /*  prepare for ATH auto adjustment:
      *  we want to decrease the ATH by 12 dB per second
      */
-#define  frame_duration (576. * cfg->mode_gr / sfreq)
+#define  frame_duration ((double) SAMPLES_PER_GRANULE * cfg->mode_gr / sfreq)
     gfc->ATH->decay = pow(10., -12. / 10. * frame_duration);
     gfc->ATH->adjust_factor = 0.01; /* minimum, for leading low loudness */
     gfc->ATH->adjust_limit = 1.0; /* on lead, allow adjust up to maximum */
@@ -2107,35 +2335,11 @@ psymodel_init(lame_global_flags const *gfp)
             gfc->ATH->eql_w[i] *= eql_balance;
         }
     }
+    assert(partition_line_count(&gd->s) == HBLKSIZE_s);
+    assert(partition_line_count(&gd->l) == HBLKSIZE);
+    init_attack_thresholds(gd, gfp);
     {
-        for (b = j = 0; b < gd->s.npart; ++b) {
-            for (i = 0; i < gd->s.numlines[b]; ++i) {
-                ++j;
-            }
-        }
-        assert(j == 129);
-        for (b = j = 0; b < gd->l.npart; ++b) {
-            for (i = 0; i < gd->l.numlines[b]; ++i) {
-                ++j;
-            }
-        }
-        assert(j == 513);
-    }
-    /* short block attack threshold */
-    {
-        float   x = gfp->attackthre;
-        float   y = gfp->attackthre_s;
-        if (x < 0) {
-            x = NSATTACKTHRE;
-        }
-        if (y < 0) {
-            y = NSATTACKTHRE_S;
-        }
-        gd->attack_threshold[0] = gd->attack_threshold[1] = gd->attack_threshold[2] = x;
-        gd->attack_threshold[3] = y;
-    }
-    {
-        float   sk_s = -10.f, sk_l = -4.7f;
+        float   sk_s, sk_l;
         static float const sk[] =
             { -7.4, -7.4, -7.4, -9.5, -7.4, -6.1, -5.5, -4.7, -4.7, -4.7, -4.7 };
         if (gfp->VBR_q < 4) {

@@ -43,21 +43,11 @@
 #include "encoder.h"
 #include "util.h"
 #include "fft.h"
+#include "fft_pvt.h"
 
 #include "vector/lame_intrin.h"
 
 
-
-#define TRI_SIZE (5-1)  /* 1024 =  4**5 */
-
-/* fft.c    */
-
-static const FLOAT costab[TRI_SIZE * 2] = {
-    9.238795325112867e-01, 3.826834323650898e-01,
-    9.951847266721969e-01, 9.801714032956060e-02,
-    9.996988186962042e-01, 2.454122852291229e-02,
-    9.999811752826011e-01, 6.135884649154475e-03
-};
 
 static void
 fht(FLOAT * fz, int n)
@@ -67,7 +57,7 @@ fht(FLOAT * fz, int n)
     FLOAT  *fi, *gi;
     FLOAT const *fn;
 
-    n <<= 1;            /* to get BLKSIZE, because of 3DNow! ASM routine */
+    n <<= 1;            /* callers pass half the transform length */
     fn = fz + n;
     k4 = 4;
     do {
@@ -78,29 +68,7 @@ fht(FLOAT * fz, int n)
         k2 = k4 << 1;
         k3 = k2 + k1;
         k4 = k2 << 1;
-        fi = fz;
-        gi = fi + kx;
-        do {
-            FLOAT   f0, f1, f2, f3;
-            f1 = fi[0] - fi[k1];
-            f0 = fi[0] + fi[k1];
-            f3 = fi[k2] - fi[k3];
-            f2 = fi[k2] + fi[k3];
-            fi[k2] = f0 - f2;
-            fi[0] = f0 + f2;
-            fi[k3] = f1 - f3;
-            fi[k1] = f1 + f3;
-            f1 = gi[0] - gi[k1];
-            f0 = gi[0] + gi[k1];
-            f3 = SQRT2 * gi[k3];
-            f2 = SQRT2 * gi[k2];
-            gi[k2] = f0 - f2;
-            gi[0] = f0 + f2;
-            gi[k3] = f1 - f3;
-            gi[k1] = f1 + f3;
-            gi += k4;
-            fi += k4;
-        } while (fi < fn);
+        fht_pass_head(fz, fn, k1, k2, k3, k4, kx);
         c1 = tri[0];
         s1 = tri[1];
         for (i = 1; i < kx; i++) {
@@ -166,83 +134,54 @@ static const unsigned char rv_tbl[] = {
     0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe
 };
 
-#define ch01(index)  (buffer[chn][index])
+/**
+ * \internal
+ * \brief The first radix-4 butterfly of the transform, on four windowed input
+ *        samples.
+ * \param x   receives the four outputs.
+ * \param a   the first windowed sample.
+ * \param b   the sample paired with \a a.
+ * \param c   the third windowed sample.
+ * \param d   the sample paired with \a c.
+ */
+static inline void
+butterfly4(FLOAT * x, FLOAT a, FLOAT b, FLOAT c, FLOAT d)
+{
+    FLOAT const f1 = a - b;
+    FLOAT const f0 = a + b;
+    FLOAT const f3 = c - d;
+    FLOAT const f2 = c + d;
 
-#define ml00(f) (window[i        ] * f(i))
-#define ml10(f) (window[i + 0x200] * f(i + 0x200))
-#define ml20(f) (window[i + 0x100] * f(i + 0x100))
-#define ml30(f) (window[i + 0x300] * f(i + 0x300))
-
-#define ml01(f) (window[i + 0x001] * f(i + 0x001))
-#define ml11(f) (window[i + 0x201] * f(i + 0x201))
-#define ml21(f) (window[i + 0x101] * f(i + 0x101))
-#define ml31(f) (window[i + 0x301] * f(i + 0x301))
-
-#define ms00(f) (window_s[i       ] * f(i + k))
-#define ms10(f) (window_s[0x7f - i] * f(i + k + 0x80))
-#define ms20(f) (window_s[i + 0x40] * f(i + k + 0x40))
-#define ms30(f) (window_s[0x3f - i] * f(i + k + 0xc0))
-
-#define ms01(f) (window_s[i + 0x01] * f(i + k + 0x01))
-#define ms11(f) (window_s[0x7e - i] * f(i + k + 0x81))
-#define ms21(f) (window_s[i + 0x41] * f(i + k + 0x41))
-#define ms31(f) (window_s[0x3e - i] * f(i + k + 0xc1))
+    x[0] = f0 + f2;
+    x[2] = f0 - f2;
+    x[1] = f1 + f3;
+    x[3] = f1 - f3;
+}
 
 void
 fft_short(lame_internal_flags const *const gfc,
           FLOAT x_real[3][BLKSIZE_s], int chn, const sample_t *const buffer[2])
 {
+    FLOAT const *const w = gfc->cd_psy->window_s;
     int     i;
     int     j;
     int     b;
 
-#define window_s gfc->cd_psy->window_s
-#define window gfc->cd_psy->window
-
     for (b = 0; b < 3; b++) {
         FLOAT  *x = &x_real[b][BLKSIZE_s / 2];
-        short const k = (576 / 3) * (b + 1);
+        int const k = (SAMPLES_PER_GRANULE / 3) * (b + 1);
+        sample_t const *const s = buffer[chn] + k;
         j = BLKSIZE_s / 8 - 1;
         do {
-            FLOAT   f0, f1, f2, f3, w;
-
             i = rv_tbl[j << 2];
-
-            f0 = ms00(ch01);
-            w = ms10(ch01);
-            f1 = f0 - w;
-            f0 = f0 + w;
-            f2 = ms20(ch01);
-            w = ms30(ch01);
-            f3 = f2 - w;
-            f2 = f2 + w;
-
             x -= 4;
-            x[0] = f0 + f2;
-            x[2] = f0 - f2;
-            x[1] = f1 + f3;
-            x[3] = f1 - f3;
-
-            f0 = ms01(ch01);
-            w = ms11(ch01);
-            f1 = f0 - w;
-            f0 = f0 + w;
-            f2 = ms21(ch01);
-            w = ms31(ch01);
-            f3 = f2 - w;
-            f2 = f2 + w;
-
-            x[BLKSIZE_s / 2 + 0] = f0 + f2;
-            x[BLKSIZE_s / 2 + 2] = f0 - f2;
-            x[BLKSIZE_s / 2 + 1] = f1 + f3;
-            x[BLKSIZE_s / 2 + 3] = f1 - f3;
+            butterfly4(x, w[i] * s[i], w[0x7f - i] * s[i + 0x80],
+                       w[i + 0x40] * s[i + 0x40], w[0x3f - i] * s[i + 0xc0]);
+            butterfly4(x + BLKSIZE_s / 2, w[i + 0x01] * s[i + 0x01], w[0x7e - i] * s[i + 0x81],
+                       w[i + 0x41] * s[i + 0x41], w[0x3e - i] * s[i + 0xc1]);
         } while (--j >= 0);
 
-#undef window
-#undef window_s
-
-        gfc->fft_fht(x, BLKSIZE_s / 2);
-        /* BLKSIZE_s/2 because of 3DNow! ASM routine */
+        gfc->fft_fht(x, BLKSIZE_s / 2); /* fht() takes half the length */
     }
 }
 
@@ -250,59 +189,39 @@ void
 fft_long(lame_internal_flags const *const gfc,
          FLOAT x[BLKSIZE], int chn, const sample_t *const buffer[2])
 {
+    FLOAT const *const w = gfc->cd_psy->window;
+    sample_t const *const s = buffer[chn];
     int     i;
     int     jj = BLKSIZE / 8 - 1;
     x += BLKSIZE / 2;
 
-#define window_s gfc->cd_psy->window_s
-#define window gfc->cd_psy->window
-
     do {
-        FLOAT   f0, f1, f2, f3, w;
-
         i = rv_tbl[jj];
-        f0 = ml00(ch01);
-        w = ml10(ch01);
-        f1 = f0 - w;
-        f0 = f0 + w;
-        f2 = ml20(ch01);
-        w = ml30(ch01);
-        f3 = f2 - w;
-        f2 = f2 + w;
-
         x -= 4;
-        x[0] = f0 + f2;
-        x[2] = f0 - f2;
-        x[1] = f1 + f3;
-        x[3] = f1 - f3;
-
-        f0 = ml01(ch01);
-        w = ml11(ch01);
-        f1 = f0 - w;
-        f0 = f0 + w;
-        f2 = ml21(ch01);
-        w = ml31(ch01);
-        f3 = f2 - w;
-        f2 = f2 + w;
-
-        x[BLKSIZE / 2 + 0] = f0 + f2;
-        x[BLKSIZE / 2 + 2] = f0 - f2;
-        x[BLKSIZE / 2 + 1] = f1 + f3;
-        x[BLKSIZE / 2 + 3] = f1 - f3;
+        butterfly4(x, w[i] * s[i], w[i + 0x200] * s[i + 0x200],
+                   w[i + 0x100] * s[i + 0x100], w[i + 0x300] * s[i + 0x300]);
+        butterfly4(x + BLKSIZE / 2, w[i + 0x001] * s[i + 0x001], w[i + 0x201] * s[i + 0x201],
+                   w[i + 0x101] * s[i + 0x101], w[i + 0x301] * s[i + 0x301]);
     } while (--jj >= 0);
 
-#undef window
-#undef window_s
-
-    gfc->fft_fht(x, BLKSIZE / 2);
-    /* BLKSIZE/2 because of 3DNow! ASM routine */
+    gfc->fft_fht(x, BLKSIZE / 2); /* fht() takes half the length */
 }
 
-#ifdef HAVE_NASM
-extern void fht_3DN(FLOAT * fz, int n);
-extern void fht_SSE(FLOAT * fz, int n);
-#endif
-
+/**
+ * \internal
+ * \brief Build the analysis windows and select the transform implementation.
+ *
+ * Two windows, because the psychoacoustic model analyzes at two time
+ * resolutions: a Blackman window over the long block, and a Hann window over
+ * each short sub-block.
+ *
+ * \todo Measure whether the long-block window matters. A comment in this file
+ *       says the choice makes no real difference, but no measurement is
+ *       known. The windows differ a lot in how much a strong component leaks
+ *       into neighboring bins. The model estimates tonality from the ratio of
+ *       the peak of a band to its mean. So the window affects the tonality
+ *       estimate and every threshold computed from it.
+ */
 void
 init_fft(lame_internal_flags * const gfc)
 {
@@ -319,21 +238,9 @@ init_fft(lame_internal_flags * const gfc)
         gfc->cd_psy->window_s[i] = 0.5 * (1.0 - cos(2.0 * PI * (i + 0.5) / BLKSIZE_s));
 
     gfc->fft_fht = fht;
-#ifdef HAVE_NASM
-    if (gfc->CPU_features.AMD_3DNow) {
-        gfc->fft_fht = fht_3DN;
+#ifdef HAVE_SSE2_INTRINSICS
+    if (vector_implementation(gfc) >= VECTOR_IMPL_SSE2) {
+        gfc->fft_fht = fht_SSE2;
     }
-    else if (gfc->CPU_features.SSE) {
-        gfc->fft_fht = fht_SSE;
-    }
-    else {
-        gfc->fft_fht = fht;
-    }
-#else
-#ifdef HAVE_XMMINTRIN_H
-#ifdef MIN_ARCH_SSE
-    gfc->fft_fht = fht_SSE2;
-#endif
-#endif
 #endif
 }

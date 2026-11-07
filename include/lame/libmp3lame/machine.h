@@ -49,6 +49,15 @@ char   *strchr(), *strrchr();
 #endif
 #include <limits.h>
 
+/* Mark a function parameter that is intentionally unused (e.g. in a stub
+   implementation or a compile-time-selected code path). Expands to nothing
+   where the compiler has no such attribute, including MSVC. */
+#if defined(__GNUC__) || defined(__clang__)
+# define LAME_UNUSED __attribute__((unused))
+#else
+# define LAME_UNUSED
+#endif
+
 #include <ctype.h>
 
 #ifdef HAVE_ERRNO_H
@@ -78,21 +87,6 @@ char   *strchr(), *strrchr();
 #include <dmalloc.h>
 #endif
 
-/*
- * 3 different types of pow() functions:
- *   - table lookup
- *   - pow()
- *   - exp()   on some machines this is claimed to be faster than pow()
- */
-
-#define POW20(x) (assert(0 <= (x+Q_MAX2) && x < Q_MAX), pow20[x+Q_MAX2])
-/*#define POW20(x)  pow(2.0,((double)(x)-210)*.25) */
-/*#define POW20(x)  exp( ((double)(x)-210)*(.25*LOG2) ) */
-
-#define IPOW20(x)  (assert(0 <= x && x < Q_MAX), ipow20[x])
-/*#define IPOW20(x)  exp( -((double)(x)-210)*.1875*LOG2 ) */
-/*#define IPOW20(x)  pow(2.0,-((double)(x)-210)*.1875) */
-
 /* in case this is used without configure */
 #ifndef inline
 # define inline
@@ -110,6 +104,10 @@ char   *strchr(), *strrchr();
 #if    defined(_MSC_VER)
 # pragma warning( disable : 4244 )
 /*# pragma warning( disable : 4305 ) */
+/* 4100: unreferenced formal parameter. Intentional in stub/compatibility
+   entry points; the GCC/Clang -Wunused-parameter build is where a genuinely
+   unused parameter is caught (see LAME_UNUSED). */
+# pragma warning( disable : 4100 )
 #endif
 
 /*
@@ -122,9 +120,8 @@ char   *strchr(), *strrchr();
  */
 
 #if ( defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__) )
-# define WIN32_LEAN_AND_MEAN
-# include <windows.h>
 # include <float.h>
+typedef float FLOAT;
 # define FLOAT_MAX FLT_MAX
 #else
 # ifndef FLOAT
@@ -137,26 +134,10 @@ typedef float FLOAT;
 # endif
 #endif
 
-#ifndef FLOAT8
-typedef double FLOAT8;
-# ifdef DBL_MAX
-#  define FLOAT8_MAX DBL_MAX
-# else
-#  define FLOAT8_MAX 1e99 /* approx */
-# endif
-#else
-# ifdef FLT_MAX
-#  define FLOAT8_MAX FLT_MAX
-# else
-#  define FLOAT8_MAX 1e37 /* approx */
-# endif
-#endif
-
 /* sample_t must be floating point, at least 32 bits */
 typedef FLOAT sample_t;
 
 #define dimension_of(array) (sizeof(array)/sizeof(array[0]))
-#define beyond(array) (array+dimension_of(array))
 /* ##-pasting does not expand its operands, so pasting __LINE__ directly would
  * yield the literal token "__LINE__" instead of the current line number,
  * making every use in a translation unit collide on the same enum tag. The
@@ -190,6 +171,53 @@ typedef FLOAT sample_t;
 #  define log10f log10
 #  endif
 #endif
+
+/**
+ *  \internal
+ *  Whether a float is a finite number. An IEEE-754 value is NaN or infinite
+ *  exactly when every exponent bit is set.
+ *
+ *  LAME is built with -ffast-math. With this option, the compiler may assume
+ *  that NaN and infinity never occur, and may remove a test for them. Reading
+ *  the raw bits does not prevent this. The compiler recognizes the integer
+ *  comparison below as a floating-point class test and replaces it with a
+ *  constant, as it does for isfinite() or x!=x. So the value is first stored
+ *  in a volatile object. The compiler may not make assumptions about a
+ *  volatile object.
+ *
+ *  @param x  the value to test.
+ *  @return nonzero when @p x is neither NaN nor an infinity.
+ */
+static inline int
+float_is_finite(float const x)
+{
+    float volatile opaque = x;
+    float   value;
+    uint32_t bits;
+
+    value = opaque;
+    memcpy(&bits, &value, sizeof bits);
+    return ((bits >> 23) & 0xFFu) != 0xFFu;
+}
+
+/**
+ *  \internal
+ *  float_is_finite() for a double.
+ *
+ *  @param x  the value to test.
+ *  @return nonzero when @p x is neither NaN nor an infinity.
+ */
+static inline int
+double_is_finite(double const x)
+{
+    double volatile opaque = x;
+    double  value;
+    uint64_t bits;
+
+    value = opaque;
+    memcpy(&bits, &value, sizeof bits);
+    return ((bits >> 52) & 0x7FFu) != 0x7FFu;
+}
 
 #endif
 

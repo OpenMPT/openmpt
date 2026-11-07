@@ -15,6 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\include\lame\configMS.h" />
     <ClInclude Include="..\..\..\include\lame\include\lame.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -33,6 +34,9 @@
     <ClInclude Include="..\..\..\include\lame\libmp3lame\fft.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\fft_pvt.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\gain_analysis.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
@@ -48,13 +52,13 @@
     <ClInclude Include="..\..\..\include\lame\libmp3lame\lame_global_flags.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\lame\libmp3lame\lameerror.h">
-      <Filter>libmp3lame</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\machine.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\newmdct.h">
+      <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\obsolte_api.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\psymodel.h">
@@ -80,6 +84,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\vbrquantize.h">
       <Filter>libmp3lame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\vector\xmm_quant_kernel.h">
+      <Filter>libmp3lame\vector</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\version.h">
       <Filter>libmp3lame</Filter>
@@ -145,6 +152,27 @@
     </ClCompile>
     <ClCompile Include="..\..\..\include\lame\libmp3lame\vbrquantize.c">
       <Filter>libmp3lame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx2_choose_table.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx2_quantize_lines.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\avx512_quantize_lines.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\neon_choose_table.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_calc_sfb_noise.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_choose_table.c">
+      <Filter>libmp3lame\vector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_quantize_lines.c">
+      <Filter>libmp3lame\vector</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\include\lame\libmp3lame\vector\xmm_quantize_sub.c">
       <Filter>libmp3lame\vector</Filter>

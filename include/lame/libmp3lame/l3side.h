@@ -44,43 +44,73 @@ typedef struct {
     III_psy_xmin en;
 } III_psy_ratio;
 
+/**
+ * \internal
+ * \brief What is fixed for one granule and channel before its quantization
+ *        starts: the spectrum and the bands it is quantized in.
+ */
 typedef struct {
-    FLOAT   xr[576];
-    int     l3_enc[576];
-    int     scalefac[SFBMAX];
-    FLOAT   xrpow_max;
-
-    int     part2_3_length;
-    int     big_values;
-    int     count1;
-    int     global_gain;
-    int     scalefac_compress;
+    FLOAT   xr[SAMPLES_PER_GRANULE];
+    int     width[SFBMAX];
+    int     window[SFBMAX];
     int     block_type;
     int     mixed_block_flag;
-    int     table_select[3];
-    int     subblock_gain[3 + 1];
-    int     region0_count;
-    int     region1_count;
-    int     preflag;
-    int     scalefac_scale;
-    int     count1table_select;
-
-    int     part2_length;
     int     sfb_lmax;
     int     sfb_smin;
     int     psy_lmax;
     int     sfbmax;
     int     psymax;
     int     sfbdivide;
-    int     width[SFBMAX];
-    int     window[SFBMAX];
-    int     count1bits;
-    /* added for LSF */
-    const int *sfb_partition_table;
-    int     slen[4];
-
     int     max_nonzero_coeff;
     char    energy_above_cutoff[SFBMAX];
+} gr_granule;
+
+/**
+ * \internal
+ * \brief How the quantized values are divided into Huffman regions and
+ *        tables, and the bits that takes.
+ */
+typedef struct {
+    int     part2_3_length;
+    int     big_values;
+    int     count1;
+    int     count1bits;
+    int     count1table_select;
+    int     region0_count;
+    int     region1_count;
+    int     table_select[3];
+} gr_huffman;
+
+/**
+ * \internal
+ * \brief The quantization of a granule: the quantized values, the
+ *        scalefactors and the gains.
+ */
+typedef struct {
+    const int *sfb_partition_table; /* added for LSF */
+    FLOAT   xrpow_max;
+    int     global_gain;
+    int     scalefac_scale;
+    int     preflag;
+    int     scalefac_compress;
+    int     part2_length;
+    int     subblock_gain[3 + 1];
+    int     slen[4];
+    int     scalefac[SFBMAX];
+    int     l3_enc[SAMPLES_PER_GRANULE];
+} gr_quant;
+
+/**
+ * \internal
+ * \brief The side information and the spectrum of one granule and channel.
+ *
+ * The search for a quantization changes only \c huffman and \c quant, so a
+ * search keeps its best result as copies of those two.
+ */
+typedef struct {
+    gr_granule granule;
+    gr_huffman huffman;
+    gr_quant quant;
 } gr_info;
 
 typedef struct {

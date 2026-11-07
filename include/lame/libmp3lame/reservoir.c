@@ -172,18 +172,18 @@ ResvFrameBegin(lame_internal_flags * gfc, int *mean_bits)
   Mark Taylor 4/99
 */
 void
-ResvMaxBits(lame_internal_flags * gfc, int mean_bits, int *targ_bits, int *extra_bits, int cbr)
+ResvMaxBits(lame_internal_flags * gfc, int mean_bits, int *targ_bits, int *extra_bits, int gr0_spent)
 {
     SessionConfig_t const *const cfg = &gfc->cfg;
     EncStateVar_t *const esv = &gfc->sv_enc;
     int     add_bits, targBits, extraBits;
     int     ResvSize = esv->ResvSize, ResvMax = esv->ResvMax;
 
-    /* conpensate the saved bits used in the 1st granule */
-    if (cbr)
+    /* compensate the saved bits used in the first granule */
+    if (gr0_spent)
         ResvSize += mean_bits;
 
-    if (gfc->sv_qnt.substep_shaping & 1)
+    if (gfc->sv_qnt.substep_shaping & SUBSTEP_TRUNCATE)
         ResvMax *= 0.9;
 
     targBits = mean_bits;
@@ -192,16 +192,16 @@ ResvMaxBits(lame_internal_flags * gfc, int mean_bits, int *targ_bits, int *extra
     if (ResvSize * 10 > ResvMax * 9) {
         add_bits = ResvSize - (ResvMax * 9) / 10;
         targBits += add_bits;
-        gfc->sv_qnt.substep_shaping |= 0x80;
+        gfc->sv_qnt.substep_shaping |= SUBSTEP_RESV_FULL;
     }
     else {
         add_bits = 0;
-        gfc->sv_qnt.substep_shaping &= 0x7f;
+        gfc->sv_qnt.substep_shaping &= SUBSTEP_USER_BITS;
         /* build up reservoir.  this builds the reservoir a little slower
          * than FhG.  It could simple be mean_bits/15, but this was rigged
          * to always produce 100 (the old value) at 128kbs */
         /*    *targ_bits -= (int) (mean_bits/15.2); */
-        if (!cfg->disable_reservoir && !(gfc->sv_qnt.substep_shaping & 1))
+        if (!cfg->disable_reservoir && !(gfc->sv_qnt.substep_shaping & SUBSTEP_TRUNCATE))
             targBits -= .1 * mean_bits;
     }
 
@@ -225,7 +225,7 @@ ResvMaxBits(lame_internal_flags * gfc, int mean_bits, int *targ_bits, int *extra
 void
 ResvAdjust(lame_internal_flags * gfc, gr_info const *gi)
 {
-    gfc->sv_enc.ResvSize -= gi->part2_3_length + gi->part2_length;
+    gfc->sv_enc.ResvSize -= gi->huffman.part2_3_length + gi->quant.part2_length;
 }
 
 

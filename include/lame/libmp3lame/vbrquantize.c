@@ -33,6 +33,7 @@
 #include "util.h"
 #include "vbrquantize.h"
 #include "quantize_pvt.h"
+#include "vector/lame_intrin.h"
 
 
 
@@ -41,7 +42,8 @@ struct algo_s;
 typedef struct algo_s algo_t;
 
 typedef void (*alloc_sf_f) (const algo_t *, const int *, const int *, int);
-typedef uint8_t (*find_sf_f) (const FLOAT *, const FLOAT *, FLOAT, unsigned int, uint8_t);
+typedef uint8_t (*find_sf_f) (const FLOAT *, const FLOAT *, FLOAT, unsigned int, uint8_t,
+                              vector_impl_t);
 
 struct algo_s {
     alloc_sf_f alloc;
@@ -81,7 +83,7 @@ typedef VOLATILE union {
 
 
 
-#ifdef TAKEHIRO_IEEE754_HACK
+#if TAKEHIRO_IEEE754_HACK
 #define DOUBLEX double
 #else
 #define DOUBLEX FLOAT
@@ -90,26 +92,24 @@ typedef VOLATILE union {
 #define MAGIC_FLOAT_def (65536*(128))
 #define MAGIC_INT_def    0x4b000000
 
-#ifdef TAKEHIRO_IEEE754_HACK
+#if TAKEHIRO_IEEE754_HACK
 #else
 /*********************************************************************
  * XRPOW_FTOI is a macro to convert floats to ints.
  * if XRPOW_FTOI(x) = nearest_int(x), then QUANTFAC(x)=adj43asm[x]
- *                                         ROUNDFAC= -0.0946
+ *                                         rounding offset -0.0946
  *
  * if XRPOW_FTOI(x) = floor(x), then QUANTFAC(x)=asj43[x]
- *                                   ROUNDFAC=0.4054
+ *                                   rounding offset 0.4054
  *********************************************************************/
 #  define QUANTFAC(rx)  adj43[rx]
-#  define ROUNDFAC_def 0.4054f
 #  define XRPOW_FTOI(src,dest) ((dest) = (int)(src))
 #endif
 
+#if TAKEHIRO_IEEE754_HACK
 static int const MAGIC_INT = MAGIC_INT_def;
-#ifndef TAKEHIRO_IEEE754_HACK
-static DOUBLEX const ROUNDFAC = ROUNDFAC_def;
-#endif
 static DOUBLEX const MAGIC_FLOAT = MAGIC_FLOAT_def;
+#endif
 
 
 inline static  float
@@ -135,8 +135,8 @@ vec_max_c(const float * xr34, unsigned int bw)
         xr34 += 4;
     }
     switch( remaining ) {
-    case 3: if (xfsf < xr34[2]) xfsf = xr34[2];
-    case 2: if (xfsf < xr34[1]) xfsf = xr34[1];
+    case 3: if (xfsf < xr34[2]) xfsf = xr34[2]; /* fall through */
+    case 2: if (xfsf < xr34[1]) xfsf = xr34[1]; /* fall through */
     case 1: if (xfsf < xr34[0]) xfsf = xr34[0];
     default: break;
     }
@@ -169,7 +169,7 @@ find_lowest_scalefac(const FLOAT xr34)
 inline static void
 k_34_4(DOUBLEX x[4], int l3[4])
 {
-#ifdef TAKEHIRO_IEEE754_HACK
+#if TAKEHIRO_IEEE754_HACK
     fi_union fi[4];
 
     assert(x[0] <= IXMAX_VAL && x[1] <= IXMAX_VAL && x[2] <= IXMAX_VAL && x[3] <= IXMAX_VAL);
@@ -214,8 +214,30 @@ k_34_4(DOUBLEX x[4], int l3[4])
  *  for which holds: sfpow34*xr34 <= IXMAX_VAL
  */
 
+/* Bands narrower than this run the scalar path: a fifth to a third of the calls
+ * sit below it (the widths are scalefactor bands, so many are tiny - a bw
+ * histogram over a -V2 encode has 38 % of calls below 8 and the most common
+ * width is 4), and there the vector setup and the horizontal reduce do not earn
+ * back their cost.  Taken from that histogram, not tuned.
+ */
+#define CALC_SFB_NOISE_VECTOR_MIN      8
+
+/** @internal
+ * This routine has an SSE2 version only.  On the tested CPUs, AVX2 and
+ * AVX-512 versions are not faster.  The AVX-512 version costs about 5 % of a
+ * `-V 2` encode on Ice Lake, and is at the noise floor on Zen 4.
+ *
+ * The reason is the reduction.  It is done four blocks at a time, so that the
+ * output is the same on all CPUs.  A wider vector does not change this, so the
+ * extra lanes only add cost.  The hardware gather of AVX2 is also not faster
+ * than the manual gather of SSE2 on the tested cores.  The measurements are in
+ * @ref vector_dispatch.
+ *
+ * A routine may exist at one tier only, and this is such a routine.
+ */
 static  FLOAT
-calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_t sf)
+calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_t sf,
+                   LAME_UNUSED vector_impl_t impl)
 {
     DOUBLEX x[4];
     int     l3[4];
@@ -223,6 +245,17 @@ calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_
     const FLOAT sfpow34 = ipow20[sf]; /*pow(sfpow,-3.0/4.0); */
 
     FLOAT   xfsf = 0;
+
+    /* The SSE2 tier pins gcc/clang's (x0^2+x2^2)+(x1^2+x3^2) reduction so all
+       CPUs of an architecture agree; the hack formulation is a different
+       computation and keeps its own scalar path (maintainer directive). */
+#if !TAKEHIRO_IEEE754_HACK
+#if defined( HAVE_SSE2_INTRINSICS )
+    if (impl >= VECTOR_IMPL_SSE2 && bw >= CALC_SFB_NOISE_VECTOR_MIN) {
+        return calc_sfb_noise_x34_sse2(xr, xr34, bw, sfpow, sfpow34, adj43, pow43);
+    }
+#endif
+#endif
     unsigned int i = bw >> 2u;
     unsigned int const remaining = (bw & 0x03u);
 
@@ -246,8 +279,8 @@ calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_
     if (remaining) {
         x[0] = x[1] = x[2] = x[3] = 0;
         switch( remaining ) {
-        case 3: x[2] = sfpow34 * xr34[2];
-        case 2: x[1] = sfpow34 * xr34[1];
+        case 3: x[2] = sfpow34 * xr34[2]; /* fall through */
+        case 2: x[1] = sfpow34 * xr34[1]; /* fall through */
         case 1: x[0] = sfpow34 * xr34[0];
         }
 
@@ -255,8 +288,8 @@ calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, unsigned int bw, uint8_
         x[0] = x[1] = x[2] = x[3] = 0;
 
         switch( remaining ) {
-        case 3: x[2] = fabsf(xr[2]) - sfpow * pow43[l3[2]];
-        case 2: x[1] = fabsf(xr[1]) - sfpow * pow43[l3[1]];
+        case 3: x[2] = fabsf(xr[2]) - sfpow * pow43[l3[2]]; /* fall through */
+        case 2: x[1] = fabsf(xr[1]) - sfpow * pow43[l3[1]]; /* fall through */
         case 1: x[0] = fabsf(xr[0]) - sfpow * pow43[l3[0]];
         }
         xfsf += (x[0] * x[0] + x[1] * x[1]) + (x[2] * x[2] + x[3] * x[3]);
@@ -276,11 +309,11 @@ typedef struct calc_noise_cache calc_noise_cache_t;
 
 static  uint8_t
 tri_calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsigned int bw,
-                       uint8_t sf, calc_noise_cache_t * did_it)
+                       uint8_t sf, calc_noise_cache_t * did_it, vector_impl_t impl)
 {
     if (did_it[sf].valid == 0) {
         did_it[sf].valid = 1;
-        did_it[sf].value = calc_sfb_noise_x34(xr, xr34, bw, sf);
+        did_it[sf].value = calc_sfb_noise_x34(xr, xr34, bw, sf, impl);
     }
     if (l3_xmin < did_it[sf].value) {
         return 1;
@@ -289,7 +322,7 @@ tri_calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsi
         uint8_t const sf_x = sf + 1;
         if (did_it[sf_x].valid == 0) {
             did_it[sf_x].valid = 1;
-            did_it[sf_x].value = calc_sfb_noise_x34(xr, xr34, bw, sf_x);
+            did_it[sf_x].value = calc_sfb_noise_x34(xr, xr34, bw, sf_x, impl);
         }
         if (l3_xmin < did_it[sf_x].value) {
             return 1;
@@ -299,7 +332,7 @@ tri_calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsi
         uint8_t const sf_x = sf - 1;
         if (did_it[sf_x].valid == 0) {
             did_it[sf_x].valid = 1;
-            did_it[sf_x].value = calc_sfb_noise_x34(xr, xr34, bw, sf_x);
+            did_it[sf_x].value = calc_sfb_noise_x34(xr, xr34, bw, sf_x, impl);
         }
         if (l3_xmin < did_it[sf_x].value) {
             return 1;
@@ -310,24 +343,24 @@ tri_calc_sfb_noise_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsi
 
 
 /**
+ *  \brief Computes the quantization step size from the allowed masking.
+ *
  *  Robert Hegemann 2001-05-01
- *  calculates quantization step size determined by allowed masking
  */
 static int
 calc_scalefac(FLOAT l3_xmin, int bw)
 {
     FLOAT const c = 5.799142446; /* 10 * 10^(2/3) * log10(4/3) */
-    return 210 + (int) (c * log10f(l3_xmin / bw) - .5f);
+    return GLOBAL_GAIN_UNITY + (int) (c * log10f(l3_xmin / bw) - .5f);
 }
 
 static uint8_t
-guess_scalefac_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsigned int bw, uint8_t sf_min)
+guess_scalefac_x34(LAME_UNUSED const FLOAT * xr, LAME_UNUSED const FLOAT * xr34, FLOAT l3_xmin,
+                   unsigned int bw, uint8_t sf_min, LAME_UNUSED vector_impl_t impl)
 {
     int const guess = calc_scalefac(l3_xmin, bw);
     if (guess < sf_min) return sf_min;
-    if (guess >= 255) return 255;
-    (void) xr;
-    (void) xr34;
+    if (guess >= GLOBAL_GAIN_MAX) return GLOBAL_GAIN_MAX;
     return guess;
 }
 
@@ -345,7 +378,7 @@ guess_scalefac_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsigned
 
 static  uint8_t
 find_scalefac_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsigned int bw,
-                  uint8_t sf_min)
+                  uint8_t sf_min, vector_impl_t impl)
 {
     calc_noise_cache_t did_it[256];
     uint8_t sf = 128, sf_ok = 255, delsf = 128, seen_good_one = 0, i;
@@ -356,7 +389,7 @@ find_scalefac_x34(const FLOAT * xr, const FLOAT * xr34, FLOAT l3_xmin, unsigned 
             sf += delsf;
         }
         else {
-            uint8_t const bad = tri_calc_sfb_noise_x34(xr, xr34, l3_xmin, bw, sf, did_it);
+            uint8_t const bad = tri_calc_sfb_noise_x34(xr, xr34, l3_xmin, bw, sf, did_it, impl);
             if (bad) {  /* distortion.  try a smaller scalefactor */
                 sf -= delsf;
             }
@@ -395,17 +428,18 @@ static int
 block_sf(algo_t * that, const FLOAT l3_xmin[SFBMAX], int vbrsf[SFBMAX], int vbrsfmin[SFBMAX])
 {
     FLOAT   max_xr34;
-    const FLOAT *const xr = &that->cod_info->xr[0];
+    const FLOAT *const xr = &that->cod_info->granule.xr[0];
     const FLOAT *const xr34_orig = &that->xr34orig[0];
-    const int *const width = &that->cod_info->width[0];
-    const char *const energy_above_cutoff = &that->cod_info->energy_above_cutoff[0];
-    unsigned int const max_nonzero_coeff = (unsigned int) that->cod_info->max_nonzero_coeff;
+    const int *const width = &that->cod_info->granule.width[0];
+    vector_impl_t const impl = vector_implementation(that->gfc);
+    const char *const energy_above_cutoff = &that->cod_info->granule.energy_above_cutoff[0];
+    unsigned int const max_nonzero_coeff = (unsigned int) that->cod_info->granule.max_nonzero_coeff;
     uint8_t maxsf = 0;
     int     sfb = 0, m_o = -1;
     unsigned int j = 0, i = 0;
-    int const psymax = that->cod_info->psymax;
+    int const psymax = that->cod_info->granule.psymax;
 
-    assert(that->cod_info->max_nonzero_coeff >= 0);
+    assert(that->cod_info->granule.max_nonzero_coeff >= 0);
 
     that->mingain_l = 0;
     that->mingain_s[0] = 0;
@@ -434,10 +468,10 @@ block_sf(algo_t * that, const FLOAT l3_xmin[SFBMAX], int vbrsf[SFBMAX], int vbrs
         }
         if (sfb < psymax && w > 2) { /* mpeg2.5 at 8 kHz doesn't use all scalefactors, unused have width 2 */
             if (energy_above_cutoff[sfb]) {
-                m2 = that->find(&xr[j], &xr34_orig[j], l3_xmin[sfb], l, m1);
+                m2 = that->find(&xr[j], &xr34_orig[j], l3_xmin[sfb], l, m1, impl);
 #if 0
                 if (0) {
-                    /** Robert Hegemann 2007-09-29:
+                    /*  Robert Hegemann 2007-09-29:
                      *  It seems here is some more potential for speed improvements.
                      *  Current find method does 11-18 quantization calculations.
                      *  Using a "good guess" may help to reduce this amount.
@@ -503,26 +537,23 @@ quantize_x34(const algo_t * that)
     DOUBLEX x[4];
     const FLOAT *xr34_orig = that->xr34orig;
     gr_info *const cod_info = that->cod_info;
-    int const ifqstep = (cod_info->scalefac_scale == 0) ? 2 : 4;
-    int    *l3 = cod_info->l3_enc;
+    int    *l3 = cod_info->quant.l3_enc;
     unsigned int j = 0, sfb = 0;
-    unsigned int const max_nonzero_coeff = (unsigned int) cod_info->max_nonzero_coeff;
+    unsigned int const max_nonzero_coeff = (unsigned int) cod_info->granule.max_nonzero_coeff;
 
-    assert(cod_info->max_nonzero_coeff >= 0);
-    assert(cod_info->max_nonzero_coeff < 576);
+    assert(cod_info->granule.max_nonzero_coeff >= 0);
+    assert(cod_info->granule.max_nonzero_coeff < SAMPLES_PER_GRANULE);
 
     while (j <= max_nonzero_coeff) {
-        int const s =
-            (cod_info->scalefac[sfb] + (cod_info->preflag ? pretab[sfb] : 0)) * ifqstep
-            + cod_info->subblock_gain[cod_info->window[sfb]] * 8;
-        uint8_t const sfac = (uint8_t) (cod_info->global_gain - s);
+        int const step = sfb_quant_step(cod_info, sfb);
+        uint8_t const sfac = (uint8_t) step;
         FLOAT const sfpow34 = ipow20[sfac];
-        unsigned int const w = (unsigned int) cod_info->width[sfb];
+        unsigned int const w = (unsigned int) cod_info->granule.width[sfb];
         unsigned int const m = (unsigned int) (max_nonzero_coeff - j + 1);
         unsigned int i, remaining;
 
-        assert((cod_info->global_gain - s) >= 0);
-        assert(cod_info->width[sfb] >= 0);
+        assert(step >= 0);
+        assert(cod_info->granule.width[sfb] >= 0);
         j += w;
         ++sfb;
         
@@ -545,16 +576,16 @@ quantize_x34(const algo_t * that)
             int tmp_l3[4];
             x[0] = x[1] = x[2] = x[3] = 0;
             switch( remaining ) {
-            case 3: x[2] = sfpow34 * xr34_orig[2];
-            case 2: x[1] = sfpow34 * xr34_orig[1];
+            case 3: x[2] = sfpow34 * xr34_orig[2]; /* fall through */
+            case 2: x[1] = sfpow34 * xr34_orig[1]; /* fall through */
             case 1: x[0] = sfpow34 * xr34_orig[0];
             }
 
             k_34_4(x, tmp_l3);
 
             switch( remaining ) {
-            case 3: l3[2] = tmp_l3[2];
-            case 2: l3[1] = tmp_l3[1];
+            case 3: l3[2] = tmp_l3[2]; /* fall through */
+            case 2: l3[1] = tmp_l3[1]; /* fall through */
             case 1: l3[0] = tmp_l3[0];
             }
 
@@ -596,9 +627,9 @@ static void
 set_subblock_gain(gr_info * cod_info, const int mingain_s[3], int sf[])
 {
     const int maxrange1 = 15, maxrange2 = 7;
-    const int ifqstepShift = (cod_info->scalefac_scale == 0) ? 1 : 2;
-    int    *const sbg = cod_info->subblock_gain;
-    unsigned int const psymax = (unsigned int) cod_info->psymax;
+    const int ifqstepShift = (cod_info->quant.scalefac_scale == 0) ? 1 : 2;
+    int    *const sbg = cod_info->quant.subblock_gain;
+    unsigned int const psymax = (unsigned int) cod_info->granule.psymax;
     unsigned int psydiv = 18;
     int     sbg0, sbg1, sbg2;
     unsigned int sfb, i;
@@ -650,8 +681,8 @@ set_subblock_gain(gr_info * cod_info, const int mingain_s[3], int sf[])
             int const m2 = (maxsf1 + 7) >> 3;
             sbg[i] = Max(m1, m2);
         }
-        if (sbg[i] > 0 && mingain_s[i] > (cod_info->global_gain - sbg[i] * 8)) {
-            sbg[i] = (cod_info->global_gain - mingain_s[i]) >> 3;
+        if (sbg[i] > 0 && mingain_s[i] > (cod_info->quant.global_gain - sbg[i] * 8)) {
+            sbg[i] = (cod_info->quant.global_gain - mingain_s[i]) >> 3;
         }
         if (sbg[i] > 7) {
             sbg[i] = 7;
@@ -672,7 +703,7 @@ set_subblock_gain(gr_info * cod_info, const int mingain_s[3], int sf[])
         for (i = 0; i < 3; ++i) {
             sbg[i] -= min_sbg;
         }
-        cod_info->global_gain -= min_sbg * 8;
+        cod_info->quant.global_gain -= min_sbg * 8;
     }
 }
 
@@ -688,14 +719,14 @@ set_subblock_gain(gr_info * cod_info, const int mingain_s[3], int sf[])
 static void
 set_scalefacs(gr_info * cod_info, const int *vbrsfmin, int sf[], const uint8_t * max_range)
 {
-    const int ifqstep = (cod_info->scalefac_scale == 0) ? 2 : 4;
-    const int ifqstepShift = (cod_info->scalefac_scale == 0) ? 1 : 2;
-    int    *const scalefac = cod_info->scalefac;
-    int const sfbmax = cod_info->sfbmax;
+    const int ifqstep = (cod_info->quant.scalefac_scale == 0) ? 2 : 4;
+    const int ifqstepShift = (cod_info->quant.scalefac_scale == 0) ? 1 : 2;
+    int    *const scalefac = cod_info->quant.scalefac;
+    int const sfbmax = cod_info->granule.sfbmax;
     int     sfb;
-    int const *const sbg = cod_info->subblock_gain;
-    int const *const window = cod_info->window;
-    int const preflag = cod_info->preflag;
+    int const *const sbg = cod_info->quant.subblock_gain;
+    int const *const window = cod_info->granule.window;
+    int const preflag = cod_info->quant.preflag;
 
     if (preflag) {
         for (sfb = 11; sfb < sfbmax; ++sfb) {
@@ -703,7 +734,7 @@ set_scalefacs(gr_info * cod_info, const int *vbrsfmin, int sf[], const uint8_t *
         }
     }
     for (sfb = 0; sfb < sfbmax; ++sfb) {
-        int const gain = cod_info->global_gain - (sbg[window[sfb]] * 8)
+        int const gain = cod_info->quant.global_gain - (sbg[window[sfb]] * 8)
             - ((preflag ? pretab[sfb] : 0) * ifqstep);
 
         if (sf[sfb] < 0) {
@@ -732,26 +763,9 @@ set_scalefacs(gr_info * cod_info, const int *vbrsfmin, int sf[], const uint8_t *
 static int
 checkScalefactor(const gr_info * cod_info, const int vbrsfmin[SFBMAX])
 {
-    int const ifqstep = cod_info->scalefac_scale == 0 ? 2 : 4;
     int     sfb;
-    for (sfb = 0; sfb < cod_info->psymax; ++sfb) {
-        const int s =
-            ((cod_info->scalefac[sfb] +
-              (cod_info->preflag ? pretab[sfb] : 0)) * ifqstep) +
-            cod_info->subblock_gain[cod_info->window[sfb]] * 8;
-
-        if ((cod_info->global_gain - s) < vbrsfmin[sfb]) {
-            /*
-               fprintf( stdout, "sf %d\n", sfb );
-               fprintf( stdout, "min %d\n", vbrsfmin[sfb] );
-               fprintf( stdout, "ggain %d\n", cod_info->global_gain );
-               fprintf( stdout, "scalefac %d\n", cod_info->scalefac[sfb] );
-               fprintf( stdout, "pretab %d\n", (cod_info->preflag ? pretab[sfb] : 0) );
-               fprintf( stdout, "scale %d\n", (cod_info->scalefac_scale + 1) );
-               fprintf( stdout, "subgain %d\n", cod_info->subblock_gain[cod_info->window[sfb]] * 8 );
-               fflush( stdout );
-               exit(-1);
-             */
+    for (sfb = 0; sfb < cod_info->granule.psymax; ++sfb) {
+        if (sfb_quant_step(cod_info, sfb) < vbrsfmin[sfb]) {
             return 0;
         }
     }
@@ -777,7 +791,7 @@ short_block_constrain(const algo_t * that, const int vbrsf[SFBMAX],
     int     mover, maxover0 = 0, maxover1 = 0, delta = 0;
     int     v, v0, v1;
     int     sfb;
-    int const psymax = cod_info->psymax;
+    int const psymax = cod_info->granule.psymax;
 
     for (sfb = 0; sfb < psymax; ++sfb) {
         assert(vbrsf[sfb] >= vbrsfmin[sfb]);
@@ -809,21 +823,21 @@ short_block_constrain(const algo_t * that, const int vbrsf[SFBMAX],
     maxover1 -= mover;
 
     if (maxover0 == 0) {
-        cod_info->scalefac_scale = 0;
+        cod_info->quant.scalefac_scale = 0;
     }
     else if (maxover1 == 0) {
-        cod_info->scalefac_scale = 1;
+        cod_info->quant.scalefac_scale = 1;
     }
     if (vbrmax < maxminsfb) {
         vbrmax = maxminsfb;
     }
-    cod_info->global_gain = vbrmax;
+    cod_info->quant.global_gain = vbrmax;
 
-    if (cod_info->global_gain < 0) {
-        cod_info->global_gain = 0;
+    if (cod_info->quant.global_gain < 0) {
+        cod_info->quant.global_gain = 0;
     }
-    else if (cod_info->global_gain > 255) {
-        cod_info->global_gain = 255;
+    else if (cod_info->quant.global_gain > GLOBAL_GAIN_MAX) {
+        cod_info->quant.global_gain = GLOBAL_GAIN_MAX;
     }
     {
         int     sf_temp[SFBMAX];
@@ -856,7 +870,7 @@ long_block_constrain(const algo_t * that, const int vbrsf[SFBMAX], const int vbr
     int     sfb;
     int     maxover0, maxover1, maxover0p, maxover1p, mover, delta = 0;
     int     v, v0, v1, v0p, v1p, vm0p = 1, vm1p = 1;
-    int const psymax = cod_info->psymax;
+    int const psymax = cod_info->granule.psymax;
 
     max_rangep = cfg->mode_gr == 2 ? max_range_long : max_range_long_lsf_pretab;
 
@@ -942,32 +956,29 @@ long_block_constrain(const algo_t * that, const int vbrsf[SFBMAX], const int vbr
     maxover1p -= mover;
 
     if (maxover0 == 0) {
-        cod_info->scalefac_scale = 0;
-        cod_info->preflag = 0;
+        cod_info->quant.scalefac_scale = 0;
+        cod_info->quant.preflag = 0;
         max_rangep = max_range_long;
     }
     else if (maxover0p == 0) {
-        cod_info->scalefac_scale = 0;
-        cod_info->preflag = 1;
+        cod_info->quant.scalefac_scale = 0;
+        cod_info->quant.preflag = 1;
     }
     else if (maxover1 == 0) {
-        cod_info->scalefac_scale = 1;
-        cod_info->preflag = 0;
+        cod_info->quant.scalefac_scale = 1;
+        cod_info->quant.preflag = 0;
         max_rangep = max_range_long;
     }
     else if (maxover1p == 0) {
-        cod_info->scalefac_scale = 1;
-        cod_info->preflag = 1;
+        cod_info->quant.scalefac_scale = 1;
+        cod_info->quant.preflag = 1;
     }
-    else {
-        assert(0);      /* this should not happen */
+    cod_info->quant.global_gain = vbrmax;
+    if (cod_info->quant.global_gain < 0) {
+        cod_info->quant.global_gain = 0;
     }
-    cod_info->global_gain = vbrmax;
-    if (cod_info->global_gain < 0) {
-        cod_info->global_gain = 0;
-    }
-    else if (cod_info->global_gain > 255) {
-        cod_info->global_gain = 255;
+    else if (cod_info->quant.global_gain > GLOBAL_GAIN_MAX) {
+        cod_info->quant.global_gain = GLOBAL_GAIN_MAX;
     }
     {
         int     sf_temp[SFBMAX];
@@ -991,7 +1002,7 @@ bitcount(const algo_t * that)
     }
     /*  this should not happen due to the way the scalefactors are selected  */
     ERRORF(that->gfc, "INTERNAL ERROR IN VBR NEW CODE (986), please send bug report\n");
-    exit(-1);
+    that->gfc->sv_enc.internal_error = 1;
 }
 
 
@@ -1000,8 +1011,8 @@ static int
 quantizeAndCountBits(const algo_t * that)
 {
     quantize_x34(that);
-    that->cod_info->part2_3_length = noquant_count_bits(that->gfc, that->cod_info, 0);
-    return that->cod_info->part2_3_length;
+    that->cod_info->huffman.part2_3_length = noquant_count_bits(that->gfc, that->cod_info, 0);
+    return that->cod_info->huffman.part2_3_length;
 }
 
 
@@ -1009,30 +1020,39 @@ quantizeAndCountBits(const algo_t * that)
 
 
 static int
+tryThatOne(algo_t const* that, const int sftemp[SFBMAX], const int vbrsfmin[SFBMAX], int vbrmax)
+{
+    FLOAT const xrpow_max = that->cod_info->quant.xrpow_max;
+    int     nbits = LARGE_BITS;
+    that->alloc(that, sftemp, vbrsfmin, vbrmax);
+    bitcount(that);
+    nbits = quantizeAndCountBits(that);
+    nbits += that->cod_info->quant.part2_length;
+    that->cod_info->quant.xrpow_max = xrpow_max;
+    return nbits;
+}
+
+
+static int
 tryGlobalStepsize(const algo_t * that, const int sfwork[SFBMAX],
                   const int vbrsfmin[SFBMAX], int delta)
 {
-    FLOAT const xrpow_max = that->cod_info->xrpow_max;
-    int     sftemp[SFBMAX], i, nbits;
+    int     sftemp[SFBMAX], i;
     int     gain, vbrmax = 0;
     for (i = 0; i < SFBMAX; ++i) {
         gain = sfwork[i] + delta;
         if (gain < vbrsfmin[i]) {
             gain = vbrsfmin[i];
         }
-        if (gain > 255) {
-            gain = 255;
+        if (gain > GLOBAL_GAIN_MAX) {
+            gain = GLOBAL_GAIN_MAX;
         }
         if (vbrmax < gain) {
             vbrmax = gain;
         }
         sftemp[i] = gain;
     }
-    that->alloc(that, sftemp, vbrsfmin, vbrmax);
-    bitcount(that);
-    nbits = quantizeAndCountBits(that);
-    that->cod_info->xrpow_max = xrpow_max;
-    return nbits;
+    return tryThatOne(that, sftemp, vbrsfmin, vbrmax) - that->cod_info->quant.part2_length;
 }
 
 
@@ -1042,7 +1062,7 @@ searchGlobalStepsizeMax(const algo_t * that, const int sfwork[SFBMAX],
                         const int vbrsfmin[SFBMAX], int target)
 {
     gr_info const *const cod_info = that->cod_info;
-    const int gain = cod_info->global_gain;
+    const int gain = cod_info->quant.global_gain;
     int     curr = gain;
     int     gain_ok = 1024;
     int     nbits = LARGE_BITS;
@@ -1052,7 +1072,7 @@ searchGlobalStepsizeMax(const algo_t * that, const int sfwork[SFBMAX],
     while (l <= r) {
         curr = (l + r) >> 1;
         nbits = tryGlobalStepsize(that, sfwork, vbrsfmin, curr - gain);
-        if (nbits == 0 || (nbits + cod_info->part2_length) < target) {
+        if (nbits == 0 || (nbits + cod_info->quant.part2_length) < target) {
             r = curr - 1;
             gain_ok = curr;
         }
@@ -1077,15 +1097,15 @@ sfDepth(const int sfwork[SFBMAX])
     int     m = 0;
     unsigned int i, j;
     for (j = SFBMAX, i = 0; j > 0; --j, ++i) {
-        int const di = 255 - sfwork[i];
+        int const di = GLOBAL_GAIN_MAX - sfwork[i];
         if (m < di) {
             m = di;
         }
         assert(sfwork[i] >= 0);
-        assert(sfwork[i] <= 255);
+        assert(sfwork[i] <= GLOBAL_GAIN_MAX);
     }
     assert(m >= 0);
-    assert(m <= 255);
+    assert(m <= GLOBAL_GAIN_MAX);
     return m;
 }
 
@@ -1102,7 +1122,8 @@ cutDistribution(const int sfwork[SFBMAX], int sf_out[SFBMAX], int cut)
 
 
 static int
-flattenDistribution(const int sfwork[SFBMAX], int sf_out[SFBMAX], int dm, int k, int p)
+flattenDistribution(const int sfwork[SFBMAX], const int vbrsfmin[SFBMAX],
+                    int sf_out[SFBMAX], int dm, int k, int p)
 {
     unsigned int i, j;
     int     x, sfmax = 0;
@@ -1110,12 +1131,14 @@ flattenDistribution(const int sfwork[SFBMAX], int sf_out[SFBMAX], int dm, int k,
         for (j = SFBMAX, i = 0; j > 0; --j, ++i) {
             int const di = p - sfwork[i];
             x = sfwork[i] + (k * di) / dm;
-            if (x < 0) {
-                x = 0;
+            /* the scalefactor may not drop below the band's minimum, or the
+               allocator cannot represent it; same floor as tryGlobalStepsize */
+            if (x < vbrsfmin[i]) {
+                x = vbrsfmin[i];
             }
             else {
-                if (x > 255) {
-                    x = 255;
+                if (x > GLOBAL_GAIN_MAX) {
+                    x = GLOBAL_GAIN_MAX;
                 }
             }
             sf_out[i] = x;
@@ -1137,17 +1160,68 @@ flattenDistribution(const int sfwork[SFBMAX], int sf_out[SFBMAX], int dm, int k,
 }
 
 
+/** \internal \brief The argument of flattenDistribution() that bisect_flatten() varies. */
+typedef enum {
+    FLATTEN_DEPTH,              /**< the cut depth k, at the global gain of the granule */
+    FLATTEN_GAIN                /**< the global gain p, at the full depth */
+} flatten_arg_t;
+
+/**
+ * \internal
+ * \brief Finds by bisection the smallest value of one argument of
+ *        flattenDistribution() whose result fits the target, and leaves the
+ *        granule quantized with it.
+ * \param that      the quantizer state.
+ * \param sfwork    the scalefactors.
+ * \param vbrsfmin  the smallest scalefactor of each band.
+ * \param wrk       work space for the flattened scalefactors.
+ * \param dm        the depth of the distribution.
+ * \param p         the global gain of the granule.
+ * \param arg       the argument that the search varies.
+ * \param lo        the smallest value to try.
+ * \param hi        the largest value to try.
+ * \param target    the number of bits that the granule may use.
+ * \return 1 if a value fits, 0 if none does.
+ */
 static int
-tryThatOne(algo_t const* that, const int sftemp[SFBMAX], const int vbrsfmin[SFBMAX], int vbrmax)
+bisect_flatten(algo_t const *that, const int sfwork[SFBMAX], const int vbrsfmin[SFBMAX],
+               int wrk[SFBMAX], int dm, int p, flatten_arg_t arg, int lo, int hi, int target)
 {
-    FLOAT const xrpow_max = that->cod_info->xrpow_max;
-    int     nbits = LARGE_BITS;
-    that->alloc(that, sftemp, vbrsfmin, vbrmax);
-    bitcount(that);
-    nbits = quantizeAndCountBits(that);
-    nbits += that->cod_info->part2_length;
-    that->cod_info->xrpow_max = xrpow_max;
-    return nbits;
+    int     bi = (lo + hi) / 2;
+    int     bi_ok = -1;
+    int     bu = lo;
+    int     bo = hi;
+
+    for (;;) {
+        int const sfmax = arg == FLATTEN_DEPTH
+            ? flattenDistribution(sfwork, vbrsfmin, wrk, dm, bi, p)
+            : flattenDistribution(sfwork, vbrsfmin, wrk, dm, dm, bi);
+        int const nbits = tryThatOne(that, wrk, vbrsfmin, sfmax);
+
+        if (nbits <= target) {
+            bi_ok = bi;
+            bo = bi - 1;
+        }
+        else {
+            bu = bi + 1;
+        }
+        if (bu <= bo) {
+            bi = (bu + bo) / 2;
+        }
+        else {
+            break;
+        }
+    }
+    if (bi_ok < 0) {
+        return 0;
+    }
+    if (bi != bi_ok) {
+        int const sfmax = arg == FLATTEN_DEPTH
+            ? flattenDistribution(sfwork, vbrsfmin, wrk, dm, bi_ok, p)
+            : flattenDistribution(sfwork, vbrsfmin, wrk, dm, dm, bi_ok);
+        (void) tryThatOne(that, wrk, vbrsfmin, sfmax);
+    }
+    return 1;
 }
 
 
@@ -1156,71 +1230,14 @@ outOfBitsStrategy(algo_t const* that, const int sfwork[SFBMAX], const int vbrsfm
 {
     int     wrk[SFBMAX];
     int const dm = sfDepth(sfwork);
-    int const p = that->cod_info->global_gain;
-    int     nbits;
+    int const p = that->cod_info->quant.global_gain;
 
-    /* PART 1 */
-    {
-        int     bi = dm / 2;
-        int     bi_ok = -1;
-        int     bu = 0;
-        int     bo = dm;
-        for (;;) {
-            int const sfmax = flattenDistribution(sfwork, wrk, dm, bi, p);
-            nbits = tryThatOne(that, wrk, vbrsfmin, sfmax);
-            if (nbits <= target) {
-                bi_ok = bi;
-                bo = bi - 1;
-            }
-            else {
-                bu = bi + 1;
-            }
-            if (bu <= bo) {
-                bi = (bu + bo) / 2;
-            }
-            else {
-                break;
-            }
-        }
-        if (bi_ok >= 0) {
-            if (bi != bi_ok) {
-                int const sfmax = flattenDistribution(sfwork, wrk, dm, bi_ok, p);
-                nbits = tryThatOne(that, wrk, vbrsfmin, sfmax);
-            }
-            return;
-        }
+    /* First flatten the distribution, then raise the global gain. */
+    if (bisect_flatten(that, sfwork, vbrsfmin, wrk, dm, p, FLATTEN_DEPTH, 0, dm, target)) {
+        return;
     }
-
-    /* PART 2: */
-    {
-        int     bi = (255 + p) / 2;
-        int     bi_ok = -1;
-        int     bu = p;
-        int     bo = 255;
-        for (;;) {
-            int const sfmax = flattenDistribution(sfwork, wrk, dm, dm, bi);
-            nbits = tryThatOne(that, wrk, vbrsfmin, sfmax);
-            if (nbits <= target) {
-                bi_ok = bi;
-                bo = bi - 1;
-            }
-            else {
-                bu = bi + 1;
-            }
-            if (bu <= bo) {
-                bi = (bu + bo) / 2;
-            }
-            else {
-                break;
-            }
-        }
-        if (bi_ok >= 0) {
-            if (bi != bi_ok) {
-                int const sfmax = flattenDistribution(sfwork, wrk, dm, dm, bi_ok);
-                nbits = tryThatOne(that, wrk, vbrsfmin, sfmax);
-            }
-            return;
-        }
+    if (bisect_flatten(that, sfwork, vbrsfmin, wrk, dm, p, FLATTEN_GAIN, p, GLOBAL_GAIN_MAX, target)) {
+        return;
     }
 
     /* fall back to old code, likely to be never called */
@@ -1228,12 +1245,58 @@ outOfBitsStrategy(algo_t const* that, const int sfwork[SFBMAX], const int vbrsfm
 }
 
 
+/**
+ * \internal
+ * \brief Splits a bit budget in proportion to weights.
+ * \param out    receives the share of each part.
+ * \param f      the weight of each part.
+ * \param s      the sum of the weights. All shares are 0 when it is not above 0.
+ * \param n      the number of parts, 1 or 2.
+ * \param total  the budget.
+ */
+static void
+split_in_proportion(int out[2], float const f[2], float s, int n, int total)
+{
+    int     i;
+
+    for (i = 0; i < n; ++i) {
+        if (s > 0) {
+            out[i] = total * f[i] / s;
+        }
+        else {
+            out[i] = 0;
+        }
+    }
+}
+
+/**
+ * \internal
+ * \brief Gives a part's budget above its use plus a slack to the other part.
+ *
+ * The first part gives first; then the second gives to the first.
+ *
+ * \param m      the budgets of the two parts.
+ * \param use    the bits that each part uses.
+ * \param slack  the bits that a part keeps above its use.
+ */
+static void
+rebalance_pair(int m[2], int const use[2], int slack)
+{
+    if (m[0] > use[0] + slack) {
+        m[1] += m[0];
+        m[1] -= use[0] + slack;
+        m[0] = use[0] + slack;
+    }
+    if (m[1] > use[1] + slack) {
+        m[0] += m[1];
+        m[0] -= use[1] + slack;
+        m[1] = use[1] + slack;
+    }
+}
+
+
 static int
-reduce_bit_usage(lame_internal_flags * gfc, int gr, int ch
-#if 0
-                 , const FLOAT xr34orig[576], const FLOAT l3_xmin[SFBMAX], int maxbits
-#endif
-    )
+reduce_bit_usage(lame_internal_flags * gfc, int gr, int ch)
 {
     SessionConfig_t const *const cfg = &gfc->cfg;
     gr_info *const cod_info = &gfc->l3_side.tt[gr][ch];
@@ -1245,46 +1308,59 @@ reduce_bit_usage(lame_internal_flags * gfc, int gr, int ch
      */
     if (cfg->use_best_huffman == 1)
         best_huffman_divide(gfc, cod_info);
-    return cod_info->part2_3_length + cod_info->part2_length;
+    return cod_info->huffman.part2_3_length + cod_info->quant.part2_length;
 }
 
 
 
 
-int
-VBR_encode_frame(lame_internal_flags * gfc, const FLOAT xr34orig[2][2][576],
-                 const FLOAT l3_xmin[2][2][SFBMAX], const int max_bits[2][2])
+/**
+ * \internal
+ * \brief The bit budgets of one frame of the VBR new encoder, and the bits used.
+ */
+typedef struct {
+    int     max_ch[2][2]; /**< the most bits per granule and channel */
+    int     max_gr[2];    /**< the most bits per granule */
+    int     max_fr;       /**< the most bits of the frame */
+    int     use_ch[2][2]; /**< the bits used per granule and channel */
+    int     use_gr[2];    /**< the bits used per granule */
+    int     use_fr;       /**< the bits the frame uses */
+} vbr_budget_t;
+
+
+/**
+ * \internal
+ * \brief Sets up the search of each granule and channel, and the budgets.
+ *
+ * \param gfc       the encoder.
+ * \param that_     receives the search set-up per granule and channel.
+ * \param xr34orig  the spectrum, raised to the power 3/4.
+ * \param max_bits  the most bits per granule and channel.
+ * \param bud       receives the budgets.
+ */
+static void
+setup_granules(lame_internal_flags * gfc, algo_t that_[2][2], const FLOAT xr34orig[2][2][SAMPLES_PER_GRANULE],
+               const int max_bits[2][2], vbr_budget_t * bud)
 {
     SessionConfig_t const *const cfg = &gfc->cfg;
-    int     sfwork_[2][2][SFBMAX];
-    int     vbrsfmin_[2][2][SFBMAX];
-    algo_t  that_[2][2];
     int const ngr = cfg->mode_gr;
     int const nch = cfg->channels_out;
-    int     max_nbits_ch[2][2] = {{0, 0}, {0 ,0}};
-    int     max_nbits_gr[2] = {0, 0};
-    int     max_nbits_fr = 0;
-    int     use_nbits_ch[2][2] = {{MAX_BITS_PER_CHANNEL+1, MAX_BITS_PER_CHANNEL+1}
-                                 ,{MAX_BITS_PER_CHANNEL+1, MAX_BITS_PER_CHANNEL+1}};
-    int     use_nbits_gr[2] = { MAX_BITS_PER_GRANULE+1, MAX_BITS_PER_GRANULE+1 };
-    int     use_nbits_fr = MAX_BITS_PER_GRANULE+MAX_BITS_PER_GRANULE;
     int     gr, ch;
-    int     ok, sum_fr;
 
     /* set up some encoding parameters
      */
     for (gr = 0; gr < ngr; ++gr) {
-        max_nbits_gr[gr] = 0;
+        bud->max_gr[gr] = 0;
         for (ch = 0; ch < nch; ++ch) {
-            max_nbits_ch[gr][ch] = max_bits[gr][ch];
-            use_nbits_ch[gr][ch] = 0;
-            max_nbits_gr[gr] += max_bits[gr][ch];
-            max_nbits_fr += max_bits[gr][ch];
+            bud->max_ch[gr][ch] = max_bits[gr][ch];
+            bud->use_ch[gr][ch] = 0;
+            bud->max_gr[gr] += max_bits[gr][ch];
+            bud->max_fr += max_bits[gr][ch];
             that_[gr][ch].find = (cfg->full_outer_loop < 0) ? guess_scalefac_x34 : find_scalefac_x34;
             that_[gr][ch].gfc = gfc;
             that_[gr][ch].cod_info = &gfc->l3_side.tt[gr][ch];
             that_[gr][ch].xr34orig = xr34orig[gr][ch];
-            if (that_[gr][ch].cod_info->block_type == SHORT_TYPE) {
+            if (that_[gr][ch].cod_info->granule.block_type == SHORT_TYPE) {
                 that_[gr][ch].alloc = short_block_constrain;
             }
             else {
@@ -1292,6 +1368,27 @@ VBR_encode_frame(lame_internal_flags * gfc, const FLOAT xr34orig[2][2][576],
             }
         }               /* for ch */
     }
+}
+
+
+/**
+ * \internal
+ * \brief Finds the scalefactors of each granule and channel that has bits.
+ *
+ * \param that_      the search set-up per granule and channel.
+ * \param l3_xmin    the allowed distortion per band.
+ * \param max_bits   the most bits per granule and channel.
+ * \param sfwork_    receives the scalefactors.
+ * \param vbrsfmin_  receives the smallest scalefactors.
+ * \param ngr        the granules of the frame.
+ * \param nch        the channels.
+ */
+static void
+search_scalefactors(algo_t that_[2][2], const FLOAT l3_xmin[2][2][SFBMAX], const int max_bits[2][2],
+                    int sfwork_[2][2][SFBMAX], int vbrsfmin_[2][2][SFBMAX], int ngr, int nch)
+{
+    int     gr, ch;
+
     /* searches scalefactors
      */
     for (gr = 0; gr < ngr; ++gr) {
@@ -1314,15 +1411,37 @@ VBR_encode_frame(lame_internal_flags * gfc, const FLOAT xr34orig[2][2][576],
             }
         }               /* for ch */
     }
+}
+
+
+/**
+ * \internal
+ * \brief Quantizes the frame with the scalefactors found, and counts the bits.
+ *
+ * \param gfc       the encoder.
+ * \param that_     the search set-up per granule and channel.
+ * \param max_bits  the most bits per granule and channel.
+ * \param bud       receives the bits used.
+ */
+static void
+quantize_as_is(lame_internal_flags * gfc, algo_t that_[2][2], const int max_bits[2][2],
+               vbr_budget_t * bud)
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int const ngr = cfg->mode_gr;
+    int const nch = cfg->channels_out;
+    int     gr, ch;
+
     /* encode 'as is'
      */
-    use_nbits_fr = 0;
+    bud->use_fr = 0;
     for (gr = 0; gr < ngr; ++gr) {
-        use_nbits_gr[gr] = 0;
+        bud->use_gr[gr] = 0;
         for (ch = 0; ch < nch; ++ch) {
             algo_t const *that = &that_[gr][ch];
             if (max_bits[gr][ch] > 0) {
-                memset(&that->cod_info->l3_enc[0], 0, sizeof(that->cod_info->l3_enc));
+                memset(&that->cod_info->quant.l3_enc[0], 0,
+                       sizeof(that->cod_info->quant.l3_enc));
                 (void) quantizeAndCountBits(that);
             }
             else {
@@ -1331,250 +1450,315 @@ VBR_encode_frame(lame_internal_flags * gfc, const FLOAT xr34orig[2][2][576],
                  *  continue with next channel
                  */
             }
-            use_nbits_ch[gr][ch] = reduce_bit_usage(gfc, gr, ch);
-            use_nbits_gr[gr] += use_nbits_ch[gr][ch];
+            bud->use_ch[gr][ch] = reduce_bit_usage(gfc, gr, ch);
+            bud->use_gr[gr] += bud->use_ch[gr][ch];
         }               /* for ch */
-        use_nbits_fr += use_nbits_gr[gr];
+        bud->use_fr += bud->use_gr[gr];
     }
+}
 
-    /* check bit constrains
-     */
-    if (use_nbits_fr <= max_nbits_fr) {
-        ok = 1;
-        for (gr = 0; gr < ngr; ++gr) {
-            if (use_nbits_gr[gr] > MAX_BITS_PER_GRANULE) {
-                /* violates the rule that every granule has to use no more
-                 * bits than MAX_BITS_PER_GRANULE
-                 */
-                ok = 0;
-            }
-            for (ch = 0; ch < nch; ++ch) {
-                if (use_nbits_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
-                    /* violates the rule that every gr_ch has to use no more
-                     * bits than MAX_BITS_PER_CHANNEL
-                     *
-                     * This isn't explicitly stated in the ISO docs, but the
-                     * part2_3_length field has only 12 bits, that makes it
-                     * up to a maximum size of 4095 bits!!!
-                     */
-                    ok = 0;
-                }
-            }
-        }
-        if (ok) {
-            return use_nbits_fr;
-        }
-    }
-    
-    /* OK, we are in trouble and have to define how many bits are
-     * to be used for each granule
-     */
-    {
-        ok = 1;
-        sum_fr = 0;
 
-        for (gr = 0; gr < ngr; ++gr) {
-            max_nbits_gr[gr] = 0;
-            for (ch = 0; ch < nch; ++ch) {
-                if (use_nbits_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
-                    max_nbits_ch[gr][ch] = MAX_BITS_PER_CHANNEL;
-                }
-                else {
-                    max_nbits_ch[gr][ch] = use_nbits_ch[gr][ch];
-                }
-                max_nbits_gr[gr] += max_nbits_ch[gr][ch];
-            }
-            if (max_nbits_gr[gr] > MAX_BITS_PER_GRANULE) {
-                float   f[2] = {0.0f, 0.0f}, s = 0.0f;
-                for (ch = 0; ch < nch; ++ch) {
-                    if (max_nbits_ch[gr][ch] > 0) {
-                        f[ch] = sqrt(sqrt(max_nbits_ch[gr][ch]));
-                        s += f[ch];
-                    }
-                    else {
-                        f[ch] = 0;
-                    }
-                }
-                for (ch = 0; ch < nch; ++ch) {
-                    if (s > 0) {
-                        max_nbits_ch[gr][ch] = MAX_BITS_PER_GRANULE * f[ch] / s;
-                    }
-                    else {
-                        max_nbits_ch[gr][ch] = 0;
-                    }
-                }
-                if (nch > 1) {
-                    if (max_nbits_ch[gr][0] > use_nbits_ch[gr][0] + 32) {
-                        max_nbits_ch[gr][1] += max_nbits_ch[gr][0];
-                        max_nbits_ch[gr][1] -= use_nbits_ch[gr][0] + 32;
-                        max_nbits_ch[gr][0] = use_nbits_ch[gr][0] + 32;
-                    }
-                    if (max_nbits_ch[gr][1] > use_nbits_ch[gr][1] + 32) {
-                        max_nbits_ch[gr][0] += max_nbits_ch[gr][1];
-                        max_nbits_ch[gr][0] -= use_nbits_ch[gr][1] + 32;
-                        max_nbits_ch[gr][1] = use_nbits_ch[gr][1] + 32;
-                    }
-                    if (max_nbits_ch[gr][0] > MAX_BITS_PER_CHANNEL) {
-                        max_nbits_ch[gr][0] = MAX_BITS_PER_CHANNEL;
-                    }
-                    if (max_nbits_ch[gr][1] > MAX_BITS_PER_CHANNEL) {
-                        max_nbits_ch[gr][1] = MAX_BITS_PER_CHANNEL;
-                    }
-                }
-                max_nbits_gr[gr] = 0;
-                for (ch = 0; ch < nch; ++ch) {
-                    max_nbits_gr[gr] += max_nbits_ch[gr][ch];
-                }
-            }
-            sum_fr += max_nbits_gr[gr];
-        }
-        if (sum_fr > max_nbits_fr) {
-            {
-                float   f[2] = {0.0f, 0.0f}, s = 0.0f;
-                for (gr = 0; gr < ngr; ++gr) {
-                    if (max_nbits_gr[gr] > 0) {
-                        f[gr] = sqrt(max_nbits_gr[gr]);
-                        s += f[gr];
-                    }
-                    else {
-                        f[gr] = 0;
-                    }
-                }
-                for (gr = 0; gr < ngr; ++gr) {
-                    if (s > 0) {
-                        max_nbits_gr[gr] = max_nbits_fr * f[gr] / s;
-                    }
-                    else {
-                        max_nbits_gr[gr] = 0;
-                    }
-                }
-            }
-            if (ngr > 1) {
-                if (max_nbits_gr[0] > use_nbits_gr[0] + 125) {
-                    max_nbits_gr[1] += max_nbits_gr[0];
-                    max_nbits_gr[1] -= use_nbits_gr[0] + 125;
-                    max_nbits_gr[0] = use_nbits_gr[0] + 125;
-                }
-                if (max_nbits_gr[1] > use_nbits_gr[1] + 125) {
-                    max_nbits_gr[0] += max_nbits_gr[1];
-                    max_nbits_gr[0] -= use_nbits_gr[1] + 125;
-                    max_nbits_gr[1] = use_nbits_gr[1] + 125;
-                }
-                for (gr = 0; gr < ngr; ++gr) {
-                    if (max_nbits_gr[gr] > MAX_BITS_PER_GRANULE) {
-                        max_nbits_gr[gr] = MAX_BITS_PER_GRANULE;
-                    }
-                }
-            }
-            for (gr = 0; gr < ngr; ++gr) {
-                float   f[2] = {0.0f, 0.0f}, s = 0.0f;
-                for (ch = 0; ch < nch; ++ch) {
-                    if (max_nbits_ch[gr][ch] > 0) {
-                        f[ch] = sqrt(max_nbits_ch[gr][ch]);
-                        s += f[ch];
-                    }
-                    else {
-                        f[ch] = 0;
-                    }
-                }
-                for (ch = 0; ch < nch; ++ch) {
-                    if (s > 0) {
-                        max_nbits_ch[gr][ch] = max_nbits_gr[gr] * f[ch] / s;
-                    }
-                    else {
-                        max_nbits_ch[gr][ch] = 0;
-                    }
-                }
-                if (nch > 1) {
-                    if (max_nbits_ch[gr][0] > use_nbits_ch[gr][0] + 32) {
-                        max_nbits_ch[gr][1] += max_nbits_ch[gr][0];
-                        max_nbits_ch[gr][1] -= use_nbits_ch[gr][0] + 32;
-                        max_nbits_ch[gr][0] = use_nbits_ch[gr][0] + 32;
-                    }
-                    if (max_nbits_ch[gr][1] > use_nbits_ch[gr][1] + 32) {
-                        max_nbits_ch[gr][0] += max_nbits_ch[gr][1];
-                        max_nbits_ch[gr][0] -= use_nbits_ch[gr][1] + 32;
-                        max_nbits_ch[gr][1] = use_nbits_ch[gr][1] + 32;
-                    }
-                    for (ch = 0; ch < nch; ++ch) {
-                        if (max_nbits_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
-                            max_nbits_ch[gr][ch] = MAX_BITS_PER_CHANNEL;
-                        }
-                    }
-                }
-            }
-        }
-        /* sanity check */
-        sum_fr = 0;
-        for (gr = 0; gr < ngr; ++gr) {
-            int     sum_gr = 0;
-            for (ch = 0; ch < nch; ++ch) {
-                sum_gr += max_nbits_ch[gr][ch];
-                if (max_nbits_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
-                    ok = 0;
-                }
-            }
-            sum_fr += sum_gr;
-            if (sum_gr > MAX_BITS_PER_GRANULE) {
-                ok = 0;
-            }
-        }
-        if (sum_fr > max_nbits_fr) {
+/**
+ * \internal
+ * \brief Tells whether every granule and channel keeps to its limit.
+ *
+ * No granule may use more than MAX_BITS_PER_GRANULE bits and no channel more
+ * than MAX_BITS_PER_CHANNEL.
+ *
+ * \param bud  the bits used.
+ * \param ngr  the granules of the frame.
+ * \param nch  the channels.
+ * \return 1 if they do, else 0.
+ */
+static int
+fits_limits(vbr_budget_t const *bud, int ngr, int nch)
+{
+    int     gr, ch;
+    int     ok = 1;
+
+    for (gr = 0; gr < ngr; ++gr) {
+        if (bud->use_gr[gr] > MAX_BITS_PER_GRANULE) {
             ok = 0;
         }
-        if (!ok) {
-            /* we must have done something wrong, fallback to 'on_pe' based constrain */
+        for (ch = 0; ch < nch; ++ch) {
+            if (bud->use_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
+                /* part2_3_length has 12 bits, so at most 4095 */
+                ok = 0;
+            }
+        }
+    }
+    return ok;
+}
+
+
+/**
+ * \internal
+ * \brief Shares the bits out again when the frame broke a limit.
+ *
+ * Each granule is capped at MAX_BITS_PER_GRANULE, and the frame at its
+ * budget, in proportion to the bits each part used.
+ *
+ * \param bud  the budgets and the bits used; the budgets change.
+ * \param ngr  the granules of the frame.
+ * \param nch  the channels.
+ */
+static void
+plan_budgets(vbr_budget_t * bud, int ngr, int nch)
+{
+    int     gr, ch;
+    int     sum_fr;
+
+    sum_fr = 0;
+
+    for (gr = 0; gr < ngr; ++gr) {
+        bud->max_gr[gr] = 0;
+        for (ch = 0; ch < nch; ++ch) {
+            if (bud->use_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
+                bud->max_ch[gr][ch] = MAX_BITS_PER_CHANNEL;
+            }
+            else {
+                bud->max_ch[gr][ch] = bud->use_ch[gr][ch];
+            }
+            bud->max_gr[gr] += bud->max_ch[gr][ch];
+        }
+        if (bud->max_gr[gr] > MAX_BITS_PER_GRANULE) {
+            float   f[2] = {0.0f, 0.0f}, s = 0.0f;
+            for (ch = 0; ch < nch; ++ch) {
+                if (bud->max_ch[gr][ch] > 0) {
+                    f[ch] = sqrt(sqrt(bud->max_ch[gr][ch]));
+                    s += f[ch];
+                }
+                else {
+                    f[ch] = 0;
+                }
+            }
+            split_in_proportion(bud->max_ch[gr], f, s, nch, MAX_BITS_PER_GRANULE);
+            if (nch > 1) {
+                rebalance_pair(bud->max_ch[gr], bud->use_ch[gr], 32);
+                if (bud->max_ch[gr][0] > MAX_BITS_PER_CHANNEL) {
+                    bud->max_ch[gr][0] = MAX_BITS_PER_CHANNEL;
+                }
+                if (bud->max_ch[gr][1] > MAX_BITS_PER_CHANNEL) {
+                    bud->max_ch[gr][1] = MAX_BITS_PER_CHANNEL;
+                }
+            }
+            bud->max_gr[gr] = 0;
+            for (ch = 0; ch < nch; ++ch) {
+                bud->max_gr[gr] += bud->max_ch[gr][ch];
+            }
+        }
+        sum_fr += bud->max_gr[gr];
+    }
+    if (sum_fr > bud->max_fr) {
+        {
+            float   f[2] = {0.0f, 0.0f}, s = 0.0f;
             for (gr = 0; gr < ngr; ++gr) {
+                if (bud->max_gr[gr] > 0) {
+                    f[gr] = sqrt(bud->max_gr[gr]);
+                    s += f[gr];
+                }
+                else {
+                    f[gr] = 0;
+                }
+            }
+            split_in_proportion(bud->max_gr, f, s, ngr, bud->max_fr);
+        }
+        if (ngr > 1) {
+            rebalance_pair(bud->max_gr, bud->use_gr, 125);
+            for (gr = 0; gr < ngr; ++gr) {
+                if (bud->max_gr[gr] > MAX_BITS_PER_GRANULE) {
+                    bud->max_gr[gr] = MAX_BITS_PER_GRANULE;
+                }
+            }
+        }
+        for (gr = 0; gr < ngr; ++gr) {
+            float   f[2] = {0.0f, 0.0f}, s = 0.0f;
+            for (ch = 0; ch < nch; ++ch) {
+                if (bud->max_ch[gr][ch] > 0) {
+                    f[ch] = sqrt(bud->max_ch[gr][ch]);
+                    s += f[ch];
+                }
+                else {
+                    f[ch] = 0;
+                }
+            }
+            split_in_proportion(bud->max_ch[gr], f, s, nch, bud->max_gr[gr]);
+            if (nch > 1) {
+                rebalance_pair(bud->max_ch[gr], bud->use_ch[gr], 32);
                 for (ch = 0; ch < nch; ++ch) {
-                    max_nbits_ch[gr][ch] = max_bits[gr][ch];
+                    if (bud->max_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
+                        bud->max_ch[gr][ch] = MAX_BITS_PER_CHANNEL;
+                    }
                 }
             }
         }
     }
+}
+
+
+/**
+ * \internal
+ * \brief Tells whether the budgets keep to every limit.
+ *
+ * \param bud  the budgets.
+ * \param ngr  the granules of the frame.
+ * \param nch  the channels.
+ * \return 1 if they do, else 0.
+ */
+static int
+budgets_are_valid(vbr_budget_t const *bud, int ngr, int nch)
+{
+    int     gr, ch;
+    int     ok = 1;
+    int     sum_fr;
+
+    /* sanity check */
+    sum_fr = 0;
+    for (gr = 0; gr < ngr; ++gr) {
+        int     sum_gr = 0;
+        for (ch = 0; ch < nch; ++ch) {
+            sum_gr += bud->max_ch[gr][ch];
+            if (bud->max_ch[gr][ch] > MAX_BITS_PER_CHANNEL) {
+                ok = 0;
+            }
+        }
+        sum_fr += sum_gr;
+        if (sum_gr > MAX_BITS_PER_GRANULE) {
+            ok = 0;
+        }
+    }
+    if (sum_fr > bud->max_fr) {
+        ok = 0;
+    }
+    return ok;
+}
+
+
+/**
+ * \internal
+ * \brief Clears what the first scalefactor storage set, before it runs again.
+ *
+ * \param l3_side  the side information of the frame.
+ * \param ngr      the granules of the frame.
+ * \param nch      the channels.
+ */
+static void
+reset_scalefac_storage(III_side_info_t * l3_side, int ngr, int nch)
+{
+    int     gr, ch;
 
     /* we already called the 'best_scalefac_store' function, so we need to reset some
      * variables before we can do it again.
      */
     for (ch = 0; ch < nch; ++ch) {
-        gfc->l3_side.scfsi[ch][0] = 0;
-        gfc->l3_side.scfsi[ch][1] = 0;
-        gfc->l3_side.scfsi[ch][2] = 0;
-        gfc->l3_side.scfsi[ch][3] = 0;
+        l3_side->scfsi[ch][0] = 0;
+        l3_side->scfsi[ch][1] = 0;
+        l3_side->scfsi[ch][2] = 0;
+        l3_side->scfsi[ch][3] = 0;
     }
     for (gr = 0; gr < ngr; ++gr) {
         for (ch = 0; ch < nch; ++ch) {
-            gfc->l3_side.tt[gr][ch].scalefac_compress = 0;
+            l3_side->tt[gr][ch].quant.scalefac_compress = 0;
         }
     }
+}
+
+
+/**
+ * \internal
+ * \brief Quantizes the frame again to fit the budgets, and counts the bits.
+ *
+ * \param gfc        the encoder.
+ * \param that_      the search set-up per granule and channel.
+ * \param sfwork_    the scalefactors; they are cut to fit.
+ * \param vbrsfmin_  the smallest scalefactors.
+ * \param max_bits   the most bits per granule and channel.
+ * \param bud        the budgets; receives the bits used.
+ */
+static void
+requantize_to_budget(lame_internal_flags * gfc, algo_t that_[2][2], int sfwork_[2][2][SFBMAX],
+                     int vbrsfmin_[2][2][SFBMAX], const int max_bits[2][2], vbr_budget_t * bud)
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int const ngr = cfg->mode_gr;
+    int const nch = cfg->channels_out;
+    int     gr, ch;
 
     /* alter our encoded data, until it fits into the target bitrate
      */
-    use_nbits_fr = 0;
+    bud->use_fr = 0;
     for (gr = 0; gr < ngr; ++gr) {
-        use_nbits_gr[gr] = 0;
+        bud->use_gr[gr] = 0;
         for (ch = 0; ch < nch; ++ch) {
             algo_t const *that = &that_[gr][ch];
-            use_nbits_ch[gr][ch] = 0;
+            bud->use_ch[gr][ch] = 0;
             if (max_bits[gr][ch] > 0) {
                 int    *sfwork = sfwork_[gr][ch];
                 int const *vbrsfmin = vbrsfmin_[gr][ch];
-                cutDistribution(sfwork, sfwork, that->cod_info->global_gain);
-                outOfBitsStrategy(that, sfwork, vbrsfmin, max_nbits_ch[gr][ch]);
+                cutDistribution(sfwork, sfwork,
+                                that->cod_info->quant.global_gain);
+                outOfBitsStrategy(that, sfwork, vbrsfmin, bud->max_ch[gr][ch]);
             }
-            use_nbits_ch[gr][ch] = reduce_bit_usage(gfc, gr, ch);
-            assert(use_nbits_ch[gr][ch] <= max_nbits_ch[gr][ch]);
-            use_nbits_gr[gr] += use_nbits_ch[gr][ch];
+            bud->use_ch[gr][ch] = reduce_bit_usage(gfc, gr, ch);
+            assert(bud->use_ch[gr][ch] <= bud->max_ch[gr][ch]);
+            bud->use_gr[gr] += bud->use_ch[gr][ch];
         }               /* for ch */
-        use_nbits_fr += use_nbits_gr[gr];
+        bud->use_fr += bud->use_gr[gr];
     }
+}
+
+
+int
+VBR_encode_frame(lame_internal_flags * gfc, const FLOAT xr34orig[2][2][SAMPLES_PER_GRANULE],
+                 const FLOAT l3_xmin[2][2][SFBMAX], const int max_bits[2][2])
+{
+    SessionConfig_t const *const cfg = &gfc->cfg;
+    int     sfwork_[2][2][SFBMAX];
+    int     vbrsfmin_[2][2][SFBMAX];
+    algo_t  that_[2][2];
+    int const ngr = cfg->mode_gr;
+    int const nch = cfg->channels_out;
+    vbr_budget_t bud = {
+        {{0, 0}, {0, 0}}, {0, 0}, 0,
+        {{MAX_BITS_PER_CHANNEL + 1, MAX_BITS_PER_CHANNEL + 1},
+         {MAX_BITS_PER_CHANNEL + 1, MAX_BITS_PER_CHANNEL + 1}},
+        {MAX_BITS_PER_GRANULE + 1, MAX_BITS_PER_GRANULE + 1},
+        MAX_BITS_PER_GRANULE + MAX_BITS_PER_GRANULE
+    };
+    int     gr, ch;
+
+    setup_granules(gfc, that_, xr34orig, max_bits, &bud);
+    search_scalefactors(that_, l3_xmin, max_bits, sfwork_, vbrsfmin_, ngr, nch);
+    quantize_as_is(gfc, that_, max_bits, &bud);
+
+    if (bud.use_fr <= bud.max_fr && fits_limits(&bud, ngr, nch)) {
+        return bud.use_fr;
+    }
+
+    /* OK, we are in trouble and have to define how many bits are
+     * to be used for each granule
+     */
+    plan_budgets(&bud, ngr, nch);
+    if (!budgets_are_valid(&bud, ngr, nch)) {
+        /* we must have done something wrong, fallback to 'on_pe' based constrain */
+        for (gr = 0; gr < ngr; ++gr) {
+            for (ch = 0; ch < nch; ++ch) {
+                bud.max_ch[gr][ch] = max_bits[gr][ch];
+            }
+        }
+    }
+
+    reset_scalefac_storage(&gfc->l3_side, ngr, nch);
+    requantize_to_budget(gfc, that_, sfwork_, vbrsfmin_, max_bits, &bud);
 
     /* check bit constrains, but it should always be ok, iff there are no bugs ;-)
      */
-    if (use_nbits_fr <= max_nbits_fr) {
-        return use_nbits_fr;
+    if (bud.use_fr <= bud.max_fr) {
+        return bud.use_fr;
     }
 
     ERRORF(gfc, "INTERNAL ERROR IN VBR NEW CODE (1313), please send bug report\n"
-           "maxbits=%d usedbits=%d\n", max_nbits_fr, use_nbits_fr);
-    exit(-1);
+           "maxbits=%d usedbits=%d\n", bud.max_fr, bud.use_fr);
+    gfc->sv_enc.internal_error = 1;
+    return bud.use_fr;
 }
