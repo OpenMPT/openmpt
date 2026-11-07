@@ -90,6 +90,11 @@ include_dependency "ext-mpg123.lua"
 	}
 	filter {}
 	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
+		if MPT_MSVC_BEFORE(2019) then
+			buildoptions {
+				"/wd4028",
+			}
+		end
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
 	end
 	filter {}
