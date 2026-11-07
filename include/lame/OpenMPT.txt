@@ -4,8 +4,12 @@ The following changes have been made:
  *  Export ordinals in `include/lame.def` have been removed.
  *  Forced library name in `include/lame.def` has been removed.
  *  `include/lame.h` has been modified to not touch WinAPI macro `CDECL`
+ *  `libmp3lame/vector/lame_intrin.h` has been fixed for Clang-cl.
+ *  `libmp3lame/util.c` has been fixed to not query CPU features if intrinsics
+    are disabled. Fixes Clang-cl build.
  *  AVX2 and AVX512 has been disable for ARM64EC in `configMS.h`.
  *  NEON has been enabled for ARM, ARM64, and ARM64EC in `configMS.h`.
+ *  Clang-cl has been fixed in `configMS.h`.
  *  All modifications have been marked with /* OpenMPT */.
  *  For building, premake is used to generate Visual Studio project files.
     See ../build/premake/ for details.

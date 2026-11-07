@@ -76,6 +76,7 @@ include_dependency "ext-mpg123.lua"
 		"../../include/lame/libmp3lame/vector/avx2_choose_table.c",
 		"../../include/lame/libmp3lame/vector/avx2_quantize_lines.c",
 		"../../include/lame/libmp3lame/vector/avx512_quantize_lines.c",
+		"../../include/lame/libmp3lame/vector/lame_intrin.h",
 		"../../include/lame/libmp3lame/vector/neon_choose_table.c",
 		"../../include/lame/libmp3lame/vector/xmm_calc_sfb_noise.c",
 		"../../include/lame/libmp3lame/vector/xmm_choose_table.c",
@@ -85,42 +86,20 @@ include_dependency "ext-mpg123.lua"
 	}
 	defines {
 		"HAVE_CONFIG_H",
-		"HAVE_MPGLIB",
 		"HAVE_MPG123",
-		"USE_LAYER_2"
 	}
 	filter {}
 	if MPT_COMPILER_MSVC or MPT_COMPILER_CLANGCL then
-		buildoptions { "/wd4305", "/wd4267", "/wd4334" }
 		buildoptions { "/wd6031", "/wd6262" } -- analyze
 	end
 	filter {}
 		if MPT_COMPILER_CLANGCL or MPT_COMPILER_CLANG then
 			buildoptions {
-				"-Wno-absolute-value",
-				"-Wno-tautological-pointer-compare",
 				"-Wno-unused-but-set-variable",
 				"-Wno-unused-const-variable",
 				"-Wno-unused-function",
 			}
 		end
-	filter {}
-	if MPT_WIN_AT_LEAST(MPT_WIN["7"]) then
-		-- WinXP builds do not use SSE2 by default
-		filter {}
-		filter { "architecture:x86" }
-			defines {
-				"HAVE_XMMINTRIN_H",
-				"MIN_ARCH_SSE",
-			}
-		filter {}
-	end
-	filter {}
-	filter { "architecture:x86_64" }
-		defines {
-			"HAVE_XMMINTRIN_H",
-			"MIN_ARCH_SSE",
-		}
 	filter {}
 
 function mpt_use_lame ()

@@ -37,7 +37,11 @@
  * same bargain: a caller compiled without these instructions is under no
  * obligation to align it the way they need.
  */
+#if 0  /* OpenMPT */
 #if defined (__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2)))
+#endif  /* OpenMPT */
+#endif  /* OpenMPT */
+#if defined(__clang__) || (defined (__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 2))))  /* OpenMPT */
 #define REALIGN __attribute__((force_align_arg_pointer))
 #define TARGET(x) __attribute__((target(x)))
 #else

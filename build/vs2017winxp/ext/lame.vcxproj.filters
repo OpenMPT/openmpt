@@ -85,6 +85,9 @@
     <ClInclude Include="..\..\..\include\lame\libmp3lame\vbrquantize.h">
       <Filter>libmp3lame</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\lame\libmp3lame\vector\lame_intrin.h">
+      <Filter>libmp3lame\vector</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\include\lame\libmp3lame\vector\xmm_quant_kernel.h">
       <Filter>libmp3lame\vector</Filter>
     </ClInclude>

@@ -84,8 +84,10 @@ typedef float       ieee754_float32_t;
  || (defined(__ICL) && (__ICL >= 450))
     #define HAVE_SSE2_INTRINSICS
 #if !defined(_M_ARM64EC)  /* OpenMPT */
+#if !defined(__clang__)  /* OpenMPT */  /* fixes Clang-cl */
     #define HAVE_AVX2_INTRINSICS
     #define HAVE_AVX512_INTRINSICS
+#endif  /* OpenMPT */
 #endif  /* OpenMPT */
 #endif
 

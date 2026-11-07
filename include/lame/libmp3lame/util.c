@@ -993,6 +993,9 @@ cpuid_feature_avx512(void)
 int
 has_SSE2(void)
 {
+#if !defined( HAVE_SSE2_INTRINSICS )  /* OpenMPT */
+  return 0;  /* OpenMPT */
+#else  /* OpenMPT */
 #if defined( LAME_BASELINE_SSE2 )
     return 1;
 #elif defined( LAME_CPU_SUPPORTS )
@@ -1002,11 +1005,15 @@ has_SSE2(void)
 #else
     return 0;           /* don't know, assume not */
 #endif
+#endif  /*OpenMPT */
 }
 
 int
 has_AVX2(void)
 {
+#if !defined( HAVE_AVX2_INTRINSICS )  /* OpenMPT */
+  return 0;  /* OpenMPT */
+#else  /* OpenMPT */
 #if defined( LAME_BASELINE_AVX2 )
     return 1;
 #elif defined( LAME_CPU_SUPPORTS )
@@ -1016,6 +1023,7 @@ has_AVX2(void)
 #else
     return 0;           /* don't know, assume not */
 #endif
+#endif  /*OpenMPT */
 }
 
 int
@@ -1057,6 +1065,9 @@ has_AVX512(void)
 int
 has_NEON(void)
 {
+#if !defined( HAVE_NEON_INTRINSICS )  /* OpenMPT */
+  return 0;  /* OpenMPT */
+#else  /* OpenMPT */
 #if defined( LAME_BASELINE_NEON )
     return 1;
 #elif !defined( LAME_TARGET_ARM )
@@ -1097,6 +1108,7 @@ has_NEON(void)
 #else
     return 0;           /* don't know, assume not */
 #endif
+#endif  /*OpenMPT */
 }
 
 /** @internal
