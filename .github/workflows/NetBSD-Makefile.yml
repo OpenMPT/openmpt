@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: '11.0', variant: 'microvm', deps: sys   }
-          - { version: '11.0', variant: 'microvm', deps: local }
-          - { version: '11.0', variant: 'microvm', deps: small }
+          - { version: '11.1', variant: 'microvm', deps: sys   }
+          - { version: '11.1', variant: 'microvm', deps: local }
+          - { version: '11.1', variant: 'microvm', deps: small }
           - { version: '10.2', variant: 'default', deps: sys   }
           - { version: '10.2', variant: 'default', deps: local }
           - { version: '10.2', variant: 'default', deps: small }
@@ -33,7 +33,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
     - name: Startup VM
-      uses: cross-platform-actions/action@v1.7.0
+      uses: cross-platform-actions/action@bf4a66308a77c42dd5fd50a7ee7c91d1fb33d4c6
       with:
         architecture: x86_64
         memory: 4G
