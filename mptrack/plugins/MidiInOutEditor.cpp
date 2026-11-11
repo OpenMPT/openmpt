@@ -135,14 +135,17 @@ void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevic
 
 	// Add dummy device
 	combo.SetItemData(combo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
+	int selectedItem = 0;
 	if(!isInput)
 	{
-		combo.SetItemData(combo.AddString(_T("Internal OpenMPT Output")), static_cast<DWORD_PTR>(MidiInOut::kInternalDevice));
+		int result = combo.AddString(_T("Internal OpenMPT Output"));
+		combo.SetItemData(result, static_cast<DWORD_PTR>(MidiInOut::kInternalDevice));
+		if (result != CB_ERR && midiDevice.index == MidiInOut::kInternalDevice)
+			selectedItem = result;
 	}
 
 	// Go through all RtMidi devices
 	auto ports = rtDevice.getPortCount();
-	int selectedItem = 0;
 	CString portName;
 	for(unsigned int i = 0; i < ports; i++)
 	{
