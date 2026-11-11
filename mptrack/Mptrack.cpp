@@ -882,32 +882,30 @@ mpt::recursive_mutex_with_lock_count & GetGlobalMutexRef()
 } // namespace Tracker
 
 
-class ComponentManagerSettings
-	: public IComponentManagerSettings
+ComponentManagerSettings::ComponentManagerSettings(TrackerSettings &conf, const mpt::PathString &configPath)
+	: conf(conf)
+	, configPath(configPath)
 {
-private:
-	TrackerSettings &conf;
-	mpt::PathString configPath;
-public:
-	ComponentManagerSettings(TrackerSettings &conf, const mpt::PathString &configPath)
-		: conf(conf)
-		, configPath(configPath)
-	{
-		return;
-	}
-	bool LoadOnStartup() const override
-	{
-		return conf.ComponentsLoadOnStartup;
-	}
-	bool KeepLoaded() const override
-	{
-		return conf.ComponentsKeepLoaded;
-	}
-	bool IsBlocked(const std::string &key) const override
-	{
-		return conf.IsComponentBlocked(key);
-	}
-};
+	return;
+}
+
+ComponentManagerSettings::~ComponentManagerSettings() = default;
+
+bool ComponentManagerSettings::LoadOnStartup() const
+{
+	return conf.ComponentsLoadOnStartup;
+}
+
+bool ComponentManagerSettings::KeepLoaded() const
+{
+	return conf.ComponentsKeepLoaded;
+}
+
+bool ComponentManagerSettings::IsBlocked(const std::string &key) const
+{
+	return conf.IsComponentBlocked(key);
+}
+
 
 
 SettingsContainer &CTrackApp::GetPluginCache()
