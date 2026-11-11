@@ -16,6 +16,7 @@
 #include "../misc/mptMutex.h"
 #include "../soundlib/MIDIMacros.h"
 #include "../soundlib/modcommand.h"
+#include "../common/ComponentManager.h"
 
 #include <future>
 
@@ -38,7 +39,6 @@ template <typename Backend> class FileSettingsContainer;
 using IniFileSettingsBackend = CachedIniFileSettingsBackend;
 using IniFileSettingsContainer = FileSettingsContainer<CachedIniFileSettingsBackend>;
 class SettingsContainer;
-class ComponentManagerSettings;
 namespace mpt
 {
 namespace Wine
@@ -48,6 +48,21 @@ class Context;
 }  // namespace Wine
 }  // namespace mpt
 class GdiplusRAII;
+
+
+class ComponentManagerSettings
+	: public IComponentManagerSettings
+{
+private:
+	TrackerSettings &conf;
+	mpt::PathString configPath;
+public:
+	ComponentManagerSettings(TrackerSettings &conf, const mpt::PathString &configPath);
+	~ComponentManagerSettings() override;
+	bool LoadOnStartup() const override;
+	bool KeepLoaded() const override;
+	bool IsBlocked(const std::string &key) const override;
+};
 
 
 /////////////////////////////////////////////////////////////////////////////
