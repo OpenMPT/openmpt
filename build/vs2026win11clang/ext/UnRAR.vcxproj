@@ -383,7 +383,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -406,7 +406,7 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -429,7 +429,7 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -457,7 +457,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -486,7 +486,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -515,7 +515,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -546,7 +546,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -576,7 +576,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -606,7 +606,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -632,7 +632,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -661,7 +661,7 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -690,7 +690,7 @@
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -724,7 +724,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -759,7 +759,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -794,7 +794,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -831,7 +831,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -867,7 +867,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
@@ -903,7 +903,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalOptions>/wd4996 /wd6031 /wd6262 /wd28159 -Wno-dangling-else -Wno-logical-not-parentheses -Wno-logical-op-parentheses -Wno-missing-braces -Wno-switch -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
