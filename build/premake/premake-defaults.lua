@@ -157,7 +157,11 @@
 	filter { "action:vs*", "language:C++", "action:vs2022" }
 		cppdialect "C++20"
 	filter { "action:vs*", "language:C++", "not action:vs2017", "not action:vs2019", "not action:vs2022" }
-		cppdialect "C++23"
+		if MPT_COMPILER_CLANGCL then
+			cppdialect "C++20"
+		else
+			cppdialect "C++23"
+		end
 	filter { "action:vs*", "action:vs2017" }
 		if MPT_WIN_AT_LEAST(MPT_WIN["10"]) then
 			conformancemode "On"
