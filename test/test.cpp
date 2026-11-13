@@ -2673,9 +2673,9 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("foo")}, 0).as<int>(), 1);
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar1")}, U_("empty")).as<mpt::ustring>(), U_("a"));
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar2")}, U_("empty")).as<mpt::ustring>(), U_("empty"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("foo")}, 0).template as<int>(), 1);
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar1")}, U_("empty")).template as<mpt::ustring>(), U_("a"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("S1"), U_("bar2")}, U_("empty")).template as<mpt::ustring>(), U_("empty"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2691,7 +2691,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2707,7 +2707,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2723,7 +2723,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2739,7 +2739,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2755,7 +2755,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2771,7 +2771,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2787,7 +2787,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("[Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("[Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2803,7 +2803,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2819,7 +2819,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_(";Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_(";Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2835,7 +2835,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).template as<mpt::ustring>(), U_(""));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2851,7 +2851,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).as<mpt::ustring>(), U_(""));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_(";Foo")}, U_("")).template as<mpt::ustring>(), U_(""));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2867,7 +2867,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar ; baz"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar ; baz"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2883,7 +2883,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2899,7 +2899,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("bar "));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("bar "));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2915,7 +2915,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\""));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("\""));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2931,7 +2931,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\"bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("\"bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2947,7 +2947,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("ba\"r"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("ba\"r"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2963,7 +2963,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("\"ba\" r"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("\"ba\" r"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2981,9 +2981,9 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo1")}, U_("")).as<mpt::ustring>(), U_("'ba' r"));
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo2")}, U_("")).as<mpt::ustring>(), U_("ba'"));
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo3")}, U_("")).as<mpt::ustring>(), U_("''"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo1")}, U_("")).template as<mpt::ustring>(), U_("'ba' r"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo2")}, U_("")).template as<mpt::ustring>(), U_("ba'"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo3")}, U_("")).template as<mpt::ustring>(), U_("''"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -2999,7 +2999,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, 9).as<int32>(), 1);
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, 9).template as<int32>(), 1);
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -3015,7 +3015,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("\"Test\""), U_("\"Foo\"")}, U_("")).as<mpt::ustring>(), U_("bar"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("\"Test\""), U_("\"Foo\"")}, U_("")).template as<mpt::ustring>(), U_("bar"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -3036,7 +3036,7 @@ static void TestIniSettingsBackendRead(const mpt::PathString &filename)
 		}
 		{
 			Backend inifile{filename};
-			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Umlauts")}, U_("")).as<mpt::ustring>(), MPT_UTF8("\xC3\xA4"));
+			VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Umlauts")}, U_("")).template as<mpt::ustring>(), MPT_UTF8("\xC3\xA4"));
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
 	}
@@ -3062,16 +3062,16 @@ static void TestIniSettingsBackendReadCaseInsensitive(const mpt::PathString &fil
 			Backend inifile{filename};
 			if(inifile.GetCaseSensitivity() == CaseSensitivity::Insensitive)
 			{
-				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).as<mpt::ustring>(), U_("a"));
-				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Bar")}, U_("")).as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Foo")}, U_("")).template as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("Bar")}, U_("")).template as<mpt::ustring>(), U_("a"));
 			}
 		}
 		{
 			Backend inifile{filename};
 			if(inifile.GetCaseSensitivity() == CaseSensitivity::Insensitive)
 			{
-				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("foo")}, U_("")).as<mpt::ustring>(), U_("a"));
-				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("bar")}, U_("")).as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("foo")}, U_("")).template as<mpt::ustring>(), U_("a"));
+				VERIFY_EQUAL(inifile.ReadSetting(SettingPath{U_("Test"), U_("bar")}, U_("")).template as<mpt::ustring>(), U_("a"));
 			}
 		}
 		DeleteFile(mpt::support_long_path(filename.AsNative()).c_str());
