@@ -4,8 +4,8 @@
  * Authors: Kenton Varda <temporal@gauge3d.org> (C interface wrapper)
  */
 
-#ifndef MODPLUG_MODPLUG_H
-#define MODPLUG_MODPLUG_H
+#ifndef MODPLUG_MODPLUG_H  /* OpenMPT */
+#define MODPLUG_MODPLUG_H  /* OpenMPT */
 
 #ifdef __cplusplus
 extern "C" {

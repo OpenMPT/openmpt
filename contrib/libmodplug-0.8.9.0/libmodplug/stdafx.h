@@ -6,8 +6,8 @@
  *          Adam Goode       <adam@evdebs.org> (endian and char fixes for PPC)
  */
 
-#ifndef MODPLUG_STDAFX_H
-#define MODPLUG_STDAFX_H
+#ifndef MODPLUG_STDAFX_H  /* OpenMPT */
+#define MODPLUG_STDAFX_H  /* OpenMPT */
 
 /* Autoconf detection of stdint/inttypes */
 #if defined(HAVE_CONFIG_H) && !defined(CONFIG_H_INCLUDED)
@@ -112,7 +112,7 @@ inline int8_t * GlobalAllocPtr(unsigned int, size_t size)
   return p;
 }
 
-inline void ProcessPlugins(int /* n */ ) {}
+inline void ProcessPlugins(int /* n */ ) {}  /* OpenMPT */
 
 #ifndef FALSE
 #define FALSE	false

@@ -10,8 +10,8 @@
 #define CONFIG_H_INCLUDED 1
 #endif
 
-#ifndef MODPLUG_SNDFILE_H
-#define MODPLUG_SNDFILE_H
+#ifndef MODPLUG_SNDFILE_H  /* OpenMPT */
+#define MODPLUG_SNDFILE_H  /* OpenMPT */
 
 #ifdef UNDER_CE
 int _strnicmp(const char *str1,const char *str2, int n);
