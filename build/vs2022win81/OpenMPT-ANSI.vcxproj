@@ -1347,6 +1347,7 @@
     <ClInclude Include="..\..\mptrack\ExternalSamples.h" />
     <ClInclude Include="..\..\mptrack\FileDialog.h" />
     <ClInclude Include="..\..\mptrack\FolderScanner.h" />
+    <ClInclude Include="..\..\mptrack\GdiplusUtils.h" />
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h" />
     <ClInclude Include="..\..\mptrack\Globals.h" />
     <ClInclude Include="..\..\mptrack\HTTP.h" />

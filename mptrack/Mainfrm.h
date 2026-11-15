@@ -208,6 +208,7 @@ protected:
 	UINT_PTR m_nTimer = 0;
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
 	uint32 m_currentSpeed = 0;
+	ROWINDEX m_currentRowsPerBeat = 0, m_currentRowsPerMeasure = 0;
 	// Misc
 	class COptionsSoundcard *m_SoundCardOptionsDialog = nullptr;
 #if defined(MPT_ENABLE_UPDATE)

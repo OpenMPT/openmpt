@@ -1,5 +1,5 @@
 /*
- * view_ins.cpp
+ * View_ins.cpp
  * ------------
  * Purpose: Instrument tab, lower panel.
  * Notes  : (currently none)
@@ -14,6 +14,7 @@
 #include "Childfrm.h"
 #include "Ctrl_ins.h"
 #include "FileDialog.h"
+#include "GdiplusUtils.h"
 #include "Globals.h"
 #include "HighDPISupport.h"
 #include "ImageLists.h"
@@ -38,6 +39,29 @@ namespace
 	const int ENV_POINT_SIZE = 4;
 	const float ENV_MIN_ZOOM = 2.0f;
 	const float ENV_MAX_ZOOM = 256.0f;
+
+	bool CreateMemoryDC(CDC &dc, CBitmap &bitmap, HBITMAP &oldBitmap, CDC &compatibleDC, CSize size)
+	{
+		if(!dc.CreateCompatibleDC(&compatibleDC))
+			return false;
+		if(!bitmap.CreateCompatibleBitmap(&compatibleDC, size.cx, size.cy))
+		{
+			dc.DeleteDC();
+			return false;
+		}
+		oldBitmap = static_cast<HBITMAP>(dc.SelectObject(bitmap.m_hObject));
+		return true;
+	}
+
+	void DeleteMemoryDC(CDC &dc, CBitmap &bitmap, HBITMAP oldBitmap)
+	{
+		if(!dc)
+			return;
+		dc.SelectObject(oldBitmap);
+		dc.DeleteDC();
+		bitmap.DeleteObject();
+	}
+
 }
 
 
@@ -154,7 +178,7 @@ void CViewInstrument::OnInitialUpdate()
 	CModScrollView::OnInitialUpdate();
 	ModifyStyleEx(0, WS_EX_ACCEPTFILES);
 	m_zoom = (ENV_POINT_SIZE * m_dpi) / 96.0f;
-	m_envPointSize = HighDPISupport::ScalePixels(ENV_POINT_SIZE, m_hWnd);
+	UpdateRenderMetrics();
 	UpdateScrollSize();
 	UpdateNcButtonState();
 	EnableToolTips();
@@ -185,9 +209,17 @@ void CViewInstrument::UpdateScrollSize()
 
 void CViewInstrument::OnDPIChanged()
 {
-	m_envPointSize = HighDPISupport::ScalePixels(ENV_POINT_SIZE, m_hWnd);
+	UpdateRenderMetrics();
 	UpdateScrollSize();
 	CModScrollView::OnDPIChanged();
+}
+
+
+void CViewInstrument::UpdateRenderMetrics()
+{
+	m_envPointSize = HighDPISupport::ScalePixels(ENV_POINT_SIZE, m_hWnd);
+	m_lineWidth = std::max(1, mpt::saturate_round<int>(m_dpi / 96.0f));
+	m_envLineWidth = std::max(1.0f, m_dpi * (1.75f / 96.0f));
 }
 
 
@@ -257,7 +289,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			{
 				m_zoom = pState->zoom;
 				SetCurrentInstrument(m_nInstrument, pState->nEnv);
-				m_bGrid = pState->bGrid;
+				m_drawGrid = pState->bGrid;
 			}
 		}
 		break;
@@ -269,7 +301,7 @@ LRESULT CViewInstrument::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 			pState->initialized = true;
 			pState->zoom = m_zoom;
 			pState->nEnv = m_nEnv;
-			pState->bGrid = m_bGrid;
+			pState->bGrid = m_drawGrid;
 			pState->instrument = m_nInstrument;
 		}
 		break;
@@ -830,7 +862,7 @@ void CViewInstrument::UpdateNcButtonState()
 		                           else if(EnvGetPitchEnv()) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_FILTER:   if(!(sndFile.GetType() & (MOD_TYPE_IT|MOD_TYPE_MPT))) dwStyle |= NCBTNS_DISABLED;
 		                           else if(EnvGetFilterEnv()) dwStyle |= NCBTNS_CHECKED; break;
-		case ID_ENVELOPE_VIEWGRID: if(m_bGrid) dwStyle |= NCBTNS_CHECKED; break;
+		case ID_ENVELOPE_VIEWGRID: if(m_drawGrid) dwStyle |= NCBTNS_CHECKED; break;
 		case ID_ENVELOPE_ZOOM_IN:  if(m_zoom >= ENV_MAX_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		case ID_ENVELOPE_ZOOM_OUT: if(m_zoom <= ENV_MIN_ZOOM) dwStyle |= NCBTNS_DISABLED; break;
 		case ID_ENVELOPE_LOAD:
@@ -874,64 +906,43 @@ void CViewInstrument::UpdateView(UpdateHint hint, CObject *pObj)
 }
 
 
-void CViewInstrument::DrawGrid(CDC *pDC, uint32 speed)
+void CViewInstrument::DrawGrid(Gdiplus::Graphics &graphics, uint32 speed)
 {
-	bool windowResized = false;
+	if(speed == 0)
+		return;
 
-	if(m_dcGrid.m_hDC)
+	int rowsPerBeat = 1, rowsPerMeasure = 1;
+	if(const CModDoc *modDoc = GetDocument(); modDoc != nullptr)
 	{
-		m_dcGrid.SelectObject(m_pbmpOldGrid);
-		m_dcGrid.DeleteDC();
-		m_bmpGrid.DeleteObject();
-		windowResized = true;
-	}
-
-	if(windowResized || m_bGridForceRedraw || (m_nScrollPosX != m_GridScrollPos) || (speed != static_cast<uint32>(m_GridSpeed) && speed > 0))
-	{
-		m_GridSpeed = speed;
-		m_GridScrollPos = m_nScrollPosX;
-		m_bGridForceRedraw = false;
-
-		// create a memory based dc for drawing the grid
-		m_dcGrid.CreateCompatibleDC(pDC);
-		m_bmpGrid.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
-		m_pbmpOldGrid = *m_dcGrid.SelectObject(&m_bmpGrid);
-
-		// Do draw
-		const int width = m_rcClient.Width();
-		int rowsPerBeat = 1, rowsPerMeasure = 1;
-		const CModDoc *modDoc = GetDocument();
-		if(modDoc != nullptr)
+		if(CMainFrame::GetMainFrame()->GetModPlaying() == modDoc)
+		{
+			// TODO: This really needs to be taken from GUI notifications rather than directly from sound engine
+			rowsPerBeat = modDoc->GetSoundFile().m_PlayState.m_nCurrentRowsPerBeat;
+			rowsPerMeasure = modDoc->GetSoundFile().m_PlayState.m_nCurrentRowsPerMeasure;
+		} else
 		{
 			rowsPerBeat = modDoc->GetSoundFile().m_nDefaultRowsPerBeat;
 			rowsPerMeasure = modDoc->GetSoundFile().m_nDefaultRowsPerMeasure;
 		}
-
-		// Paint it black!
-		m_dcGrid.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
-
-		const uint32 startTick = (ScreenToTick(0) / speed) * speed;
-		const uint32 endTick = (ScreenToTick(width) / speed) * speed;
-
-		auto oldPen = m_dcGrid.SelectStockObject(DC_PEN);
-		for(uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
-		{
-			if(rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
-				m_dcGrid.SetDCPenColor(RGB(0x80, 0x80, 0x80));
-			else if(rowsPerBeat > 0 && row % rowsPerBeat == 0)
-				m_dcGrid.SetDCPenColor(RGB(0x55, 0x55, 0x55));
-			else
-				m_dcGrid.SetDCPenColor(RGB(0x33, 0x33, 0x33));
-
-			int x = TickToScreen(tick);
-			m_dcGrid.MoveTo(x, 0);
-			m_dcGrid.LineTo(x, m_rcClient.bottom);
-		}
-		if(oldPen)
-			m_dcGrid.SelectObject(oldPen);
 	}
 
-	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcGrid, 0, 0, SRCCOPY);
+	const uint32 startTick = mpt::align_down(static_cast<uint32>(ScreenToTick(0)), speed);
+	const uint32 endTick = mpt::align_down(static_cast<uint32>(ScreenToTick(m_rcClient.Width())), speed);
+	const auto height = static_cast<Gdiplus::REAL>(m_rcClient.bottom);
+
+	Gdiplus::Pen pen{Gdiplus::Color{}, static_cast<Gdiplus::REAL>(m_lineWidth)};
+	for(uint32 tick = startTick, row = startTick / speed; tick <= endTick; tick += speed, row++)
+	{
+		if(rowsPerMeasure > 0 && row % rowsPerMeasure == 0)
+			pen.SetColor(Gdiplus::Color{0x80, 0x80, 0x80});
+		else if(rowsPerBeat > 0 && row % rowsPerBeat == 0)
+			pen.SetColor(Gdiplus::Color{0x55, 0x55, 0x55});
+		else
+			pen.SetColor(Gdiplus::Color{0x33, 0x33, 0x33});
+
+		const Gdiplus::REAL x = GDIP::LineCenter(TickToScreen(tick), m_lineWidth);
+		graphics.DrawLine(&pen, x, 0.0f, x, height);
+	}
 }
 
 
@@ -941,117 +952,115 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	if((!pModDoc) || (!pDC))
 		return;
 
-	// to avoid flicker, establish a memory dc, draw to it
-	// and then BitBlt it to the destination "pDC"
-
-	//check for window resize
-	if(m_dcMemMain.GetSafeHdc() && m_rcOldClient != m_rcClient)
+	if(m_dcEnvelope && m_rcOldClient != m_rcClient)
 	{
-		m_dcMemMain.SelectObject(oldBitmap);
-		m_dcMemMain.DeleteDC();
-		m_bmpMemMain.DeleteObject();
+		DeleteMemoryDC(m_dcEnvelope, m_bmpEnvelope, m_bmpEnvelopeOld);
+		DeleteMemoryDC(m_dcMemMain, m_bmpMemMain, m_bmpMemMainOld);
 	}
-
-	if(!m_dcMemMain.m_hDC)
+	if(!m_dcEnvelope)
 	{
-		m_dcMemMain.CreateCompatibleDC(pDC);
-		if(!m_dcMemMain.m_hDC)
+		if(!CreateMemoryDC(m_dcEnvelope, m_bmpEnvelope, m_bmpEnvelopeOld, *pDC, m_rcClient.Size()))
 			return;
-	}
-	if(!m_bmpMemMain.m_hObject)
-	{
-		m_bmpMemMain.CreateCompatibleBitmap(pDC, m_rcClient.Width(), m_rcClient.Height());
-	}
-	m_rcOldClient = m_rcClient;
-	oldBitmap = *m_dcMemMain.SelectObject(&m_bmpMemMain);
-
-	auto stockBrush = CBrush::FromHandle(GetStockBrush(DC_BRUSH));
-	if(m_bGrid)
-	{
-		DrawGrid(&m_dcMemMain, pModDoc->GetSoundFile().m_PlayState.m_nMusicSpeed);
-	} else
-	{
-		// Paint it black!
-		m_dcMemMain.FillSolidRect(&m_rcClient, TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV]);
-	}
-
-	auto oldPen = m_dcMemMain.SelectObject(CMainFrame::penDarkGray);
-
-	// Middle line (half volume or pitch / panning center)
-	const int ymed = (m_rcClient.bottom - 1) / 2;
-	m_dcMemMain.MoveTo(0, ymed);
-	m_dcMemMain.LineTo(m_rcClient.right, ymed);
-
-	// Drawing Loop Start/End
-	if(EnvGetLoop())
-	{
-		m_dcMemMain.SelectObject(m_nDragItem == ENV_DRAGLOOPSTART ? CMainFrame::penGray99 : CMainFrame::penDarkGray);
-		int x1 = PointToScreen(EnvGetLoopStart()) - m_envPointSize / 2;
-		m_dcMemMain.MoveTo(x1, 0);
-		m_dcMemMain.LineTo(x1, m_rcClient.bottom);
-		m_dcMemMain.SelectObject(m_nDragItem == ENV_DRAGLOOPEND ? CMainFrame::penGray99 : CMainFrame::penDarkGray);
-		int x2 = PointToScreen(EnvGetLoopEnd()) + m_envPointSize / 2;
-		m_dcMemMain.MoveTo(x2, 0);
-		m_dcMemMain.LineTo(x2, m_rcClient.bottom);
-	}
-	// Drawing Sustain Start/End
-	if(EnvGetSustain())
-	{
-		m_dcMemMain.SelectObject(CMainFrame::penHalfDarkGray);
-		int nspace = m_rcClient.bottom / 4;
-		int n1 = EnvGetSustainStart();
-		int x1 = PointToScreen(n1) - m_envPointSize / 2;
-		int y1 = ValueToScreen(EnvGetValue(n1));
-		m_dcMemMain.MoveTo(x1, y1 - nspace);
-		m_dcMemMain.LineTo(x1, y1 + nspace);
-		int n2 = EnvGetSustainEnd();
-		int x2 = PointToScreen(n2) + m_envPointSize / 2;
-		int y2 = ValueToScreen(EnvGetValue(n2));
-		m_dcMemMain.MoveTo(x2, y2 - nspace);
-		m_dcMemMain.LineTo(x2, y2 + nspace);
-	}
-	uint32 numPoints = EnvGetNumPoints();
-	// Drawing Envelope
-	if(numPoints)
-	{
-		m_dcMemMain.SelectObject(GetStockObject(DC_PEN));
-		m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPES]);
-		uint32 releaseNode = EnvGetReleaseNode();
-		RECT rect;
-		for(uint32 i = 0; i < numPoints; i++)
+		if(!CreateMemoryDC(m_dcMemMain, m_bmpMemMain, m_bmpMemMainOld, *pDC, m_rcClient.Size()))
 		{
-			int x = PointToScreen(i);
-			int y = ValueToScreen(EnvGetValue(i));
-			rect.left = x - m_envPointSize + 1;
-			rect.top = y - m_envPointSize + 1;
-			rect.right = x + m_envPointSize;
-			rect.bottom = y + m_envPointSize;
-			if(i)
-				m_dcMemMain.LineTo(x, y);
-			else
-				m_dcMemMain.MoveTo(x, y);
-
-			if(i == releaseNode)
-			{
-				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0x00, 0x00));
-				m_dcMemMain.FrameRect(&rect, stockBrush);
-				m_dcMemMain.SetDCPenColor(TrackerSettings::Instance().rgbCustomColors[MODCOLOR_ENVELOPE_RELEASE]);
-			} else if(i == m_nDragItem - 1)
-			{
-				// currently selected env point
-				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0xFF, 0x00));
-				m_dcMemMain.FrameRect(&rect, stockBrush);
-			} else
-			{
-				m_dcMemMain.SetDCBrushColor(RGB(0xFF, 0xFF, 0xFF));
-				m_dcMemMain.FrameRect(&rect, stockBrush);
-			}
+			DeleteMemoryDC(m_dcEnvelope, m_bmpEnvelope, m_bmpEnvelopeOld);
+			return;
 		}
 	}
-	DrawPositionMarks();
-	if(oldPen)
-		m_dcMemMain.SelectObject(oldPen);
+	m_rcOldClient = m_rcClient;
 
+	Gdiplus::Graphics graphics{m_dcEnvelope};
+	GDIP::SetupGraphics(graphics);
+
+	const auto &colors = TrackerSettings::Instance().rgbCustomColors;
+	graphics.Clear(GDIP::ToColor(colors[MODCOLOR_BACKENV]));
+	// TODO: Speed really needs to be taken from GUI notifications rather than directly from sound engine
+	if(m_drawGrid)
+		DrawGrid(graphics, pModDoc->GetSoundFile().m_PlayState.m_nMusicSpeed);
+
+	const Gdiplus::Color colorShadow = GDIP::ToColor(GetSysColor(COLOR_BTNSHADOW)), colorHighlight{0x99, 0x99, 0x99};
+	const auto lineWidth = static_cast<Gdiplus::REAL>(m_lineWidth);
+	const auto height = static_cast<Gdiplus::REAL>(m_rcClient.bottom);
+	Gdiplus::Pen pen{colorShadow, lineWidth};
+
+	// Middle line (half volume or pitch / panning center)
+	const Gdiplus::REAL yMed = GDIP::LineCenter((m_rcClient.bottom - 1) / 2, m_lineWidth);
+	graphics.DrawLine(&pen, 0.0f, yMed, static_cast<Gdiplus::REAL>(m_rcClient.right), yMed);
+
+	// Envelope line segments + nodes
+	if(const uint32 numPoints = EnvGetNumPoints(); numPoints > 0)
+	{
+		std::vector<POINT> points(numPoints);
+		std::vector<Gdiplus::PointF> linePoints(numPoints);
+		for(uint32 i = 0; i < numPoints; i++)
+		{
+			points[i] = {PointToScreen(i), ValueToScreen(EnvGetValue(i))};
+			linePoints[i] = {points[i].x + 0.5f, points[i].y + 0.5f};
+		}
+
+		Gdiplus::Pen envPen{GDIP::ToColor(colors[MODCOLOR_ENVELOPES]), m_envLineWidth};
+		envPen.SetLineJoin(Gdiplus::LineJoinBevel);
+		const uint32 releaseNode = EnvGetReleaseNode();
+		const uint32 numPointsBeforeRelease = (releaseNode < numPoints) ? releaseNode + 1 : numPoints;
+		if(numPointsBeforeRelease > 1)
+			graphics.DrawLines(&envPen, linePoints.data(), static_cast<INT>(numPointsBeforeRelease));
+		if(numPointsBeforeRelease < numPoints)
+		{
+			envPen.SetColor(GDIP::ToColor(colors[MODCOLOR_ENVELOPE_RELEASE]));
+			graphics.DrawLines(&envPen, linePoints.data() + releaseNode, static_cast<INT>(numPoints - releaseNode));
+		}
+
+		const auto nodeSize = static_cast<Gdiplus::REAL>(2 * m_envPointSize - 1 - m_lineWidth);
+		const Gdiplus::REAL nodeOffset = 1 - m_envPointSize + lineWidth * 0.5f;
+		Gdiplus::Pen nodePen{Gdiplus::Color{}, lineWidth};
+		for(uint32 i = 0; i < numPoints; i++)
+		{
+			if(i == releaseNode)
+				nodePen.SetColor(Gdiplus::Color{0xFF, 0x00, 0x00});
+			else if(i == m_nDragItem - 1)
+				nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0x00});  // Currently selected node
+			else
+				nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0xFF});
+			graphics.DrawRectangle(&nodePen, points[i].x + nodeOffset, points[i].y + nodeOffset, nodeSize, nodeSize);
+		}
+	}
+
+	// Loop Start/End
+	if(EnvGetLoop())
+	{
+		const auto DrawLoopLine = [&](int x, bool selected)
+		{
+			pen.SetColor(selected ? colorHighlight : colorShadow);
+			const Gdiplus::REAL xf = GDIP::LineCenter(x, m_lineWidth);
+			graphics.DrawLine(&pen, xf, 0.0f, xf, height);
+		};
+		DrawLoopLine(PointToScreen(EnvGetLoopStart()) - m_envPointSize / 2, m_nDragItem == ENV_DRAGLOOPSTART);
+		DrawLoopLine(PointToScreen(EnvGetLoopEnd()) + m_envPointSize / 2, m_nDragItem == ENV_DRAGLOOPEND);
+	}
+
+	// Sustain Start/End
+	if(EnvGetSustain())
+	{
+		pen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0xFF});
+
+		Gdiplus::Pen dashPen{colorShadow, lineWidth};
+		static constexpr Gdiplus::REAL dashPattern[] = {3.0f, 3.0f};  // Dash lengths are relative to pen width, so the pattern is effectively DPI-aware
+		dashPen.SetDashPattern(dashPattern, static_cast<INT>(std::size(dashPattern)));
+
+		const int lineLength = m_rcClient.bottom / 4;
+		const auto DrawSustainLine = [&](int x, int y)
+		{
+			const Gdiplus::REAL xf = GDIP::LineCenter(x, m_lineWidth);
+			graphics.DrawLine(&pen, xf, static_cast<Gdiplus::REAL>(y - lineLength), xf, static_cast<Gdiplus::REAL>(y + lineLength));
+			graphics.DrawLine(&dashPen, xf, static_cast<Gdiplus::REAL>(y - lineLength), xf, static_cast<Gdiplus::REAL>(y + lineLength));
+		};
+		const uint32 sustainStart = EnvGetSustainStart(), sustainEnd = EnvGetSustainEnd();
+		DrawSustainLine(PointToScreen(sustainStart) - m_envPointSize / 2, ValueToScreen(EnvGetValue(sustainStart)));
+		DrawSustainLine(PointToScreen(sustainEnd) + m_envPointSize / 2, ValueToScreen(EnvGetValue(sustainEnd)));
+	}
+
+	m_dcMemMain.BitBlt(0, 0, m_rcClient.Width(), m_rcClient.Height(), &m_dcEnvelope, 0, 0, SRCCOPY);
+	DrawPositionMarks();
 	pDC->BitBlt(m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), &m_dcMemMain, 0, 0, SRCCOPY);
 }
 
@@ -1176,14 +1185,27 @@ uint32 CViewInstrument::EnvInsertPoint(int nTick, int nValue)
 
 void CViewInstrument::DrawPositionMarks()
 {
-	CRect rect;
+	MPT_ASSERT(m_dcMemMain);
+	m_positionMarks.clear();
+	Gdiplus::Graphics graphics{m_dcMemMain};
+	GDIP::SetupGraphics(graphics);
+	const Gdiplus::SolidBrush brush{GDIP::ToColor(~TrackerSettings::Instance().rgbCustomColors[MODCOLOR_BACKENV] & 0xFFFFFF)};
 	for(auto pos : m_dwNotifyPos) if (pos != Notification::PosInvalid)
 	{
-		rect.top = -2;
-		rect.left = TickToScreen(pos);
-		rect.right = rect.left + 1;
-		rect.bottom = m_rcClient.bottom + 1;
-		InvertRect(m_dcMemMain.m_hDC, &rect);
+		const int left = GDIP::LineStart(TickToScreen(pos), m_lineWidth);
+		const CRect rect{left, 0, left + m_lineWidth, m_rcClient.bottom};
+		graphics.FillRectangle(&brush, rect.left, rect.top, rect.Width(), rect.Height());
+		m_positionMarks.push_back(rect);
+	}
+}
+
+
+void CViewInstrument::RestorePositionMarks()
+{
+	MPT_ASSERT(m_dcMemMain);
+	for(const CRect &rect : m_positionMarks)
+	{
+		m_dcMemMain.BitBlt(rect.left, rect.top, rect.Width(), rect.Height(), &m_dcEnvelope, rect.left, rect.top, SRCCOPY);
 	}
 }
 
@@ -1228,17 +1250,16 @@ LRESULT CViewInstrument::OnPlayerNotify(Notification *pnotify)
 				break;
 			}
 		}
-		if(update)
+		if(update && m_dcMemMain)
 		{
-			HDC hdc = ::GetDC(m_hWnd);
-			DrawPositionMarks();
+			RestorePositionMarks();
 			for(CHANNELINDEX j = 0; j < MAX_CHANNELS; j++)
 			{
-				uint32 newpos = (uint32)pnotify->pos[j];
-				m_dwNotifyPos[j] = newpos;
+				m_dwNotifyPos[j] = static_cast<uint32>(pnotify->pos[j]);
 			}
 			DrawPositionMarks();
-			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_dcMemMain.GetSafeHdc(), 0, 0, SRCCOPY);
+			HDC hdc = ::GetDC(m_hWnd);
+			BitBlt(hdc, m_rcClient.left, m_rcClient.top, m_rcClient.Width(), m_rcClient.Height(), m_dcMemMain, 0, 0, SRCCOPY);
 			::ReleaseDC(m_hWnd, hdc);
 		}
 	}
@@ -1954,9 +1975,7 @@ void CViewInstrument::OnEnvFilterChanged()
 
 void CViewInstrument::OnEnvToggleGrid()
 {
-	m_bGrid = !m_bGrid;
-	if(m_bGrid)
-		m_bGridForceRedraw = true;
+	m_drawGrid = !m_drawGrid;
 	CModDoc *pModDoc = GetDocument();
 	if(pModDoc)
 		pModDoc->UpdateAllViews(nullptr, InstrumentHint(m_nInstrument).Envelope());

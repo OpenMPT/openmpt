@@ -657,6 +657,9 @@
     <ClInclude Include="..\..\mptrack\FolderScanner.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\GdiplusUtils.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\GeneralConfigDlg.h">
       <Filter>mptrack</Filter>
     </ClInclude>

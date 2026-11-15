@@ -1,5 +1,5 @@
 /*
- * view_ins.h
+ * View_ins.h
  * ----------
  * Purpose: Instrument tab, lower panel.
  * Notes  : (currently none)
@@ -15,6 +15,11 @@
 #include "Globals.h"
 #include "Moddoc.h"
 #include "../soundlib/Snd_defs.h"
+
+namespace Gdiplus
+{
+class Graphics;
+}
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -41,10 +46,8 @@ protected:
 	CPoint m_ptMenu;
 	CRect m_rcClient, m_rcOldClient;
 
-	CBitmap m_bmpGrid;
-	CBitmap m_bmpMemMain;
-	HBITMAP m_pbmpOldGrid = nullptr;
-	HBITMAP oldBitmap = nullptr;
+	CBitmap m_bmpEnvelope, m_bmpMemMain;
+	HBITMAP m_bmpEnvelopeOld = nullptr, m_bmpMemMainOld = nullptr;
 
 	EnvelopeType m_nEnv = ENV_VOLUME;
 	uint32 m_nDragItem = 1, m_nBtnMouseOver = 0xFFFF;
@@ -53,22 +56,22 @@ protected:
 
 	INSTRUMENTINDEX m_nInstrument = 1;
 
-	CDC m_dcMemMain;
-	CDC m_dcGrid;
-	int m_GridScrollPos = -1;
-	int m_GridSpeed = -1;
+	CDC m_dcEnvelope;  // Rendered envelope without play position marks
+	CDC m_dcMemMain;   // m_dcEnvelope plus play position marks
 
 	float m_zoom = 4;
 	int m_envPointSize = 4;
-	uint32 m_maxTickDrag = 0;  // Maximum tick for scroll size during envelope node dragging
+	int m_lineWidth = 1;          // For grid / loop points / etc.
+	float m_envLineWidth = 1.0f;  // For envelope segments
+	uint32 m_maxTickDrag = 0;     // Maximum tick for scroll size during envelope node dragging
 
-	bool m_bGrid = true;
-	bool m_bGridForceRedraw = false;
+	bool m_drawGrid = true;
 	bool m_mouseMoveModified = false;
 
 	std::bitset<128> m_baPlayingNote;
 	CModDoc::NoteToChannelMap m_noteChannel;	// Note -> Preview channel assignment
 	std::array<uint32, MAX_CHANNELS> m_dwNotifyPos;
+	std::vector<CRect> m_positionMarks;  // Areas of m_dcMemMain that differ from m_dcEnvelope
 
 public:
 	CViewInstrument();
@@ -165,12 +168,14 @@ protected:
 	int ScreenToValue(int y) const;
 	void InvalidateEnvelope() { InvalidateRect(NULL, FALSE); }
 	void DrawPositionMarks();
+	void RestorePositionMarks();
 	void DrawNcButton(CDC *pDC, UINT nBtn);
 	bool GetNcButtonRect(UINT button, CRect &rect) const;
 	UINT GetNcButtonAtPoint(CPoint point, CRect *outRect = nullptr) const;
 	void UpdateNcButtonState();
 	void PlayNote(ModCommand::NOTE note);
-	void DrawGrid(CDC *memDC, uint32 speed);
+	void UpdateRenderMetrics();
+	void DrawGrid(Gdiplus::Graphics &graphics, uint32 speed);
 	void UpdateIndicator();
 	void UpdateIndicator(int tick, int val);
 	CString EnvValueToString(int tick, int val) const;

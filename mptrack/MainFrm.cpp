@@ -2581,6 +2581,8 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 		{
 			PostMessage(WM_COMMAND, ID_PLAYER_STOP);
 			m_currentSpeed = 0;
+			m_currentRowsPerBeat = 0;
+			m_currentRowsPerMeasure = 0;
 		}
 		//Log("OnUpdatePosition: row=%d time=%lu\n", pnotify->nRow, pnotify->TimestampSamples);
 		if(CModDoc *modDoc = GetModPlaying(); modDoc != nullptr)
@@ -2598,9 +2600,13 @@ LRESULT CMainFrame::OnUpdatePosition(WPARAM, LPARAM lParam)
 				m_pSndFile->m_pluginDryWetRatioChanged.reset();
 			}
 			// Update envelope views if speed has changed
-			if(m_pSndFile->m_PlayState.m_nMusicSpeed != m_currentSpeed)
+			const auto &playState = m_pSndFile->m_PlayState;
+			if(playState.m_nMusicSpeed != m_currentSpeed || playState.m_nCurrentRowsPerBeat != m_currentRowsPerBeat || playState.m_nCurrentRowsPerMeasure != m_currentRowsPerMeasure)
 			{
-				m_currentSpeed = m_pSndFile->m_PlayState.m_nMusicSpeed;
+				// TODO: These should be communicated to the instrument view through position notifications when the song is playing - but that would only update the currently active instrument view.
+				m_currentSpeed = playState.m_nMusicSpeed;
+				m_currentRowsPerBeat = playState.m_nCurrentRowsPerBeat;
+				m_currentRowsPerMeasure = playState.m_nCurrentRowsPerMeasure;
 				modDoc->UpdateAllViews(InstrumentHint().Envelope());
 			}
 		}
