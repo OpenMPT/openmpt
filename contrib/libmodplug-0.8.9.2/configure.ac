@@ -1,12 +1,12 @@
 AC_INIT([libopenmpt-modplug], [0.8.9.2-openmpt1], [https://bugs.openmpt.org/], [libopenmpt-modplug], [https://lib.openmpt.org/])
-AC_PREREQ([2.68])
+AC_PREREQ([2.72])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_FILES([Makefile libopenmpt_modplug.pc libmodplug.pc])
 
-AM_INIT_AUTOMAKE([1.11 -Wall -Werror foreign subdir-objects])
+AM_INIT_AUTOMAKE([1.17 -Wall -Werror foreign subdir-objects])
 
 AM_PROG_AR
 
@@ -14,7 +14,7 @@ LT_INIT
 
 AC_SYS_LARGEFILE
 
-PKG_PROG_PKG_CONFIG([0.24])
+PKG_PROG_PKG_CONFIG([0.29])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CXX
@@ -23,18 +23,24 @@ AC_PROG_INSTALL
 LIBOPENMPT_REQUIRES_PRIVATE=
 LIBOPENMPT_LIBS_PRIVATE=
 
-# We want a modern C compiler 
-AC_PROG_CC_STDC
-#AC_PROG_CC_C99
-
 # We need C++11 support
-AX_CXX_COMPILE_STDCXX(17, [noext], [optional])
-AS_IF([test "x$HAVE_CXX17" != "x1"],
+AX_CXX_COMPILE_STDCXX([23], [noext], [optional])
+AS_IF([test "x$HAVE_CXX23" != "x1"],
  [
-  AX_CXX_COMPILE_STDCXX(14, [noext], [optional])
-  AS_IF([test "x$HAVE_CXX14" != "x1"],
+  AX_CXX_COMPILE_STDCXX([20], [noext], [optional])
+  AS_IF([test "x$HAVE_CXX20" != "x1"],
    [
-    AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+    AX_CXX_COMPILE_STDCXX(17, [noext], [optional])
+    AS_IF([test "x$HAVE_CXX17" != "x1"],
+     [
+      AX_CXX_COMPILE_STDCXX(14, [noext], [optional])
+      AS_IF([test "x$HAVE_CXX14" != "x1"],
+       [
+        AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+       ],[]
+      )
+     ],[]
+    )
    ],[]
   )
  ],[]
