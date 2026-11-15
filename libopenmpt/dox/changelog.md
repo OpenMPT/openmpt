@@ -8,6 +8,10 @@ is just a high-level summary.
 ### libopenmpt 0.6.32-pre
 
  *  zlib: Update to v1.4 (2026-11-05).
+ *  minimp3: Update to commit a01e51e230b58a27f234b60ceece2e76f501f517
+    (2026-11-15) fork <https://github.com/manxorist/minimp3> tag
+    `openmpt-2026-11-15-v6` commit ee98b37589cb71983cb0c4606781ccc0894220c2
+    (2026-11-15).
  *  stb_vorbis: Update to v1.24 (2026-11-12).
 
 ### libopenmpt 0.6.31 (2026-10-31)
