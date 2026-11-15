@@ -1,13 +1,9 @@
-minimp3 library from https://github.com/lieff/minimp3
-Fork https://github.com/manxorist/minimp3/releases/tag/openmpt-2025-11-07-v5
-commit 2116754771b79347ad2f39127abace2a093c383e (2024-08-15)
+minimp3 library from https://github.com/lieff/minimp3 commit
+a01e51e230b58a27f234b60ceece2e76f501f517 (2026-11-15) fork
+https://github.com/manxorist/minimp3 tag openmpt-2026-11-15-v6 commit
+ee98b37589cb71983cb0c4606781ccc0894220c2 (2026-11-15).
 The following changes have been made:
  *  minimp3.c has been added
  *  The following pull rquests have been merged:
-     *  https://github.com/lieff/minimp3/pull/126
-     *  https://github.com/lieff/minimp3/pull/96
-     *  https://github.com/lieff/minimp3/pull/97
      *  https://github.com/lieff/minimp3/pull/125
-     *  https://github.com/lieff/minimp3/pull/127
      *  https://github.com/lieff/minimp3/pull/132
- *  all modifications are marked by /* OpenMPT */

@@ -1567,7 +1567,7 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
 
 #else /* MINIMP3_FLOAT_OUTPUT */
 
-            static const f4 g_scale = { 1.0f/32768.0f, 1.0f/32768.0f, 1.0f/32768.0f, 1.0f/32768.0f };
+            static const f4 g_scale = VSET(1.0f/32768.0f);
             a = VMUL(a, g_scale);
             b = VMUL(b, g_scale);
 #if HAVE_SSE
@@ -1734,6 +1734,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
     const uint8_t *hdr;
     bs_t bs_frame[1];
     mp3dec_scratch_t scratch;
+    memset(scratch.ist_pos, 0, sizeof(scratch.ist_pos)); /* avoid use-of-uninitialized-value (scfsi reuse) */
 
     if (mp3_bytes > 4 && dec->header[0] == 0xff && hdr_compare(dec->header, mp3))
     {
@@ -1831,7 +1832,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
     int aligned_count = num_samples & ~7;
     for(; i < aligned_count; i += 8)
     {
-        static const f4 g_scale = { 32768.0f, 32768.0f, 32768.0f, 32768.0f };
+        static const f4 g_scale = VSET(32768.0f);
         f4 a = VMUL(VLD(&in[i  ]), g_scale);
         f4 b = VMUL(VLD(&in[i+4]), g_scale);
 #if HAVE_SSE
