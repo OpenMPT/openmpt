@@ -21,6 +21,16 @@ Metadata and other state is not provided or updated.
 
 */
 
+#include <libopenmpt/libopenmpt_version.h>
+#if !defined(OPENMPT_API_VERSION_MAKE)
+#define OPENMPT_API_VERSION_MAKE(major, minor, patch) (((major)<<24)|((minor)<<16)|((patch)<<0))
+#endif
+#if !defined(OPENMPT_API_VERSION_AT_LEAST)
+#define OPENMPT_API_VERSION_AT_LEAST(major, minor, patch) (OPENMPT_API_VERSION >= OPENMPT_API_VERSION_MAKE((major), (minor), (patch)))
+#endif
+#if !defined(OPENMPT_API_VERSION_BEFORE)
+#define OPENMPT_API_VERSION_BEFORE(major, minor, patch) (OPENMPT_API_VERSION < OPENMPT_API_VERSION_MAKE((major), (minor), (patch)))
+#endif
 #include <libopenmpt/libopenmpt.hpp>
 
 #include <string>
@@ -77,12 +87,21 @@ static openmpt::module * get_self( const CSoundFile * that ) {
 
 #define mod ( get_self( this ) )
 
+#if OPENMPT_API_VERSION_AT_LEAST(0,7,0)
+#define update_state() \
+	if ( mod ) m_nCurrentPattern = mod->get_current_order(); \
+	if ( mod ) m_nPattern = mod->get_current_pattern(); \
+	if ( mod ) m_nMusicSpeed = mod->get_current_speed(); \
+	if ( mod ) m_nMusicTempo = static_cast<int>(std::trunc(mod->get_current_tempo2())); \
+/**/
+#else
 #define update_state() \
 	if ( mod ) m_nCurrentPattern = mod->get_current_order(); \
 	if ( mod ) m_nPattern = mod->get_current_pattern(); \
 	if ( mod ) m_nMusicSpeed = mod->get_current_speed(); \
 	if ( mod ) m_nMusicTempo = mod->get_current_tempo(); \
 /**/
+#endif
 
 UINT CSoundFile::m_nXBassDepth = 0;
 UINT CSoundFile::m_nXBassRange = 0;

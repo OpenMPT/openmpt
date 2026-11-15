@@ -11,6 +11,16 @@
 #undef LIBOPENMPT_BUILD_DLL
 #endif
 
+#include <libopenmpt/libopenmpt_version.h>
+#if !defined(OPENMPT_API_VERSION_MAKE)
+#define OPENMPT_API_VERSION_MAKE(major, minor, patch) (((major)<<24)|((minor)<<16)|((patch)<<0))
+#endif
+#if !defined(OPENMPT_API_VERSION_AT_LEAST)
+#define OPENMPT_API_VERSION_AT_LEAST(major, minor, patch) (OPENMPT_API_VERSION >= OPENMPT_API_VERSION_MAKE((major), (minor), (patch)))
+#endif
+#if !defined(OPENMPT_API_VERSION_BEFORE)
+#define OPENMPT_API_VERSION_BEFORE(major, minor, patch) (OPENMPT_API_VERSION < OPENMPT_API_VERSION_MAKE((major), (minor), (patch)))
+#endif
 #include <libopenmpt/libopenmpt.h>
 
 #include <limits.h>
@@ -327,7 +337,11 @@ LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentSpeed(ModPlugFile* file)
 LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentTempo(ModPlugFile* file)
 {
 	if(!file) return 0;
+#if OPENMPT_API_VERSION_AT_LEAST(0,7,0)
+	return (int)trunc(openmpt_module_get_current_tempo2(file->mod));
+#else
 	return openmpt_module_get_current_tempo(file->mod);
+#endif
 }
 
 LIBOPENMPT_MODPLUG_API int ModPlug_GetCurrentOrder(ModPlugFile* file)
