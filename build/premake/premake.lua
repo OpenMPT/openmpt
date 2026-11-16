@@ -3,6 +3,13 @@ MPT_PREMAKE_VERSION = ""
 
 MPT_PREMAKE_VERSION = "5.0"
 
+
+
+collectgarbage("setpause", 110)  -- run garbage collector when memory consumption reaches 110% of previous value (default: 200)
+collectgarbage("setstepmul", 1000)  -- run garbage collector at 10x the speed of memory allocation, whatever that means (default: 200)
+
+
+
 newoption {
 	trigger = "windows-version",
 	value = "Windows Version",
