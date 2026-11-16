@@ -987,10 +987,11 @@ void CViewInstrument::OnDraw(CDC *pDC)
 	const Gdiplus::REAL yMed = GDIP::LineCenter((m_rcClient.bottom - 1) / 2, m_lineWidth);
 	graphics.DrawLine(&pen, 0.0f, yMed, static_cast<Gdiplus::REAL>(m_rcClient.right), yMed);
 
-	// Envelope line segments + nodes
-	if(const uint32 numPoints = EnvGetNumPoints(); numPoints > 0)
+	// Envelope line segments
+	const uint32 numPoints = EnvGetNumPoints(), releaseNode = EnvGetReleaseNode();
+	std::vector<POINT> points(numPoints);
+	if(numPoints > 0)
 	{
-		std::vector<POINT> points(numPoints);
 		std::vector<Gdiplus::PointF> linePoints(numPoints);
 		for(uint32 i = 0; i < numPoints; i++)
 		{
@@ -1000,7 +1001,6 @@ void CViewInstrument::OnDraw(CDC *pDC)
 
 		Gdiplus::Pen envPen{GDIP::ToColor(colors[MODCOLOR_ENVELOPES]), m_envLineWidth};
 		envPen.SetLineJoin(Gdiplus::LineJoinBevel);
-		const uint32 releaseNode = EnvGetReleaseNode();
 		const uint32 numPointsBeforeRelease = (releaseNode < numPoints) ? releaseNode + 1 : numPoints;
 		if(numPointsBeforeRelease > 1)
 			graphics.DrawLines(&envPen, linePoints.data(), static_cast<INT>(numPointsBeforeRelease));
@@ -1008,20 +1008,6 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		{
 			envPen.SetColor(GDIP::ToColor(colors[MODCOLOR_ENVELOPE_RELEASE]));
 			graphics.DrawLines(&envPen, linePoints.data() + releaseNode, static_cast<INT>(numPoints - releaseNode));
-		}
-
-		const auto nodeSize = static_cast<Gdiplus::REAL>(2 * m_envPointSize - 1 - m_lineWidth);
-		const Gdiplus::REAL nodeOffset = 1 - m_envPointSize + lineWidth * 0.5f;
-		Gdiplus::Pen nodePen{Gdiplus::Color{}, lineWidth};
-		for(uint32 i = 0; i < numPoints; i++)
-		{
-			if(i == releaseNode)
-				nodePen.SetColor(Gdiplus::Color{0xFF, 0x00, 0x00});
-			else if(i == m_nDragItem - 1)
-				nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0x00});  // Currently selected node
-			else
-				nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0xFF});
-			graphics.DrawRectangle(&nodePen, points[i].x + nodeOffset, points[i].y + nodeOffset, nodeSize, nodeSize);
 		}
 	}
 
@@ -1057,6 +1043,21 @@ void CViewInstrument::OnDraw(CDC *pDC)
 		const uint32 sustainStart = EnvGetSustainStart(), sustainEnd = EnvGetSustainEnd();
 		DrawSustainLine(PointToScreen(sustainStart) - m_envPointSize / 2, ValueToScreen(EnvGetValue(sustainStart)));
 		DrawSustainLine(PointToScreen(sustainEnd) + m_envPointSize / 2, ValueToScreen(EnvGetValue(sustainEnd)));
+	}
+
+	// Envelope nodes
+	const auto nodeSize = static_cast<Gdiplus::REAL>(2 * m_envPointSize - 1 - m_lineWidth);
+	const Gdiplus::REAL nodeOffset = 1 - m_envPointSize + lineWidth * 0.5f;
+	Gdiplus::Pen nodePen{Gdiplus::Color{}, lineWidth};
+	for(uint32 i = 0; i < numPoints; i++)
+	{
+		if(i == releaseNode)
+			nodePen.SetColor(Gdiplus::Color{0xFF, 0x00, 0x00});
+		else if(i == m_nDragItem - 1)
+			nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0x00});  // Currently selected node
+		else
+			nodePen.SetColor(Gdiplus::Color{0xFF, 0xFF, 0xFF});
+		graphics.DrawRectangle(&nodePen, points[i].x + nodeOffset, points[i].y + nodeOffset, nodeSize, nodeSize);
 	}
 
 	m_dcMemMain.BitBlt(0, 0, m_rcClient.Width(), m_rcClient.Height(), &m_dcEnvelope, 0, 0, SRCCOPY);
