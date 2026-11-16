@@ -575,7 +575,13 @@ dofile "../../build/premake/premake-defaults.lua"
 
 
 
+collectgarbage("collect")
+
+
+
 include_dependency = include
+
+collectgarbage("collect")
 
 solution "all"
 
@@ -643,6 +649,8 @@ include_dependency = includeexternal
 
 if not MPT_OS_WINDOWS_WINRT then
 
+collectgarbage("collect")
+
 solution "libopenmpt_test"
 	startproject "libopenmpt_test"
 
@@ -653,6 +661,8 @@ end
 
 
 if not MPT_OS_WINDOWS_WINRT then
+
+collectgarbage("collect")
 
 solution "in_openmpt"
 	startproject "in_openmpt"
@@ -666,6 +676,8 @@ end
 
 if not MPT_OS_WINDOWS_WINRT then
 
+collectgarbage("collect")
+
 solution "xmp-openmpt"
 	startproject "xmp-openmpt"
 
@@ -675,12 +687,16 @@ end
 
 
 
+collectgarbage("collect")
+
 solution "libopenmpt-small"
 	startproject "libopenmpt-small"
 
  includeexternal "../../build/premake/mpt-libopenmpt-small.lua"
 
 
+
+collectgarbage("collect")
 
 solution "libopenmpt"
 	startproject "libopenmpt"
@@ -691,6 +707,8 @@ if not MPT_OS_WINDOWS_WINRT then
 end
 
 
+collectgarbage("collect")
+
 solution "openmpt123"
 	startproject "openmpt123"
 
@@ -699,6 +717,8 @@ solution "openmpt123"
 
 
 if not MPT_OS_WINDOWS_WINRT then
+
+collectgarbage("collect")
 
 solution "PluginBridge"
 	startproject "PluginBridge"
@@ -711,6 +731,8 @@ end
 
 if not MPT_OS_WINDOWS_WINRT then
 
+collectgarbage("collect")
+
 solution "OpenMPT-UTF8"
 	startproject "OpenMPT-UTF8"
 
@@ -720,6 +742,8 @@ solution "OpenMPT-UTF8"
  includeexternal "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-UTF8.lua"
 
+collectgarbage("collect")
+
 solution "OpenMPT-ANSI"
 	startproject "OpenMPT-ANSI"
 
@@ -728,6 +752,8 @@ solution "OpenMPT-ANSI"
  includeexternal "../../build/premake/mpt-OpenMPT-NativeSupport.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-WineWrapper.lua"
  includeexternal "../../build/premake/mpt-OpenMPT-ANSI.lua"
+
+collectgarbage("collect")
 
 solution "OpenMPT"
 	startproject "OpenMPT"
@@ -739,6 +765,10 @@ solution "OpenMPT"
  includeexternal "../../build/premake/mpt-OpenMPT.lua"
 
 end
+
+
+
+collectgarbage("collect")
 
 
 
