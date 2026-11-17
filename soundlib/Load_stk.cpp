@@ -263,6 +263,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 			if(illegalBytes > std::max(512u, numPatterns * 128u))
 				return false;
 		}
+		bool has0xyArpeggio = false, has1xyArpeggio = false;
 		for(ROWINDEX row = 0; row < 64; row++)
 		{
 			for(CHANNELINDEX chn = 0; chn < 4; chn++)
@@ -286,6 +287,22 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 
 				switch(eff)
 				{
+				case 0:
+					if(minVersion < ST2_00_Exterminator && !has1xyArpeggio)
+					{
+						switch(param)
+						{
+						case 0x37:
+						case 0x47:
+						case 0x11:  // bally.mod (MD5 5d844401b0a457566cb5d2f242238597, SHA1 833fd1b187b6d691b75d0413c36fc7b5bed6eec4)
+						case 0x30:  // bugbash4.mod (MD5 567937b799e4f62d8a6af421bb508a4e, SHA1 dc46ac7a267fac9a86279c76c8fec081f7675146)
+						case 0x40:  // bugbash4.mod
+							minVersion = (fileHeader.restartPos != 0x78) ? ST_IX : ST2_00_Exterminator;
+							has0xyArpeggio = true;
+							break;
+						}
+					}
+					break;
 				case 1:
 				case 2:
 					if(param > 0x1F && minVersion == UST1_80)
@@ -301,6 +318,7 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 						// This suspiciously looks like an arpeggio.
 						// Catch sleepwalk.mod by Karsten Obarski, which has a default tempo of 125 rather than 120 in the header, so gets mis-identified as a later tracker version.
 						minVersion = hasDiskNames ? UST1_80 : UST1_00;
+						has1xyArpeggio = true;
 					}
 					break;
 				case 0x0B:
@@ -336,6 +354,12 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 		{
 			// Not many Dxx commands in one pattern means they were probably pattern breaks
 			minVersion = ST2_00;
+		}
+		if(has0xyArpeggio && has1xyArpeggio && minVersion > UST1_80)
+		{
+			// multi_megamix.mod (MD5 ec63689e92637c534802657dda0a4c2e, 73d225f929c92072e7250647e53e0de4d2583430):
+			// The 0xy arpeggios are probably just leftovers from editing. Assume original UST effect interpretation.
+			minVersion = UST1_80;
 		}
 		totalNumDxx += numDxx;
 	}
@@ -400,16 +424,6 @@ bool CSoundFile::ReadSTK(FileReader &file, ModLoadingFlags loadFlags)
 						m.param = param;
 						switch(command)
 						{
-						case 0:
-							// jackdance.mod by Karsten Obarski has 0xy arpeggios...
-							if(param < 0x03)
-							{
-								m.command = CMD_NONE;
-							} else
-							{
-								m.command = CMD_ARPEGGIO;
-							}
-							break;
 						case 1:
 							m.command = CMD_ARPEGGIO;
 							break;
