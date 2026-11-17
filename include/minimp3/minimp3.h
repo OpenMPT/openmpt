@@ -691,10 +691,12 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
     {
         int sh = 3 - scf_shift;
 #if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) && (__GNUC__ >= 14) && (__GNUC__ < 15))  /* OpenMPT */
         /* n_long_sfb + n_short_sfb <= 39 by construction (see L3_read_side_info);
            hint it to silence -Wstringop-overflow and drop the bounds branch */
         if ((unsigned)(gr->n_long_sfb + gr->n_short_sfb) >= sizeof(iscf))
             __builtin_unreachable();
+#endif  /* OpenMPT */
 #endif
         for (i = 0; i < gr->n_short_sfb; i += 3)
         {
@@ -1573,7 +1575,11 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
 
 #else /* MINIMP3_FLOAT_OUTPUT */
 
+#if 0  /* OpenMPT */
             static const f4 g_scale = VSET(1.0f/32768.0f);
+#else  /* OpenMPT */
+            const f4 g_scale = VSET(1.0f/32768.0f);  /* OpenMPT */
+#endif  /* OpenMPT */
             a = VMUL(a, g_scale);
             b = VMUL(b, g_scale);
 #if HAVE_SSE
@@ -1839,7 +1845,11 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
     int aligned_count = num_samples & ~7;
     for(; i < aligned_count; i += 8)
     {
+#if 0  /* OpenMPT */
         static const f4 g_scale = VSET(32768.0f);
+#else  /* OpenMPT */
+        const f4 g_scale = VSET(32768.0f);  /* OpenMPT */
+#endif  /* OpenMPT */
         f4 a = VMUL(VLD(&in[i  ]), g_scale);
         f4 b = VMUL(VLD(&in[i+4]), g_scale);
 #if HAVE_SSE
