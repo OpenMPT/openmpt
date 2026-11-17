@@ -7,3 +7,8 @@ The following changes have been made:
  *  The following pull rquests have been merged:
      *  https://github.com/lieff/minimp3/pull/125
      *  https://github.com/lieff/minimp3/pull/132
+ *  The following modifications have been marked with /* OpenMPT */:
+     *  A work-around for https://github.com/lieff/minimp3/issues/158 has been
+        implemented.
+     *  A work-around for https://github.com/lieff/minimp3/issues/157 has been
+        implemented.
