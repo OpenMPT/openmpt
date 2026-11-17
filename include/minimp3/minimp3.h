@@ -690,13 +690,14 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
     if (gr->n_short_sfb)
     {
         int sh = 3 - scf_shift;
-#if defined(__GNUC__) || defined(__clang__)
-#if (defined(__GNUC__) && (__GNUC__ >= 14) && (__GNUC__ < 15))  /* OpenMPT */
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 7))
         /* n_long_sfb + n_short_sfb <= 39 by construction (see L3_read_side_info);
-           hint it to silence -Wstringop-overflow and drop the bounds branch */
+           hint it to silence -Wstringop-overflow and drop the bounds branch.
+           GCC < 7 has no -Wstringop-overflow to silence, but mishandles the hint
+           and reports a bogus -Warray-bounds instead (issue #157), so don't emit
+           it there. */
         if ((unsigned)(gr->n_long_sfb + gr->n_short_sfb) >= sizeof(iscf))
             __builtin_unreachable();
-#endif  /* OpenMPT */
 #endif
         for (i = 0; i < gr->n_short_sfb; i += 3)
         {
@@ -1575,11 +1576,7 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
 
 #else /* MINIMP3_FLOAT_OUTPUT */
 
-#if 0  /* OpenMPT */
-            static const f4 g_scale = VSET(1.0f/32768.0f);
-#else  /* OpenMPT */
-            const f4 g_scale = VSET(1.0f/32768.0f);  /* OpenMPT */
-#endif  /* OpenMPT */
+            const f4 g_scale = VSET(1.0f/32768.0f);
             a = VMUL(a, g_scale);
             b = VMUL(b, g_scale);
 #if HAVE_SSE
@@ -1845,11 +1842,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
     int aligned_count = num_samples & ~7;
     for(; i < aligned_count; i += 8)
     {
-#if 0  /* OpenMPT */
-        static const f4 g_scale = VSET(32768.0f);
-#else  /* OpenMPT */
-        const f4 g_scale = VSET(32768.0f);  /* OpenMPT */
-#endif  /* OpenMPT */
+        const f4 g_scale = VSET(32768.0f);
         f4 a = VMUL(VLD(&in[i  ]), g_scale);
         f4 b = VMUL(VLD(&in[i+4]), g_scale);
 #if HAVE_SSE
@@ -1857,14 +1850,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
         static const f4 g_min = { -32768.0f, -32768.0f, -32768.0f, -32768.0f };
         __m128i pcm8 = _mm_packs_epi32(_mm_cvtps_epi32(_mm_max_ps(_mm_min_ps(a, g_max), g_min)),
                                        _mm_cvtps_epi32(_mm_max_ps(_mm_min_ps(b, g_max), g_min)));
-        out[i  ] = _mm_extract_epi16(pcm8, 0);
-        out[i+1] = _mm_extract_epi16(pcm8, 1);
-        out[i+2] = _mm_extract_epi16(pcm8, 2);
-        out[i+3] = _mm_extract_epi16(pcm8, 3);
-        out[i+4] = _mm_extract_epi16(pcm8, 4);
-        out[i+5] = _mm_extract_epi16(pcm8, 5);
-        out[i+6] = _mm_extract_epi16(pcm8, 6);
-        out[i+7] = _mm_extract_epi16(pcm8, 7);
+        _mm_storeu_si128( (__m128i *)(&out[i]), pcm8 );
 #else /* HAVE_SSE */
         int16x4_t pcma, pcmb;
         a = VADD(a, VSET(0.5f));
