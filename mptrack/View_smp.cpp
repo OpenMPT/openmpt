@@ -48,11 +48,11 @@ OPENMPT_NAMESPACE_BEGIN
 
 
 // Non-client toolbar
-#define SMP_LEFTBAR_CY    HighDPISupport::ScalePixels(29, m_hWnd)
+#define SMP_LEFTBAR_CXBTN (HighDPISupport::ScalePixels(20, m_hWnd) + 4)
+#define SMP_LEFTBAR_CYBTN (HighDPISupport::ScalePixels(18, m_hWnd) + 4)
+#define SMP_LEFTBAR_CY    (SMP_LEFTBAR_CYBTN + HighDPISupport::ScalePixels(7, m_hWnd))
 #define SMP_LEFTBAR_CXSEP HighDPISupport::ScalePixels(14, m_hWnd)
 #define SMP_LEFTBAR_CXSPC HighDPISupport::ScalePixels(3, m_hWnd)
-#define SMP_LEFTBAR_CXBTN HighDPISupport::ScalePixels(24, m_hWnd)
-#define SMP_LEFTBAR_CYBTN HighDPISupport::ScalePixels(22, m_hWnd)
 static constexpr int TIMELINE_HEIGHT = 26;
 
 static int TimelineHeight(HWND hwnd)

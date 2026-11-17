@@ -43,11 +43,11 @@ namespace
 
 
 // Non-client toolbar
-#define ENV_LEFTBAR_CY    HighDPISupport::ScalePixels(29, m_hWnd)
+#define ENV_LEFTBAR_CXBTN (HighDPISupport::ScalePixels(20, m_hWnd) + 4)
+#define ENV_LEFTBAR_CYBTN (HighDPISupport::ScalePixels(18, m_hWnd) + 4)
+#define ENV_LEFTBAR_CY    (ENV_LEFTBAR_CYBTN + HighDPISupport::ScalePixels(7, m_hWnd))
 #define ENV_LEFTBAR_CXSEP HighDPISupport::ScalePixels(14, m_hWnd)
 #define ENV_LEFTBAR_CXSPC HighDPISupport::ScalePixels(3, m_hWnd)
-#define ENV_LEFTBAR_CXBTN HighDPISupport::ScalePixels(24, m_hWnd)
-#define ENV_LEFTBAR_CYBTN HighDPISupport::ScalePixels(22, m_hWnd)
 
 
 static constexpr UINT cLeftBarButtons[ENV_LEFTBAR_BUTTONS] =
