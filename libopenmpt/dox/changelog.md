@@ -8,7 +8,7 @@ is just a high-level summary.
 ### libopenmpt 0.5.45-pre
 
  *  zlib: Update to v1.4 (2026-11-05).
- *  minimp3: Update to commit b6394c288ba6f39d2eac61a8d2e6d3157444d94b
+ *  minimp3: Update to commit 142823796ab8efa55e1bf11406028f3be77ecceb
     (2026-11-18).
  *  stb_vorbis: Update to v1.24 (2026-11-12).
 
