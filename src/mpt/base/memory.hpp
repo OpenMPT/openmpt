@@ -58,20 +58,19 @@ struct is_byte<const std::byte> : public std::true_type { };
 
 template <typename T>
 constexpr bool declare_binary_safe(const T &) noexcept {
+	if (std::is_same<T, char>::value) {
+		return true;
+	}
+	if (std::is_same<T, uint8>::value) {
+		return true;
+	}
+	if (std::is_same<T, int8>::value) {
+		return true;
+	}
+	if (std::is_same<T, std::byte>::value) {
+		return true;
+	}
 	return false;
-}
-
-constexpr bool declare_binary_safe(const char &) noexcept {
-	return true;
-}
-constexpr bool declare_binary_safe(const uint8 &) noexcept {
-	return true;
-}
-constexpr bool declare_binary_safe(const int8 &) noexcept {
-	return true;
-}
-constexpr bool declare_binary_safe(const std::byte &) noexcept {
-	return true;
 }
 
 // Tell which types are safe to binary write into files.
