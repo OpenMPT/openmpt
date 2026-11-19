@@ -31,7 +31,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v7
     - name: Startup VM
-      uses: cross-platform-actions/action@bf4a66308a77c42dd5fd50a7ee7c91d1fb33d4c6
+      uses: cross-platform-actions/action@v1.8.0
       with:
         architecture: x86_64
         memory: 4G
