@@ -78,7 +78,7 @@
 
 //      Release         NTDDI-version                                   NTDDI-constant  Release     Build.Sub  Codename        Semester     Semester Semester Marketing-Name    min-SDK-Version WDK_NTDDI_VERSION
 //                                                                                           .Version                                       Codename  Date
-																																																														   
+
 #define MPT_WIN_10_PRE  MPT_WIN_MAKE_VERSION(0x06, 0x04, 0x00, 0x00) //                                                                                       Threshold            -            -
 #define MPT_WIN_10      MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x00) // NTDDI_WIN10      Win10.1507 10240      Threshold                              1507    -                    10.0.19041.0 NTDDI_WIN10_VB
 #define MPT_WIN_10_1511 MPT_WIN_MAKE_VERSION(0x0a, 0x00, 0x00, 0x01) // NTDDI_WIN10_TH2  Win10.1511 10586      Threshold 2                            1511    November Update      10.0.19041.0 NTDDI_WIN10_VB
@@ -492,6 +492,10 @@ static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
 #define MPT_OS_NETBSD 1
 
 
+#elif defined(__sun)
+#define MPT_OS_SOLARIS 1
+
+
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 #define MPT_OS_GENERIC_UNIX 1
 
@@ -598,6 +602,9 @@ static_assert(WDK_NTDDI_VERSION >= MPT_WIN_VERSION);
 #endif
 #ifndef MPT_OS_NETBSD
 #define MPT_OS_NETBSD 0
+#endif
+#ifndef MPT_OS_SOLARIS
+#define MPT_OS_SOLARIS 1
 #endif
 #ifndef MPT_OS_GENERIC_UNIX
 #define MPT_OS_GENERIC_UNIX 0
