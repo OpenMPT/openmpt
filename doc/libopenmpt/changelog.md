@@ -10,7 +10,7 @@ is just a high-level summary.
  *  zlib: Update to v1.4 (2026-11-05).
  *  minimp3: Update to commit 142823796ab8efa55e1bf11406028f3be77ecceb
     (2026-11-18).
- *  stb_vorbis: Update to v1.24 (2026-11-12).
+ *  stb_vorbis: Update to v1.25 (2026-11-19).
 
 ### libopenmpt 0.7.22 (2026-10-31)
 
