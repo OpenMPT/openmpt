@@ -471,11 +471,13 @@ MPT_ATTR_ALWAYSINLINE MPT_CONSTEXPR20_FUN int16 byteswap_impl(int16 value) noexc
 // endian-converting and casting back to int.
 // Thus these overloads.
 
-constexpr inline uint8 byteswap_impl(uint8 value) noexcept {
+template <typename T, typename std::enable_if<std::is_same<T, uint8>::value && !std::is_same<T, char>::value, bool>::type = true>
+constexpr inline T byteswap_impl(T value) noexcept {
 	return value;
 }
 
-constexpr inline int8 byteswap_impl(int8 value) noexcept {
+template <typename T, typename std::enable_if<std::is_same<T, int8>::value && !std::is_same<T, char>::value, bool>::type = true>
+constexpr inline T byteswap_impl(T value) noexcept {
 	return value;
 }
 
