@@ -59,7 +59,13 @@ inline mpt::osinfo::osclass get_class_from_sysname(const std::string & sysname) 
 inline std::string get_sysname() {
 #if MPT_OS_WINDOWS
 	return "Windows";
-#else  // !MPT_OS_WINDOWS
+#elif MPT_OS_SOLARIS
+	struct utsname uname_result;
+	if (uname(&uname_result) != 0) {
+		return {};
+	}
+	return mpt::ReadAutoBuf(uname_result.sysname);
+#else  // !MPT_OS_WINDOWS && !MPT_OS_SOLARIS
 	utsname uname_result;
 	if (uname(&uname_result) != 0) {
 		return {};
