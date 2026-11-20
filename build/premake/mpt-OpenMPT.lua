@@ -18,6 +18,7 @@ include_dependency "../../build/premake/ext-ogg.lua"
 include_dependency "../../build/premake/ext-opus.lua"
 include_dependency "../../build/premake/ext-opusenc.lua"
 include_dependency "../../build/premake/ext-opusfile.lua"
+include_dependency "../../build/premake/ext-pitch-detection.lua"
 include_dependency "../../build/premake/ext-portaudio.lua"
 if MPT_MSVC_BEFORE(2022) then
 include_dependency "../../build/premake/ext-pthread-win32.lua"
@@ -100,6 +101,8 @@ end
 	defines { "MPT_WITH_OPUSENC" }
 	mpt_use_opusfile()
 	defines { "MPT_WITH_OPUSFILE" }
+	mpt_use_pitch_detection()
+	defines { "MPT_WITH_PITCH_DETECTION" }
 	mpt_use_portaudio()
 	defines { "MPT_WITH_PORTAUDIO" }
 	if MPT_MSVC_BEFORE(2022) then

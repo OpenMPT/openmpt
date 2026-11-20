@@ -1,0 +1,13 @@
+pitch-detection: autocorrelation-based pitch detection,
+commit 8055f50bd94ffcc9fec4b63ca9a6a087eec9d892 (2025-01-07)
+https://github.com/sevagh/pitch-detection
+The following changes have been made:
+ *  Unnecessary files have been removed.
+ *  The ffts and mlpack dependencies have been removed.
+    OpenMPT's TinyFFT implementation is used instead.
+ *  MPM_LOWER_PITCH_CUTOFF has been lowered to work better with some tested
+    samples, and a function has been added to expose this value.
+ *  ssize_t has been replaced by std::ptrdiff_t.
+ *  All modifications have been marked with // OpenMPT
+ *  For building, premake is used to generate Visual Studio project files. See
+    ../build/premake/ for details.

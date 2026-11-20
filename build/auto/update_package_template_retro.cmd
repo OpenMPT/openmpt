@@ -24,6 +24,7 @@ copy /y ..\include\opus\COPYING                                      .\Licenses\
 copy /y ..\include\opusenc\COPYING                                   .\Licenses\License.Opusenc.txt || goto error
 copy /y ..\include\opusenc\AUTHORS                                   .\Licenses\License.Opusenc.Authors.txt || goto error
 copy /y ..\include\opusfile\COPYING                                  .\Licenses\License.Opusfile.txt || goto error
+copy /y ..\include\pitch-detection\LICENSE                           .\Licenses\License.PitchDetection.txt || goto error
 copy /y ..\include\portaudio\LICENSE.txt                             .\Licenses\License.PortAudio.txt || goto error
 rem copy /y ..\include\portaudio\bindings\cpp\COPYING                    .\Licenses\License.portaudiocpp.txt || goto error
 copy /y ..\include\pthread-win32\docs\COPYING.md                     .\Licenses\License.PThread-Win32.txt || goto error

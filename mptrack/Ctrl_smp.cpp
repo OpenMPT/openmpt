@@ -2993,17 +2993,11 @@ void CCtrlSamples::OnStereoSeparation()
 void CCtrlSamples::OnAutotune()
 {
 	SampleSelectionPoints selection = GetSelectionPoints();
-	if(selection.SelectionActive() && selection.channels != SampleChannelSelection::Both)
-	{
-		selection.channels = SampleChannelSelection::Both;
-		SetSelectionPoints(selection.start, selection.end, selection.channels);
-	}
-
 	if(!selection.SelectionActive())
 		selection.start = selection.end = 0;
 
 	ModSample &sample = m_sndFile.GetSample(m_nSample);
-	Autotune at(sample, m_sndFile.GetType(), selection.start, selection.end);
+	Autotune at(sample, m_sndFile.GetType(), selection.start, selection.end, selection.channels);
 	if(at.CanApply())
 	{
 		CAutotuneDlg dlg(this);
@@ -3019,13 +3013,30 @@ void CCtrlSamples::OnAutotune()
 				sample.nC5Speed = newFreq;
 			} else
 			{
-				modified = at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+				const Autotune::Result result = at.Apply(static_cast<double>(dlg.GetPitchReference()), dlg.GetTargetNote());
+				modified = (result == Autotune::Result::OK);
+				switch(result)
+				{
+				case Autotune::Result::OK:
+				case Autotune::Result::NoChange:
+					break;
+				case Autotune::Result::NoPitchFound:
+					Reporting::Information(U_("Unable to detect pitch. It may help to first transpose the sample up by an octave and then try again."));
+					break;
+				case Autotune::Result::CannotApply:
+				case Autotune::Result::Error:
+					MessageBeep(MB_ICONWARNING);
+					break;
+				}
 			}
 			OnFineTuneChangedDone();
 			if(modified)
 				SetModified(SampleHint().Info(), true, false);
 			EndWaitCursor();
 		}
+	} else
+	{
+		MessageBeep(MB_ICONWARNING);
 	}
 	SwitchToViewIfMouse();
 }

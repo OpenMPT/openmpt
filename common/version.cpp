@@ -659,6 +659,11 @@ mpt::ustring GetFullCreditsString()
 		"Ryuhei Mori for TinyFFT\n"
 		"https://github.com/ryuhei-mori/tinyfft\n"
 		"\n"
+#ifdef MPT_WITH_PITCH_DETECTION
+		"Sevag Hanssian for McLeod Pitch Detection\n"
+		"https://github.com/sevagh/pitch-detection\n"
+		"\n"
+#endif
 #ifdef MPT_WITH_ZLIB
 		"Jean-loup Gailly and Mark Adler for zlib\n"
 		"https://zlib.net/\n"

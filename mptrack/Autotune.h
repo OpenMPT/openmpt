@@ -14,6 +14,7 @@
 
 #include "DialogBase.h"
 #include "../soundlib/Snd_defs.h"
+#include "../tracklib/Types.h"
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -26,31 +27,40 @@ class Autotune
 {
 protected:
 	ModSample &m_sample;
-	MODTYPE m_modType;
+	const MODTYPE m_modType;
 
-	SmpLength m_selectionStart, m_selectionEnd;
+	const SmpLength m_selectionStart, m_selectionEnd;
+	const SampleChannelSelection m_channelSelection;
 
-	int16 *m_sampleData = nullptr;
-	SmpLength m_sampleLength = 0;
+	std::vector<double> m_sampleData;
 
 public:
-	Autotune(ModSample &smp, MODTYPE type, SmpLength selStart, SmpLength selEnd) : m_sample(smp), m_modType(type), m_selectionStart(selStart), m_selectionEnd(selEnd)
-	{ };
-
-	~Autotune()
+	enum class Result : uint8
 	{
-		delete[] m_sampleData;
-	}
+		OK,
+		NoChange,
+		CannotApply,
+		Error,
+		NoPitchFound,
+	};
+
+	Autotune(ModSample &smp, MODTYPE type, SmpLength selStart, SmpLength selEnd, SampleChannelSelection channelSel)
+		: m_sample{smp}
+		, m_modType{type}
+		, m_selectionStart{selStart}
+		, m_selectionEnd{selEnd}
+		, m_channelSelection{channelSel}
+	{ }
 
 	bool CanApply() const;
-	bool Apply(double pitchReference, int targetNote);
+	Result Apply(double pitchReference, int targetNote);
 
 protected:
 
 	template <class T>
-	void CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd);
+	void CopySamples(const T *origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd);
 
-	bool PrepareSample(SmpLength maxShift);
+	bool PrepareSample(SmpLength windowSize);
 
 };
 

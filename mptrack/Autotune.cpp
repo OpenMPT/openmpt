@@ -1,7 +1,7 @@
 /*
  * Autotune.cpp
  * ------------
- * Purpose: Class for tuning a sample to a given base note automatically.
+ * Purpose: Class for tuning a sample to a given base note automatically, using McLeod Pitch Method.
  * Notes  : (currently none)
  * Authors: OpenMPT Devs
  * The OpenMPT source code is released under the BSD license. Read LICENSE for more details.
@@ -13,93 +13,81 @@
 #include "resource.h"
 #include "../common/misc_util.h"
 #include "../soundlib/Sndfile.h"
+#include "../soundlib/TinyFFT.h"
+#include "../tracklib/SampleEdit.h"
+
+#include <pitch-detection/include/pitch_detection.h>
 
 #include <algorithm>
 #include <cmath>
 #include <execution>
 #include <numeric>
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-#if MPT_COMPILER_MSVC
-#include <intrin.h>
-#endif
-#include <emmintrin.h>
-#endif
+#include <thread>
 
 
 OPENMPT_NAMESPACE_BEGIN
 
 
-// The more bins, the more autocorrelations are done and the more precise the result is.
-#define BINS_PER_NOTE 32
-#define MIN_SAMPLE_LENGTH 2
-
-#define START_NOTE		(24 * BINS_PER_NOTE)	// C-2
-#define END_NOTE		(96 * BINS_PER_NOTE)	// C-8
-#define HISTORY_BINS	(12 * BINS_PER_NOTE)	// One octave
+static constexpr SmpLength MIN_SAMPLE_LENGTH = 2;
 
 
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif // MPT_COMPILER_CLANG
 static inline double FrequencyToNote(double freq, double pitchReference)
 {
-	return ((12.0 * (log(freq / (pitchReference / 2.0)) / log(2.0))) + 57.0);
-}
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
-
-
-static inline double NoteToFrequency(double note, double pitchReference)
-{
-	return pitchReference * pow(2.0, (note - 69.0) / 12.0);
+	return 69.0 + 12.0 * std::log2(freq / pitchReference);
 }
 
 
-// Calculate the amount of samples for autocorrelation shifting for a given note
-static inline SmpLength NoteToShift(uint32 sampleFreq, int note, double pitchReference)
-{
-	const double fundamentalFrequency = NoteToFrequency((double)note / BINS_PER_NOTE, pitchReference);
-	return std::max(mpt::saturate_round<SmpLength>((double)sampleFreq / fundamentalFrequency), SmpLength(1));
-}
-
-
-// Create an 8-Bit sample buffer with loop unrolling and mono conversion for autocorrelation.
+// Create a normalized sample buffer with loop unrolling and deinterleaving stereo channels.
 template <class T>
-void Autotune::CopySamples(const T* origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd)
+void Autotune::CopySamples(const T *origSample, SmpLength sampleLoopStart, SmpLength sampleLoopEnd)
 {
+	const bool singleChannel = SampleEdit::IsSingleChannel(m_sample, m_channelSelection);
 	const uint8 channels = m_sample.GetNumChannels();
+	const uint8 firstChannel = singleChannel ? SampleEdit::SelectedChannel(m_channelSelection) : 0;
+	const uint8 numAnalyzedChannels = singleChannel ? 1 : channels;
+	const SmpLength channelLength = static_cast<SmpLength>(m_sampleData.size() / numAnalyzedChannels);
+	double peak = 0.0;
+	std::vector<double> dcOffsets(numAnalyzedChannels);
 	sampleLoopStart *= channels;
 	sampleLoopEnd *= channels;
 
-	for(SmpLength i = 0, pos = 0; i < m_sampleLength; i++, pos += channels)
+	for(uint8 outChn = 0; outChn < numAnalyzedChannels; outChn++)
 	{
-		if(pos >= sampleLoopEnd)
+		const uint8 inChn = firstChannel + outChn;
+		double *out = m_sampleData.data() + outChn * channelLength;
+		double sum = 0.0;
+		T minValue = 0, maxValue = 0;
+		for(SmpLength i = 0, pos = inChn; i < channelLength; i++, pos += channels)
 		{
-			pos = sampleLoopStart;
+			if(pos >= sampleLoopEnd)
+				pos = sampleLoopStart + inChn;
+
+			const T value = origSample[pos];
+			out[i] = value;
+			sum += value;
+			minValue = std::min(minValue, value);
+			maxValue = std::max(maxValue, value);
 		}
+		dcOffsets[outChn] = sum / channelLength;
+		peak = std::max({peak, maxValue - dcOffsets[outChn], dcOffsets[outChn] - minValue});
+	}
 
-		const T* smp = origSample + pos;
-
-		int32 data = 0;	// More than enough for 256 channels... :)
-		for(uint8 chn = 0; chn < channels; chn++)
+	// Removing DC offset increases confidence with some samples
+	const double gain = peak > 0.0 ? 1.0 / peak : 1.0;
+	for(uint8 outChn = 0; outChn < numAnalyzedChannels; outChn++)
+	{
+		double *out = m_sampleData.data() + outChn * channelLength;
+		for(SmpLength i = 0; i < channelLength; i++)
 		{
-			// We only want the MSB.
-			data += static_cast<int32>(smp[chn] >> ((sizeof(T) - 1) * 8));
+			out[i] = (out[i] - dcOffsets[outChn]) * gain;
 		}
-
-		data /= channels;
-
-		m_sampleData[i] = static_cast<int16>(data);
 	}
 }
 
 
-// Prepare a sample buffer for autocorrelation
-bool Autotune::PrepareSample(SmpLength maxShift)
+// Prepare a sample buffer for pitch detection
+bool Autotune::PrepareSample(SmpLength windowSize)
 {
-
 	// Determine which parts of the sample should be examined.
 	SmpLength sampleOffset = 0, sampleLoopStart = 0, sampleLoopEnd = m_sample.nLength;
 	if(m_selectionEnd >= sampleLoopStart + MIN_SAMPLE_LENGTH)
@@ -122,19 +110,9 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 		sampleLoopEnd = m_sample.nLoopEnd;
 	}
 
-	// We should analyse at least a one second (= GetSampleRate() samples) long sample.
-	m_sampleLength = std::max(sampleLoopEnd, static_cast<SmpLength>(m_sample.GetSampleRate(m_modType))) + maxShift;
-	m_sampleLength = (m_sampleLength + 7) & ~7;
-
-	if(m_sampleData != nullptr)
-	{
-		delete[] m_sampleData;
-	}
-	m_sampleData = new int16[m_sampleLength];
-	if(m_sampleData == nullptr)
-	{
-		return false;
-	}
+	// We should analyze at least a one second (= GetSampleRate() samples) long sample.
+	const uint8 numAnalyzedChannels = SampleEdit::IsSingleChannel(m_sample, m_channelSelection) ? 1 : m_sample.GetNumChannels();
+	m_sampleData.resize(mpt::align_up(std::max(sampleLoopEnd, static_cast<SmpLength>(m_sample.GetSampleRate(m_modType))), windowSize) * numAnalyzedChannels);
 
 	// Copy sample over.
 	switch(m_sample.GetElementarySampleSize())
@@ -142,14 +120,12 @@ bool Autotune::PrepareSample(SmpLength maxShift)
 	case 1:
 		CopySamples(m_sample.sample8() + sampleOffset * m_sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
-
 	case 2:
 		CopySamples(m_sample.sample16() + sampleOffset * m_sample.GetNumChannels(), sampleLoopStart, sampleLoopEnd);
 		return true;
 	}
 
 	return false;
-
 }
 
 
@@ -159,218 +135,64 @@ bool Autotune::CanApply() const
 }
 
 
-namespace
+Autotune::Result Autotune::Apply(double pitchReference, int targetNote)
 {
-
-
-struct AutotuneHistogramEntry
-{
-	int index;
-	uint64 sum;
-};
-
-struct AutotuneHistogram
-{
-	std::array<uint64, HISTORY_BINS> histogram{};
-};
-
-struct AutotuneContext
-{
-	const int16 *m_sampleData;
-	double pitchReference;
-	SmpLength processLength;
-	uint32 sampleFreq;
-};
-
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-
-static inline AutotuneHistogramEntry CalculateNoteHistogramSSE2(int note, AutotuneContext ctx)
-{
-	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
-	uint64 autocorrSum = 0;
-	{
-		const __m128i *normalData = reinterpret_cast<const __m128i *>(ctx.m_sampleData);
-		const __m128i *shiftedData = reinterpret_cast<const __m128i *>(ctx.m_sampleData + autocorrShift);
-		for(SmpLength i = ctx.processLength / 8; i != 0; i--)
-		{
-			__m128i normal = _mm_loadu_si128(normalData++);
-			__m128i shifted = _mm_loadu_si128(shiftedData++);
-			__m128i diff = _mm_sub_epi16(normal, shifted);		// 8 16-bit differences
-			__m128i squares = _mm_madd_epi16(diff, diff);		// Multiply and add: 4 32-bit squares
-
-			__m128i sum1 = _mm_shuffle_epi32(squares, _MM_SHUFFLE(0, 1, 2, 3));	// Move upper two integers to lower
-			__m128i sum2  = _mm_add_epi32(squares, sum1);						// Now we can add the (originally) upper two and lower two integers
-			__m128i sum3 = _mm_shuffle_epi32(sum2, _MM_SHUFFLE(1, 1, 1, 1));	// Move the second-lowest integer to lowest position
-			__m128i sum4  = _mm_add_epi32(sum2, sum3);							// Add the two lowest positions
-			autocorrSum += _mm_cvtsi128_si32(sum4);
-		}
-	}
-	return {note % HISTORY_BINS, autocorrSum};
-}
-
-#endif
-
-static inline AutotuneHistogramEntry CalculateNoteHistogram(int note, AutotuneContext ctx)
-{
-	const SmpLength autocorrShift = NoteToShift(ctx.sampleFreq, note, ctx.pitchReference);
-	uint64 autocorrSum = 0;
-	{
-		const int16 *normalData = ctx.m_sampleData;
-		const int16 *shiftedData = ctx.m_sampleData + autocorrShift;
-		// Add up squared differences of all values
-		for(SmpLength i = ctx.processLength; i != 0; i--, normalData++, shiftedData++)
-		{
-			autocorrSum += (*normalData - *shiftedData) * (*normalData - *shiftedData);
-		}
-	}
-	return {note % HISTORY_BINS, autocorrSum};
-}
-
-
-static inline AutotuneHistogram operator+(AutotuneHistogram a, AutotuneHistogram b) noexcept
-{
-	AutotuneHistogram result;
-	for(std::size_t i = 0; i < HISTORY_BINS; ++i)
-	{
-		result.histogram[i] = a.histogram[i] + b.histogram[i];
-	}
-	return result;
-}
-
-
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif // MPT_COMPILER_CLANG
-static inline AutotuneHistogram & operator+=(AutotuneHistogram &a, AutotuneHistogram b) noexcept
-{
-	for(std::size_t i = 0; i < HISTORY_BINS; ++i)
-	{
-		a.histogram[i] += b.histogram[i];
-	}
-	return a;
-}
-#if MPT_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif // MPT_COMPILER_CLANG
-
-
-static inline AutotuneHistogram &operator+=(AutotuneHistogram &a, AutotuneHistogramEntry b) noexcept
-{
-	a.histogram[b.index] += b.sum;
-	return a;
-}
-
-
-struct AutotuneHistogramReduce
-{
-	inline AutotuneHistogram operator()(AutotuneHistogram a, AutotuneHistogram b) noexcept
-	{
-		return a + b;
-	}
-	inline AutotuneHistogram operator()(AutotuneHistogramEntry a, AutotuneHistogramEntry b) noexcept
-	{
-		AutotuneHistogram result;
-		result += a;
-		result += b;
-		return result;
-	}
-	inline AutotuneHistogram operator()(AutotuneHistogramEntry a, AutotuneHistogram b) noexcept
-	{
-		b += a;
-		return b;
-	}
-	inline AutotuneHistogram operator()(AutotuneHistogram a, AutotuneHistogramEntry b) noexcept
-	{
-		a += b;
-		return a;
-	}
-};
-
-
-} // local
-
-
-
-bool Autotune::Apply(double pitchReference, int targetNote)
-{
-	if(!CanApply())
-	{
-		return false;
-	}
-
 	const uint32 sampleFreq = m_sample.GetSampleRate(m_modType);
-	// At the lowest frequency, we get the highest autocorrelation shift amount.
-	const SmpLength maxShift = NoteToShift(sampleFreq, START_NOTE, pitchReference);
-	if(!PrepareSample(maxShift))
-	{
-		return false;
-	}
-	// We don't process the autocorrelation overhead.
-	const SmpLength processLength = m_sampleLength - maxShift;
+	if(!sampleFreq || !CanApply())
+		return Result::CannotApply;
 
-	AutotuneContext ctx;
-	ctx.m_sampleData = m_sampleData;
-	ctx.pitchReference = pitchReference;
-	ctx.processLength = processLength;
-	ctx.sampleFreq = sampleFreq;
-	
-	// Note that we cannot use a fake integer iterator here because of the requirement on ForwardIterator to return a reference to the elements.
-	std::array<int, END_NOTE - START_NOTE> notes;
-	std::iota(notes.begin(), notes.end(), START_NOTE);
+	const uint32 windowOrder = std::max(static_cast<uint32>(mpt::bit_width(static_cast<uint32>(4.0 * sampleFreq / pitch::lower_pitch_cutoff()))), uint32(4));
+	const SmpLength windowSize = SmpLength(1) << windowOrder;
+	if(!PrepareSample(windowSize))
+		return Result::Error;
 
-	AutotuneHistogram autocorr =
-#if defined(MPT_WANT_ARCH_INTRINSICS_X86_SSE2) && defined(MPT_ARCH_INTRINSICS_X86_SSE2)
-		(CPU::HasFeatureSetAndModesEnabled(CPU::feature::sse2, CPU::mode::xmm128sse)) ?
-			[&]() {
-				mpt::arch::feature_fence_guard arch_feature_guard;
-				return std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogramSSE2(note, ctx); } );
-			}()
-		:
-#endif
-			std::transform_reduce(std::execution::par_unseq, std::begin(notes), std::end(notes), AutotuneHistogram{}, AutotuneHistogramReduce{}, [ctx](int note) { return CalculateNoteHistogram(note, ctx); } );
-	
-	// Interpolate the histogram...
-	AutotuneHistogram interpolated;
-	for(int i = 0; i < HISTORY_BINS; i++)
+	struct TinyFFTProvider : public pitch::FFTProvider
 	{
-		interpolated.histogram[i] = autocorr.histogram[i];
-		const int kernelWidth = 4;
-		for(int ki = kernelWidth; ki >= 0; ki--)
+		TinyFFTProvider(const uint32 fftSize): fft{fftSize} {}
+		
+		void FFT(std::vector<std::complex<double>> &A) const override { fft.FFT(A); }
+		void IFFT(std::vector<std::complex<double>> &A) const override { fft.IFFT(A); }
+		void Normalize(std::vector<std::complex<double>> &data) const override { TinyFFT::Normalize(data); }
+		
+		const TinyFFT fft;
+	};
+	const TinyFFTProvider fft{windowOrder + 1};
+
+	const SmpLength numFrames = static_cast<SmpLength>(m_sampleData.size() / windowSize);
+	const SmpLength numWorkers = std::min(numFrames, static_cast<SmpLength>(std::max(std::thread::hardware_concurrency(), 1u)));
+	std::vector<double> frequencies(numFrames);
+	std::vector<SmpLength> workers(numWorkers);
+	std::iota(workers.begin(), workers.end(), SmpLength(0));
+
+	std::for_each(std::execution::par, workers.begin(), workers.end(), [&](SmpLength worker)
+	{
+		const SmpLength firstFrame = static_cast<SmpLength>(Util::muldiv_unsigned(worker, numFrames, numWorkers));
+		const SmpLength endFrame = static_cast<SmpLength>(Util::muldiv_unsigned(worker + 1, numFrames, numWorkers));
+		pitch_alloc::Mpm<double> mpm{static_cast<long>(windowSize), fft};
+		std::vector<double> frame;
+		for(SmpLength i = firstFrame; i < endFrame; i++)
 		{
-			// Choose bins to interpolate with
-			int left = i - ki;
-			if(left < 0) left += HISTORY_BINS;
-			int right = i + ki;
-			if(right >= HISTORY_BINS) right -= HISTORY_BINS;
-
-			interpolated.histogram[i] = interpolated.histogram[i] / 2 + (autocorr.histogram[left] + autocorr.histogram[right]) / 2;
+			const auto start = m_sampleData.begin() + i * windowSize;
+			frame.assign(start, start + windowSize);
+			frequencies[i] = mpm.pitch(frame, static_cast<int>(sampleFreq));
 		}
-	}
+	});
 
-	// ...and find global minimum
-	int minimumBin = static_cast<int>(std::min_element(std::begin(interpolated.histogram), std::end(interpolated.histogram)) - std::begin(interpolated.histogram));
+	mpt::erase_if(frequencies, [](const double frequency) { return frequency <= 0.0; });
+	if(frequencies.empty())
+		return Result::NoPitchFound;
 
-	// Center target notes around C
-	if(targetNote >= 6)
-	{
-		targetNote -= 12;
-	}
+	const auto medianFreq = frequencies.begin() + frequencies.size() / 2;
+	std::nth_element(frequencies.begin(), medianFreq, frequencies.end());
 
-	// Center bins around target note
-	minimumBin -= targetNote * BINS_PER_NOTE;
-	if(minimumBin >= 6 * BINS_PER_NOTE)
-	{
-		minimumBin -= 12 * BINS_PER_NOTE;
-	}
-	minimumBin += targetNote * BINS_PER_NOTE;
+	// Only shift within the current octave of the sample
+	double offset = FrequencyToNote(*medianFreq, pitchReference) - targetNote;
+	offset -= 12.0 * std::floor((offset + 6.0) / 12.0);
 
-	const double newFundamentalFreq = NoteToFrequency(static_cast<double>(69 - targetNote) + static_cast<double>(minimumBin) / BINS_PER_NOTE, pitchReference);
-
-	if(const auto newFreq = mpt::saturate_round<uint32>(sampleFreq * pitchReference / newFundamentalFreq); newFreq != sampleFreq)
+	if(const auto newFreq = mpt::saturate_round<uint32>(sampleFreq * std::pow(2.0, -offset / 12.0)); newFreq != sampleFreq)
 		m_sample.nC5Speed = newFreq;
 	else
-		return false;
+		return Result::NoChange;
 
 	if((m_modType & (MOD_TYPE_XM | MOD_TYPE_MOD)))
 	{
@@ -381,7 +203,7 @@ bool Autotune::Apply(double pitchReference, int targetNote)
 		}
 	}
 
-	return true;
+	return Result::OK;
 }
 
 
