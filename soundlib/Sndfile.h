@@ -437,6 +437,18 @@ private:
 	// Interleaved Front Mix Buffer (Also room for interleaved rear mix)
 	mixsample_t MixSoundBuffer[MIXBUFFERSIZE * 4];
 	mixsample_t MixRearBuffer[MIXBUFFERSIZE * 2];
+
+public:
+	// Per-channel audio capture — enabled via "render.channel_capture" CTL.
+	// Allocated on enable, freed on disable - Interleaved stereo: [ch * MIXBUFFERSIZE * 2].
+	bool                     m_channelCaptureEnabled{false};
+	CHANNELINDEX             m_channelCaptureNumChannels{0};
+	float                    m_channelCaptureGlobalVolScale{1.0f};
+	std::vector<mixsample_t> m_channelCaptureBuf;
+
+	void SetChannelCaptureEnabled(bool enable, CHANNELINDEX numChannels);
+
+private:
 	// Non-interleaved plugin processing buffer
 	float MixFloatBuffer[2][MIXBUFFERSIZE];
 	mixsample_t MixInputBuffer[NUMMIXINPUTBUFFERS][MIXBUFFERSIZE];
