@@ -7,6 +7,8 @@ is just a high-level summary.
 
 ### libopenmpt 0.8.11-pre
 
+ *  [**New**] `Makefile` now supports OpenIndiana.
+
  *  zlib: Update to v1.4 (2026-11-05).
  *  minimp3: Update to commit 142823796ab8efa55e1bf11406028f3be77ecceb
     (2026-11-18).
