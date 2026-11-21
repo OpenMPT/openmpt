@@ -182,6 +182,7 @@ template <typename T> class Mpm : public BaseAlloc
 	probabilistic_pitch(const std::vector<T> &, int);
 };
 
+#if 0  // OpenMPT
 /*
  * Allocate the buffers for YIN for re-use.
  * Intended for multiple consistently-sized audio buffers.
@@ -206,6 +207,7 @@ template <typename T> class Yin : public BaseAlloc
 	T
 	probabilistic_pitch(const std::vector<T> &, int);
 };
+#endif  // OpenMPT
 } // namespace pitch_alloc
 
 namespace util
