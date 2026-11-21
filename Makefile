@@ -351,6 +351,10 @@ endif
 ifeq ($(UNAME_S),Linux)
 HOST_FLAVOUR=LINUX
 endif
+
+ifeq ($(UNAME_S),SunOS)
+HOST_FLAVOUR=SOLARIS
+endif
 ifeq ($(UNAME_S),NetBSD)
 HOST_FLAVOUR=NETBSD
 endif

@@ -33,6 +33,10 @@ else ifeq ($(HOST_FLAVOUR),LINUX)
 
 include build/make/config-gcc.mk
 
+else ifeq ($(HOST_FLAVOUR),SOLARIS)
+
+include build/make/config-solaris.mk
+
 else ifeq ($(HOST_FLAVOUR),NETBSD)
 
 include build/make/config-gcc.mk
