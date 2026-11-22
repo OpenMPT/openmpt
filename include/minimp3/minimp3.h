@@ -706,6 +706,8 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
     {
         int sh = 3 - scf_shift;
 #if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 7))
+#endif  /* OpenMPT */
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 8))  /* OpenMPT */
         /* n_long_sfb + n_short_sfb <= 39 by construction (see L3_read_side_info);
            hint it to silence -Wstringop-overflow and drop the bounds branch.
            GCC < 7 has no -Wstringop-overflow to silence, but mishandles the hint
