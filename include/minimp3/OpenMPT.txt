@@ -2,3 +2,6 @@ minimp3 library from https://github.com/lieff/minimp3 commit
 142823796ab8efa55e1bf11406028f3be77ecceb (2026-11-18)
 The following changes have been made:
  *  minimp3.c has been added
+ *  A work-around to fix a bogus GCC 7 warning has been implemented. See
+    <https://github.com/lieff/minimp3/issues/157#issuecomment-7076455482>.
+ *  All modifications have been marked with "/* OpenMPT */".
