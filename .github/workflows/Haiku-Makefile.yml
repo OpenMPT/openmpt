@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    timeout-minutes: 120
 
     strategy:
       fail-fast: false
