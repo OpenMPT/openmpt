@@ -13,6 +13,7 @@ jobs:
       run:
         shell: msys2 {0}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - { sys: UCRT64,  rep: ucrt64,  env: ucrt-x86_64 }
