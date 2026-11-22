@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    timeout-minutes: 60
     runs-on: windows-latest
     defaults:
       run:
