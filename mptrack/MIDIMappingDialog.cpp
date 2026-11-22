@@ -32,13 +32,11 @@ CMIDIMappingDialog::CMIDIMappingDialog(CWnd *pParent, CSoundFile &sndfile)
 	, m_rMIDIMapper{m_sndFile.GetMIDIMapper()}
 {
 	CMainFrame::GetInputHandler()->Bypass(true);
-	oldMIDIRecondWnd = CMainFrame::GetMainFrame()->GetMidiRecordWnd();
 }
 
 
 CMIDIMappingDialog::~CMIDIMappingDialog()
 {
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(oldMIDIRecondWnd);
 	CMainFrame::GetInputHandler()->Bypass(false);
 }
 
@@ -68,16 +66,14 @@ BEGIN_MESSAGE_MAP(CMIDIMappingDialog, ResizableDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ADD, &CMIDIMappingDialog::OnBnClickedButtonAdd)
 	ON_BN_CLICKED(IDC_BUTTON_REPLACE, &CMIDIMappingDialog::OnBnClickedButtonReplace)
 	ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CMIDIMappingDialog::OnBnClickedButtonRemove)
-	ON_MESSAGE(WM_MOD_MIDIMSG,		&CMIDIMappingDialog::OnMidiMsg)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINMOVEMAPPING, &CMIDIMappingDialog::OnDeltaposSpinmovemapping)
 	ON_BN_CLICKED(IDC_CHECK_PATRECORD, &CMIDIMappingDialog::OnBnClickedCheckPatRecord)
 END_MESSAGE_MAP()
 
 
-LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
+void CMIDIMappingDialog::OnMidiMessage(mpt::const_byte_span midiData)
 {
-	uint32 midiData = static_cast<uint32>(dwMidiDataParam);
-	if(IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
+	if(!midiData.empty() && IsDlgButtonChecked(IDC_CHECK_MIDILEARN))
 	{
 		for(int i = 0; i < m_EventCBox.GetCount(); i++)
 		{
@@ -102,7 +98,6 @@ LRESULT CMIDIMappingDialog::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			}
 		}
 	}
-	return 1;
 }
 
 
@@ -157,7 +152,7 @@ BOOL CMIDIMappingDialog::OnInitDialog()
 
 	GetDlgItem(IDC_CHECK_PATRECORD)->EnableWindow((m_sndFile.GetType() == MOD_TYPE_MPT) ? TRUE : FALSE);
 
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd());
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(this, MidiTransformers::None);
 
 	CheckDlgButton(IDC_CHECK_MIDILEARN, BST_CHECKED);
 

@@ -12,6 +12,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 
+#include "MidiInputCallback.h"
 #include "ResizableDialog.h"
 #include "Moddoc.h"
 #include "../soundlib/Snd_defs.h"
@@ -21,7 +22,7 @@ OPENMPT_NAMESPACE_BEGIN
 class IMixPlugin;
 struct UpdateHint;
 
-class CAbstractVstEditor : public ResizableDialog
+class CAbstractVstEditor : public ResizableDialog, public IMidiInputCallback
 {
 protected:
 	CMenu m_Menu;
@@ -85,7 +86,6 @@ public:
 	afx_msg void OnCreateInstrument();
 	afx_msg void OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hMenu);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnMove(int x, int y);
 	afx_msg void OnClose() { DoClose(); }
@@ -94,6 +94,9 @@ public:
 	void PostNcDestroy() override;
 	void OnOK() override { DoClose(); }
 	void OnCancel() override { DoClose(); }
+	BOOL PreTranslateMessage(MSG *msg) override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span data) override;
 
 	virtual bool OpenEditor(CWnd *parent);
 	virtual void DoClose();
@@ -109,7 +112,6 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL PreTranslateMessage(MSG *msg) override;
 	bool HandleKeyMessage(MSG &msg, bool handleGlobal = false);
 	void UpdatePresetMenu(bool force = false);
 	void GeneratePresetMenu(int32 offset, CMenu &parent);

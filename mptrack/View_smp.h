@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "Globals.h"
+#include "MidiInputCallback.h"
 #include "Moddoc.h"
 #include "TrackerSettings.h"
 #include "../soundlib/modsmp_ctrl.h"
@@ -24,7 +25,7 @@ OPENMPT_NAMESPACE_BEGIN
 #define SMP_LEFTBAR_BUTTONS		8
 class OPLInstrDlg;
 
-class CViewSample: public CModScrollView
+class CViewSample: public CModScrollView, public IMidiInputCallback
 {
 public:
 	enum Flags : uint8
@@ -100,10 +101,6 @@ protected:
 	// Sample drawing
 	CPoint m_lastDrawPoint{-1, -1};  // For drawing horizontal lines
 	int m_drawChannel = 0;           // Which sample channel are we drawing on?
-
-	// Note-off event buffer for MIDI sustain pedal
-	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
-	std::bitset<16> m_midiSustainActive;
 
 	DWORD m_NcButtonState[SMP_LEFTBAR_BUTTONS];
 	std::array<SmpLength, MAX_CHANNELS> m_dwNotifyPos;
@@ -199,6 +196,8 @@ public:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	BOOL OnScrollBy(CSize sizeScroll, BOOL bDoScroll = TRUE) override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -259,7 +258,6 @@ protected:
 	afx_msg void OnAddSilence();
 	afx_msg void OnChangeGridSize();
 	afx_msg void OnQuickFade();
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM); //rewbs.customKeys
 	// cppcheck-suppress duplInheritedMember
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

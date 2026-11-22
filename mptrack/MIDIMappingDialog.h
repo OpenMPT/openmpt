@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CListCtrl.h"
+#include "MidiInputCallback.h"
 #include "MIDIMapping.h"
 #include "ResizableDialog.h"
 #include "PluginComboBox.h"
@@ -23,7 +24,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CSoundFile;
 class CMIDIMapper;
 
-class CMIDIMappingDialog : public ResizableDialog
+class CMIDIMappingDialog : public ResizableDialog, public IMidiInputCallback
 {
 public:
 	CMIDIMappingDirective m_Setting;
@@ -31,7 +32,6 @@ public:
 protected:
 	CSoundFile &m_sndFile;
 	CMIDIMapper &m_rMIDIMapper;
-	HWND oldMIDIRecondWnd;
 
 	// Dialog Data
 	CComboBox m_ControllerCBox;
@@ -60,6 +60,7 @@ protected:
 	BOOL OnInitDialog() override;
 	void DoDataExchange(CDataExchange* pDX) override;	// DDX/DDV support
 	CString GetToolTipText(UINT id, HWND hwnd) const override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 
 	DECLARE_MESSAGE_MAP()
 
@@ -75,7 +76,6 @@ protected:
 	afx_msg void OnBnClickedButtonAdd();
 	afx_msg void OnBnClickedButtonReplace();
 	afx_msg void OnBnClickedButtonRemove();
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg void OnDeltaposSpinmovemapping(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCheckPatRecord();
 };

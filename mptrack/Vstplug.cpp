@@ -1504,11 +1504,13 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 			{
 				if(ev->type == kVstMidiType)
 				{
-					plugin->MidiSend(static_cast<const VstMidiEvent *>(ev)->midiData);
+					auto &event = *static_cast<const VstMidiEvent *>(ev);
+					size_t size = MIDIEvents::GetEventLength(event.midiData[0]);
+					plugin->MidiSend(mpt::as_span(event.midiData).subspan(0, size));
 				} else if(ev->type == kVstSysExType)
 				{
-					auto event = static_cast<const VstMidiSysexEvent *>(ev);
-					plugin->MidiSend(mpt::as_span(mpt::byte_cast<const std::byte *>(event->sysexDump), event->dumpBytes));
+					auto &event = *static_cast<const VstMidiSysexEvent *>(ev);
+					plugin->MidiSend(mpt::as_span(event.sysexDump, event.dumpBytes));
 				}
 			}
 		}
@@ -1523,7 +1525,12 @@ void CVstPlugin::ReceiveVSTEvents(const VstEvents *events)
 			if(ev->type == kVstMidiType)
 			{
 				VstMidiEvent *event = static_cast<VstMidiEvent *>(ev);
-				::SendNotifyMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, event->midiData, reinterpret_cast<LPARAM>(this));
+				size_t size = MIDIEvents::GetEventLength(event->midiData[0]);
+				CMainFrame::GetMainFrame()->EnqueueMidiMessage(mpt::as_span(event->midiData).subspan(0, size), this);
+			} else if (ev->type == kVstSysExType)
+			{
+				VstMidiSysexEvent *event = static_cast<VstMidiSysexEvent *>(ev);
+				CMainFrame::GetMainFrame()->EnqueueMidiMessage(mpt::as_span(event->sysexDump, event->dumpBytes), this);
 			}
 		}
 	}
@@ -1621,12 +1628,11 @@ void CVstPlugin::Process(float *pOutL, float *pOutR, uint32 numFrames)
 
 bool CVstPlugin::MidiSend(mpt::const_byte_span midiData)
 {
-	if(IsBypassed())
+	if(IsBypassed() || midiData.empty())
 		return true;
 
 	ResetSilence();
-	const uint8 type = mpt::byte_cast<uint8>(midiData[0]);
-	if(type == MIDIEvents::sysExStart)
+	if(midiData[0] == std::byte{MIDIEvents::sysExStart})
 	{
 		VstMidiSysexEvent event{};
 		event.type = kVstSysExType;
@@ -1642,13 +1648,13 @@ bool CVstPlugin::MidiSend(mpt::const_byte_span midiData)
 		// C-5 01|=== ..
 		// TODO: Should not be used with real-time notes! Letting the key go too quickly
 		// (e.g. while output device is being initialized) will cause the note to be stuck!
-		bool insertAtFront = (MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOff);
+		bool insertAtFront = (MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evNoteOff);
 
 		VstMidiEvent event{};
 		event.type = kVstMidiType;
 		event.byteSize = sizeof(event);
-		MPT_ASSERT(midiData.size() <= sizeof(event.midiData) && midiData.size() == MIDIEvents::GetEventLength(type));
-		memcpy(&event.midiData, midiData.data(), std::min(sizeof(event.midiData), midiData.size()));
+		MPT_ASSERT(midiData.size() <= event.midiData.size() && midiData.size() == MIDIEvents::GetEventLength(midiData[0]));
+		std::copy(midiData.data(), midiData.data() + std::min(event.midiData.size(), midiData.size()), event.midiData.begin());
 
 		return vstEvents.Enqueue(&event, insertAtFront);
 	}

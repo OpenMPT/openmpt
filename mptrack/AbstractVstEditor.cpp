@@ -90,7 +90,6 @@ BEGIN_MESSAGE_MAP(CAbstractVstEditor, ResizableDialog)
 	ON_COMMAND(ID_VSTPRESETNAME,		&CAbstractVstEditor::OnVSTPresetRename)
 	ON_COMMAND(ID_PLUGINTOINSTRUMENT,	&CAbstractVstEditor::OnCreateInstrument)
 	ON_COMMAND_RANGE(ID_PRESET_SET, ID_PRESET_SET + PRESETS_PER_GROUP, &CAbstractVstEditor::OnSetPreset)
-	ON_MESSAGE(WM_MOD_MIDIMSG,		&CAbstractVstEditor::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&CAbstractVstEditor::OnCustomKeyMsg) //rewbs.customKeys
 	ON_COMMAND_RANGE(ID_PLUGSELECT, ID_PLUGSELECT + MAX_MIXPLUGINS, &CAbstractVstEditor::OnToggleEditor) //rewbs.patPlugName
 	ON_COMMAND_RANGE(ID_SELECTINST, ID_SELECTINST + MAX_INSTRUMENTS, &CAbstractVstEditor::OnSetInputInstrument) //rewbs.patPlugName
@@ -149,24 +148,29 @@ void CAbstractVstEditor::OnActivate(UINT nState, CWnd *pWndOther, BOOL bMinimize
 {
 	ResizableDialog::OnActivate(nState, pWndOther, bMinimized);
 	if(nState != WA_INACTIVE)
-	{
-		auto callback = [&plugin = m_VstPlugin](mpt::const_byte_span sysex) { plugin.MidiSend(sysex); };
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(GetSafeHwnd(), callback);
-	}
+		CMainFrame::GetMainFrame()->SetMidiRecordCallback(this, MidiTransformers::Transpose);
 }
 
 
-LRESULT CAbstractVstEditor::OnMidiMsg(WPARAM midiData, LPARAM sender)
+bool CAbstractVstEditor::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
+	return DefaultPreFilterMidiMessage(midiData, &m_VstPlugin.GetSoundFile(), kCtxVSTGUI);
+}
+
+
+void CAbstractVstEditor::OnMidiMessage(mpt::const_byte_span data)
+{
+	// Prevent MIDI feedback
+	if(data.empty() || CMainFrame::GetMainFrame()->GetCurrentMidiSender() == &m_VstPlugin)
+		return;
+
 	CModDoc *modDoc = m_VstPlugin.GetModDoc();
-	if(modDoc != nullptr && sender != reinterpret_cast<LPARAM>(&m_VstPlugin))
+	if(modDoc != nullptr)
 	{
 		if(!CheckInstrument(m_nInstrument))
 			m_nInstrument = GetBestInstrumentCandidate();
-		modDoc->ProcessMIDI((uint32)midiData, 0, m_nInstrument, &m_VstPlugin, kCtxVSTGUI);
-		return 1;
+		modDoc->ProcessMIDI(data, 0, m_nInstrument, &m_VstPlugin);
 	}
-	return 0;
 }
 
 

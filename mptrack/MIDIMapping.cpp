@@ -99,8 +99,10 @@ bool CMIDIMapper::Deserialize(FileReader &file)
 }
 
 
-bool CMIDIMapper::OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramval)
+bool CMIDIMapper::OnMIDImsg(mpt::const_byte_span midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramval)
 {
+	if(midimsg.empty())
+		return false;
 	const MIDIEvents::EventType eventType = MIDIEvents::GetTypeFromEvent(midimsg);
 	const uint8 controller = MIDIEvents::GetDataByte1FromEvent(midimsg);
 	const uint8 channel = MIDIEvents::GetChannelFromEvent(midimsg) & 0x7F;

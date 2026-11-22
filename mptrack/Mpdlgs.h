@@ -21,6 +21,7 @@ OPENMPT_NAMESPACE_BEGIN
 
 class CSoundFile;
 class CMainFrame;
+struct MidiPortInfo;
 
 #define NUM_CHANNELCOMBOBOXES	4
 
@@ -205,6 +206,7 @@ public:
 
 public:
 	CMidiSetupDlg(FlagSet<MidiSetup> flags, UINT device);
+	~CMidiSetupDlg();
 
 protected:
 	BOOL OnInitDialog() override;
@@ -220,6 +222,7 @@ protected:
 	CSpinButtonCtrl m_SpinSpd, m_SpinPat, m_SpinAmp;
 	CComboBox m_InputDevice, m_ATBehaviour, m_Quantize, m_ContinueMode, m_RecordPitchBend;
 	AccessibleEdit m_editAmp;
+	std::vector<MidiPortInfo> m_midiInPorts;
 };
 
 

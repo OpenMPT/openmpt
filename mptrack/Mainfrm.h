@@ -13,6 +13,8 @@
 #include "openmpt/all/BuildSettings.hpp"
 #include "CImageListEx.h"
 #include "Mainbar.h"
+#include "MidiInputCallback.h"
+#include "MidiTransformer.h"
 #include "Notification.h"
 #include "openmpt/soundbase/Dither.hpp"
 #include "Settings.h"
@@ -27,6 +29,7 @@
 
 #include <Msctf.h>
 
+#include <atomic>
 #include <functional>
 
 OPENMPT_NAMESPACE_BEGIN
@@ -35,6 +38,8 @@ class CAutoSaver;
 class CDLSBank;
 class CInputHandler;
 class CModDoc;
+class MidiInputHandle;
+class MidiMessage;
 class QuickStartDlg;
 struct UpdateCheckResult;
 struct UpdateHint;
@@ -143,6 +148,8 @@ class CMainFrame
 	, public SoundDevice::CallbackBufferHandler<DithersOpenMPT>
 	, public SoundDevice::IMessageReceiver
 	, public TfLanguageProfileNotifySink
+	, public IMidiInputCallbackDestroyedNotifySink
+	, public IMidiInputCallback
 {
 	DECLARE_DYNAMIC(CMainFrame)
 	// static data
@@ -174,23 +181,6 @@ public:
 	DWORD m_AudioThreadId = 0;
 	bool m_InNotifyHandler = false;
 
-	// Midi Input
-public:
-	struct MidiInData
-	{
-		struct SysExBuffer
-		{
-			MIDIHDR header;
-			std::vector<std::byte> data;
-		};
-
-		std::vector<SysExBuffer> sysexBuffers;
-		mpt::mutex dataMutex;
-		HMIDIIN inHandle = nullptr;
-	};
-
-	MidiInData midiInData;
-
 public:
 	CImageListEx m_MiscIcons, m_MiscIconsDisabled;			// Misc Icons
 	CImageListEx m_PatternIcons, m_PatternIconsDisabled;	// Pattern icons (includes some from sample editor as well...)
@@ -202,8 +192,18 @@ protected:
 	CStatusBar m_wndStatusBar;
 	CMainToolBar m_wndToolBar;
 	CSoundFile *m_pSndFile = nullptr; // != NULL only when currently playing or rendering
-	HWND m_hWndMidi = nullptr;
-	std::function<void(mpt::const_byte_span)> m_midiSysExCallback;
+
+	// MIDI Input
+	std::unique_ptr<MidiInputHandle> m_midiInputHandle;
+	IMidiInputCallback *m_midiRecordCallback = nullptr;
+	MidiTransposeFilter m_transposeFilter;
+	MidiVolumeFilter m_volumeFilter;
+	MidiSustainFilter m_sustainFilter;
+	mpt::mutex m_midiInputMutex;  // Protects m_midiInputQueue
+	std::vector<MidiMessage> m_midiInputQueue;
+	std::atomic<bool> m_midiMsgPending = false;
+	void *m_currentMidiSender = nullptr;  // Set during dispatch for feedback prevention
+
 	samplecount_t m_dwTimeSec = 0;
 	UINT_PTR m_nTimer = 0;
 	UINT m_nAvgMixChn = 0, m_nMixChn = 0;
@@ -270,22 +270,23 @@ public:
 	bool IsAudioDeviceOpen() const;
 	bool DoNotification(DWORD dwSamplesRead, int64 streamPosition);
 
-// Midi Input Functions
 public:
-	bool midiOpenDevice(bool showSettings = true);
-	void midiCloseDevice();
-	void SetMidiRecordWnd(HWND hwnd, std::function<void(mpt::const_byte_span)> sysExCallback = {})
-	{
-		m_hWndMidi = hwnd;
-		m_midiSysExCallback = std::move(sysExCallback);
-	}
-	HWND GetMidiRecordWnd() const { return m_hWndMidi; }
-	auto GetMidiSysexCallback() const { return m_midiSysExCallback; }
+	// MIDI Input Functions
+	bool MidiOpenDevice(bool showSettings = true);
+	void MidiCloseDevice();
+	void OnMidiMessage(mpt::const_byte_span midiData) override { EnqueueMidiMessage(midiData); }
+	void SetMidiRecordCallback(IMidiInputCallback *callback, FlagSet<MidiTransformers> transformers = MidiTransformers::Default);
+	IMidiInputCallback *GetMidiRecordCallback() const { return m_midiRecordCallback; }
+	void OnMidiInputCallbackDestroyed(void *callback) override;
+	// Enqueue a received MIDI message for processing in UI thread
+	void EnqueueMidiMessage(mpt::const_byte_span data, void *sender = nullptr);
+	// Returns the sender of the MIDI message currently being dispatched (for feedback prevention)
+	void *GetCurrentMidiSender() const { return m_currentMidiSender; }
+	static int NoteVolumeFromMidi(mpt::const_byte_span midiData);
+
 	void LoadMetronomeSamples();
 	void UpdateMetronomeSamples();
 	void UpdateMetronomeVolume();
-
-	static int ApplyVolumeRelatedSettings(const DWORD &dwParam1, const uint8 midivolume);
 
 // static functions
 public:
@@ -382,7 +383,9 @@ public:
 	void SetupMiscOptions();
 	void SetupPlayer();
 
-	void SetupMidi(FlagSet<MidiSetup> d, UINT n);
+	void SetupMidi(FlagSet<MidiSetup> flags, UINT device);
+	void UpdateMidiFilters();
+
 	HWND GetFollowSong() const;
 	HWND GetFollowSong(const CModDoc *pDoc) const { return (pDoc == GetModPlaying()) ? GetFollowSong() : nullptr; }
 	void ResetNotificationBuffer();
@@ -464,6 +467,7 @@ protected:
 	afx_msg void OnOpenMRUItem(UINT nId);
 	afx_msg void OnUpdateMRUItem(CCmdUI *cmd);
 	afx_msg LRESULT OnInvalidatePatterns(WPARAM, LPARAM);
+	afx_msg LRESULT OnMidiMsgReady(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnInternetUpdate();
 	afx_msg void OnUpdateAvailable();

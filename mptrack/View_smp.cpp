@@ -155,7 +155,6 @@ BEGIN_MESSAGE_MAP(CViewSample, CModScrollView)
 	ON_COMMAND_RANGE(ID_SAMPLE_CUE_1, ID_SAMPLE_CUE_9, &CViewSample::OnSetCuePoint)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		&CViewSample::OnUpdateUndo)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO,		&CViewSample::OnUpdateRedo)
-	ON_MESSAGE(WM_MOD_MIDIMSG,				&CViewSample::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			&CViewSample::OnCustomKeyMsg) //rewbs.customKeys
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -3784,7 +3783,6 @@ void CViewSample::OnAddSilence()
 	}
 	if(dlg.m_editOption == AddSilenceDlg::kResize)
 	{
-		// resize - dlg.m_nSamples = new size
 		if(dlg.m_numSamples == 0)
 		{
 			pModDoc->GetSampleUndo().PrepareUndo(m_nSample, sundo_replace, "Delete Sample");
@@ -3802,7 +3800,6 @@ void CViewSample::OnAddSilence()
 		}
 	} else
 	{
-		// add silence - dlg.m_nSamples = amount of bytes to be added
 		if(dlg.m_numSamples > 0)
 		{
 			CriticalSection cs;
@@ -3823,89 +3820,52 @@ void CViewSample::OnAddSilence()
 	}
 }
 
-LRESULT CViewSample::OnMidiMsg(WPARAM midiDataParam, LPARAM)
-{
-	const uint32 midiData = static_cast<uint32>(midiDataParam);
-	static uint8 midiVolume = 127;
 
+bool CViewSample::PreFilterMidiMessage(mpt::const_byte_span midiData)
+{
+	return DefaultPreFilterMidiMessage(midiData, &GetDocument()->GetSoundFile(), kCtxViewSamples);
+}
+
+
+void CViewSample::OnMidiMessage(mpt::const_byte_span midiData)
+{
 	CModDoc *pModDoc = GetDocument();
+	if(!pModDoc || midiData.empty())
+		return;
+
 	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
 	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
-	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 
-	CSoundFile *pSndFile = (pModDoc) ? &pModDoc->GetSoundFile() : nullptr;
-	if (!pSndFile) return 0;
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
 
 	uint8 nNote = midiByte1 + NOTE_MIN;
-	int nVol = midiByte2;
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
-	if(event == MIDIEvents::evNoteOn && !nVol)
+	if(event == MIDIEvents::evNoteOn && !midiByte2)
 		event = MIDIEvents::evNoteOff;	//Convert event to note-off if req'd
-
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(kCtxViewSamples, midiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
-	{
-		// Mapped to a command, no need to pass message on.
-		return 1;
-	}
 
 	switch(event)
 	{
-	case MIDIEvents::evNoteOff: // Note Off
-		if(m_midiSustainActive[channel])
-		{
-			m_midiSustainBuffer[channel].push_back(midiData);
-			return 1;
-		}
-		[[fallthrough]];
-	case MIDIEvents::evNoteOn: // Note On
+	case MIDIEvents::evNoteOff:
+	case MIDIEvents::evNoteOn:
 		LimitMax(nNote, NOTE_MAX);
 		pModDoc->NoteOff(nNote, true);
 		if(event != MIDIEvents::evNoteOff)
-		{
-			nVol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
-			PlayNote(nNote, 0, nVol);
-		}
-		break;
-
-	case MIDIEvents::evControllerChange: // Controller change
-		switch(midiByte1)
-		{
-		case MIDIEvents::MIDICC_Volume_Coarse: // Volume
-			midiVolume = midiByte2;
-			break;
-
-		case MIDIEvents::MIDICC_HoldPedal_OnOff:
-			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
-			if(!m_midiSustainActive[channel])
-			{
-				// Release all notes
-				for(const auto offEvent : m_midiSustainBuffer[channel])
-				{
-					OnMidiMsg(offEvent, 0);
-				}
-				m_midiSustainBuffer[channel].clear();
-			}
-			break;
-		}
+			PlayNote(nNote, 0, CMainFrame::NoteVolumeFromMidi(midiData));
 		break;
 
 	case MIDIEvents::evPitchBend:
 		for(CHANNELINDEX chn : m_noteChannel)
 		{
 			if(chn != CHANNELINDEX_INVALID)
-				pSndFile->m_PlayState.Chn[chn].SetMIDIPitchBend(midiByte2, midiByte1);
+				sndFile.m_PlayState.Chn[chn].SetMIDIPitchBend(midiByte2, midiByte1);
 		}
 		break;
 
 	default:
 		break;
 	}
-
-	return 1;
 }
+
 
 BOOL CViewSample::PreTranslateMessage(MSG *pMsg)
 {

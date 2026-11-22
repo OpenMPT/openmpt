@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "Globals.h"
+#include "MidiInputCallback.h"
 #include "PatternCursor.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
@@ -79,7 +80,7 @@ struct PatternEditPos
 // Pattern editing class
 
 
-class CViewPattern final : public CModScrollView
+class CViewPattern final : public CModScrollView, public IMidiInputCallback
 {
 public:
 	// Pattern status flags
@@ -165,9 +166,7 @@ protected:
 	CHANNELINDEX m_chordPatternChannels[MPTChord::notesPerChord];
 	ModCommand::NOTE m_prevChordNote, m_prevChordBaseNote;
 
-	// Note-off event buffer for MIDI sustain pedal
-	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
-	std::bitset<16> m_midiSustainActive;
+	bool m_midiCCMapped = false;
 
 	struct ChannelState
 	{
@@ -359,6 +358,8 @@ public:
 	LRESULT OnModViewMsg(WPARAM, LPARAM) override;
 	LRESULT OnPlayerNotify(Notification *) override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -453,7 +454,6 @@ protected:
 	afx_msg void OnUpdateUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateRedo(CCmdUI *pCmdUI);
 	afx_msg void OnSelectPlugin(UINT nID);
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	afx_msg LRESULT OnRecordPlugParamChange(WPARAM, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	afx_msg void OnClearSelectionFromMenu();

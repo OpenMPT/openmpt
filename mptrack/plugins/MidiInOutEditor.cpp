@@ -19,7 +19,6 @@
 #include "../UpdateHints.h"
 #include "../../soundlib/MIDIEvents.h"
 #include "../../soundlib/MIDIMacroParser.h"
-#include <rtmidi/RtMidi.h>
 
 
 OPENMPT_NAMESPACE_BEGIN
@@ -71,8 +70,8 @@ bool MidiInOutEditor::OpenEditor(CWnd *parent)
 	m_latencyEdit.AllowNegative(true);
 	m_latencyEdit.SetDecimalValue(plugin.m_latency * 1000.0, 4);
 	m_latencySpin.SetRange32(mpt::saturate_round<int>(plugin.GetOutputLatency() * -1000.0), int32_max);
-	PopulateList(m_inputCombo, plugin.m_midiIn,  plugin.m_inputDevice, true);
-	PopulateList(m_outputCombo, plugin.m_midiOut, plugin.m_outputDevice, false);
+	PopulateList(m_inputCombo, true, plugin.m_inputDevice.id);
+	PopulateList(m_outputCombo, false, plugin.m_outputDevice.id);
 	UpdateOutputPlugin();
 	CheckDlgButton(IDC_CHECK1, plugin.m_sendTimingInfo ? BST_CHECKED : BST_UNCHECKED);
 	CheckDlgButton(IDC_CHECK2, plugin.m_alwaysSendInitialDump ? BST_UNCHECKED : BST_CHECKED);
@@ -128,38 +127,33 @@ void MidiInOutEditor::UpdateMidiDump()
 
 
 // Update lists of available input / output devices
-void MidiInOutEditor::PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput)
+void MidiInOutEditor::PopulateList(CComboBox &combo, bool isInput, MidiPortID currentPort)
 {
 	combo.SetRedraw(FALSE);
 	combo.ResetContent();
 
 	// Add dummy device
-	combo.SetItemData(combo.AddString(_T("<none>")), static_cast<DWORD_PTR>(MidiInOut::kNoDevice));
+	combo.SetItemData(combo.AddString(_T("<none>")), static_cast<DWORD_PTR>(kNoMidiDevice));
 	int selectedItem = 0;
 	if(!isInput)
 	{
 		int result = combo.AddString(_T("Internal OpenMPT Output"));
 		combo.SetItemData(result, static_cast<DWORD_PTR>(MidiInOut::kInternalDevice));
-		if (result != CB_ERR && midiDevice.index == MidiInOut::kInternalDevice)
+		if (result != CB_ERR && currentPort == MidiInOut::kInternalDevice)
 			selectedItem = result;
 	}
 
-	// Go through all RtMidi devices
-	auto ports = rtDevice.getPortCount();
-	CString portName;
-	for(unsigned int i = 0; i < ports; i++)
+	// Go through all MIDI devices
+	MidiDeviceManager &manager = MidiDeviceManager::Instance();
+	const auto ports = isInput ? manager.EnumerateInputPorts() : manager.EnumerateOutputPorts();
+	for(const auto &port : ports)
 	{
-		try
-		{
-			portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::Charset::UTF8, midiDevice.GetPortName(i)), isInput);
-			int result = combo.AddString(portName);
-			combo.SetItemData(result, i);
+		CString portName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::Charset::UTF8, port.name), isInput);
+		int result = combo.AddString(portName);
+		combo.SetItemData(result, port.id);
 
-			if(result != CB_ERR && i == midiDevice.index)
-				selectedItem = result;
-		} catch(RtMidiError &)
-		{
-		}
+		if(result != CB_ERR && port.id == currentPort)
+			selectedItem = result;
 	}
 
 	combo.SetCurSel(selectedItem);
@@ -183,12 +177,12 @@ void MidiInOutEditor::UpdateOutputPlugin()
 
 
 // Refresh current input / output device in GUI
-void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
+void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiPortID device)
 {
 	int items = combo.GetCount();
 	for(int i = 0; i < items; i++)
 	{
-		if(static_cast<MidiDevice::ID>(combo.GetItemData(i)) == device)
+		if(static_cast<MidiPortID>(combo.GetItemData(i)) == device)
 		{
 			combo.SetCurSel(i);
 			break;
@@ -199,14 +193,14 @@ void MidiInOutEditor::SetCurrentDevice(CComboBox &combo, MidiDevice::ID device)
 
 void MidiInOutEditor::OnInputChanged()
 {
-	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(m_inputCombo.GetItemData(m_inputCombo.GetCurSel()));
+	MidiPortID newDevice = static_cast<MidiPortID>(m_inputCombo.GetItemData(m_inputCombo.GetCurSel()));
 	static_cast<MidiInOut &>(m_VstPlugin).OpenDevice(newDevice, true);
 }
 
 
 void MidiInOutEditor::OnOutputChanged()
 {
-	MidiDevice::ID newDevice = static_cast<MidiDevice::ID>(m_outputCombo.GetItemData(m_outputCombo.GetCurSel()));
+	MidiPortID newDevice = static_cast<MidiPortID>(m_outputCombo.GetItemData(m_outputCombo.GetCurSel()));
 	static_cast<MidiInOut &>(m_VstPlugin).OpenDevice(newDevice, false);
 }
 

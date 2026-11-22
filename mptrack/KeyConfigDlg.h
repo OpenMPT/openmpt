@@ -13,6 +13,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 #include "CListCtrl.h"
 #include "CommandSet.h"
+#include "MidiInputCallback.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
@@ -36,11 +37,10 @@ public:
 };
 
 
-class CCustEdit: public CEdit
+class CCustEdit: public CEdit, public IMidiInputCallback
 {
 protected:
 	COptionsKeyboard *m_pOptKeyDlg = nullptr;
-	bool m_isFocussed = false;
 	bool m_bypassed = false;
 
 public:
@@ -56,10 +56,10 @@ public:
 	
 protected:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
-	
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
+
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
 	afx_msg void OnKillFocus(CWnd *pNewWnd);
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	
 	DECLARE_MESSAGE_MAP()
 };

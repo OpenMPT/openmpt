@@ -24,6 +24,7 @@ class CModDoc;
 class CSoundFile;
 struct DRAGONDROP;
 struct Notification;
+enum InputTargetContext : int8;
 
 class CModControlBar: public CToolBarCtrl
 {
@@ -251,6 +252,9 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
+
+
+bool DefaultPreFilterMidiMessage(mpt::const_byte_span midiData, CSoundFile *sndFile, InputTargetContext ctx);
 
 
 OPENMPT_NAMESPACE_END

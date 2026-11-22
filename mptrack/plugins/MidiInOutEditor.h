@@ -35,7 +35,7 @@ public:
 	MidiInOutEditor(MidiInOut &plugin);
 
 	// Refresh current input / output device in GUI
-	void SetCurrentDevice(bool asInputDevice, MidiDevice::ID device)
+	void SetCurrentDevice(bool asInputDevice, MidiPortID device)
 	{
 		CComboBox &combo = asInputDevice ? m_inputCombo : m_outputCombo;
 		SetCurrentDevice(combo, device);
@@ -49,10 +49,10 @@ public:
 protected:
 
 	// Update lists of available input / output devices
-	static void PopulateList(CComboBox &combo, RtMidi &rtDevice, MidiDevice &midiDevice, bool isInput);
+	static void PopulateList(CComboBox &combo, bool isInput, MidiPortID currentPort);
 	void UpdateOutputPlugin();
 	// Refresh current input / output device in GUI
-	void SetCurrentDevice(CComboBox &combo, MidiDevice::ID device);
+	void SetCurrentDevice(CComboBox &combo, MidiPortID device);
 
 	void UpdateMidiDump();
 

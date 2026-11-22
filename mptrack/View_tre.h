@@ -12,6 +12,7 @@
 #pragma once
 
 #include "openmpt/all/BuildSettings.hpp"
+#include "MidiInputCallback.h"
 
 #include "../soundlib/modcommand.h"
 #include "../soundlib/Snd_defs.h"
@@ -65,7 +66,7 @@ public:
 };
 
 
-class CModTree: public CTreeCtrl
+class CModTree: public CTreeCtrl, public IMidiInputCallback
 {
 public:
 	enum ModItemType : uint8
@@ -267,6 +268,8 @@ public:
 	//{{AFX_VIRTUAL(CModTree)
 public:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 	//}}AFX_VIRTUAL
 
 // Drag & Drop operations
@@ -373,7 +376,6 @@ protected:
 	afx_msg void OnSortBySize() { SetInstrumentLibraryFilterSortOrder(LibrarySortOrder::Size); }
 
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

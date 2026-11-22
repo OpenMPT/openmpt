@@ -659,7 +659,7 @@ struct VstMidiEvent : public VstEvent
 {
 	int32 noteLength;
 	int32 noteOffset;
-	uint32 midiData;
+	std::array<std::byte, 4> midiData;
 	int8 detune;
 	int8 noteOffVelocity;
 	int8 reserved1;

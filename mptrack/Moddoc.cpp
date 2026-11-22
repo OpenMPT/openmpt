@@ -928,10 +928,8 @@ UINT CModDoc::ShowLog(const CString &preamble, const CString &title, CWnd *paren
 }
 
 
-void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx)
+void CModDoc::ProcessMIDI(mpt::const_byte_span midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins, IMixPlugin *plugin)
 {
-	static uint8 midiVolume = 127;
-
 	MIDIEvents::EventType event  = MIDIEvents::GetTypeFromEvent(midiData);
 	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
 	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
@@ -942,35 +940,10 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 	if((event == MIDIEvents::evNoteOn) && !vol)
 		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
 
-	PLUGINDEX mappedIndex = 0;
-	PlugParamIndex paramIndex = 0;
-	uint16 paramValue = 0;
-	bool captured = m_SndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
-
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(ctx, midiData) != kcNull
-		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
-	{
-		// Mapped to a command, no need to pass message on.
-		captured = true;
-	}
-
-	if(captured)
-	{
-		// Event captured by MIDI mapping or shortcut, no need to pass message on.
-		return;
-	}
-
 	const bool validInstr = (ins > 0 && ins <= GetNumInstruments()), validSample = (smp > 0 && smp <= GetNumSamples());
 	switch(event)
 	{
 	case MIDIEvents::evNoteOff:
-		if(m_midiSustainActive[channel])
-		{
-			m_midiSustainBuffer[channel].push_back(midiData);
-			return;
-		}
 		if(validInstr || validSample)
 		{
 			LimitMax(note, NOTE_MAX);
@@ -988,33 +961,12 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 		if(validInstr || validSample)
 		{
 			LimitMax(note, NOTE_MAX);
-			vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
+			vol = CMainFrame::NoteVolumeFromMidi(midiData);
 			PlayNote(PlayNoteParam(note).Instrument(ins).Sample(smp).Volume(vol).CheckNNA(m_midiPlayingNotes[channel]), &m_noteChannel);
 			return;
 		} else if(plugin != nullptr)
 		{
 			plugin->MidiSend(midiData);
-		}
-		break;
-
-	case MIDIEvents::evControllerChange:
-		switch(midiByte1)
-		{
-		case MIDIEvents::MIDICC_Volume_Coarse:
-			midiVolume = midiByte2;
-			break;
-		case MIDIEvents::MIDICC_HoldPedal_OnOff:
-			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
-			if(!m_midiSustainActive[channel])
-			{
-				// Release all notes
-				for(const auto offEvent : m_midiSustainBuffer[channel])
-				{
-					ProcessMIDI(offEvent, 0, ins, plugin, ctx);
-				}
-				m_midiSustainBuffer[channel].clear();
-			}
-			break;
 		}
 		break;
 
@@ -1037,7 +989,7 @@ void CModDoc::ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins,
 	{
 		plugin->MidiSend(midiData);
 		// Sending midi may modify the plug. For now, if MIDI data is not active sensing or aftertouch messages, set modified.
-		if(midiData != MIDIEvents::System(MIDIEvents::sysActiveSense)
+		if(!mpt::span_elements_equal(midiData, MIDIEvents::System(MIDIEvents::sysActiveSense))
 			&& event != MIDIEvents::evPolyAftertouch && event != MIDIEvents::evChannelAftertouch
 			&& event != MIDIEvents::evPitchBend
 			&& m_SndFile.GetModSpecifications().supportsPlugins)
@@ -1158,7 +1110,7 @@ CHANNELINDEX CModDoc::PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChan
 				if ((nPlugin) && (nPlugin <= MAX_MIXPLUGINS))
 				{
 					IMixPlugin *pPlugin = m_SndFile.m_MixPlugins[nPlugin - 1].pMixPlugin;
-					if(pPlugin != nullptr)
+					if(pPlugin != nullptr && pPlugin != pMainFrm->GetCurrentMidiSender())
 					{
 						pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN], static_cast<uint16>(chn.nVolume), channel);
 					}
@@ -1222,6 +1174,7 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 		}
 	}
 
+	const CMainFrame *mainFrm = CMainFrame::GetMainFrame();
 	const FlagSet<ChannelFlags> mask = (fade ? CHN_NOTEFADE : (CHN_NOTEFADE | CHN_KEYOFF));
 	const CHANNELINDEX startChn = currentChn != CHANNELINDEX_INVALID ? currentChn : m_SndFile.GetNumChannels();
 	const CHANNELINDEX endChn = currentChn != CHANNELINDEX_INVALID ? currentChn + 1 : MAX_CHANNELS;
@@ -1230,7 +1183,10 @@ bool CModDoc::NoteOff(UINT note, bool fade, INSTRUMENTINDEX ins, CHANNELINDEX cu
 	for(CHANNELINDEX i = startChn; i < endChn && !found; i++, pChn++)
 	{
 		// Fade all channels > m_nChannels which are playing this note and aren't NNA channels.
-		if(pPlugin && pChn->pModInstrument == pIns && (currentChn == CHANNELINDEX_INVALID || currentChn == i) && pChn->lastMidiNoteWithoutArp == pIns->NoteMap[note - NOTE_MIN])
+		if(pPlugin && pChn->pModInstrument == pIns
+			&& (currentChn == CHANNELINDEX_INVALID || currentChn == i)
+			&& pChn->lastMidiNoteWithoutArp == pIns->NoteMap[note - NOTE_MIN]
+			&& pPlugin != mainFrm->GetCurrentMidiSender())
 		{
 			pPlugin->MidiCommand(*pIns, pIns->NoteMap[note - NOTE_MIN] | IMixPlugin::MIDI_NOTE_OFF, 0, currentChn);
 			pChn->lastMidiNoteWithoutArp = NOTE_NONE;

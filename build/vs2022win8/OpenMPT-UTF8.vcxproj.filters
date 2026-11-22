@@ -753,6 +753,15 @@
     <ClInclude Include="..\..\mptrack\Mainfrm.h">
       <Filter>mptrack</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\mptrack\MidiDeviceManager.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\MidiInputCallback.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mptrack\MidiTransformer.h">
+      <Filter>mptrack</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\mptrack\ModConvert.h">
       <Filter>mptrack</Filter>
     </ClInclude>
@@ -2144,6 +2153,12 @@
     <ClCompile Include="..\..\mptrack\Mainbar.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mptrack\MidiDeviceManager.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mptrack\MidiTransformer.cpp">
+      <Filter>mptrack</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\mptrack\Mod2wave.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
@@ -2163,9 +2178,6 @@
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp">
-      <Filter>mptrack</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\mptrack\Mpt_midi.cpp">
       <Filter>mptrack</Filter>
     </ClCompile>
     <ClCompile Include="..\..\mptrack\Mptrack.cpp">

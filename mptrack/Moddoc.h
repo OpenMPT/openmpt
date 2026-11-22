@@ -43,8 +43,6 @@ struct SplitKeyboardSettings
 	bool octaveLink = false;	// apply octaveModifier
 };
 
-enum InputTargetContext : int8;
-
 
 struct LogEntry
 {
@@ -98,7 +96,7 @@ struct PlayNoteParam
 	PlayNoteParam& Offset(SmpLength sampleOffset) { m_sampleOffset = sampleOffset; return *this; }
 
 	PlayNoteParam& Volume(int32 volume) { m_volume = volume; return *this; }
-	PlayNoteParam& Panning(int32 panning) { m_panning= panning; return *this; }
+	PlayNoteParam& Panning(int32 panning) { m_panning = panning; return *this; }
 	PlayNoteParam& Sample(SAMPLEINDEX sample) { m_sample = sample; return *this; }
 	PlayNoteParam& Instrument(INSTRUMENTINDEX instr) { m_instr = instr; return *this; }
 	PlayNoteParam& Channel(CHANNELINDEX channel) { m_currentChannel = channel; return *this; }
@@ -148,10 +146,7 @@ public:
 	bool m_bHasValidPath = false; //becomes true if document is loaded or saved.
 
 protected:
-	// Note-off event buffer for MIDI sustain pedal
-	std::array<std::vector<uint32>, 16> m_midiSustainBuffer;
 	std::array<std::bitset<128>, 16> m_midiPlayingNotes;
-	std::bitset<16> m_midiSustainActive;
 
 	std::vector<RecordGroup> m_multiRecordGroup;
 
@@ -257,7 +252,7 @@ public:
 	bool RemoveSample(SAMPLEINDEX nSmp);
 	bool RemoveInstrument(INSTRUMENTINDEX nIns);
 
-	void ProcessMIDI(uint32 midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins, IMixPlugin *plugin, InputTargetContext ctx);
+	void ProcessMIDI(mpt::const_byte_span midiData, SAMPLEINDEX smp, INSTRUMENTINDEX ins, IMixPlugin *plugin);
 	CHANNELINDEX PlayNote(PlayNoteParam &params, NoteToChannelMap *noteChannel = nullptr);
 	bool NoteOff(UINT note, bool fade = false, INSTRUMENTINDEX ins = INSTRUMENTINDEX_INVALID, CHANNELINDEX currentChn = CHANNELINDEX_INVALID);
 	void CheckNNA(ModCommand::NOTE note, INSTRUMENTINDEX ins, std::bitset<128> &playingNotes);

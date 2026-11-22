@@ -148,7 +148,6 @@ public:
 	virtual float RenderSilence(uint32 numSamples);
 
 	// MIDI event handling
-	bool MidiSend(uint32 midiCode);
 	virtual bool MidiSend(mpt::const_byte_span /*midiData*/) { return true; }
 	virtual void MidiCC(MIDIEvents::MidiCC /*nController*/, uint8 /*nParam*/, CHANNELINDEX /*trackChannel*/) { }
 	virtual void MidiPitchBendRaw(int32 /*pitchbend*/, CHANNELINDEX /*trackChannel*/) {}

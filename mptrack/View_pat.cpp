@@ -62,7 +62,6 @@ BEGIN_MESSAGE_MAP(CViewPattern, CModScrollView)
 	ON_WM_KILLFOCUS()
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,	&CViewPattern::OnCustomKeyMsg)
-	ON_MESSAGE(WM_MOD_MIDIMSG,		&CViewPattern::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_RECORDPARAM,	&CViewPattern::OnRecordPlugParamChange)
 	ON_COMMAND(ID_EDIT_CUT,			&CViewPattern::OnEditCut)
 	ON_COMMAND(ID_EDIT_COPY,		&CViewPattern::OnEditCopy)
@@ -199,6 +198,8 @@ void CViewPattern::OnInitialUpdate()
 	CModDoc *modDoc = GetDocument();
 	if(modDoc->GetSoundFile().m_SongFlags[SONG_FORMAT_NO_VOLCOL] && TrackerSettings::Instance().autoHideVolumeColumnForMOD)
 		m_visibleColumns.reset(PatternCursor::volumeColumn);
+
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(this, MidiTransformers::Sustain | MidiTransformers::Transpose);
 }
 
 
@@ -3935,53 +3936,18 @@ ModCommand &CViewPattern::GetModCommand(CSoundFile &sndFile, const PatternEditPo
 }
 
 
-LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
+bool CViewPattern::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
-	const uint32 midiData = static_cast<uint32>(dwMidiDataParam);
-	static uint8 midiVolume = 127;
-
-	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CModDoc *pModDoc = GetDocument();
-
-	if(pModDoc == nullptr || pMainFrm == nullptr)
-		return 0;
+	if(pModDoc == nullptr || midiData.empty())
+		return false;
 
 	CSoundFile &sndFile = pModDoc->GetSoundFile();
-
-	//Midi message from our perspective:
-	//     +---------------------------+---------------------------+-------------+-------------+
-	//bit: | 24.23.22.21 | 20.19.18.17 | 16.15.14.13 | 12.11.10.09 | 08.07.06.05 | 04.03.02.01 |
-	//     +---------------------------+---------------------------+-------------+-------------+
-	//     |     Velocity (0-127)      |  Note (middle C is 60)    |   Event     |   Channel   |
-	//     +---------------------------+---------------------------+-------------+-------------+
-	//(http://home.roadrunner.com/~jgglatt/tech/midispec.htm)
-
-	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
-	const uint8 channel = MIDIEvents::GetChannelFromEvent(midiData);
-
-	const uint8 nNote = midiByte1 + NOTE_MIN;
-	int vol = midiByte2;  // At this stage nVol is a non linear value in [0;127]
-	                      // Need to convert to linear in [0;64] - see below
-	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
-
-	if((event == MIDIEvents::evNoteOn) && !vol)
-		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
-
-	// Handle MIDI mapping.
 	PLUGINDEX mappedIndex = uint8_max;
 	PlugParamIndex paramIndex = 0;
 	uint16 paramValue = uint16_max;
 	bool captured = sndFile.GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue);
-
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), midiData) != kcNull
-	   || ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
-	{
-		// Mapped to a command, no need to pass message on.
-		captured = true;
-	}
+	m_midiCCMapped = (paramValue != uint16_max);
 
 	// Write parameter control commands if needed.
 	if(paramValue != uint16_max && IsEditingEnabled() && sndFile.GetType() == MOD_TYPE_MPT)
@@ -4003,11 +3969,36 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		pModDoc->UpdateAllViews(this, PatternHint(editPos.pattern).Data(), this);
 	}
 
-	if(captured)
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetInputHandler();
+	if(ih->HandleMIDIMessage(static_cast<InputTargetContext>(kCtxViewPatterns + 1 + m_Cursor.GetColumnType()), midiData) != kcNull
+	   || ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
 	{
-		// Event captured by MIDI mapping or shortcut, no need to pass message on.
-		return 1;
+		// Mapped to a command, no need to pass message on.
+		captured = true;
 	}
+
+	return captured;
+}
+
+
+void CViewPattern::OnMidiMessage(mpt::const_byte_span midiData)
+{
+	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
+	CModDoc *pModDoc = GetDocument();
+	if(pModDoc == nullptr || pMainFrm == nullptr || midiData.empty())
+		return;
+
+	CSoundFile &sndFile = pModDoc->GetSoundFile();
+
+	const uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
+	const uint8 midiByte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
+	const uint8 nNote = midiByte1 + NOTE_MIN;
+	int vol = midiByte2;
+	MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
+
+	if((event == MIDIEvents::evNoteOn) && !midiByte2)
+		event = MIDIEvents::evNoteOff;  //Convert event to note-off if req'd
 
 	const FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
 	const RecordPitchBend pitchBendBehaviour = TrackerSettings::Instance().pitchBendBehaviour;
@@ -4016,19 +4007,14 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 
 	switch(event)
 	{
-	case MIDIEvents::evNoteOff:  // Note Off
-		if(m_midiSustainActive[channel])
-		{
-			m_midiSustainBuffer[channel].push_back(midiData);
-			return 1;
-		}
+	case MIDIEvents::evNoteOff:
 		// The following method takes care of:
 		// . Silencing specific active notes (just setting nNote to 255 as was done before is not acceptible)
 		// . Entering a note off in pattern if required
 		TempStopNote(nNote, midiSetup[MidiSetup::RecordNoteOff]);
 		break;
 
-	case MIDIEvents::evNoteOn:  // Note On
+	case MIDIEvents::evNoteOn:
 		// Continue playing as soon as MIDI notes are being received
 		if((pMainFrm->GetSoundFilePlaying() != &sndFile || sndFile.IsPaused()) && midiSetup[MidiSetup::PlayPatternOnMidiNote])
 		{
@@ -4038,7 +4024,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 				pModDoc->OnPatternPlayNoLoop();
 		}
 
-		vol = CMainFrame::ApplyVolumeRelatedSettings(midiData, midiVolume);
+		vol = CMainFrame::NoteVolumeFromMidi(midiData);
 		if(vol < 0)
 			vol = -1;
 		else
@@ -4046,50 +4032,30 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		TempEnterNote(nNote, vol, true);
 		break;
 
-	case MIDIEvents::evPolyAftertouch:  // Polyphonic aftertouch
-		EnterAftertouch(nNote, vol);
+	case MIDIEvents::evPolyAftertouch:
+		EnterAftertouch(nNote, midiByte2);
 		break;
 
-	case MIDIEvents::evChannelAftertouch:  // Channel aftertouch
+	case MIDIEvents::evChannelAftertouch:
 		EnterAftertouch(NOTE_NONE, midiByte1);
 		break;
 
-	case MIDIEvents::evPitchBend:  // Pitch wheel
+	case MIDIEvents::evPitchBend:
 		if(modSpecs.HasCommand(CMD_FINETUNE))
 			recordParamAsZxx = pitchBendBehaviour != RecordPitchBend::DoNotRecord;
 		else
 			recordParamAsZxx = pitchBendBehaviour == RecordPitchBend::RecordAsFinetuneOrMacro || pitchBendBehaviour == RecordPitchBend::RecordAsMacro;
 		break;
 
-	case MIDIEvents::evControllerChange:  //Controller change
+	case MIDIEvents::evControllerChange:
 		// Checking whether to record MIDI controller change as MIDI macro change.
 		// Don't write this if command was already written by MIDI mapping.
-		if((paramValue == uint16_max || sndFile.GetType() != MOD_TYPE_MPT)
+		if((!m_midiCCMapped || sndFile.GetType() != MOD_TYPE_MPT)
+		   && midiByte1 != MIDIEvents::MIDICC_HoldPedal_OnOff  // Already handled by sustain pedal logic
 		   && midiSetup[MidiSetup::RecordCCsAsMacros]
 		   && !TrackerSettings::Instance().midiIgnoreCCs.Get()[midiByte1 & 0x7F])
 		{
 			recordParamAsZxx = true;
-		}
-
-		switch(midiByte1)
-		{
-		case MIDIEvents::MIDICC_Volume_Coarse:
-			midiVolume = midiByte2;
-			break;
-
-		case MIDIEvents::MIDICC_HoldPedal_OnOff:
-			m_midiSustainActive[channel] = (midiByte2 >= 0x40);
-			if(!m_midiSustainActive[channel])
-			{
-				// Release all notes
-				for(const auto offEvent : m_midiSustainBuffer[channel])
-				{
-					OnMidiMsg(offEvent, 0);
-				}
-				m_midiSustainBuffer[channel].clear();
-			}
-			recordParamAsZxx = false;
-			break;
 		}
 		break;
 
@@ -4097,7 +4063,7 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 		if(midiSetup[MidiSetup::RespondToPlayControl])
 		{
 			// Respond to MIDI song messages
-			switch(static_cast<MIDIEvents::SystemEvent>(midiData))
+			switch(static_cast<MIDIEvents::SystemEvent>(midiData[0]))
 			{
 			case MIDIEvents::sysStart:
 				pModDoc->OnPlayerPlayFromStart();
@@ -4179,12 +4145,10 @@ LRESULT CViewPattern::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 			plug->MidiSend(midiData);
 			// Sending MIDI may modify the plugin. For now, if MIDI data
 			// is not active sensing, set modified.
-			if(midiData != MIDIEvents::System(MIDIEvents::sysActiveSense))
+			if(!mpt::span_elements_equal(midiData, MIDIEvents::System(MIDIEvents::sysActiveSense)))
 				pModDoc->SetModified();
 		}
 	}
-
-	return 1;
 }
 
 

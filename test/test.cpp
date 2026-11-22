@@ -3396,44 +3396,83 @@ MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestSettings()
 // Test MIDI Event generating / reading
 MPT_ATTR_NOINLINE MPT_DECL_NOINLINE static void TestMIDIEvents()
 {
-	uint32 midiEvent;
+	auto ccEvent = MIDIEvents::CC(MIDIEvents::MIDICC_Balance_Coarse, 13, 40);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(ccEvent), MIDIEvents::evControllerChange);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(ccEvent), 13);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(ccEvent), MIDIEvents::MIDICC_Balance_Coarse);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(ccEvent), 40);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(ccEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(ccEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(ccEvent), false);
 
-	midiEvent = MIDIEvents::CC(MIDIEvents::MIDICC_Balance_Coarse, 13, 40);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evControllerChange);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 13);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), MIDIEvents::MIDICC_Balance_Coarse);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 40);
+	auto noteOnEvent = MIDIEvents::NoteOn(10, 50, 120);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(noteOnEvent), MIDIEvents::evNoteOn);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(noteOnEvent), 10);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(noteOnEvent), 50);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(noteOnEvent), 120);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(noteOnEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(noteOnEvent), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(noteOnEvent), false);
 
-	midiEvent = MIDIEvents::NoteOn(10, 50, 120);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evNoteOn);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 10);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 50);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 120);
+	auto noteOn0VolEvent = MIDIEvents::NoteOn(10, 50, 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(noteOn0VolEvent), MIDIEvents::evNoteOn);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(noteOn0VolEvent), 10);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(noteOn0VolEvent), 50);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(noteOn0VolEvent), 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(noteOn0VolEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(noteOn0VolEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(noteOn0VolEvent), true);
 
-	midiEvent = MIDIEvents::NoteOff(15, 127, 42);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evNoteOff);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 15);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 127);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 42);
+	auto noteOffEvent = MIDIEvents::NoteOff(15, 127, 42);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(noteOffEvent), MIDIEvents::evNoteOff);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(noteOffEvent), 15);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(noteOffEvent), 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(noteOffEvent), 42);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(noteOffEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(noteOffEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(noteOffEvent), true);
 
-	midiEvent = MIDIEvents::ProgramChange(1, 127);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evProgramChange);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 1);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 127);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0);
+	auto progEvent = MIDIEvents::ProgramChange(1, 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(progEvent), MIDIEvents::evProgramChange);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(progEvent), 1);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(progEvent), 127);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(progEvent), 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(progEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(progEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(progEvent), false);
 
-	midiEvent = MIDIEvents::PitchBend(2, MIDIEvents::pitchBendMax);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evPitchBend);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), 2);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 0x7F);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0x7F);
+	auto pbEvent = MIDIEvents::PitchBend(2, MIDIEvents::pitchBendMax);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(pbEvent), MIDIEvents::evPitchBend);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(pbEvent), 2);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(pbEvent), 0x7F);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(pbEvent), 0x7F);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(pbEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(pbEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(pbEvent), false);
 
-	midiEvent = MIDIEvents::System(MIDIEvents::sysStart);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(midiEvent), MIDIEvents::evSystem);
-	VERIFY_EQUAL_NONCONT(midiEvent & 0xFF, MIDIEvents::sysStart);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(midiEvent), MIDIEvents::sysStart & 0x0F);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(midiEvent), 0);
-	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(midiEvent), 0);
+	auto sysEvent = MIDIEvents::System(MIDIEvents::sysStart);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetTypeFromEvent(sysEvent), MIDIEvents::evSystem);
+	VERIFY_EQUAL_NONCONT(sysEvent[0], std::byte{MIDIEvents::sysStart});
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetChannelFromEvent(sysEvent), MIDIEvents::sysStart & 0x0F);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte1FromEvent(sysEvent), 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::GetDataByte2FromEvent(sysEvent), 0);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(sysEvent), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOnEvent(sysEvent), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsNoteOffEvent(sysEvent), false);
+
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysExStart)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysQuarterFrame)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysPositionPointer)), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysSongSelect)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysTuneRequest)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysExEnd)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysMIDIClock)), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysMIDITick)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysStart)), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysStop)), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysContinue)), true);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysActiveSense)), false);
+	VERIFY_EQUAL_NONCONT(MIDIEvents::IsTransportEvent(MIDIEvents::System(MIDIEvents::sysReset)), false);
 }
 
 

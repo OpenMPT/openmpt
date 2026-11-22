@@ -14,6 +14,7 @@
 #include "openmpt/all/BuildSettings.hpp"
 #include "AccessibleControls.h"
 #include "ColorPickerButton.h"
+#include "MidiInputCallback.h"
 #include "PluginComboBox.h"
 #include "UpdateHints.h"
 
@@ -26,7 +27,7 @@ OPENMPT_NAMESPACE_BEGIN
 class CModDoc;
 class IMixPlugin;
 
-class CViewGlobals: public CFormView
+class CViewGlobals: public CFormView, public IMidiInputCallback
 {
 protected:
 	CRect m_rcClient;
@@ -75,10 +76,11 @@ public:
 	void DoDataExchange(CDataExchange *pDX) override;
 	void OnUpdate(CView *pSender, LPARAM lHint, CObject *pHint) override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span /*midiData*/) override { }
 
 	void UpdateView(UpdateHint hint, CObject *pObj = nullptr);
 	LRESULT OnModViewMsg(WPARAM, LPARAM);
-	LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 
 private:
 	void PrepareUndo(CHANNELINDEX chnMod4);

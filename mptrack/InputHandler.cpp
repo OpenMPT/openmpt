@@ -176,8 +176,10 @@ void CInputHandler::SetupSpecialKeyInterception()
 
 
 // Translate MIDI messages to shortcut commands
-CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, uint32 message)
+CommandID CInputHandler::HandleMIDIMessage(InputTargetContext context, mpt::const_byte_span message)
 {
+	if(message.empty())
+		return kcNull;
 	KeyMapRange cmd = { m_keyMap.end(), m_keyMap.end() };
 	auto byte1 = MIDIEvents::GetDataByte1FromEvent(message), byte2 = MIDIEvents::GetDataByte2FromEvent(message);
 	switch(MIDIEvents::GetTypeFromEvent(message))

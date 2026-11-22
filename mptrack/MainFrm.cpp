@@ -27,6 +27,7 @@
 #include "InputHandler.h"
 #include "IPCWindow.h"
 #include "KeyConfigDlg.h"
+#include "MidiDeviceManager.h"
 #include "Moddoc.h"
 #include "ModDocTemplate.h"
 #include "Mpdlgs.h"
@@ -121,6 +122,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
 
 	ON_MESSAGE(WM_MOD_UPDATEPOSITION,     &CMainFrame::OnUpdatePosition)
 	ON_MESSAGE(WM_MOD_INVALIDATEPATTERNS, &CMainFrame::OnInvalidatePatterns)
+	ON_MESSAGE(WM_MOD_MIDIMSG,            &CMainFrame::OnMidiMsgReady)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,         &CMainFrame::OnCustomKeyMsg)
 	ON_MESSAGE(WM_MOD_MIDIMAPPING,        &CMainFrame::OnViewMIDIMapping)
 	ON_MESSAGE(WM_MOD_UPDATEVIEWS,        &CMainFrame::OnUpdateViews)
@@ -328,7 +330,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	UpdateColors();
 
 	if(TrackerSettings::Instance().midiSetup & MidiSetup::EnableMidiInOnStartup)
-		midiOpenDevice(false);
+		MidiOpenDevice(false);
 
 #if MPT_COMPILER_MSVC
 #pragma warning(push)
@@ -426,8 +428,8 @@ BOOL CMainFrame::DestroyWindow()
 		KillTimer(m_nTimer);
 		m_nTimer = 0;
 	}
-	if(midiInData.inHandle)
-		midiCloseDevice();
+	if(m_midiInputHandle)
+		MidiCloseDevice();
 	// Delete bitmaps
 	delete bmpNotes;
 	bmpNotes = nullptr;
@@ -499,12 +501,11 @@ void CMainFrame::OnClose()
 
 BOOL CMainFrame::OnDeviceChange(UINT nEventType, DWORD_PTR dwData)
 {
-	if(nEventType == DBT_DEVNODES_CHANGED && midiInData.inHandle)
+	if(nEventType == DBT_DEVNODES_CHANGED && m_midiInputHandle)
 	{
-		// Calling this (or most other MIDI input related functions) makes the MIDI driver realize
-		// that the connection to USB MIDI devices was lost and send a MIM_CLOSE message.
-		// Otherwise, after disconnecting a USB MIDI device, the MIDI callback will stay alive forever but return no data.
-		midiInGetNumDevs();
+		// Check if USB MIDI device was disconnected
+		if(!MidiDeviceManager::CheckDeviceStatus(*m_midiInputHandle))
+			SendMessage(WM_COMMAND, ID_MIDI_RECORD);
 	}
 	return CMDIFrameWnd::OnDeviceChange(nEventType, dwData);
 }
@@ -783,6 +784,7 @@ void CMainFrame::SoundDeviceMessage(LogLevel level, const mpt::ustring &str)
 void CMainFrame::SoundCallbackPreStart()
 {
 	MPT_TRACE();
+	MidiDeviceManager::Instance().ResetSyncPoint();
 	m_SoundDeviceClock.SetResolution(1);
 }
 
@@ -924,6 +926,7 @@ void CMainFrame::SoundCallbackLockedProcessDone(SoundDevice::TimeInfo timeInfo)
 	MPT_ASSERT(InAudioThread());
 	OPENMPT_PROFILE_FUNCTION(Profiler::Notify);
 	MPT_ASSERT((timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames) < std::numeric_limits<samplecount_t>::max());
+	MidiDeviceManager::Instance().UpdateSyncPoint(timeInfo.SyncPointStreamFrames, timeInfo.SyncPointSystemTimestamp, timeInfo.Speed, m_pSndFile->GetSampleRate());
 	samplecount_t framesRendered = static_cast<samplecount_t>(timeInfo.RenderStreamPositionAfter.Frames - timeInfo.RenderStreamPositionBefore.Frames);
 	int64 streamPosition = timeInfo.RenderStreamPositionAfter.Frames;
 	DoNotification(framesRendered, streamPosition);
@@ -1522,6 +1525,7 @@ bool CMainFrame::PlayMod(CModDoc *pModDoc)
 
 	// set mixing parameters in CSoundFile
 	UpdateAudioParameters(sndFile);
+	mpt::reconstruct(sndFile.m_TimingInfo);
 
 	SetPlaybackSoundFile(&sndFile);
 
@@ -1580,9 +1584,10 @@ bool CMainFrame::StopMod(CModDoc *pModDoc)
 	SetElapsedTime(0);
 	GenerateStopNotification();
 
-	m_pSndFile->ResetPlayPos();
-	m_pSndFile->ResetChannels();
+	CSoundFile &sndFile = *m_pSndFile;
 	UnsetPlaybackSoundFile();
+	sndFile.ResetPlayPos();
+	sndFile.ResetChannels();
 
 	StopPlayback();
 
@@ -1956,17 +1961,29 @@ void CMainFrame::SetupMiscOptions()
 }
 
 
-void CMainFrame::SetupMidi(FlagSet<MidiSetup> d, UINT n)
+void CMainFrame::SetupMidi(FlagSet<MidiSetup> flags, UINT device)
 {
-	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != n);
-	TrackerSettings::Instance().midiSetup = d;
-	TrackerSettings::Instance().SetMIDIDevice(n);
-	if(deviceChanged && midiInData.inHandle)
+	bool deviceChanged = (TrackerSettings::Instance().m_nMidiDevice != device);
+	TrackerSettings::Instance().midiSetup = flags;
+	TrackerSettings::Instance().SetMIDIDevice(device);
+	if(deviceChanged && m_midiInputHandle)
 	{
 		// Device has changed, close the old one.
-		midiCloseDevice();
-		midiOpenDevice();
+		MidiCloseDevice();
+		MidiOpenDevice();
 	}
+
+	UpdateMidiFilters();
+}
+
+
+void CMainFrame::UpdateMidiFilters()
+{
+	FlagSet<MidiSetup> midiSetup = TrackerSettings::Instance().midiSetup;
+	m_volumeFilter.SetRecordVelocity(midiSetup[MidiSetup::RecordVelocity]);
+	m_volumeFilter.SetApplyChannelVolumeToVelocity(midiSetup[MidiSetup::ApplyChannelVolumeToVelocity]);
+	m_volumeFilter.SetVelocityAmplification(TrackerSettings::Instance().midiVelocityAmp);
+	m_transposeFilter.SetTranspose(mpt::saturate_cast<int16>(midiSetup[MidiSetup::TransposeKeyboard] ? (GetBaseOctave() - 4) * 12 : 0));
 }
 
 
@@ -2566,6 +2583,136 @@ LRESULT CMainFrame::OnInvalidatePatterns(WPARAM, LPARAM)
 {
 	theApp.UpdateAllViews(UpdateHint().MPTOptions());
 	return TRUE;
+}
+
+
+bool CMainFrame::MidiOpenDevice(bool showSettings)
+{
+	if(m_midiInputHandle)
+		return true;
+
+	UpdateMidiFilters();
+
+	MidiDeviceManager &manager = MidiDeviceManager::Instance();
+	MidiPortID port = TrackerSettings::Instance().GetCurrentMIDIDevice();
+	m_midiInputHandle = manager.OpenInput(port, this);
+
+	if(!m_midiInputHandle)
+	{
+		// Show MIDI configuration on fail.
+		if(showSettings)
+		{
+			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+			OnViewOptions();
+		}
+
+		// Let's see if the user updated the settings.
+		port = static_cast<MidiPortID>(TrackerSettings::Instance().GetCurrentMIDIDevice());
+		m_midiInputHandle = manager.OpenInput(port, this);
+
+		if(!m_midiInputHandle)
+			return false;
+	}
+
+	return true;
+}
+
+
+void CMainFrame::MidiCloseDevice()
+{
+	m_midiInputHandle.reset();
+	m_sustainFilter.Reset();
+	m_volumeFilter.Reset();
+	m_transposeFilter.Reset();
+}
+
+
+void CMainFrame::OnMidiRecord()
+{
+	if(m_midiInputHandle)
+		MidiCloseDevice();
+	else
+		MidiOpenDevice();
+}
+
+
+void CMainFrame::OnUpdateMidiRecord(CCmdUI *pCmdUI)
+{
+	if(pCmdUI)
+		pCmdUI->SetCheck(m_midiInputHandle ? TRUE : FALSE);
+}
+
+
+void CMainFrame::SetMidiRecordCallback(IMidiInputCallback *callback, FlagSet<MidiTransformers> transformers)
+{
+	m_sustainFilter.SetBypassed(!transformers[MidiTransformers::Sustain]);
+	m_volumeFilter.SetBypassed(!transformers[MidiTransformers::Volume]);
+	m_transposeFilter.SetBypassed(!transformers[MidiTransformers::Transpose]);
+
+	m_midiRecordCallback = callback;
+	if(callback)
+		callback->SetDestroyNotifySink(this);
+}
+
+
+void CMainFrame::OnMidiInputCallbackDestroyed(void *callback)
+{
+	if(m_midiRecordCallback == callback)
+		m_midiRecordCallback = nullptr;
+}
+
+
+void CMainFrame::EnqueueMidiMessage(mpt::const_byte_span data, void *sender)
+{
+	{
+		mpt::lock_guard<mpt::mutex> lock{m_midiInputMutex};
+		m_midiInputQueue.emplace_back(0, data, sender);
+	}
+	if(!m_midiMsgPending.exchange(true))
+		PostMessage(WM_MOD_MIDIMSG, 0, 0);
+}
+
+
+LRESULT CMainFrame::OnMidiMsgReady(WPARAM, LPARAM)
+{
+	m_midiMsgPending = false;
+
+	std::vector<MidiMessage> localQueue;
+	{
+		mpt::lock_guard<mpt::mutex> lock{m_midiInputMutex};
+		std::swap(localQueue, m_midiInputQueue);
+		m_midiInputQueue.reserve(localQueue.capacity());
+	}
+
+	for(auto &msg : localQueue)
+	{
+		m_currentMidiSender = msg.m_sender;
+
+		if(m_midiRecordCallback)
+		{
+			if(m_midiRecordCallback->PreFilterMidiMessage(msg))
+				continue;
+
+			m_sustainFilter.SetNextCallback(&m_volumeFilter);
+			m_volumeFilter.SetNextCallback(&m_transposeFilter);
+			m_transposeFilter.SetNextCallback(m_midiRecordCallback);
+
+			m_sustainFilter.OnMidiMessage(msg);
+		} else
+		{
+			// No recording target, just handle keyboard shortcuts
+			GetInputHandler()->HandleMIDIMessage(kCtxAllContexts, msg);
+		}
+	}
+	m_currentMidiSender = nullptr;
+
+	return 0;
+}
+
+
+int CMainFrame::NoteVolumeFromMidi(mpt::const_byte_span midiData)
+{
+	return GetMainFrame()->m_volumeFilter.ApplyVolumeSettings(midiData);
 }
 
 
@@ -3374,18 +3521,16 @@ void CMainFrame::UpdateMetronomeVolume()
 }
 
 
-HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString>& paths, const mpt::PathString &folderName, const uint16 idRangeBegin)
+HMENU CMainFrame::CreateFileMenu(const size_t maxCount, std::vector<mpt::PathString> &paths, const mpt::PathString &folderName, const uint16 idRangeBegin)
 {
 	paths.clear();
 
-	for(size_t i = 0; i < 2; i++)  // 0: app items, 1: user items
-	{
-		// To avoid duplicates, check whether app path and config path are the same.
-		if(i == 1 && mpt::PathCompareNoCase(theApp.GetInstallPath(), theApp.GetConfigPath()) == 0)
-			break;
+	std::vector<mpt::PathString> basePaths{theApp.GetInstallPath()};
+	if(mpt::PathString configPath = theApp.GetConfigPath(); mpt::PathCompareNoCase(basePaths.front(), configPath))
+		basePaths.push_back(std::move(configPath));
 
-		mpt::PathString basePath;
-		basePath = (i == 0) ? theApp.GetInstallPath() : theApp.GetConfigPath();
+	for(mpt::PathString basePath : basePaths)
+	{
 		basePath += folderName;
 		if(!mpt::native_fs{}.is_directory(basePath))
 			continue;

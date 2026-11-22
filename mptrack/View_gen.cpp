@@ -117,7 +117,6 @@ BEGIN_MESSAGE_MAP(CViewGlobals, CFormView)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TABCTRL1,	&CViewGlobals::OnTabSelchange)
 	ON_MESSAGE(WM_MOD_UNLOCKCONTROLS,		&CViewGlobals::OnUnlockControls)
 	ON_MESSAGE(WM_MOD_VIEWMSG,	&CViewGlobals::OnModViewMsg)
-	ON_MESSAGE(WM_MOD_MIDIMSG,	&CViewGlobals::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_PLUGPARAMAUTOMATE,	&CViewGlobals::OnParamAutomated)
 	ON_MESSAGE(WM_MOD_PLUGINDRYWETRATIOCHANGED, &CViewGlobals::OnDryWetRatioChangedFromPlayer)
 
@@ -274,20 +273,15 @@ LRESULT CViewGlobals::OnMDIDeactivate(WPARAM, LPARAM)
 }
 
 
-LRESULT CViewGlobals::OnMidiMsg(WPARAM midiData_, LPARAM)
+bool CViewGlobals::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
-	uint32 midiData = static_cast<uint32>(midiData_);
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(kCtxViewGeneral, midiData) == kcNull)
-		ih->HandleMIDIMessage(kCtxAllContexts, midiData);
-	return 1;
+	return DefaultPreFilterMidiMessage(midiData, &GetDocument()->GetSoundFile(), kCtxViewGeneral);
 }
 
 
 void CViewGlobals::RecalcLayout()
 {
-	if (m_TabCtrl.m_hWnd != NULL)
+	if(m_TabCtrl.m_hWnd)
 	{
 		CRect rect;
 		GetClientRect(&rect);

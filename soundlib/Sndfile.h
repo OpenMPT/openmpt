@@ -267,6 +267,7 @@ struct TimingInfo
 	int64 StreamFrames = 0;
 	uint64 SystemTimestamp = 0; // nanoseconds
 	double Speed = 1.0;
+	uint32 FramesRenderedInChunk = 0;
 };
 
 

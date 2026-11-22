@@ -14,6 +14,7 @@
 #include "dlg_misc.h"
 #include "ImageLists.h"
 #include "Mainfrm.h"
+#include "MidiDeviceManager.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "Reporting.h"
@@ -1755,6 +1756,9 @@ CMidiSetupDlg::CMidiSetupDlg(FlagSet<MidiSetup> flags, UINT device)
 }
 
 
+CMidiSetupDlg::~CMidiSetupDlg() {}
+
+
 BOOL CMidiSetupDlg::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
@@ -1856,19 +1860,15 @@ void CMidiSetupDlg::RefreshDeviceList(UINT currentDevice)
 {
 	m_InputDevice.SetRedraw(FALSE);
 	m_InputDevice.ResetContent();
-	UINT ndevs = midiInGetNumDevs();
-	for(UINT i = 0; i < ndevs; i++)
+	m_midiInPorts = MidiDeviceManager::Instance().EnumerateInputPorts();
+	for(const MidiPortInfo &port : m_midiInPorts)
 	{
-		MIDIINCAPS mic;
-		mic.szPname[0] = 0;
-		if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
+		CString displayName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::Charset::UTF8, port.name), true);
+		int item = m_InputDevice.AddString(displayName);
+		m_InputDevice.SetItemData(item, port.id);
+		if(port.id == currentDevice)
 		{
-			int item = m_InputDevice.AddString(theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::String::ReadWinBuf(mic.szPname)), true));
-			m_InputDevice.SetItemData(item, i);
-			if(i == currentDevice)
-			{
-				m_InputDevice.SetCurSel(item);
-			}
+			m_InputDevice.SetCurSel(item);
 		}
 	}
 	m_InputDevice.SetRedraw(TRUE);
@@ -1881,12 +1881,17 @@ void CMidiSetupDlg::OnRenameDevice()
 	int n = m_InputDevice.GetCurSel();
 	if(n >= 0)
 	{
-		UINT device = static_cast<UINT>(m_InputDevice.GetItemData(n));
-		MIDIINCAPS mic;
-		mic.szPname[0] = 0;
-		midiInGetDevCaps(device, &mic, sizeof(mic));
-		CString name = mic.szPname;
-		CString friendlyName = theApp.GetSettings().Read(U_("MIDI Input Ports"), mpt::ToUnicode(name), name);
+		MidiPortID device = static_cast<MidiPortID>(m_InputDevice.GetItemData(n));
+		CString name, friendlyName;
+		for(const MidiPortInfo &port : m_midiInPorts)
+		{
+			if(port.id == device)
+			{
+				name = mpt::ToCString(mpt::Charset::UTF8, port.name);
+				friendlyName = mpt::ToCString(port.friendlyName);
+				break;
+			}
+		}
 		CInputDlg dlg(this, _T("New name for ") + name + _T(":"), friendlyName);
 		if(dlg.DoModal() == IDOK)
 		{

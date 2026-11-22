@@ -14,12 +14,13 @@
 #include "openmpt/all/BuildSettings.hpp"
 
 #include "CListCtrl.h"
+#include "MidiInputCallback.h"
 #include "Globals.h"
 #include "../soundlib/modcommand.h"
 
 OPENMPT_NAMESPACE_BEGIN
 
-class CViewComments: public CModScrollView
+class CViewComments: public CModScrollView, public IMidiInputCallback
 {
 public:
 	CViewComments() = default;
@@ -47,6 +48,8 @@ public:
 	BOOL PreTranslateMessage(MSG *pMsg) override;
 	LRESULT OnModViewMsg(WPARAM wParam, LPARAM lParam) override;
 	void UpdateView(UpdateHint hint, CObject *pObject = nullptr) override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -66,7 +69,6 @@ protected:
 	afx_msg void OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCopyNames();
 	afx_msg void OnPasteNames();
-	afx_msg LRESULT OnMidiMsg(WPARAM midiData, LPARAM);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

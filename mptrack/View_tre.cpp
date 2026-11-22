@@ -157,7 +157,6 @@ BEGIN_MESSAGE_MAP(CModTree, CTreeCtrl)
 	ON_COMMAND(ID_MODTREE_SORT_BY_SIZE,      &CModTree::OnSortBySize)
 	
 	ON_MESSAGE(WM_MOD_KEYCOMMAND, &CModTree::OnCustomKeyMsg)
-	ON_MESSAGE(WM_MOD_MIDIMSG,    &CModTree::OnMidiMsg)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -264,10 +263,8 @@ void CModTree::Init()
 
 void CModTree::OnDestroy()
 {
-	if(CMainFrame::GetMainFrame()->GetMidiRecordWnd() == m_hWnd)
-	{
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(nullptr);
-	}
+	if(CMainFrame::GetMainFrame()->GetMidiRecordCallback() == this)
+		CMainFrame::GetMainFrame()->SetMidiRecordCallback(nullptr);
 }
 
 
@@ -4467,31 +4464,24 @@ LRESULT CModTree::OnCustomKeyMsg(WPARAM wParam, LPARAM /*lParam*/)
 }
 
 
-LRESULT CModTree::OnMidiMsg(WPARAM midiData_, LPARAM)
+bool CModTree::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
-	uint32 midiData = static_cast<uint32>(midiData_);
-	// Handle MIDI messages assigned to shortcuts
-	CInputHandler *ih = CMainFrame::GetInputHandler();
-	if(ih->HandleMIDIMessage(kCtxViewTree, midiData) == kcNull)
-	    ih->HandleMIDIMessage(kCtxAllContexts, midiData);
+	return DefaultPreFilterMidiMessage(midiData, nullptr, kCtxViewTree);
+}
 
-	uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-	int volume;
-	switch(MIDIEvents::GetTypeFromEvent(midiData))
+
+void CModTree::OnMidiMessage(mpt::const_byte_span midiData)
+{
+	if(midiData.empty())
+		return;
+
+	if(MIDIEvents::IsNoteOnEvent(midiData))
 	{
-	case MIDIEvents::evNoteOn:
-		volume = MIDIEvents::GetDataByte2FromEvent(midiData);
-		if(volume > 0)
-		{
-			PlayItem(GetSelectedItem(), midiByte1 + NOTE_MIN, Util::muldivr(volume, 256, 127));
-			return 1;
-		}
-		[[fallthrough]];
-	case MIDIEvents::evNoteOff:
+		uint8 note = MIDIEvents::GetDataByte1FromEvent(midiData);
+		PlayItem(GetSelectedItem(), note + NOTE_MIN, CMainFrame::NoteVolumeFromMidi(midiData));
+	} else if (MIDIEvents::IsNoteOffEvent(midiData))
+	{
 		PlayItem(GetSelectedItem(), NOTE_NOTECUT);
-		return 1;
-	default:
-		return 0;
 	}
 }
 
@@ -4506,8 +4496,8 @@ void CModTree::OnKillFocus(CWnd *pNewWnd)
 	CTreeCtrl::OnKillFocus(pNewWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = false;
 	// Required to immediately redirect MIDI input focus after drag&drop from tree view to editor
-	if(pNewWnd != nullptr)
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(pNewWnd->m_hWnd);
+	if(auto *callback = dynamic_cast<IMidiInputCallback *>(pNewWnd))
+		CMainFrame::GetMainFrame()->SetMidiRecordCallback(callback);
 }
 
 
@@ -4515,7 +4505,7 @@ void CModTree::OnSetFocus(CWnd *pOldWnd)
 {
 	CTreeCtrl::OnSetFocus(pOldWnd);
 	CMainFrame::GetMainFrame()->m_bModTreeHasFocus = true;
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWnd);
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(this);
 }
 
 

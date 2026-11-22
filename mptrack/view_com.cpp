@@ -88,7 +88,6 @@ BEGIN_MESSAGE_MAP(CViewComments, CModScrollView)
 	ON_WM_SIZE()
 	ON_WM_DESTROY()
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,       &CViewComments::OnCustomKeyMsg)
-	ON_MESSAGE(WM_MOD_MIDIMSG,          &CViewComments::OnMidiMsg)
 	ON_COMMAND(IDC_LIST_SAMPLES,        &CViewComments::OnShowSamples)
 	ON_COMMAND(IDC_LIST_INSTRUMENTS,    &CViewComments::OnShowInstruments)
 	ON_COMMAND(IDC_LIST_PATTERNS,       &CViewComments::OnShowPatterns)
@@ -190,9 +189,14 @@ LRESULT CViewComments::OnModViewMsg(WPARAM wParam, LPARAM lParam)
 }
 
 
-LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
+bool CViewComments::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
-	uint32 midiData = static_cast<uint32>(midiData_);
+	return DefaultPreFilterMidiMessage(midiData, &GetDocument()->GetSoundFile(), kCtxViewComments);
+}
+
+
+void CViewComments::OnMidiMessage(mpt::const_byte_span midiData)
+{
 	INSTRUMENTINDEX ins = 0;
 	SAMPLEINDEX smp = 0;
 
@@ -202,8 +206,7 @@ LRESULT CViewComments::OnMidiMsg(WPARAM midiData_, LPARAM)
 	else if(item > 0 && m_nListId == IDC_LIST_INSTRUMENTS)
 		ins = static_cast<INSTRUMENTINDEX>(item);
 
-	GetDocument()->ProcessMIDI(midiData, smp, ins, GetDocument()->GetSoundFile().GetInstrumentPlugin(ins), kCtxViewComments);
-	return 1;
+	GetDocument()->ProcessMIDI(midiData, smp, ins, GetDocument()->GetSoundFile().GetInstrumentPlugin(ins));
 }
 
 

@@ -17,23 +17,37 @@ namespace MIDIEvents
 {
 
 // Build a generic MIDI event
-uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2)
+std::array<std::byte, 3> Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2)
 {
 	MPT_ASSERT(!(dataByte1 & 0x80));
 	MPT_ASSERT(!(dataByte2 & 0x80));
-	return (eventType & 0xF0) | (midiChannel & 0x0F) | (dataByte1 << 8) | (dataByte2 << 16);
+	return {
+		mpt::byte_cast<std::byte>(static_cast<uint8>((eventType & 0xF0) | (midiChannel & 0x0F))),
+		mpt::byte_cast<std::byte>(dataByte1),
+		mpt::byte_cast<std::byte>(dataByte2)
+	};
+}
+
+
+std::array<std::byte, 2> Event(EventType eventType, uint8 midiChannel, uint8 dataByte)
+{
+	MPT_ASSERT(!(dataByte & 0x80));
+	return {
+		mpt::byte_cast<std::byte>(static_cast<uint8>((eventType & 0xF0) | (midiChannel & 0x0F))),
+		mpt::byte_cast<std::byte>(dataByte)
+	};
 }
 
 
 // Build a MIDI CC event
-uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param)
+std::array<std::byte, 3> CC(MidiCC midiCC, uint8 midiChannel, uint8 param)
 {
 	return Event(evControllerChange, midiChannel, static_cast<uint8>(midiCC), param);
 }
 
 
 // Build a MIDI Pitchbend event
-uint32 PitchBend(uint8 midiChannel, uint16 bendAmount)
+std::array<std::byte, 3> PitchBend(uint8 midiChannel, uint16 bendAmount)
 {
 	MPT_ASSERT(!(bendAmount & 0xC000));
 	return Event(evPitchBend, midiChannel, static_cast<uint8>(bendAmount & 0x7F), static_cast<uint8>((bendAmount >> 7) & 0x7F));
@@ -41,35 +55,35 @@ uint32 PitchBend(uint8 midiChannel, uint16 bendAmount)
 
 
 // Build a MIDI Program Change event
-uint32 ProgramChange(uint8 midiChannel, uint8 program)
+std::array<std::byte, 2> ProgramChange(uint8 midiChannel, uint8 program)
 {
-	return Event(evProgramChange, midiChannel, program, 0);
+	return Event(evProgramChange, midiChannel, program);
 }
 
 
 // Build a MIDI Note Off event
-uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity)
+std::array<std::byte, 3> NoteOff(uint8 midiChannel, uint8 note, uint8 velocity)
 {
 	return Event(evNoteOff, midiChannel, note, velocity);
 }
 
 
 // Build a MIDI Note On event
-uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity)
+std::array<std::byte, 3> NoteOn(uint8 midiChannel, uint8 note, uint8 velocity)
 {
 	return Event(evNoteOn, midiChannel, note, velocity);
 }
 
 
 // Build a MIDI System Event
-uint8 System(SystemEvent eventType)
+std::array<std::byte, 1> System(SystemEvent eventType)
 {
-	return static_cast<uint8>(eventType);
+	return {mpt::byte_cast<std::byte>(static_cast<uint8>(eventType))};
 }
 
 
 // Build a MIDI Song Position Event
-uint32 SongPosition(uint16 quarterNotes)
+std::array<std::byte, 3> SongPosition(uint16 quarterNotes)
 {
 	MPT_ASSERT(!(quarterNotes & 0xC000));
 	return Event(evSystem, sysPositionPointer, static_cast<uint8>(quarterNotes & 0x7F), static_cast<uint8>((quarterNotes >> 7) & 0x7F));
@@ -77,45 +91,79 @@ uint32 SongPosition(uint16 quarterNotes)
 
 
 // Get MIDI channel from a MIDI event
-uint8 GetChannelFromEvent(uint32 midiMsg)
+uint8 GetChannelFromEvent(mpt::const_byte_span midiMsg)
 {
-	return static_cast<uint8>((midiMsg & 0xF));
+	MPT_ASSERT(midiMsg.size() >= 1);
+	return static_cast<uint8>((mpt::byte_cast<uint8>(midiMsg[0]) & 0x0F));
 }
 
 
 // Get MIDI Event type from a MIDI event
-EventType GetTypeFromEvent(uint32 midiMsg)
+EventType GetTypeFromEvent(mpt::const_byte_span midiMsg)
 {
-	return static_cast<EventType>(midiMsg & 0xF0);
+	MPT_ASSERT(midiMsg.size() >= 1);
+	return static_cast<EventType>((mpt::byte_cast<uint8>(midiMsg[0]) & 0xF0));
 }
 
 
 // Get first data byte from a MIDI event
-uint8 GetDataByte1FromEvent(uint32 midiMsg)
+uint8 GetDataByte1FromEvent(mpt::const_byte_span midiMsg)
 {
-	return static_cast<uint8>(((midiMsg >> 8) & 0xFF));
+	return midiMsg.size() >= 2 ? mpt::byte_cast<uint8>(midiMsg[1]) : uint8{0};
+}
+
+// Get second data byte from a MIDI event
+uint8 GetDataByte2FromEvent(mpt::const_byte_span midiMsg)
+{
+	return midiMsg.size() >= 3 ? mpt::byte_cast<uint8>(midiMsg[2]) : uint8{0};
 }
 
 
-// Get second data byte from a MIDI event
-uint8 GetDataByte2FromEvent(uint32 midiMsg)
+// True if message is a Song Position/Clock/Start/Continue/Stop system message
+bool IsTransportEvent(mpt::const_byte_span midiMsg)
 {
-	return static_cast<uint8>(((midiMsg >> 16) & 0xFF));
+	if(GetTypeFromEvent(midiMsg) != evSystem)
+		return false;
+	switch(static_cast<MIDIEvents::SystemEvent>(midiMsg[0]))
+	{
+	case MIDIEvents::sysPositionPointer:
+	case MIDIEvents::sysMIDIClock:
+	case MIDIEvents::sysStart:
+	case MIDIEvents::sysContinue:
+	case MIDIEvents::sysStop:
+		return true;
+	default:
+		return false;
+	}
+}
+
+
+// True only for note-on events with velocity > 0
+bool IsNoteOnEvent(mpt::const_byte_span midiMsg)
+{
+	return midiMsg.size() >= 3 && GetTypeFromEvent(midiMsg) == evNoteOn && GetDataByte2FromEvent(midiMsg) > 0;
+}
+
+
+// True for note-off events and note-on events with velocity == 0
+bool IsNoteOffEvent(mpt::const_byte_span midiMsg)
+{
+	return midiMsg.size() >= 3 && (GetTypeFromEvent(midiMsg) == evNoteOff || (GetTypeFromEvent(midiMsg) == evNoteOn && GetDataByte2FromEvent(midiMsg) == 0));
 }
 
 
 // Get the length of a MIDI event in bytes
-uint8 GetEventLength(uint8 firstByte)
+uint8 GetEventLength(std::byte firstByte)
 {
 	uint8 msgSize = 3;
-	switch(GetTypeFromEvent(firstByte))
+	switch(static_cast<EventType>((mpt::byte_cast<uint8>(firstByte) & 0xF0)))
 	{
 	case evProgramChange:
 	case evChannelAftertouch:
 		msgSize = 2;
 		break;
 	case evSystem:
-		switch(static_cast<SystemEvent>(firstByte))
+		switch(static_cast<SystemEvent>(mpt::byte_cast<uint8>(firstByte)))
 		{
 		case sysQuarterFrame:
 		case sysSongSelect:

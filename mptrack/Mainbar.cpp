@@ -14,6 +14,7 @@
 #include "ImageLists.h"
 #include "InputHandler.h"
 #include "Mainfrm.h"
+#include "MidiDeviceManager.h"
 #include "Moddoc.h"
 #include "Mptrack.h"
 #include "resource.h"
@@ -566,6 +567,9 @@ void CMainToolBar::SetBaseOctave(UINT octave)
 	wsprintf(s, _T("Octave %d"), octave);
 	m_EditOctave.SetWindowText(s);
 	m_SpinOctave.SetPos(octave);
+
+	if(CMainFrame *mainFrm = CMainFrame::GetMainFrame())
+		mainFrm->UpdateMidiFilters();
 }
 
 
@@ -852,19 +856,16 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 		// Show a list of MIDI devices
 		{
 			HMENU hMenu = ::CreatePopupMenu();
-			MIDIINCAPS mic;
-			UINT numDevs = midiInGetNumDevs();
-			if(numDevs > MAX_MIDI_DEVICES) numDevs = MAX_MIDI_DEVICES;
+			auto ports = MidiDeviceManager::Instance().EnumerateInputPorts();
+			if(ports.size() > MAX_MIDI_DEVICES)
+				ports.resize(MAX_MIDI_DEVICES);
 			UINT current = TrackerSettings::Instance().GetCurrentMIDIDevice();
-			for(UINT i = 0; i < numDevs; i++)
+			for(const auto &port : ports)
 			{
-				mic.szPname[0] = 0;
-				if(midiInGetDevCaps(i, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
-				{
-					::AppendMenu(hMenu, MF_STRING | (i == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + i, theApp.GetFriendlyMIDIPortName(mpt::String::ReadCStringBuf(mic.szPname), true));
-				}
+				CString displayName = theApp.GetFriendlyMIDIPortName(mpt::ToCString(mpt::Charset::UTF8, port.name), true);
+				::AppendMenu(hMenu, MF_STRING | (port.id == current ? MF_CHECKED : 0), ID_SELECT_MIDI_DEVICE + port.id, displayName);
 			}
-			if(!numDevs)
+			if(ports.empty())
 			{
 				::AppendMenu(hMenu, MF_STRING | MF_GRAYED, 0, _T("No MIDI input devices found"));
 			}
@@ -880,9 +881,9 @@ void CMainToolBar::OnTbnDropDownToolBar(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CMainToolBar::OnSelectMIDIDevice(UINT id)
 {
-	CMainFrame::GetMainFrame()->midiCloseDevice();
+	CMainFrame::GetMainFrame()->MidiCloseDevice();
 	TrackerSettings::Instance().SetMIDIDevice(id - ID_SELECT_MIDI_DEVICE);
-	CMainFrame::GetMainFrame()->midiOpenDevice();
+	CMainFrame::GetMainFrame()->MidiOpenDevice();
 }
 
 

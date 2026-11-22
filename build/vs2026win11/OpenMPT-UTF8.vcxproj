@@ -1792,6 +1792,9 @@
     <ClInclude Include="..\..\mptrack\MPTrackWine.h" />
     <ClInclude Include="..\..\mptrack\Mainbar.h" />
     <ClInclude Include="..\..\mptrack\Mainfrm.h" />
+    <ClInclude Include="..\..\mptrack\MidiDeviceManager.h" />
+    <ClInclude Include="..\..\mptrack\MidiInputCallback.h" />
+    <ClInclude Include="..\..\mptrack\MidiTransformer.h" />
     <ClInclude Include="..\..\mptrack\ModConvert.h" />
     <ClInclude Include="..\..\mptrack\ModDocTemplate.h" />
     <ClInclude Include="..\..\mptrack\Moddoc.h" />
@@ -2257,6 +2260,8 @@
     <ClCompile Include="..\..\mptrack\MPTrackWine.cpp" />
     <ClCompile Include="..\..\mptrack\MainFrm.cpp" />
     <ClCompile Include="..\..\mptrack\Mainbar.cpp" />
+    <ClCompile Include="..\..\mptrack\MidiDeviceManager.cpp" />
+    <ClCompile Include="..\..\mptrack\MidiTransformer.cpp" />
     <ClCompile Include="..\..\mptrack\Mod2wave.cpp" />
     <ClCompile Include="..\..\mptrack\ModConvert.cpp" />
     <ClCompile Include="..\..\mptrack\ModDocTemplate.cpp" />
@@ -2264,7 +2269,6 @@
     <ClCompile Include="..\..\mptrack\Modedit.cpp" />
     <ClCompile Include="..\..\mptrack\MoveFXSlotDialog.cpp" />
     <ClCompile Include="..\..\mptrack\Mpdlgs.cpp" />
-    <ClCompile Include="..\..\mptrack\Mpt_midi.cpp" />
     <ClCompile Include="..\..\mptrack\Mptrack.cpp" />
     <ClCompile Include="..\..\mptrack\OPLExport.cpp" />
     <ClCompile Include="..\..\mptrack\OPLInstrDlg.cpp" />

@@ -47,7 +47,7 @@ public:
 	static KeyEventType GetKeyEventType(const MSG &msg);
 	static KeyEventType GetKeyEventType(UINT nFlags);
 	bool IsKeyPressHandledByTextBox(DWORD wparam, HWND hWnd) const;
-	CommandID HandleMIDIMessage(InputTargetContext context, uint32 message);
+	CommandID HandleMIDIMessage(InputTargetContext context, mpt::const_byte_span message);
 
 	int GetKeyListSize(CommandID cmd) const;
 

@@ -34,16 +34,14 @@ OPENMPT_NAMESPACE_BEGIN
 BEGIN_MESSAGE_MAP(CCustEdit, CEdit)
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
-	ON_MESSAGE(WM_MOD_MIDIMSG, &CCustEdit::OnMidiMsg)
 END_MESSAGE_MAP()
 
 
-LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
+void CCustEdit::OnMidiMessage(mpt::const_byte_span midiData)
 {
-	if(!m_isFocussed)
-		return 1;
+	if(midiData.empty())
+		return;
 
-	uint32 midiData = static_cast<uint32>(dwMidiDataParam);
 	const auto byte1 = MIDIEvents::GetDataByte1FromEvent(midiData), byte2 = MIDIEvents::GetDataByte2FromEvent(midiData);
 	switch(MIDIEvents::GetTypeFromEvent(midiData))
 	{
@@ -64,8 +62,6 @@ LRESULT CCustEdit::OnMidiMsg(WPARAM dwMidiDataParam, LPARAM)
 	default:
 		break;
 	}
-
-	return 1;
 }
 
 
@@ -104,18 +100,16 @@ void CCustEdit::OnSetFocus(CWnd *pOldWnd)
 	// Lock the input handler
 	CMainFrame::GetInputHandler()->Bypass(true);
 	// Accept MIDI input
-	CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWnd);
-
-	m_isFocussed = true;
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(this, MidiTransformers::None);
 }
 
 
 void CCustEdit::OnKillFocus(CWnd *pNewWnd)
 {
 	CEdit::OnKillFocus(pNewWnd);
-	//unlock the input handler
+	// Unlock the input handler
 	CMainFrame::GetInputHandler()->Bypass(false);
-	m_isFocussed = false;
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(nullptr);
 	m_pOptKeyDlg->OnCancelKeyChoice(this);
 }
 

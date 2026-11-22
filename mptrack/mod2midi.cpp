@@ -315,8 +315,7 @@ namespace MidiExport
 		{
 			if(midiData.empty())
 				return false;
-			const uint8 type = mpt::byte_cast<uint8>(midiData[0]);
-			if(type == MIDIEvents::sysExStart)
+			if(midiData[0] == std::byte{MIDIEvents::sysExStart})
 			{
 				// SysEx
 				WriteTicks();
@@ -328,10 +327,10 @@ namespace MidiExport
 				// Note-On events go last to prevent early note-off in a situation like this:
 				// ... ..|C-5 01
 				// C-5 01|=== ..
-				if(allowQueue && MIDIEvents::GetTypeFromEvent(type) == MIDIEvents::evNoteOn)
+				if(allowQueue && MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evNoteOn)
 				{
 					std::array<uint8, 4> midiDataArray;
-					MPT_ASSERT(midiData.size() <= sizeof(midiDataArray) && midiData.size() == MIDIEvents::GetEventLength(type));
+					MPT_ASSERT(midiData.size() <= sizeof(midiDataArray) && midiData.size() == MIDIEvents::GetEventLength(midiData[0]));
 					memcpy(midiDataArray.data(), midiData.data(), std::min(sizeof(midiDataArray), midiData.size()));
 					m_queuedEvents.push_back(midiDataArray);
 					return true;

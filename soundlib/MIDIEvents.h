@@ -138,34 +138,42 @@ namespace MIDIEvents
 	extern const char* const MidiCCNames[MIDICC_end + 1];  // Charset::UTF8
 
 	// Build a generic MIDI event
-	uint32 Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2);
+	std::array<std::byte, 3> Event(EventType eventType, uint8 midiChannel, uint8 dataByte1, uint8 dataByte2);
+	std::array<std::byte, 2> Event(EventType eventType, uint8 midiChannel, uint8 dataByte1);
 	// Build a MIDI CC event
-	uint32 CC(MidiCC midiCC, uint8 midiChannel, uint8 param);
+	std::array<std::byte, 3> CC(MidiCC midiCC, uint8 midiChannel, uint8 param);
 	// Build a MIDI Pitchbend event
-	uint32 PitchBend(uint8 midiChannel, uint16 bendAmount);
+	std::array<std::byte, 3> PitchBend(uint8 midiChannel, uint16 bendAmount);
 	// Build a MIDI Program Change event
-	uint32 ProgramChange(uint8 midiChannel, uint8 program);
+	std::array<std::byte, 2> ProgramChange(uint8 midiChannel, uint8 program);
 	// Build a MIDI Note Off event
-	uint32 NoteOff(uint8 midiChannel, uint8 note, uint8 velocity);
+	std::array<std::byte, 3> NoteOff(uint8 midiChannel, uint8 note, uint8 velocity);
 	// Build a MIDI Note On event
-	uint32 NoteOn(uint8 midiChannel, uint8 note, uint8 velocity);
+	std::array<std::byte, 3> NoteOn(uint8 midiChannel, uint8 note, uint8 velocity);
 	// Build a MIDI System Event
-	uint8 System(SystemEvent eventType);
+	std::array<std::byte, 1> System(SystemEvent eventType);
 	// Build a MIDI Song Position Event
-	uint32 SongPosition(uint16 quarterNotes);
+	std::array<std::byte, 3> SongPosition(uint16 quarterNotes);
 
 	// Get MIDI channel from a MIDI event
-	uint8 GetChannelFromEvent(uint32 midiMsg);
+	uint8 GetChannelFromEvent(mpt::const_byte_span midiMsg);
 	// Get MIDI Event type from a MIDI event
-	EventType GetTypeFromEvent(uint32 midiMsg);
+	EventType GetTypeFromEvent(mpt::const_byte_span midiMsg);
 	// Get first data byte from a MIDI event
-	uint8 GetDataByte1FromEvent(uint32 midiMsg);
+	uint8 GetDataByte1FromEvent(mpt::const_byte_span midiMsg);
 	// Get second data byte from a MIDI event
-	uint8 GetDataByte2FromEvent(uint32 midiMsg);
+	uint8 GetDataByte2FromEvent(mpt::const_byte_span midiMsg);
+
+	// True if message is a Song Position/Clock/Start/Continue/Stop system message
+	bool IsTransportEvent(mpt::const_byte_span midiMsg);
+	// True only for note-on events with velocity > 0
+	bool IsNoteOnEvent(mpt::const_byte_span midiMsg);
+	// True for note-off events and note-on events with velocity == 0
+	bool IsNoteOffEvent(mpt::const_byte_span midiMsg);
 
 	// Get the length of a MIDI event in bytes
-	uint8 GetEventLength(uint8 firstByte);
-
+	uint8 GetEventLength(std::byte firstByte);
+	inline uint8 GetEventLength(uint8 firstByte) { return GetEventLength(mpt::byte_cast<std::byte>(firstByte)); }
 }
 
 

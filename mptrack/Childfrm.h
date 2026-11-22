@@ -98,8 +98,6 @@ protected:
 	static CChildFrame *m_lastActiveFrame;
 	static int glMdiOpenCount;
 
-// Attributes
-protected:
 	CSplitterWnd m_wndSplitter;
 	HWND m_hWndCtrl = nullptr, m_hWndView = nullptr;
 	GeneralViewState m_ViewGeneral;
@@ -112,7 +110,6 @@ protected:
 	bool m_maxWhenClosed = false;
 	bool m_initialActivation = true;
 
-// Operations
 public:
 	CModControlView *GetModControlView() const { return reinterpret_cast<CModControlView *>(m_wndSplitter.GetPane(0, 0)); }
 	BOOL ChangeViewClass(CRuntimeClass *pNewViewClass, CCreateContext *pContext = nullptr);
@@ -142,18 +139,17 @@ public:
 
 	static CChildFrame *LastActiveFrame() { return m_lastActiveFrame; }
 
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CChildFrame)
 public:
-	BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext) override;
+	//{{AFX_VIRTUAL(CChildFrame)
+	BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext *pContext) override;
 	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 	void ActivateFrame(int nCmdShow) override;
 	void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 	//}}AFX_VIRTUAL
 
-// Generated message map functions
 protected:
+	void UpdateMidiRecordCallback() const;
+
 	//{{AFX_MSG(CChildFrame)
 	afx_msg LRESULT OnDPIChangedAfterParent(WPARAM, LPARAM);
 	afx_msg void OnDestroy();

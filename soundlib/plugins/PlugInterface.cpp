@@ -377,14 +377,6 @@ float IMixPlugin::RenderSilence(uint32 numFrames)
 }
 
 
-bool IMixPlugin::MidiSend(uint32 midiCode)
-{
-	std::array<std::byte, 4> midiData;
-	memcpy(midiData.data(), &midiCode, 4);
-	return MidiSend(mpt::as_span(midiData.data(), std::min(static_cast<uint8>(midiData.size()), MIDIEvents::GetEventLength(mpt::byte_cast<uint8>(midiData[0])))));
-}
-
-
 // Get list of plugins to which output is sent. A nullptr indicates master output.
 size_t IMixPlugin::GetOutputPlugList(std::vector<IMixPlugin *> &list)
 {
@@ -1033,12 +1025,13 @@ void IMidiPlugin::ReceiveMidi(mpt::const_byte_span midiData)
 	}
 
 #ifdef MODPLUG_TRACKER
-	if(m_recordMIDIOut && midiData[0] != std::byte{0xF0})
+	// Exclude Song Position/Play/Continue/Stop messages.
+	// They may for example originate from our MIDI I/O plugin, which sends them as soon as we start/stop playback,
+	// so we don't want to react to those events in the pattern editor again.
+	if(m_recordMIDIOut && !MIDIEvents::IsTransportEvent(midiData))
 	{
 		// Spam MIDI data to all views
-		uint32 midiCode = 0;
-		memcpy(&midiCode, midiData.data(), std::min(sizeof(midiCode), midiData.size()));
-		::PostMessage(CMainFrame::GetMainFrame()->GetMidiRecordWnd(), WM_MOD_MIDIMSG, midiCode, reinterpret_cast<LPARAM>(this));
+		CMainFrame::GetMainFrame()->EnqueueMidiMessage(midiData, this);
 	}
 #endif  // MODPLUG_TRACKER
 }

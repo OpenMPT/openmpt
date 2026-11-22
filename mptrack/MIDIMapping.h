@@ -92,7 +92,7 @@ public:
 	// - paramvalue to parameter value.
 	// In case of multiple mappings, these get the values from the last mapping found.
 	// Returns true if MIDI was 'captured' by some directive, false otherwise.
-	bool OnMIDImsg(const DWORD midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramvalue);
+	bool OnMIDImsg(mpt::const_byte_span midimsg, PLUGINDEX &mappedIndex, PlugParamIndex &paramindex, uint16 &paramvalue);
 
 	// Swaps the positions of two elements.
 	void Swap(const size_t a, const size_t b);

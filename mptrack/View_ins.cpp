@@ -150,7 +150,6 @@ BEGIN_MESSAGE_MAP(CViewInstrument, CModScrollView)
 	ON_COMMAND(ID_ENVELOPE_TOGGLERELEASENODE, &CViewInstrument::OnEnvToggleReleasNode)
 	ON_COMMAND(ID_ENVELOPE_SCALEPOINTS, &CViewInstrument::OnEnvelopeScalePoints)
 
-	ON_MESSAGE(WM_MOD_MIDIMSG,				&CViewInstrument::OnMidiMsg)
 	ON_MESSAGE(WM_MOD_KEYCOMMAND,			&CViewInstrument::OnCustomKeyMsg)
 
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO,		&CViewInstrument::OnUpdateUndo)
@@ -2112,24 +2111,25 @@ void CViewInstrument::OnDropFiles(HDROP hDropInfo)
 }
 
 
-LRESULT CViewInstrument::OnMidiMsg(WPARAM midiDataParam, LPARAM)
+bool CViewInstrument::PreFilterMidiMessage(mpt::const_byte_span midiData)
 {
-	const uint32 midiData = static_cast<uint32>(midiDataParam);
+	return DefaultPreFilterMidiMessage(midiData, &GetDocument()->GetSoundFile(), kCtxViewInstruments);
+}
+
+
+void CViewInstrument::OnMidiMessage(mpt::const_byte_span midiData)
+{
 	CModDoc *modDoc = GetDocument();
-	if(modDoc != nullptr)
+	if(modDoc == nullptr || midiData.empty())
+		return;
+
+	modDoc->ProcessMIDI(midiData, 0, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument));
+
+	if(MIDIEvents::IsNoteOnEvent(midiData))
 	{
-		modDoc->ProcessMIDI(midiData, 0, m_nInstrument, modDoc->GetSoundFile().GetInstrumentPlugin(m_nInstrument), kCtxViewInstruments);
-
-		MIDIEvents::EventType event = MIDIEvents::GetTypeFromEvent(midiData);
 		uint8 midiByte1 = MIDIEvents::GetDataByte1FromEvent(midiData);
-		if(event == MIDIEvents::evNoteOn)
-		{
-			CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
-		}
-
-		return 1;
+		CMainFrame::GetMainFrame()->SetInfoText(mpt::ToCString(modDoc->GetSoundFile().GetNoteName(midiByte1 + NOTE_MIN, m_nInstrument)));
 	}
-	return 0;
 }
 
 

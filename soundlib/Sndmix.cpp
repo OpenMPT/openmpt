@@ -364,6 +364,7 @@ samplecount_t CSoundFile::Read(samplecount_t count, IAudioTarget &target, IAudio
 		countToRender -= countChunk;
 		m_PlayState.m_nBufferCount -= countChunk;
 		m_PlayState.m_lTotalSampleCount += countChunk;
+		m_TimingInfo.FramesRenderedInChunk += countChunk;
 		const ROWINDEX rowsPerBeat = m_PlayState.m_nCurrentRowsPerBeat ? m_PlayState.m_nCurrentRowsPerBeat : DEFAULT_ROWS_PER_BEAT;
 		if(!m_PlayState.m_nBufferCount && !m_PlayState.m_flags[SONG_PAUSED])
 			m_PlayState.m_ppqPosFract += 1.0 / (rowsPerBeat * m_PlayState.TicksOnRow());

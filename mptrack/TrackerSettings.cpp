@@ -14,6 +14,7 @@
 #include "ExceptionHandler.h"
 #include "HighDPISupport.h"
 #include "Mainfrm.h"
+#include "MidiDeviceManager.h"
 #include "Moddoc.h"
 #include "Mpdlgs.h"
 #include "Mptrack.h"
@@ -1527,11 +1528,14 @@ void TrackerSettings::SaveChords(MPTChords &chords)
 void TrackerSettings::SetMIDIDevice(UINT id)
 {
 	m_nMidiDevice = id;
-	MIDIINCAPS mic;
-	mic.szPname[0] = 0;
-	if(midiInGetDevCaps(id, &mic, sizeof(mic)) == MMSYSERR_NOERROR)
+	const auto ports = MidiDeviceManager::Instance().EnumerateInputPorts();
+	for(const auto &port : ports)
 	{
-		midiDeviceName = mic.szPname;
+		if(port.id == id)
+		{
+			midiDeviceName = mpt::ToCString(mpt::Charset::UTF8, port.name);
+			return;
+		}
 	}
 }
 
@@ -1544,31 +1548,22 @@ UINT TrackerSettings::GetCurrentMIDIDevice()
 	CString deviceName = midiDeviceName;
 	deviceName.TrimRight();
 
-	MIDIINCAPS mic;
-	UINT candidate = m_nMidiDevice, numDevs = midiInGetNumDevs();
-	for(UINT i = 0; i < numDevs; i++)
+	const auto ports = MidiDeviceManager::Instance().EnumerateInputPorts();
+	size_t numDevs = ports.size();
+	MidiPortID candidate = m_nMidiDevice;
+	for(size_t i = 0; i < numDevs; i++)
 	{
-		mic.szPname[0] = 0;
-		if(midiInGetDevCaps(i, &mic, sizeof(mic)) != MMSYSERR_NOERROR)
-			continue;
-
 		// Some device names have trailing spaces (e.g. "USB MIDI Interface "), but those may get lost in our settings framework.
-		mpt::String::SetNullTerminator(mic.szPname);
-		size_t strLen = _tcslen(mic.szPname);
-		while(strLen-- > 0)
+		CString portName = mpt::ToCString(mpt::Charset::UTF8, ports[i].name);
+		portName.TrimRight();
+		if(portName == deviceName)
 		{
-			if(mic.szPname[strLen] == _T(' '))
-				mic.szPname[strLen] = 0;
-			else
-				break;
-		}
-		if(CString(mic.szPname) == deviceName)
-		{
-			candidate = i;
-			numDevs = m_nMidiDevice + 1;
+			candidate = ports[i].id;
 			// If the same device name exists twice, try to match both device number and name
 			if(candidate == m_nMidiDevice)
 				return candidate;
+			// Already found a matching name, only need to check up to the device number we want to match
+			numDevs = m_nMidiDevice + 1;
 		}
 	}
 	// If the device changed its ID, update it now.

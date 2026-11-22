@@ -147,7 +147,7 @@ BOOL CChildFrame::OnNcActivate(BOOL bActivate)
 	if(bActivate && m_hWndView)
 	{
 		// Need this in addition to OnMDIActivate when switching from a non-MDI window such as a plugin editor
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
+		UpdateMidiRecordCallback();
 	}
 	if(m_hWndCtrl)
 		::SendMessage(m_hWndCtrl, bActivate ? WM_MOD_MDIACTIVATE : WM_MOD_MDIDEACTIVATE, 0, 0);
@@ -166,7 +166,7 @@ void CChildFrame::OnMDIActivate(BOOL bActivate, CWnd *pActivateWnd, CWnd *pDeact
 	{
 		MPT_ASSERT(pActivateWnd == this);
 		CMainFrame::GetMainFrame()->UpdateEffectKeys(static_cast<CModDoc *>(GetActiveDocument()));
-		CMainFrame::GetMainFrame()->SetMidiRecordWnd(m_hWndView);
+		UpdateMidiRecordCallback();
 		m_lastActiveFrame = this;
 	}
 	if(m_hWndCtrl)
@@ -244,20 +244,16 @@ BOOL CChildFrame::ChangeViewClass(CRuntimeClass* pViewClass, CCreateContext* pCo
 {
 	CMainFrame *pMainFrm = CMainFrame::GetMainFrame();
 	CWnd *pWnd;
-	if (pViewClass->m_lpszClassName == m_currentViewClassName) return TRUE;
+	if(pViewClass->m_lpszClassName == m_currentViewClassName)
+		return TRUE;
 	if(!m_currentViewClassName.empty())
 	{
+		if(pMainFrm->GetMidiRecordCallback() == dynamic_cast<IMidiInputCallback *>(m_wndSplitter.GetPane(1, 0)))
+			pMainFrm->SetMidiRecordCallback(nullptr);
 		m_currentViewClassName.clear();
 		m_wndSplitter.DeleteView(1, 0);
 	}
-	if ((m_hWndView) && (pMainFrm))
-	{
-		if (pMainFrm->GetMidiRecordWnd() == m_hWndView)
-		{
-			pMainFrm->SetMidiRecordWnd(NULL);
-		}
-	}
-	m_hWndView = NULL;
+	m_hWndView = nullptr;
 	if (!m_wndSplitter.CreateView(1, 0, pViewClass, CSize(0, 0), pContext)) return FALSE;
 	// Get 2nd window handle
 	if ((pWnd = m_wndSplitter.GetPane(1, 0)) != NULL) m_hWndView = pWnd->m_hWnd;
@@ -267,7 +263,7 @@ BOOL CChildFrame::ChangeViewClass(CRuntimeClass* pViewClass, CCreateContext* pCo
 	{
 		::PostMessage(m_hWndView, WM_MOD_VIEWMSG, VIEWMSG_SETCTRLWND, (LPARAM)m_hWndCtrl);
 		::PostMessage(m_hWndCtrl, WM_MOD_CTRLMSG, CTRLMSG_SETVIEWWND, (LPARAM)m_hWndView);
-		pMainFrm->SetMidiRecordWnd(m_hWndView);
+		UpdateMidiRecordCallback();
 	}
 	return TRUE;
 }
@@ -373,6 +369,13 @@ LRESULT CChildFrame::OnInstrumentSelected(WPARAM wParam, LPARAM lParam)
 		::SendMessage(m_hWndCtrl, WM_MOD_CTRLMSG, CTRLMSG_PAT_SETINSTRUMENT, nIns);
 	}
 	return 0;
+}
+
+
+void CChildFrame::UpdateMidiRecordCallback() const
+{
+	CWnd *viewWnd = m_wndSplitter.GetPane(1, 0);
+	CMainFrame::GetMainFrame()->SetMidiRecordCallback(dynamic_cast<IMidiInputCallback *>(viewWnd));
 }
 
 

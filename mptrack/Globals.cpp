@@ -738,10 +738,8 @@ void CModScrollView::OnDestroy()
 			pModDoc->SetNotifications(Notification::Default);
 			pModDoc->SetFollowWnd(NULL);
 		}
-		if (pMainFrm->GetMidiRecordWnd() == m_hWnd)
-		{
-			pMainFrm->SetMidiRecordWnd(NULL);
-		}
+		if(pMainFrm->GetMidiRecordCallback() == dynamic_cast<IMidiInputCallback *>(this))
+			pMainFrm->SetMidiRecordCallback(nullptr);
 	}
 	CScrollView::OnDestroy();
 }
@@ -891,6 +889,25 @@ void CModControlBar::OnDPIChanged()
 	SetBitmapSize(CSize(imgSize, imgSize));
 	SetButtonSize(CSize(btnSizeX, btnSizeY));
 	SetExtendedStyle(extendedStyle);
+}
+
+
+bool DefaultPreFilterMidiMessage(mpt::const_byte_span midiData, CSoundFile *sndFile, InputTargetContext ctx)
+{
+	PLUGINDEX mappedIndex = 0;
+	PlugParamIndex paramIndex = 0;
+	uint16 paramValue = 0;
+	bool captured = sndFile ? sndFile->GetMIDIMapper().OnMIDImsg(midiData, mappedIndex, paramIndex, paramValue) : false;
+
+	// Handle MIDI messages assigned to shortcuts
+	CInputHandler *ih = CMainFrame::GetInputHandler();
+	if(ih->HandleMIDIMessage(ctx, midiData) != kcNull
+		|| ih->HandleMIDIMessage(kCtxAllContexts, midiData) != kcNull)
+	{
+		// Mapped to a command, no need to pass message on.
+		captured = true;
+	}
+	return captured;
 }
 
 

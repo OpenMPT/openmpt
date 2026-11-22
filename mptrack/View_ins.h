@@ -13,6 +13,7 @@
 
 #include "openmpt/all/BuildSettings.hpp"
 #include "Globals.h"
+#include "MidiInputCallback.h"
 #include "Moddoc.h"
 #include "../soundlib/Snd_defs.h"
 
@@ -40,7 +41,7 @@ enum DragPoints
 	ENV_DRAGNEXT			= (MAX_ENVPOINTS + 6),
 };
 
-class CViewInstrument: public CModScrollView
+class CViewInstrument: public CModScrollView, public IMidiInputCallback
 {
 protected:
 	CPoint m_ptMenu;
@@ -196,6 +197,8 @@ public:
 	LRESULT OnPlayerNotify(Notification *) override;
 	HRESULT get_accName(VARIANT varChild, BSTR *pszName) override;
 	INT_PTR OnToolHitTest(CPoint point, TOOLINFO *pTI) const override;
+	bool PreFilterMidiMessage(mpt::const_byte_span midiData) override;
+	void OnMidiMessage(mpt::const_byte_span midiData) override;
 	//}}AFX_VIRTUAL
 
 protected:
@@ -242,7 +245,6 @@ protected:
 	afx_msg void OnEnvelopeScalePoints();
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg LRESULT OnCustomKeyMsg(WPARAM, LPARAM);
-	afx_msg LRESULT OnMidiMsg(WPARAM, LPARAM);
 	// cppcheck-suppress duplInheritedMember
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnXButtonUp(UINT nFlags, UINT nButton, CPoint point);
