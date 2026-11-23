@@ -36,6 +36,9 @@ struct MidiDeviceManager::SharedInputPort
 {
 	RtMidiIn rtMidiIn;
 	mpt::mutex callbackMutex;  // Guards callbacks vector
+#if MPT_COMPILER_MSVC
+	_Guarded_by_(callbackMutex)
+#endif  // MPT_COMPILER_MSVC
 	std::vector<IMidiInputCallback *> callbacks;
 	std::vector<std::byte> sysexBuffer;
 
@@ -48,6 +51,9 @@ struct MidiDeviceManager::SharedOutputPort
 	RtMidiOut rtMidiOut;
 	std::thread outputThread;
 	mpt::mutex mutex;  // Guards queue vector
+#if MPT_COMPILER_MSVC
+	_Guarded_by_(mutex)
+#endif  // MPT_COMPILER_MSVC
 	std::vector<MidiMessage> queue;
 	std::condition_variable_any cv;
 	std::atomic<bool> running = false;
@@ -281,9 +287,12 @@ void MidiDeviceManager::CloseInput(MidiInputHandle &handle)
 	mpt::lock_guard<mpt::mutex> lock{m_managerMutex};
 	SharedInputPort &port = handle.m_port;
 
-	// Remove this specific callback
-	auto &cbs = port.callbacks;
-	cbs.erase(std::remove(cbs.begin(), cbs.end(), &handle.m_callback), cbs.end());
+	{
+		// Remove this specific callback
+		mpt::lock_guard<mpt::mutex> callbackLock{port.callbackMutex};
+		auto &cbs = port.callbacks;
+		cbs.erase(std::remove(cbs.begin(), cbs.end(), &handle.m_callback), cbs.end());
+	}
 
 	if(port.HasReferences())
 		return;
