@@ -200,6 +200,9 @@ protected:
 	MidiVolumeFilter m_volumeFilter;
 	MidiSustainFilter m_sustainFilter;
 	mpt::mutex m_midiInputMutex;  // Protects m_midiInputQueue
+#if MPT_COMPILER_MSVC
+	_Guarded_by_(m_midiInputMutex)
+#endif  // MPT_COMPILER_MSVC
 	std::vector<MidiMessage> m_midiInputQueue;
 	std::atomic<bool> m_midiMsgPending = false;
 	void *m_currentMidiSender = nullptr;  // Set during dispatch for feedback prevention
@@ -222,6 +225,9 @@ protected:
 
 	// Notification Buffer
 	mpt::mutex m_NotificationBufferMutex; // to avoid deadlocks, this mutex should only be taken as a innermost lock, i.e. do not block on anything while holding this mutex
+#if MPT_COMPILER_MSVC
+	_Guarded_by_(m_NotificationBufferMutex)
+#endif  // MPT_COMPILER_MSVC
 	Util::fixed_size_queue<Notification, MAX_UPDATE_HISTORY> m_NotifyBuffer;
 
 	// Instrument preview in tree view

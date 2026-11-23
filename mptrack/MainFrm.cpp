@@ -2594,27 +2594,19 @@ bool CMainFrame::MidiOpenDevice(bool showSettings)
 	UpdateMidiFilters();
 
 	MidiDeviceManager &manager = MidiDeviceManager::Instance();
-	MidiPortID port = TrackerSettings::Instance().GetCurrentMIDIDevice();
-	m_midiInputHandle = manager.OpenInput(port, this);
+	m_midiInputHandle = manager.OpenInput(TrackerSettings::Instance().GetCurrentMIDIDevice(), this);
 
-	if(!m_midiInputHandle)
+	if(!m_midiInputHandle && showSettings)
 	{
-		// Show MIDI configuration on fail.
-		if(showSettings)
-		{
-			CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
-			OnViewOptions();
-		}
+		// Show MIDI configuration on fail
+		CMainFrame::m_nLastOptionsPage = OPTIONS_PAGE_MIDI;
+		OnViewOptions();
 
-		// Let's see if the user updated the settings.
-		port = static_cast<MidiPortID>(TrackerSettings::Instance().GetCurrentMIDIDevice());
-		m_midiInputHandle = manager.OpenInput(port, this);
-
-		if(!m_midiInputHandle)
-			return false;
+		// Let's see if the user updated the settings successfully
+		m_midiInputHandle = manager.OpenInput(TrackerSettings::Instance().GetCurrentMIDIDevice(), this);
 	}
 
-	return true;
+	return m_midiInputHandle != nullptr;
 }
 
 
