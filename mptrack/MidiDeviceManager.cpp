@@ -312,7 +312,7 @@ void MidiDeviceManager::OutputThreadFunc(SharedOutputPort &port)
 	const auto *sdm = theApp.GetSoundDevicesManager();
 	const auto sysInfo = sdm->GetSysInfo();
 	const auto appInfo = sdm->GetAppInfo();
-	SoundDevice::CPriorityBooster priorityBooster{sysInfo, true, appInfo.BoostedThreadMMCSSClassVista, appInfo.BoostedThreadPriorityXP};
+	SoundDevice::CPriorityBooster priorityBooster{sysInfo, true, mpt::ToWin(appInfo.BoostedThreadMMCSSClassVista), appInfo.BoostedThreadPriorityXP};
 	Util::MultimediaClock clock;
 	clock.SetResolution(1);
 
