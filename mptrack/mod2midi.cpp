@@ -71,7 +71,7 @@ namespace MidiExport
 		std::shared_ptr<MidiChannelState> m_channelState;
 		std::array<decltype(m_instr.midiPWD), 16> m_pitchWheelDepth = { 0 };
 
-		std::vector<std::array<uint8, 4>> m_queuedEvents;
+		std::vector<std::array<std::byte, 3>> m_queuedEvents;
 		const MidiInOut *m_originalPlugin = nullptr;
 
 		std::ostringstream f;
@@ -235,8 +235,7 @@ namespace MidiExport
 				if(m_channelState->panning[midiCh] == newPanning)
 					continue;
 				m_channelState->panning[midiCh] = newPanning;
-				std::array<uint8, 4> midiData = {static_cast<uint8>(0xB0 | midiCh), 0x0A, newPanning, 0};
-				m_queuedEvents.push_back(midiData);
+				m_queuedEvents.push_back(MIDIEvents::CC(MIDIEvents::MIDICC_Panposition_Coarse, midiCh, newPanning));
 			}
 
 			for(const auto &midiData : m_queuedEvents)
@@ -329,9 +328,9 @@ namespace MidiExport
 				// C-5 01|=== ..
 				if(allowQueue && MIDIEvents::GetTypeFromEvent(midiData) == MIDIEvents::evNoteOn)
 				{
-					std::array<uint8, 4> midiDataArray;
+					std::array<std::byte, 3> midiDataArray;
 					MPT_ASSERT(midiData.size() <= sizeof(midiDataArray) && midiData.size() == MIDIEvents::GetEventLength(midiData[0]));
-					memcpy(midiDataArray.data(), midiData.data(), std::min(sizeof(midiDataArray), midiData.size()));
+					std::copy(midiData.data(), midiData.data() + std::min(midiDataArray.size(), midiData.size()), midiDataArray.begin());
 					m_queuedEvents.push_back(midiDataArray);
 					return true;
 				}
@@ -454,7 +453,7 @@ namespace MidiExport
 	class Conversion
 	{
 		std::vector<ModInstrument *> m_oldInstruments;
-		std::vector<MidiTrack *> m_tracks;
+		std::vector<std::unique_ptr<MidiTrack>> m_tracks;
 		std::vector<SNDMIXPLUGIN> m_oldPlugins;
 		SNDMIXPLUGIN tempoTrackPlugin;
 		VSTPluginLib m_plugFactory;
@@ -465,15 +464,15 @@ namespace MidiExport
 
 	public:
 		Conversion(CSoundFile &sndFile, const InstrMap &instrMap, std::ostream &file, bool overlappingInstruments, const SubSong &subsongInfo)
-			: m_oldInstruments(sndFile.GetNumInstruments())
-			, m_plugFactory(nullptr, true, {}, {})
-			, m_sndFile(sndFile)
-			, m_file(file)
-			, m_subsongInfo(subsongInfo)
-			, m_wasInstrumentMode(sndFile.GetNumInstruments() > 0)
+			: m_oldInstruments{sndFile.GetNumInstruments()}
+			, m_plugFactory{nullptr, true, {}, {}}
+			, m_sndFile{sndFile}
+			, m_file{file}
+			, m_subsongInfo{subsongInfo}
+			, m_wasInstrumentMode{sndFile.GetNumInstruments() > 0}
 		{
-			m_oldPlugins.assign(std::begin(m_sndFile.m_MixPlugins), std::end(m_sndFile.m_MixPlugins));
-			std::fill(std::begin(m_sndFile.m_MixPlugins), std::end(m_sndFile.m_MixPlugins), SNDMIXPLUGIN());
+			m_oldPlugins.assign(m_sndFile.m_MixPlugins.begin(), m_sndFile.m_MixPlugins.end());
+			std::fill(m_sndFile.m_MixPlugins.begin(), m_sndFile.m_MixPlugins.end(), SNDMIXPLUGIN{});
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
 			{
 				m_oldInstruments[i - 1] = m_sndFile.Instruments[i];
@@ -484,11 +483,10 @@ namespace MidiExport
 			}
 
 			m_tracks.reserve(m_sndFile.GetNumInstruments() + 1);
-			MidiTrack &tempoTrack = *(new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments, nullptr});
-			tempoTrackPlugin.pMixPlugin = &tempoTrack;
-			tempoTrack.WriteString(kText, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage.GetString()));
-			tempoTrack.WriteString(kCopyright, m_sndFile.m_songArtist);
-			m_tracks.push_back(&tempoTrack);
+			auto &tempoTrack = m_tracks.emplace_back(std::make_unique<MidiTrack>(m_plugFactory, m_sndFile, m_subsongInfo, tempoTrackPlugin, nullptr, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songName), nullptr, overlappingInstruments, nullptr));
+			tempoTrackPlugin.pMixPlugin = tempoTrack.get();
+			tempoTrack->WriteString(kText, mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.m_songMessage.GetString()));
+			tempoTrack->WriteString(kCopyright, m_sndFile.m_songArtist);
 
 			PLUGINDEX nextPlug = 0;
 			for(INSTRUMENTINDEX i = 1; i <= m_sndFile.GetNumInstruments(); i++)
@@ -502,12 +500,11 @@ namespace MidiExport
 				SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[nextPlug++];
 
 				ModInstrument *oldInstr = m_wasInstrumentMode ? m_oldInstruments[i - 1] : nullptr;
-				MidiTrack &midiInstr = *(new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, &tempoTrack, oldInstr ? mpt::ToUnicode(m_sndFile.GetCharsetInternal(), oldInstr->name) : mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(i)), oldInstr, overlappingInstruments, originalPlugin});
-				ModInstrument &instr = midiInstr;
-				mixPlugin.pMixPlugin = &midiInstr;
+				auto &midiInstr = m_tracks.emplace_back(std::make_unique<MidiTrack>(m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, tempoTrack.get(), oldInstr ? mpt::ToUnicode(m_sndFile.GetCharsetInternal(), oldInstr->name) : mpt::ToUnicode(m_sndFile.GetCharsetInternal(), m_sndFile.GetSampleName(i)), oldInstr, overlappingInstruments, originalPlugin));
+				ModInstrument &instr = *midiInstr;
+				mixPlugin.pMixPlugin = midiInstr.get();
 				
 				m_sndFile.Instruments[i] = &instr;
-				m_tracks.push_back(&midiInstr);
 
 				if(m_wasInstrumentMode) instr = *oldInstr;
 				instr.nMixPlug = nextPlug;
@@ -534,21 +531,20 @@ namespace MidiExport
 						}
 					}
 				}
-				midiInstr.WritePitchWheelDepth();
+				midiInstr->WritePitchWheelDepth();
 			}
 
 			for(size_t plug = 0; plug < m_oldPlugins.size(); plug++)
 			{
 				if(MidiInOut *midiPlugin = dynamic_cast<MidiInOut *>(m_oldPlugins[plug].pMixPlugin))
 				{
-					MidiTrack *track = &tempoTrack;
+					MidiTrack *track = tempoTrack.get();
 					// This plugin slot is not covered by an instrument - create a placeholder plugin in case PC events are sent to this plugin
 					SNDMIXPLUGIN &mixPlugin = m_sndFile.m_MixPlugins[plug];
 					if(!mixPlugin.IsValidPlugin())
 					{
-						track = new MidiTrack{m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, &tempoTrack, MPT_UFORMAT("Automation For MIDI Plugin FX{}")(mpt::ufmt::dec0<2>(plug + 1)), nullptr, overlappingInstruments, midiPlugin};
+						track = m_tracks.emplace_back(std::make_unique<MidiTrack>(m_plugFactory, m_sndFile, m_subsongInfo, mixPlugin, tempoTrack.get(), MPT_UFORMAT("Automation For MIDI Plugin FX{}")(mpt::ufmt::dec0<2>(plug + 1)), nullptr, overlappingInstruments, midiPlugin)).get();
 						mixPlugin.pMixPlugin = track;
-						m_tracks.push_back(track);
 					}
 					if(auto dump = midiPlugin->GetInitialMidiDump(); !dump.empty())
 					{
@@ -567,7 +563,7 @@ namespace MidiExport
 
 		void Finalise()
 		{
-			for(auto track : m_tracks)
+			for(auto &track : m_tracks)
 			{
 				std::string data = track->Finalise().str();
 				if(!data.empty())
@@ -596,10 +592,7 @@ namespace MidiExport
 			{
 				plug.Destroy();
 			}
-			for(auto &track : m_tracks)
-			{
-				delete track;	// Resets m_MixPlugins[i].pMixPlugin, so do it before copying back the old structs
-			}
+			m_tracks.clear();  // Destroying a plugin instance resets the corresponding m_MixPlugins[i].pMixPlugin, so do it before copying back the old structs
 			std::move(m_oldPlugins.cbegin(), m_oldPlugins.cend(), std::begin(m_sndFile.m_MixPlugins));
 
 			// Be sure that instrument pointers to our faked instruments are gone.
