@@ -12,10 +12,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { version: 'r1beta6' }
+          - { version: 'r1beta6', current: false }
+          - { version: 'r1beta6', current: true  }
 
     concurrency:
-      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-autotools
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.current}}-autotools
       cancel-in-progress: true
 
     runs-on: ubuntu-24.04
@@ -35,13 +36,15 @@ jobs:
     - name: Sync files to VM
       shell: cpa.sh {0} --sync-files runner-to-vm
       run: true
+    - name: Switch system to current
+      if: matrix.current
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        yes yes | pkgman add-repo https://eu.hpkg.haiku-os.org/haiku/master/$(getarch)/current
+        yes yes | pkgman add-repo https://eu.hpkg.haiku-os.org/haikuports/master/$(getarch)/current
     - name: Update system
       shell: cpa.sh {0} --sync-files none
       run: |
-        pkgman list-repos
-        yes yes | pkgman add-repo https://eu.hpkg.haiku-os.org/haiku/master/$(getarch)/current
-        yes yes | pkgman add-repo https://eu.hpkg.haiku-os.org/haikuports/master/$(getarch)/current
-        pkgman list-repos
         pkgman refresh
         pkgman full-sync -y
     - name: Reboot VM
