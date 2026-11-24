@@ -1111,6 +1111,70 @@ float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, in
 	return 0.0;
 }
 
+int openmpt_module_get_current_channel_state( openmpt_module * mod, int32_t channel, openmpt_module_current_channel_state * state ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		if ( !state ) {
+			throw openmpt::interface::argument_null_pointer();
+		}
+		openmpt::module_impl::current_channel_state cpp_state;
+		if ( !mod->impl->get_current_channel_state( channel, cpp_state ) ) {
+			return 0;
+		}
+		state->volume = cpp_state.volume;
+		state->final_volume = cpp_state.final_volume;
+		state->pan = cpp_state.pan;
+		state->instrument = cpp_state.instrument;
+		state->key = cpp_state.key;
+		state->period = cpp_state.period;
+		state->position = cpp_state.position;
+		state->increment = cpp_state.increment;
+		state->pitchbend = cpp_state.pitchbend;
+		state->note = cpp_state.note;
+		state->sample = cpp_state.sample;
+		state->muted = cpp_state.muted;
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+
+int openmpt_module_get_sample_state( openmpt_module * mod, int32_t sample, openmpt_module_sample_state * state ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		if ( !state ) {
+			throw openmpt::interface::argument_null_pointer();
+		}
+		openmpt::module_impl::sample_state cpp_state;
+		if ( !mod->impl->get_sample_state( sample, cpp_state ) ) {
+			return 0;
+		}
+		state->data = cpp_state.data;
+		state->length = cpp_state.length;
+		state->loop_start = cpp_state.loop_start;
+		state->loop_end = cpp_state.loop_end;
+		state->flags = cpp_state.flags;
+		state->c5speed = cpp_state.c5speed;
+		state->channels = cpp_state.channels;
+		state->bits_per_sample = cpp_state.bits_per_sample;
+		return 1;
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+
+int32_t openmpt_module_channel_mute( openmpt_module * mod, int32_t channel, int32_t status ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->set_channel_mute( channel, status );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return -1;
+}
+
 int32_t openmpt_module_get_num_subsongs( openmpt_module * mod ) {
 	try {
 		openmpt::interface::check_soundfile( mod );
