@@ -1110,6 +1110,24 @@ float openmpt_module_get_current_channel_vu_rear_right( openmpt_module * mod, in
 	}
 	return 0.0;
 }
+size_t openmpt_module_get_current_channel_audio_mono( openmpt_module * mod, int32_t channel, size_t count, float * buf ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_current_channel_audio_mono( channel, count, buf );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
+size_t openmpt_module_get_current_channel_audio_stereo( openmpt_module * mod, int32_t channel, size_t count, float * buf_left, float * buf_right ) {
+	try {
+		openmpt::interface::check_soundfile( mod );
+		return mod->impl->get_current_channel_audio_stereo( channel, count, buf_left, buf_right );
+	} catch ( ... ) {
+		openmpt::report_exception( __func__, mod );
+	}
+	return 0;
+}
 
 int32_t openmpt_module_get_num_subsongs( openmpt_module * mod ) {
 	try {
