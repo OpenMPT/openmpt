@@ -171,7 +171,7 @@ private:
 	std::map<MidiPortID, SharedOutputPort> m_openOutputs;
 
 	// TODO make this non-locking?
-	std::atomic<SyncPoint> m_syncPoint;
+	std::atomic<SyncPoint> m_syncPoint = SyncPoint{};
 };
 
 
