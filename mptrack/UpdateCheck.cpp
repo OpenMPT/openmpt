@@ -184,6 +184,8 @@ static bool IsArchitectureFeatureSupported(const mpt::ustring &architecture, con
 			const mpt::arch::current::cpu_info CPUInfo = mpt::arch::get_cpu_info();
 			if(feature == U_("")) return true;
 			else if(feature == U_("lm")) return CPUInfo.can_long_mode();
+			else if(feature == U_("cx8")) return CPUInfo[mpt::arch::current::feature::cx8];
+			else if(feature == U_("cx16")) return CPUInfo[mpt::arch::current::feature::cx16];
 			else if(feature == U_("mmx")) return CPUInfo[mpt::arch::current::feature::mmx];
 			else if(feature == U_("sse")) return CPUInfo[mpt::arch::current::feature::sse] && CPUInfo[mpt::arch::current::mode::xmm128sse];
 			else if(feature == U_("sse2")) return CPUInfo[mpt::arch::current::feature::sse2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
