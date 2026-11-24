@@ -671,6 +671,8 @@ std::string CUpdateCheck::GetStatisticsDataV3(const Settings &settings)
 			j["System"]["Processor"]["Id"]["Model"] = CPUInfo.get_model();
 			j["System"]["Processor"]["Id"]["Stepping"] = CPUInfo.get_stepping();
 			j["System"]["Processor"]["Features"]["lm"] = CPUInfo.can_long_mode();
+			j["System"]["Processor"]["Features"]["cx8"] = CPUInfo[mpt::arch::current::feature::cx8];
+			j["System"]["Processor"]["Features"]["cx16"] = CPUInfo[mpt::arch::current::feature::cx16];
 			j["System"]["Processor"]["Features"]["mmx"] = CPUInfo[mpt::arch::current::feature::mmx] && CPUInfo[mpt::arch::current::mode::xmm128sse];
 			j["System"]["Processor"]["Features"]["sse"] = CPUInfo[mpt::arch::current::feature::sse] && CPUInfo[mpt::arch::current::mode::xmm128sse];
 			j["System"]["Processor"]["Features"]["sse2"] = CPUInfo[mpt::arch::current::feature::sse2] && CPUInfo[mpt::arch::current::mode::xmm128sse];
