@@ -197,10 +197,12 @@ char *INT123_compat_getenv(const char* name);
  */
 int INT123_compat_open(const char *filename, int flags);
 FILE* INT123_compat_fopen(const char *filename, const char *mode);
+#ifndef NO_FDOPEN  /* OpenMPT */
 /**
  * Also fdopen to avoid having to define POSIX macros in various source files.
  */
 FILE* INT123_compat_fdopen(int fd, const char *mode);
+#endif // NO_FDOPEN  /* OpenMPT */
 
 /**
  * Closing a file handle can be platform specific.

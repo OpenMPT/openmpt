@@ -96,6 +96,9 @@
 /* libmpg123 does not care about environment variables */
 #define NO_ENV
 
+/* libmpg123 does not care about fdopen */
+#define NO_FDOPEN
+
 /* libmpg123 does not care about file mode */
 #define NO_FILEMODE
 

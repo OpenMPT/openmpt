@@ -10,8 +10,10 @@
 */
 
 #include "config.h"
+#if !defined(NO_CATCHSIGNAL) || !defined(NO_FDOPEN)  /* OpenMPT */
 /* This source file does need _POSIX_SOURCE to get some sigaction. */
 #define _POSIX_SOURCE
+#endif // NO_CATCHSIGNAL || NO_FDOPEN  /* OpenMPT */
 #include "compat.h"
 
 #ifdef _MSC_VER
@@ -142,6 +144,7 @@ fopen_ok:
 	return stream;
 }
 
+#ifndef NO_FDOPEN  /* OpenMPT */
 FILE* INT123_compat_fdopen(int fd, const char *mode)
 {
 #if defined(MPG123_COMPAT_MSVCRT_IO)
@@ -150,6 +153,7 @@ FILE* INT123_compat_fdopen(int fd, const char *mode)
 	return fdopen(fd, mode);
 #endif
 }
+#endif // NO_FDOPEN  /* OpenMPT */
 
 int INT123_compat_close(int infd)
 {
