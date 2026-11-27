@@ -1,4 +1,4 @@
-name: Haiku Makefile
+name: OpenIndiana Makefile
 
 on:
   push:
@@ -57,7 +57,6 @@ jobs:
     - name: Cleanup boot environments
       shell: cpa.sh {0} --sync-files none
       run: |
-        sudo /usr/sbin/beadm list -H
         sudo /usr/sbin/beadm list -H | tr ';' ' ' | grep -v ' NR ' | awk '{print $1;}' | xargs -n 1 sudo /usr/sbin/beadm destroy -F
     - name: Cleanup pkg files
       shell: cpa.sh {0} --sync-files none
