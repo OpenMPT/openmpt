@@ -1,0 +1,103 @@
+name: Haiku Makefile
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { version: '2026.10.30', current: true , deps: sys   }
+          - { version: '2026.10.30', current: true , deps: local }
+          - { version: '2026.10.30', current: true , deps: small }
+
+    concurrency:
+      group: ${{github.ref}}-${{github.workflow}}-${{matrix.version}}-${{matrix.current}}-${{matrix.deps}}
+      cancel-in-progress: true
+
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+    - name: Startup VM
+      uses: cross-platform-actions/action@7037457d8fb8a439e85b4a6da7b4b44566523be0
+      with:
+        architecture: x86_64
+        memory: 4G
+        operating_system: openindiana
+        version: ${{matrix.version}}
+        shell: bash
+        sync_files: false
+    - name: Set compression
+      shell: cpa.sh {0} --sync-files none
+      if: true
+      run: |
+        sudo zfs set compression=gzip-9 rpool
+    - name: Set pkg to delete tempfiles
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg set-property flush-content-cache-on-success true
+    - name: Update system
+      if: matrix.current
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg update --accept --require-new-be
+    - name: Reboot VM
+      if: matrix.current
+      shell: cpa.sh {0} --sync-files none --reboot
+      run: true
+    - name: Cleanup boot environments
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo /usr/sbin/beadm list -H
+        sudo /usr/sbin/beadm list -H | tr ';' ' ' | grep -v ' NR ' | awk '{print $1;}' | xargs -n 1 sudo /usr/sbin/beadm destroy -F
+    - name: Cleanup pkg files
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg purge-history
+    - name: Cleanup swap
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo swap -d /dev/zvol/dsk/rpool/swap
+        sudo zfs destroy rpool/swap
+    - name: Install build-essential
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg purge-history
+        sudo pkg install --accept archiver/gnu-tar compress/bzip2 compress/gzip compress/p7zip compress/xz developer/as developer/assembler/nasm developer/assembler/yasm developer/build/gnu-make developer/build/libtool developer/build/make developer/build/pkg-config developer/gnu-binutils developer/linker file/gnu-coreutils file/gnu-findutils library/libtool/libltdl system/header system/header/header-audio text/gawk text/gnu-diffutils text/gnu-grep text/gnu-patch text/gnu-sed
+        sudo pkg purge-history
+        sudo pkg install --accept developer/illumos-closed developer/opensolaris/osnet 
+        sudo pkg purge-history
+        sudo pkg install --accept data/docbook text/texinfo 
+        sudo pkg purge-history
+        sudo pkg install --accept metapackages/build-essential
+        sudo pkg purge-history
+    - name: Install dependencies
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg install --accept developer/versioning/subversion developer/versioning/git
+        sudo pkg install --accept text/gawk developer/build/gnu-make developer/build/pkg-config developer/build/autoconf developer/build/autoconf-archive developer/build/automake developer/build/libtool library/libtool/libltdl developer/build/help2man developer/documentation-tool/doxygen
+        sudo pkg install --accept audio/mpg123 library/libogg library/libvorbis codec/flac library/libsndfile library/sdl2 library/audio/pulseaudio
+    - name: Cleanup pkg files
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        sudo pkg purge-history
+    - name: Sync files to VM
+      shell: cpa.sh {0} --sync-files runner-to-vm
+      run: true
+    - name: Build
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }}
+    - name: Test
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        gmake -j4 STRICT=1 VERBOSE=1 ${{ (matrix.deps == 'sys') && 'AUTO_DEPS=1' || (matrix.deps == 'local') && 'LOCAL_ZLIB=1 LOCAL_MPG123=1 LOCAL_OGG=1 LOCAL_VORBIS=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' || 'NO_ZLIB=1 NO_MPG123=1 NO_OGG=1 NO_VORBIS=1 NO_VORBISFILE=1 NO_PORTAUDIO=1 NO_PORTAUDIOCPP=1 NO_PULSEAUDIO=1 NO_SDL2=1 NO_FLAC=1 NO_SNDFILE=1' }} check
