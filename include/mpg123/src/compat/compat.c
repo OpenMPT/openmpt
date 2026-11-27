@@ -10,10 +10,8 @@
 */
 
 #include "config.h"
-#ifndef NO_CATCHSIGNAL  /* OpenMPT */
 /* This source file does need _POSIX_SOURCE to get some sigaction. */
 #define _POSIX_SOURCE
-#endif // NO_CATCHSIGNAL  /* OpenMPT */
 #include "compat.h"
 
 #ifdef _MSC_VER
